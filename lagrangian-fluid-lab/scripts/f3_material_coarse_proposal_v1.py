@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+import copy
 import hashlib
 import json
 from pathlib import Path
@@ -42,6 +43,8 @@ QUEUE_REGISTRATION = Path(
     "campaigns/core-v1/material/evidence/diagnostic-queue-registration.json"
 )
 JOB_SPEC = Path("campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json")
+HISTORICAL_PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-28.json")
+RERUN_PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-29-RERUN1.json")
 
 EXPECTED_CORE_MATERIAL_SHA256 = (
     "9e294e64c431c725717caf86eb001dc3a3505a312e279386796b6a472b5ee94e"
@@ -775,6 +778,58 @@ def validate_proposal(value: Mapping[str, Any]) -> list[str]:
     return errors
 
 
+def refresh_static_proposal(
+    root: str | Path = LAB_ROOT,
+    *,
+    source_report_path: str | Path = HISTORICAL_PROPOSAL,
+) -> dict[str, Any]:
+    """Refresh only current code bindings in an additive proposal report.
+
+    The historical proposal already contains the byte-only source-HDF5 claim
+    and the immutable campaign metadata.  This helper deliberately reuses
+    those claims without opening the source file, while rebinding the current
+    frozen worker to the checked-out ``core_runtime.py`` bytes.  It is a
+    diagnostic proposal refresh, never an authorization or a formal receipt.
+    """
+
+    root_path = Path(root).resolve()
+    source_path = Path(source_report_path)
+    if not source_path.is_absolute():
+        source_path = root_path / source_path
+    source_path = source_path.resolve()
+    try:
+        source_path.relative_to(root_path)
+    except ValueError as error:
+        raise ValueError("historical proposal must remain below the lab root") from error
+
+    previous = _read_json(source_path)
+    refreshed = copy.deepcopy(previous)
+    runtime_ref = _ref(root_path, CORE_RUNTIME, "current frozen worker runtime")
+    bindings = refreshed.get("input_bindings")
+    if not isinstance(bindings, dict):
+        raise ValueError("historical proposal input_bindings is not an object")
+    bindings["current_frozen_worker"] = runtime_ref
+
+    runtime_contract = refreshed.get("frozen_worker_runtime_contract")
+    if not isinstance(runtime_contract, dict):
+        raise ValueError("historical proposal frozen worker contract is not an object")
+    runtime_contract["runtime_sha256"] = runtime_ref["sha256"]
+    frozen_worker = runtime_contract.get("frozen_worker")
+    if isinstance(frozen_worker, dict):
+        frozen_worker["runtime_sha256"] = runtime_ref["sha256"]
+
+    refreshed["created_at"] = "2026-09-29"
+    refreshed["rerun_metadata"] = {
+        "kind": "additive_dated_rerun",
+        "rerun_of": str(source_path.relative_to(root_path)),
+        "reason": "refresh current frozen-worker byte binding after security hardening",
+        "source_hdf5_opened": False,
+        "formal": False,
+        "qualification_credit": 0,
+    }
+    return refreshed
+
+
 def write_report(value: Mapping[str, Any], output: str | Path) -> Path:
     """Write only an explicitly requested proposal report; never overwrite."""
 
@@ -792,8 +847,17 @@ def write_report(value: Mapping[str, Any], output: str | Path) -> Path:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, help="explicit JSON report path; no attempt/runtime is started")
+    parser.add_argument(
+        "--refresh-from",
+        type=Path,
+        default=None,
+        help="refresh only current code bindings from an existing proposal without opening source HDF5",
+    )
     args = parser.parse_args(argv)
-    value = build_proposal()
+    if args.refresh_from is None:
+        value = build_proposal()
+    else:
+        value = refresh_static_proposal(source_report_path=args.refresh_from)
     errors = validate_proposal(value)
     if errors:
         raise SystemExit("proposal validation failed: " + ", ".join(errors))

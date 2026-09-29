@@ -115,6 +115,30 @@ def test_historical_raw_job_spec_is_not_silently_reused() -> None:
     assert value["frozen_worker_runtime_contract"]["implementation_binding"]["refresh_required_before_launch"] is True
 
 
+def test_additive_rerun_refreshes_only_current_worker_binding() -> None:
+    value = proposal.refresh_static_proposal(ROOT)
+
+    assert proposal.validate_proposal(value) == []
+    assert value["created_at"] == "2026-09-29"
+    assert value["rerun_metadata"] == {
+        "kind": "additive_dated_rerun",
+        "rerun_of": "reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-28.json",
+        "reason": "refresh current frozen-worker byte binding after security hardening",
+        "source_hdf5_opened": False,
+        "formal": False,
+        "qualification_credit": 0,
+    }
+    assert value["input_bindings"]["source_h5"] == json.loads(
+        REPORT.read_text(encoding="utf-8")
+    )["input_bindings"]["source_h5"]
+    assert value["input_bindings"]["current_frozen_worker"]["sha256"] != json.loads(
+        REPORT.read_text(encoding="utf-8")
+    )["input_bindings"]["current_frozen_worker"]["sha256"]
+    assert value["frozen_worker_runtime_contract"]["runtime_sha256"] == value[
+        "input_bindings"
+    ]["current_frozen_worker"]["sha256"]
+
+
 def test_report_is_json_only_and_cannot_overwrite(tmp_path: Path) -> None:
     value = proposal.build_proposal(ROOT)
     destination = tmp_path / "proposal.json"

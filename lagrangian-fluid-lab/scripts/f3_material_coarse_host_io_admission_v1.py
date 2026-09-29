@@ -28,13 +28,13 @@ except ModuleNotFoundError:  # pragma: no cover - exercised by the CLI form.
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = "core.material.f3.coarse.host_io_admission.v1"
-CREATED_AT = "2026-09-28"
+CREATED_AT = "2026-09-29"
 
 CANDIDATE_ID = "CORE-F3-MATERIAL-COARSE-s2"
 JOB_ID = "core-f3-material-coarse-s2"
 
-PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-28.json")
-HOST_IO_RECEIPT = Path("reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-28.json")
+PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-29-RERUN1.json")
+HOST_IO_RECEIPT = Path("reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-29-RERUN1.json")
 CORE_MATERIAL = Path("scripts/core_material.py")
 CORE_RUNTIME = Path("scripts/core_runtime.py")
 SOURCE_H5 = Path(
@@ -43,10 +43,10 @@ SOURCE_H5 = Path(
 JOB_SPEC = Path("campaigns/core-v1/material/jobs/core-f3-material-coarse-s2.json")
 
 DEFAULT_JSON = LAB_ROOT / (
-    "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.json"
+    "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-29-RERUN1.json"
 )
 DEFAULT_ZH_CN = LAB_ROOT / (
-    "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.zh-CN.md"
+    "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-29-RERUN1.zh-CN.md"
 )
 
 _MUTATION_KEYS = (

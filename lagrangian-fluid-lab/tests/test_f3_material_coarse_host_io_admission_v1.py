@@ -15,7 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PROPOSAL = ROOT / adapter.PROPOSAL
 HOST_IO = ROOT / adapter.HOST_IO_RECEIPT
 REPORT = ROOT / "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.json"
-ZH_REPORT = ROOT / "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.zh-CN.md"
+HISTORICAL_REPORT = ROOT / "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.json"
+REPORT = ROOT / adapter.DEFAULT_JSON.relative_to(ROOT)
+ZH_REPORT = ROOT / adapter.DEFAULT_ZH_CN.relative_to(ROOT)
 
 
 @pytest.fixture(scope="module")
@@ -174,6 +176,18 @@ def test_committed_machine_and_chinese_reports_are_valid(current_report: dict) -
         "# F3 coarse material host-I/O diagnostic admission"
     )
     assert committed == current_report
+
+
+def test_historical_report_remains_immutable_and_current_binding_is_rerun() -> None:
+    historical = json.loads(HISTORICAL_REPORT.read_text(encoding="utf-8"))
+    assert adapter.validate_admission(historical) == []
+    assert historical["created_at"] == "2026-09-28"
+    assert historical["input_bindings"]["core_runtime"]["sha256"] != adapter._bind(
+        ROOT,
+        ROOT / adapter.CORE_RUNTIME,
+        "current scripts/core_runtime.py",
+    )["sha256"]
+    assert REPORT.name.endswith("2026-09-29-RERUN1.json")
 
 
 def test_report_writers_never_overwrite(tmp_path: Path, current_report: dict) -> None:
