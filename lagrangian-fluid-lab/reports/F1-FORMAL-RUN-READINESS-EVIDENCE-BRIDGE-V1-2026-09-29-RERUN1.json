@@ -1,0 +1,625 @@
+{
+  "authorization": {
+    "T1_numerical": false,
+    "T2": false,
+    "T2_credit": 0,
+    "T2_macro": false,
+    "T2_path": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "execution_authorized": false,
+    "formal": false,
+    "formal_eligible": false,
+    "formal_run_ready": false,
+    "qualification": false,
+    "qualification_credit": 0,
+    "readiness_projection_only": true,
+    "registry_eligible": false
+  },
+  "blockers": [
+    {
+      "code": "fresh_f1_reopen_authorization_missing",
+      "detail": "the current F1/F2 route is closed with no auditable new falsifiable F1 Definition; fresh root review is required before any formal run or GPU submission.",
+      "severity": "high"
+    },
+    {
+      "code": "formal_runtime_products_missing",
+      "detail": "the fixed F1 job manifest remains prepared_only and the qualification evaluation retains all 15 runtime rows as missing; preparation cannot substitute for result, audit, observations, or trajectory products.",
+      "severity": "high"
+    },
+    {
+      "code": "source_identity_closure_missing",
+      "detail": "source Definition, design digest, and matrix digest are metadata-only bindings; no Core manifest, known_inputs closure, per-cell source hash, or solver/runtime identity is bound for the formal products.",
+      "severity": "high"
+    },
+    {
+      "code": "terminal_evidence_missing_or_failed",
+      "detail": "no formal 15-cell terminal receipts exist; the retained full-window canary and G1 anchor complete their event windows but fail hard integrity, so neither is a terminal qualification pass.",
+      "severity": "high"
+    },
+    {
+      "code": "fixed_15_row_denominator_incomplete",
+      "detail": "the fixed 15-row denominator retains 15 missing formal runtime rows and zero formal runtime rows; all missing rows must remain visible.",
+      "severity": "high"
+    },
+    {
+      "code": "qualification_gates_incomplete",
+      "detail": "the current evaluation has canary, matrix, spatial, time/output, cadence, and independent checks closed; T1_numerical remains false and credit remains zero.",
+      "severity": "high"
+    },
+    {
+      "code": "material_evidence_absent",
+      "detail": "F1 has no independently bound material sidecar, training, or reproduction evidence; preparation and historical negative evidence are not T2 evidence.",
+      "severity": "high"
+    }
+  ],
+  "checks": {
+    "candidate_contract_bound": true,
+    "fifteen_formal_runtime_rows_present": false,
+    "fifteen_prepared_input_rows_bound": true,
+    "fixed_fifteen_row_denominator_bound": true,
+    "formal_source_identity_closed": false,
+    "formal_terminal_evidence_complete": false,
+    "fresh_reopen_authorization": false,
+    "historical_failures_excluded_from_numerator": true,
+    "historical_fullwindow_failure_bound": true,
+    "historical_g1_failure_bound": true,
+    "preparation_is_not_formal_runtime": true,
+    "qualification_credit_added": false,
+    "t1_runtime_evidence_complete": false,
+    "t2_material_evidence_present": false
+  },
+  "created_at": "2026-09-29T00:00:00Z",
+  "decision": "bounded_f1_formal_run_readiness_evidence_projection",
+  "dependencies": {
+    "candidate_card": {
+      "bytes": 71336,
+      "content_opened": true,
+      "expected_schema": "core.cfd.static.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-candidate-card.json",
+      "role": "15-cell F1 candidate contract",
+      "sha256": "b57e8b37ee9d42f00332c50e3e5d703616ca27079bcf171478e1cb5ebc4fbd17"
+    },
+    "g1_negative_anchor": {
+      "bytes": 5431,
+      "content_opened": true,
+      "expected_schema": "core.f1.suspended_obstacle_gap.negative_evidence.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/evidence/f1-suspended-obstacle-gap-g1-anchor-negative-evidence-v1.json",
+      "role": "historical G1 hard-integrity negative anchor",
+      "sha256": "d9bd24ead4064b1e4f87aa8194be668370b0a3648835309791399ae3194a37e2"
+    },
+    "h2_repair_stop": {
+      "bytes": 1114,
+      "content_opened": true,
+      "expected_schema": "core.canary_result.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/evidence/f1-h2-mdbc-summary.json",
+      "role": "historical H1/H2 repair-stop negative evidence",
+      "sha256": "8af3da1ea18d4fbdf4dd6a89827480780e27837c85015225aeb1d9229fc49f80"
+    },
+    "jobs_manifest": {
+      "bytes": 10859,
+      "content_opened": true,
+      "expected_schema": "core.cfd.jobs.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-qualification-jobs.json",
+      "role": "fixed 15-cell formal job metadata",
+      "sha256": "7e44ed371b5bb51eb432471fa2a8ab172930b939d4c0547961cfcea79d758ce0"
+    },
+    "observer_calibration": {
+      "bytes": 1528,
+      "content_opened": true,
+      "expected_schema": "core.f1.observer.calibration.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-observer-calibration.json",
+      "role": "manufactured observer calibration metadata",
+      "sha256": "5951679cb44bca3906d7919be91abe3746cec04fd2c445ec9850b458912d0235"
+    },
+    "prepared_matrix": {
+      "bytes": 8609,
+      "content_opened": true,
+      "expected_schema": "core.f1.qualification.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/prepared/F1_H1_qualification/prepared-matrix.json",
+      "role": "15-cell preparation aggregate",
+      "sha256": "9d1552e368eb17881a5fa67a1a8035d1d026bf3382068dafed2e70fb381c5f56"
+    },
+    "qualification_design": {
+      "bytes": 84803,
+      "content_opened": true,
+      "expected_schema": "core.f1.qualification.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-qualification-design.json",
+      "role": "F1 qualification design and observer metadata",
+      "sha256": "4e4dd82b35a674342a48f56c0080b5aee280ac58e59be633f3464f58571671d3"
+    },
+    "qualification_evaluation": {
+      "bytes": 4263,
+      "content_opened": true,
+      "expected_schema": "core.f1.qualification.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-qualification-evaluation.json",
+      "role": "F1 qualification evaluation summary",
+      "sha256": "a88578e9e661f80cece90412ca7fb69c6add437f33742ec6ac731399e3121027"
+    },
+    "route_closed": {
+      "bytes": 9964,
+      "content_opened": true,
+      "expected_schema": "core.third_t1.f1_f2_route_closed.candidate_card.v3",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-f2-third-t1-route-closed-v3.json",
+      "role": "current F1/F2 route authorization and denominator policy",
+      "sha256": "73e10749edb937c886eebd90122ce275f85f2389cd9774a3fd4dd05698d5151f"
+    },
+    "static_validation": {
+      "bytes": 995,
+      "content_opened": true,
+      "expected_schema": "core.cfd.static.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f1-reference-static-validation.json",
+      "role": "bounded F1 static/preparation validation metadata",
+      "sha256": "e740e1133a12d9189a1bada7289ff9bcac1ef882efc44b4503ef51d3bb5e0a91"
+    },
+    "terminal_canary_audit": {
+      "bytes": 6402,
+      "content_opened": true,
+      "expected_schema": "core.cfd.v1",
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/evidence/f1-fullwindow-failed-audit.json",
+      "role": "historical F1 full-window canary audit",
+      "sha256": "28b3ecc77d5a461e1cbddb3857506386f038aed12c61302151406da020c0d93a"
+    }
+  },
+  "evidence": {
+    "candidate": {
+      "candidate_revision": "F1_H1_obstacle_height_range_v1",
+      "candidate_status": "pre_registered_unqualified",
+      "qualification_claim": "none",
+      "qualification_only": true,
+      "qualified": false,
+      "registered_cells": 15,
+      "scope_id": "F1_single_obstacle_height_range_v1"
+    },
+    "denominator": {
+      "fixed_failure_denominator": true,
+      "formal_failed_rows": 0,
+      "formal_runtime_rows": 0,
+      "historical_negative_anchors_excluded": true,
+      "missing_rows_retained": true,
+      "missing_runtime_rows": 15,
+      "preparation_credit": 0,
+      "prepared_rows": 15,
+      "qualification_credit": 0,
+      "registered_rows": 15,
+      "survivor_renormalization": false
+    },
+    "historical_negative_evidence": {
+      "evidence_class": "historical_negative_only_not_formal_T1",
+      "fullwindow_canary": {
+        "endpoint_violation_particle_frames": 166,
+        "event_window_complete": true,
+        "hard_integrity_pass": false,
+        "qualification_credit": 0
+      },
+      "g1_negative_anchor": {
+        "event_window_complete": true,
+        "finite_geometry_chord_crossings": 1700,
+        "hard_integrity_pass": false,
+        "obstacle_penetration_particle_frames": 615,
+        "qualification_credit": 0
+      },
+      "h2_repair_stop": {
+        "hard_integrity_pass": false,
+        "native_death_count": 6689,
+        "qualification_credit": 0
+      }
+    },
+    "observer": {
+      "calibration_is_not_qualification": true,
+      "calibration_passed": true,
+      "revision_id": "F1_H1_geometry_observer_qualification_v1"
+    },
+    "preparation": {
+      "evidence_class": "preparation_only_not_formal_runtime_or_T1",
+      "gpu_invoked": false,
+      "jobs_materialized": false,
+      "mass_gate_pass_cells": 15,
+      "preflight_pass_cells": 15,
+      "prepared_cells": 15,
+      "registered_cells": 15,
+      "solver_invoked": false,
+      "static_validation_pass": true
+    },
+    "route_authorization": {
+      "authorized_now": false,
+      "new_definition_status": "none_auditable",
+      "root_review_required_to_reopen": true,
+      "status": "route_closed_no_new_hypothesis",
+      "third_t1_family_established": false
+    },
+    "runtime": {
+      "canary_gate": false,
+      "evaluation_cells_present": 0,
+      "evaluation_missing_rows": 15,
+      "fixed_failure_denominator": true,
+      "formal_evidence_complete": false,
+      "formal_failed_rows": 0,
+      "formal_runtime_rows": 0,
+      "jobs_execution_status": "prepared_only; canary gate required before qualification",
+      "matrix_complete": false,
+      "missing_rows_retained": true,
+      "missing_runtime_rows": 15,
+      "prepared_rows": 15,
+      "registered_rows": 15,
+      "rows": [
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p010000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 0,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p007500000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 1,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p00000000_h0p40000000_dp0p005000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 2,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p010000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 3,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 4,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p005000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 5,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p010000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.01,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 6,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p007500000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 7,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q1p00000000_h0p52000000_dp0p005000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 8,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 1.0,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p25000000_h0p43000000_dp0p007500000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 9,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.25,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p25000000_h0p43000000_dp0p005000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 10,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.25,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p75000000_h0p49000000_dp0p007500000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 11,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.75,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p75000000_h0p49000000_dp0p005000000000_qualification",
+          "credit": 0,
+          "design_cell": "spatial",
+          "dp_m": 0.005,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 12,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.75,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification_internal_time",
+          "credit": 0,
+          "design_cell": "internal_time",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 13,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        },
+        {
+          "T1_numerical": false,
+          "T2": false,
+          "case_id": "CORE_F1_H1_obstacle_q0p50000000_h0p46000000_dp0p007500000000_qualification_native_output",
+          "credit": 0,
+          "design_cell": "native_output",
+          "dp_m": 0.0075,
+          "formal_run_readiness": "blocked_by_missing_runtime_evidence",
+          "index": 14,
+          "preparation_evidence": "prepared_input_only_not_formal_runtime",
+          "q": 0.5,
+          "qualification_credit": 0,
+          "runtime_status": "missing_runtime_product",
+          "source_identity_status": "metadata_only_no_core_source_closure",
+          "terminal_evidence_status": "no_formal_terminal_receipt",
+          "trajectory_content_opened_by_bridge": false
+        }
+      ]
+    },
+    "source_identity": {
+      "artifact_paths_followed": false,
+      "closed": false,
+      "design_sha256_bound": true,
+      "formal_core_manifest_bound": false,
+      "known_inputs_closure_bound": false,
+      "matrix_sha256_bound": true,
+      "per_cell_source_hash_closure": false,
+      "solver_runtime_identity_bound": false,
+      "source_definition_declared": true
+    },
+    "terminal_evidence": {
+      "formal_terminal_evidence_complete": false,
+      "formal_terminal_rows": 0,
+      "historical_failure_not_promoted": true,
+      "historical_fullwindow_canary": {
+        "event_window_complete": true,
+        "hard_integrity_pass": false,
+        "numerator_eligible": false,
+        "qualified": false,
+        "requested_horizon_reached": true
+      },
+      "historical_g1_anchor": {
+        "event_window_complete": true,
+        "hard_integrity_pass": false,
+        "numerator_eligible": false,
+        "qualified": false
+      },
+      "trajectory_content_opened_by_bridge": false
+    }
+  },
+  "mutations": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "plan_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0
+  },
+  "next_safe_action": "先由独立 root review 提出一个超出已关闭 H1/H2/H3/G1 谱系的新、可证伪 F1 Definition 和新 namespace；获准后再为固定 15 行取得 fresh runtime admission，并逐行绑定 prepared hash、Core manifest、known_inputs、source/solver/runtime identity、result/audit/observations/trajectory 终态证据。此 bridge 之前不得启动 solver、worker、native、GPU 或 queue，也不得把 preparation 或历史失败计作 formal/T1/T2。",
+  "prohibited_operations": [
+    "production_hdf5_bi4_trajectory_read_or_hash",
+    "nested_artifact_path_follow_or_open",
+    "xml_native_or_solver_input_execution",
+    "solver_worker_native_gpu_queue_start",
+    "registry_ledger_denominator_gate_plan_completion_mutation",
+    "preparation_or_historical_failure_promoted_to_formal_T1_or_T2"
+  ],
+  "read_policy": {
+    "bounded_json_allowlist_only": true,
+    "max_json_bytes": 262144,
+    "nested_artifact_paths_followed": false,
+    "production_hdf5_bi4_trajectory_opened": false,
+    "production_hdf5_bi4_trajectory_stat_or_hash": false,
+    "registry_ledger_denominator_gate_plan_write": false,
+    "solver_worker_native_gpu_queue": false,
+    "xml_or_native_input_opened": false
+  },
+  "readiness": {
+    "formal_qualification": {
+      "T1_numerical": false,
+      "T2": false,
+      "credit": 0,
+      "qualification_credit": 0
+    },
+    "future_formal_run": {
+      "admission_ready": false,
+      "formal_run_ready": false,
+      "reason": "fresh F1 reopen authorization plus complete source-bound 15-cell runtime and terminal evidence are required",
+      "runtime_evidence_ready": false,
+      "source_identity_ready": false,
+      "terminal_evidence_ready": false
+    },
+    "preparation": {
+      "pass": true,
+      "prepared_cells": 15,
+      "required_cells": 15
+    }
+  },
+  "record_id": "f1-formal-run-readiness-evidence-bridge-v1",
+  "schema": "core.f1.formal_run_readiness_evidence_bridge_report.v1",
+  "scope_id": "F1_single_obstacle_height_range_v1",
+  "side_effects": {
+    "bounded_json_inputs_opened": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "production_artifact_stat_or_hash": false,
+    "production_bi4_opened": false,
+    "production_hdf5_opened": false,
+    "production_trajectory_opened": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "status": "blocked_fail_closed",
+  "validation": {
+    "blocked": true,
+    "blockers_nonempty": true,
+    "contract_valid": true,
+    "historical_failure_not_promoted": true,
+    "preparation_not_promoted": true,
+    "source_identity_not_promoted": true,
+    "terminal_evidence_not_promoted": true
+  }
+}

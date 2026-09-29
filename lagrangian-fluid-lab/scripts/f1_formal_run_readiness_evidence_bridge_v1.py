@@ -30,12 +30,15 @@ RECORD_ID = "f1-formal-run-readiness-evidence-bridge-v1"
 SCOPE_ID = "F1_single_obstacle_height_range_v1"
 DESIGN_REVISION = "F1_H1_geometry_observer_qualification_v1"
 CANDIDATE_REVISION = "F1_H1_obstacle_height_range_v1"
-OBSERVED_AT_UTC = "2026-09-28T00:00:00Z"
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+OBSERVED_AT_UTC = "2026-09-29T00:00:00Z"
 MAX_JSON_BYTES = 256 * 1024
 SHA256_HEX = frozenset("0123456789abcdef")
 
-DEFAULT_REPORT = LAB_ROOT / "reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.json"
-DEFAULT_ZH_REPORT = LAB_ROOT / "reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.zh-CN.md"
+HISTORICAL_REPORT = LAB_ROOT / "reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.json"
+HISTORICAL_ZH_REPORT = LAB_ROOT / "reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.zh-CN.md"
+DEFAULT_REPORT = LAB_ROOT / f"reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-{CURRENT_RERUN_ID}.json"
+DEFAULT_ZH_REPORT = LAB_ROOT / f"reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-{CURRENT_RERUN_ID}.zh-CN.md"
 
 DEPENDENCY_SPECS: dict[str, dict[str, Any]] = {
     "candidate_card": {
@@ -933,7 +936,7 @@ def _zh_report(report: Mapping[str, Any]) -> str:
 
 下一步必须先获得一个超出 H1/H2/H3/G1 已关闭谱系的新 F1 物理 Definition、独立 root review 和新 namespace；之后才能补齐 source-bound 15-cell runtime/terminal evidence，并重新运行本 bridge。
 
-机器报告：`F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.json`。
+机器报告：`{DEFAULT_REPORT.name}`。
 """
 
 

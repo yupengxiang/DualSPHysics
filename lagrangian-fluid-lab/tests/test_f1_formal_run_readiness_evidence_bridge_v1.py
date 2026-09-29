@@ -14,11 +14,7 @@ LAB_ROOT = Path(__file__).parents[1]
 
 
 def _checked_in_report() -> dict:
-    return json.loads(
-        (LAB_ROOT / "reports/F1-FORMAL-RUN-READINESS-EVIDENCE-BRIDGE-V1-2026-09-28.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    return json.loads(bridge.DEFAULT_REPORT.read_text(encoding="utf-8"))
 
 
 def test_default_projection_is_bounded_and_fail_closed() -> None:
@@ -167,6 +163,15 @@ def test_checked_in_report_matches_current_projection() -> None:
     assert checked_in == expected
     assert bridge.verify_report() == expected
     assert bridge.validate_report(checked_in) == checked_in
+
+
+def test_historical_report_is_retained_as_a_stale_snapshot() -> None:
+    historical = json.loads(bridge.HISTORICAL_REPORT.read_text(encoding="utf-8"))
+
+    assert bridge.HISTORICAL_REPORT.exists()
+    assert bridge.HISTORICAL_ZH_REPORT.exists()
+    assert historical["created_at"] != bridge.OBSERVED_AT_UTC
+    assert historical != bridge.build_report()
 
 
 def test_writer_is_immutable_and_chinese_report_is_bounded(tmp_path: Path) -> None:
