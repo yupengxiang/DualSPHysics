@@ -1,0 +1,624 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "audit_mode": "independent_read_only_static_ast_boundary_audit",
+  "audited_files": [
+    {
+      "bytes": 72359,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714903,
+      "mtime_ns": 1790640058028877383,
+      "nlink": 1,
+      "path": "scripts/f3_graph_raw_hidden16_current_manifest_seed17_diagnostic_runner_v1.py",
+      "role": "diagnostic_runner_v1",
+      "sha256": "c56e351c7f269943428409a95661c77713e18967511b141e68a0af232bba78d2"
+    },
+    {
+      "bytes": 55608,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714858,
+      "mtime_ns": 1790638888252816942,
+      "nlink": 1,
+      "path": "scripts/f3_graph_raw_hidden16_current_manifest_audited_executor_v1.py",
+      "role": "audited_executor_v1",
+      "sha256": "4f029289fd9dff051c8ead2165b903300cb8ca526f4b63bce1fc3b39a9c8a482"
+    },
+    {
+      "bytes": 60092,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714831,
+      "mtime_ns": 1790633608676292239,
+      "nlink": 1,
+      "path": "scripts/f3_graph_raw_hidden16_current_manifest_rollout_launcher_v1.py",
+      "role": "rollout_launcher_v1",
+      "sha256": "d8156c34910cfe67f2e78af236c0ab80f666ab2fbfd69c62ecf3068cc5145c43"
+    },
+    {
+      "bytes": 44135,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714870,
+      "mtime_ns": 1790636182488346843,
+      "nlink": 1,
+      "path": "scripts/f3_graph_raw_hidden16_current_manifest_terminal_artifact_validator_v1.py",
+      "role": "raw_terminal_validator_v1",
+      "sha256": "5670b3c525ee007000d346c9320df198909e9676dd0ffe45ad5d01a3707348f5"
+    },
+    {
+      "bytes": 59678,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714881,
+      "mtime_ns": 1790638888254816885,
+      "nlink": 1,
+      "path": "scripts/f3_graph_raw_hidden16_current_manifest_terminal_execution_bridge_v1.py",
+      "role": "raw_terminal_bridge_v1",
+      "sha256": "05e17efddceb10f9b1c4d51e60062530dc606c6d5b788b9ff6b41b251b139a4d"
+    },
+    {
+      "bytes": 43170,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714891,
+      "mtime_ns": 1790637769772555513,
+      "nlink": 1,
+      "path": "scripts/f3_graph_terminal_production_validator_capability_v1.py",
+      "role": "production_validator_capability_v1",
+      "sha256": "a33825cacc46650292bbe106181fd1c26d2f3b6354bfdec19302447c55a0a0ce"
+    },
+    {
+      "bytes": 42805,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714894,
+      "mtime_ns": 1790638271353291313,
+      "nlink": 1,
+      "path": "scripts/f3_graph_terminal_production_validator_admission_v1.py",
+      "role": "validator_admission_v1",
+      "sha256": "f802e02f21b8bf6f6786522d71874ceb3cc8a3af5c29eaf3774da143eab92f0d"
+    },
+    {
+      "bytes": 34867,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318713635,
+      "mtime_ns": 1790638608546734800,
+      "nlink": 1,
+      "path": "scripts/f3_full_rollout_receipt_hdf5_validator_v1.py",
+      "role": "common_hdf5_validator_v1",
+      "sha256": "248906346435182f638a572fe9fc6ccca4cb221f7bf3566f905fe93147d7fe87"
+    },
+    {
+      "bytes": 27331,
+      "content_opened": true,
+      "dev": 2081,
+      "ino": 318714893,
+      "mtime_ns": 1790638178999912107,
+      "nlink": 1,
+      "path": "scripts/f3_graph_terminal_validator_security_hardening_v1.py",
+      "role": "validator_hardening_contract_v1",
+      "sha256": "63931b04e20de923ef39a4ce614029880f50d9be7ba9bf4cb1cad23ef4e8fbed"
+    }
+  ],
+  "blocked_reasons": [
+    "v1 is safe only as a non-authorizing zero-credit boundary",
+    "v2 must not promote caller-supplied admission/proof/validator fields",
+    "scheduler-owned replay consumption and full descriptor-bound artifact reads are absent",
+    "GPU numeric index/free-VRAM snapshot is not a stable physical-device reservation",
+    "formal/credit promotion remains outside this diagnostic audit"
+  ],
+  "boundary_matrix": {
+    "existing_job_stop_restart": {
+      "dangerous_calls": {
+        "audited_executor_v1": [],
+        "diagnostic_runner_v1": [],
+        "production_validator_capability_v1": [],
+        "raw_terminal_bridge_v1": []
+      },
+      "safe_now": true,
+      "v1": "no kill/killpg/terminate/send_signal/pkill/systemctl call was found in audited execution boundaries",
+      "v2": "must retain no-arbitrary-job-control contract; only the own child process group may be supervised"
+    },
+    "formal_credit_promotion": {
+      "safe_now": true,
+      "v1": "launch false, formal false, credit zero, capability absent",
+      "v2": "must_remain_zero_credit_and_external_gate_only"
+    },
+    "gpu_env_device_mapping": {
+      "numeric_mapping_present": true,
+      "safe_now": false,
+      "shared_occupancy_allowed": true,
+      "v1": "CUDA_VISIBLE_DEVICES numeric index maps to logical cuda:0 and free VRAM is probed",
+      "v2": "blocked_until_UUID_or_PCI_and_child_runtime_attestation"
+    },
+    "output_hdf5_external_links": {
+      "safe_now": false,
+      "v1": "common byte-snapshot validator rejects unsafe links, but production path preflight is not uniformly behind it",
+      "v2": "blocked_until_link_inventory_precedes_every_dereference"
+    },
+    "popen_identity": {
+      "safe_now": false,
+      "v1": "raw runner/bridge have sealed future-only in-memory records; production receipt validation still accepts serialized declarations",
+      "v2": "blocked_until_only_internal_sealed_witness_can_authorize"
+    },
+    "receipt_replay": {
+      "safe_now": false,
+      "v1": "local fresh namespace/nonce checks exist, but production receipt freshness is declarative and no external consume-once ledger is bound",
+      "v2": "blocked_until_atomic_reservation_and_consumption"
+    },
+    "toctou": {
+      "safe_now": false,
+      "v1": "common HDF5 descriptor snapshot exists; production capability and some independent path openings remain outside one immutable snapshot",
+      "v2": "blocked_until_all_artifacts_use_descriptor_bound_bytes"
+    }
+  },
+  "contract_date": "2026-09-29",
+  "credit": 0,
+  "diagnostic_only": true,
+  "findings": [
+    {
+      "affected": [
+        "diagnostic_runner_v1.build_plan/build_report",
+        "audited_executor_v1.build_audited_plan/_revalidate_for_execution",
+        "raw_terminal_bridge_v1.build_bridge_plan/_revalidate_bridge_plan/execute_diagnostic_one_shot"
+      ],
+      "blocker": "v2_admission_requires_scheduler_owned_probe_and_no_authorizing_caller_callbacks",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "callback_argument_locations": {
+          "bridge": {
+            "admission: Mapping[str, Any] | None = None": [
+              486
+            ],
+            "admission_probe: Callable": [
+              519,
+              848,
+              972
+            ]
+          },
+          "executor": {
+            "admission: Mapping[str, Any] | None = None": [
+              681
+            ],
+            "admission_probe: Callable": [
+              742,
+              901,
+              1041
+            ]
+          },
+          "runner": {
+            "def _validate_current_admission": [
+              727
+            ],
+            "resource_admission: Mapping[str, Any] | None = None": [
+              675,
+              1331
+            ]
+          }
+        },
+        "current_gate": "execution capability is uninstalled and explicit execution fails closed",
+        "numeric_gpu_probe": true
+      },
+      "id": "F3-DAV2-SA-001",
+      "required_fix": "Remove authorizing callback parameters from the privileged path; obtain a scheduler-owned, timestamped GPU/CPU/I/O snapshot and bind its host/GPU identity, freshness, and reservation token to the one-shot plan.",
+      "risk": "A future v2 caller could supply a self-declared admitted mapping, probe callback, terminal validator, or Popen seam and accidentally turn advisory input into execution authority.",
+      "severity": "P1",
+      "title": "Admission and execution callbacks remain caller-injectable at the v1 API boundary"
+    },
+    {
+      "affected": [
+        "audited_executor_v1.build_audited_plan",
+        "production_validator_capability_v1._validate_identity/_validate_process_proof",
+        "diagnostic_runner_v1._reserve_namespace/execute_diagnostic"
+      ],
+      "blocker": "v2_requires_atomic_one_shot_namespace_reservation_and_receipt_consumption",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "claim_only_fields": [
+          "fresh_namespace",
+          "namespace_fresh",
+          "reuse_forbidden",
+          "nonce"
+        ],
+        "executor_does_not_materialize_reservation": true,
+        "namespace_consumption_ledger_absent": true,
+        "runner_local_reservation_exists": true
+      },
+      "id": "F3-DAV2-SA-002",
+      "required_fix": "Reserve the output namespace through an owner-controlled descriptor/marker, bind owner host/inode/nonce/plan digest, atomically consume it once, and reject any receipt whose reservation is already consumed or absent.",
+      "risk": "A copied or replayed receipt can repeat a valid-looking nonce/namespace claim because the production boundary has no scheduler-owned consume-once marker or external replay ledger.",
+      "severity": "P1",
+      "title": "Fresh nonce and namespace claims do not yet provide externally consumed replay protection"
+    },
+    {
+      "affected": [
+        "production_validator_capability_v1._read_bounded_bytes",
+        "production_validator_capability_v1._validate_hdf5_identity",
+        "raw_terminal_validator_v1 -> common_hdf5_validator_v1 integration"
+      ],
+      "blocker": "v2_requires_one_descriptor_bound_snapshot_for_every_json_and_hdf5_artifact",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "common_safe_reader_exists_but_is_not_global": true,
+        "locations": {
+          "production": {
+            "def _read_bounded_bytes": [
+              277
+            ],
+            "with h5py.File(path, \"r\") as handle": [
+              680
+            ]
+          },
+          "runner": {
+            "hdf5_validator.validate_receipt(": [
+              1081
+            ]
+          }
+        },
+        "production_hdf5_path_open": true,
+        "production_path_reader": true,
+        "raw_runner_independent_path_call": true
+      },
+      "id": "F3-DAV2-SA-003",
+      "required_fix": "Route every artifact through directory-fd/O_NOFOLLOW/single-link reads and hand only the immutable bytes to JSON/HDF5 validators; never reopen the pathname after identity validation.",
+      "risk": "A parent-directory rename, replacement, or in-place mutation can make a later path open observe bytes different from the audited descriptor/path identity.",
+      "severity": "P1",
+      "title": "The production validator still has pathname reopen windows outside the common descriptor snapshot"
+    },
+    {
+      "affected": [
+        "production_validator_capability_v1._validate_hdf5_identity",
+        "common_hdf5_validator_v1._reject_unsafe_hdf5_links",
+        "raw_terminal_validator_v1._hardened_hdf5_checks"
+      ],
+      "blocker": "v2_requires_hdf5_parse_only_from_bound_bytes_after_link_inventory",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "common_rejection_exists": true,
+        "path_open_precedes_common_snapshot": true,
+        "production_open_locations": {
+          "with h5py.File(path, \"r\") as handle": [
+            680
+          ]
+        },
+        "required_link_policy": [
+          "reject ExternalLink",
+          "reject SoftLink",
+          "reject virtual datasets",
+          "reject externally stored datasets"
+        ]
+      },
+      "id": "F3-DAV2-SA-004",
+      "required_fix": "Read once into a stable byte snapshot, inventory every HDF5 link/object before dereference, reject external/soft/VDS/external-storage objects, then run all validators on the same in-memory handle.",
+      "risk": "A crafted output HDF5 can reach a path-based preflight before the safe byte-snapshot validator; the v2 boundary must make link rejection a precondition, not a later check.",
+      "severity": "P1",
+      "title": "HDF5 external/soft/VDS rejection is not enforced before every v1 path-based HDF5 open"
+    },
+    {
+      "affected": [
+        "audited_executor_v1._query_gpu_rows/probe_resource_admission",
+        "diagnostic_runner_v1._assert_exact_command",
+        "raw_terminal_bridge_v1._parse_gpu_bindings"
+      ],
+      "blocker": "v2_requires_uuid_or_pci_identity_and_child_runtime_device_attestation",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "mapping": {
+          "logical_selector": "cuda:0",
+          "physical_selector": "CUDA_VISIBLE_DEVICES=<nvidia-smi index>"
+        },
+        "numeric_mapping_present": true,
+        "policy_note": "shared GPU use is allowed when VRAM is sufficient; this audit does not require exclusivity",
+        "resource_reservation_absent": true,
+        "stable_identity_absent": true
+      },
+      "id": "F3-DAV2-SA-005",
+      "required_fix": "Bind the selected GPU UUID/PCI identity and a fresh memory snapshot; set and bind the CUDA ordering policy, verify the child runtime device identity, and treat occupancy as shareable only when the bound VRAM budget remains valid.",
+      "risk": "CUDA enumeration/order or a concurrent allocator can make numeric index 2 differ from the probed physical GPU or invalidate the free-VRAM snapshot after admission.",
+      "severity": "P1",
+      "title": "GPU admission binds a numeric index and advisory free VRAM, not a stable physical device identity"
+    },
+    {
+      "affected": [
+        "production_validator_capability_v1._validate_process_proof",
+        "raw_terminal_bridge_v1.validate_terminal_attestation",
+        "raw_terminal_bridge_v1._RealProcessRecord/_run_real_popen_wait"
+      ],
+      "blocker": "v2_requires_in_memory_sealed_real_popen_wait_witness_bound_to_kernel_and_plan_identity",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "production_locations": {
+          "def _validate_process_proof": [
+            471
+          ],
+          "proof.get(\"evaluator_pid\")": [
+            490
+          ]
+        },
+        "receipt_pid_and_command_fields": true,
+        "sealed_record_present_but_gate_closed": true,
+        "serialized_terminal_mapping": true
+      },
+      "id": "F3-DAV2-SA-006",
+      "required_fix": "Accept process evidence only from an internal sealed record created immediately after the captured real Popen/wait path; bind argv, cwd, sanitized environment, executable identity, PID start-time/host, plan digest, and one-shot namespace.",
+      "risk": "A receipt can self-declare a successful PID, command, wait, or artifact proof and pass its own digest without proving that the current process executed the exact plan.",
+      "severity": "P1",
+      "title": "Serialized Popen/PID and terminal attestation fields are not authoritative process evidence"
+    },
+    {
+      "affected": [
+        "diagnostic_runner_v1._run_real_popen_wait",
+        "raw_terminal_bridge_v1._run_real_popen_wait",
+        "diagnostic_runner_v1._snapshot_inputs"
+      ],
+      "blocker": "v2_requires_allowlisted_environment_and_trusted_executable_runtime_identity",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "ambient_environment_copied": true,
+        "executable_content_hash_not_required": true,
+        "locations": {
+          "bridge": {
+            "environment = os.environ.copy()": [
+              869
+            ]
+          },
+          "runner": {
+            "allow_leaf_symlink=True": [
+              531
+            ],
+            "environment = os.environ.copy()": [
+              805
+            ]
+          }
+        }
+      },
+      "id": "F3-DAV2-SA-007",
+      "required_fix": "Construct a minimal allowlisted environment, bind the full effective environment digest, require stable executable bytes or a trusted immutable runtime image, and verify the child executable identity before any promotion.",
+      "risk": "PATH/LD_PRELOAD/PYTHONPATH and an executable replaced after stat validation can change what the child actually runs while the recorded override map remains unchanged.",
+      "severity": "P1",
+      "title": "Future Popen identity includes ambient inherited environment and stat-only executable metadata"
+    },
+    {
+      "affected": [
+        "diagnostic_runner_v1.ZERO_CREDIT/report validation",
+        "raw_terminal_bridge_v1.build_diagnostic_evidence",
+        "production_validator_admission_v1"
+      ],
+      "blocker": "v2_formal_promotion_requires_separate_authority_and_explicit_nonzero_credit_gate",
+      "blocking_for_v2": true,
+      "current_status": "blocked_fail_closed",
+      "evidence": {
+        "production_capability_uninstalled": true,
+        "required_separation": "diagnostic receipt must never mutate formal registry/ledger/gate/completion state",
+        "runner_capability_uninstalled": true,
+        "zero_credit_explicit": true
+      },
+      "id": "F3-DAV2-SA-008",
+      "required_fix": "Keep v2 diagnostic admission zero-credit; if formal release is ever requested, require a separately reviewed gate that consumes only sealed, replay-free, source/terminal-bound evidence and records the decision outside the runner.",
+      "risk": "Adding v2 admission by flipping a boolean or trusting a validator report would allow diagnostic evidence to become formal credit without an independent gate/ledger decision.",
+      "severity": "P1",
+      "title": "Formal/credit promotion is correctly closed today but has no safe v2 promotion contract"
+    }
+  ],
+  "formal": false,
+  "formal_eligible": false,
+  "qualification": false,
+  "qualification_credit": 0,
+  "report_id": "f3-graph-raw-hidden16-diagnostic-admission-v2-security-audit-v1",
+  "schema": "core.f3.graph_raw.hidden16.diagnostic_admission_v2.security_audit.report.v1",
+  "scope": {
+    "common_hdf5_validator_v1": true,
+    "existing_audited_executor_v1": true,
+    "existing_production_validator_capability_v1": true,
+    "existing_raw_terminal_bridge_v1": true,
+    "existing_raw_terminal_validator_v1": true,
+    "existing_runner_v1": true,
+    "existing_validator_admission_v1": true,
+    "future_runner": "diagnostic_admission_v2",
+    "no_module_import_execution": true,
+    "no_workload_or_gpu_execution": true
+  },
+  "side_effects": {
+    "completion_writes": 0,
+    "gate_writes": 0,
+    "gpu_used_for_execution": false,
+    "ledger_writes": 0,
+    "nvidia_smi_invocations": 0,
+    "plan_writes": 0,
+    "popen_attempts": 0,
+    "processes_restarted": 0,
+    "processes_started": 0,
+    "processes_stopped": 0,
+    "production_artifacts_opened": 0,
+    "queue_submissions": 0,
+    "registry_writes": 0,
+    "solver_started": false,
+    "source_files_written": 0,
+    "wait_attempts": 0,
+    "worker_started": false
+  },
+  "source_bound": true,
+  "static_checks": {
+    "admission_probe_runs_nvidia_smi": true,
+    "ambient_environment_is_copied_for_future_popen": true,
+    "bridge_explicit_execute_fails_before_popen": true,
+    "bridge_terminal_attestation_is_serialized_mapping": true,
+    "callback_injection_surfaces": {
+      "audited_executor_v1": [
+        {
+          "arguments": [
+            "admission"
+          ],
+          "function": "build_audited_plan",
+          "line": 671
+        },
+        {
+          "arguments": [
+            "admission_probe"
+          ],
+          "function": "_revalidate_for_execution",
+          "line": 739
+        },
+        {
+          "arguments": [
+            "popen_factory"
+          ],
+          "function": "_reject_injected_popen",
+          "line": 885
+        },
+        {
+          "arguments": [
+            "admission_probe",
+            "popen_factory",
+            "terminal_capability"
+          ],
+          "function": "_run_popen_wait",
+          "line": 896
+        },
+        {
+          "arguments": [
+            "admission_probe",
+            "popen_factory",
+            "terminal_capability"
+          ],
+          "function": "execute_plan",
+          "line": 1036
+        }
+      ],
+      "diagnostic_runner_v1": [
+        {
+          "arguments": [
+            "resource_admission"
+          ],
+          "function": "build_plan",
+          "line": 667
+        },
+        {
+          "arguments": [
+            "popen_factory"
+          ],
+          "function": "_reject_injected_popen",
+          "line": 787
+        },
+        {
+          "arguments": [
+            "capability",
+            "popen_factory"
+          ],
+          "function": "execute_diagnostic",
+          "line": 1272
+        },
+        {
+          "arguments": [
+            "resource_admission"
+          ],
+          "function": "build_report",
+          "line": 1323
+        }
+      ],
+      "raw_terminal_bridge_v1": [
+        {
+          "arguments": [
+            "admission"
+          ],
+          "function": "build_bridge_plan",
+          "line": 476
+        },
+        {
+          "arguments": [
+            "admission_probe"
+          ],
+          "function": "_revalidate_bridge_plan",
+          "line": 516
+        },
+        {
+          "arguments": [
+            "popen_factory"
+          ],
+          "function": "_reject_injected_popen",
+          "line": 795
+        },
+        {
+          "arguments": [
+            "admission_probe",
+            "popen_factory"
+          ],
+          "function": "_run_real_popen_wait",
+          "line": 844
+        },
+        {
+          "arguments": [
+            "_capability"
+          ],
+          "function": "build_diagnostic_evidence",
+          "line": 939
+        },
+        {
+          "arguments": [
+            "admission_probe",
+            "popen_factory",
+            "terminal_validator"
+          ],
+          "function": "execute_diagnostic_one_shot",
+          "line": 968
+        }
+      ]
+    },
+    "common_hdf5_descriptor_and_link_hardening_exists": true,
+    "dangerous_process_control_calls": {
+      "audited_executor_v1": [],
+      "diagnostic_runner_v1": [],
+      "production_validator_capability_v1": [],
+      "raw_terminal_bridge_v1": []
+    },
+    "executable_content_hash_is_not_required_by_snapshot": true,
+    "executor_does_not_materialize_namespace_reservation": true,
+    "executor_explicit_execute_fails_before_popen": true,
+    "hdf5_link_rejection_is_byte_snapshot_only": true,
+    "namespace_consumption_ledger_is_absent": true,
+    "numeric_gpu_env_mapping_present": true,
+    "production_process_pid_is_receipt_field": true,
+    "production_validator_capability_is_uninstalled": true,
+    "production_validator_has_path_based_bounded_reader": true,
+    "production_validator_reopens_hdf5_path": true,
+    "raw_runner_reopens_path_in_independent_validator": true,
+    "resource_admission_is_snapshot_not_reservation": true,
+    "runner_execute_capability_is_uninstalled": true,
+    "sealed_in_memory_record_exists_but_is_not_admitted": true,
+    "stable_gpu_uuid_or_pci_binding_absent": true,
+    "zero_credit_and_launch_denial_are_explicit": true
+  },
+  "status": "blocked_fail_closed",
+  "v2_admission": {
+    "formal_authority_present": false,
+    "launch_allowed": false,
+    "minimum_contract": {
+      "allowlisted_effective_environment_digest": true,
+      "child_runtime_device_attestation": true,
+      "descriptor_bound_json_and_hdf5_bytes": true,
+      "diagnostic_zero_credit_only": true,
+      "external_replay_consumption_record": true,
+      "fresh_vram_snapshot_with_shared_occupancy_budget": true,
+      "gpu_uuid_or_pci_identity": true,
+      "no_caller_authorizing_callbacks": true,
+      "no_existing_job_stop_or_restart": true,
+      "reject_external_soft_vds_and_external_storage_links": true,
+      "scheduler_owned_one_shot_namespace_reservation": true,
+      "sealed_internal_real_popen_wait_witness": true,
+      "trusted_executable_identity": true
+    },
+    "required_blocker_count": 8,
+    "safe_to_upgrade_now": false
+  }
+}
