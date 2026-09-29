@@ -41,10 +41,10 @@ REPORT_RECORD_ID = "f8-r008-admission-verification-bridge-report-v1"
 STATUS = "diagnostic_only_admission_verification_blocked"
 
 DEFAULT_REPORT = Path(
-    "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-28.json"
+    "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-29-RERUN1.json"
 )
 DEFAULT_ZH_REPORT = Path(
-    "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-28.zh-CN.md"
+    "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-29-RERUN1.zh-CN.md"
 )
 
 MAX_INPUT_BYTES = 2 * 1024 * 1024

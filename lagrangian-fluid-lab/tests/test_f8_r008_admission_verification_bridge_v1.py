@@ -15,11 +15,7 @@ LAB = Path(__file__).parents[1]
 
 
 def _load_report() -> dict:
-    return json.loads(
-        (LAB / "reports/F8-R008-ADMISSION-VERIFICATION-BRIDGE-V1-2026-09-28.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    return json.loads((LAB / bridge.DEFAULT_REPORT).read_text(encoding="utf-8"))
 
 
 def test_default_bridge_binds_static_chain_but_stays_blocked() -> None:
