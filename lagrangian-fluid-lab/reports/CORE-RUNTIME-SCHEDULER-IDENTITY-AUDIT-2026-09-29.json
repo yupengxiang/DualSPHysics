@@ -1,0 +1,58 @@
+{
+  "schema": "core.runtime.scheduler_identity_audit.v1",
+  "scope": [
+    "scripts/core_runtime.py",
+    "tests/test_core_runtime.py",
+    "tests/test_core_runtime_scheduler.py"
+  ],
+  "findings": [
+    {
+      "id": "CRS-001",
+      "severity": "P1",
+      "title": "scheduler request had no one-shot reservation consume or canonical attempt binding",
+      "before": "prepare-launch accepted a request and attempt directory independently; replaying the request into another canonical-looking directory could start another worker path",
+      "status": "fixed"
+    },
+    {
+      "id": "CRS-002",
+      "severity": "P1",
+      "title": "terminal receipt was not bound to scheduler host/GPU allocation or launch chain",
+      "before": "finalize_receipt checked only receipt schema, job_id, attempt_id, and execution_status",
+      "status": "fixed"
+    },
+    {
+      "id": "CRS-003",
+      "severity": "P1",
+      "title": "attempt metadata reads followed symlinks and did not enforce a stable single inode",
+      "before": "collect and worker metadata paths used ordinary pathname reads/open calls",
+      "status": "fixed"
+    }
+  ],
+  "implemented": [
+    "scheduler binding covers job_id, attempt_id, exact attempt_dir, queue spec hash, reservation id, logical host, host hostname/boot id, and GPU UUID/index",
+    "reservation consume uses owner-only O_EXCL creation, fsync, and binding comparison for duplicate/replay handling",
+    "probe, prepare-launch, worker, heartbeat, collect, and terminal receipt finalization enforce the same identity chain",
+    "worker validates current host boot identity and live GPU UUID/index before launch and during GPU sampling",
+    "metadata and receipt reads reject symlink/hardlink/non-regular files and detect inode/stat changes during read"
+  ],
+  "verification": {
+    "scheduler_regression": "17 passed",
+    "core_runtime_regression": "28 passed",
+    "py_compile": true,
+    "git_diff_check": true,
+    "negative_tests": [
+      "one-shot reservation duplicate and cross-attempt replay",
+      "host boot-id drift",
+      "GPU UUID/index drift",
+      "terminal allocation and launch/heartbeat identity mismatch",
+      "result metadata symlink"
+    ]
+  },
+  "execution_boundary": {
+    "production_workload_started": false,
+    "solver_started": false,
+    "existing_runtime_or_archive_processes_stopped_or_restarted": false,
+    "production_evidence_created_or_consumed": false
+  },
+  "residual_boundary": "This is fail-closed binding and local host/GPU identity checking. It does not claim an independent cryptographic attestation against a same-UID process that can rewrite the trusted runtime or scheduler state; such a trust root is outside core_runtime.py and remains required for production qualification authority."
+}

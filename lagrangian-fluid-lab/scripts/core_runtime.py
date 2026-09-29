@@ -21,6 +21,7 @@ import shlex
 import shutil
 import signal
 import sqlite3
+import stat
 import subprocess
 import sys
 import time
@@ -34,6 +35,8 @@ SAFE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,159}$")
 _UNSET = object()
 EXECUTION_RECEIPT_SCHEMA = "core.execution_receipt.v1"
 RECOVERY_ATTENTION_SCHEMA = "core.reconciliation_attention.v1"
+SCHEDULER_BINDING_SCHEMA = "core.scheduler_reservation.v1"
+RESERVATION_CONSUME_SCHEMA = "core.scheduler_reservation_consume.v1"
 
 
 def queue_priority(job):
@@ -71,6 +74,201 @@ def atomic_json(path, value):
         stream.flush()
         os.fsync(stream.fileno())
     os.replace(temporary, path)
+
+
+def _boot_id():
+    return Path("/proc/sys/kernel/random/boot_id").read_text().strip()
+
+
+def host_identity():
+    """Return the node identity used by scheduler and worker evidence."""
+    return {"hostname": os.uname().nodename, "boot_id": _boot_id()}
+
+
+def _read_json_regular(path):
+    """Read one immutable-looking JSON file without following a symlink.
+
+    The descriptor is opened with ``O_NOFOLLOW`` and checked before and after
+    the read.  A producer may atomically replace the pathname later, but the
+    coordinator only receives the bytes observed from this one regular inode.
+    """
+    path = Path(path)
+    flags = os.O_RDONLY | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags)
+    try:
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            raise OSError("JSON evidence is not a single-link regular file: " + str(path))
+        chunks = []
+        while True:
+            block = os.read(fd, 1024 * 1024)
+            if not block:
+                break
+            chunks.append(block)
+        after = os.fstat(fd)
+        identity_before = (before.st_dev, before.st_ino, before.st_size, before.st_nlink,
+                           before.st_mtime_ns, before.st_ctime_ns)
+        identity_after = (after.st_dev, after.st_ino, after.st_size, after.st_nlink,
+                          after.st_mtime_ns, after.st_ctime_ns)
+        if identity_before != identity_after:
+            raise OSError("JSON evidence changed while reading: " + str(path))
+    finally:
+        os.close(fd)
+    return json.loads(b"".join(chunks).decode())
+
+
+def _exclusive_json(path, value):
+    """Create a durable owner-only JSON marker exactly once."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    parent_stat = os.lstat(path.parent)
+    if stat.S_ISLNK(parent_stat.st_mode) or not stat.S_ISDIR(parent_stat.st_mode):
+        raise OSError("reservation marker parent is not a real directory: " + str(path.parent))
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    try:
+        data = (json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + "\n").encode()
+        offset = 0
+        while offset < len(data):
+            offset += os.write(fd, data[offset:])
+        os.fsync(fd)
+        observed = os.fstat(fd)
+        if not stat.S_ISREG(observed.st_mode) or observed.st_nlink != 1:
+            raise OSError("reservation marker is not a single-link regular file: " + str(path))
+    finally:
+        os.close(fd)
+    directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY | os.O_CLOEXEC)
+    try:
+        os.fsync(directory)
+    finally:
+        os.close(directory)
+
+
+def _absolute_path(path):
+    return str(Path(path).absolute())
+
+
+def _validate_attempt_layout(attempt_dir, job_id, attempt_id):
+    """Require the scheduler's canonical attempts/<job>/<attempt> layout."""
+    attempt = Path(_absolute_path(attempt_dir))
+    if not SAFE_ID.fullmatch(str(job_id)) or not SAFE_ID.fullmatch(str(attempt_id)):
+        raise ValueError("scheduler binding has an unsafe job or attempt identifier")
+    if attempt.name != attempt_id or attempt.parent.name != job_id or attempt.parent.parent.name != "attempts":
+        raise ValueError("attempt directory is not bound to job/attempt identity")
+    for path in (attempt, attempt.parent, attempt.parent.parent, attempt.parent.parent.parent):
+        try:
+            item = os.lstat(path)
+        except FileNotFoundError:
+            raise ValueError("attempt directory component is missing: " + str(path)) from None
+        if stat.S_ISLNK(item.st_mode) or not stat.S_ISDIR(item.st_mode):
+            raise ValueError("attempt directory component is not a real directory: " + str(path))
+    return attempt
+
+
+def scheduler_binding(job_id, attempt_id, attempt_dir, spec_hash, allocation):
+    """Build the immutable scheduler-to-worker identity envelope."""
+    allocation = json.loads(canonical(allocation))
+    binding = {
+        "schema": SCHEDULER_BINDING_SCHEMA,
+        "job_id": job_id,
+        "attempt_id": attempt_id,
+        "attempt_dir": _absolute_path(attempt_dir),
+        "spec_hash": spec_hash,
+        "allocation": allocation,
+    }
+    expected_host = {
+        key: allocation[key]
+        for key in ("_host", "_host_hostname", "_host_boot_id")
+        if key in allocation
+    }
+    if expected_host:
+        binding["host_binding"] = expected_host
+    return binding
+
+
+def _reservation_marker_path(attempt, reservation_id):
+    if not SAFE_ID.fullmatch(str(reservation_id)):
+        raise ValueError("scheduler reservation id is unsafe")
+    # Canonical layout was checked before this helper.  parents[2] is the
+    # runtime root: runtime/attempts/<job>/<attempt>.
+    return attempt.parents[2] / "reservations" / (reservation_id + ".json")
+
+
+def gpu_identity(allocation, gpus=None):
+    """Resolve the scheduler GPU UUID/index against a live inventory."""
+    requested_uuid = allocation.get("gpu_uuid")
+    requested_index = allocation.get("gpu_index")
+    if requested_uuid is None:
+        if requested_index is not None:
+            raise ValueError("CPU reservation unexpectedly contains a GPU index")
+        return {"uuid": None, "index": None}
+    if gpus is None:
+        gpus, _ = gpu_snapshot()
+    candidates = [gpu for gpu in gpus if gpu.get("uuid") == requested_uuid]
+    if requested_index is not None:
+        candidates = [gpu for gpu in candidates if gpu.get("index") == requested_index]
+    if len(candidates) != 1:
+        raise ValueError("scheduler GPU identity is missing or changed")
+    return {"uuid": candidates[0]["uuid"], "index": candidates[0]["index"]}
+
+
+def validate_scheduler_binding(spec, attempt_dir, *, check_runtime_identity=False):
+    """Validate request identity and, optionally, current host/GPU identity."""
+    binding = spec.get("scheduler_binding")
+    if not isinstance(binding, dict) or binding.get("schema") != SCHEDULER_BINDING_SCHEMA:
+        raise ValueError("missing scheduler reservation binding")
+    attempt_id = spec.get("attempt_id")
+    attempt = _validate_attempt_layout(attempt_dir, spec.get("job_id"), attempt_id)
+    expected = scheduler_binding(
+        spec.get("job_id"), attempt_id, attempt,
+        binding.get("spec_hash"), spec.get("allocation", {}),
+    )
+    if canonical(binding) != canonical(expected):
+        raise ValueError("scheduler reservation binding does not match request identity")
+    reservation_id = binding["allocation"].get("_reservation_id")
+    if not reservation_id:
+        raise ValueError("scheduler reservation is missing its one-shot id")
+    if not check_runtime_identity:
+        return binding, attempt, None, None
+    expected_host = {
+        key: binding.get("host_binding", {}).get(key)
+        for key in ("_host_hostname", "_host_boot_id")
+        if binding.get("host_binding", {}).get(key) is not None
+    }
+    actual_host = host_identity()
+    if expected_host and {
+            "_host_hostname": actual_host["hostname"],
+            "_host_boot_id": actual_host["boot_id"],
+    } != expected_host:
+        raise ValueError("scheduler host identity changed before launch")
+    expected_allocation = binding["allocation"]
+    try:
+        actual_gpu = gpu_identity(expected_allocation)
+    except ValueError as exc:
+        raise ValueError(str(exc) + " before launch") from exc
+    return binding, attempt, actual_host, actual_gpu
+
+
+def consume_scheduler_reservation(spec, attempt_dir):
+    """Consume one scheduler reservation, rejecting path/token replays."""
+    binding, attempt, _, _ = validate_scheduler_binding(spec, attempt_dir, check_runtime_identity=True)
+    marker = _reservation_marker_path(attempt, binding["allocation"]["_reservation_id"])
+    payload = {
+        "schema": RESERVATION_CONSUME_SCHEMA,
+        "binding": binding,
+        "consumed_at": time.time(),
+    }
+    try:
+        _exclusive_json(marker, payload)
+        return {"consumed": True, "marker": str(marker)}
+    except FileExistsError:
+        try:
+            existing = _read_json_regular(marker)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ValueError("scheduler reservation marker is not safely readable") from exc
+        if existing.get("schema") != RESERVATION_CONSUME_SCHEMA or existing.get("binding") != binding:
+            raise ValueError("scheduler reservation token replayed with a different binding")
+        return {"consumed": False, "marker": str(marker), "reason": "already_consumed"}
 
 
 def proc_identity(pid):
@@ -136,7 +334,7 @@ def shared_worker_gpu_snapshot(cache_root, *, ttl_seconds=2.0):
     root = Path(cache_root)
     root.mkdir(parents=True, exist_ok=True)
     path = root / 'worker-gpu-snapshot.json'
-    boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+    boot_id = _boot_id()
     with (root/'worker-gpu-snapshot.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
@@ -162,7 +360,7 @@ def probe(path):
         key, value = line.split(":", 1)
         memory[key] = int(value.split()[0]) / 1024
     gpus, processes = gpu_snapshot()
-    return dict(time=time.time(), hostname=os.uname().nodename, cpu_count=os.cpu_count(),
+    return dict(time=time.time(), hostname=os.uname().nodename, boot_id=_boot_id(), cpu_count=os.cpu_count(),
                 load1=os.getloadavg()[0], ram_total_mib=memory["MemTotal"], ram_available_mib=memory["MemAvailable"],
                 disk_free_bytes=shutil.disk_usage(path).free, gpus=gpus, gpu_processes=processes)
 
@@ -438,7 +636,8 @@ class Store:
             return None
 
     @staticmethod
-    def _receipt_errors(receipt, job_id, attempt_id):
+    def _receipt_errors(receipt, job_id, attempt_id, *, expected_allocation=None,
+                        expected_binding=None, launch=None, heartbeat=None):
         errors = []
         if not isinstance(receipt, dict):
             return ["receipt_not_object"]
@@ -450,6 +649,43 @@ class Store:
             errors.append("attempt_id_mismatch")
         if receipt.get("execution_status") not in ("succeeded", "failed"):
             errors.append("invalid_execution_status")
+        if expected_allocation is not None and receipt.get("allocation") != expected_allocation:
+            errors.append("allocation_mismatch")
+        if expected_binding is not None:
+            if receipt.get("scheduler_binding") != expected_binding:
+                errors.append("scheduler_binding_mismatch")
+            if not isinstance(launch, dict):
+                errors.append("launch_identity_missing")
+            if not isinstance(heartbeat, dict):
+                errors.append("heartbeat_identity_missing")
+            expected_host = expected_binding.get("host_binding", {})
+            expected_host = {
+                "hostname": expected_host["_host_hostname"],
+                "boot_id": expected_host["_host_boot_id"],
+            } if {"_host_hostname", "_host_boot_id"} <= set(expected_host) else None
+            expected_gpu = {
+                "uuid": expected_allocation.get("gpu_uuid"),
+                "index": expected_allocation.get("gpu_index"),
+            }
+            for label, observed in (("receipt", receipt), ("launch", launch), ("heartbeat", heartbeat)):
+                if not isinstance(observed, dict):
+                    continue
+                if observed.get("job_id") != job_id:
+                    errors.append(label + "_job_id_mismatch")
+                if observed.get("attempt_id") != attempt_id:
+                    errors.append(label + "_attempt_id_mismatch")
+                if observed.get("scheduler_binding") != expected_binding:
+                    errors.append(label + "_scheduler_binding_mismatch")
+                if expected_host is not None and observed.get("host_identity") != expected_host:
+                    errors.append(label + "_host_identity_mismatch")
+                if observed.get("gpu_identity") != expected_gpu:
+                    errors.append(label + "_gpu_identity_mismatch")
+            for label, observed in (("receipt", receipt), ("launch", launch), ("heartbeat", heartbeat)):
+                if isinstance(observed, dict):
+                    if "host_identity" not in observed and expected_host is not None:
+                        errors.append(label + "_host_identity_missing")
+                    if "gpu_identity" not in observed:
+                        errors.append(label + "_gpu_identity_missing")
         return errors
 
     @staticmethod
@@ -526,7 +762,7 @@ class Store:
             raise
 
     def finalize_receipt(self, job_id, receipt, *, expected_attempt_id=_UNSET,
-                         heartbeat=None, expected_job_id=None):
+                         heartbeat=None, launch=None, expected_job_id=None):
         """Validate and atomically accept one execution receipt.
 
         The stored execution receipt is the billing identity for a job.  A
@@ -541,7 +777,8 @@ class Store:
         self.db.execute("BEGIN IMMEDIATE")
         try:
             row = self.db.execute(
-                "SELECT job_id,status,attempt_id,heartbeat,result FROM jobs WHERE job_id=?",
+                "SELECT job_id,status,attempt_id,attempt_dir,spec_hash,allocation,heartbeat,result "
+                "FROM jobs WHERE job_id=?",
                 (job_id,),
             ).fetchone()
             if row is None:
@@ -583,7 +820,20 @@ class Store:
                 self.db.commit()
                 return {"action": "attention", "reason": "conflicting_receipt"}
 
-            errors = self._receipt_errors(receipt, job_id, row["attempt_id"])
+            expected_allocation = self._json_value(row["allocation"])
+            expected_binding = None
+            if expected_allocation.get("_reservation_id"):
+                expected_binding = scheduler_binding(
+                    row["job_id"], row["attempt_id"], row["attempt_dir"],
+                    row["spec_hash"], expected_allocation,
+                )
+            errors = self._receipt_errors(
+                receipt, job_id, row["attempt_id"],
+                expected_allocation=expected_allocation if expected_allocation else None,
+                expected_binding=expected_binding,
+                launch=launch,
+                heartbeat=heartbeat,
+            )
             if errors:
                 if (row["status"] == "attention" and current.get("schema") == RECOVERY_ATTENTION_SCHEMA
                         and current.get("reason") == "invalid_execution_receipt"
@@ -674,12 +924,18 @@ def deploy_runtime(host):
 
 
 def collect_attempt(path):
-    path = Path(path)
+    path = Path(_absolute_path(path))
     result = {}
     receipt_errors = []
+    try:
+        directory = os.lstat(path)
+        if stat.S_ISLNK(directory.st_mode) or not stat.S_ISDIR(directory.st_mode):
+            receipt_errors.append({"file": ".", "error": "AttemptDirectoryNotRegular"})
+    except FileNotFoundError:
+        pass
     for name in ("launch", "heartbeat", "result"):
         try:
-            value = json.loads((path / (name + ".json")).read_text())
+            value = _read_json_regular(path / (name + ".json"))
             if not isinstance(value, dict):
                 receipt_errors.append({"file": name + ".json", "error": "JSONShapeError"})
             else:
@@ -688,10 +944,29 @@ def collect_attempt(path):
             pass
         except (OSError, TypeError, ValueError) as exc:
             receipt_errors.append({"file": name + ".json", "error": type(exc).__name__})
-    if receipt_errors:
-        result["receipt_errors"] = receipt_errors
     launch = result.get("launch", {})
     heartbeat = result.get("heartbeat", {})
+    terminal = result.get("result", {})
+    for label, observed in (("launch", launch), ("heartbeat", heartbeat), ("result", terminal)):
+        if not isinstance(observed, dict):
+            continue
+        if observed.get("job_id") is not None and observed.get("attempt_id") is not None:
+            for other_label, other in (("launch", launch), ("heartbeat", heartbeat), ("result", terminal)):
+                if (isinstance(other, dict) and other.get("job_id") is not None
+                        and other.get("attempt_id") is not None
+                        and (other.get("job_id"), other.get("attempt_id"))
+                        != (observed.get("job_id"), observed.get("attempt_id"))):
+                    receipt_errors.append({"file": label + ".json", "error": "identity_chain_mismatch"})
+                    break
+        binding = observed.get("scheduler_binding")
+        if binding is not None:
+            for other_label, other in (("launch", launch), ("heartbeat", heartbeat), ("result", terminal)):
+                if (isinstance(other, dict) and other.get("scheduler_binding") is not None
+                        and other.get("scheduler_binding") != binding):
+                    receipt_errors.append({"file": label + ".json", "error": "scheduler_binding_chain_mismatch"})
+                    break
+    if receipt_errors:
+        result["receipt_errors"] = receipt_errors
     identity = launch.get("worker_identity")
     result["worker_alive"] = is_alive(identity)
     result["child_alive"] = is_alive(heartbeat.get("child_identity"))
@@ -807,109 +1082,165 @@ def freeze_job(spec, lab, root):
     return spec
 
 
-def worker(spec_file, attempt_dir):
-    attempt = Path(attempt_dir).resolve()
-    attempt.mkdir(parents=True, exist_ok=True)
-    lock = (attempt / "worker.lock").open("a")
+def _open_worker_lock(path):
+    flags = os.O_RDWR | os.O_CREAT | os.O_CLOEXEC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    observed = os.fstat(fd)
+    if not stat.S_ISREG(observed.st_mode) or observed.st_nlink != 1:
+        os.close(fd)
+        raise OSError("worker lock is not a single-link regular file: " + str(path))
+    lock = os.fdopen(fd, "a+")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
-        return 0
-    if (attempt / "result.json").exists():
-        return 0
-    # An incomplete previous worker is never silently re-executed in the same attempt.
-    if (attempt / "launch.json").exists():
-        return 2
-    spec = json.loads(Path(spec_file).read_text())
-    attempt_id = spec.get("attempt_id") or attempt.name
-    start = time.time()
-    identity = proc_identity(os.getpid())
-    atomic_json(attempt / "launch.json", {"time": start, "worker_identity": identity,
-                "job_id": spec["job_id"], "attempt_id": attempt_id})
-    env = os.environ.copy()
-    env.update({k: str(v) for k, v in spec.get("env", {}).items()})
-    threads = str(max(1, int(spec["resources"]["cpu_cores"])))
-    for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
-        env[name] = str(spec.get("env", {}).get(name, threads))
-    gpu = spec.get("allocation", {}).get("gpu_uuid")
-    env["CUDA_VISIBLE_DEVICES"] = gpu or ""
-    env["CORE_ATTEMPT_DIR"] = str(attempt)
-    argv = [x.replace("{attempt_dir}", str(attempt)) for x in spec["argv"]]
-    peak_rss = peak_gpu = 0.0
-    proc = None
-    timeout = False
-    error = None
-    returncode = None
+        lock.close()
+        return None
+    return lock
+
+
+def _existing_regular(path):
     try:
-        for item in spec.get("input_files", []):
-            if digest(item["path"]) != item["sha256"]:
-                raise ValueError("input hash mismatch: " + item["path"])
-        with (attempt / "stdout.log").open("ab", buffering=0) as log:
-            proc = subprocess.Popen(argv, cwd=spec["cwd"], env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
-            child_identity = proc_identity(proc.pid)
-            while True:
-                pids, rss = process_tree(proc.pid)
-                # Canonical attempts are runtime/attempts/job/attempt. Sharing
-                # the runtime-local cache avoids one nvidia-smi pair per job.
-                _, gpu_processes = shared_worker_gpu_snapshot(attempt.parents[2]) if gpu else ([], [])
-                gpu_mib = sum(x["used_mib"] for x in gpu_processes if x["pid"] in pids and x["uuid"] == gpu)
-                peak_rss, peak_gpu = max(peak_rss, rss / 1024**2), max(peak_gpu, gpu_mib)
-                atomic_json(attempt / "heartbeat.json", {"time": time.time(), "worker_identity": identity,
-                            "child_identity": child_identity, "process_ids": sorted(pids), "rss_mib": rss / 1024**2,
-                            "gpu_mib": gpu_mib, "peak_rss_mib": peak_rss, "peak_gpu_mib": peak_gpu})
-                returncode = proc.poll()
-                if returncode is not None:
-                    break
-                if time.time() - start > spec["timeout_seconds"]:
-                    timeout = True
+        observed = os.lstat(path)
+    except FileNotFoundError:
+        return False
+    if stat.S_ISLNK(observed.st_mode) or not stat.S_ISREG(observed.st_mode) or observed.st_nlink != 1:
+        raise OSError("worker metadata is not a single-link regular file: " + str(path))
+    return True
+
+
+def worker(spec_file, attempt_dir):
+    attempt = Path(_absolute_path(attempt_dir))
+    attempt.mkdir(parents=True, exist_ok=True)
+    spec = _read_json_regular(spec_file)
+    attempt_id = spec.get("attempt_id") or attempt.name
+    lock = _open_worker_lock(attempt / "worker.lock")
+    if lock is None:
+        return 0
+    try:
+        if _existing_regular(attempt / "result.json"):
+            return 0
+        # An incomplete previous worker is never silently re-executed in the same attempt.
+        if _existing_regular(attempt / "launch.json"):
+            return 2
+        start = time.time()
+        identity = proc_identity(os.getpid())
+        binding = spec.get("scheduler_binding")
+        actual_host = host_identity()
+        actual_gpu = {"uuid": None, "index": None}
+        launch_payload = {"time": start, "worker_identity": identity,
+                          "job_id": spec["job_id"], "attempt_id": attempt_id,
+                          "scheduler_binding": binding, "host_identity": actual_host}
+        env = os.environ.copy()
+        env.update({k: str(v) for k, v in spec.get("env", {}).items()})
+        threads = str(max(1, int(spec["resources"]["cpu_cores"])))
+        for name in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+            env[name] = str(spec.get("env", {}).get(name, threads))
+        allocation = spec.get("allocation", {})
+        gpu = allocation.get("gpu_uuid")
+        env["CUDA_VISIBLE_DEVICES"] = gpu or ""
+        env["CORE_ATTEMPT_DIR"] = str(attempt)
+        argv = [x.replace("{attempt_dir}", str(attempt)) for x in spec["argv"]]
+        peak_rss = peak_gpu = 0.0
+        proc = None
+        child_identity = None
+        timeout = False
+        error = None
+        returncode = None
+        try:
+            if binding is not None:
+                binding, attempt, actual_host, actual_gpu = validate_scheduler_binding(
+                    spec, attempt, check_runtime_identity=True,
+                )
+            else:
+                actual_gpu = gpu_identity(allocation)
+            launch_payload.update({"scheduler_binding": binding, "host_identity": actual_host,
+                                    "gpu_identity": actual_gpu})
+            atomic_json(attempt / "launch.json", launch_payload)
+            for item in spec.get("input_files", []):
+                if digest(item["path"]) != item["sha256"]:
+                    raise ValueError("input hash mismatch: " + item["path"])
+            with (attempt / "stdout.log").open("ab", buffering=0) as log:
+                proc = subprocess.Popen(argv, cwd=spec["cwd"], env=env, stdout=log, stderr=subprocess.STDOUT,
+                                        start_new_session=True)
+                child_identity = proc_identity(proc.pid)
+                while True:
+                    pids, rss = process_tree(proc.pid)
+                    # Canonical attempts are runtime/attempts/job/attempt. Sharing
+                    # the runtime-local cache avoids one nvidia-smi pair per job.
+                    sampled_gpus, gpu_processes = (shared_worker_gpu_snapshot(attempt.parents[2])
+                                                   if gpu else ([], []))
+                    if gpu and gpu_identity(allocation, sampled_gpus) != actual_gpu:
+                        raise ValueError("GPU identity changed during execution")
+                    gpu_mib = sum(x["used_mib"] for x in gpu_processes if x["pid"] in pids and x["uuid"] == gpu)
+                    peak_rss, peak_gpu = max(peak_rss, rss / 1024**2), max(peak_gpu, gpu_mib)
+                    atomic_json(attempt / "heartbeat.json", {"time": time.time(), "worker_identity": identity,
+                                "child_identity": child_identity, "process_ids": sorted(pids), "rss_mib": rss / 1024**2,
+                                "gpu_mib": gpu_mib, "peak_rss_mib": peak_rss, "peak_gpu_mib": peak_gpu,
+                                "job_id": spec["job_id"], "attempt_id": attempt_id,
+                                "scheduler_binding": binding, "host_identity": actual_host,
+                                "gpu_identity": actual_gpu})
+                    returncode = proc.poll()
+                    if returncode is not None:
+                        break
+                    if time.time() - start > spec["timeout_seconds"]:
+                        timeout = True
+                        os.killpg(proc.pid, signal.SIGTERM)
+                        try:
+                            proc.wait(timeout=10)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(proc.pid, signal.SIGKILL)
+                            proc.wait()
+                        returncode = proc.returncode
+                        break
+                    time.sleep(2)
+        except Exception as exc:
+            error = repr(exc)
+            launch_payload["error"] = error
+            with contextlib.suppress(OSError, ValueError, TypeError):
+                atomic_json(attempt / "launch.json", launch_payload)
+            if proc and proc.poll() is None:
+                with contextlib.suppress(ProcessLookupError):
                     os.killpg(proc.pid, signal.SIGTERM)
-                    try:
-                        proc.wait(timeout=10)
-                    except subprocess.TimeoutExpired:
-                        os.killpg(proc.pid, signal.SIGKILL)
-                        proc.wait()
-                    returncode = proc.returncode
-                    break
-                time.sleep(2)
-    except Exception as exc:
-        error = repr(exc)
-        if proc and proc.poll() is None:
-            with contextlib.suppress(ProcessLookupError):
-                os.killpg(proc.pid, signal.SIGTERM)
-            try:
-                proc.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                os.killpg(proc.pid, signal.SIGKILL)
-                proc.wait()
-    outputs = []
-    missing = []
-    for relative in spec.get("required_outputs", []):
-        path = attempt / relative
-        if path.is_file():
-            outputs.append({"path": relative, "sha256": digest(path), "bytes": path.stat().st_size})
-        else:
-            missing.append(relative)
-    # Include raw solver files and checkpoints, not just the small required reports.
-    indexed = {item["path"]: item for item in outputs}
-    for path in attempt.rglob("*"):
-        if path.is_file() and not path.is_symlink() and path.name not in {"heartbeat.json", "worker.log", "worker.lock"}:
-            relative = str(path.relative_to(attempt))
-            if relative not in indexed:
-                indexed[relative] = {"path": relative, "sha256": digest(path), "bytes": path.stat().st_size}
-    usage = resource.getrusage(resource.RUSAGE_CHILDREN)
-    end = time.time()
-    result = {"schema": EXECUTION_RECEIPT_SCHEMA, "job_id": spec["job_id"],
-              "attempt_id": attempt_id,
-              "execution_status": "succeeded" if returncode == 0 and not error and not missing and not timeout else "failed",
-              "scientific_status": "not_inferred_from_execution", "started": start, "finished": end,
-              "returncode": returncode, "timeout": timeout, "error": error, "missing_outputs": missing,
-              "outputs": outputs, "artifact_index": list(indexed.values()), "argv": argv, "source_snapshot": spec.get("source_snapshot"),
-              "usage": {"wall_seconds": end - start, "cpu_seconds_children": usage.ru_utime + usage.ru_stime,
-                        "peak_rss_mib_sampled_tree": peak_rss, "max_child_rss_mib": usage.ru_maxrss / 1024,
-                        "peak_gpu_mib_sampled": peak_gpu, "gpu_process_reservation_hours": (end - start) / 3600 if gpu else 0},
-              "allocation": spec.get("allocation", {})}
-    atomic_json(attempt / "result.json", result)
-    return 0 if result["execution_status"] == "succeeded" else 1
+                try:
+                    proc.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                    proc.wait()
+        outputs = []
+        missing = []
+        for relative in spec.get("required_outputs", []):
+            path = attempt / relative
+            if path.is_file() and not path.is_symlink():
+                outputs.append({"path": relative, "sha256": digest(path), "bytes": path.stat().st_size})
+            else:
+                missing.append(relative)
+        # Include raw solver files and checkpoints, not just the small required reports.
+        indexed = {item["path"]: item for item in outputs}
+        for path in attempt.rglob("*"):
+            if path.is_file() and not path.is_symlink() and path.name not in {"heartbeat.json", "worker.log", "worker.lock"}:
+                relative = str(path.relative_to(attempt))
+                if relative not in indexed:
+                    indexed[relative] = {"path": relative, "sha256": digest(path), "bytes": path.stat().st_size}
+        usage = resource.getrusage(resource.RUSAGE_CHILDREN)
+        end = time.time()
+        result = {"schema": EXECUTION_RECEIPT_SCHEMA, "job_id": spec["job_id"],
+                  "attempt_id": attempt_id,
+                  "execution_status": "succeeded" if returncode == 0 and not error and not missing and not timeout else "failed",
+                  "scientific_status": "not_inferred_from_execution", "started": start, "finished": end,
+                  "returncode": returncode, "timeout": timeout, "error": error, "missing_outputs": missing,
+                  "outputs": outputs, "artifact_index": list(indexed.values()), "argv": argv,
+                  "source_snapshot": spec.get("source_snapshot"), "scheduler_binding": binding,
+                  "host_identity": actual_host, "gpu_identity": actual_gpu,
+                  "usage": {"wall_seconds": end - start, "cpu_seconds_children": usage.ru_utime + usage.ru_stime,
+                            "peak_rss_mib_sampled_tree": peak_rss, "max_child_rss_mib": usage.ru_maxrss / 1024,
+                            "peak_gpu_mib_sampled": peak_gpu, "gpu_process_reservation_hours": (end - start) / 3600 if gpu else 0},
+                  "allocation": allocation}
+        atomic_json(attempt / "result.json", result)
+        return 0 if result["execution_status"] == "succeeded" else 1
+    finally:
+        with contextlib.suppress(OSError):
+            fcntl.flock(lock, fcntl.LOCK_UN)
+        lock.close()
 
 
 def launch_detached(spec_file, attempt_dir):
@@ -920,6 +1251,30 @@ def launch_detached(spec_file, attempt_dir):
                                  "--attempt-dir", str(attempt)], stdin=subprocess.DEVNULL,
                                 stdout=log, stderr=subprocess.STDOUT, start_new_session=True, close_fds=True)
     return {"launcher_pid": proc.pid}
+
+
+def prepare_launch(spec_file, attempt_dir):
+    """Consume a scheduler reservation before publishing the worker request."""
+    spec = _read_json_regular(spec_file)
+    if spec.get("source_snapshot"):
+        source = Path(spec["source_snapshot"]["path"])
+        manifest = _read_json_regular(source / "source-manifest.json")
+        if manifest["sha256"] != spec["source_snapshot"]["sha256"]:
+            raise ValueError("source snapshot identity mismatch")
+        for relative, expected in manifest["files"].items():
+            if digest(source / relative) != expected:
+                raise ValueError("source snapshot transfer hash mismatch")
+    else:
+        spec = freeze_job(spec, spec["source_lab"], Path(spec["source_lab"]) / "campaigns/core-v1/runtime")
+    consumed = consume_scheduler_reservation(spec, attempt_dir)
+    if not consumed["consumed"]:
+        return {"consumed": False, "launched": False, "reason": consumed["reason"],
+                "marker": consumed["marker"]}
+    attempt = Path(_absolute_path(attempt_dir))
+    prepared = attempt / "spec.json"
+    atomic_json(prepared, spec)
+    return {"consumed": True, "launched": True, "marker": consumed["marker"],
+            **launch_detached(prepared, attempt)}
 
 
 class Coordinator:
@@ -989,7 +1344,8 @@ class Coordinator:
             if result is not None:
                 self.store.finalize_receipt(
                     job["job_id"], result, expected_attempt_id=job["attempt_id"],
-                    heartbeat=receipt.get("heartbeat", {}), expected_job_id=job["job_id"],
+                    heartbeat=receipt.get("heartbeat", {}), launch=receipt.get("launch", {}),
+                    expected_job_id=job["job_id"],
                 )
             elif receipt.get("worker_alive") or receipt.get("child_alive"):
                 self.store.cas_update(
@@ -1014,6 +1370,9 @@ class Coordinator:
         attempt = Path(host["lab"]) / "campaigns/core-v1/runtime/attempts" / job["job_id"] / attempt_id
         allocation = dict(allocation)
         allocation["_host"] = name
+        if not allocation.get("_host_hostname") or not allocation.get("_host_boot_id"):
+            raise ValueError("scheduler reservation lacks a trusted host identity")
+        allocation["_reservation_id"] = uuid.uuid4().hex
         # Keep scheduler-selected in the submission record, but freeze the
         # concrete host into the worker request and receipt.
         spec = freeze_job(dict(job["spec"], host=name, allocation=allocation), self.lab, self.store.root)
@@ -1024,6 +1383,9 @@ class Coordinator:
                 attempt_id=attempt_id, allocation=allocation, attempt_dir=str(attempt)):
             raise RuntimeError("job changed before reservation")
         spec["attempt_id"] = attempt_id
+        spec["scheduler_binding"] = scheduler_binding(
+            job["job_id"], attempt_id, attempt, job["spec_hash"], allocation,
+        )
         local_spec = self.store.root / "specs" / (attempt_id + ".json")
         atomic_json(local_spec, spec)
         if not self.store.cas_update(
@@ -1134,6 +1496,16 @@ class Coordinator:
             for name in names:
                 allocation = choose_resources(job["spec"], snapshots[name], planned_active[name])
                 if allocation is not None:
+                    if not snapshots[name].get("hostname") or not snapshots[name].get("boot_id"):
+                        with self.store.db:
+                            self.store.event(job["job_id"], "launch_preparation_error", {
+                                "error": "scheduler probe lacks trusted host identity",
+                                "host": name,
+                            })
+                        continue
+                    allocation = dict(allocation)
+                    allocation["_host_hostname"] = snapshots[name]["hostname"]
+                    allocation["_host_boot_id"] = snapshots[name]["boot_id"]
                     selected = (name, allocation)
                     break
             if selected is not None:
@@ -1231,20 +1603,7 @@ def main():
     elif args.command == "worker":
         return worker(args.spec, args.attempt_dir)
     elif args.command == "prepare-launch":
-        spec = json.loads(args.spec.read_text())
-        if spec.get("source_snapshot"):
-            source = Path(spec["source_snapshot"]["path"])
-            manifest = json.loads((source / "source-manifest.json").read_text())
-            if manifest["sha256"] != spec["source_snapshot"]["sha256"]:
-                raise ValueError("source snapshot identity mismatch")
-            for relative, expected in manifest["files"].items():
-                if digest(source / relative) != expected:
-                    raise ValueError("source snapshot transfer hash mismatch")
-        else:
-            spec = freeze_job(spec, spec["source_lab"], Path(spec["source_lab"]) / "campaigns/core-v1/runtime")
-        prepared = args.attempt_dir / "spec.json"
-        atomic_json(prepared, spec)
-        print(canonical(launch_detached(str(prepared), args.attempt_dir)))
+        print(canonical(prepare_launch(args.spec, args.attempt_dir)))
     elif args.command == "submit":
         print(canonical({"inserted": Store(args.root).submit(json.loads(args.spec.read_text()))}))
     else:

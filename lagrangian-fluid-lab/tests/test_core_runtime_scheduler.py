@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -79,7 +80,7 @@ def test_scheduler_selected_routes_and_persists_effective_host(tmp_path):
     )
     snapshot = {
         "time": 0,
-        "hostname": "test",
+        "hostname": "test", "boot_id": "boot-test",
         "cpu_count": 128,
         "ram_total_mib": 251000,
         "ram_available_mib": 200000,
@@ -128,7 +129,7 @@ def test_concurrent_coordinators_serialize_resource_admission(tmp_path):
     setup.db.close()
 
     snapshot = {
-        "time": 0, "hostname": "test", "cpu_count": 8,
+        "time": 0, "hostname": "test", "boot_id": "boot-test", "cpu_count": 8,
         "ram_total_mib": 16000, "ram_available_mib": 12000,
         "disk_free_bytes": 10**12,
         "gpus": [{"index": 0, "uuid": "GPU-a", "name": "test",
@@ -346,6 +347,137 @@ def test_cas_transition_allows_only_one_observer_to_advance_attempt(tmp_path):
     assert row["attempt_id"] == "attempt-a"
 
 
+def _scheduled_cpu_envelope(tmp_path, *, job_id="scheduled-job", attempt_id="attempt-1"):
+    root = tmp_path / "runtime"
+    store = Store(root)
+    store.submit({
+        "job_id": job_id,
+        "argv": ["/bin/true"],
+        "cwd": "/tmp",
+        "host": "ada",
+        "resources": {"cpu_cores": 1, "ram_mib": 128, "gpu_peak_mib": 0, "io_weight": 0},
+        "required_outputs": [],
+        "timeout_seconds": 10,
+    })
+    attempt_dir = root / "attempts" / job_id / attempt_id
+    attempt_dir.mkdir(parents=True)
+    allocation = {
+        "_host": "ada",
+        "_host_hostname": os.uname().nodename,
+        "_host_boot_id": runtime._boot_id(),
+        "_reservation_id": "reservation-1",
+        "gpu_uuid": None,
+        "gpu_index": None,
+        "reserved_gpu_mib": 0,
+    }
+    assert store.cas_update(
+        job_id, "running", expected_status="queued", expected_attempt_id=None,
+        expected_job_id=job_id, attempt_id=attempt_id,
+        attempt_dir=str(attempt_dir), allocation=allocation,
+    )
+    row = store.jobs()[0]
+    binding = runtime.scheduler_binding(
+        job_id, attempt_id, attempt_dir, row["spec_hash"], allocation,
+    )
+    return store, row, attempt_dir, allocation, binding
+
+
+def test_scheduler_reservation_is_one_shot_and_attempt_bound(tmp_path):
+    store, row, attempt_dir, allocation, binding = _scheduled_cpu_envelope(tmp_path)
+    spec = dict(row["spec"], attempt_id=row["attempt_id"], allocation=allocation,
+                scheduler_binding=binding)
+
+    first = runtime.consume_scheduler_reservation(spec, attempt_dir)
+    second = runtime.consume_scheduler_reservation(spec, attempt_dir)
+
+    assert first["consumed"] is True
+    assert second == {"consumed": False, "marker": first["marker"], "reason": "already_consumed"}
+
+    replay_attempt = attempt_dir.parent / "attempt-replay"
+    replay_attempt.mkdir()
+    replay_spec = dict(spec, attempt_id="attempt-replay")
+    replay_spec["scheduler_binding"] = runtime.scheduler_binding(
+        row["job_id"], "attempt-replay", replay_attempt, row["spec_hash"], allocation,
+    )
+    with pytest.raises(ValueError, match="replayed with a different binding"):
+        runtime.consume_scheduler_reservation(replay_spec, replay_attempt)
+
+
+def test_scheduler_reservation_rejects_host_and_gpu_identity_drift(tmp_path, monkeypatch):
+    store, row, attempt_dir, allocation, _ = _scheduled_cpu_envelope(tmp_path)
+    allocation = dict(allocation, gpu_uuid="GPU-a", gpu_index=0, reserved_gpu_mib=4096)
+    binding = runtime.scheduler_binding(
+        row["job_id"], row["attempt_id"], attempt_dir, row["spec_hash"], allocation,
+    )
+    spec = dict(row["spec"], attempt_id=row["attempt_id"], allocation=allocation,
+                scheduler_binding=binding)
+    monkeypatch.setattr(runtime, "gpu_snapshot", lambda: ([
+        {"index": 0, "uuid": "GPU-b", "name": "other", "total_mib": 48000,
+         "used_mib": 0, "utilization": 0},
+    ], []))
+    with pytest.raises(ValueError, match="GPU identity is missing or changed"):
+        runtime.consume_scheduler_reservation(spec, attempt_dir)
+
+    drifted_allocation = dict(allocation, _host_boot_id="different-boot")
+    drifted = dict(spec, allocation=drifted_allocation)
+    drifted["scheduler_binding"] = runtime.scheduler_binding(
+        row["job_id"], row["attempt_id"], attempt_dir, row["spec_hash"], drifted_allocation,
+    )
+    with pytest.raises(ValueError, match="host identity changed"):
+        runtime.consume_scheduler_reservation(drifted, attempt_dir)
+
+
+def test_terminal_receipt_requires_scheduler_allocation_and_identity_chain(tmp_path):
+    store, row, attempt_dir, allocation, binding = _scheduled_cpu_envelope(tmp_path)
+    valid = _receipt(row["job_id"], row["attempt_id"])
+    valid.update({
+        "allocation": allocation,
+        "scheduler_binding": binding,
+        "host_identity": {"hostname": allocation["_host_hostname"], "boot_id": allocation["_host_boot_id"]},
+        "gpu_identity": {"uuid": None, "index": None},
+    })
+    launch = dict(valid, time=1.0, worker_identity={"pid": 1, "start_ticks": 1, "boot_id": allocation["_host_boot_id"]})
+    heartbeat = dict(valid, time=2.0, worker_identity=launch["worker_identity"],
+                     child_identity=None, process_ids=[])
+
+    accepted = store.finalize_receipt(
+        row["job_id"], valid, expected_attempt_id=row["attempt_id"],
+        launch=launch, heartbeat=heartbeat, expected_job_id=row["job_id"],
+    )
+    assert accepted["action"] == "accepted"
+
+    other_store, other_row, other_attempt, other_allocation, other_binding = _scheduled_cpu_envelope(
+        tmp_path / "forged", job_id="forged-job"
+    )
+    forged = _receipt(other_row["job_id"], other_row["attempt_id"])
+    forged.update({
+        "allocation": dict(other_allocation, _host="h200"),
+        "scheduler_binding": other_binding,
+        "host_identity": {"hostname": other_allocation["_host_hostname"], "boot_id": other_allocation["_host_boot_id"]},
+        "gpu_identity": {"uuid": "GPU-forged", "index": 7},
+    })
+    outcome = other_store.finalize_receipt(
+        other_row["job_id"], forged, expected_attempt_id=other_row["attempt_id"],
+        launch=None, heartbeat=None, expected_job_id=other_row["job_id"],
+    )
+    assert outcome["action"] == "attention"
+    assert "allocation_mismatch" in other_store.jobs()[0]["result"]["errors"]
+    assert "launch_identity_missing" in other_store.jobs()[0]["result"]["errors"]
+
+
+def test_collect_attempt_rejects_metadata_symlink(tmp_path):
+    attempt = tmp_path / "runtime" / "attempts" / "job" / "attempt"
+    attempt.mkdir(parents=True)
+    external = tmp_path / "external.json"
+    external.write_text(json.dumps(_receipt("job", "attempt")))
+    (attempt / "result.json").symlink_to(external)
+
+    collected = runtime.collect_attempt(attempt)
+
+    assert "result" not in collected
+    assert any(item["file"] == "result.json" for item in collected["receipt_errors"])
+
+
 def test_finalize_receipt_is_idempotent_and_does_not_double_count(tmp_path):
     store = _active_store(tmp_path, job_id="finalize-job", attempt_id="attempt-1")
     receipt = _receipt("finalize-job", "attempt-1")
@@ -484,7 +616,7 @@ def test_unreachable_active_host_keeps_reservation_and_never_duplicates_launch(t
     )
     snapshot = {
         "time": 0,
-        "hostname": "test",
+        "hostname": "test", "boot_id": "boot-test",
         "cpu_count": 2,
         "ram_total_mib": 4096,
         "ram_available_mib": 3072,
@@ -595,7 +727,7 @@ def test_restarted_coordinator_keeps_live_attempt_reserved_without_duplicate_lau
             root, {"ada": {"lab": str(tmp_path), "python": sys.executable}})
         snapshot = {
             "time": 0,
-            "hostname": "test",
+            "hostname": "test", "boot_id": "boot-test",
             "cpu_count": 128,
             "ram_total_mib": 250000,
             "ram_available_mib": 230000,
