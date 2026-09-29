@@ -1,0 +1,282 @@
+{
+  "T1_numerical": false,
+  "T2_macro": false,
+  "T2_path": false,
+  "audit_mode": "bounded_mlp_seed43_authority_projection_gap_only",
+  "contract_source_sha256": {
+    "current_manifest_rollout_launcher": "24c21945f15d824331af2a02ec969e8ca877eadc71ea403187d18d85b981ad89",
+    "current_manifest_terminal_evidence": "503b6a8d1fda0d1e13a5c039ad3b143eea8ae3173d6901765c64ee9c42a33e09",
+    "current_manifest_training_evidence": "b925e66f1965f309a07d15a3cf31bc24e609bc489c45b8a4bb943e09b10309c9",
+    "rollout_launcher_regression": "98583c0dbf9ff3cd71669cbe9082fe7d7b58feb43b30e1909437d43aea0b6bd0"
+  },
+  "contract_sources": {
+    "current_manifest_rollout_launcher": {
+      "bytes": 34551,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_mlp_hidden16_current_manifest_rollout_launcher_v1.py",
+      "sha256": "24c21945f15d824331af2a02ec969e8ca877eadc71ea403187d18d85b981ad89"
+    },
+    "current_manifest_terminal_evidence": {
+      "bytes": 70187,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_mlp_hidden16_current_manifest_terminal_evidence_v1.py",
+      "sha256": "503b6a8d1fda0d1e13a5c039ad3b143eea8ae3173d6901765c64ee9c42a33e09"
+    },
+    "current_manifest_training_evidence": {
+      "bytes": 34170,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_mlp_hidden16_current_manifest_training_evidence_v1.py",
+      "sha256": "b925e66f1965f309a07d15a3cf31bc24e609bc489c45b8a4bb943e09b10309c9"
+    },
+    "rollout_launcher_regression": {
+      "bytes": 8637,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_mlp_hidden16_current_manifest_rollout_launcher_v1.py",
+      "sha256": "98583c0dbf9ff3cd71669cbe9082fe7d7b58feb43b30e1909437d43aea0b6bd0"
+    }
+  },
+  "credit": 0,
+  "diagnostic_only": true,
+  "exact_gaps": [
+    {
+      "condition": "a deployment-owned Ed25519 public key and external scheduler root are not both present",
+      "consequence": "no caller-supplied authority can be authenticated as a real scheduler authority",
+      "id": "F3-MLP43-AUTH-ROOT-001",
+      "required_evidence": "install the owner-controlled 32-byte Ed25519 public key and protected scheduler root, then provide metadata/permission evidence",
+      "title": "MLP seed43 scheduler trust root unavailable"
+    },
+    {
+      "condition": "no current-manifest MLP seed43 one-shot authority document is available under the configured root",
+      "consequence": "nonce, namespace inode, source/plan/resource and GPU identity bindings have no external scheduler witness",
+      "id": "F3-MLP43-AUTH-DOC-002",
+      "required_evidence": "obtain a scheduler-issued authority document and validate its Ed25519 signature against the deployment key",
+      "title": "signed external authority document unavailable"
+    },
+    {
+      "condition": "no durable scheduler consume-path claim is available",
+      "consequence": "the reservation cannot be shown to be unused by another consumer",
+      "id": "F3-MLP43-AUTH-CLAIM-003",
+      "required_evidence": "obtain an external claim bound to authority id, document digest, receipt identity, nonce and namespace descriptor",
+      "title": "one-shot consume claim unavailable"
+    },
+    {
+      "condition": "the current-manifest launcher accepts a local plan and exposes --execute without an external authority envelope",
+      "consequence": "a local nonce/namespace/GPU-index plan cannot authorize diagnostic execution or be promoted to Core evidence",
+      "id": "F3-MLP43-AUTH-IMPL-004",
+      "required_evidence": "add a producer-issued, fail-closed seed43 admission boundary before any retry; do not widen the existing launcher locally",
+      "title": "current MLP launcher has no external-authority admission gate"
+    },
+    {
+      "condition": "the MLP plan contains a local GPU index but no scheduler-owned UUID/PCI snapshot binding",
+      "consequence": "GPU index availability cannot prove that the reserved physical resource is the one used by the evaluator",
+      "id": "F3-MLP43-AUTH-RESOURCE-005",
+      "required_evidence": "obtain a scheduler-owned resource snapshot bound by digest to the authority, nonce, namespace and command plan",
+      "title": "scheduler-owned GPU identity binding unavailable"
+    },
+    {
+      "condition": "the audit reads only bounded source files and trust-path metadata; it does not consume or replay authority documents",
+      "consequence": "synthetic fixtures or present filenames cannot promote launch, terminal status or Core credit",
+      "id": "F3-MLP43-AUTH-VERIFY-006",
+      "required_evidence": "after all external evidence exists, a dedicated admission verifier must perform signature, nonce, namespace, source, resource and one-shot checks",
+      "title": "this gap audit does not verify production authority"
+    }
+  ],
+  "external_authority": {
+    "authority_documents": [],
+    "caller_claim_can_substitute": false,
+    "claim_documents": [],
+    "path_supplied": false,
+    "real_external_document_required": true,
+    "scheduler_root": {
+      "path": "/var/lib/dual-sph/f3-mlp-seed43-scheduler",
+      "present": false
+    },
+    "signature_algorithm": "ed25519",
+    "trusted_key": {
+      "path": "/etc/dual-sph/scheduler-ed25519-public.key",
+      "present": false
+    },
+    "verified": false
+  },
+  "formal": false,
+  "formal_eligible": false,
+  "implementation_coverage": {
+    "authority_gate_before_execute": false,
+    "current_manifest_identity_binding": true,
+    "diagnostic_zero_credit_boundary": true,
+    "ed25519_signature_verification": false,
+    "external_scheduler_authority_contract": false,
+    "local_namespace_binding": true,
+    "local_nonce_binding": true,
+    "local_source_digest_binding": true,
+    "one_shot_external_consume_witness": false,
+    "scheduler_owned_gpu_uuid_pci_binding": false,
+    "seed43_parameter_binding": true
+  },
+  "implementation_evidence": {
+    "forbidden_call_names": [],
+    "forbidden_imports": [],
+    "launcher_default_is_dry_run": true,
+    "launcher_execute_surface_present": true,
+    "launcher_imports": [
+      "__future__",
+      "argparse",
+      "contextlib",
+      "dataclasses",
+      "hashlib",
+      "json",
+      "math",
+      "os",
+      "pathlib",
+      "re",
+      "scripts",
+      "stat",
+      "sys",
+      "typing"
+    ],
+    "terminal_contract_zero_credit": true,
+    "training_contract_zero_credit": true
+  },
+  "observed_at_utc": "2026-09-29T06:18:12Z",
+  "production_observation": {
+    "authority_document_available": false,
+    "authority_documents_metadata_only": [],
+    "claim_documents_metadata_only": [],
+    "current_manifest_metadata_only": {
+      "bytes": 93710,
+      "directory": false,
+      "gid": 1001,
+      "mode": 436,
+      "nlink": 1,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "present": true,
+      "regular_file": true,
+      "symlink": false,
+      "uid": 1001
+    },
+    "current_terminal_report_metadata_only": {
+      "bytes": 22960,
+      "content_opened": false,
+      "directory": false,
+      "gid": 1001,
+      "mode": 420,
+      "nlink": 1,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TERMINAL-EVIDENCE-2026-09-29-RERUN2.json",
+      "present": true,
+      "regular_file": true,
+      "symlink": false,
+      "uid": 1001
+    },
+    "current_training_report_metadata_only": {
+      "bytes": 10172,
+      "content_opened": false,
+      "directory": false,
+      "gid": 1001,
+      "mode": 420,
+      "nlink": 1,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+      "present": true,
+      "regular_file": true,
+      "symlink": false,
+      "uid": 1001
+    },
+    "external_scheduler_root_metadata_only": {
+      "path": "/var/lib/dual-sph/f3-mlp-seed43-scheduler",
+      "present": false
+    },
+    "one_shot_claim_available": false,
+    "production_authority_verified": false,
+    "production_key_available": false,
+    "production_scheduler_root_available": false,
+    "trusted_scheduler_public_key_metadata_only": {
+      "path": "/etc/dual-sph/scheduler-ed25519-public.key",
+      "present": false
+    }
+  },
+  "projection_contract": {
+    "authority_gate_before_execute": false,
+    "durable_receipt_written": false,
+    "formal_promotion_allowed": false,
+    "historical_receipt_rewritten": false,
+    "non_authorizing_projection_only": true,
+    "popen_allowed": false,
+    "producer_reissue_required": true,
+    "runner_consumable": false,
+    "safe_local_projection_implemented": false,
+    "safe_local_repair": false
+  },
+  "qualification": false,
+  "qualification_credit": 0,
+  "readiness": {
+    "authority_verified": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "gpu_execution_observed": false,
+    "launch_allowed": false,
+    "popen_attempted": false,
+    "queue_submitted": false,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "report_id": "f3-mlp-hidden16-seed43-authority-projection-gap-v1",
+  "requested_agent_policy": {
+    "model": "gpt-5.6-luna",
+    "parallel_scope": "f3_mlp_hidden16_seed43_authority_projection_gap_v1",
+    "reasoning_effort": "max"
+  },
+  "required_external_contract": {
+    "caller_claim_can_substitute": false,
+    "external_scheduler_authority": true,
+    "namespace_inode_binding": true,
+    "nonce_binding": true,
+    "one_shot_consume_witness": true,
+    "plan_digest_binding": true,
+    "resource_snapshot_binding": true,
+    "scheduler_owned_gpu_uuid_pci_binding": true,
+    "signature_algorithm": "ed25519",
+    "source_digest_binding": true
+  },
+  "resource_binding": {
+    "caller_snapshot_accepted": false,
+    "implicit_probe_allowed": false,
+    "local_gpu_index_present_in_plan": true,
+    "scheduler_owned_gpu_uuid_pci_required": true,
+    "verified": false
+  },
+  "schema": "core.f3.mlp.hidden16.seed43.authority_projection_gap.v1.report",
+  "scope": {
+    "case_id": "F3_DEV_00_a0p903125",
+    "current_manifest": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "family": "F3",
+    "frames": 836,
+    "hidden": 16,
+    "historical_receipts_modified": false,
+    "model_kind": "mlp",
+    "seed": 43,
+    "shared_files_modified": false,
+    "split": "test",
+    "transitions": 835,
+    "updates": 500
+  },
+  "side_effects": {
+    "PLAN_writes": 0,
+    "completion_writes": 0,
+    "current_manifest_bytes_opened": 0,
+    "current_terminal_report_bytes_opened": 0,
+    "current_training_report_bytes_opened": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "gpu_probes": 0,
+    "historical_receipt_writes": 0,
+    "ledger_writes": 0,
+    "popen_attempts": 0,
+    "production_large_files_opened": 0,
+    "queue_submissions": 0,
+    "registry_writes": 0,
+    "solver_attempts": 0,
+    "source_files_read": 4,
+    "worker_attempts": 0
+  },
+  "status": "blocked_fail_closed",
+  "write_set": [
+    "reports/F3-MLP-HIDDEN16-SEED43-AUTHORITY-PROJECTION-GAP-2026-09-29.json",
+    "reports/F3-MLP-HIDDEN16-SEED43-AUTHORITY-PROJECTION-GAP-2026-09-29.zh-CN.md"
+  ]
+}
