@@ -1,0 +1,238 @@
+{
+  "contract_schema": "core.formal_training_release_root_admission_contract.v1",
+  "cross_bindings": {
+    "dataset_manifest_to_matrix": true,
+    "legacy_root_receipt_to_matrix": true,
+    "matrix_reference_self_consistent": true,
+    "source_closure_to_matrix": true,
+    "terminal_evidence_role_to_matrix": false,
+    "trusted_root_role_to_matrix": false
+  },
+  "decision": {
+    "credit": 0,
+    "formal_eligible": false,
+    "launch_allowed": false,
+    "non_authorizing_adapter": true,
+    "qualification_credit": 0,
+    "reason": "no synthetic input or caller self-claim can mint trusted-root authentication, formal terminal evidence, launch authority, or credit",
+    "status": "blocked_fail_closed"
+  },
+  "execution_constraints": {
+    "bounded_json_only": true,
+    "checkpoint_opened": false,
+    "completion_written": false,
+    "dataset_payload_only": true,
+    "denominator_written": false,
+    "gate_written": false,
+    "gpu_started": false,
+    "hdf5_opened": false,
+    "historical_receipt_written": false,
+    "ledger_written": false,
+    "plan_written": false,
+    "queue_submitted": false,
+    "read_only": true,
+    "registry_written": false,
+    "trainer_imported": false,
+    "training_started": false,
+    "worker_started": false
+  },
+  "implementation_boundary": {
+    "composes_existing_local_verifiers": false,
+    "cryptographic_root_verification": false,
+    "duplicates_case_or_checkpoint_verification": false,
+    "matrix_scope_join_only": true,
+    "terminal_artifact_reverification": false
+  },
+  "input_paths": {
+    "formal_dataset_release_manifest": "campaigns/core-v1/f3-dataset-v2.json",
+    "model_seed_matrix": "reports/CORE-FORMAL-TRAINING-READINESS-MATRIX-2026-09-29.json",
+    "source_closure": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/source-closure.json",
+    "terminal_evidence": "campaigns/core-v1/registry.json",
+    "trusted_root": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/receipt.json"
+  },
+  "inputs": {
+    "formal_dataset_release_manifest": {
+      "reference": {
+        "bytes": 93710,
+        "path": "campaigns/core-v1/f3-dataset-v2.json",
+        "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+      },
+      "schema": "core.dataset.v2"
+    },
+    "model_seed_matrix": {
+      "reference": {
+        "bytes": 16643,
+        "path": "reports/CORE-FORMAL-TRAINING-READINESS-MATRIX-2026-09-29.json",
+        "sha256": "b5516cacb73dab1e783bc7733053f7204b9d78951735fe528b69d16c5c168ce5"
+      },
+      "schema": "core.formal_training_readiness_matrix.v1"
+    },
+    "source_closure": {
+      "reference": {
+        "bytes": 4869,
+        "path": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/source-closure.json",
+        "sha256": "fe1e03d0c459f3a410440757755059f2f7049d49edb349a6fe7f54896dc429e5"
+      },
+      "schema": "core.formal_source_closure.v2"
+    },
+    "terminal_evidence": {
+      "reference": {
+        "bytes": 41714,
+        "path": "campaigns/core-v1/registry.json",
+        "sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d"
+      },
+      "schema": "core.registry.v1"
+    },
+    "trusted_root": {
+      "reference": {
+        "bytes": 14294,
+        "path": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/receipt.json",
+        "sha256": "65c6c682dca9af3e3caa40f87140fa1c92b8c589b0ef2e8550b3ef135c3e9c36"
+      },
+      "schema": "core.formal_source_closure_admission.v2"
+    }
+  },
+  "missing_blockers": [
+    "FORMAL_DATASET_RELEASE_NOT_GRANTED",
+    "TRUSTED_ROOT_ATTESTATION_MISSING",
+    "TRUSTED_ROOT_AUTHENTICATION_NOT_INTEGRATED",
+    "SOURCE_CLOSURE_RELEASE_OR_ROOT_GATE_MISSING",
+    "TERMINAL_EVIDENCE_MATRIX_MISSING",
+    "TERMINAL_ARTIFACT_REVERIFICATION_NOT_INTEGRATED",
+    "MATRIX_TRUSTED_ROOT_ROLE_REFERENCE_MISSING",
+    "MATRIX_TERMINAL_EVIDENCE_ROLE_REFERENCE_MISSING"
+  ],
+  "observations": {
+    "dataset_release": {
+      "case_count": 32,
+      "checks": {
+        "case_count_bounded": true,
+        "dataset_id_present": true,
+        "formal_release": false,
+        "schema_supported": true,
+        "source_manifest_digest_present": true
+      },
+      "dataset_id": "F3_registered32_core_native_v2",
+      "formal_release": false,
+      "release_ready": false,
+      "schema": "core.dataset.v2"
+    },
+    "model_seed_matrix": {
+      "decision_closed": true,
+      "decision_status": "blocked_fail_closed",
+      "matrix_valid": true,
+      "report_id": "core-formal-training-readiness-matrix-v1",
+      "rows_exact": true,
+      "run_ids": [
+        "graph_raw-seed17",
+        "graph_raw-seed29",
+        "graph_raw-seed43",
+        "graph_residual-seed17",
+        "graph_residual-seed29",
+        "graph_residual-seed43",
+        "mlp-seed17",
+        "mlp-seed29",
+        "mlp-seed43"
+      ],
+      "scope_checks": {
+        "models_exact": true,
+        "run_count_exact": true,
+        "run_ids_exact": true,
+        "seeds_exact": true
+      },
+      "schema": "core.formal_training_readiness_matrix.v1"
+    },
+    "source_closure": {
+      "checks": {
+        "closure_digest_present": true,
+        "complete": true,
+        "formal_release": false,
+        "formal_training_allowed": false,
+        "formal_training_ready": false,
+        "launch_allowed": false,
+        "missing_files_empty": true,
+        "root_admission_granted": false,
+        "schema_supported": true
+      },
+      "closure_sha256": "4a9a966c071752683c334974d2a91b2cd67dc968d9d761905d4f4d16b5c28751",
+      "closure_version": "core-formal-source-closure-v7-20260929",
+      "complete": true,
+      "formal_release": false,
+      "formal_training_allowed": false,
+      "formal_training_ready": false,
+      "launch_allowed": false,
+      "release_ready": false,
+      "root_admission_granted": false,
+      "schema": "core.formal_source_closure.v2"
+    },
+    "terminal_evidence": {
+      "admission_ready": false,
+      "checks": {
+        "dataset_manifest_bound": false,
+        "matrix_scope_declares_all_runs": true,
+        "model_seed_matrix_bound": false,
+        "run_rows_exact": false,
+        "schema_supported": false,
+        "source_closure_bound": false,
+        "trusted_root_bound": false
+      },
+      "complete": false,
+      "matrix_inputs_present": [
+        "current_manifest",
+        "current_manifest_evidence",
+        "registry",
+        "source_closure",
+        "source_closure_receipt",
+        "training_contract"
+      ],
+      "schema": "core.registry.v1",
+      "status": null,
+      "terminal_artifacts_reverified": false
+    },
+    "trusted_root": {
+      "admission_ready": false,
+      "authentication_boundary": "external verifier not integrated",
+      "checks": {
+        "attestation_reference_present": false,
+        "decision_granted": false,
+        "external_authority_declared": false,
+        "schema_supported": false,
+        "status_verified": false,
+        "subject_bound": false
+      },
+      "decision_granted": null,
+      "schema": "core.formal_source_closure_admission.v2",
+      "status": "planning_only_blocked",
+      "structurally_bound": false,
+      "trusted_root_authenticated": false
+    }
+  },
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "purpose": "bounded read-only join of formal dataset release, trusted root, source closure, terminal evidence, and the fixed model/seed matrix",
+  "report_id": "core-formal-training-release-root-admission-gap-v1",
+  "schema": "core.formal_training_release_root_admission_report.v1",
+  "scope": {
+    "models": [
+      "graph_raw",
+      "graph_residual",
+      "mlp"
+    ],
+    "run_count": 9,
+    "run_ids": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ]
+  }
+}

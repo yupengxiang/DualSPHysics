@@ -1,0 +1,57 @@
+{
+  "schema": "core.formal_training_release_root_admission_campaign.v1",
+  "contract_schema": "core.formal_training_release_root_admission_contract.v1",
+  "campaign_id": "core-formal-training-release-root-admission-v1",
+  "status": "planning_only_blocked",
+  "synthetic_only": true,
+  "input_roles": {
+    "formal_dataset_release_manifest": {
+      "required_schema": "core.dataset.v2",
+      "formal_release_required": true
+    },
+    "trusted_root": {
+      "required_schema": "core.formal_training_trusted_root_attestation.v1",
+      "external_authentication_required": true
+    },
+    "source_closure": {
+      "required_schema_prefix": "core.formal_source_closure.",
+      "formal_release_required": true,
+      "root_admission_required": true
+    },
+    "terminal_evidence": {
+      "required_schema": "core.formal_training_terminal_evidence_matrix.v1",
+      "run_count_required": 9,
+      "artifact_reverification_required": true
+    },
+    "model_seed_matrix": {
+      "required_schema": "core.formal_training_readiness_matrix.v1",
+      "models": [
+        "graph_raw",
+        "graph_residual",
+        "mlp"
+      ],
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "run_count": 9
+    }
+  },
+  "default_decision": {
+    "launch_allowed": false,
+    "formal_eligible": false,
+    "qualification_credit": 0,
+    "credit": 0,
+    "non_authorizing": true
+  },
+  "execution_policy": {
+    "read_only": true,
+    "bounded_json_only": true,
+    "hdf5_or_checkpoint_reads": false,
+    "training_or_gpu_execution": false,
+    "worker_or_queue_submission": false,
+    "registry_ledger_denominator_gate_completion_mutation": false,
+    "historical_receipt_mutation": false
+  }
+}
