@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 
 from scripts.f2_static_receiver_ballistic_catch_proposal_v1 import (
+    HISTORICAL_PROPOSAL,
     LAB,
     PROPOSAL,
     sha256,
@@ -131,3 +132,11 @@ def test_validator_binding_is_the_current_read_only_script() -> None:
     assert script == Path(__file__).parents[1] / implementation["path"]
     assert implementation["sha256"] == sha256(script)
     assert implementation["bytes"] == script.stat().st_size
+
+
+def test_historical_proposal_is_retained_as_a_stale_snapshot() -> None:
+    assert HISTORICAL_PROPOSAL.exists()
+    historical = json.loads(HISTORICAL_PROPOSAL.read_text(encoding="utf-8"))
+    assert historical["evidence"]["bindings"][0]["sha256"] != sha256(
+        LAB / "campaigns/core-v1/completion.json"
+    )

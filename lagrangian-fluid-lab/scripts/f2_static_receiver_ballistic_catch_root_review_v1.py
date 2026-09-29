@@ -28,10 +28,12 @@ from scripts.f2_static_receiver_ballistic_catch_proposal_v1 import (
 )
 
 
-ROOT_RECEIPT = BASE / "root-review-receipt-v1.json"
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+HISTORICAL_ROOT_RECEIPT = BASE / "root-review-receipt-v1.json"
+ROOT_RECEIPT = BASE / f"root-review-receipt-{CURRENT_RERUN_ID}.json"
 WRITER = LAB_ROOT / "scripts/f2_static_receiver_ballistic_catch_definition_writer_v1.py"
 SCHEMA = "core.f2.static_receiver_ballistic_catch.root_review.v1"
-CREATED_AT = "2026-09-21T00:00:00+00:00"
+CREATED_AT = "2026-09-29T00:00:00+00:00"
 
 
 def sha256(path: Path) -> str:

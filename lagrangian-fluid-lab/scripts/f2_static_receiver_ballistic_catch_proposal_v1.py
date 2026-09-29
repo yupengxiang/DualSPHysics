@@ -17,7 +17,9 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
-PROPOSAL = LAB / "campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-proposal-v1.json"
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+HISTORICAL_PROPOSAL = LAB / "campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-proposal-v1.json"
+PROPOSAL = LAB / f"campaigns/core-v1/cfd/f2-static-receiver-ballistic-catch-proposal-{CURRENT_RERUN_ID}.json"
 
 
 def sha256(path: Path) -> str:
