@@ -1,0 +1,137 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-413",
+  "observed_at": "2026-09-29T13:30:24+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; shared occupancy is allowed when VRAM remains sufficient; never stop or restart an existing process"
+  },
+  "commits": ["f18f8907", "21404f9c", "dc11f0fc", "e8dd34cd", "671b972b", "800ca22a"],
+  "completed_units": {
+    "f3_graph_raw_seed17_diagnostic_rollout_readiness": {
+      "commits": ["f18f8907", "21404f9c"],
+      "status": "blocked_fail_closed_before_popen",
+      "blocker": "current admission receipt lacks required authority object",
+      "popen_attempted": false,
+      "real_workload_started": 0,
+      "terminal_receipt_created": false,
+      "tests": 61,
+      "credit": 0
+    },
+    "f4_tallwall120_material_cpu_diagnostic_intake": {
+      "commit": "dc11f0fc",
+      "status": "blocked_before_execution",
+      "representative_case": "DEV_07",
+      "historical_frames": 218,
+      "historical_unknown": 1.0,
+      "historical_coverage": 0.0,
+      "blocking_prerequisites": ["fresh-root", "scheduler-host-io", "terminal-sidecar", "DEV_07-sidecar", "32-case-matrix", "source-reader-drift"],
+      "tests": 24,
+      "credit": 0
+    },
+    "f2_fallback_boundary_contract": {
+      "commit": "e8dd34cd",
+      "status": "blocked_fail_closed",
+      "boundaries": ["static/full-cup", "dynamic-dbc/open-top", "pour/catch"],
+      "preserved_blockers": ["cell-00-hard-failure", "14-missing-runtime", "dynamic-boundary/open-mouth", "catch-ownership"],
+      "new_tests": 8,
+      "related_tests": 21,
+      "credit": 0
+    },
+    "f1_prepared_runtime_admission_boundary": {
+      "commit": "671b972b",
+      "status": "blocked_fail_closed",
+      "prepared_rows": 15,
+      "runtime_admitted": 0,
+      "trusted_source_runtime_observer_root_authority": false,
+      "tests": 43,
+      "credit": 0
+    },
+    "f8_solver_output_core_input_gate": {
+      "commit": "800ca22a",
+      "status": "synthetic_only_diagnostic_core_input_gate_implemented",
+      "per_case_bindings": ["case", "attempt", "nonce", "artifact", "frame", "time_axis", "digest"],
+      "new_tests": 11,
+      "related_tests": 27,
+      "real_bcd_held_fd_evidence": false,
+      "trusted_target_runtime_worker_identity": false,
+      "terminal_native_integrity": false,
+      "t1_adjudicated": false,
+      "credit": 0
+    }
+  },
+  "verification": {
+    "parent_combined_new_test_files": 37,
+    "py_compile": true,
+    "git_diff_check": true,
+    "production_workloads_started": 0,
+    "formal_training_started": 0,
+    "solver_worker_queue_started": false,
+    "gpu_used_for_production_or_formal_training": false,
+    "production_data_read": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "existing_processes_stopped_or_restarted": 0,
+    "gpu_snapshot_mib": {
+      "gpu0_free": 48497,
+      "gpu1_free": 48497,
+      "gpu2_free": 48497,
+      "gpu3_free": 48497,
+      "gpu4_free": 48497,
+      "gpu5_free": 48497,
+      "gpu6_free": 48497,
+      "gpu7_free": 48497,
+      "utilization_percent": 0
+    }
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17", "graph_raw-seed29", "graph_raw-seed43",
+      "graph_residual-seed17", "graph_residual-seed29", "graph_residual-seed43",
+      "mlp-seed17", "mlp-seed29", "mlp-seed43"
+    ],
+    "observed_t1_case_runs": 0,
+    "required_t1_case_runs": 288,
+    "missing_t1_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "observed_material_case_runs": 0,
+    "required_material_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "causal_lineage_contracts": true,
+    "evidence_valid": true,
+    "credit": 0
+  },
+  "external_blockers_preserved": [
+    "F3 admission authority and terminal production evidence",
+    "F4 fresh-root/scheduler host-I-O/terminal/source-reader receipts and 32 sidecars",
+    "F1/F2 trusted runtime/source/observer evidence and formal outputs",
+    "F8 real B/C/D held-FD evidence, trusted target/runtime/worker identity, terminal/native-integrity and T1 adjudication",
+    "formal dataset release and root trust for all 9 training runs",
+    "A8 trusted root, external host and distinct-data-root full-product receipt",
+    "fixed T1/material denominators and release manifest"
+  ],
+  "next_safe_path": {
+    "f3": "Close the current authority-bound admission receipt and only then retry through the existing sealed runner; do not bypass it.",
+    "f4": "Wait for producer-issued fresh-root, scheduler host-I/O, terminal, source-reader and complete material sidecar evidence before intake or execution.",
+    "f1_f2": "Keep prepared/static contracts as blocker evidence; do not infer runtime or T1 from preparation.",
+    "f8": "Use the new gate only after real trusted B/C/D and runtime evidence arrives; it cannot mint capability or credit.",
+    "formal_training": "Do not create or submit formal training specs before release/root trust/terminal contracts close.",
+    "gpu_required": false,
+    "direct_worker_launch_allowed": false,
+    "formal_promotion_allowed": false
+  }
+}
