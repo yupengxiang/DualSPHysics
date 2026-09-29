@@ -1,0 +1,55 @@
+{
+  "artifact_scope": [
+    "B_source",
+    "B_receipt",
+    "B_manifest",
+    "C_receipt",
+    "C_manifest",
+    "C_raw_frame",
+    "D_receipt",
+    "D_manifest",
+    "D_decoded_frame"
+  ],
+  "boundary": {
+    "diagnostic_only": true,
+    "formal_eligible": false,
+    "gate_mutation": 0,
+    "pathname_reopen": false,
+    "production_bundle_read": false,
+    "production_hdf5_or_bi4_read": false,
+    "qualification_credit": 0,
+    "symlink_follow": false,
+    "hardlink_acceptance": false
+  },
+  "input": {
+    "descriptor": "canonical pathless JSON metadata",
+    "file_access": "caller-held regular-file FDs only",
+    "read_operations": [
+      "fstat",
+      "pread"
+    ],
+    "stages": [
+      "B",
+      "C",
+      "D"
+    ]
+  },
+  "record_id": "f8-r008-held-fd-bcd-input-provenance-adapter-v1",
+  "schema": "core.cfd.f8.r008_held_fd_bcd_input_provenance_adapter_contract.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "synthetic_only_diagnostic_contract",
+  "verifier": {
+    "implementation": "scripts/f8_r008_held_fd_bcd_input_provenance_adapter_v1.py",
+    "report": "reports/F8-R008-HELD-FD-BCD-INPUT-PROVENANCE-ADAPTER-V1.json",
+    "tests": "tests/test_f8_r008_held_fd_bcd_input_provenance_adapter_v1.py"
+  },
+  "required_bindings": [
+    "regular single-link stable FD identity",
+    "unique FD inode identity for every artifact",
+    "B/C/D case attempt nonce source identity",
+    "B-to-C-to-D upstream receipt SHA-256",
+    "binary64 time-axis SHA-256",
+    "C raw frame and D decoded frame SHA-256",
+    "D decoded frame raw-source SHA-256"
+  ]
+}
