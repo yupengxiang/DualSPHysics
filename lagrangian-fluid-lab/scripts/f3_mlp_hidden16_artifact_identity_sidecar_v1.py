@@ -877,6 +877,14 @@ def write_identity(
     seed = _validate_seed(seed)
     nonce = _validate_nonce(nonce)
     paths = _fresh_paths(seed, nonce)
+    # Check the caller-bound checkpoint inode before rereading the training
+    # matrix.  A sibling hardlink replacement updates the matrix directory's
+    # ctime; without this early check the bounded matrix reader would report a
+    # generic parent-path drift and hide the actual checkpoint violation.
+    checkpoint_claim = identity.get("checkpoint") if isinstance(identity, Mapping) else None
+    if isinstance(checkpoint_claim, Mapping) and isinstance(checkpoint_claim.get("path"), str):
+        checkpoint_claim_path = _absolute_clean(checkpoint_claim["path"], "identity.checkpoint")
+        _regular_single_link(checkpoint_claim_path, "identity.checkpoint")
     # Re-hash at the write boundary as well.  This keeps a caller from
     # mutating a previously-built mapping (or supplying a forged mapping) and
     # still obtaining a positive sidecar.
