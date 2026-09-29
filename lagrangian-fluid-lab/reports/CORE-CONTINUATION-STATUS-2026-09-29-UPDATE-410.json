@@ -1,0 +1,138 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-410",
+  "observed_at": "2026-09-29T12:52:19+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; shared occupancy is allowed when VRAM remains sufficient; never stop or restart an existing process"
+  },
+  "commits": [
+    "09391672",
+    "0c8d0901",
+    "deb55991",
+    "a7559f1b"
+  ],
+  "completed_units": {
+    "s4_scheduler_spec_state_fix": {
+      "commit": "09391672",
+      "scope": "remove an invalid pre-submit namespace-nonexistence assertion after the live diagnostic attempt had correctly created its scheduler-owned namespace",
+      "parent_regression_tests": 48,
+      "side_effects": false
+    },
+    "f3_material_setup_variant_diagnosis": {
+      "commit": "0c8d0901",
+      "status": "blocked_fail_closed",
+      "scope": "diagnose the shared support/reconstruction/visibility reliability predicate before proposing another scheduler variant",
+      "observed_h2_k48_unknown_fraction": 0.046875,
+      "observed_h1_unknown_fraction": 0.06640625,
+      "s2_s4_spec_regression_tests": 2,
+      "diagnosis_tests": 4,
+      "safe_new_variant": false,
+      "workload_started": false,
+      "credit": 0
+    },
+    "f3_material_external_admission_security_audit": {
+      "commit": "deb55991",
+      "status": "blocked_missing_fresh_root_scheduler_receipts",
+      "scope": "prove that terminal intake cannot promote a diagnostic scheduler receipt without fresh-root, scheduler host-I/O and one-shot authorization",
+      "agent_regression_tests": 51,
+      "parent_regression_tests": 19,
+      "promotion_bypass_found": false,
+      "receipt_created": false,
+      "queue_submitted": false,
+      "credit": 0
+    },
+    "graph_raw_seed17_formal_training_readiness": {
+      "commit": "a7559f1b",
+      "run_id": "graph_raw-seed17",
+      "status": "blocked_fail_closed",
+      "scope": "bounded readiness audit for the next formal training evidence-chain unit",
+      "blocker_count": 14,
+      "matching_diagnostic_specs": 7,
+      "formal_spec_count": 0,
+      "formal_terminal_evidence_present": false,
+      "formal_training_runs_observed": 0,
+      "training_launched": false,
+      "gpu_used": false,
+      "queue_submitted": false,
+      "credit": 0
+    }
+  },
+  "verification": {
+    "production_workloads_started": 0,
+    "formal_training_started": 0,
+    "gpu_used_for_production_or_formal_training": false,
+    "production_data_read": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "existing_processes_stopped_or_restarted": 0,
+    "gpu_snapshot_mib": {
+      "gpu0_free": 48497,
+      "gpu1_free": 48497,
+      "gpu2_free": 48497,
+      "gpu3_free": 48497,
+      "gpu4_free": 48497,
+      "gpu5_free": 48497,
+      "gpu6_free": 48497,
+      "gpu7_free": 48497,
+      "utilization_percent": 0
+    }
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": [
+      "F3",
+      "F4"
+    ],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "observed_t1_case_runs": 0,
+    "required_t1_case_runs": 288,
+    "missing_t1_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "observed_material_case_runs": 0,
+    "required_material_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "causal_lineage_contracts": true,
+    "evidence_valid": true,
+    "credit": 0
+  },
+  "external_blockers_preserved": [
+    "fresh one-shot root admission receipt",
+    "scheduler-owned host-I/O reservation receipt",
+    "trusted external root/host/second-host evidence",
+    "formal dataset release and current training-contract source bindings",
+    "formal scheduler spec and formal terminal training evidence for all 9 runs",
+    "formal T1/material case-run terminal evidence and release manifest",
+    "F8 target kernel/source/build/runtime pins",
+    "independent reproduction receipt"
+  ],
+  "next_safe_path": {
+    "f3_material": "Keep s2/s4 and H1/H2 results as negative diagnostics; do not submit an unproven setup variant. Resolve the shared reliability predicate and obtain the missing external admission receipts before another run.",
+    "formal_training": "Do not create or submit graph_raw-seed17 formal training spec until formal release, root trust anchor, current source bindings, formal launch contract and terminal contract are all closed.",
+    "gpu_required": false,
+    "direct_worker_launch_allowed": false,
+    "formal_promotion_allowed": false
+  }
+}
