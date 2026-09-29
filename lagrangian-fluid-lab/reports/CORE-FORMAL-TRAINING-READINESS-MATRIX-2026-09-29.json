@@ -1,0 +1,556 @@
+{
+  "schema": "core.formal_training_readiness_matrix.v1",
+  "report_id": "core-formal-training-readiness-matrix-v1",
+  "observed_at_utc": "2026-09-29T05:16:55.228871Z",
+  "purpose": "shared read-only readiness matrix for Core's fixed nine formal model-seed runs",
+  "scope": {
+    "models": [
+      "graph_raw",
+      "graph_residual",
+      "mlp"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "run_count": 9,
+    "run_ids": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ]
+  },
+  "inputs": {
+    "source_closure": {
+      "path": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/source-closure.json",
+      "bytes": 4869,
+      "sha256": "fe1e03d0c459f3a410440757755059f2f7049d49edb349a6fe7f54896dc429e5"
+    },
+    "source_closure_receipt": {
+      "path": "campaigns/core-v1/learning/formal-source-closure-v7-20260929/receipt.json",
+      "bytes": 14294,
+      "sha256": "65c6c682dca9af3e3caa40f87140fa1c92b8c589b0ef2e8550b3ef135c3e9c36"
+    },
+    "training_contract": {
+      "path": "campaigns/core-v1/learning/training-contract-v1/contract.json",
+      "bytes": 4327,
+      "sha256": "a75a74013bdc82886f41cd5f7098cb78253fee3adc69bcfd65bca6193394d0be"
+    },
+    "current_manifest": {
+      "path": "campaigns/core-v1/f3-dataset-v2.json",
+      "bytes": 93710,
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+    },
+    "registry": {
+      "path": "campaigns/core-v1/registry.json",
+      "bytes": 41714,
+      "sha256": "1ddfeda5b2d3eb142f94be4bb2cbc6f1b65271d6b77efc8b65c829b94e66b38d"
+    },
+    "current_manifest_evidence": {
+      "graph_raw": {
+        "path": "reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "bytes": 12572,
+        "sha256": "a34479e8ceab6b5d3c3bce67262105923172143736b3ea8766d50d338343d432"
+      },
+      "graph_residual": {
+        "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "bytes": 15228,
+        "sha256": "8e0b02063b0d213a3762d5c1f02ec8e1194b31ef81b5f85ec6544e987da5d7b9"
+      },
+      "mlp": {
+        "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+        "bytes": 10172,
+        "sha256": "aa5561dc69148a38a14d6b21c501d9214aba242707be782eeb512ba45e6300ef"
+      }
+    }
+  },
+  "source_closure": {
+    "schema": "core.formal_source_closure.v2",
+    "closure_version": "core-formal-source-closure-v7-20260929",
+    "complete": true,
+    "formal_release": false,
+    "formal_training_allowed": false,
+    "formal_training_ready": false,
+    "launch_allowed": false,
+    "root_admission_granted": false,
+    "closure_sha256": "4a9a966c071752683c334974d2a91b2cd67dc968d9d761905d4f4d16b5c28751",
+    "receipt_status": "planning_only_blocked",
+    "receipt_formal_release": false,
+    "receipt_formal_training_ready": false,
+    "receipt_launch_allowed": false,
+    "root_admission": {
+      "granted": false,
+      "status": "required_not_granted",
+      "decision": "hold"
+    }
+  },
+  "training_contract": {
+    "schema": "core.training_contract.v1",
+    "status": "planning_only",
+    "planning_only": true,
+    "formal_training_allowed": false,
+    "models": [
+      "mlp",
+      "graph_raw",
+      "graph_residual"
+    ],
+    "seeds": [
+      17,
+      29,
+      43
+    ],
+    "expected_run_count": 9,
+    "expected_run_ids": [
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43",
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43"
+    ],
+    "training": {
+      "hidden": 64,
+      "updates": 32000,
+      "milestones": [
+        8000,
+        16000,
+        24000,
+        32000
+      ],
+      "optimizer": "Adam",
+      "learning_rate": 0.001,
+      "loss_centers": 256
+    }
+  },
+  "current_manifest": {
+    "schema": "core.dataset.v2",
+    "dataset_id": "F3_registered32_core_native_v2",
+    "case_count": 32,
+    "formal_release": false,
+    "source_manifest_sha256": "86e27740d764f9769e3255a82a599013a282f1bc4385ad3c29a657a56d9c5bea"
+  },
+  "current_manifest_evidence": {
+    "graph_raw": {
+      "model": "graph_raw",
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "schema": "core.f3.graph_raw.hidden16.current_manifest_training_evidence.v1",
+      "status": "diagnostic_bound",
+      "source_bound": true,
+      "diagnostic_only": true,
+      "formal": false,
+      "formal_eligible": false,
+      "credit": 0,
+      "qualification_credit": 0,
+      "formal_training_runs_counted": 0,
+      "reference": {
+        "path": "reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "bytes": 12572,
+        "sha256": "a34479e8ceab6b5d3c3bce67262105923172143736b3ea8766d50d338343d432"
+      },
+      "expected_model": "graph_raw"
+    },
+    "graph_residual": {
+      "model": "graph_residual",
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "schema": "core.f3.graph_residual.hidden16.current_manifest_training_evidence.v1",
+      "status": "diagnostic_bound",
+      "source_bound": true,
+      "diagnostic_only": true,
+      "formal": false,
+      "formal_eligible": false,
+      "credit": 0,
+      "qualification_credit": 0,
+      "formal_training_runs_counted": 0,
+      "reference": {
+        "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "bytes": 15228,
+        "sha256": "8e0b02063b0d213a3762d5c1f02ec8e1194b31ef81b5f85ec6544e987da5d7b9"
+      },
+      "expected_model": "graph_residual"
+    },
+    "mlp": {
+      "model": "mlp",
+      "seeds": [
+        17,
+        29,
+        43
+      ],
+      "schema": "core.f3.mlp.hidden16.current_manifest_training_evidence.v1",
+      "status": "diagnostic_bound",
+      "source_bound": true,
+      "diagnostic_only": true,
+      "formal": false,
+      "formal_eligible": false,
+      "credit": 0,
+      "qualification_credit": 0,
+      "formal_training_runs_counted": 0,
+      "reference": {
+        "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+        "bytes": 10172,
+        "sha256": "aa5561dc69148a38a14d6b21c501d9214aba242707be782eeb512ba45e6300ef"
+      },
+      "expected_model": "mlp"
+    }
+  },
+  "core_campaign_status": {
+    "schema": "core.completion.v1",
+    "can_finalize": false,
+    "checks": {
+      "three_t1_families": false,
+      "two_macro_t2_families": false,
+      "nine_formal_training_runs": false,
+      "t1_denominator_complete": false,
+      "material_denominator_complete": false,
+      "independent_reproduction": false,
+      "causal_lineage_contracts": true,
+      "evidence_valid": true
+    },
+    "training_runs": [],
+    "expected_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "missing_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "missing_target_t1_case_runs": 432,
+    "missing_target_material_case_runs": 288,
+    "issues": []
+  },
+  "formal_spec_scan": {
+    "directory": "campaigns/core-v1/runtime/specs",
+    "candidate_counts": {
+      "graph_raw-seed17": 5,
+      "graph_raw-seed29": 0,
+      "graph_raw-seed43": 0,
+      "graph_residual-seed17": 5,
+      "graph_residual-seed29": 0,
+      "graph_residual-seed43": 0,
+      "mlp-seed17": 5,
+      "mlp-seed29": 0,
+      "mlp-seed43": 0
+    },
+    "formal_counts": {
+      "graph_raw-seed17": 0,
+      "graph_raw-seed29": 0,
+      "graph_raw-seed43": 0,
+      "graph_residual-seed17": 0,
+      "graph_residual-seed29": 0,
+      "graph_residual-seed43": 0,
+      "mlp-seed17": 0,
+      "mlp-seed29": 0,
+      "mlp-seed43": 0
+    },
+    "formal_spec_paths": [],
+    "scan_errors": []
+  },
+  "runs": [
+    {
+      "run_id": "graph_raw-seed17",
+      "model": "graph_raw",
+      "seed": 17,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "graph_raw-seed29",
+      "model": "graph_raw",
+      "seed": 29,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "graph_raw-seed43",
+      "model": "graph_raw",
+      "seed": 43,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RAW-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN2.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "graph_residual-seed17",
+      "model": "graph_residual",
+      "seed": 17,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "graph_residual-seed29",
+      "model": "graph_residual",
+      "seed": 29,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "graph_residual-seed43",
+      "model": "graph_residual",
+      "seed": 43,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-GRAPH-RESIDUAL-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN5.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "mlp-seed17",
+      "model": "mlp",
+      "seed": 17,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "mlp-seed29",
+      "model": "mlp",
+      "seed": 29,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    },
+    {
+      "run_id": "mlp-seed43",
+      "model": "mlp",
+      "seed": 43,
+      "formal_spec": false,
+      "formal_release": false,
+      "root_trust": false,
+      "terminal_evidence": false,
+      "credit": false,
+      "credit_value": 0,
+      "current_manifest_evidence": {
+        "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+        "status": "diagnostic_bound",
+        "diagnostic_only": true,
+        "formal": false,
+        "formal_eligible": false,
+        "credit": 0
+      },
+      "status": "blocked_fail_closed",
+      "blocking_reasons": [
+        "formal_spec_missing",
+        "formal_release_missing",
+        "root_trust_missing",
+        "formal_terminal_evidence_missing",
+        "formal_credit_missing"
+      ]
+    }
+  ],
+  "decision": {
+    "status": "blocked_fail_closed",
+    "all_runs_blocked": true,
+    "spec_created": false,
+    "launch_allowed": false,
+    "no_spec_created": true,
+    "no_launch": true,
+    "reason": "all nine formal runs remain blocked by missing formal release/root trust/terminal evidence/credit and no formal scheduler spec exists"
+  },
+  "side_effects": {
+    "read_only": true,
+    "trainer_imported": false,
+    "training_started": false,
+    "optimizer_started": false,
+    "gpu_started": false,
+    "queue_submitted": false,
+    "worker_started": false,
+    "registry_written": false,
+    "ledger_written": false,
+    "denominator_written": false,
+    "gate_written": false,
+    "completion_written": false,
+    "plan_written": false,
+    "update_411_written": false
+  },
+  "implementation_boundary": {
+    "generic_matrix_projection": true,
+    "run_specific_auditor_replayed": false,
+    "seed17_auditor_logic_reused": false,
+    "diagnostic_evidence_promoted": false
+  }
+}
