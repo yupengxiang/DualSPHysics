@@ -3,16 +3,47 @@
 from __future__ import annotations
 
 import copy
+import base64
 import hashlib
 import json
+import os
 from pathlib import Path
 import socket
 import stat
 import sys
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 import pytest
 
 from scripts import f3_graph_raw_hidden16_seed17_diagnostic_admission_v1 as admission
+
+
+_TEST_SCHEDULER_KEY: Ed25519PrivateKey | None = None
+
+
+@pytest.fixture(autouse=True)
+def _synthetic_scheduler_trust_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Install only a test trust anchor; this is never a production authority."""
+
+    global _TEST_SCHEDULER_KEY
+    scheduler_root = tmp_path / "scheduler-ledger"
+    scheduler_root.mkdir(mode=0o700)
+    key_root = tmp_path / "scheduler-trust"
+    key_root.mkdir(mode=0o700)
+    key_path = key_root / "scheduler-ed25519-public.key"
+    _TEST_SCHEDULER_KEY = Ed25519PrivateKey.generate()
+    key_path.write_bytes(
+        _TEST_SCHEDULER_KEY.public_key().public_bytes(
+            serialization.Encoding.Raw,
+            serialization.PublicFormat.Raw,
+        )
+    )
+    key_path.chmod(0o600)
+    monkeypatch.setattr(admission, "EXTERNAL_SCHEDULER_ROOT", scheduler_root)
+    monkeypatch.setattr(admission, "TRUSTED_SCHEDULER_PUBLIC_KEY_PATH", key_path)
+    yield
+    _TEST_SCHEDULER_KEY = None
 
 
 def _write_json(path: Path, payload: object) -> bytes:
@@ -20,6 +51,78 @@ def _write_json(path: Path, payload: object) -> bytes:
     raw = (json.dumps(payload, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode()
     path.write_bytes(raw)
     return raw
+
+
+def _namespace(fixture: dict[str, object], nonce: str) -> Path:
+    output_root = Path(fixture["output_root"])
+    namespace = output_root / (
+        f"f3-graph_raw500-hidden16-currentmanifest-seed{admission.SEED}"
+        f"-full835-nonce{nonce}"
+    )
+    namespace.mkdir(mode=0o700)
+    return namespace
+
+
+def _write_external_authority(fixture: dict[str, object], nonce: str) -> Path:
+    key = _TEST_SCHEDULER_KEY
+    assert key is not None
+    namespace = _namespace(fixture, nonce)
+    plan = admission._build_reserved_plan(
+        fixture["root"],
+        manifest=fixture["manifest"],
+        training_receipt=fixture["training"],
+        checkpoint=fixture["checkpoint"],
+        nonce=nonce,
+        namespace=namespace,
+        gpu_index=admission.GPU_INDEX,
+    )
+    namespace_descriptor = admission._existing_namespace_descriptor(namespace)
+    authority_id = hashlib.sha256(
+        f"synthetic-test-authority:{namespace}".encode()
+    ).hexdigest()
+    scheduler_root = Path(admission.EXTERNAL_SCHEDULER_ROOT)
+    authority_path = scheduler_root / f"{authority_id}.authority.json"
+    consume_path = scheduler_root / f"{authority_id}.claim.json"
+    public_key = key.public_key().public_bytes(
+        serialization.Encoding.Raw,
+        serialization.PublicFormat.Raw,
+    )
+    gpu = admission._gpu_identity(fixture["resource"]["gpu"])
+    unsigned = {
+        "schema": admission.EXTERNAL_AUTHORITY_SCHEMA,
+        "authority_id": authority_id,
+        "state": "issued",
+        "one_shot": True,
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": admission.CURRENT_HOST,
+        },
+        "scheduler": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": admission.CURRENT_HOST,
+            "role": "external_scheduler",
+        },
+        "namespace": namespace_descriptor,
+        "nonce": nonce,
+        "plan_sha256": admission._plan_binding_digest(plan),
+        "resource_snapshot_sha256": admission.canonical_digest(fixture["resource"]),
+        "gpu": gpu,
+        "gpu_identity_sha256": admission.canonical_digest(gpu),
+        "consume_path": str(consume_path),
+        "key_id": hashlib.sha256(public_key).hexdigest(),
+        "signature_algorithm": "ed25519",
+    }
+    document = {
+        **unsigned,
+        "signature_base64": base64.b64encode(
+            key.sign(admission._authority_signing_message(unsigned))
+        ).decode("ascii"),
+    }
+    _write_json(authority_path, document)
+    authority_path.chmod(0o600)
+    return authority_path
 
 
 def _fixture(tmp_path: Path) -> dict[str, object]:
@@ -127,6 +230,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
 
 def _mint(tmp_path: Path, nonce: str = "a" * 32) -> tuple[dict[str, object], dict[str, object]]:
     fixture = _fixture(tmp_path)
+    authority_path = _write_external_authority(fixture, nonce)
     receipt = admission.mint_admission(
         fixture["root"],
         manifest=fixture["manifest"],
@@ -135,7 +239,9 @@ def _mint(tmp_path: Path, nonce: str = "a" * 32) -> tuple[dict[str, object], dic
         nonce=nonce,
         output_root=fixture["output_root"],
         resource_admission=fixture["resource"],
+        external_authority=authority_path,
     )
+    fixture["authority"] = authority_path
     return receipt, fixture
 
 
@@ -156,6 +262,8 @@ def test_receipt_binds_all_identity_domains_and_stays_zero_credit(tmp_path: Path
     assert receipt["credit"] == 0
     assert receipt["formal"] is False
     assert receipt["consumption"]["one_shot"] is True
+    assert receipt["identity"]["external_authority"]["authority_id"]
+    assert receipt["consumption"]["external_claim_path"].endswith(".claim.json")
     marker = Path(receipt["namespace_marker"]["path"])
     receipt_path = Path(receipt["receipt_path"])
     assert stat.S_IMODE(marker.stat().st_mode) == 0o600
@@ -171,6 +279,8 @@ def test_receipt_consumption_is_atomic_and_not_reusable(tmp_path: Path) -> None:
     assert capability.receipt["credit"] == 0
     assert capability.lock_path.is_file()
     assert capability.as_dict()["popen_authorized"] is False
+    assert capability.external_claim_path is not None
+    assert capability.external_claim_path.is_file()
     assert Path(capability.consumed_marker).is_file()
     with pytest.raises(admission.AdmissionError, match="already been consumed"):
         admission.consume_receipt(receipt_path)
@@ -224,7 +334,8 @@ def test_report_is_receipt_bound_but_never_formal(tmp_path: Path) -> None:
     assert report["credit"] == 0
     assert report["formal_state_touched"] is False
     assert report["popen_attempted"] is False
-    assert len(report["blocked_reasons"]) == 3
+    assert len(report["blocked_reasons"]) == 1
+    assert "external scheduler authority" in report["blocked_reasons"][0]
 
 
 def test_gpu_mapping_environment_and_executable_snapshot_are_bound(tmp_path: Path) -> None:
@@ -301,8 +412,39 @@ def test_consumption_binds_owner_lock_marker_inode_and_nonce(tmp_path: Path) -> 
     assert lock_payload["owner"]["uid"] == admission.os.getuid()
     assert consumed_payload["credit"] == 0
     assert consumed_payload["formal"] is False
+    claim = Path(receipt["consumption"]["external_claim_path"])
+    claim_payload = json.loads(claim.read_text(encoding="utf-8"))
+    assert claim_payload["authority_id"] == receipt["identity"]["external_authority"]["authority_id"]
+    assert claim_payload["namespace_descriptor"]["ino"] == receipt["identity"]["namespace_descriptor"]["ino"]
     with pytest.raises(admission.AdmissionError, match="already been consumed"):
         admission.consume_receipt(receipt_path)
+
+
+def test_external_authority_is_required_and_caller_snapshot_is_not_authority(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    nonce = "9" * 32
+    namespace = _namespace(fixture, nonce)
+    with pytest.raises(admission.AdmissionError, match="external scheduler authority is required"):
+        admission.mint_admission(
+            fixture["root"],
+            manifest=fixture["manifest"],
+            training_receipt=fixture["training"],
+            checkpoint=fixture["checkpoint"],
+            nonce=nonce,
+            output_root=fixture["output_root"],
+            resource_admission=fixture["resource"],
+        )
+    assert not any(namespace.iterdir())
+
+
+def test_external_authority_signature_and_binding_fail_closed(tmp_path: Path) -> None:
+    receipt, fixture = _mint(tmp_path, nonce="a" * 32)
+    authority_path = Path(fixture["authority"])
+    authority = json.loads(authority_path.read_text(encoding="utf-8"))
+    authority["nonce"] = "b" * 32
+    authority_path.write_text(json.dumps(authority, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(admission.AdmissionError, match="signature verification|descriptor drifted|nonce"):
+        admission.load_receipt(Path(receipt["receipt_path"]))
 
 
 def test_authority_boundary_cannot_be_promoted_by_receipt_fields(tmp_path: Path) -> None:

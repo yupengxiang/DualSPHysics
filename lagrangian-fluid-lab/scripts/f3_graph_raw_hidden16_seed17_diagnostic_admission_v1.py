@@ -15,8 +15,9 @@ or PLAN state is read or written.  This contract never starts a process.
 from __future__ import annotations
 
 import argparse
+import base64
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import errno
 import hashlib
 import json
@@ -31,6 +32,11 @@ import sys
 import tempfile
 import time
 from typing import Any
+
+try:
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+except ImportError:  # pragma: no cover - the bounded lab venv supplies cryptography.
+    Ed25519PublicKey = None  # type: ignore[assignment,misc]
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -86,6 +92,17 @@ LOGICAL_GPU_INDEX = 0
 CUDA_DEVICE_ORDER = "PCI_BUS_ID"
 
 AUTHORITY_SCHEMA = f"{SCHEMA}.non_authorizing_boundary"
+EXTERNAL_AUTHORITY_SCHEMA = f"{SCHEMA}.external_scheduler_authority.v1"
+EXTERNAL_CLAIM_SCHEMA = f"{SCHEMA}.external_scheduler_claim.v1"
+EXTERNAL_AUTHORITY_DOMAIN = b"CORE-F3-GRAPH-RAW-SEED17-EXTERNAL-AUTHORITY-V1\0"
+# These are deployment trust anchors, not request parameters.  A production
+# scheduler must install them outside the lab/tmp trees with owner-only write
+# access.  The test suite monkeypatches the paths to a synthetic scheduler
+# fixture; no production receipt is minted from that fixture.
+TRUSTED_SCHEDULER_PUBLIC_KEY_PATH = Path(
+    "/etc/dual-sph/scheduler-ed25519-public.key"
+)
+EXTERNAL_SCHEDULER_ROOT = Path("/var/lib/dual-sph/f3-seed17-scheduler")
 CURRENT_HOST = socket.gethostname()
 
 ZERO_CREDIT: dict[str, Any] = {
@@ -469,6 +486,55 @@ def _namespace(output_root: Path | str, nonce: str) -> Path:
     return root / f"f3-graph_raw500-hidden16-currentmanifest-seed{SEED}-full835-nonce{nonce}"
 
 
+def _existing_namespace_descriptor(path: Path | str) -> dict[str, Any]:
+    """Describe a scheduler-reserved namespace without creating or replacing it."""
+
+    candidate = _absolute(path, "scheduler-reserved namespace")
+    _reject_symlink_components(candidate, "scheduler-reserved namespace")
+    try:
+        info = os.lstat(candidate)
+    except OSError as error:
+        _fail(f"cannot inspect scheduler-reserved namespace: {error}")
+    if not stat.S_ISDIR(info.st_mode):
+        _fail("scheduler-reserved namespace must be a directory")
+    if stat.S_IMODE(info.st_mode) != 0o700:
+        _fail("scheduler-reserved namespace must be mode 0700")
+    if info.st_uid != os.getuid() or info.st_gid != os.getgid():
+        _fail("scheduler-reserved namespace owner drifted")
+    if info.st_nlink < 2:
+        _fail("scheduler-reserved namespace link count is invalid")
+    parent_fd, parent_identity = _open_parent_directory(
+        candidate.parent, "scheduler-reserved namespace parent"
+    )
+    try:
+        current = os.stat(candidate.name, dir_fd=parent_fd, follow_symlinks=False)
+        if (
+            not stat.S_ISDIR(current.st_mode)
+            or stat.S_IMODE(current.st_mode) != 0o700
+            or current.st_uid != os.getuid()
+            or current.st_gid != os.getgid()
+            or current.st_dev != info.st_dev
+            or current.st_ino != info.st_ino
+        ):
+            _fail("scheduler-reserved namespace changed during inspection")
+        _assert_parent_unchanged(candidate.parent, parent_identity, "scheduler-reserved namespace")
+    except OSError as error:
+        _fail(f"cannot inspect scheduler-reserved namespace parent: {error}")
+    finally:
+        os.close(parent_fd)
+    return {
+        "path": str(candidate),
+        "dev": int(info.st_dev),
+        "ino": int(info.st_ino),
+        "mode": int(stat.S_IMODE(info.st_mode)),
+        "uid": int(info.st_uid),
+        "gid": int(info.st_gid),
+        "nlink": int(info.st_nlink),
+        "parent_dev": int(parent_identity["dev"]),
+        "parent_ino": int(parent_identity["ino"]),
+    }
+
+
 def _source_descriptor(root: Path, relative: Path, name: str) -> dict[str, Any]:
     path = root / relative
     if not _under(path, root):
@@ -565,6 +631,322 @@ def _command_digest(argv: Sequence[str], cwd: str, env: Mapping[str, str]) -> st
     return canonical_digest({"argv": list(argv), "cwd": cwd, "env_overrides": dict(env), "gpu_index": GPU_INDEX, "seed": SEED, "case_id": CASE_ID, "split": SPLIT, "transitions": TRANSITIONS, "frames": FRAMES})
 
 
+def _plan_binding(plan: launcher.RolloutPlan) -> dict[str, Any]:
+    """Return the exact scheduler-visible plan identity used by the signature."""
+
+    env = dict(plan.env)
+    env["CUDA_DEVICE_ORDER"] = CUDA_DEVICE_ORDER
+    return {
+        "schema": f"{EXTERNAL_AUTHORITY_SCHEMA}.plan",
+        "root": str(plan.root),
+        "seed": int(plan.seed),
+        "run_id": str(plan.run_id),
+        "nonce": str(plan.nonce),
+        "manifest": {
+            "path": str(plan.manifest),
+            "canonical_sha256": str(plan.manifest_sha256),
+            "file_sha256": str(plan.manifest_file_sha256),
+        },
+        "training_receipt": {
+            "path": str(plan.training_receipt),
+            "file_sha256": str(plan.training_receipt_sha256),
+        },
+        "checkpoint": dict(plan.checkpoint),
+        "checkpoint_metadata": dict(plan.checkpoint_metadata),
+        "namespace": str(plan.namespace),
+        "outputs": {key: str(value) for key, value in plan.outputs.items()},
+        "command": list(plan.command),
+        "env_overrides": env,
+        "command_sha256": _command_digest(plan.command, str(plan.root), env),
+        "launcher_command_sha256": str(plan.command_sha256),
+    }
+
+
+def _plan_binding_digest(plan: launcher.RolloutPlan) -> str:
+    return canonical_digest(_plan_binding(plan))
+
+
+def _build_reserved_plan(
+    root: Path,
+    *,
+    manifest: Path | str,
+    training_receipt: Path | str,
+    checkpoint: Path | str | None,
+    nonce: str,
+    namespace: Path,
+    gpu_index: int,
+) -> launcher.RolloutPlan:
+    """Build launcher identity against a shadow path, then bind reserved paths.
+
+    The existing launcher intentionally rejects reused namespaces.  A
+    scheduler, however, must reserve the namespace before signing its inode.
+    The shadow plan therefore exercises the unchanged launcher parser while
+    this admission contract replaces only the path-bearing plan fields with
+    the already-reserved namespace and rechecks every output collision.
+    """
+
+    with tempfile.TemporaryDirectory(
+        prefix="f3-graph-raw-seed17-plan-",
+        dir=tempfile.gettempdir(),
+    ) as shadow_root_text:
+        shadow_namespace = Path(shadow_root_text) / namespace.name
+        plan = launcher.build_plan(
+            root,
+            seed=SEED,
+            manifest=manifest,
+            training_receipt=training_receipt,
+            checkpoint=checkpoint,
+            nonce=nonce,
+            output_namespace=shadow_namespace,
+            gpu_index=gpu_index,
+        )
+    outputs = launcher._output_paths(
+        namespace,
+        root,
+        SEED,
+        nonce,
+        plan.manifest_sha256,
+    )
+    for name, output in outputs.items():
+        if name == "namespace":
+            continue
+        launcher._absolute_path(output, f"output.{name}")
+        launcher._assert_no_symlink_components(output.parent, f"output.{name} parent")
+        if os.path.lexists(output):
+            _fail(f"refusing to reuse reserved output.{name}: {output}")
+    command = launcher._command_for(
+        root=root,
+        python=Path(plan.command[0]),
+        manifest=plan.manifest,
+        checkpoint=Path(str(plan.checkpoint["path"])),
+        outputs=outputs,
+    )
+    command_sha256 = launcher.canonical_digest(
+        {
+            "argv": list(command),
+            "cwd": str(root),
+            "env_overrides": dict(plan.env),
+            "model_kind": MODEL,
+            "hidden": HIDDEN,
+            "updates": UPDATES,
+        }
+    )
+    return replace(
+        plan,
+        namespace=namespace,
+        outputs=outputs,
+        command=command,
+        command_sha256=command_sha256,
+    )
+
+
+def _external_scheduler_root() -> Path:
+    root = _absolute(EXTERNAL_SCHEDULER_ROOT, "external scheduler root")
+    _reject_symlink_components(root, "external scheduler root")
+    if not root.is_dir():
+        _fail("external scheduler root is not an existing directory")
+    return root
+
+
+def _external_scheduler_path(value: Path | str, name: str) -> Path:
+    root = _external_scheduler_root()
+    candidate = _absolute(value, name)
+    if candidate == root or not _under(candidate, root):
+        _fail(f"{name} must remain under the external scheduler root")
+    _reject_symlink_components(candidate.parent, f"{name} parent")
+    return candidate
+
+
+def _authority_signing_message(unsigned: Mapping[str, Any]) -> bytes:
+    return EXTERNAL_AUTHORITY_DOMAIN + canonical_json(dict(unsigned)).encode("utf-8")
+
+
+def _authority_unsigned(document: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in document.items()
+        if key != "signature_base64"
+    }
+
+
+def _authority_namespace_claim(value: Any) -> dict[str, Any]:
+    claim = dict(_mapping(value, "external_authority.namespace"))
+    _reject_unknown(
+        claim,
+        {"path", "dev", "ino", "mode", "uid", "gid", "nlink", "parent_dev", "parent_ino"},
+        "external_authority.namespace",
+    )
+    _absolute(claim.get("path"), "external_authority.namespace.path")
+    for key in ("dev", "ino", "mode", "uid", "gid", "nlink", "parent_dev", "parent_ino"):
+        _int(claim.get(key), f"external_authority.namespace.{key}")
+    _exact(claim, "mode", 0o700, "external_authority.namespace")
+    _exact(claim, "uid", os.getuid(), "external_authority.namespace")
+    _exact(claim, "gid", os.getgid(), "external_authority.namespace")
+    if claim["nlink"] < 2:
+        _fail("external_authority.namespace.nlink must be >= 2")
+    return claim
+
+
+def _authority_owner(value: Any, name: str) -> dict[str, Any]:
+    owner = dict(_mapping(value, name))
+    _reject_unknown(owner, {"uid", "gid", "host"}, name)
+    _int(owner.get("uid"), f"{name}.uid")
+    _int(owner.get("gid"), f"{name}.gid")
+    _string(owner.get("host"), f"{name}.host")
+    return owner
+
+
+def _authority_gpu(value: Any) -> dict[str, Any]:
+    gpu = dict(_mapping(value, "external_authority.gpu"))
+    _reject_unknown(
+        gpu,
+        {
+            "physical_index", "uuid", "pci_bus_id", "logical_index",
+            "cuda_visible_devices", "cuda_device", "cuda_device_order",
+        },
+        "external_authority.gpu",
+    )
+    return _gpu_identity(gpu)
+
+
+def _read_trusted_scheduler_key() -> tuple[bytes, dict[str, Any]]:
+    key_path = _absolute(TRUSTED_SCHEDULER_PUBLIC_KEY_PATH, "trusted scheduler public key")
+    _reject_symlink_components(key_path, "trusted scheduler public key")
+    raw, descriptor, _ = _read_file(
+        key_path,
+        "trusted scheduler public key",
+        max_bytes=64,
+        parse_json=False,
+    )
+    if len(raw) != 32:
+        _fail("trusted scheduler public key must be exactly 32 bytes")
+    if descriptor["mode"] & 0o022:
+        _fail("trusted scheduler public key is group/other writable")
+    return raw, descriptor
+
+
+def _validate_external_authority(
+    path: Path | str,
+    *,
+    nonce: str,
+    namespace_descriptor: Mapping[str, Any],
+    plan_sha256: str,
+    resource_snapshot: Mapping[str, Any],
+    expected_meta: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Verify an external signed reservation and return receipt metadata.
+
+    The authority is intentionally not mintable by this module.  Its public
+    key is a deployment trust anchor, while the signed document is an
+    external scheduler reservation.  The local receipt is never sufficient
+    to substitute for either one.
+    """
+
+    authority_path = _external_scheduler_path(path, "external scheduler authority")
+    raw, descriptor, payload = _read_file(
+        authority_path,
+        "external scheduler authority",
+        max_bytes=256 * 1024,
+        parse_json=True,
+    )
+    if payload is None:
+        _fail("external scheduler authority payload is absent")
+    _reject_unknown(
+        payload,
+        {
+            "schema", "authority_id", "state", "one_shot", "owner", "scheduler",
+            "namespace", "nonce", "plan_sha256", "resource_snapshot_sha256",
+            "gpu", "gpu_identity_sha256", "consume_path", "key_id",
+            "signature_algorithm", "signature_base64",
+        },
+        "external scheduler authority",
+    )
+    _exact(payload, "schema", EXTERNAL_AUTHORITY_SCHEMA, "external scheduler authority")
+    authority_id = _sha(payload.get("authority_id"), "external_authority.authority_id")
+    _exact(payload, "state", "issued", "external scheduler authority")
+    _exact(payload, "one_shot", True, "external scheduler authority")
+    owner = _authority_owner(payload.get("owner"), "external_authority.owner")
+    _exact(owner, "uid", os.getuid(), "external_authority.owner")
+    _exact(owner, "gid", os.getgid(), "external_authority.owner")
+    _exact(owner, "host", CURRENT_HOST, "external_authority.owner")
+    scheduler_raw = dict(_mapping(payload.get("scheduler"), "external_authority.scheduler"))
+    _reject_unknown(scheduler_raw, {"uid", "gid", "host", "role"}, "external_authority.scheduler")
+    _int(scheduler_raw.get("uid"), "external_authority.scheduler.uid")
+    _int(scheduler_raw.get("gid"), "external_authority.scheduler.gid")
+    _string(scheduler_raw.get("host"), "external_authority.scheduler.host")
+    _exact(scheduler_raw, "role", "external_scheduler", "external_authority.scheduler")
+
+    claimed_namespace = _authority_namespace_claim(payload.get("namespace"))
+    if canonical_json(claimed_namespace) != canonical_json(dict(namespace_descriptor)):
+        _fail("external scheduler authority namespace inode binding drifted")
+    _exact(payload, "nonce", _validate_nonce(nonce), "external scheduler authority")
+    _exact(payload, "plan_sha256", _sha(plan_sha256, "plan_sha256"), "external scheduler authority")
+    resource_digest = _sha(
+        payload.get("resource_snapshot_sha256"),
+        "external_authority.resource_snapshot_sha256",
+    )
+    if resource_digest != canonical_digest(resource_snapshot):
+        _fail("external scheduler authority resource snapshot binding drifted")
+    gpu_identity = _authority_gpu(payload.get("gpu"))
+    resource_gpu = _gpu_identity(_mapping(resource_snapshot.get("gpu"), "resource_admission.gpu"))
+    if canonical_json(gpu_identity) != canonical_json(resource_gpu):
+        _fail("external scheduler authority GPU identity binding drifted")
+    _exact(
+        payload,
+        "gpu_identity_sha256",
+        canonical_digest(gpu_identity),
+        "external_authority",
+    )
+    consume_path = _external_scheduler_path(
+        payload.get("consume_path"), "external scheduler consume path"
+    )
+    if consume_path == authority_path or _under(consume_path, Path(namespace_descriptor["path"])):
+        _fail("external scheduler consume path is not independent of the local namespace")
+    _string(payload.get("key_id"), "external_authority.key_id")
+    _exact(payload, "signature_algorithm", "ed25519", "external_authority")
+    signature_text = _string(payload.get("signature_base64"), "external_authority.signature_base64")
+    try:
+        signature = base64.b64decode(signature_text.encode("ascii"), validate=True)
+    except (UnicodeEncodeError, ValueError) as error:
+        _fail(f"external scheduler authority signature is not strict base64: {error}")
+    if len(signature) != 64 or base64.b64encode(signature).decode("ascii") != signature_text:
+        _fail("external scheduler authority signature is not canonical Ed25519")
+    public_key_bytes, key_descriptor = _read_trusted_scheduler_key()
+    key_id = hashlib.sha256(public_key_bytes).hexdigest()
+    _exact(payload, "key_id", key_id, "external_authority")
+    if Ed25519PublicKey is None:
+        _fail("cryptography Ed25519 verifier is unavailable")
+    try:
+        Ed25519PublicKey.from_public_bytes(public_key_bytes).verify(
+            signature,
+            _authority_signing_message(_authority_unsigned(payload)),
+        )
+    except Exception as error:
+        # ``InvalidSignature`` is deliberately normalized to the same
+        # fail-closed error as malformed key material.
+        _fail(f"external scheduler authority signature verification failed: {error}")
+
+    unsigned_digest = canonical_digest(_authority_unsigned(payload))
+    metadata = {
+        "schema": EXTERNAL_AUTHORITY_SCHEMA,
+        "path": str(authority_path),
+        "file": dict(descriptor),
+        "payload_sha256": hashlib.sha256(raw).hexdigest(),
+        "document_sha256": unsigned_digest,
+        "authority_id": authority_id,
+        "key_id": key_id,
+        "consume_path": str(consume_path),
+        "key_file": {
+            "path": str(TRUSTED_SCHEDULER_PUBLIC_KEY_PATH),
+            "file": dict(key_descriptor),
+            "sha256": hashlib.sha256(public_key_bytes).hexdigest(),
+        },
+    }
+    if expected_meta is not None and canonical_json(dict(expected_meta)) != canonical_json(metadata):
+        _fail("external scheduler authority descriptor drifted from the receipt")
+    return metadata
+
+
 def _environment_snapshot(env: Mapping[str, str]) -> dict[str, Any]:
     effective = dict(env)
     expected = {
@@ -611,6 +993,7 @@ def _identity_core(
     namespace_descriptor: Mapping[str, Any],
     namespace: Path,
     nonce: str,
+    external_authority: Mapping[str, Any],
 ) -> dict[str, Any]:
     env = dict(plan.env)
     env["CUDA_DEVICE_ORDER"] = CUDA_DEVICE_ORDER
@@ -627,6 +1010,7 @@ def _identity_core(
         "transitions": TRANSITIONS,
         "frames": FRAMES,
         "run_id": plan.run_id,
+        "plan_sha256": _plan_binding_digest(plan),
         "root": str(root),
         "manifest": {
             "path": str(plan.manifest),
@@ -668,6 +1052,7 @@ def _identity_core(
         "namespace_descriptor": dict(namespace_descriptor),
         "namespace": str(namespace),
         "nonce": nonce,
+        "external_authority": dict(external_authority),
     }
 
 
@@ -689,11 +1074,13 @@ class AdmissionCapability:
     consumed_marker: Path
     lock_path: Path
     seal: str
+    external_claim_path: Path | None = None
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "receipt_path": str(self.receipt_path),
             "consumed_marker": str(self.consumed_marker),
+            "external_claim_path": None if self.external_claim_path is None else str(self.external_claim_path),
             "receipt_sha256": self.receipt.get("receipt_sha256"),
             "seal": self.seal,
             "diagnostic_only": True,
@@ -713,8 +1100,14 @@ def mint_admission(
     nonce: str | None = None,
     output_root: Path | str = "/tmp",
     resource_admission: Mapping[str, Any] | None = None,
+    external_authority: Path | str | None = None,
+    scheduler_authority: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Mint one strict, zero-credit receipt without starting a process."""
+    """Mint one strict receipt after external scheduler attestation.
+
+    The scheduler must reserve the namespace before this function is called.
+    A local caller cannot create or substitute the authority document.
+    """
 
     root_path = _absolute(root, "root")
     _reject_symlink_components(root_path, "root")
@@ -722,25 +1115,35 @@ def mint_admission(
         _fail("root must be an existing directory")
     selected_nonce = _validate_nonce(nonce if nonce is not None else secrets.token_hex(16))
     namespace = _namespace(output_root, selected_nonce)
-    if os.path.lexists(namespace):
-        _fail("fresh namespace already exists")
     _reject_symlink_components(namespace.parent, "namespace parent")
 
     if resource_admission is None:
         _fail("scheduler-owned GPU UUID/PCI snapshot is required; implicit probing is disabled")
     resource_snapshot = _validate_resource(resource_admission)
+    if external_authority is not None and scheduler_authority is not None:
+        _fail("provide only one external scheduler authority path")
+    authority_path = external_authority if external_authority is not None else scheduler_authority
 
     # launcher is the existing identity authority for current-manifest v3,
     # exact command construction, and seed17/checkpoint cross-binding.
-    plan = launcher.build_plan(
+    plan = _build_reserved_plan(
         root_path,
-        seed=SEED,
         manifest=manifest,
         training_receipt=training_receipt,
         checkpoint=checkpoint,
         nonce=selected_nonce,
-        output_namespace=namespace,
+        namespace=namespace,
         gpu_index=GPU_INDEX,
+    )
+    if authority_path is None:
+        _fail("external scheduler authority is required; local receipt fields are not authority")
+    namespace_descriptor = _existing_namespace_descriptor(namespace)
+    authority_metadata = _validate_external_authority(
+        authority_path,
+        nonce=selected_nonce,
+        namespace_descriptor=namespace_descriptor,
+        plan_sha256=_plan_binding_digest(plan),
+        resource_snapshot=resource_snapshot,
     )
     manifest_raw, manifest_descriptor, manifest_payload = _read_file(plan.manifest, "current manifest", max_bytes=MAX_JSON_BYTES, parse_json=True)
     del manifest_raw
@@ -761,7 +1164,6 @@ def mint_admission(
     if not _under(executable_path, root_path):
         _fail("Python executable escapes the lab root")
     executable_descriptor = _executable_descriptor(executable_path)
-    namespace_descriptor = _mkdir_exclusive(namespace, mode=0o700)
     identity = _identity_core(
         root=root_path,
         plan=plan,
@@ -774,6 +1176,7 @@ def mint_admission(
         namespace_descriptor=namespace_descriptor,
         namespace=namespace,
         nonce=selected_nonce,
+        external_authority=authority_metadata,
     )
     identity_digest = canonical_digest(identity)
     marker_core = _marker_core(identity_digest, namespace, selected_nonce)
@@ -798,6 +1201,7 @@ def mint_admission(
         },
         "lock_path": str(lock_path),
         "consumed_marker": str(consumed_path),
+        "external_claim_path": authority_metadata["consume_path"],
         "owner": {
             "uid": os.getuid(),
             "gid": os.getgid(),
@@ -831,6 +1235,7 @@ def mint_admission(
             },
             "lock_path": str(lock_path),
             "consumed_marker": str(consumed_path),
+            "external_claim_path": authority_metadata["consume_path"],
         },
         "diagnostic_execute_only": True,
         "authority": {
@@ -878,6 +1283,50 @@ def _validate_file_descriptor_shape(value: Any, name: str) -> dict[str, Any]:
     return descriptor
 
 
+def _validate_external_authority_metadata(
+    value: Any,
+    *,
+    namespace: Path,
+) -> dict[str, Any]:
+    metadata = dict(_mapping(value, "identity.external_authority"))
+    _reject_unknown(
+        metadata,
+        {
+            "schema", "path", "file", "payload_sha256", "document_sha256",
+            "authority_id", "key_id", "consume_path", "key_file",
+        },
+        "identity.external_authority",
+    )
+    _exact(metadata, "schema", EXTERNAL_AUTHORITY_SCHEMA, "identity.external_authority")
+    authority_path = _external_scheduler_path(
+        metadata.get("path"), "identity.external_authority.path"
+    )
+    authority_file = _validate_file_descriptor_shape(
+        metadata.get("file"), "identity.external_authority.file"
+    )
+    if authority_file["path"] != str(authority_path):
+        _fail("identity.external_authority.file.path is inconsistent")
+    _sha(metadata.get("payload_sha256"), "identity.external_authority.payload_sha256")
+    _sha(metadata.get("document_sha256"), "identity.external_authority.document_sha256")
+    _sha(metadata.get("authority_id"), "identity.external_authority.authority_id")
+    _sha(metadata.get("key_id"), "identity.external_authority.key_id")
+    consume_path = _external_scheduler_path(
+        metadata.get("consume_path"), "identity.external_authority.consume_path"
+    )
+    if consume_path == authority_path or _under(consume_path, namespace):
+        _fail("identity.external_authority.consume_path is not independent")
+    key_file = dict(_mapping(metadata.get("key_file"), "identity.external_authority.key_file"))
+    _reject_unknown(key_file, {"path", "file", "sha256"}, "identity.external_authority.key_file")
+    _exact(key_file, "path", str(TRUSTED_SCHEDULER_PUBLIC_KEY_PATH), "identity.external_authority.key_file")
+    key_descriptor = _validate_file_descriptor_shape(
+        key_file.get("file"), "identity.external_authority.key_file.file"
+    )
+    if key_descriptor["path"] != key_file["path"]:
+        _fail("identity.external_authority.key_file.file.path is inconsistent")
+    _sha(key_file.get("sha256"), "identity.external_authority.key_file.sha256")
+    return metadata
+
+
 def _validate_namespace_descriptor(value: Any, namespace: Path) -> dict[str, Any]:
     descriptor = dict(_mapping(value, "identity.namespace_descriptor"))
     _reject_unknown(
@@ -905,6 +1354,7 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
             "frames", "run_id", "root", "manifest", "training_receipt", "checkpoint",
             "source_sha256", "resource_snapshot", "gpu", "gpu_identity_sha256", "command",
             "environment", "executable", "owner", "namespace_descriptor", "namespace", "nonce",
+            "plan_sha256", "external_authority",
         },
         "identity",
     )
@@ -916,6 +1366,7 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
     _exact(identity, "split", SPLIT, "identity")
     _exact(identity, "transitions", TRANSITIONS, "identity")
     _exact(identity, "frames", FRAMES, "identity")
+    _sha(identity.get("plan_sha256"), "identity.plan_sha256")
     _validate_nonce(identity.get("nonce"))
     namespace = _absolute(identity.get("namespace"), "identity.namespace")
     expected_name = f"f3-graph_raw500-hidden16-currentmanifest-seed{SEED}-full835-nonce{identity['nonce']}"
@@ -924,6 +1375,10 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
     root = _absolute(identity.get("root"), "identity.root")
     _reject_symlink_components(root, "identity.root")
     _validate_namespace_descriptor(identity.get("namespace_descriptor"), namespace)
+    _validate_external_authority_metadata(
+        identity.get("external_authority"),
+        namespace=namespace,
+    )
     owner = dict(_mapping(identity.get("owner"), "identity.owner"))
     _reject_unknown(owner, {"uid", "gid", "host"}, "identity.owner")
     _exact(owner, "uid", os.getuid(), "identity.owner")
@@ -1151,7 +1606,11 @@ def _validate_state_file(
         _fail("admission state payload is absent")
     _reject_unknown(
         payload,
-        {"schema", "state", "identity_sha256", "namespace", "nonce", "namespace_marker", "lock_path", "consumed_marker", "owner", *ZERO_CREDIT},
+        {
+            "schema", "state", "identity_sha256", "namespace", "nonce",
+            "namespace_marker", "lock_path", "consumed_marker",
+            "external_claim_path", "owner", *ZERO_CREDIT,
+        },
         "admission state",
     )
     _exact(payload, "schema", f"{SCHEMA}.state", "admission state")
@@ -1164,6 +1623,12 @@ def _validate_state_file(
         _exact(state_marker, key, marker[key] if key != "payload_sha256" else marker["payload_sha256"], "admission state.namespace_marker")
     _exact(payload, "lock_path", str(namespace / CONSUMPTION_LOCK_NAME), "admission state")
     _exact(payload, "consumed_marker", str(namespace / CONSUMED_NAME), "admission state")
+    _exact(
+        payload,
+        "external_claim_path",
+        _mapping(receipt["consumption"], "consumption")["external_claim_path"],
+        "admission state",
+    )
     owner = dict(_mapping(payload.get("owner"), "admission state.owner"))
     _reject_unknown(owner, {"uid", "gid", "host"}, "admission state.owner")
     _exact(owner, "uid", os.getuid(), "admission state.owner")
@@ -1193,7 +1658,10 @@ def _validate_lock_file(
         _fail("consumption lock payload is absent")
     _reject_unknown(
         payload,
-        {"schema", "state", "identity_sha256", "namespace", "nonce", "namespace_marker", "owner", *ZERO_CREDIT},
+        {
+            "schema", "state", "identity_sha256", "namespace", "nonce",
+            "namespace_marker", "external_claim", "owner", *ZERO_CREDIT,
+        },
         "consumption lock",
     )
     _exact(payload, "schema", f"{SCHEMA}.lock", "consumption lock")
@@ -1204,6 +1672,17 @@ def _validate_lock_file(
     lock_marker = _mapping(payload.get("namespace_marker"), "consumption lock.namespace_marker")
     for key in ("dev", "ino"):
         _exact(lock_marker, key, marker[key], "consumption lock.namespace_marker")
+    lock_claim = dict(_mapping(payload.get("external_claim"), "consumption lock.external_claim"))
+    _reject_unknown(lock_claim, {"path", "authority_id", "document_sha256"}, "consumption lock.external_claim")
+    _exact(
+        lock_claim,
+        "path",
+        _mapping(receipt["consumption"], "consumption")["external_claim_path"],
+        "consumption lock.external_claim",
+    )
+    authority = _mapping(_mapping(receipt["identity"], "identity")["external_authority"], "identity.external_authority")
+    _exact(lock_claim, "authority_id", authority["authority_id"], "consumption lock.external_claim")
+    _exact(lock_claim, "document_sha256", authority["document_sha256"], "consumption lock.external_claim")
     owner = dict(_mapping(payload.get("owner"), "consumption lock.owner"))
     _reject_unknown(owner, {"uid", "gid", "host"}, "consumption lock.owner")
     _exact(owner, "uid", os.getuid(), "consumption lock.owner")
@@ -1232,7 +1711,11 @@ def _validate_consumed_marker(
         _fail("consumed marker payload is absent")
     _reject_unknown(
         payload,
-        {"schema", "state", "receipt_sha256", "identity_sha256", "receipt_path", "namespace", "nonce", "namespace_marker", "lock", "consumed_at_ns", "owner", *ZERO_CREDIT},
+        {
+            "schema", "state", "receipt_sha256", "identity_sha256", "receipt_path",
+            "namespace", "nonce", "namespace_marker", "external_claim", "lock",
+            "consumed_at_ns", "owner", *ZERO_CREDIT,
+        },
         "consumed marker",
     )
     _exact(payload, "schema", CONSUMED_SCHEMA, "consumed marker")
@@ -1245,6 +1728,21 @@ def _validate_consumed_marker(
     consumed_marker = _mapping(payload.get("namespace_marker"), "consumed marker.namespace_marker")
     for key in ("dev", "ino"):
         _exact(consumed_marker, key, marker[key], "consumed marker.namespace_marker")
+    consumed_claim = dict(_mapping(payload.get("external_claim"), "consumed marker.external_claim"))
+    _reject_unknown(
+        consumed_claim,
+        {"path", "authority_id", "document_sha256"},
+        "consumed marker.external_claim",
+    )
+    _exact(
+        consumed_claim,
+        "path",
+        _mapping(receipt["consumption"], "consumption")["external_claim_path"],
+        "consumed marker.external_claim",
+    )
+    authority = _mapping(_mapping(receipt["identity"], "identity")["external_authority"], "identity.external_authority")
+    _exact(consumed_claim, "authority_id", authority["authority_id"], "consumed marker.external_claim")
+    _exact(consumed_claim, "document_sha256", authority["document_sha256"], "consumed marker.external_claim")
     _validate_written_descriptor(
         _mapping(payload.get("lock"), "consumed marker.lock"),
         "consumed marker.lock",
@@ -1258,6 +1756,69 @@ def _validate_consumed_marker(
     _exact(owner, "host", CURRENT_HOST, "consumed marker.owner")
     for key, expected in ZERO_CREDIT.items():
         _exact(payload, key, expected, "consumed marker")
+    return descriptor
+
+
+def _validate_external_claim(
+    receipt: Mapping[str, Any],
+    *,
+    path: Path | str,
+) -> dict[str, Any]:
+    """Validate the durable scheduler-ledger claim for this receipt."""
+
+    claim_path = _external_scheduler_path(path, "external scheduler consume claim")
+    raw, descriptor, payload = _read_file(
+        claim_path,
+        "external scheduler consume claim",
+        max_bytes=64 * 1024,
+        parse_json=True,
+    )
+    del raw
+    _validate_written_descriptor(
+        descriptor,
+        "external scheduler consume claim",
+        expected_path=claim_path,
+    )
+    if payload is None:
+        _fail("external scheduler consume claim payload is absent")
+    _reject_unknown(
+        payload,
+        {
+            "schema", "state", "authority_id", "authority_document_sha256",
+            "receipt_sha256", "identity_sha256", "receipt_path", "namespace",
+            "nonce", "namespace_descriptor", "claim_path", "claimed_at_ns",
+            "owner", *ZERO_CREDIT,
+        },
+        "external scheduler consume claim",
+    )
+    identity = _mapping(receipt["identity"], "identity")
+    authority = _mapping(identity["external_authority"], "identity.external_authority")
+    namespace = _absolute(identity["namespace"], "identity.namespace")
+    _exact(payload, "schema", EXTERNAL_CLAIM_SCHEMA, "external scheduler consume claim")
+    _exact(payload, "state", "consumed", "external scheduler consume claim")
+    _exact(payload, "authority_id", authority["authority_id"], "external scheduler consume claim")
+    _exact(
+        payload,
+        "authority_document_sha256",
+        authority["document_sha256"],
+        "external scheduler consume claim",
+    )
+    _exact(payload, "receipt_sha256", receipt["receipt_sha256"], "external scheduler consume claim")
+    _exact(payload, "identity_sha256", receipt["identity_sha256"], "external scheduler consume claim")
+    _exact(payload, "receipt_path", receipt["receipt_path"], "external scheduler consume claim")
+    _exact(payload, "namespace", str(namespace), "external scheduler consume claim")
+    _exact(payload, "nonce", identity["nonce"], "external scheduler consume claim")
+    _exact(payload, "claim_path", str(claim_path), "external scheduler consume claim")
+    claim_namespace = _authority_namespace_claim(payload.get("namespace_descriptor"))
+    if canonical_json(claim_namespace) != canonical_json(identity["namespace_descriptor"]):
+        _fail("external scheduler consume claim namespace binding drifted")
+    _int(payload.get("claimed_at_ns"), "external scheduler consume claim.claimed_at_ns", 1)
+    owner = _authority_owner(payload.get("owner"), "external scheduler consume claim.owner")
+    _exact(owner, "uid", os.getuid(), "external scheduler consume claim.owner")
+    _exact(owner, "gid", os.getgid(), "external scheduler consume claim.owner")
+    _exact(owner, "host", CURRENT_HOST, "external scheduler consume claim.owner")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(payload, key, expected, "external scheduler consume claim")
     return descriptor
 
 
@@ -1288,6 +1849,15 @@ def validate_receipt(
         _validate_authority(receipt)
         identity = _mapping(receipt.get("identity"), "identity")
         _validate_identity_shape(identity)
+        if check_files:
+            _validate_external_authority(
+                _mapping(identity["external_authority"], "identity.external_authority")["path"],
+                nonce=identity["nonce"],
+                namespace_descriptor=identity["namespace_descriptor"],
+                plan_sha256=identity["plan_sha256"],
+                resource_snapshot=identity["resource_snapshot"],
+                expected_meta=identity["external_authority"],
+            )
         identity_digest = _sha(receipt.get("identity_sha256"), "receipt.identity_sha256")
         if identity_digest != canonical_digest(identity):
             _fail("receipt.identity_sha256 does not bind identity")
@@ -1297,11 +1867,21 @@ def validate_receipt(
         _exact(consumption, "consumed", False, "consumption")
         _reject_unknown(
             consumption,
-            {"one_shot", "state", "consumed", "state_file", "lock_path", "consumed_marker"},
+            {
+                "one_shot", "state", "consumed", "state_file", "lock_path",
+                "consumed_marker", "external_claim_path",
+            },
             "consumption",
         )
         namespace = _absolute(identity["namespace"], "identity.namespace")
         _exact(consumption, "lock_path", str(namespace / CONSUMPTION_LOCK_NAME), "consumption")
+        authority_meta = _mapping(identity["external_authority"], "identity.external_authority")
+        _exact(
+            consumption,
+            "external_claim_path",
+            authority_meta["consume_path"],
+            "consumption",
+        )
         consumed_marker = _absolute(consumption.get("consumed_marker"), "consumption.consumed_marker")
         if consumed_marker != namespace / CONSUMED_NAME:
             _fail("consumed marker escapes namespace")
@@ -1328,6 +1908,15 @@ def validate_receipt(
                 _fail("admission receipt file descriptor drifted")
             if marker_descriptor is None:
                 _fail("namespace marker was not checked")
+            external_claim_path = _external_scheduler_path(
+                consumption["external_claim_path"],
+                "external scheduler consume claim",
+            )
+            external_claim_exists = os.path.lexists(external_claim_path)
+            if external_claim_exists:
+                _validate_external_claim(receipt, path=external_claim_path)
+                if not allow_consumed:
+                    _fail("external scheduler authority has already been consumed")
             lock_path = namespace / CONSUMPTION_LOCK_NAME
             lock_exists = os.path.lexists(lock_path)
             consumed_exists = os.path.lexists(consumed_marker)
@@ -1379,13 +1968,52 @@ def _capability_seal(receipt: Mapping[str, Any], consumed_descriptor: Mapping[st
 
 
 def consume_receipt(path: Path | str) -> AdmissionCapability:
-    """Atomically consume an issued receipt exactly once."""
+    """Atomically consume the external reservation and local receipt once."""
 
     receipt_path = _absolute(path, "admission receipt")
     receipt = load_receipt(receipt_path, allow_consumed=False)
     identity = _mapping(receipt["identity"], "identity")
     namespace = _absolute(identity["namespace"], "identity.namespace")
     marker = _mapping(receipt["namespace_marker"], "namespace_marker")
+    namespace_descriptor = _mapping(identity["namespace_descriptor"], "identity.namespace_descriptor")
+    authority = _mapping(identity["external_authority"], "identity.external_authority")
+    _validate_external_authority(
+        authority["path"],
+        nonce=identity["nonce"],
+        namespace_descriptor=namespace_descriptor,
+        plan_sha256=identity["plan_sha256"],
+        resource_snapshot=identity["resource_snapshot"],
+        expected_meta=authority,
+    )
+    external_claim_path = _external_scheduler_path(
+        authority["consume_path"], "external scheduler consume claim"
+    )
+    external_claim_raw = (canonical_json({
+        "schema": EXTERNAL_CLAIM_SCHEMA,
+        "state": "consumed",
+        "authority_id": authority["authority_id"],
+        "authority_document_sha256": authority["document_sha256"],
+        "receipt_sha256": receipt["receipt_sha256"],
+        "identity_sha256": receipt["identity_sha256"],
+        "receipt_path": str(receipt_path),
+        "namespace": str(namespace),
+        "nonce": identity["nonce"],
+        "namespace_descriptor": dict(namespace_descriptor),
+        "claim_path": str(external_claim_path),
+        "claimed_at_ns": time.time_ns(),
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": CURRENT_HOST,
+        },
+        **ZERO_CREDIT,
+    }) + "\n").encode()
+    try:
+        _write_exclusive(external_claim_path, external_claim_raw, mode=0o600)
+    except AdmissionError as error:
+        if "refusing to overwrite" in str(error) or "already exists" in str(error):
+            _fail("external scheduler authority has already been consumed")
+        raise
     consumed_path = namespace / CONSUMED_NAME
     lock_path = namespace / CONSUMPTION_LOCK_NAME
     lock_raw = (canonical_json({
@@ -1397,6 +2025,11 @@ def consume_receipt(path: Path | str) -> AdmissionCapability:
         "namespace_marker": {
             "dev": marker["dev"],
             "ino": marker["ino"],
+        },
+        "external_claim": {
+            "path": str(external_claim_path),
+            "authority_id": authority["authority_id"],
+            "document_sha256": authority["document_sha256"],
         },
         "owner": {
             "uid": os.getuid(),
@@ -1424,6 +2057,11 @@ def consume_receipt(path: Path | str) -> AdmissionCapability:
             "dev": marker["dev"],
             "ino": marker["ino"],
         },
+        "external_claim": {
+            "path": str(external_claim_path),
+            "authority_id": authority["authority_id"],
+            "document_sha256": authority["document_sha256"],
+        },
         "lock": lock_descriptor,
         "consumed_at_ns": time.time_ns(),
         "owner": {
@@ -1444,6 +2082,7 @@ def consume_receipt(path: Path | str) -> AdmissionCapability:
         consumed_marker=consumed_path,
         lock_path=lock_path,
         seal=seal,
+        external_claim_path=external_claim_path,
     )
 
 
@@ -1512,9 +2151,21 @@ def build_report(
     nonce: str | None = None,
     output_root: Path | str = "/tmp",
     resource_admission: Mapping[str, Any] | None = None,
+    external_authority: Path | str | None = None,
+    scheduler_authority: Path | str | None = None,
 ) -> dict[str, Any]:
     try:
-        receipt = mint_admission(root, manifest=manifest, training_receipt=training_receipt, checkpoint=checkpoint, nonce=nonce, output_root=output_root, resource_admission=resource_admission)
+        receipt = mint_admission(
+            root,
+            manifest=manifest,
+            training_receipt=training_receipt,
+            checkpoint=checkpoint,
+            nonce=nonce,
+            output_root=output_root,
+            resource_admission=resource_admission,
+            external_authority=external_authority,
+            scheduler_authority=scheduler_authority,
+        )
         identity = dict(receipt["identity"])
         report = {
             "schema": REPORT_SCHEMA,
@@ -1623,6 +2274,9 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             _sha(report.get("receipt_sha256"), "report.receipt_sha256")
             _validate_nonce(report.get("namespace_nonce"))
             _validate_identity_shape(_mapping(report.get("identity"), "report.identity"))
+        elif status == "blocked_fail_closed":
+            _exact(report, "admission_granted", False, "report")
+            _exact(report, "receipt_bound_capability_issued", False, "report")
     except (AdmissionError, TypeError, AttributeError, KeyError) as error:
         errors.append(str(error))
     return errors
@@ -1640,7 +2294,7 @@ def render_markdown(report: Mapping[str, Any]) -> str:
         "- identity: graph_raw / hidden16 / seed17 / test / 835 transitions / 836 frames",
         "- GPU: physical GPU2 exposed as logical cuda:0; exact resource snapshot bound",
         "- source pins: manifest, training receipt, checkpoint, core_learning, validators",
-        "- one-shot mode: receipt-bound token issued; execution capability not admitted; receipt/markers use 0600; namespace uses 0700",
+        "- one-shot mode: external scheduler-signed reservation and independent ledger claim are required; execution capability not admitted",
         "- subprocess/Popen: not attempted; formal/registry/ledger/gate/completion/PLAN: untouched",
         "- credit: `0`",
         "",
