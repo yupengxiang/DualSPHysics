@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+import errno
 import hashlib
 import json
 import math
@@ -24,6 +25,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import socket
 import stat
 import sys
 import tempfile
@@ -69,8 +71,22 @@ MAX_CHECKPOINT_BYTES = 4 * 1024 * 1024 * 1024
 MAX_JSON_DEPTH = 64
 MAX_ARRAY_ITEMS = 4096
 MAX_STRING_BYTES = 2 * 1024 * 1024
+MAX_EXECUTABLE_BYTES = 512 * 1024 * 1024
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 NONCE_RE = re.compile(r"^[0-9a-f]{32}$")
+GPU_UUID_RE = re.compile(r"^GPU-[0-9A-Fa-f-]{8,}$")
+PCI_BUS_RE = re.compile(r"^[0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}\.[0-7]$")
+
+NAMESPACE_MARKER_NAME = ".diagnostic-admission-marker.json"
+RECEIPT_NAME = ".diagnostic-admission-receipt.json"
+STATE_NAME = ".diagnostic-admission-state.json"
+CONSUMPTION_LOCK_NAME = ".diagnostic-admission-consumption.lock"
+CONSUMED_NAME = ".diagnostic-admission-consumed"
+LOGICAL_GPU_INDEX = 0
+CUDA_DEVICE_ORDER = "PCI_BUS_ID"
+
+AUTHORITY_SCHEMA = f"{SCHEMA}.non_authorizing_boundary"
+CURRENT_HOST = socket.gethostname()
 
 ZERO_CREDIT: dict[str, Any] = {
     "diagnostic_only": True,
@@ -204,12 +220,11 @@ def _absolute(value: Path | str, name: str) -> Path:
     raw = os.fspath(value)
     if not isinstance(raw, str) or not raw or "\x00" in raw:
         _fail(f"{name} must be a non-empty path")
-    path = Path(raw)
-    if not path.is_absolute() or any(part in {".", ".."} for part in path.parts):
-        _fail(f"{name} must be absolute and lexical-alias free")
-    normalized = Path(os.path.normpath(str(path)))
-    if normalized != path:
+    if os.path.normpath(raw) != raw:
         _fail(f"{name} uses a lexical path alias")
+    path = Path(raw)
+    if path.anchor != "/" or not path.is_absolute() or any(part in {".", ".."} for part in path.parts):
+        _fail(f"{name} must be absolute and lexical-alias free")
     return path
 
 
@@ -234,28 +249,74 @@ def _reject_symlink_components(path: Path, name: str, *, allow_missing_leaf: boo
             _fail(f"{name} contains a symlink component: {current}")
 
 
-def _read_file(path: Path | str, name: str, *, max_bytes: int, parse_json: bool = False) -> tuple[bytes, dict[str, Any], dict[str, Any] | None]:
+def _open_parent_directory(path: Path | str, name: str) -> tuple[int, dict[str, int]]:
+    """Open every directory component with O_NOFOLLOW and retain its fd."""
+
     candidate = _absolute(path, name)
     _reject_symlink_components(candidate, name)
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    fd: int | None = None
     try:
-        before = os.lstat(candidate)
+        fd = os.open("/", flags)
+        for part in candidate.parts[1:]:
+            next_fd = os.open(part, flags, dir_fd=fd)
+            os.close(fd)
+            fd = next_fd
+        info = os.fstat(fd)
+        if not stat.S_ISDIR(info.st_mode):
+            _fail(f"{name} is not a directory")
+        return fd, {
+            "dev": int(info.st_dev),
+            "ino": int(info.st_ino),
+            "uid": int(info.st_uid),
+            "gid": int(info.st_gid),
+        }
+    except AdmissionError:
+        if fd is not None:
+            os.close(fd)
+        raise
     except OSError as error:
-        _fail(f"cannot inspect {name}: {error}")
-    if not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
-        _fail(f"{name} must be a regular single-link file")
-    if before.st_size < 1 or before.st_size > max_bytes:
-        _fail(f"{name} is outside the bounded size")
-    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
-    try:
-        fd = os.open(candidate, flags)
-    except OSError as error:
+        if fd is not None:
+            os.close(fd)
         _fail(f"cannot open {name} without following links: {error}")
-    chunks: list[bytes] = []
-    identity = (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+
+
+def _assert_parent_unchanged(path: Path, parent_identity: Mapping[str, int], name: str) -> None:
     try:
+        info = os.lstat(path)
+    except OSError as error:
+        _fail(f"cannot inspect {name} parent after access: {error}")
+    if (
+        stat.S_ISLNK(info.st_mode)
+        or not stat.S_ISDIR(info.st_mode)
+        or int(info.st_dev) != int(parent_identity["dev"])
+        or int(info.st_ino) != int(parent_identity["ino"])
+    ):
+        _fail(f"{name} parent changed during access")
+
+
+def _read_file(path: Path | str, name: str, *, max_bytes: int, parse_json: bool = False) -> tuple[bytes, dict[str, Any], dict[str, Any] | None]:
+    candidate = _absolute(path, name)
+    parent_fd, parent_identity = _open_parent_directory(candidate.parent, f"{name} parent")
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    fd: int | None = None
+    try:
+        before = os.stat(candidate.name, dir_fd=parent_fd, follow_symlinks=False)
+        if stat.S_ISLNK(before.st_mode) or not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            _fail(f"{name} must be a regular non-symlink single-link file")
+        if before.st_size < 1 or before.st_size > max_bytes:
+            _fail(f"{name} is outside the bounded size")
+        fd = os.open(candidate.name, flags, dir_fd=parent_fd)
         opened = os.fstat(fd)
+        identity = (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
         if (opened.st_dev, opened.st_ino, opened.st_size, opened.st_mtime_ns) != identity:
             _fail(f"{name} changed before read")
+        chunks: list[bytes] = []
         total = 0
         while total <= max_bytes:
             block = os.read(fd, min(1024 * 1024, max_bytes + 1 - total))
@@ -266,16 +327,17 @@ def _read_file(path: Path | str, name: str, *, max_bytes: int, parse_json: bool 
         closed = os.fstat(fd)
         if (closed.st_dev, closed.st_ino, closed.st_size, closed.st_mtime_ns) != identity or total != before.st_size:
             _fail(f"{name} changed during read")
+        after = os.stat(candidate.name, dir_fd=parent_fd, follow_symlinks=False)
+        if (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns) != identity:
+            _fail(f"{name} changed after read")
+        _assert_parent_unchanged(candidate.parent, parent_identity, name)
+        _reject_symlink_components(candidate, name)
     except OSError as error:
-        _fail(f"cannot read {name}: {error}")
+        _fail(f"cannot read {name} without following links: {error}")
     finally:
-        os.close(fd)
-    try:
-        after = os.lstat(candidate)
-    except OSError as error:
-        _fail(f"cannot inspect {name} after read: {error}")
-    if (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns) != identity:
-        _fail(f"{name} changed after read")
+        if fd is not None:
+            os.close(fd)
+        os.close(parent_fd)
     raw = b"".join(chunks)
     descriptor = {
         "path": str(candidate),
@@ -287,6 +349,8 @@ def _read_file(path: Path | str, name: str, *, max_bytes: int, parse_json: bool 
         "gid": int(before.st_gid),
         "nlink": int(before.st_nlink),
         "mtime_ns": int(before.st_mtime_ns),
+        "parent_dev": int(parent_identity["dev"]),
+        "parent_ino": int(parent_identity["ino"]),
         "sha256": hashlib.sha256(raw).hexdigest(),
         "content_opened": True,
     }
@@ -301,23 +365,76 @@ def _read_file(path: Path | str, name: str, *, max_bytes: int, parse_json: bool 
     return raw, descriptor, payload
 
 
+def _mkdir_exclusive(path: Path | str, *, mode: int = 0o700) -> dict[str, Any]:
+    candidate = _absolute(path, "exclusive directory")
+    parent_fd, parent_identity = _open_parent_directory(candidate.parent, "exclusive directory parent")
+    try:
+        os.mkdir(candidate.name, mode, dir_fd=parent_fd)
+        info = os.stat(candidate.name, dir_fd=parent_fd, follow_symlinks=False)
+        if not stat.S_ISDIR(info.st_mode) or stat.S_IMODE(info.st_mode) != mode:
+            _fail(f"exclusive directory {candidate} owner/mode drifted")
+        if info.st_uid != os.getuid() or info.st_gid != os.getgid():
+            _fail(f"exclusive directory {candidate} owner drifted")
+        _assert_parent_unchanged(candidate.parent, parent_identity, "exclusive directory")
+        os.fsync(parent_fd)
+    except FileExistsError:
+        _fail(f"refusing to reuse existing directory: {candidate}")
+    except OSError as error:
+        _fail(f"cannot create exclusive directory {candidate}: {error}")
+    finally:
+        os.close(parent_fd)
+    return {
+        "path": str(candidate),
+        "dev": int(info.st_dev),
+        "ino": int(info.st_ino),
+        "mode": int(stat.S_IMODE(info.st_mode)),
+        "uid": int(info.st_uid),
+        "gid": int(info.st_gid),
+        "nlink": int(info.st_nlink),
+        "parent_dev": int(parent_identity["dev"]),
+        "parent_ino": int(parent_identity["ino"]),
+    }
+
+
 def _write_exclusive(path: Path, raw: bytes, *, mode: int = 0o600) -> dict[str, Any]:
     path = _absolute(path, "exclusive output")
-    _reject_symlink_components(path.parent, "exclusive output parent")
-    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0) | getattr(os, "O_NOFOLLOW", 0)
+    parent_fd, parent_identity = _open_parent_directory(path.parent, "exclusive output parent")
+    flags = (
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+    )
+    fd: int | None = None
     try:
-        fd = os.open(path, flags, mode)
+        fd = os.open(path.name, flags, mode, dir_fd=parent_fd)
         with os.fdopen(fd, "wb", closefd=True) as handle:
+            fd = None
             handle.write(raw)
             handle.flush()
             os.fsync(handle.fileno())
+        info = os.stat(path.name, dir_fd=parent_fd, follow_symlinks=False)
+        if (
+            stat.S_ISLNK(info.st_mode)
+            or not stat.S_ISREG(info.st_mode)
+            or stat.S_IMODE(info.st_mode) != mode
+            or info.st_uid != os.getuid()
+            or info.st_gid != os.getgid()
+            or info.st_nlink != 1
+            or info.st_size != len(raw)
+        ):
+            _fail(f"exclusive file {path} owner/mode/link drifted")
+        _assert_parent_unchanged(path.parent, parent_identity, "exclusive output")
+        os.fsync(parent_fd)
     except FileExistsError:
         _fail(f"refusing to overwrite existing file: {path}")
     except OSError as error:
         _fail(f"cannot write exclusive file {path}: {error}")
-    info = os.lstat(path)
-    if stat.S_IMODE(info.st_mode) != mode or info.st_uid != os.getuid() or info.st_gid != os.getgid():
-        _fail(f"exclusive file {path} owner/mode drifted")
+    finally:
+        if fd is not None:
+            os.close(fd)
+        os.close(parent_fd)
     return {
         "path": str(path),
         "dev": int(info.st_dev),
@@ -328,6 +445,8 @@ def _write_exclusive(path: Path, raw: bytes, *, mode: int = 0o600) -> dict[str, 
         "gid": int(info.st_gid),
         "nlink": int(info.st_nlink),
         "mtime_ns": int(info.st_mtime_ns),
+        "parent_dev": int(parent_identity["dev"]),
+        "parent_ino": int(parent_identity["ino"]),
         "sha256": hashlib.sha256(raw).hexdigest(),
     }
 
@@ -342,6 +461,9 @@ def _validate_nonce(value: Any) -> str:
 def _namespace(output_root: Path | str, nonce: str) -> Path:
     root = _absolute(output_root, "output_root")
     temp = Path(tempfile.gettempdir()).resolve()
+    _reject_symlink_components(root, "output_root")
+    if not root.is_dir():
+        _fail("output_root must be an existing directory")
     if not _under(root, temp):
         _fail("output_root must remain under /tmp")
     return root / f"f3-graph_raw500-hidden16-currentmanifest-seed{SEED}-full835-nonce{nonce}"
@@ -351,6 +473,8 @@ def _source_descriptor(root: Path, relative: Path, name: str) -> dict[str, Any]:
     path = root / relative
     if not _under(path, root):
         _fail(f"{name} escapes the lab root")
+    if not _under(path.resolve(strict=False), root):
+        _fail(f"{name} resolves outside the lab root")
     _raw, descriptor, _ = _read_file(path, name, max_bytes=MAX_SOURCE_BYTES)
     return descriptor
 
@@ -360,23 +484,118 @@ def _checkpoint_descriptor(path: Path) -> dict[str, Any]:
     return descriptor
 
 
+def _validate_owner(value: Any, name: str) -> dict[str, Any]:
+    owner = dict(_mapping(value, name))
+    _reject_unknown(owner, {"uid", "gid", "host", "scope", "snapshot_nonce"}, name)
+    _exact(owner, "uid", os.getuid(), name)
+    _exact(owner, "gid", os.getgid(), name)
+    _exact(owner, "host", CURRENT_HOST, name)
+    _exact(owner, "scope", "scheduler_owned_diagnostic_snapshot", name)
+    _validate_nonce(owner.get("snapshot_nonce"))
+    return owner
+
+
+def _gpu_identity(gpu: Mapping[str, Any]) -> dict[str, Any]:
+    identity = {
+        "physical_index": gpu.get("physical_index"),
+        "uuid": gpu.get("uuid"),
+        "pci_bus_id": gpu.get("pci_bus_id"),
+        "logical_index": gpu.get("logical_index"),
+        "cuda_visible_devices": gpu.get("cuda_visible_devices"),
+        "cuda_device": gpu.get("cuda_device"),
+        "cuda_device_order": gpu.get("cuda_device_order"),
+    }
+    _int(identity["physical_index"], "resource_admission.gpu.physical_index")
+    if identity["physical_index"] != GPU_INDEX:
+        _fail("GPU physical index is not bound to GPU2")
+    uuid = _string(identity["uuid"], "resource_admission.gpu.uuid")
+    if GPU_UUID_RE.fullmatch(uuid) is None or len(set(uuid.upper())) <= 2:
+        _fail("resource_admission.gpu.uuid is not a stable non-placeholder UUID")
+    pci = _string(identity["pci_bus_id"], "resource_admission.gpu.pci_bus_id")
+    if PCI_BUS_RE.fullmatch(pci) is None:
+        _fail("resource_admission.gpu.pci_bus_id is not canonical")
+    _exact(identity, "logical_index", LOGICAL_GPU_INDEX, "resource_admission.gpu")
+    _exact(identity, "cuda_visible_devices", str(GPU_INDEX), "resource_admission.gpu")
+    _exact(identity, "cuda_device", "cuda:0", "resource_admission.gpu")
+    _exact(identity, "cuda_device_order", CUDA_DEVICE_ORDER, "resource_admission.gpu")
+    return identity
+
+
 def _validate_resource(value: Mapping[str, Any]) -> dict[str, Any]:
     payload = dict(value)
+    _reject_unknown(
+        payload,
+        {"schema", "gpu_index", "gpu", "cpu", "io", "thresholds", "status", "admitted", "blocked_reasons", "content_opened", "owner"},
+        "resource_admission",
+    )
     _exact(payload, "schema", resource.ADMISSION_SCHEMA, "resource_admission")
     _exact(payload, "gpu_index", GPU_INDEX, "resource_admission")
+    _exact(payload, "status", "admitted", "resource_admission")
     _bool(payload.get("admitted"), "resource_admission.admitted")
     if not payload["admitted"]:
         _fail("GPU2 resource snapshot is not admitted")
+    _exact(payload, "content_opened", False, "resource_admission")
+    blocked = payload.get("blocked_reasons")
+    if not isinstance(blocked, list) or blocked:
+        _fail("resource_admission.blocked_reasons must be empty for an admitted snapshot")
     gpu = _mapping(payload.get("gpu"), "resource_admission.gpu")
+    _reject_unknown(
+        gpu,
+        {
+            "total_mib", "used_mib", "free_mib", "physical_index", "uuid",
+            "pci_bus_id", "logical_index", "cuda_visible_devices",
+            "cuda_device", "cuda_device_order", "identity_source",
+            "identity_attested", "identity_sha256",
+        },
+        "resource_admission.gpu",
+    )
     for key in ("total_mib", "used_mib", "free_mib"):
         _int(gpu.get(key), f"resource_admission.gpu.{key}")
     if gpu["used_mib"] + gpu["free_mib"] > gpu["total_mib"]:
         _fail("GPU2 used/free VRAM exceeds total VRAM")
+    gpu_identity = _gpu_identity(gpu)
+    _exact(gpu, "identity_source", "scheduler_owned_snapshot", "resource_admission.gpu")
+    _exact(gpu, "identity_attested", True, "resource_admission.gpu")
+    _exact(gpu, "identity_sha256", canonical_digest(gpu_identity), "resource_admission.gpu")
+    _validate_owner(payload.get("owner"), "resource_admission.owner")
     return payload
 
 
 def _command_digest(argv: Sequence[str], cwd: str, env: Mapping[str, str]) -> str:
     return canonical_digest({"argv": list(argv), "cwd": cwd, "env_overrides": dict(env), "gpu_index": GPU_INDEX, "seed": SEED, "case_id": CASE_ID, "split": SPLIT, "transitions": TRANSITIONS, "frames": FRAMES})
+
+
+def _environment_snapshot(env: Mapping[str, str]) -> dict[str, Any]:
+    effective = dict(env)
+    expected = {
+        "CUDA_VISIBLE_DEVICES": str(GPU_INDEX),
+        "CUDA_DEVICE_ORDER": CUDA_DEVICE_ORDER,
+        "PYTHONDONTWRITEBYTECODE": "1",
+    }
+    if effective != expected:
+        _fail("environment is not the minimal fixed allowlist")
+    snapshot = {
+        "policy": "allowlist_only_no_ambient_inheritance",
+        "inherit": False,
+        "variables": effective,
+    }
+    snapshot["sha256"] = canonical_digest(snapshot)
+    return snapshot
+
+
+def _executable_descriptor(path: Path | str) -> dict[str, Any]:
+    candidate = _absolute(path, "Python executable")
+    if not candidate.is_file():
+        _fail("Python executable is not an existing file")
+    _raw, descriptor, _ = _read_file(
+        candidate,
+        "Python executable",
+        max_bytes=MAX_EXECUTABLE_BYTES,
+        parse_json=False,
+    )
+    if not (descriptor["mode"] & 0o111):
+        _fail("Python executable is not executable")
+    return descriptor
 
 
 def _identity_core(
@@ -388,11 +607,16 @@ def _identity_core(
     checkpoint_descriptor: Mapping[str, Any],
     sources: Mapping[str, Mapping[str, Any]],
     resource_snapshot: Mapping[str, Any],
+    executable_descriptor: Mapping[str, Any],
+    namespace_descriptor: Mapping[str, Any],
     namespace: Path,
     nonce: str,
 ) -> dict[str, Any]:
     env = dict(plan.env)
+    env["CUDA_DEVICE_ORDER"] = CUDA_DEVICE_ORDER
     command = list(plan.command)
+    environment = _environment_snapshot(env)
+    gpu = dict(_mapping(resource_snapshot["gpu"], "resource_admission.gpu"))
     return {
         "model_kind": MODEL,
         "hidden": HIDDEN,
@@ -422,12 +646,26 @@ def _identity_core(
         },
         "source_sha256": {key: dict(value) for key, value in sources.items()},
         "resource_snapshot": dict(resource_snapshot),
+        "gpu": gpu,
+        "gpu_identity_sha256": canonical_digest(_gpu_identity(gpu)),
         "command": {
             "argv": command,
             "cwd": str(root),
             "env_overrides": env,
             "sha256": _command_digest(command, str(root), env),
         },
+        "environment": environment,
+        "executable": {
+            "path": str(command[0]),
+            "file": dict(executable_descriptor),
+            "sha256": str(executable_descriptor["sha256"]),
+        },
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": CURRENT_HOST,
+        },
+        "namespace_descriptor": dict(namespace_descriptor),
         "namespace": str(namespace),
         "nonce": nonce,
     }
@@ -449,6 +687,7 @@ class AdmissionCapability:
     receipt: Mapping[str, Any]
     receipt_path: Path
     consumed_marker: Path
+    lock_path: Path
     seal: str
 
     def as_dict(self) -> dict[str, Any]:
@@ -458,6 +697,9 @@ class AdmissionCapability:
             "receipt_sha256": self.receipt.get("receipt_sha256"),
             "seal": self.seal,
             "diagnostic_only": True,
+            "popen_authorized": False,
+            "launch_allowed": False,
+            "formal_promotion_allowed": False,
             "credit": 0,
         }
 
@@ -475,7 +717,8 @@ def mint_admission(
     """Mint one strict, zero-credit receipt without starting a process."""
 
     root_path = _absolute(root, "root")
-    if not root_path.is_dir():
+    _reject_symlink_components(root_path, "root")
+    if not root_path.is_dir() or stat.S_ISLNK(os.lstat(root_path).st_mode):
         _fail("root must be an existing directory")
     selected_nonce = _validate_nonce(nonce if nonce is not None else secrets.token_hex(16))
     namespace = _namespace(output_root, selected_nonce)
@@ -484,7 +727,7 @@ def mint_admission(
     _reject_symlink_components(namespace.parent, "namespace parent")
 
     if resource_admission is None:
-        resource_admission = resource.probe_resource_admission(GPU_INDEX, root=root_path)
+        _fail("scheduler-owned GPU UUID/PCI snapshot is required; implicit probing is disabled")
     resource_snapshot = _validate_resource(resource_admission)
 
     # launcher is the existing identity authority for current-manifest v3,
@@ -514,6 +757,11 @@ def mint_admission(
     if checkpoint_descriptor["bytes"] != int(plan.checkpoint["bytes"]):
         _fail("checkpoint bytes differ from the training receipt declaration")
     sources = {key: _source_descriptor(root_path, relative, key) for key, relative in SOURCE_RELATIVE_PATHS.items()}
+    executable_path = _absolute(plan.command[0], "Python executable")
+    if not _under(executable_path, root_path):
+        _fail("Python executable escapes the lab root")
+    executable_descriptor = _executable_descriptor(executable_path)
+    namespace_descriptor = _mkdir_exclusive(namespace, mode=0o700)
     identity = _identity_core(
         root=root_path,
         plan=plan,
@@ -522,19 +770,43 @@ def mint_admission(
         checkpoint_descriptor=checkpoint_descriptor,
         sources=sources,
         resource_snapshot=resource_snapshot,
+        executable_descriptor=executable_descriptor,
+        namespace_descriptor=namespace_descriptor,
         namespace=namespace,
         nonce=selected_nonce,
     )
     identity_digest = canonical_digest(identity)
-    try:
-        os.mkdir(namespace, 0o700)
-    except OSError as error:
-        _fail(f"cannot reserve fresh namespace: {error}")
     marker_core = _marker_core(identity_digest, namespace, selected_nonce)
     marker_raw = (canonical_json(marker_core) + "\n").encode("utf-8")
     marker_path = namespace / ".diagnostic-admission-marker.json"
     marker_descriptor = _write_exclusive(marker_path, marker_raw, mode=0o600)
     receipt_path = namespace / ".diagnostic-admission-receipt.json"
+    state_path = namespace / STATE_NAME
+    lock_path = namespace / CONSUMPTION_LOCK_NAME
+    consumed_path = namespace / CONSUMED_NAME
+    state_core = {
+        "schema": f"{SCHEMA}.state",
+        "state": "issued",
+        "identity_sha256": identity_digest,
+        "namespace": str(namespace),
+        "nonce": selected_nonce,
+        "namespace_marker": {
+            "dev": marker_descriptor["dev"],
+            "ino": marker_descriptor["ino"],
+            "sha256": marker_descriptor["sha256"],
+            "payload_sha256": hashlib.sha256(marker_raw).hexdigest(),
+        },
+        "lock_path": str(lock_path),
+        "consumed_marker": str(consumed_path),
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": CURRENT_HOST,
+        },
+        **ZERO_CREDIT,
+    }
+    state_raw = (canonical_json(state_core) + "\n").encode("utf-8")
+    state_descriptor = _write_exclusive(state_path, state_raw, mode=0o600)
     receipt_core: dict[str, Any] = {
         "schema": SCHEMA,
         "status": "issued",
@@ -552,9 +824,26 @@ def mint_admission(
             "one_shot": True,
             "state": "issued",
             "consumed": False,
-            "consumed_marker": str(namespace / ".diagnostic-admission-consumed"),
+            "state_file": {
+                **state_descriptor,
+                "path": str(state_path),
+                "payload_sha256": hashlib.sha256(state_raw).hexdigest(),
+            },
+            "lock_path": str(lock_path),
+            "consumed_marker": str(consumed_path),
         },
         "diagnostic_execute_only": True,
+        "authority": {
+            "schema": AUTHORITY_SCHEMA,
+            "receipt_authorizes_popen": False,
+            "diagnostic_execute_allowed": False,
+            "launch_allowed": False,
+            "formal_promotion_allowed": False,
+            "credit_promotion_allowed": False,
+            "external_gate_required": True,
+            "formal_state_touched": False,
+            "credit": 0,
+        },
         **ZERO_CREDIT,
     }
     receipt_core["receipt_sha256"] = canonical_digest(receipt_core)
@@ -566,7 +855,59 @@ def mint_admission(
     return result
 
 
+def _validate_file_descriptor_shape(value: Any, name: str) -> dict[str, Any]:
+    descriptor = dict(_mapping(value, name))
+    _reject_unknown(
+        descriptor,
+        {"path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "parent_dev", "parent_ino", "sha256", "content_opened"},
+        name,
+    )
+    _absolute(descriptor.get("path"), f"{name}.path")
+    _int(descriptor.get("dev"), f"{name}.dev")
+    _int(descriptor.get("ino"), f"{name}.ino")
+    _int(descriptor.get("bytes"), f"{name}.bytes", 1)
+    _int(descriptor.get("mode"), f"{name}.mode")
+    _int(descriptor.get("uid"), f"{name}.uid")
+    _int(descriptor.get("gid"), f"{name}.gid")
+    _exact(descriptor, "nlink", 1, name)
+    _int(descriptor.get("mtime_ns"), f"{name}.mtime_ns")
+    _int(descriptor.get("parent_dev"), f"{name}.parent_dev")
+    _int(descriptor.get("parent_ino"), f"{name}.parent_ino")
+    _sha(descriptor.get("sha256"), f"{name}.sha256")
+    _exact(descriptor, "content_opened", True, name)
+    return descriptor
+
+
+def _validate_namespace_descriptor(value: Any, namespace: Path) -> dict[str, Any]:
+    descriptor = dict(_mapping(value, "identity.namespace_descriptor"))
+    _reject_unknown(
+        descriptor,
+        {"path", "dev", "ino", "mode", "uid", "gid", "nlink", "parent_dev", "parent_ino"},
+        "identity.namespace_descriptor",
+    )
+    _exact(descriptor, "path", str(namespace), "identity.namespace_descriptor")
+    _int(descriptor.get("dev"), "identity.namespace_descriptor.dev")
+    _int(descriptor.get("ino"), "identity.namespace_descriptor.ino")
+    _exact(descriptor, "mode", 0o700, "identity.namespace_descriptor")
+    _exact(descriptor, "uid", os.getuid(), "identity.namespace_descriptor")
+    _exact(descriptor, "gid", os.getgid(), "identity.namespace_descriptor")
+    _int(descriptor.get("nlink"), "identity.namespace_descriptor.nlink", 2)
+    _int(descriptor.get("parent_dev"), "identity.namespace_descriptor.parent_dev")
+    _int(descriptor.get("parent_ino"), "identity.namespace_descriptor.parent_ino")
+    return descriptor
+
+
 def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
+    _reject_unknown(
+        identity,
+        {
+            "model_kind", "hidden", "updates", "seed", "case_id", "split", "transitions",
+            "frames", "run_id", "root", "manifest", "training_receipt", "checkpoint",
+            "source_sha256", "resource_snapshot", "gpu", "gpu_identity_sha256", "command",
+            "environment", "executable", "owner", "namespace_descriptor", "namespace", "nonce",
+        },
+        "identity",
+    )
     _exact(identity, "model_kind", MODEL, "identity")
     _exact(identity, "hidden", HIDDEN, "identity")
     _exact(identity, "updates", UPDATES, "identity")
@@ -580,23 +921,65 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
     expected_name = f"f3-graph_raw500-hidden16-currentmanifest-seed{SEED}-full835-nonce{identity['nonce']}"
     if namespace.name != expected_name or not _under(namespace, Path(tempfile.gettempdir()).resolve()):
         _fail("identity.namespace is not the fresh seed17/full835 nonce namespace")
+    root = _absolute(identity.get("root"), "identity.root")
+    _reject_symlink_components(root, "identity.root")
+    _validate_namespace_descriptor(identity.get("namespace_descriptor"), namespace)
+    owner = dict(_mapping(identity.get("owner"), "identity.owner"))
+    _reject_unknown(owner, {"uid", "gid", "host"}, "identity.owner")
+    _exact(owner, "uid", os.getuid(), "identity.owner")
+    _exact(owner, "gid", os.getgid(), "identity.owner")
+    _exact(owner, "host", CURRENT_HOST, "identity.owner")
+    resource_snapshot = _validate_resource(
+        _mapping(identity.get("resource_snapshot"), "identity.resource_snapshot")
+    )
+    gpu = dict(_mapping(identity.get("gpu"), "identity.gpu"))
+    _gpu_identity(gpu)
+    _exact(gpu, "identity_sha256", canonical_digest(_gpu_identity(gpu)), "identity.gpu")
+    if canonical_digest(_gpu_identity(gpu)) != _sha(
+        identity.get("gpu_identity_sha256"), "identity.gpu_identity_sha256"
+    ):
+        _fail("identity GPU UUID/PCI mapping digest drifted")
+    if canonical_json(gpu) != canonical_json(resource_snapshot["gpu"]):
+        _fail("identity GPU snapshot differs from the owner resource snapshot")
+    manifest = dict(_mapping(identity.get("manifest"), "identity.manifest"))
+    _reject_unknown(manifest, {"path", "canonical_sha256", "file"}, "identity.manifest")
+    manifest_path = _absolute(manifest.get("path"), "identity.manifest.path")
+    _sha(manifest.get("canonical_sha256"), "identity.manifest.canonical_sha256")
+    _validate_file_descriptor_shape(manifest.get("file"), "identity.manifest.file")
+    training = dict(_mapping(identity.get("training_receipt"), "identity.training_receipt"))
+    _reject_unknown(training, {"path", "file"}, "identity.training_receipt")
+    _absolute(training.get("path"), "identity.training_receipt.path")
+    _validate_file_descriptor_shape(training.get("file"), "identity.training_receipt.file")
+    checkpoint = dict(_mapping(identity.get("checkpoint"), "identity.checkpoint"))
+    _reject_unknown(
+        checkpoint,
+        {"path", "declared_sha256", "sha256", "bytes", "file"},
+        "identity.checkpoint",
+    )
+    _absolute(checkpoint.get("path"), "identity.checkpoint.path")
+    _sha(checkpoint.get("declared_sha256"), "identity.checkpoint.declared_sha256")
+    _sha(checkpoint.get("sha256"), "identity.checkpoint.sha256")
+    _int(checkpoint.get("bytes"), "identity.checkpoint.bytes", 1)
+    _validate_file_descriptor_shape(checkpoint.get("file"), "identity.checkpoint.file")
     source_sha = _mapping(identity.get("source_sha256"), "identity.source_sha256")
     if set(source_sha) != set(SOURCE_RELATIVE_PATHS):
         _fail("identity.source_sha256 does not cover every pinned source")
     for key, value in source_sha.items():
-        item = _mapping(value, f"identity.source_sha256.{key}")
-        _sha(item.get("sha256"), f"identity.source_sha256.{key}.sha256")
-        _int(item.get("dev"), f"identity.source_sha256.{key}.dev")
-        _int(item.get("ino"), f"identity.source_sha256.{key}.ino")
-        _exact(item, "nlink", 1, f"identity.source_sha256.{key}")
+        item = _validate_file_descriptor_shape(value, f"identity.source_sha256.{key}")
+        if Path(item["path"]) != root / SOURCE_RELATIVE_PATHS[key]:
+            _fail(f"identity.source_sha256.{key}.path is not rooted in the bound lab")
     command = _mapping(identity.get("command"), "identity.command")
+    _reject_unknown(command, {"argv", "cwd", "env_overrides", "sha256"}, "identity.command")
     argv = command.get("argv")
     if not isinstance(argv, list) or not argv or any(not isinstance(item, str) for item in argv):
         _fail("identity.command.argv must be a non-empty string list")
     _exact(command, "cwd", identity.get("root"), "identity.command")
     env = _mapping(command.get("env_overrides"), "identity.command.env_overrides")
     _exact(env, "CUDA_VISIBLE_DEVICES", str(GPU_INDEX), "identity.command.env_overrides")
+    _exact(env, "CUDA_DEVICE_ORDER", CUDA_DEVICE_ORDER, "identity.command.env_overrides")
     _exact(env, "PYTHONDONTWRITEBYTECODE", "1", "identity.command.env_overrides")
+    if set(env) != {"CUDA_VISIBLE_DEVICES", "CUDA_DEVICE_ORDER", "PYTHONDONTWRITEBYTECODE"}:
+        _fail("identity command environment contains an unbound ambient variable")
     _sha(command.get("sha256"), "identity.command.sha256")
     if command["sha256"] != _command_digest(argv, command["cwd"], env):
         _fail("identity exact command digest mismatch")
@@ -612,23 +995,66 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
             _fail(f"identity command is not bound to {option}={value}")
     if argv[-1] != "--diagnostic" or "--diagnostic" in argv[:-1]:
         _fail("identity command must end with one --diagnostic flag")
+    executable = dict(_mapping(identity.get("executable"), "identity.executable"))
+    _reject_unknown(executable, {"path", "file", "sha256"}, "identity.executable")
+    executable_path = _absolute(executable.get("path"), "identity.executable.path")
+    if executable_path != Path(argv[0]) or not _under(executable_path, root):
+        _fail("identity executable path is not the bound root-local argv[0]")
+    _sha(executable.get("sha256"), "identity.executable.sha256")
+    executable_file = _validate_file_descriptor_shape(
+        executable.get("file"), "identity.executable.file"
+    )
+    if executable_file["path"] != str(executable_path) or executable_file["sha256"] != executable["sha256"]:
+        _fail("identity executable content snapshot is inconsistent")
+    if not (executable_file["mode"] & 0o111):
+        _fail("identity executable snapshot is not executable")
+    environment = dict(_mapping(identity.get("environment"), "identity.environment"))
+    _reject_unknown(environment, {"policy", "inherit", "variables", "sha256"}, "identity.environment")
+    _exact(environment, "policy", "allowlist_only_no_ambient_inheritance", "identity.environment")
+    _exact(environment, "inherit", False, "identity.environment")
+    variables = _mapping(environment.get("variables"), "identity.environment.variables")
+    if canonical_json(dict(variables)) != canonical_json(dict(env)):
+        _fail("identity environment snapshot differs from command environment")
+    _exact(
+        environment,
+        "sha256",
+        canonical_digest({
+            "policy": environment["policy"],
+            "inherit": environment["inherit"],
+            "variables": dict(variables),
+        }),
+        "identity.environment",
+    )
 
 
 def _validate_marker(receipt: Mapping[str, Any]) -> dict[str, Any]:
-    marker = _mapping(receipt.get("namespace_marker"), "namespace_marker")
+    marker = dict(_mapping(receipt.get("namespace_marker"), "namespace_marker"))
+    _reject_unknown(
+        marker,
+        {"path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "parent_dev", "parent_ino", "sha256", "payload_sha256"},
+        "namespace_marker",
+    )
     marker_path = _absolute(marker.get("path"), "namespace_marker.path")
     namespace = _absolute(_mapping(receipt.get("identity"), "identity").get("namespace"), "identity.namespace")
-    if marker_path.parent != namespace or marker_path.name != ".diagnostic-admission-marker.json":
+    if marker_path.parent != namespace or marker_path.name != NAMESPACE_MARKER_NAME:
         _fail("namespace marker is not inside the bound namespace")
-    _exact(marker, "mode", 0o600, "namespace_marker")
-    _exact(marker, "uid", os.getuid(), "namespace_marker")
-    _exact(marker, "gid", os.getgid(), "namespace_marker")
-    _exact(marker, "nlink", 1, "namespace_marker")
+    _reject_symlink_components(marker_path, "namespace marker")
+    for key, expected in (
+        ("mode", 0o600),
+        ("uid", os.getuid()),
+        ("gid", os.getgid()),
+        ("nlink", 1),
+    ):
+        _exact(marker, key, expected, "namespace_marker")
+    for key in ("dev", "ino", "bytes", "mtime_ns", "parent_dev", "parent_ino"):
+        _int(marker.get(key), f"namespace_marker.{key}", 1 if key != "bytes" else 1)
+    _sha(marker.get("sha256"), "namespace_marker.sha256")
+    _sha(marker.get("payload_sha256"), "namespace_marker.payload_sha256")
     raw, descriptor, payload = _read_file(marker_path, "namespace marker", max_bytes=64 * 1024, parse_json=True)
     if payload is None:
         _fail("namespace marker payload is absent")
-    for key in ("dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "sha256"):
-        if key in marker and key != "sha256" and descriptor.get(key) != marker[key]:
+    for key in ("path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "parent_dev", "parent_ino", "sha256"):
+        if descriptor.get(key) != marker[key]:
             _fail(f"namespace marker {key} drifted")
     expected_payload_sha = marker.get("payload_sha256")
     if expected_payload_sha != hashlib.sha256(raw).hexdigest():
@@ -639,6 +1065,199 @@ def _validate_marker(receipt: Mapping[str, Any]) -> dict[str, Any]:
     _exact(payload, "identity_sha256", receipt["identity_sha256"], "namespace marker")
     _exact(payload, "diagnostic_only", True, "namespace marker")
     _exact(payload, "one_shot", True, "namespace marker")
+    return descriptor
+
+
+def _validate_written_descriptor(
+    value: Any,
+    name: str,
+    *,
+    expected_path: Path,
+    expected_mode: int = 0o600,
+) -> dict[str, Any]:
+    descriptor = dict(_mapping(value, name))
+    _reject_unknown(
+        descriptor,
+        {"path", "dev", "ino", "bytes", "mode", "uid", "gid", "nlink", "mtime_ns", "parent_dev", "parent_ino", "sha256", "payload_sha256", "content_opened"},
+        name,
+    )
+    _exact(descriptor, "path", str(expected_path), name)
+    _int(descriptor.get("dev"), f"{name}.dev")
+    _int(descriptor.get("ino"), f"{name}.ino")
+    _int(descriptor.get("bytes"), f"{name}.bytes", 1)
+    _exact(descriptor, "mode", expected_mode, name)
+    _exact(descriptor, "uid", os.getuid(), name)
+    _exact(descriptor, "gid", os.getgid(), name)
+    _exact(descriptor, "nlink", 1, name)
+    _int(descriptor.get("mtime_ns"), f"{name}.mtime_ns")
+    _int(descriptor.get("parent_dev"), f"{name}.parent_dev")
+    _int(descriptor.get("parent_ino"), f"{name}.parent_ino")
+    _sha(descriptor.get("sha256"), f"{name}.sha256")
+    if "payload_sha256" in descriptor:
+        _sha(descriptor.get("payload_sha256"), f"{name}.payload_sha256")
+    if "content_opened" in descriptor:
+        _exact(descriptor, "content_opened", True, name)
+    return descriptor
+
+
+def _validate_authority(receipt: Mapping[str, Any]) -> None:
+    authority = dict(_mapping(receipt.get("authority"), "authority"))
+    _reject_unknown(
+        authority,
+        {"schema", "receipt_authorizes_popen", "diagnostic_execute_allowed", "launch_allowed", "formal_promotion_allowed", "credit_promotion_allowed", "external_gate_required", "formal_state_touched", "credit"},
+        "authority",
+    )
+    _exact(authority, "schema", AUTHORITY_SCHEMA, "authority")
+    for key in (
+        "receipt_authorizes_popen",
+        "diagnostic_execute_allowed",
+        "launch_allowed",
+        "formal_promotion_allowed",
+        "credit_promotion_allowed",
+        "formal_state_touched",
+    ):
+        _exact(authority, key, False, "authority")
+    _exact(authority, "external_gate_required", True, "authority")
+    _exact(authority, "credit", 0, "authority")
+
+
+def _validate_state_file(
+    receipt: Mapping[str, Any],
+    *,
+    namespace: Path,
+    marker: Mapping[str, Any],
+) -> dict[str, Any]:
+    consumption = _mapping(receipt["consumption"], "consumption")
+    state_info = dict(_mapping(consumption.get("state_file"), "consumption.state_file"))
+    state_path = namespace / STATE_NAME
+    descriptor = _validate_written_descriptor(
+        state_info,
+        "consumption.state_file",
+        expected_path=state_path,
+    )
+    _sha(state_info.get("payload_sha256"), "consumption.state_file.payload_sha256")
+    raw, current_descriptor, payload = _read_file(
+        state_path,
+        "admission state",
+        max_bytes=64 * 1024,
+        parse_json=True,
+    )
+    for key in descriptor:
+        if key != "payload_sha256" and current_descriptor.get(key) != descriptor[key]:
+            _fail(f"admission state {key} drifted")
+    if hashlib.sha256(raw).hexdigest() != state_info["payload_sha256"]:
+        _fail("admission state payload SHA drifted")
+    if payload is None:
+        _fail("admission state payload is absent")
+    _reject_unknown(
+        payload,
+        {"schema", "state", "identity_sha256", "namespace", "nonce", "namespace_marker", "lock_path", "consumed_marker", "owner", *ZERO_CREDIT},
+        "admission state",
+    )
+    _exact(payload, "schema", f"{SCHEMA}.state", "admission state")
+    _exact(payload, "state", "issued", "admission state")
+    _exact(payload, "identity_sha256", receipt["identity_sha256"], "admission state")
+    _exact(payload, "namespace", str(namespace), "admission state")
+    _exact(payload, "nonce", _mapping(receipt["identity"], "identity")["nonce"], "admission state")
+    state_marker = _mapping(payload.get("namespace_marker"), "admission state.namespace_marker")
+    for key in ("dev", "ino", "sha256", "payload_sha256"):
+        _exact(state_marker, key, marker[key] if key != "payload_sha256" else marker["payload_sha256"], "admission state.namespace_marker")
+    _exact(payload, "lock_path", str(namespace / CONSUMPTION_LOCK_NAME), "admission state")
+    _exact(payload, "consumed_marker", str(namespace / CONSUMED_NAME), "admission state")
+    owner = dict(_mapping(payload.get("owner"), "admission state.owner"))
+    _reject_unknown(owner, {"uid", "gid", "host"}, "admission state.owner")
+    _exact(owner, "uid", os.getuid(), "admission state.owner")
+    _exact(owner, "gid", os.getgid(), "admission state.owner")
+    _exact(owner, "host", CURRENT_HOST, "admission state.owner")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(payload, key, expected, "admission state")
+    return current_descriptor
+
+
+def _validate_lock_file(
+    receipt: Mapping[str, Any],
+    *,
+    namespace: Path,
+    marker: Mapping[str, Any],
+) -> dict[str, Any]:
+    lock_path = namespace / CONSUMPTION_LOCK_NAME
+    raw, descriptor, payload = _read_file(
+        lock_path,
+        "consumption lock",
+        max_bytes=64 * 1024,
+        parse_json=True,
+    )
+    del raw
+    _validate_written_descriptor(descriptor, "consumption lock", expected_path=lock_path)
+    if payload is None:
+        _fail("consumption lock payload is absent")
+    _reject_unknown(
+        payload,
+        {"schema", "state", "identity_sha256", "namespace", "nonce", "namespace_marker", "owner", *ZERO_CREDIT},
+        "consumption lock",
+    )
+    _exact(payload, "schema", f"{SCHEMA}.lock", "consumption lock")
+    _exact(payload, "state", "locked", "consumption lock")
+    _exact(payload, "identity_sha256", receipt["identity_sha256"], "consumption lock")
+    _exact(payload, "namespace", str(namespace), "consumption lock")
+    _exact(payload, "nonce", _mapping(receipt["identity"], "identity")["nonce"], "consumption lock")
+    lock_marker = _mapping(payload.get("namespace_marker"), "consumption lock.namespace_marker")
+    for key in ("dev", "ino"):
+        _exact(lock_marker, key, marker[key], "consumption lock.namespace_marker")
+    owner = dict(_mapping(payload.get("owner"), "consumption lock.owner"))
+    _reject_unknown(owner, {"uid", "gid", "host"}, "consumption lock.owner")
+    _exact(owner, "uid", os.getuid(), "consumption lock.owner")
+    _exact(owner, "gid", os.getgid(), "consumption lock.owner")
+    _exact(owner, "host", CURRENT_HOST, "consumption lock.owner")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(payload, key, expected, "consumption lock")
+    return descriptor
+
+
+def _validate_consumed_marker(
+    receipt: Mapping[str, Any],
+    *,
+    namespace: Path,
+    marker: Mapping[str, Any],
+) -> dict[str, Any]:
+    consumed_path = namespace / CONSUMED_NAME
+    raw, descriptor, payload = _read_file(
+        consumed_path,
+        "consumed marker",
+        max_bytes=64 * 1024,
+        parse_json=True,
+    )
+    _validate_written_descriptor(descriptor, "consumed marker", expected_path=consumed_path)
+    if payload is None:
+        _fail("consumed marker payload is absent")
+    _reject_unknown(
+        payload,
+        {"schema", "state", "receipt_sha256", "identity_sha256", "receipt_path", "namespace", "nonce", "namespace_marker", "lock", "consumed_at_ns", "owner", *ZERO_CREDIT},
+        "consumed marker",
+    )
+    _exact(payload, "schema", CONSUMED_SCHEMA, "consumed marker")
+    _exact(payload, "state", "consumed", "consumed marker")
+    _exact(payload, "receipt_sha256", receipt["receipt_sha256"], "consumed marker")
+    _exact(payload, "identity_sha256", receipt["identity_sha256"], "consumed marker")
+    _exact(payload, "receipt_path", receipt["receipt_path"], "consumed marker")
+    _exact(payload, "namespace", str(namespace), "consumed marker")
+    _exact(payload, "nonce", _mapping(receipt["identity"], "identity")["nonce"], "consumed marker")
+    consumed_marker = _mapping(payload.get("namespace_marker"), "consumed marker.namespace_marker")
+    for key in ("dev", "ino"):
+        _exact(consumed_marker, key, marker[key], "consumed marker.namespace_marker")
+    _validate_written_descriptor(
+        _mapping(payload.get("lock"), "consumed marker.lock"),
+        "consumed marker.lock",
+        expected_path=namespace / CONSUMPTION_LOCK_NAME,
+    )
+    _int(payload.get("consumed_at_ns"), "consumed marker.consumed_at_ns", 1)
+    owner = dict(_mapping(payload.get("owner"), "consumed marker.owner"))
+    _reject_unknown(owner, {"uid", "gid", "host"}, "consumed marker.owner")
+    _exact(owner, "uid", os.getuid(), "consumed marker.owner")
+    _exact(owner, "gid", os.getgid(), "consumed marker.owner")
+    _exact(owner, "host", CURRENT_HOST, "consumed marker.owner")
+    for key, expected in ZERO_CREDIT.items():
+        _exact(payload, key, expected, "consumed marker")
     return descriptor
 
 
@@ -656,7 +1275,7 @@ def validate_receipt(
         allowed = set(ZERO_CREDIT) | {
             "schema", "status", "receipt_version", "report_id", "identity", "identity_sha256",
             "namespace_marker", "receipt_path", "consumption", "diagnostic_execute_only",
-            "receipt_sha256", "receipt_file",
+            "authority", "receipt_sha256", "receipt_file",
         }
         _reject_unknown(receipt, allowed, "receipt")
         _exact(receipt, "schema", SCHEMA, "receipt")
@@ -666,6 +1285,7 @@ def validate_receipt(
         _exact(receipt, "diagnostic_execute_only", True, "receipt")
         for key, expected in ZERO_CREDIT.items():
             _exact(receipt, key, expected, "receipt")
+        _validate_authority(receipt)
         identity = _mapping(receipt.get("identity"), "identity")
         _validate_identity_shape(identity)
         identity_digest = _sha(receipt.get("identity_sha256"), "receipt.identity_sha256")
@@ -675,29 +1295,60 @@ def validate_receipt(
         _exact(consumption, "one_shot", True, "consumption")
         _exact(consumption, "state", "issued", "consumption")
         _exact(consumption, "consumed", False, "consumption")
+        _reject_unknown(
+            consumption,
+            {"one_shot", "state", "consumed", "state_file", "lock_path", "consumed_marker"},
+            "consumption",
+        )
+        namespace = _absolute(identity["namespace"], "identity.namespace")
+        _exact(consumption, "lock_path", str(namespace / CONSUMPTION_LOCK_NAME), "consumption")
         consumed_marker = _absolute(consumption.get("consumed_marker"), "consumption.consumed_marker")
-        if consumed_marker.parent != _absolute(identity["namespace"], "identity.namespace"):
+        if consumed_marker != namespace / CONSUMED_NAME:
             _fail("consumed marker escapes namespace")
         marker_descriptor = _validate_marker(receipt) if check_files else None
+        if check_files and marker_descriptor is not None:
+            _validate_state_file(receipt, namespace=namespace, marker=receipt["namespace_marker"])
         receipt_digest = _sha(receipt.get("receipt_sha256"), "receipt.receipt_sha256")
         core = {key: value for key, value in receipt.items() if key not in {"receipt_sha256", "receipt_file"}}
         if receipt_digest != canonical_digest(core):
             _fail("receipt.receipt_sha256 does not bind receipt bytes")
         if check_files:
             receipt_path = _absolute(receipt.get("receipt_path"), "receipt_path")
-            if not receipt_path.is_file() or receipt_path.parent != _absolute(identity["namespace"], "identity.namespace"):
+            if receipt_path != namespace / RECEIPT_NAME:
                 _fail("receipt_path is not the bound namespace receipt")
-            raw, descriptor, file_payload = _read_file(receipt_path, "admission receipt", max_bytes=MAX_JSON_BYTES, parse_json=True)
-            del raw
+            _raw, descriptor, file_payload = _read_file(receipt_path, "admission receipt", max_bytes=MAX_JSON_BYTES, parse_json=True)
             expected_file_payload = {key: value for key, value in receipt.items() if key != "receipt_file"}
             if file_payload != expected_file_payload:
                 _fail("admission receipt file payload drifted")
-            if stat.S_IMODE(os.lstat(receipt_path).st_mode) != 0o600:
-                _fail("admission receipt must be mode 0600")
+            _validate_written_descriptor(descriptor, "admission receipt", expected_path=receipt_path)
+            comparable_descriptor = {
+                key: value for key, value in descriptor.items() if key != "content_opened"
+            }
+            if "receipt_file" in receipt and receipt["receipt_file"] != comparable_descriptor:
+                _fail("admission receipt file descriptor drifted")
             if marker_descriptor is None:
                 _fail("namespace marker was not checked")
-            if os.path.lexists(consumed_marker) and not allow_consumed:
-                _fail("single-use admission has already been consumed")
+            lock_path = namespace / CONSUMPTION_LOCK_NAME
+            lock_exists = os.path.lexists(lock_path)
+            consumed_exists = os.path.lexists(consumed_marker)
+            if lock_exists:
+                lock_descriptor = _validate_lock_file(
+                    receipt,
+                    namespace=namespace,
+                    marker=receipt["namespace_marker"],
+                )
+            else:
+                lock_descriptor = None
+            if consumed_exists:
+                if lock_descriptor is None:
+                    _fail("consumed marker exists without its owner lock")
+                _validate_consumed_marker(
+                    receipt,
+                    namespace=namespace,
+                    marker=receipt["namespace_marker"],
+                )
+            if (lock_exists or consumed_exists) and not allow_consumed:
+                _fail("single-use admission has already been consumed or locked")
     except (AdmissionError, TypeError, AttributeError, KeyError, OSError) as error:
         errors.append(str(error))
     return errors
@@ -734,22 +1385,66 @@ def consume_receipt(path: Path | str) -> AdmissionCapability:
     receipt = load_receipt(receipt_path, allow_consumed=False)
     identity = _mapping(receipt["identity"], "identity")
     namespace = _absolute(identity["namespace"], "identity.namespace")
-    consumed_path = _absolute(_mapping(receipt["consumption"], "consumption")["consumed_marker"], "consumed marker")
+    marker = _mapping(receipt["namespace_marker"], "namespace_marker")
+    consumed_path = namespace / CONSUMED_NAME
+    lock_path = namespace / CONSUMPTION_LOCK_NAME
+    lock_raw = (canonical_json({
+        "schema": f"{SCHEMA}.lock",
+        "state": "locked",
+        "identity_sha256": receipt["identity_sha256"],
+        "namespace": str(namespace),
+        "nonce": identity["nonce"],
+        "namespace_marker": {
+            "dev": marker["dev"],
+            "ino": marker["ino"],
+        },
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": CURRENT_HOST,
+        },
+        **ZERO_CREDIT,
+    }) + "\n").encode()
+    try:
+        lock_descriptor = _write_exclusive(lock_path, lock_raw, mode=0o600)
+    except AdmissionError as error:
+        if "refusing to overwrite" in str(error) or "already exists" in str(error):
+            _fail("single-use admission has already been consumed or locked")
+        raise
+    receipt = load_receipt(receipt_path, allow_consumed=True)
     raw = (canonical_json({
         "schema": CONSUMED_SCHEMA,
+        "state": "consumed",
         "receipt_sha256": receipt["receipt_sha256"],
+        "identity_sha256": receipt["identity_sha256"],
         "receipt_path": str(receipt_path),
         "namespace": str(namespace),
         "nonce": identity["nonce"],
+        "namespace_marker": {
+            "dev": marker["dev"],
+            "ino": marker["ino"],
+        },
+        "lock": lock_descriptor,
         "consumed_at_ns": time.time_ns(),
+        "owner": {
+            "uid": os.getuid(),
+            "gid": os.getgid(),
+            "host": CURRENT_HOST,
+        },
         "diagnostic_only": True,
-        "credit": 0,
+        **ZERO_CREDIT,
     }) + "\n").encode()
     descriptor = _write_exclusive(consumed_path, raw, mode=0o600)
     if consumed_path.parent != namespace:
         _fail("consumed marker escaped namespace")
     seal = _capability_seal(receipt, descriptor)
-    return AdmissionCapability(receipt=receipt, receipt_path=receipt_path, consumed_marker=consumed_path, seal=seal)
+    return AdmissionCapability(
+        receipt=receipt,
+        receipt_path=receipt_path,
+        consumed_marker=consumed_path,
+        lock_path=lock_path,
+        seal=seal,
+    )
 
 
 def revalidate_receipt(
@@ -787,12 +1482,18 @@ def revalidate_receipt(
         _fail("training receipt file identity drifted")
     if checkpoint_descriptor != expected_checkpoint["file"] or checkpoint_descriptor["sha256"] != expected_checkpoint["sha256"]:
         _fail("checkpoint identity drifted")
+    executable = _mapping(identity["executable"], "identity.executable")
+    current_executable = _executable_descriptor(executable["path"])
+    if current_executable != executable["file"]:
+        _fail("Python executable identity drifted")
     sources = _mapping(identity["source_sha256"], "identity.source_sha256")
     for key, relative in SOURCE_RELATIVE_PATHS.items():
         current = _source_descriptor(root, relative, key)
         if current != sources[key]:
             _fail(f"{key} source identity drifted")
-    current_resource = _validate_resource(resource_admission if resource_admission is not None else resource.probe_resource_admission(GPU_INDEX, root=root))
+    if resource_admission is None:
+        _fail("scheduler-owned GPU UUID/PCI snapshot is required; implicit probing is disabled")
+    current_resource = _validate_resource(resource_admission)
     if canonical_json(current_resource) != canonical_json(identity["resource_snapshot"]):
         _fail("GPU2 resource snapshot drifted from the receipt")
     command = _mapping(identity["command"], "identity.command")
