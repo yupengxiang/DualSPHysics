@@ -1940,6 +1940,11 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         status = report.get("status")
         if status not in {"dry_run_ready", "diagnostic_terminal_verified", "blocked_fail_closed"}:
             _fail("report.status is invalid")
+        if status == "diagnostic_terminal_verified":
+            _fail(
+                "diagnostic terminal status is not accepted without an independently "
+                "bound terminal receipt"
+            )
         if status == "dry_run_ready":
             _exact(report, "execute_requested", False, "report")
             _exact(report, "popen_attempted", False, "report")

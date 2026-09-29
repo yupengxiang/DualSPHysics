@@ -536,3 +536,22 @@ def test_report_keeps_formal_and_credit_isolation(tmp_path: Path) -> None:
     forged = copy.deepcopy(report)
     forged["credit"] = 1
     assert runner.validate_report(forged)
+
+
+def test_forged_terminal_success_status_is_fail_closed(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    report = runner.build_report(fixture["receipt"], execute_requested=True)
+    forged = copy.deepcopy(report)
+    forged.update(
+        {
+            "status": "diagnostic_terminal_verified",
+            "execute_requested": True,
+            "popen_attempted": True,
+            "wait_attempted": True,
+            "real_workload_started": 1,
+            "terminal_receipt": {"schema": runner.TERMINAL_RECEIPT_SCHEMA},
+        }
+    )
+    errors = runner.validate_report(forged)
+    assert errors
+    assert "not accepted without an independently bound terminal receipt" in errors[0]

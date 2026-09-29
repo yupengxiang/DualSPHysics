@@ -264,6 +264,14 @@ def test_receipt_binds_all_identity_domains_and_stays_zero_credit(tmp_path: Path
     assert receipt["consumption"]["one_shot"] is True
     assert receipt["identity"]["external_authority"]["authority_id"]
     assert receipt["consumption"]["external_claim_path"].endswith(".claim.json")
+    snapshot = receipt["identity"]["rollout_snapshot"]
+    assert snapshot["schema"] == admission.launcher.ROLLOUT_SNAPSHOT_SCHEMA
+    assert receipt["identity"]["rollout_snapshot_sha256"] == admission.launcher.canonical_digest(snapshot)
+    assert snapshot["seed"] == admission.SEED
+    assert snapshot["namespace"] == receipt["identity"]["namespace"]
+    assert snapshot["nonce"] == receipt["identity"]["nonce"]
+    assert snapshot["command"] == receipt["identity"]["command"]["argv"]
+    assert snapshot["digests"]["training_receipt_file_sha256"] == receipt["identity"]["training_receipt"]["file"]["sha256"]
     marker = Path(receipt["namespace_marker"]["path"])
     receipt_path = Path(receipt["receipt_path"])
     assert stat.S_IMODE(marker.stat().st_mode) == 0o600
@@ -271,8 +279,58 @@ def test_receipt_binds_all_identity_domains_and_stays_zero_credit(tmp_path: Path
     assert stat.S_IMODE(marker.parent.stat().st_mode) == 0o700
 
 
+def test_final_rollout_snapshot_reread_rejects_training_digest_drift(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    nonce = "b" * 32
+    namespace = _namespace(fixture, nonce)
+    plan = admission._build_reserved_plan(
+        fixture["root"],
+        manifest=fixture["manifest"],
+        training_receipt=fixture["training"],
+        checkpoint=fixture["checkpoint"],
+        nonce=nonce,
+        namespace=namespace,
+        gpu_index=admission.GPU_INDEX,
+    )
+
+    training = Path(fixture["training"])
+    training.write_bytes(training.read_bytes() + b"\n")
+    with pytest.raises(
+        admission.launcher.ContractError,
+        match="training receipt file digest drifted",
+    ):
+        admission._reconcile_plan_reread(plan)
+    assert not (namespace / admission.NAMESPACE_MARKER_NAME).exists()
+    assert not (namespace / admission.STATE_NAME).exists()
+
+
+def test_receipt_snapshot_cross_binding_rejects_namespace_or_command_drift(tmp_path: Path) -> None:
+    receipt, _fixture_data = _mint(tmp_path, nonce="c" * 32)
+    forged = copy.deepcopy(receipt["identity"])
+    forged["rollout_snapshot"]["namespace"] = "/tmp/not-the-seed29-namespace"
+    forged["rollout_snapshot_sha256"] = admission.launcher.canonical_digest(
+        forged["rollout_snapshot"]
+    )
+    with pytest.raises(admission.AdmissionError, match="rollout snapshot namespace drifted"):
+        admission._validate_identity_shape(forged)
+
+    forged = copy.deepcopy(receipt["identity"])
+    forged["rollout_snapshot"]["command"][-1] = "--formal"
+    forged["rollout_snapshot"]["command_sha256"] = admission.launcher.command_digest(
+        forged["rollout_snapshot"]["command"],
+        forged["rollout_snapshot"]["root"],
+        forged["rollout_snapshot"]["env_overrides"],
+    )
+    forged["rollout_snapshot"]["digests"]["command_sha256"] = forged["rollout_snapshot"]["command_sha256"]
+    forged["rollout_snapshot_sha256"] = admission.launcher.canonical_digest(
+        forged["rollout_snapshot"]
+    )
+    with pytest.raises(admission.AdmissionError, match="rollout snapshot command drifted"):
+        admission._validate_identity_shape(forged)
+
+
 def test_receipt_consumption_is_atomic_and_not_reusable(tmp_path: Path) -> None:
-    receipt, _fixture_data = _mint(tmp_path, nonce="b" * 32)
+    receipt, _fixture_data = _mint(tmp_path, nonce="d" * 32)
     receipt_path = Path(receipt["receipt_path"])
     capability = admission.consume_receipt(receipt_path)
     assert capability.receipt_path == receipt_path
@@ -287,13 +345,13 @@ def test_receipt_consumption_is_atomic_and_not_reusable(tmp_path: Path) -> None:
 
 
 def test_source_and_gpu_snapshot_drift_fail_closed(tmp_path: Path) -> None:
-    receipt, fixture = _mint(tmp_path, nonce="c" * 32)
+    receipt, fixture = _mint(tmp_path, nonce="e" * 32)
     source = Path(fixture["root"]) / admission.SOURCE_RELATIVE_PATHS["core_learning"]
     source.write_text("# drifted source\n", encoding="utf-8")
     with pytest.raises(admission.AdmissionError, match="source identity drifted"):
         admission.revalidate_receipt(receipt, resource_admission=fixture["resource"])
 
-    receipt2, fixture2 = _mint(tmp_path / "second", nonce="d" * 32)
+    receipt2, fixture2 = _mint(tmp_path / "second", nonce="f" * 32)
     drifted_resource = copy.deepcopy(fixture2["resource"])
     drifted_resource["gpu"]["free_mib"] -= 1
     with pytest.raises(admission.AdmissionError, match="resource snapshot drifted"):

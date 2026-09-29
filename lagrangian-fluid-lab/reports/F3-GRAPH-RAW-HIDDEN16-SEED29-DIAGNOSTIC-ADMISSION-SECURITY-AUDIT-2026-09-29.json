@@ -1,0 +1,152 @@
+{
+  "schema": "core.f3.graph_raw.hidden16.seed29.diagnostic_admission.security_audit.report.v1",
+  "report_id": "f3-graph-raw-hidden16-seed29-diagnostic-admission-security-audit-2026-09-29",
+  "contract_date": "2026-09-29",
+  "status": "closed_minimal_fail_closed",
+  "audit_mode": "bounded_read_only_security_audit",
+  "scope": {
+    "model_kind": "graph_raw",
+    "hidden": 16,
+    "seed": 29,
+    "primary_admission": "scripts/f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py",
+    "primary_runner": "scripts/f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+    "real_call_data_flow": [
+      "build_reserved_plan -> _plan_binding/_identity_core",
+      "_reconcile_plan_reread before authority validation and namespace state writes",
+      "identity snapshot/digest validation during receipt validation",
+      "runner descriptor gate before any child launch and terminal status validation"
+    ],
+    "reference_control": "raw seed17 SA-003 behavior-level cross-binding only; seed29 paths and data flow were independently inspected",
+    "synthetic_scheduler_fixture_is_not_production_authority": true,
+    "no_gpu_or_nvidia_smi": true,
+    "no_popen_or_wait": true,
+    "no_solver": true,
+    "no_registry_ledger_denominator_gate_completion_writes": true
+  },
+  "baseline_findings": [
+    {
+      "id": "F3-RAW-H16-S29-SA-003",
+      "title": "Rollout snapshot/digest was not behaviorally cross-bound through seed29 admission",
+      "before": "seed29 identity binding did not carry the launcher snapshot/digest and minting lacked the final stable plan reread before local namespace state writes",
+      "disposition": "closed_minimal_fail_closed",
+      "evidence": [
+        "plan and identity now carry rollout_snapshot and rollout_snapshot_sha256",
+        "final manifest, training receipt, and checkpoint reread is reconciled before authority validation and state writes",
+        "identity validation cross-binds namespace, nonce, command, manifest, training receipt, checkpoint, and snapshot digest"
+      ],
+      "test": "test_final_rollout_snapshot_reread_rejects_training_digest_drift and test_receipt_snapshot_cross_binding_rejects_namespace_or_command_drift"
+    },
+    {
+      "id": "F3-RAW-H16-S29-DESC-001",
+      "title": "Path-only child output cannot become descriptor-bound authority",
+      "before": "the current seed29 runner has no admitted child descriptor publication path",
+      "disposition": "closed_fail_closed",
+      "evidence": [
+        "pathname-only child output is rejected at the descriptor gate before Popen",
+        "execution_capability_admitted and popen_capability_admitted remain false"
+      ],
+      "test": "existing seed29 descriptor-bound runner regression"
+    },
+    {
+      "id": "F3-RAW-H16-S29-TERM-001",
+      "title": "Terminal success status must not authorize without an independent terminal receipt",
+      "before": "validate_report accepted the terminal-success status branch as a shape-level possibility even though this runner does not mint an independently bound terminal receipt",
+      "disposition": "closed_minimal_fail_closed",
+      "evidence": [
+        "diagnostic_terminal_verified is now rejected unconditionally by the current non-authorizing runner",
+        "terminal proof remains absent rather than being inferred from report fields"
+      ],
+      "test": "test_forged_terminal_success_status_is_fail_closed"
+    }
+  ],
+  "control_matrix": {
+    "rollout_plan_snapshot_cross_binding": true,
+    "final_stable_reread_before_namespace_state": true,
+    "manifest_digest_cross_binding": true,
+    "training_receipt_digest_cross_binding": true,
+    "checkpoint_descriptor_cross_binding": true,
+    "namespace_nonce_command_cross_binding": true,
+    "pathname_only_child_output_rejected": true,
+    "descriptor_bound_child_output_publication_available": false,
+    "forged_terminal_success_status_rejected": true,
+    "independent_terminal_receipt_minted": false,
+    "production_scheduler_trust_anchor_attested": false,
+    "runtime_gpu_identity_observed": false,
+    "launch_allowed": false,
+    "formal_credit": 0
+  },
+  "audited_files": [
+    {
+      "path": "scripts/f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py",
+      "role": "seed29 admission",
+      "bytes": 110428,
+      "sha256": "87f0d2e56e89d741236f554351338d27ffcb3572a166a51f06c32cf3a142191d"
+    },
+    {
+      "path": "scripts/f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+      "role": "seed29 bounded runner consumer",
+      "bytes": 91993,
+      "sha256": "bee4bb28b406b759757815b7da74fa7f8d1ee69d315089508aa644f63d57e18f"
+    },
+    {
+      "path": "tests/test_f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py",
+      "role": "seed29 admission tests",
+      "bytes": 23337,
+      "sha256": "d887d48151db18794c3a38f9381bd88ed24d2df4741fbad1d8659f208702dad9"
+    },
+    {
+      "path": "tests/test_f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+      "role": "seed29 runner tests",
+      "bytes": 23557,
+      "sha256": "fb2bfd3a03e31797fa850dcbe285a5ab6564b693e572dc26a8e22d2329ef30f6"
+    }
+  ],
+  "tests": [
+    {
+      "command": ".venv/bin/pytest -q tests/test_f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py tests/test_f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+      "result": "34 passed"
+    },
+    {
+      "command": ".venv/bin/pytest -q seed29 admission/runner plus raw hidden16 launcher, executor, case-matrix, training-evidence, terminal-validator, terminal-bridge, admission-v2, admission-v3 regression files",
+      "result": "144 passed"
+    },
+    {
+      "command": ".venv/bin/python -m py_compile scripts/f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py scripts/f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+      "result": "passed"
+    }
+  ],
+  "readiness": {
+    "diagnostic_only": true,
+    "launch_allowed": false,
+    "popen_attempted": false,
+    "wait_attempted": false,
+    "gpu_execution_observed": false,
+    "independent_terminal_proof": false,
+    "production_authority_present": false,
+    "blocked_reasons": [
+      "no production scheduler-owned trust anchor or consume witness was supplied",
+      "no runtime GPU or child terminal observation was performed by this bounded audit"
+    ]
+  },
+  "side_effects": {
+    "gpu_used_for_execution": false,
+    "popen_attempts": 0,
+    "wait_attempts": 0,
+    "solver_started": false,
+    "registry_writes": 0,
+    "ledger_writes": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "completion_writes": 0,
+    "plan_writes": 0,
+    "source_files_written": 4
+  },
+  "write_set": [
+    "scripts/f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py",
+    "scripts/f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+    "tests/test_f3_graph_raw_hidden16_seed29_diagnostic_admission_v1.py",
+    "tests/test_f3_graph_raw_hidden16_seed29_diagnostic_runner_v2.py",
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED29-DIAGNOSTIC-ADMISSION-SECURITY-AUDIT-2026-09-29.json",
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED29-DIAGNOSTIC-ADMISSION-SECURITY-AUDIT-2026-09-29.zh-CN.md"
+  ]
+}
