@@ -5,6 +5,8 @@ import json
 
 from scripts.f3_f4_t2_admission_contract_v1 import (
     LAB,
+    HISTORICAL_OUTPUT,
+    HISTORICAL_REPORT,
     OUTPUT,
     QUALIFICATION_SCHEMA,
     REPORT,
@@ -128,3 +130,16 @@ def test_no_runtime_or_core_gate_mutation_and_report_is_explicit() -> None:
     assert "唯一允许的下一步" in report
     assert "不重跑 CFD" in report
     assert "T2_macro=false" in report
+
+
+def test_historical_t2_contract_remains_immutable_after_rerun() -> None:
+    historical = json.loads(HISTORICAL_OUTPUT.read_text(encoding="utf-8"))
+    current = _contract()
+
+    assert historical["status"] == "proposal_only_root_review_required"
+    assert current["status"] == "proposal_only_root_review_required"
+    assert HISTORICAL_OUTPUT != OUTPUT
+    assert HISTORICAL_REPORT != REPORT
+    assert current["T2_macro"] is False
+    assert current["T2_path"] is False
+    assert current["qualification_credit"] == "none"

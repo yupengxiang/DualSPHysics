@@ -20,11 +20,16 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
-OUTPUT = LAB / (
+HISTORICAL_OUTPUT = LAB / (
     "campaigns/core-v1/material/evidence/"
     "f3-f4-t2-admission-root-review-contract-20260921.json"
 )
-REPORT = LAB / "reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21.zh-CN.md"
+HISTORICAL_REPORT = LAB / "reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21.zh-CN.md"
+OUTPUT = LAB / (
+    "campaigns/core-v1/material/evidence/"
+    "f3-f4-t2-admission-root-review-contract-20260921-RERUN1.json"
+)
+REPORT = LAB / "reports/F3-F4-T2-ADMISSION-CONTRACT-2026-09-21-RERUN1.zh-CN.md"
 QUALIFICATION_SCHEMA = "core.qualification.v1"
 
 SOURCE_WINDOW_AUDIT = LAB / (
