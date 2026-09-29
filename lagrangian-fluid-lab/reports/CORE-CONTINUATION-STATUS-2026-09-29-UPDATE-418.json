@@ -1,0 +1,119 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-418",
+  "observed_at": "2026-09-29T14:33:18+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; shared occupancy is allowed when VRAM remains sufficient; never stop or restart an existing process"
+  },
+  "commits": ["565ba305", "0a6ca907", "37e829f5", "2a4717b7", "7b811d59"],
+  "completed_units": {
+    "f3_hidden16_authority_gap_aggregate": {
+      "commit": "565ba305",
+      "status": "blocked_fail_closed",
+      "coverage": {"expected_model_seed_entries": 9, "observed_unique_entries": 9, "complete": true},
+      "missing": ["external_scheduler_authority", "trusted_ed25519_root_or_key", "authority_bound_terminal_evidence"],
+      "launch_allowed": false,
+      "tests": 7,
+      "credit": 0
+    },
+    "f4_tallwall120_material_t2_sidecar_aggregate_gap": {
+      "commit": "0a6ca907",
+      "status": "blocked_fail_closed",
+      "sidecar_cases": {"expected": 32, "observed": 0, "complete": 0, "source_drift": 32},
+      "missing": ["archives_v2_source_refresh", "fresh_root_scheduler_authority", "scheduler_owned_host_io_reservation", "32_terminal_material_sidecars"],
+      "existing_contract_reused": true,
+      "related_tests": 37,
+      "T2_macro": false,
+      "credit": 0
+    },
+    "core_t1_formal_release_observed_case_run_join": {
+      "commit": "37e829f5",
+      "status": "blocked_fail_closed",
+      "target_rows": 432,
+      "formal_run_shape": {"runs": 9, "f3_rows_per_run": 32, "f4_rows_per_run": 16},
+      "observed_case_runs": 0,
+      "missing": ["formal_release_root_admission", "formal_terminal_evidence", "authority_bound_observed_case_run_receipts"],
+      "tests": 5,
+      "launch_allowed": false,
+      "credit": 0
+    },
+    "f8_r008_target_kernel_pin_authority_reconciliation": {
+      "commit": "2a4717b7",
+      "status": "diagnostic_only_target_kernel_pin_authority_reconciliation_blocked",
+      "required_pin_count": 6,
+      "cross_contract_match_count": 0,
+      "authority_missing_count": 3,
+      "missing": ["external_target_manifest", "trusted_pin_attestation_or_trust_anchor", "value_level_source_build_runtime_join", "target_runtime_conformance"],
+      "readiness_pass": false,
+      "tests": 14,
+      "credit": 0
+    },
+    "a8_full_product_external_host_root_join_gap": {
+      "commit": "7b811d59",
+      "status": "blocked_missing_trusted_root_external_host_and_full_product_terminal_join",
+      "missing": ["trusted_root_receipt", "external_host_attestation", "distinct_data_root_proof", "terminal_full_product_receipt", "Core_gate_evidence"],
+      "independent_reproduction": false,
+      "tests": 16,
+      "launch_allowed": false,
+      "credit": 0
+    }
+  },
+  "verification": {
+    "parent_targeted_new_unit_tests": 42,
+    "f4_related_existing_contract_tests": 37,
+    "py_compile": true,
+    "json_verify": true,
+    "report_cli_verify": true,
+    "git_diff_check": true,
+    "production_workloads_started": 0,
+    "formal_training_started": 0,
+    "popen_started": 0,
+    "solver_worker_queue_started": false,
+    "gpu_used_for_production_or_formal_training": false,
+    "production_data_read": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "existing_processes_stopped_or_restarted": 0,
+    "scheduler_status": {"queued": 0, "reserved": 0, "launching": 0, "running": 0, "attention": 0, "succeeded": 294, "failed": 19, "cancelled": 13},
+    "gpu_snapshot_mib": {"gpu0_free": 48497, "gpu1_free": 48497, "gpu2_free": 48497, "gpu3_free": 48497, "gpu4_free": 48497, "gpu5_free": 48497, "gpu6_free": 48497, "gpu7_free": 48497, "utilization_percent": 0}
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": ["graph_raw-seed17", "graph_raw-seed29", "graph_raw-seed43", "graph_residual-seed17", "graph_residual-seed29", "graph_residual-seed43", "mlp-seed17", "mlp-seed29", "mlp-seed43"],
+    "observed_t1_case_runs": 0,
+    "required_t1_case_runs": 288,
+    "missing_t1_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "observed_material_case_runs": 0,
+    "required_material_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "causal_lineage_contracts": true,
+    "evidence_valid": true,
+    "credit": 0
+  },
+  "external_blockers_preserved": ["real F3 external scheduler authority root and trusted Ed25519 key", "F4 archives-v2 source refresh and fresh material authority/sidecars", "formal release/root trust and observed terminal case-run receipts", "F8 trusted target kernel/source/build/runtime pin and runtime conformance", "A8 trusted root/external host/distinct data root/full-product receipt", "fixed T1/material denominators and release manifest"],
+  "next_safe_path": {
+    "f3": "Use the complete nine-entry aggregate only as a coverage check; obtain producer-issued current-schema scheduler authority and terminal receipts before any sealed runner execution.",
+    "f4": "Refresh the source collection under authoritative archives-v2 and obtain fresh root/scheduler/host-I-O receipts before creating material sidecars.",
+    "f8": "Obtain the externally trusted target pin and value-level source/build/runtime join, then re-run the existing runtime conformance boundary.",
+    "a8": "Obtain real trusted-root, external-host, distinct-data-root, and terminal full-product receipts; synthetic join output cannot mint independent reproduction.",
+    "core": "Keep all results diagnostic/zero-credit until the external evidence is consumed by the existing fail-closed gates.",
+    "gpu_required": false,
+    "direct_worker_launch_allowed": false,
+    "formal_promotion_allowed": false
+  }
+}
