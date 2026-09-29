@@ -286,6 +286,30 @@ def test_receipt_consumption_is_atomic_and_not_reusable(tmp_path: Path) -> None:
         admission.consume_receipt(receipt_path)
 
 
+def test_final_plan_reread_rejects_training_file_digest_drift(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    nonce = "b" * 32
+    namespace = _namespace(fixture, nonce)
+    plan = admission._build_reserved_plan(
+        fixture["root"],
+        manifest=fixture["manifest"],
+        training_receipt=fixture["training"],
+        checkpoint=fixture["checkpoint"],
+        nonce=nonce,
+        namespace=namespace,
+        gpu_index=admission.GPU_INDEX,
+    )
+
+    training = Path(fixture["training"])
+    training.write_bytes(training.read_bytes() + b"\n")
+    with pytest.raises(
+        admission.launcher.ContractError,
+        match="training receipt file digest drifted",
+    ):
+        admission._reconcile_plan_reread(plan)
+    assert not (namespace / ".diagnostic-admission-marker.json").exists()
+
+
 def test_source_and_gpu_snapshot_drift_fail_closed(tmp_path: Path) -> None:
     receipt, fixture = _mint(tmp_path, nonce="c" * 32)
     source = Path(fixture["root"]) / admission.SOURCE_RELATIVE_PATHS["core_learning"]

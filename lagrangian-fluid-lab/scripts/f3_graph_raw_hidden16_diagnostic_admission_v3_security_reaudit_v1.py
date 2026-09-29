@@ -246,6 +246,276 @@ def _leading_fail(tree: ast.Module, name: str) -> bool:
     )
 
 
+def _function_node(
+    tree: ast.Module, name: str
+) -> ast.FunctionDef | ast.AsyncFunctionDef | None:
+    nodes = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.name == name
+    ]
+    return nodes[0] if len(nodes) == 1 else None
+
+
+def _dotted_name(node: ast.AST) -> tuple[str, ...]:
+    if isinstance(node, ast.Name):
+        return (node.id,)
+    if isinstance(node, ast.Attribute):
+        prefix = _dotted_name(node.value)
+        return (*prefix, node.attr) if prefix else ()
+    return ()
+
+
+def _calls(node: ast.AST, target: tuple[str, ...]) -> list[ast.Call]:
+    return [
+        candidate
+        for candidate in ast.walk(node)
+        if isinstance(candidate, ast.Call)
+        and _dotted_name(candidate.func) == target
+    ]
+
+
+def _name(node: ast.AST | None, value: str) -> bool:
+    return isinstance(node, ast.Name) and node.id == value
+
+
+def _attribute(node: ast.AST | None, owner: str, attribute: str) -> bool:
+    return (
+        isinstance(node, ast.Attribute)
+        and _name(node.value, owner)
+        and node.attr == attribute
+    )
+
+
+def _subscript(node: ast.AST | None, owner: str, key: str) -> bool:
+    return (
+        isinstance(node, ast.Subscript)
+        and _name(node.value, owner)
+        and isinstance(node.slice, ast.Constant)
+        and node.slice.value == key
+    )
+
+
+def _keyword(call: ast.Call, name: str) -> ast.AST | None:
+    for keyword in call.keywords:
+        if keyword.arg == name:
+            return keyword.value
+    return None
+
+
+def _has_not_equal(
+    node: ast.AST,
+    left,
+    right,
+) -> bool:
+    for candidate in ast.walk(node):
+        if not isinstance(candidate, ast.Compare):
+            continue
+        if (
+            len(candidate.ops) == 1
+            and isinstance(candidate.ops[0], ast.NotEq)
+            and len(candidate.comparators) == 1
+            and left(candidate.left)
+            and right(candidate.comparators[0])
+        ):
+            return True
+    return False
+
+
+def _assignment_call(node: ast.AST, name: str, target: tuple[str, ...], argument: str) -> bool:
+    for candidate in ast.walk(node):
+        if not isinstance(candidate, ast.Assign) or len(candidate.targets) != 1:
+            continue
+        if not _name(candidate.targets[0], name) or not isinstance(candidate.value, ast.Call):
+            continue
+        if _dotted_name(candidate.value.func) != target or len(candidate.value.args) != 1:
+            continue
+        if _name(candidate.value.args[0], argument):
+            return True
+    return False
+
+
+def _return_dict_has_true(node: ast.AST, key: str) -> bool:
+    for candidate in ast.walk(node):
+        if not isinstance(candidate, ast.Return) or not isinstance(candidate.value, ast.Dict):
+            continue
+        for dict_key, dict_value in zip(candidate.value.keys, candidate.value.values):
+            if (
+                isinstance(dict_key, ast.Constant)
+                and dict_key.value == key
+                and isinstance(dict_value, ast.Constant)
+                and dict_value.value is True
+            ):
+                return True
+    return False
+
+
+def _cross_binding_contract(
+    admission_tree: ast.Module,
+    launcher_tree: ast.Module,
+) -> bool:
+    """Verify the SA-003 data-flow contract without importing audited code.
+
+    This deliberately follows calls, arguments, comparisons, and returned
+    values in the AST.  It does not infer the contract from comments or from
+    a handful of source-text fragments that can survive a disconnected stub.
+    """
+
+    mint = _function_node(admission_tree, "mint_admission")
+    reread = _function_node(admission_tree, "_reconcile_plan_reread")
+    plan_reconcile = _function_node(launcher_tree, "reconcile_plan_snapshot")
+    snapshot_reconcile = _function_node(launcher_tree, "reconcile_rollout_snapshot")
+    if any(node is None for node in (mint, reread, plan_reconcile, snapshot_reconcile)):
+        return False
+    assert mint is not None
+    assert reread is not None
+    assert plan_reconcile is not None
+    assert snapshot_reconcile is not None
+
+    mint_calls = [
+        call
+        for call in _calls(mint, ("_reconcile_plan_reread",))
+        if len(call.args) == 1 and _name(call.args[0], "plan")
+    ]
+    authority_lines = [
+        call.lineno for call in _calls(mint, ("_validate_external_authority",))
+    ]
+    write_lines = [call.lineno for call in _calls(mint, ("_write_exclusive",))]
+    if (
+        len(mint_calls) != 1
+        or not authority_lines
+        or not write_lines
+        or mint_calls[0].lineno >= min(*authority_lines, *write_lines)
+    ):
+        return False
+
+    def _stable_json_read(field: str) -> bool:
+        return any(
+            call.args
+            and _attribute(call.args[0], "plan", field)
+            and _name(_keyword(call, "max_bytes"), "MAX_JSON_BYTES")
+            and isinstance(_keyword(call, "parse_json"), ast.Constant)
+            and _keyword(call, "parse_json").value is True
+            for call in _calls(reread, ("_read_file",))
+        )
+
+    if not _stable_json_read("manifest") or not _stable_json_read("training_receipt"):
+        return False
+
+    handoff = [
+        call
+        for call in _calls(reread, ("launcher", "reconcile_plan_snapshot"))
+        if len(call.args) == 1 and _name(call.args[0], "plan")
+    ]
+    required_handoff = {
+        "manifest_descriptor": "manifest_descriptor",
+        "manifest_payload": "manifest_payload",
+        "training_descriptor": "training_descriptor",
+        "training_payload": "training_payload",
+        "checkpoint_descriptor": "checkpoint_descriptor",
+    }
+    if len(handoff) != 1 or any(
+        not _name(_keyword(handoff[0], keyword), value)
+        for keyword, value in required_handoff.items()
+    ):
+        return False
+
+    delegation = [
+        call
+        for call in _calls(plan_reconcile, ("reconcile_rollout_snapshot",))
+        if len(call.args) == 1 and _name(call.args[0], "snapshot")
+    ]
+    expected_snapshot = (
+        _keyword(delegation[0], "expected_snapshot_sha256")
+        if len(delegation) == 1
+        else None
+    )
+    if (
+        len(delegation) != 1
+        or not isinstance(expected_snapshot, ast.Call)
+        or _dotted_name(expected_snapshot.func)
+        != ("rollout_plan_snapshot_digest",)
+        or len(expected_snapshot.args) != 1
+        or not _name(expected_snapshot.args[0], "plan")
+        or not all(
+            _name(_keyword(delegation[0], keyword), value)
+            for keyword, value in required_handoff.items()
+        )
+    ):
+        return False
+
+    training_loop = False
+    for candidate in ast.walk(snapshot_reconcile):
+        if not isinstance(candidate, ast.For) or not isinstance(candidate.target, ast.Tuple):
+            continue
+        target_names = [item.id for item in candidate.target.elts if isinstance(item, ast.Name)]
+        if target_names != ["label", "observed", "expected_path", "expected_sha"]:
+            continue
+        if not isinstance(candidate.iter, ast.Tuple):
+            continue
+        has_training_row = any(
+            isinstance(row, ast.Tuple)
+            and len(row.elts) == 4
+            and _name(row.elts[1], "observed_training")
+            and _subscript(row.elts[2], "training_record", "path")
+            and _subscript(row.elts[3], "training_record", "file_sha256")
+            for row in candidate.iter.elts
+        )
+        if has_training_row and _has_not_equal(
+            candidate,
+            lambda value: _subscript(value, "observed", "path"),
+            lambda value: _name(value, "expected_path"),
+        ) and _has_not_equal(
+            candidate,
+            lambda value: _subscript(value, "observed", "sha256"),
+            lambda value: _name(value, "expected_sha"),
+        ):
+            training_loop = True
+            break
+
+    training_canonical = _assignment_call(
+        snapshot_reconcile,
+        "training_canonical",
+        ("canonical_digest",),
+        "training_payload",
+    ) and _has_not_equal(
+        snapshot_reconcile,
+        lambda value: _name(value, "training_canonical"),
+        lambda value: _subscript(value, "training_record", "canonical_sha256"),
+    )
+    observed_digest_fields = False
+    for candidate in ast.walk(snapshot_reconcile):
+        if not isinstance(candidate, ast.Assign) or len(candidate.targets) != 1:
+            continue
+        if not _name(candidate.targets[0], "observed_digests") or not isinstance(candidate.value, ast.Dict):
+            continue
+        fields = {
+            key.value: value
+            for key, value in zip(candidate.value.keys, candidate.value.values)
+            if isinstance(key, ast.Constant) and isinstance(key.value, str)
+        }
+        observed_digest_fields = (
+            _subscript(fields.get("training_receipt_file_sha256"), "observed_training", "sha256")
+            and _name(fields.get("training_receipt_canonical_sha256"), "training_canonical")
+        )
+        if observed_digest_fields:
+            break
+    digest_set_checked = _has_not_equal(
+        snapshot_reconcile,
+        lambda value: _name(value, "observed_digests"),
+        lambda value: _subscript(value, "expected", "digests"),
+    )
+    return (
+        _calls(snapshot_reconcile, ("validate_rollout_plan_snapshot",))
+        and training_loop
+        and training_canonical
+        and observed_digest_fields
+        and digest_set_checked
+        and _return_dict_has_true(snapshot_reconcile, "cross_bound")
+    )
+
+
 def _dangerous_calls(tree: ast.AST) -> list[str]:
     dangerous = {
         "kill",
@@ -435,17 +705,13 @@ def _static_checks(
         )
     )
     launcher_path_reopen = not launcher_stable_preflight
-    # The launcher snapshot is read safely, but the admission flow still does
-    # not compare the later stable descriptors with the exact file digests
-    # captured in RolloutPlan before it accepts the signed plan.
-    admission_cross_binds_launcher_receipt = all(
-        needle in admission_mint
-        for needle in (
-            'manifest_descriptor["sha256"]',
-            "plan.manifest_file_sha256",
-            'training_descriptor["sha256"]',
-            "plan.training_receipt_sha256",
-        )
+    # SA-003 is a cross-module data-flow property.  Verify the admission
+    # reread/handoff and the launcher's actual descriptor/canonical digest
+    # comparisons structurally, rather than requiring copied source strings in
+    # mint_admission itself.
+    admission_cross_binds_launcher_receipt = _cross_binding_contract(
+        trees["admission_v1_after_p1_fixes"],
+        trees["rollout_launcher_dependency"],
     )
     output_atomic_reservation = all(
         needle in runner_revalidate
@@ -1052,7 +1318,6 @@ def build_audit_report() -> dict[str, Any]:
         },
         "blocked_reasons": [
             "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
-            "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
             "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit",
         ],
         **ZERO_CREDIT,

@@ -62,7 +62,6 @@
   ],
   "blocked_reasons": [
     "signed external scheduler authority and local one-shot claim protocol are source-present, but no production scheduler-owned trust anchor/consume witness was supplied",
-    "launcher preflight uses bounded stable reads, but the exact RolloutPlan file digests are not compared with the later admission reread",
     "GPU UUID/PCI live-probe and child-attestation controls are source-present but no runtime observation was performed by this read-only audit"
   ],
   "contract_date": "2026-09-29",
@@ -82,8 +81,8 @@
       "descriptor_bound_child_output_publication": true,
       "evaluator_outputs_reserved_before_popen": true,
       "launcher_preflight_stable": true,
-      "launcher_snapshot_cross_bound": false,
-      "verdict": "P1_blocked"
+      "launcher_snapshot_cross_bound": true,
+      "verdict": "closed_pending_terminal_proof"
     },
     "gpu_uuid_pci_logical_mapping": {
       "child_runtime_identity": true,
@@ -169,63 +168,6 @@
       "risk": "The submitted code now verifies a signed authority and writes a durable external claim, but this read-only audit has no independently deployed scheduler trust anchor, scheduler-owned CAS/consume witness, or real authority/claim pair. A local synthetic claim must not be promoted to a production one-shot fact.",
       "severity": "P1",
       "title": "Signed scheduler authority exists, but production consume-once authority is not independently attested"
-    },
-    {
-      "affected": [
-        "rollout_launcher_v1._read_bounded_json",
-        "admission_v1.mint_admission"
-      ],
-      "blocking_for_readiness": true,
-      "current_status": "blocked_fail_closed",
-      "evidence": {
-        "admission_cross_binds_launcher_training_file_digest": false,
-        "admission_stable_fd_reread": true,
-        "launcher_path_based_preflight_reader": false,
-        "launcher_stable_fd_preflight_reader": true,
-        "locations": {
-          "admission": {
-            "def _open_parent_directory": [
-              269
-            ],
-            "def _read_file": [
-              320
-            ],
-            "dir_fd=parent_fd": [
-              326,
-              331,
-              347,
-              389,
-              390,
-              428,
-              434,
-              510
-            ]
-          },
-          "launcher": {
-            "closed = os.fstat(fd)": [
-              356
-            ],
-            "def _read_bounded_json": [
-              327
-            ],
-            "opened = os.fstat(fd)": [
-              345
-            ],
-            "os.lstat(candidate)": [
-              331,
-              364
-            ],
-            "os.open(candidate, flags)": [
-              340
-            ]
-          }
-        }
-      },
-      "id": "F3-DAV3-SA-003",
-      "required_fix": "Compare both later stable file descriptors and canonical manifest digest with the exact RolloutPlan snapshot before accepting the external authority or creating namespace state; reject any mismatch.",
-      "risk": "The launcher reader itself is bounded and stable, but a file can change after its plan is returned and before mint_admission's later reread. Without exact equality checks against RolloutPlan.manifest_file_sha256 and training_receipt_sha256, the signed command plan and final receipt can describe different bytes.",
-      "severity": "P1",
-      "title": "Launcher stable reads are not cross-bound to the final admission snapshot"
     },
     {
       "affected": [
@@ -316,7 +258,7 @@
   },
   "source_bound": true,
   "static_checks": {
-    "admission_cross_binds_launcher_training_file_digest": false,
+    "admission_cross_binds_launcher_training_file_digest": true,
     "admission_stable_fd_reads": true,
     "allowlisted_environment_digest": true,
     "caller_supplied_resource_snapshot": true,

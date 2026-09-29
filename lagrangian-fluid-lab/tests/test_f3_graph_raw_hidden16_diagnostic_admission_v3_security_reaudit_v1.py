@@ -65,17 +65,17 @@ def test_scheduler_authority_protocol_is_present_but_production_attestation_is_m
     assert checks["caller_supplied_resource_snapshot"] is True
 
 
-def test_path_hardening_distinguishes_closed_reads_from_remaining_binding_gaps() -> None:
+def test_path_hardening_accepts_verified_rollout_snapshot_cross_binding() -> None:
     report = audit.build_audit_report()
     checks = report["static_checks"]
     assert checks["admission_stable_fd_reads"] is True
     assert checks["runner_stable_fd_artifact_reads"] is True
     assert checks["launcher_stable_fd_preflight_reader"] is True
     assert checks["launcher_path_based_preflight_reader"] is False
-    assert checks["admission_cross_binds_launcher_training_file_digest"] is False
+    assert checks["admission_cross_binds_launcher_training_file_digest"] is True
     assert checks["runner_output_atomic_reservation_before_popen"] is True
     assert checks["descriptor_bound_child_output_publication"] is True
-    assert report["control_matrix"]["full_path_toc_tou"]["verdict"] == "P1_blocked"
+    assert report["control_matrix"]["full_path_toc_tou"]["verdict"] == "closed_pending_terminal_proof"
     assert (
         report["control_matrix"]["stable_fd_artifact_validation"]["verdict"]
         == "closed_for_reads_and_descriptor_publication_pending_terminal_proof"
@@ -135,13 +135,12 @@ def test_expected_p1_findings_are_explicit() -> None:
     findings = {item["id"]: item for item in report["findings"]}
     assert set(findings) == {
         "F3-DAV3-SA-001",
-        "F3-DAV3-SA-003",
         "F3-DAV3-SA-006",
     }
     assert all(item["current_status"] == "blocked_fail_closed" for item in findings.values())
-    assert sum(item["severity"] == "P1" for item in findings.values()) == 3
+    assert sum(item["severity"] == "P1" for item in findings.values()) == 2
     assert sum(item["severity"] == "P2" for item in findings.values()) == 0
-    assert len(report["blocked_reasons"]) == 3
+    assert len(report["blocked_reasons"]) == 2
 
 
 def test_dangerous_existing_job_control_calls_are_absent() -> None:
