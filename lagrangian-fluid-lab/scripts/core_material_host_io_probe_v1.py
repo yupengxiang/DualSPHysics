@@ -23,6 +23,7 @@ import math
 import os
 from pathlib import Path
 import re
+import stat
 import tempfile
 import time
 from typing import Any, Mapping, Sequence
@@ -153,6 +154,23 @@ _REQUIRED_CPU_FIELDS = (
     "load_average_1_5_15",
 )
 _REQUIRED_RAM_FIELDS = ("total_bytes", "available_bytes", "source")
+
+_SUCCESS_CHECK_NAMES = frozenset(
+    {
+        "workspace_bounded",
+        "workspace_cleaned",
+        "workspace_usage_exact",
+        "filesystem_identity_present",
+        "filesystem_identity_stable",
+        "free_disk_headroom",
+        "concurrency_within_affinity",
+        "bytes_exact",
+        "fsync_completed",
+        "readback_hash_match",
+        "elapsed_fields_finite",
+    }
+)
+_SHA256 = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 
 
 def _utc_now() -> str:
@@ -524,14 +542,45 @@ def _base_report(request: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def _workspace_usage(workspace: Path) -> tuple[int, int]:
-    entries = list(workspace.iterdir())
+def _node_identity(value: os.stat_result) -> tuple[int, int, int, int, int, int, int]:
+    return (
+        int(value.st_dev),
+        int(value.st_ino),
+        int(value.st_mode),
+        int(value.st_nlink),
+        int(value.st_size),
+        int(value.st_mtime_ns),
+        int(value.st_ctime_ns),
+    )
+
+
+def _regular_node(value: os.stat_result, label: str) -> os.stat_result:
+    if not stat.S_ISREG(value.st_mode):
+        raise ValueError(f"{label} is not a regular file")
+    if value.st_nlink != 1:
+        raise ValueError(f"{label} must have exactly one hard link")
+    return value
+
+
+def _workspace_usage(workspace: Path, *, directory_fd: int | None = None) -> tuple[int, int]:
+    if directory_fd is None:
+        entries = list(os.scandir(workspace))
+        snapshots = [
+            entry.stat(follow_symlinks=False)
+            for entry in entries
+        ]
+    else:
+        names = os.listdir(directory_fd)
+        snapshots = [
+            os.stat(name, dir_fd=directory_fd, follow_symlinks=False)
+            for name in names
+        ]
     total_bytes = 0
-    for entry in entries:
-        if entry.is_symlink() or not entry.is_file():
+    for info in snapshots:
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
             raise ValueError("temporary workspace contains a non-regular entry")
-        total_bytes += int(entry.stat().st_size)
-    return len(entries), total_bytes
+        total_bytes += int(info.st_size)
+    return len(snapshots), total_bytes
 
 
 def _measure_io(workspace: Path, requested_bytes: int) -> dict[str, Any]:
@@ -544,82 +593,141 @@ def _measure_io(workspace: Path, requested_bytes: int) -> dict[str, Any]:
     fsync_elapsed = 0.0
     fsync_count = 0
     fd = -1
+    directory_fd = -1
+    open_directory_flags = (
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_CLOEXEC", 0)
+    )
+    directory_fd = os.open(workspace, open_directory_flags)
     try:
-        fd = os.open(probe_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-        write_started_ns = time.perf_counter_ns()
-        while written < requested_bytes:
-            size = min(IO_CHUNK_BYTES, requested_bytes - written)
-            chunk = _pattern_chunk(written, size)
-            offset = 0
-            while offset < len(chunk):
-                count = os.write(fd, chunk[offset:])
-                if count <= 0:
-                    raise OSError("short write returned zero bytes")
-                digest_written.update(chunk[offset : offset + count])
-                offset += count
-                written += count
-        write_elapsed = (time.perf_counter_ns() - write_started_ns) / 1_000_000_000.0
-        fsync_started_ns = time.perf_counter_ns()
-        os.fsync(fd)
-        fsync_elapsed = (time.perf_counter_ns() - fsync_started_ns) / 1_000_000_000.0
-        fsync_count = 1
-    finally:
-        if fd >= 0:
-            os.close(fd)
+        directory_info = os.fstat(directory_fd)
+        if not stat.S_ISDIR(directory_info.st_mode):
+            raise ValueError("temporary workspace is not a directory")
 
-    file_size_after_write = probe_path.stat().st_size
-    workspace_file_count_after_write, workspace_bytes_after_write = _workspace_usage(workspace)
-    if workspace_file_count_after_write != 1 or workspace_bytes_after_write > MAX_WORKSPACE_BYTES:
-        raise ValueError("bounded temporary workspace usage exceeded its contract")
-    read_started_ns = time.perf_counter_ns()
-    digest_read = hashlib.sha256()
-    read = 0
-    fd = -1
-    try:
-        fd = os.open(probe_path, os.O_RDONLY)
-        while True:
-            chunk = os.read(fd, IO_CHUNK_BYTES)
-            if not chunk:
-                break
-            digest_read.update(chunk)
-            read += len(chunk)
+        fd = os.open(
+            PROBE_FILE_NAME,
+            os.O_WRONLY
+            | os.O_CREAT
+            | os.O_EXCL
+            | getattr(os, "O_NOFOLLOW", 0)
+            | getattr(os, "O_CLOEXEC", 0),
+            0o600,
+            dir_fd=directory_fd,
+        )
+        try:
+            write_started_ns = time.perf_counter_ns()
+            while written < requested_bytes:
+                size = min(IO_CHUNK_BYTES, requested_bytes - written)
+                chunk = _pattern_chunk(written, size)
+                offset = 0
+                while offset < len(chunk):
+                    count = os.write(fd, chunk[offset:])
+                    if count <= 0:
+                        raise OSError("short write returned zero bytes")
+                    digest_written.update(chunk[offset : offset + count])
+                    offset += count
+                    written += count
+            write_elapsed = (time.perf_counter_ns() - write_started_ns) / 1_000_000_000.0
+            fsync_started_ns = time.perf_counter_ns()
+            os.fsync(fd)
+            fsync_elapsed = (time.perf_counter_ns() - fsync_started_ns) / 1_000_000_000.0
+            fsync_count = 1
+            write_info = _regular_node(os.fstat(fd), "probe write descriptor")
+        finally:
+            os.close(fd)
+            fd = -1
+
+        named_after_write = _regular_node(
+            os.stat(PROBE_FILE_NAME, dir_fd=directory_fd, follow_symlinks=False),
+            "probe file",
+        )
+        if _node_identity(named_after_write) != _node_identity(write_info):
+            raise RuntimeError("probe file path identity changed after write")
+        file_size_after_write = write_info.st_size
+        workspace_file_count_after_write, workspace_bytes_after_write = _workspace_usage(
+            workspace, directory_fd=directory_fd
+        )
+        if workspace_file_count_after_write != 1 or workspace_bytes_after_write > MAX_WORKSPACE_BYTES:
+            raise ValueError("bounded temporary workspace usage exceeded its contract")
+
+        read_started_ns = time.perf_counter_ns()
+        digest_read = hashlib.sha256()
+        read = 0
+        fd = os.open(
+            PROBE_FILE_NAME,
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_CLOEXEC", 0),
+            dir_fd=directory_fd,
+        )
+        try:
+            read_before = _regular_node(os.fstat(fd), "probe read descriptor")
+            if _node_identity(read_before) != _node_identity(write_info):
+                raise RuntimeError("probe file identity changed before read")
+            while True:
+                chunk = os.read(fd, IO_CHUNK_BYTES)
+                if not chunk:
+                    break
+                digest_read.update(chunk)
+                read += len(chunk)
+            read_after = _regular_node(os.fstat(fd), "probe read descriptor")
+        finally:
+            os.close(fd)
+            fd = -1
+        read_elapsed = (time.perf_counter_ns() - read_started_ns) / 1_000_000_000.0
+        if _node_identity(read_after) != _node_identity(read_before):
+            raise RuntimeError("probe file changed while being read")
+        named_after_read = _regular_node(
+            os.stat(PROBE_FILE_NAME, dir_fd=directory_fd, follow_symlinks=False),
+            "probe file",
+        )
+        if _node_identity(named_after_read) != _node_identity(read_after):
+            raise RuntimeError("probe file path identity changed while being read")
+        file_size_after_read = read_after.st_size
+        written_digest = digest_written.hexdigest()
+        read_digest = digest_read.hexdigest()
+        readback_match = written_digest == read_digest and read == requested_bytes
+        os.unlink(PROBE_FILE_NAME, dir_fd=directory_fd)
+        try:
+            os.stat(PROBE_FILE_NAME, dir_fd=directory_fd, follow_symlinks=False)
+        except FileNotFoundError:
+            file_removed = True
+        else:
+            file_removed = False
+        workspace_file_count_after_remove, workspace_bytes_after_remove = _workspace_usage(
+            workspace, directory_fd=directory_fd
+        )
+        if workspace_file_count_after_remove != 0 or workspace_bytes_after_remove != 0:
+            raise ValueError("temporary workspace was not empty after probe cleanup")
+        elapsed = (time.perf_counter_ns() - started_ns) / 1_000_000_000.0
+        values = {
+            "bytes_requested": requested_bytes,
+            "bytes_written": written,
+            "bytes_read": read,
+            "fsync_count": fsync_count,
+            "write_elapsed_seconds": write_elapsed,
+            "fsync_elapsed_seconds": fsync_elapsed,
+            "read_elapsed_seconds": read_elapsed,
+            "elapsed_seconds": elapsed,
+            "write_sha256": written_digest,
+            "read_sha256": read_digest,
+            "readback_sha256_match": readback_match,
+            "file_size_after_write": int(file_size_after_write),
+            "file_size_after_read": int(file_size_after_read),
+            "file_removed": file_removed,
+            "workspace_file_count_after_write": workspace_file_count_after_write,
+            "workspace_bytes_after_write": workspace_bytes_after_write,
+            "workspace_file_count_after_remove": workspace_file_count_after_remove,
+            "workspace_bytes_after_remove": workspace_bytes_after_remove,
+        }
+        if not all(_is_finite_nonnegative(values[name]) for name in ("write_elapsed_seconds", "fsync_elapsed_seconds", "read_elapsed_seconds", "elapsed_seconds")):
+            raise ValueError("I/O elapsed measurement is invalid")
+        return values
     finally:
         if fd >= 0:
             os.close(fd)
-    read_elapsed = (time.perf_counter_ns() - read_started_ns) / 1_000_000_000.0
-    file_size_after_read = probe_path.stat().st_size
-    written_digest = digest_written.hexdigest()
-    read_digest = digest_read.hexdigest()
-    readback_match = written_digest == read_digest and read == requested_bytes
-    probe_path.unlink()
-    file_removed = not probe_path.exists()
-    workspace_file_count_after_remove, workspace_bytes_after_remove = _workspace_usage(workspace)
-    if workspace_file_count_after_remove != 0 or workspace_bytes_after_remove != 0:
-        raise ValueError("temporary workspace was not empty after probe cleanup")
-    elapsed = (time.perf_counter_ns() - started_ns) / 1_000_000_000.0
-    values = {
-        "bytes_requested": requested_bytes,
-        "bytes_written": written,
-        "bytes_read": read,
-        "fsync_count": fsync_count,
-        "write_elapsed_seconds": write_elapsed,
-        "fsync_elapsed_seconds": fsync_elapsed,
-        "read_elapsed_seconds": read_elapsed,
-        "elapsed_seconds": elapsed,
-        "write_sha256": written_digest,
-        "read_sha256": read_digest,
-        "readback_sha256_match": readback_match,
-        "file_size_after_write": int(file_size_after_write),
-        "file_size_after_read": int(file_size_after_read),
-        "file_removed": file_removed,
-        "workspace_file_count_after_write": workspace_file_count_after_write,
-        "workspace_bytes_after_write": workspace_bytes_after_write,
-        "workspace_file_count_after_remove": workspace_file_count_after_remove,
-        "workspace_bytes_after_remove": workspace_bytes_after_remove,
-    }
-    if not all(_is_finite_nonnegative(values[name]) for name in ("write_elapsed_seconds", "fsync_elapsed_seconds", "read_elapsed_seconds", "elapsed_seconds")):
-        raise ValueError("I/O elapsed measurement is invalid")
-    return values
+        if directory_fd >= 0:
+            os.close(directory_fd)
 
 
 def _build_completed_report(
@@ -818,6 +926,22 @@ def _get_path(value: Mapping[str, Any], path: Sequence[str]) -> Any:
     return current
 
 
+def _is_sha256(value: Any) -> bool:
+    return isinstance(value, str) and _SHA256.fullmatch(value) is not None
+
+
+def _is_absolute_direct_child(parent: Any, child: Any) -> bool:
+    if not isinstance(parent, str) or not isinstance(child, str):
+        return False
+    parent_path = Path(parent)
+    child_path = Path(child)
+    return (
+        parent_path.is_absolute()
+        and child_path.is_absolute()
+        and child_path.parent == parent_path
+    )
+
+
 def validate_report(report: Mapping[str, Any]) -> list[str]:
     """Return structural/contract errors; never infer a pass from omissions."""
 
@@ -863,11 +987,29 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             if controls.get(key) != 0:
                 errors.append(f"execution control must remain zero: {key}")
 
-    if status == "diagnostic_pass":
+    if status in {"diagnostic_pass", "diagnostic_fail_closed"}:
         probe = report.get("probe")
-        if not isinstance(probe, Mapping) or probe.get("probe_pass") is not True or probe.get("contract_valid") is not True or probe.get("measurement_complete") is not True:
-            errors.append("diagnostic_pass requires a complete passing probe")
-        if report.get("failure") is not None:
+        if not isinstance(probe, Mapping):
+            errors.append("diagnostic result requires a probe object")
+        else:
+            checks = probe.get("checks")
+            if not isinstance(checks, Mapping) or set(checks) != _SUCCESS_CHECK_NAMES:
+                errors.append("diagnostic result has an incomplete checks map")
+            else:
+                if any(type(value) is not bool for value in checks.values()):
+                    errors.append("diagnostic checks must be boolean")
+                expected_probe_pass = all(checks.values())
+                if probe.get("probe_pass") is not expected_probe_pass:
+                    errors.append("probe_pass is inconsistent with diagnostic checks")
+            if probe.get("contract_valid") is not True:
+                errors.append("diagnostic result requires a valid probe contract")
+            if probe.get("measurement_complete") is not True:
+                errors.append("diagnostic result requires complete measurements")
+            if status == "diagnostic_pass" and probe.get("probe_pass") is not True:
+                errors.append("diagnostic_pass requires a complete passing probe")
+            if status == "diagnostic_fail_closed" and probe.get("probe_pass") is not False:
+                errors.append("diagnostic_fail_closed requires a failed resource check")
+        if status == "diagnostic_pass" and report.get("failure") is not None:
             errors.append("diagnostic_pass cannot carry a failure")
         try:
             _validate_success_measurements(report, errors)
@@ -891,23 +1033,60 @@ def _validate_success_measurements(report: Mapping[str, Any], errors: list[str])
     if request.get("family_scope") != ["F3", "F4"]:
         errors.append("request family_scope must cover F3 and F4")
     requested_probe_bytes = request.get("probe_bytes")
-    if not _is_positive_int(requested_probe_bytes) or requested_probe_bytes > MAX_WORKSPACE_BYTES:
+    probe_bytes_valid = _is_positive_int(requested_probe_bytes) and requested_probe_bytes <= MAX_WORKSPACE_BYTES
+    if not probe_bytes_valid:
         errors.append("request probe_bytes is invalid")
-    if not _is_positive_int(request.get("concurrency")):
+    concurrency = request.get("concurrency")
+    concurrency_valid = _is_positive_int(concurrency) and concurrency <= MAX_CONCURRENCY
+    if not concurrency_valid:
         errors.append("request concurrency is invalid")
-    if not _is_nonnegative_int(request.get("owned_io_bytes_per_worker")):
+    owned_io_bytes = request.get("owned_io_bytes_per_worker")
+    owned_io_valid = _is_nonnegative_int(owned_io_bytes)
+    if not owned_io_valid:
         errors.append("request owned_io_bytes_per_worker is invalid")
+    minimum_free_disk_bytes = request.get("minimum_free_disk_bytes")
+    minimum_free_valid = _is_nonnegative_int(minimum_free_disk_bytes)
+    if not minimum_free_valid:
+        errors.append("request minimum_free_disk_bytes is invalid")
+    temporary_parent = request.get("temporary_parent")
+    if not isinstance(temporary_parent, str) or not Path(temporary_parent).is_absolute():
+        errors.append("request temporary_parent must be absolute")
+
     workspace = report.get("workspace")
-    if not isinstance(workspace, Mapping) or workspace.get("cleaned") is not True or workspace.get("exists_after_cleanup") is not False:
-        errors.append("temporary workspace was not proven cleaned")
-    if isinstance(workspace, Mapping) and workspace.get("used_bytes") != requested_probe_bytes:
-        errors.append("workspace used bytes do not match request")
+    if not isinstance(workspace, Mapping):
+        errors.append("workspace is not an object")
+    else:
+        if workspace.get("kind") != "bounded_temporary_directory":
+            errors.append("temporary workspace kind is invalid")
+        if workspace.get("owned") is not True:
+            errors.append("temporary workspace must be owned")
+        if workspace.get("file_name") != PROBE_FILE_NAME:
+            errors.append("temporary workspace file name is invalid")
+        if workspace.get("max_files") != 1 or workspace.get("max_bytes") != MAX_WORKSPACE_BYTES:
+            errors.append("temporary workspace bounds are invalid")
+        if workspace.get("parent") != temporary_parent:
+            errors.append("temporary workspace parent is not bound to the request")
+        if not _is_absolute_direct_child(temporary_parent, workspace.get("path")):
+            errors.append("temporary workspace path is not a direct child of its parent")
+        elif not Path(workspace["path"]).name.startswith(WORKSPACE_PREFIX):
+            errors.append("temporary workspace path is not a fresh probe namespace")
+        if workspace.get("requested_payload_bytes") != requested_probe_bytes:
+            errors.append("workspace requested bytes do not match request")
+        if workspace.get("used_bytes") != requested_probe_bytes:
+            errors.append("workspace used bytes do not match request")
+        if workspace.get("file_count_before_cleanup") != 1:
+            errors.append("workspace pre-cleanup file count is invalid")
+        if workspace.get("file_count_after_probe") != 0:
+            errors.append("workspace post-probe file count is invalid")
+        if workspace.get("cleaned") is not True or workspace.get("exists_after_cleanup") is not False:
+            errors.append("temporary workspace was not proven cleaned")
+
     io_measurement = report.get("io_measurement")
     if not isinstance(io_measurement, Mapping):
         errors.append("I/O measurement is not an object")
     else:
-        for key in ("bytes_written", "bytes_read", "file_size_after_write", "file_size_after_read"):
-            if io_measurement.get(key) != requested_probe_bytes:
+        for key in ("bytes_requested", "bytes_written", "bytes_read", "file_size_after_write", "file_size_after_read"):
+            if not probe_bytes_valid or io_measurement.get(key) != requested_probe_bytes:
                 errors.append(f"I/O field does not match requested bytes: {key}")
         if io_measurement.get("workspace_file_count_after_write") != 1:
             errors.append("temporary workspace write file count is invalid")
@@ -917,8 +1096,14 @@ def _validate_success_measurements(report: Mapping[str, Any], errors: list[str])
             errors.append("temporary workspace was not empty after the probe")
         if io_measurement.get("fsync_count") != 1:
             errors.append("exactly one fsync is required")
+        if io_measurement.get("file_removed") is not True:
+            errors.append("probe file removal was not proven")
         if io_measurement.get("readback_sha256_match") is not True:
             errors.append("readback digest did not match")
+        if not _is_sha256(io_measurement.get("write_sha256")) or not _is_sha256(io_measurement.get("read_sha256")):
+            errors.append("I/O digests are not valid SHA-256 values")
+        elif io_measurement.get("write_sha256") != io_measurement.get("read_sha256"):
+            errors.append("write/read digests differ")
         for key in ("write_elapsed_seconds", "fsync_elapsed_seconds", "read_elapsed_seconds", "elapsed_seconds"):
             if not _is_finite_nonnegative(io_measurement.get(key)):
                 errors.append(f"invalid elapsed field: {key}")
@@ -940,6 +1125,61 @@ def _validate_success_measurements(report: Mapping[str, Any], errors: list[str])
             for field in fields:
                 if field not in snapshot or snapshot[field] is None:
                     errors.append(f"missing {section_name} snapshot field: {field}")
+
+    filesystem = report.get("filesystem")
+    if isinstance(filesystem, Mapping):
+        before = filesystem.get("before")
+        after = filesystem.get("after")
+        if filesystem.get("stable") is not True:
+            errors.append("filesystem identity is not marked stable")
+        if isinstance(before, Mapping) and isinstance(after, Mapping):
+            if before != after:
+                errors.append("filesystem identity changed between snapshots")
+            if isinstance(workspace, Mapping) and before.get("path") != workspace.get("path"):
+                errors.append("filesystem path is not bound to the probe workspace")
+
+    disk = report.get("disk")
+    if isinstance(disk, Mapping):
+        before = disk.get("before")
+        after = disk.get("after")
+        required_free = disk.get("required_free_bytes")
+        if not minimum_free_valid or not isinstance(required_free, int) or isinstance(required_free, bool):
+            errors.append("disk required free bytes are invalid")
+        elif not (probe_bytes_valid and concurrency_valid and owned_io_valid):
+            errors.append("disk requirement cannot be recomputed from the request")
+        else:
+            projected_total = concurrency * owned_io_bytes + 2 * requested_probe_bytes
+            expected_required_free = minimum_free_disk_bytes + projected_total
+            if required_free != expected_required_free:
+                errors.append("disk required free bytes are not bound to the request")
+            if disk.get("minimum_free_bytes") != minimum_free_disk_bytes:
+                errors.append("disk minimum free bytes are not bound to the request")
+            if isinstance(after, Mapping) and disk.get("projection_headroom_after_bytes") != after.get("free_bytes", 0) - required_free:
+                errors.append("disk projection headroom is inconsistent")
+            if isinstance(before, Mapping) and isinstance(after, Mapping):
+                expected_free_pass = before.get("free_bytes", -1) >= required_free and after.get("free_bytes", -1) >= required_free
+                if disk.get("free_disk_pass") is not expected_free_pass:
+                    errors.append("disk free pass is inconsistent with snapshots")
+
+    cpu = report.get("cpu")
+    if isinstance(cpu, Mapping) and isinstance(concurrency, int) and not isinstance(concurrency, bool):
+        after = cpu.get("after")
+        if isinstance(after, Mapping):
+            affinity = after.get("affinity_cpu_count")
+            expected_cpu_pass = _is_positive_int(affinity) and concurrency <= affinity
+            if cpu.get("concurrency_within_affinity") is not expected_cpu_pass:
+                errors.append("CPU concurrency check is inconsistent with the request")
+
+    ram = report.get("ram")
+    if isinstance(ram, Mapping):
+        for side in ("before", "after"):
+            snapshot = ram.get(side)
+            if isinstance(snapshot, Mapping):
+                total = snapshot.get("total_bytes")
+                available = snapshot.get("available_bytes")
+                if not _is_positive_int(total) or not _is_nonnegative_int(available) or available > total:
+                    errors.append(f"RAM {side} snapshot is invalid")
+
     projection = report.get("owned_io_projection")
     if isinstance(projection, Mapping):
         projection_fields = tuple(
@@ -950,8 +1190,30 @@ def _validate_success_measurements(report: Mapping[str, Any], errors: list[str])
             errors.append("owned I/O projection contains invalid byte fields")
         elif projection.get("projected_total_io_bytes") != sum(projection_fields):
             errors.append("owned I/O projection total is inconsistent")
+        if probe_bytes_valid and projection.get("probe_write_bytes") != requested_probe_bytes:
+            errors.append("owned I/O write projection is not bound to the request")
+        if probe_bytes_valid and projection.get("probe_read_bytes") != requested_probe_bytes:
+            errors.append("owned I/O read projection is not bound to the request")
+        if concurrency_valid and owned_io_valid:
+            if projection.get("concurrency") != concurrency:
+                errors.append("owned I/O concurrency is not bound to the request")
+            if projection.get("owned_io_bytes_per_worker") != owned_io_bytes:
+                errors.append("owned I/O worker bytes are not bound to the request")
+            if projection.get("projected_owned_io_bytes") != concurrency * owned_io_bytes:
+                errors.append("owned I/O worker projection is inconsistent")
+        if (
+            _is_nonnegative_int(projection.get("projected_total_io_bytes"))
+            and projection["projected_total_io_bytes"] > MAX_PROJECTED_IO_BYTES
+        ):
+            errors.append("owned I/O projection exceeds the bounded maximum")
+        if projection.get("concurrency_source") != "caller_declared_projection":
+            errors.append("owned I/O concurrency source is invalid")
+        if projection.get("projection_unit") != "declared_io_volume_bytes":
+            errors.append("owned I/O projection unit is invalid")
         if projection.get("observed") is not False:
             errors.append("owned I/O projection must remain declared, not observed")
+        if projection.get("scheduler_owned_io_verified") is not False:
+            errors.append("diagnostic probe cannot claim scheduler-owned I/O")
     else:
         errors.append("owned I/O projection is not an object")
 
@@ -962,14 +1224,49 @@ def write_report(report: Mapping[str, Any], destination: Path | str) -> Path:
     errors = validate_report(report)
     if errors:
         raise ValueError("cannot write invalid host-I/O probe report: " + "; ".join(errors))
-    destination_path = Path(destination)
+    destination_path = Path(destination).absolute()
     if not destination_path.parent.is_dir():
         raise FileNotFoundError(destination_path.parent)
-    with destination_path.open("x", encoding="utf-8") as stream:
-        json.dump(report, stream, indent=2, sort_keys=True, allow_nan=False)
-        stream.write("\n")
-        stream.flush()
-        os.fsync(stream.fileno())
+    current = Path(destination_path.anchor)
+    for component in destination_path.parts[1:-1]:
+        current /= component
+        try:
+            info = os.lstat(current)
+        except FileNotFoundError:
+            continue
+        if stat.S_ISLNK(info.st_mode):
+            raise ValueError("report destination contains a symlinked parent")
+
+    descriptor = os.open(
+        destination_path,
+        os.O_WRONLY
+        | os.O_CREAT
+        | os.O_EXCL
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_CLOEXEC", 0),
+        0o644,
+    )
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            descriptor = -1
+            json.dump(report, stream, indent=2, sort_keys=True, allow_nan=False)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+    parent_fd = os.open(
+        destination_path.parent,
+        os.O_RDONLY
+        | getattr(os, "O_DIRECTORY", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_CLOEXEC", 0),
+    )
+    try:
+        os.fsync(parent_fd)
+    finally:
+        os.close(parent_fd)
     return destination_path
 
 

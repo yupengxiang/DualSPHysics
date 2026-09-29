@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts import core_material_host_io_probe_v1 as probe
 
 
@@ -120,6 +122,56 @@ def test_missing_field_never_validates_as_a_pass(tmp_path: Path) -> None:
     assert errors
 
 
+def test_internal_checks_cannot_be_tampered_into_a_positive_receipt(tmp_path: Path) -> None:
+    report = _positive(tmp_path)
+    report["probe"]["checks"]["filesystem_identity_stable"] = False
+
+    errors = probe.validate_report(report)
+
+    assert "probe_pass is inconsistent with diagnostic checks" in errors
+    assert errors
+
+
+def test_filesystem_identity_drift_is_rejected_even_with_passing_flags(tmp_path: Path) -> None:
+    report = _positive(tmp_path)
+    report["filesystem"]["stable"] = False
+    report["filesystem"]["after"]["filesystem_id"] += 1
+
+    errors = probe.validate_report(report)
+
+    assert "filesystem identity is not marked stable" in errors
+    assert "filesystem identity changed between snapshots" in errors
+
+
+def test_request_and_projection_are_cross_bound(tmp_path: Path) -> None:
+    report = _positive(tmp_path)
+    report["request"]["minimum_free_disk_bytes"] = 0
+
+    errors = probe.validate_report(report)
+
+    assert "disk minimum free bytes are not bound to the request" in errors
+    assert errors
+
+
+def test_workspace_path_must_be_a_fresh_direct_child(tmp_path: Path) -> None:
+    report = _positive(tmp_path)
+    report["workspace"]["path"] = str(tmp_path / "nested" / "not-a-probe")
+
+    errors = probe.validate_report(report)
+
+    assert "temporary workspace path is not a direct child of its parent" in errors
+    assert errors
+
+
+def test_workspace_usage_rejects_symlink_entries(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    (workspace / "alias").symlink_to(tmp_path / "outside")
+
+    with pytest.raises(ValueError, match="non-regular entry"):
+        probe._workspace_usage(workspace)
+
+
 def test_resource_negative_is_complete_but_fail_closed(tmp_path: Path) -> None:
     report = probe.run_probe(
         temp_parent=tmp_path,
@@ -149,6 +201,18 @@ def test_report_writer_is_new_file_only(tmp_path: Path) -> None:
         pass
     else:
         raise AssertionError("diagnostic writer must not overwrite an existing artifact")
+
+
+def test_report_writer_rejects_symlinked_parent(tmp_path: Path) -> None:
+    report = _positive(tmp_path)
+    real_parent = tmp_path / "real-parent"
+    real_parent.mkdir()
+    alias_parent = tmp_path / "alias-parent"
+    alias_parent.symlink_to(real_parent, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="symlinked parent"):
+        probe.write_report(report, alias_parent / "diagnostic.json")
+    assert list(real_parent.iterdir()) == []
 
 
 def test_committed_diagnostic_fixture_is_zero_credit_and_non_authorizing() -> None:
