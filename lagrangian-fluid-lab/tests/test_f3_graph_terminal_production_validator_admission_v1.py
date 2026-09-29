@@ -34,6 +34,13 @@ def test_default_report_is_source_bound_but_never_authorizing() -> None:
     assert report["credit"] == 0
     assert report["authority_boundary"]["token_is_formal_authority"] is False
     assert report["runtime_evidence"]["independent_process_proof_present"] is False
+    boundary = report["admission_receipt"]["runtime_evidence_boundary"]
+    assert boundary["production_scheduler_trust_anchor_required"] is True
+    assert boundary["production_scheduler_trust_anchor_present"] is False
+    assert boundary["one_shot_consume_witness_required"] is True
+    assert boundary["one_shot_consume_witness_present"] is False
+    assert boundary["runtime_identity_observation_required"] is True
+    assert boundary["runtime_identity_observed"] is False
 
 
 def test_receipt_binds_validator_source_and_its_tests_by_pinned_sha() -> None:
@@ -150,6 +157,19 @@ def test_forged_token_or_positive_authority_cannot_be_added() -> None:
     forged = deepcopy(report)
     forged["admission_granted"] = True
     assert admission.validate_report(forged, root=ROOT)
+
+
+def test_runtime_boundary_cannot_be_self_attested() -> None:
+    receipt = deepcopy(admission.build_receipt(ROOT))
+    receipt["runtime_evidence_boundary"]["production_scheduler_trust_anchor_present"] = True
+    _rebind(receipt)
+    errors = admission.validate_receipt(receipt, root=ROOT)
+    assert errors
+    assert any("runtime_evidence_boundary" in error for error in errors)
+
+    report = admission.build_report(ROOT)
+    report["runtime_evidence"]["runtime_identity_observed"] = True
+    assert admission.validate_report(report, root=ROOT)
 
 
 def test_committed_report_is_current_and_cli_verifiable(capsys: pytest.CaptureFixture[str]) -> None:

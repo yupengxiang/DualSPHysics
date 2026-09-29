@@ -66,6 +66,9 @@ WRAPPED_VALIDATOR_SCHEMA = "core.f3.full_rollout_receipt_hdf5_validation.v1"
 WRAPPED_CAPABILITY_SCHEMA = (
     "core.f3.graph.terminal.production_validator_capability.v1"
 )
+RUNTIME_EVIDENCE_BOUNDARY_SCHEMA = (
+    "core.f3.graph.terminal.production_validator_runtime_evidence_boundary.v1"
+)
 
 MODEL_KINDS = ("graph_raw", "graph_residual")
 SEEDS = (17, 29, 43)
@@ -104,6 +107,33 @@ ZERO_CREDIT: dict[str, Any] = {
     "qualification_credit": 0,
     "credit": 0,
 }
+
+
+def _planned_runtime_evidence_boundary() -> dict[str, Any]:
+    """Describe evidence that must come from production, never this receipt.
+
+    The admission sidecar is intentionally non-authorizing.  Keeping every
+    observed/present flag false makes that boundary explicit and digest-bound;
+    a local caller cannot turn a planned receipt into scheduler authority by
+    flipping one of these fields.
+    """
+
+    return {
+        "schema": RUNTIME_EVIDENCE_BOUNDARY_SCHEMA,
+        "production_scheduler_trust_anchor_required": True,
+        "production_scheduler_trust_anchor_present": False,
+        "production_scheduler_trust_anchor_verified": False,
+        "one_shot_consume_witness_required": True,
+        "one_shot_consume_witness_present": False,
+        "one_shot_consume_witness_verified": False,
+        "runtime_identity_observation_required": True,
+        "runtime_identity_observed": False,
+        "gpu_uuid_pci_observed": False,
+        "child_runtime_gpu_attested": False,
+        "terminal_identity_observed": False,
+        "local_self_attestation_accepted": False,
+        "promotion_allowed": False,
+    }
 
 
 class AdmissionError(ValueError):
@@ -498,6 +528,7 @@ def _build_receipt(root: Path, namespace: str = DEFAULT_NAMESPACE) -> dict[str, 
             "proof_verified": False,
             "authoritative": False,
         },
+        "runtime_evidence_boundary": _planned_runtime_evidence_boundary(),
         "authority_boundary": {
             "token_present": False,
             "token_is_formal_authority": False,
@@ -524,6 +555,7 @@ RECEIPT_KEYS = frozenset(
         "artifact_root_policy",
         "artifact_bindings",
         "independent_process_proof_requirement",
+        "runtime_evidence_boundary",
         "authority_boundary",
         "receipt_binding_sha256",
         *ZERO_CREDIT,
@@ -806,6 +838,14 @@ def _validate_process_requirement(value: Any) -> None:
         _exact(proof, key, expected, "independent_process_proof_requirement")
 
 
+def _validate_runtime_evidence_boundary(value: Any) -> None:
+    observed = _mapping(value, "runtime_evidence_boundary")
+    expected = _planned_runtime_evidence_boundary()
+    _reject_unknown(observed, set(expected), "runtime_evidence_boundary")
+    for key, claim in expected.items():
+        _exact(observed, key, claim, "runtime_evidence_boundary")
+
+
 def _validate_authority(value: Any) -> None:
     authority = _mapping(value, "authority_boundary")
     _reject_unknown(
@@ -864,6 +904,7 @@ def validate_receipt(
             )
         _validate_artifact_policy(receipt.get("artifact_root_policy"), namespace_root, artifact_bindings)
         _validate_process_requirement(receipt.get("independent_process_proof_requirement"))
+        _validate_runtime_evidence_boundary(receipt.get("runtime_evidence_boundary"))
         _validate_authority(receipt.get("authority_boundary"))
         for key, expected in ZERO_CREDIT.items():
             _exact(receipt, key, expected, "receipt")
@@ -903,6 +944,9 @@ def _blocked_report(
         "independent real Popen/wait proof is absent and cannot be self-authorized",
         "production HDF5 artifact identity/validator receipt is absent",
         "fresh one-time namespace reservation is not externally attested",
+        "production scheduler trust anchor is absent; this local receipt is not a scheduler authority",
+        "external one-shot consume witness is absent; receipt replay cannot be promoted",
+        "runtime GPU UUID/PCI, child logical-device, and terminal identity observation is absent",
         "token claims are not formal authority; admission remains zero-credit",
     ]
     reasons = list(receipt_errors) + base_blockers
@@ -926,6 +970,9 @@ def _blocked_report(
             "exact_evaluator_command_digest": receipt_valid,
             "independent_popen_wait_requirement": receipt_valid,
             "artifact_root_containment_policy": receipt_valid,
+            "production_scheduler_trust_anchor_requirement": receipt_valid,
+            "one_shot_consume_witness_requirement": receipt_valid,
+            "runtime_identity_observation_requirement": receipt_valid,
         },
         "runtime_evidence": {
             "independent_process_proof_present": False,
@@ -933,6 +980,14 @@ def _blocked_report(
             "production_artifact_receipt_present": False,
             "production_hdf5_validator_passed": False,
             "fresh_namespace_reservation_attested": False,
+            "production_scheduler_trust_anchor_present": False,
+            "production_scheduler_trust_anchor_verified": False,
+            "one_shot_consume_witness_present": False,
+            "one_shot_consume_witness_verified": False,
+            "runtime_identity_observed": False,
+            "gpu_uuid_pci_observed": False,
+            "child_runtime_gpu_attested": False,
+            "terminal_identity_observed": False,
         },
         "authority_boundary": {
             "token_present": False,
@@ -957,6 +1012,9 @@ def _blocked_report(
             "artifact_root_containment": True,
             "symlink_free_required": True,
             "hardlink_count_required": 1,
+            "production_scheduler_trust_anchor": "required_external_and_not_self_attested",
+            "one_shot_consume_witness": "required_external_atomic_replay_free_consume",
+            "runtime_identity_observation": "required_live_gpu_uuid_pci_child_and_terminal_binding",
         },
         "input_boundary": {
             "validator_source_opened": source_bound,
@@ -1055,6 +1113,9 @@ def validate_report(report: Mapping[str, Any], *, root: Path | str = LAB_ROOT) -
             "exact_evaluator_command_digest",
             "independent_popen_wait_requirement",
             "artifact_root_containment_policy",
+            "production_scheduler_trust_anchor_requirement",
+            "one_shot_consume_witness_requirement",
+            "runtime_identity_observation_requirement",
         ):
             _exact(checks, key, True, "report.checks")
         runtime = _mapping(report.get("runtime_evidence"), "report.runtime_evidence")
@@ -1101,6 +1162,8 @@ def render_markdown(report: Mapping[str, Any]) -> str:
             "- contract: graph_raw/graph_residual, hidden16, update-500, test, 835 transitions / 836 frames",
             "- process proof: independent real Popen/wait required but absent",
             "- artifact policy: root-contained, symlink-free, single-hardlink required",
+            "- production boundary: external scheduler trust anchor and one-shot consume witness are required but absent",
+            "- runtime identity: live GPU UUID/PCI, child logical device, and terminal artifact observation are required but absent",
             "- authority: token is not formal authority; credit is `0`",
             "",
             "## Blockers",
