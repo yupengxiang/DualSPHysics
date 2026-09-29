@@ -108,3 +108,16 @@ def test_report_validator_rejects_claim_drift():
     report["credit"] = 1
 
     assert "report.credit must remain 0" in contract.validate_report(report)
+
+
+def test_report_validator_rejects_forged_status_and_structural_pass():
+    report = contract.build_report(contract.synthetic_projection())
+    report.update({
+        "status": "trusted_external_host_ready",
+        "passed": True,
+        "structural_contract_passed": True,
+    })
+
+    errors = contract.validate_report(report)
+
+    assert "report.status is unsupported" in errors

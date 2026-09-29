@@ -219,6 +219,90 @@ def test_validate_report_rejects_claim_drift(tmp_path):
     assert "report.claims drift" in errors
 
 
+def test_metadata_claims_cannot_close_current_checkpoint_binding(tmp_path):
+    fixture = _fixture(tmp_path)
+    current_payload = json.loads(fixture["current_bundle"].read_text())
+    current_payload["checkpoint_count"] = 1
+    current_payload["model_reproduction_supported"] = True
+    _write_json(fixture["current_bundle"], current_payload)
+
+    report = _build(fixture)
+
+    assert report["passed"] is False
+    assert report["claims"] == auditor.FALSE_CLAIMS
+    assert report["trusted_checkpoint_binding"]["ready"] is False
+    assert "current_trusted_checkpoint_binding_missing" in report["blockers"]
+    assert "current_bundle.checkpoint_count is not zero" in auditor.validate_report(report)
+
+
+def test_provenance_checkpoint_path_must_match_registry_and_bundle_identity(tmp_path):
+    fixture = _fixture(tmp_path)
+    historical_root = fixture["historical_bundle"].parent
+    dataset = historical_root / "dataset.json"
+    provenance = _write_json(
+        tmp_path / "provenance.json",
+        {
+            "schema": auditor.CHECKPOINT_PROVENANCE_SCHEMA,
+            "bundle": {
+                "bundle_json_sha256": _sha(fixture["historical_bundle"]),
+                "checkpoint_registry_sha256": _sha(fixture["historical_registry"]),
+                "dataset_json_sha256": _sha(dataset),
+            },
+            "checkpoint": {
+                "bundle_path": "models/forged-checkpoint.pt",
+                "bytes": 7,
+                "path": "models/checkpoint-000.pt",
+                "sha256": "2" * 64,
+            },
+            "dataset_binding": {
+                "canonical_sha256": "4" * 64,
+                "dataset_id": "synthetic-fixture",
+                "path": "dataset.json",
+                "sha256": _sha(dataset),
+            },
+            "diagnostic_only": True,
+            "formal_training_count": 0,
+            "model_kind": "mlp",
+            "qualification_note": "synthetic diagnostic only",
+            "schema_version_note": "not an authority",
+            "seed": 17,
+            "training": {
+                "completed_updates": 16,
+                "initialization_evidence": {"hidden": 64},
+                "run_id": "synthetic-fixture",
+            },
+            "update": 16,
+        },
+    )
+
+    report = auditor.build_audit(
+        lab_root=fixture["lab_root"],
+        current_bundle=fixture["current_bundle"],
+        historical_bundle=fixture["historical_bundle"],
+        historical_registry=fixture["historical_registry"],
+        historical_provenance=provenance,
+    )
+
+    assert "historical_checkpoint_provenance_bundle_checkpoint_path_mismatch" in report[
+        "blockers"
+    ]
+    assert "historical_checkpoint_provenance_checkpoint_source_path_not_authoritative" in report[
+        "blockers"
+    ]
+    assert report["comparisons"]["model_identity"]["current_identity_bound"] is False
+    assert auditor.validate_report(report) == []
+
+
+def test_report_validator_rejects_forged_lineage_receipts(tmp_path):
+    report = _build(_fixture(tmp_path))
+    mutated = copy.deepcopy(report)
+    mutated["lineage_boundary"]["reader"]["receipt_supplied_to_this_boundary"] = True
+
+    errors = auditor.validate_report(mutated)
+
+    assert "lineage_boundary.reader receipt must be absent" in errors
+
+
 def test_cli_writes_and_validates_diagnostic_outputs(tmp_path):
     fixture = _fixture(tmp_path)
     report_path = tmp_path / "audit.json"

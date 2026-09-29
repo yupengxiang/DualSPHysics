@@ -34,6 +34,11 @@ DATA_ROOT_SCHEMA = "core.reproduction.a8_distinct_data_root_identity.v1"
 TRUSTED_ROOT_SCHEMA = "core.reproduction.a8_trusted_root_review.v1"
 EXTERNAL_HOST_SCHEMA = "core.reproduction.a8_external_host_attestation.v1"
 FULL_PRODUCT_SCHEMA = "core.reproduction.a8_non_diagnostic_full_product_receipt.v1"
+STRUCTURAL_BLOCKED_STATUS = (
+    "blocked_missing_trusted_root_external_host_and_"
+    "non_diagnostic_full_product_receipt"
+)
+INVALID_BLOCKED_STATUS = "blocked_invalid_or_untrusted_projection"
 INPUT_ORIGIN = "synthetic_fixture"
 MAX_INPUT_BYTES = 128 * 1024
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
@@ -477,10 +482,7 @@ def build_report(projection: Mapping[str, Any]) -> dict[str, Any]:
         )
 
         report.update({
-            "status": (
-                "blocked_missing_trusted_root_external_host_and_"
-                "non_diagnostic_full_product_receipt"
-            ),
+            "status": STRUCTURAL_BLOCKED_STATUS,
             "passed": True,
             "structural_contract_passed": True,
             "checks": {
@@ -523,7 +525,7 @@ def build_report(projection: Mapping[str, Any]) -> dict[str, Any]:
             ],
         })
     except ContractError as error:
-        report["status"] = "blocked_invalid_or_untrusted_projection"
+        report["status"] = INVALID_BLOCKED_STATUS
         report["errors"] = [{"code": error.code, "message": str(error)}]
         report["blockers"] = ["invalid_or_untrusted_cross_binding_projection"]
     return report
@@ -554,21 +556,43 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         ):
             if checks.get(key) is not False:
                 errors.append(f"report.checks.{key} must remain false")
-    if report.get("status") == (
-        "blocked_missing_trusted_root_external_host_and_"
-        "non_diagnostic_full_product_receipt"
-    ):
+    status = report.get("status")
+    if status == STRUCTURAL_BLOCKED_STATUS:
+        if report.get("passed") is not True:
+            errors.append("structural blocked report.passed must be true")
         if report.get("passed") is not True or report.get("structural_contract_passed") is not True:
             errors.append("blocked structural report must retain structural_contract_passed")
-        for key in (
-            "distinct_data_root_identity",
-            "trusted_root_review_cross_binding",
-            "external_host_attestation_cross_binding",
-            "non_diagnostic_full_product_receipt_cross_binding",
-            "cross_binding_identity",
-        ):
-            if checks.get(key) is not True:
-                errors.append(f"report.checks.{key} must be true for synthetic fixture")
+        expected_checks = {
+            "distinct_data_root_identity": True,
+            "trusted_root_review_cross_binding": True,
+            "external_host_attestation_cross_binding": True,
+            "non_diagnostic_full_product_receipt_cross_binding": True,
+            "cross_binding_identity": True,
+            "trusted_root_review": False,
+            "external_host_attestation": False,
+            "non_diagnostic_full_product_receipt": False,
+        }
+        if isinstance(checks, Mapping):
+            if dict(checks) != expected_checks:
+                errors.append("structural blocked report.checks drift")
+            for key in (
+                "distinct_data_root_identity",
+                "trusted_root_review_cross_binding",
+                "external_host_attestation_cross_binding",
+                "non_diagnostic_full_product_receipt_cross_binding",
+                "cross_binding_identity",
+            ):
+                if checks.get(key) is not True:
+                    errors.append(f"report.checks.{key} must be true for synthetic fixture")
+    elif status == INVALID_BLOCKED_STATUS:
+        if report.get("passed") is not False:
+            errors.append("invalid blocked report.passed must be false")
+        if report.get("structural_contract_passed") is not False:
+            errors.append("invalid blocked report must not be structurally passed")
+        if not isinstance(report.get("errors"), list) or not report["errors"]:
+            errors.append("invalid blocked report.errors must be non-empty")
+    else:
+        errors.append("report.status is unsupported")
     if report.get("readiness_pass") is not False:
         errors.append("report.readiness_pass must remain false")
     return errors

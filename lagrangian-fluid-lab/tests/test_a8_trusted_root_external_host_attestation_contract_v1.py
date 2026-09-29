@@ -129,6 +129,19 @@ def test_report_validator_rejects_claim_drift():
     assert "report.credit must remain 0" in contract.validate_report(report)
 
 
+def test_report_validator_rejects_forged_status_and_structural_pass():
+    report = contract.build_report(contract.synthetic_projection())
+    report.update({
+        "status": "trusted_external_host_ready",
+        "passed": True,
+        "structural_contract_passed": True,
+    })
+
+    errors = contract.validate_report(report)
+
+    assert "report.status is unsupported" in errors
+
+
 def test_module_has_no_operational_probe_imports():
     source = Path(contract.__file__).read_text(encoding="utf-8")
     tree = ast.parse(source)

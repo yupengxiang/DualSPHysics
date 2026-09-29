@@ -1,5 +1,5 @@
 {
-  "audit_scope": "current A8 reader_bundle.v2 checkpoint-free index versus historical checkpoint-bearing bundle/registry",
+  "audit_scope": "current A8 reader_bundle.v2 checkpoint-free index versus historical checkpoint-bearing bundle/registry; external host/root and reader/scoring receipts are outside this input boundary",
   "blockers": [
     "checkpoint_content_hash_not_verified_by_this_boundary",
     "code_identity_sha_mismatch_common_paths:10",
@@ -9,13 +9,19 @@
     "current_model_entrypoint_has_no_trusted_registry_row:models/checkpoint-000.pt",
     "current_trusted_checkpoint_binding_missing",
     "dataset_source_raw_sha_mismatch_current_vs_historical",
+    "distinct_data_root_receipt_not_supplied_to_this_boundary",
+    "distinct_physical_host_receipt_not_supplied_to_this_boundary",
     "historical_bundle_absolute_reused_from:65",
     "historical_bundle_schema_legacy_or_different:'core.reader_bundle.v1'",
     "historical_checkpoint_provenance_absolute_checkpoint_source_path",
     "historical_checkpoint_provenance_absolute_dataset_source_path",
+    "historical_checkpoint_provenance_checkpoint_source_path_not_authoritative",
     "historical_checkpoint_provenance_is_diagnostic_only",
     "historical_portable_package_has_absolute_reused_from_paths",
-    "independent_reproduction_requires_fresh_current_v2_binding_and_distinct_host_receipt"
+    "independent_reproduction_requires_fresh_current_v2_binding_and_distinct_host_receipt",
+    "reader_reproduction_lineage_not_supplied_to_this_boundary",
+    "scoring_lineage_not_supplied_to_this_boundary",
+    "trusted_root_review_not_supplied_to_this_boundary"
   ],
   "claims": {
     "T1_numerical": false,
@@ -110,13 +116,19 @@
         }
       ],
       "historical_provenance": {
+        "bundle_identity": {
+          "bundle_json_sha256": "00c8d22f9965f6576a7a5a668ba934a2a4109e376dd90abd271310e70a3d81a2",
+          "checkpoint_registry_sha256": "84218f0252445aac0ecfe1c6586f8912d0f760f850e23bd8da50986efcfa3453",
+          "dataset_json_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680"
+        },
         "checkpoint": {
+          "bundle_path": "models/checkpoint-000.pt",
           "content_hash_verified": false,
           "content_opened": false,
-          "lstat_regular": true,
+          "lstat_regular": false,
           "model_kind": "mlp",
           "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/learning/formal-preprofile-v3/collected/h200-core-preprofile-mlp-seed17-v3/checkpoint.pt",
-          "path_exists_by_lstat": true,
+          "path_exists_by_lstat": false,
           "path_kind": "absolute",
           "sha256_claim": "670880ac0f7703e1882fe6140b8328a1be789fdc20efede6d0398df2f6a1cfb7"
         },
@@ -140,6 +152,7 @@
         },
         "qualification_note": "Seed17 update16 engineering preprofile checkpoint; this A8 reproduction is not a formal 32000-update model and produces no ledger evidence.",
         "raw_payload_canonical_sha256": "bbf8725613022921e543676fa57845f8cf1459fa037f15b472f77fec8f73bb54",
+        "registry_identity_match": true,
         "registry_sha_match": true,
         "schema": "core.a8_checkpoint_provenance.v1",
         "training_identity": {
@@ -625,6 +638,38 @@
     "schema": "core.bundled_checkpoints.v1"
   },
   "interpretation": "Metadata and lstat reconciliation only; historical checkpoint presence and diagnostic receipts are not current independent reproduction or T1/T2 evidence.",
+  "lineage_boundary": {
+    "checkpoint_model": {
+      "content_hash_verified": false,
+      "current_binding": false,
+      "historical_metadata_only": true,
+      "trusted": false
+    },
+    "distinct_data_root": {
+      "evidence_supplied_to_this_boundary": false,
+      "metadata_claim_accepted": false,
+      "trusted": false
+    },
+    "distinct_physical_host": {
+      "evidence_supplied_to_this_boundary": false,
+      "metadata_claim_accepted": false,
+      "trusted": false
+    },
+    "metadata_only_claims_can_mint_readiness": false,
+    "reader": {
+      "receipt_supplied_to_this_boundary": false,
+      "trusted": false
+    },
+    "scoring": {
+      "receipt_supplied_to_this_boundary": false,
+      "trusted": false
+    },
+    "trusted_root_review": {
+      "evidence_supplied_to_this_boundary": false,
+      "metadata_claim_accepted": false,
+      "trusted": false
+    }
+  },
   "mutations": {
     "completion": 0,
     "denominator": 0,
@@ -668,6 +713,8 @@
       "trusted training receipt linking checkpoint to model/config/seed/update and formal-vs-diagnostic status",
       "content-hash attestation performed by an authorized producer outside this metadata-only auditor",
       "portable package contract with no absolute source/reuse paths",
+      "reader reproduction receipt bound to the current bundle and dataset",
+      "scoring receipt bound to reader and autonomous prediction output identities",
       "fresh independent reproduction receipt from a distinct host using the newly bound current package"
     ],
     "required_next_step": "bind a current-v2 checkpoint registry and independently attest each checkpoint before any model reproduction",

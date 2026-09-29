@@ -36,6 +36,8 @@ TRUSTED_ROOT_SCHEMA = "core.reproduction.trusted_root_review.v1"
 EXTERNAL_HOST_SCHEMA = "core.reproduction.external_host_attestation.v1"
 DATA_ROOT_SCHEMA = "core.reproduction.data_root_identity.v1"
 PREFLIGHT_SCHEMA = "core.reproduction.independent_preflight.v1"
+STRUCTURAL_BLOCKED_STATUS = "blocked_missing_trusted_root_and_external_host_attestation"
+INVALID_BLOCKED_STATUS = "blocked"
 INPUT_ORIGIN = "synthetic_fixture"
 MAX_INPUT_BYTES = 128 * 1024
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
@@ -398,7 +400,7 @@ def build_report(projection: Mapping[str, Any]) -> dict[str, Any]:
         )
 
         report.update({
-            "status": "blocked_missing_trusted_root_and_external_host_attestation",
+            "status": STRUCTURAL_BLOCKED_STATUS,
             "passed": True,
             "structural_contract_passed": True,
             "checks": {
@@ -456,19 +458,40 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         errors.append("report.execution_constraints drift")
     if report.get("readiness_pass") is not False:
         errors.append("report.readiness_pass must remain false")
-    if report.get("status") == "blocked_missing_trusted_root_and_external_host_attestation":
+    status = report.get("status")
+    if status == STRUCTURAL_BLOCKED_STATUS:
+        if report.get("passed") is not True:
+            errors.append("structural blocked report.passed must be true")
         if report.get("structural_contract_passed") is not True:
             errors.append("blocked structural report must retain structural_contract_passed")
         checks = report.get("checks")
         if not isinstance(checks, Mapping):
             errors.append("report.checks missing")
         else:
+            expected_checks = {
+                "typed_preflight_projection": True,
+                "data_root_identity_binding": True,
+                "trusted_root_review": False,
+                "external_host_attestation": False,
+                "non_diagnostic_full_product_evidence": False,
+            }
+            if dict(checks) != expected_checks:
+                errors.append("structural blocked report.checks drift")
             if checks.get("data_root_identity_binding") is not True:
                 errors.append("data-root identity binding must be true for synthetic fixture")
             if checks.get("trusted_root_review") is not False:
                 errors.append("trusted-root check must remain false")
             if checks.get("external_host_attestation") is not False:
                 errors.append("external-host check must remain false")
+    elif status == INVALID_BLOCKED_STATUS:
+        if report.get("passed") is not False:
+            errors.append("invalid blocked report.passed must be false")
+        if report.get("structural_contract_passed") is not False:
+            errors.append("invalid blocked report must not be structurally passed")
+        if not isinstance(report.get("errors"), list) or not report["errors"]:
+            errors.append("invalid blocked report.errors must be non-empty")
+    else:
+        errors.append("report.status is unsupported")
     return errors
 
 

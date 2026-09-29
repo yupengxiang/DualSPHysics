@@ -9,6 +9,7 @@
 - 历史包：core.reader_bundle.v1，checkpoint_count=1；历史 registry 身份不会转移成当前绑定。
 - dataset raw SHA 相同：False；相对路径相同：False。
 - 当前模型身份已绑定：False。
+- 本边界未接收 trusted root、distinct physical host、reader 或 scoring receipt；metadata-only claim 不被接受为 readiness。
 
 ## 关键阻塞
 
@@ -20,13 +21,19 @@
 - current_model_entrypoint_has_no_trusted_registry_row:models/checkpoint-000.pt
 - current_trusted_checkpoint_binding_missing
 - dataset_source_raw_sha_mismatch_current_vs_historical
+- distinct_data_root_receipt_not_supplied_to_this_boundary
+- distinct_physical_host_receipt_not_supplied_to_this_boundary
 - historical_bundle_absolute_reused_from:65
 - historical_bundle_schema_legacy_or_different:'core.reader_bundle.v1'
 - historical_checkpoint_provenance_absolute_checkpoint_source_path
 - historical_checkpoint_provenance_absolute_dataset_source_path
+- historical_checkpoint_provenance_checkpoint_source_path_not_authoritative
 - historical_checkpoint_provenance_is_diagnostic_only
 - historical_portable_package_has_absolute_reused_from_paths
 - independent_reproduction_requires_fresh_current_v2_binding_and_distinct_host_receipt
+- reader_reproduction_lineage_not_supplied_to_this_boundary
+- scoring_lineage_not_supplied_to_this_boundary
+- trusted_root_review_not_supplied_to_this_boundary
 
 ## 下一步需要的 trusted checkpoint binding
 

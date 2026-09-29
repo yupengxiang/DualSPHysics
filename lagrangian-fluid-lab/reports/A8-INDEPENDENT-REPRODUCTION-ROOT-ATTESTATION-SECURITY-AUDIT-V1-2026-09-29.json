@@ -1,0 +1,130 @@
+{
+  "schema": "core.a8.independent_reproduction_root_attestation_security_audit.v1",
+  "audit_id": "a8-independent-reproduction-root-attestation-security-audit-v1",
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "conclusion": "metadata_only_bypass_not_observed_after_hardening_readiness_remains_blocked",
+  "scope": [
+    "another physical host and distinct data root claims",
+    "trusted root review and external host attestation claims",
+    "checkpoint and model identity lineage",
+    "reader, autonomous prediction and scoring lineage",
+    "bounded report validation and provenance path handling"
+  ],
+  "findings": [
+    {
+      "id": "A8-SEC-01",
+      "severity": "medium",
+      "status": "fixed_fail_closed",
+      "finding": "The independent-readiness and trusted-root report validators accepted an unknown status with passed=true and structural_contract_passed=true.",
+      "repair": "Validators now accept only the known structural-blocked or invalid-blocked status and enforce status/pass/check consistency plus exact check maps."
+    },
+    {
+      "id": "A8-SEC-02",
+      "severity": "medium",
+      "status": "fixed_fail_closed",
+      "finding": "Historical checkpoint provenance could lstat a caller-supplied source path relative to the auditor working directory and did not require complete bundle/registry/checkpoint lineage.",
+      "repair": "The auditor no longer treats the provenance source path as a bound identity; it requires provenance bundle/registry/dataset hashes, a normalized bundle checkpoint path matching the registry, and model/seed/update consistency."
+    },
+    {
+      "id": "A8-SEC-03",
+      "severity": "high",
+      "status": "blocked_missing_external_evidence",
+      "finding": "No metadata-only proof establishes a second physical host, a distinct data root, a trusted root review, an external host attestation, or current-v2 checkpoint content identity.",
+      "repair": "No receipt was fabricated. Synthetic contracts and the checkpoint auditor remain non-authorizing, readiness=false, claims=false and credit=0."
+    },
+    {
+      "id": "A8-SEC-04",
+      "severity": "high",
+      "status": "blocked_missing_external_evidence",
+      "finding": "The checkpoint auditor does not receive reader or scoring receipts and therefore cannot close reader-to-prediction-to-scoring lineage.",
+      "repair": "The report now records reader/scoring lineage as absent from this boundary and lists fresh bound receipts as required evidence."
+    }
+  ],
+  "evidence_status": {
+    "distinct_physical_host": {
+      "status": "missing_external_evidence",
+      "metadata_claim_accepted": false,
+      "receipt_fabricated": false
+    },
+    "distinct_data_root": {
+      "status": "missing_external_evidence",
+      "metadata_claim_accepted": false,
+      "receipt_fabricated": false
+    },
+    "trusted_root_review": {
+      "status": "missing_external_evidence",
+      "metadata_claim_accepted": false,
+      "receipt_fabricated": false
+    },
+    "external_host_attestation": {
+      "status": "missing_external_evidence",
+      "metadata_claim_accepted": false,
+      "receipt_fabricated": false
+    },
+    "checkpoint_model": {
+      "status": "blocked_missing_trusted_checkpoint_binding",
+      "current_binding": false,
+      "content_hash_verified": false,
+      "historical_metadata_is_authority": false
+    },
+    "reader_scoring_lineage": {
+      "status": "not_supplied_to_checkpoint_audit_boundary",
+      "metadata_claim_accepted": false,
+      "receipt_fabricated": false
+    }
+  },
+  "non_authorizing_controls": {
+    "readiness_pass": false,
+    "independent_reproduction": false,
+    "full_product_reproduction": false,
+    "formal_admission": false,
+    "formal_training": false,
+    "credit": 0,
+    "qualification_credit": 0,
+    "registry_mutation": 0,
+    "ledger_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "completion_mutation": 0,
+    "solver_started": false,
+    "worker_started": false,
+    "gpu_started": false,
+    "external_host_receipt_fabricated": false,
+    "trusted_root_receipt_fabricated": false
+  },
+  "tests": {
+    "target_a8": {
+      "command": "pytest -q tests/test_a8_independent_reproduction_readiness_contract_v1.py tests/test_a8_trusted_root_external_host_attestation_contract_v1.py tests/test_a8_checkpoint_model_reproduction_readiness_auditor_v1.py",
+      "passed": 35,
+      "failed": 0
+    },
+    "a8_and_related_without_broken_h5py_import": {
+      "command": "pytest -q tests/test_a8_*.py tests/test_core_independent_reproduction_assembly_root_review_consistency_v1.py tests/test_core_independent_reproduction_evidence_assembly_v1.py tests/test_core_independent_reproduction_preflight.py tests/test_core_independent_reproduction_root_review_adapter_v1.py tests/test_core_formal_admission_readiness.py tests/test_core_formal_readiness.py",
+      "passed": 98,
+      "failed": 0
+    },
+    "environment_blocked_regressions": [
+      {
+        "tests": [
+          "tests/test_core_independent_reproduction.py",
+          "tests/test_core_reproduction_check.py"
+        ],
+        "stage": "collection",
+        "reason": "system h5py binary is incompatible with the installed NumPy ABI (dtype size mismatch)",
+        "solver_worker_gpu_started": false
+      }
+    ]
+  },
+  "allowed_write_set": [
+    "scripts/a8_independent_reproduction_readiness_contract_v1.py",
+    "scripts/a8_trusted_root_external_host_attestation_contract_v1.py",
+    "scripts/a8_checkpoint_model_reproduction_readiness_auditor_v1.py",
+    "tests/test_a8_independent_reproduction_readiness_contract_v1.py",
+    "tests/test_a8_trusted_root_external_host_attestation_contract_v1.py",
+    "tests/test_a8_checkpoint_model_reproduction_readiness_auditor_v1.py",
+    "reports/A8-CHECKPOINT-MODEL-REPRODUCTION-READINESS-AUDIT-V1-2026-09-28.json",
+    "reports/A8-CHECKPOINT-MODEL-REPRODUCTION-READINESS-AUDIT-V1-2026-09-28.zh-CN.md",
+    "reports/A8-INDEPENDENT-REPRODUCTION-ROOT-ATTESTATION-SECURITY-AUDIT-V1-2026-09-29.json",
+    "reports/A8-INDEPENDENT-REPRODUCTION-ROOT-ATTESTATION-SECURITY-AUDIT-V1-2026-09-29.zh-CN.md"
+  ]
+}

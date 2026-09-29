@@ -43,6 +43,7 @@ MAX_STRING_BYTES = 4096
 SHA256_HEX_LENGTH = 64
 CURRENT_BUNDLE_SCHEMA = "core.reader_bundle.v2"
 CHECKPOINT_REGISTRY_SCHEMA = "core.bundled_checkpoints.v1"
+CHECKPOINT_PROVENANCE_SCHEMA = "core.a8_checkpoint_provenance.v1"
 REPORT_SCHEMA = "core.a8.checkpoint_model_reproduction_readiness_audit.v1"
 REPORT_ID = "a8-checkpoint-model-reproduction-readiness-audit-v1"
 OBSERVED_AT_UTC = "2026-09-28T00:00:00Z"
@@ -641,9 +642,32 @@ def _provenance_projection(
     *,
     provenance_ref: Mapping[str, object],
     registry: Mapping[str, object],
+    historical_bundle: Mapping[str, object],
     label: str,
 ) -> tuple[dict[str, object], list[str]]:
     blockers: list[str] = []
+    if payload.get("schema") != CHECKPOINT_PROVENANCE_SCHEMA:
+        blockers.append(f"{label}_schema_unsupported:{payload.get('schema')!r}")
+
+    bundle_claims = payload.get("bundle")
+    if not isinstance(bundle_claims, Mapping):
+        blockers.append(f"{label}_bundle_identity_missing")
+        bundle_claims = {}
+    expected_bundle_claims = {
+        "bundle_json_sha256": historical_bundle.get("bundle_ref", {}).get("sha256"),
+        "checkpoint_registry_sha256": registry.get("registry_ref", {}).get("sha256"),
+        "dataset_json_sha256": historical_bundle.get("dataset", {}).get("ref", {}).get("sha256"),
+    }
+    for field, expected in expected_bundle_claims.items():
+        claimed = bundle_claims.get(field)
+        try:
+            claimed = _sha256(claimed, label=f"{label}.bundle.{field}")
+        except AuditContractError as error:
+            blockers.append(str(error))
+            continue
+        if claimed != expected:
+            blockers.append(f"{label}_{field}_mismatch")
+
     checkpoint = payload.get("checkpoint")
     training = payload.get("training")
     dataset_binding = payload.get("dataset_binding")
@@ -664,24 +688,42 @@ def _provenance_projection(
             )
         except AuditContractError as error:
             blockers.append(str(error))
+    else:
+        blockers.append(f"{label}_checkpoint_sha_missing")
     checkpoint_path = checkpoint.get("path")
     checkpoint_path_kind = None
-    checkpoint_path_exists = False
-    checkpoint_lstat = None
     if isinstance(checkpoint_path, str):
         path_value = Path(checkpoint_path)
         checkpoint_path_kind = (
             "absolute" if path_value.is_absolute() else "relative"
         )
-        try:
-            checkpoint_lstat = os.lstat(path_value)
-            checkpoint_path_exists = True
-        except OSError:
-            checkpoint_path_exists = False
         if path_value.is_absolute():
             blockers.append(f"{label}_absolute_checkpoint_source_path")
+        else:
+            try:
+                _safe_relative(checkpoint_path, label=f"{label}.checkpoint.path")
+            except AuditContractError as error:
+                blockers.append(str(error))
+        # The provenance path is caller-supplied historical metadata.  Do not
+        # lstat it relative to the auditor's cwd: that would make an arbitrary
+        # file look like a bound checkpoint.  The package registry row below is
+        # the only path identity this boundary may inspect.
+        blockers.append(f"{label}_checkpoint_source_path_not_authoritative")
     else:
         blockers.append(f"{label}_checkpoint_path_missing")
+
+    checkpoint_bundle_path = checkpoint.get("bundle_path")
+    if isinstance(checkpoint_bundle_path, str):
+        try:
+            checkpoint_bundle_path = _safe_relative(
+                checkpoint_bundle_path,
+                label=f"{label}.checkpoint.bundle_path",
+            )
+        except AuditContractError as error:
+            blockers.append(str(error))
+    else:
+        blockers.append(f"{label}_checkpoint_bundle_path_missing")
+
     provenance_dataset_path = dataset_binding.get("path")
     provenance_dataset_path_kind = None
     if isinstance(provenance_dataset_path, str):
@@ -712,6 +754,12 @@ def _provenance_projection(
         )
     if checkpoint_sha and registry_match is None:
         blockers.append(f"{label}_checkpoint_sha_not_in_registry")
+    if isinstance(registry_match, Mapping):
+        for field in ("model_kind", "seed", "update"):
+            if checkpoint.get(field, payload.get(field)) != registry_match.get(field):
+                blockers.append(f"{label}_registry_identity_drift:{field}")
+        if checkpoint_bundle_path != registry_match.get("path"):
+            blockers.append(f"{label}_bundle_checkpoint_path_mismatch")
     initialization = training.get("initialization_evidence")
     if not isinstance(initialization, Mapping):
         initialization = {}
@@ -724,9 +772,17 @@ def _provenance_projection(
         "hidden": initialization.get("hidden"),
         "run_id": training.get("run_id"),
     }
+    if (
+        training.get("completed_updates") is not None
+        and training.get("completed_updates") != payload.get("update")
+    ):
+        blockers.append(f"{label}_completed_updates_identity_drift")
     projection = {
         "provenance_ref": dict(provenance_ref),
         "schema": payload.get("schema"),
+        "bundle_identity": {
+            field: bundle_claims.get(field) for field in expected_bundle_claims
+        },
         "diagnostic_only": diagnostic_only,
         "formal_training_count": formal_count,
         "qualification_note": payload.get("qualification_note"),
@@ -735,11 +791,9 @@ def _provenance_projection(
             or payload.get("model_kind"),
             "path": checkpoint_path,
             "path_kind": checkpoint_path_kind,
-            "path_exists_by_lstat": checkpoint_path_exists,
-            "lstat_regular": bool(
-                checkpoint_lstat
-                and stat.S_ISREG(checkpoint_lstat.st_mode)
-            ),
+            "bundle_path": checkpoint_bundle_path,
+            "path_exists_by_lstat": False,
+            "lstat_regular": False,
             "sha256_claim": checkpoint_sha,
             "content_opened": False,
             "content_hash_verified": False,
@@ -753,6 +807,11 @@ def _provenance_projection(
         },
         "training_identity": training_identity,
         "registry_sha_match": registry_match is not None,
+        "registry_identity_match": isinstance(registry_match, Mapping)
+        and not any(
+            f"{label}_registry_identity_drift:{field}" in blockers
+            for field in ("model_kind", "seed", "update")
+        ),
         "raw_payload_canonical_sha256": _canonical_sha256(payload),
     }
     return projection, sorted(set(blockers))
@@ -852,6 +911,7 @@ def build_audit(
             provenance_payload,
             provenance_ref=provenance_ref,
             registry=historical_registry_projection,
+            historical_bundle=historical,
             label="historical_checkpoint_provenance",
         )
 
@@ -961,6 +1021,11 @@ def build_audit(
         [
             "current_trusted_checkpoint_binding_missing",
             "checkpoint_content_hash_not_verified_by_this_boundary",
+            "distinct_physical_host_receipt_not_supplied_to_this_boundary",
+            "distinct_data_root_receipt_not_supplied_to_this_boundary",
+            "trusted_root_review_not_supplied_to_this_boundary",
+            "reader_reproduction_lineage_not_supplied_to_this_boundary",
+            "scoring_lineage_not_supplied_to_this_boundary",
             "independent_reproduction_requires_fresh_current_v2_binding_and_distinct_host_receipt",
         ]
     )
@@ -1094,10 +1159,44 @@ def build_audit(
             "trusted training receipt linking checkpoint to model/config/seed/update and formal-vs-diagnostic status",
             "content-hash attestation performed by an authorized producer outside this metadata-only auditor",
             "portable package contract with no absolute source/reuse paths",
+            "reader reproduction receipt bound to the current bundle and dataset",
+            "scoring receipt bound to reader and autonomous prediction output identities",
             "fresh independent reproduction receipt from a distinct host using the newly bound current package",
         ],
         "historical_checkpoint_rows_cannot_satisfy_current_binding": True,
         "checkpoint_count_does_not_imply_ready": True,
+    }
+    lineage_boundary = {
+        "distinct_physical_host": {
+            "evidence_supplied_to_this_boundary": False,
+            "metadata_claim_accepted": False,
+            "trusted": False,
+        },
+        "distinct_data_root": {
+            "evidence_supplied_to_this_boundary": False,
+            "metadata_claim_accepted": False,
+            "trusted": False,
+        },
+        "trusted_root_review": {
+            "evidence_supplied_to_this_boundary": False,
+            "metadata_claim_accepted": False,
+            "trusted": False,
+        },
+        "checkpoint_model": {
+            "current_binding": False,
+            "historical_metadata_only": True,
+            "content_hash_verified": False,
+            "trusted": False,
+        },
+        "reader": {
+            "receipt_supplied_to_this_boundary": False,
+            "trusted": False,
+        },
+        "scoring": {
+            "receipt_supplied_to_this_boundary": False,
+            "trusted": False,
+        },
+        "metadata_only_claims_can_mint_readiness": False,
     }
     read_boundary = {
         "bounded_json_only": True,
@@ -1125,7 +1224,8 @@ def build_audit(
         "passed": False,
         "audit_scope": (
             "current A8 reader_bundle.v2 checkpoint-free index versus "
-            "historical checkpoint-bearing bundle/registry"
+            "historical checkpoint-bearing bundle/registry; external "
+            "host/root and reader/scoring receipts are outside this input boundary"
         ),
         "current_bundle": current,
         "historical_bundle": historical,
@@ -1139,6 +1239,7 @@ def build_audit(
             "code_identity": code_comparison,
         },
         "trusted_checkpoint_binding": trusted_checkpoint_binding,
+        "lineage_boundary": lineage_boundary,
         "blockers": blockers,
         "claims": dict(FALSE_CLAIMS),
         "mutations": dict(ZERO_MUTATIONS),
@@ -1202,9 +1303,49 @@ def validate_report(report: Mapping[str, object]) -> list[str]:
             errors.append("current_bundle.schema is not v2")
         if current.get("checkpoint_count") != 0:
             errors.append("current_bundle.checkpoint_count is not zero")
+        if current.get("model_reproduction_supported") is not False:
+            errors.append("current_bundle.model_reproduction_supported is not false")
     binding = report.get("trusted_checkpoint_binding")
     if not isinstance(binding, Mapping) or binding.get("ready") is not False:
         errors.append("trusted checkpoint binding must remain missing")
+    comparisons = report.get("comparisons")
+    if not isinstance(comparisons, Mapping):
+        errors.append("report.comparisons missing")
+    else:
+        model_identity = comparisons.get("model_identity")
+        if not isinstance(model_identity, Mapping) or model_identity.get(
+            "current_identity_bound"
+        ) is not False:
+            errors.append("current model identity must remain unbound")
+    lineage = report.get("lineage_boundary")
+    if not isinstance(lineage, Mapping):
+        errors.append("report.lineage_boundary missing")
+    else:
+        for field in (
+            "distinct_physical_host",
+            "distinct_data_root",
+            "trusted_root_review",
+        ):
+            value = lineage.get(field)
+            if not isinstance(value, Mapping) or value.get(
+                "evidence_supplied_to_this_boundary"
+            ) is not False or value.get("metadata_claim_accepted") is not False:
+                errors.append(f"lineage_boundary.{field} must remain untrusted")
+        for field in ("reader", "scoring"):
+            value = lineage.get(field)
+            if not isinstance(value, Mapping) or value.get(
+                "receipt_supplied_to_this_boundary"
+            ) is not False:
+                errors.append(f"lineage_boundary.{field} receipt must be absent")
+        checkpoint_model = lineage.get("checkpoint_model")
+        if (
+            not isinstance(checkpoint_model, Mapping)
+            or checkpoint_model.get("current_binding") is not False
+            or checkpoint_model.get("content_hash_verified") is not False
+        ):
+            errors.append("lineage_boundary.checkpoint_model must remain unbound")
+        if lineage.get("metadata_only_claims_can_mint_readiness") is not False:
+            errors.append("lineage boundary must reject metadata-only readiness")
     blockers = report.get("blockers")
     if not isinstance(blockers, list) or not blockers:
         errors.append("report.blockers must be non-empty")
@@ -1256,6 +1397,7 @@ def render_zh_cn(report: Mapping[str, object]) -> str:
         f"- 历史包：{historical.get('schema')}，checkpoint_count={historical.get('checkpoint_count')}；历史 registry 身份不会转移成当前绑定。",
         f"- dataset raw SHA 相同：{source.get('dataset_raw_sha_equal')}；相对路径相同：{source.get('dataset_relative_path_equal')}。",
         f"- 当前模型身份已绑定：{model.get('current_identity_bound')}。",
+        "- 本边界未接收 trusted root、distinct physical host、reader 或 scoring receipt；metadata-only claim 不被接受为 readiness。",
         "",
         "## 关键阻塞",
         "",
