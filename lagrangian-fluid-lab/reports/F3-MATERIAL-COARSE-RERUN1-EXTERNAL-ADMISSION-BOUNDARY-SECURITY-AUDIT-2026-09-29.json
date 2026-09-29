@@ -1,0 +1,127 @@
+{
+  "schema": "core.security.f3.material.coarse.external_admission_boundary_audit.v1",
+  "report_id": "f3-material-coarse-rerun1-external-admission-boundary-security-audit-2026-09-29",
+  "observed_at": "2026-09-29",
+  "status": "pass_fail_closed",
+  "scope": {
+    "family": "F3",
+    "direction": "material",
+    "variants": [
+      "coarse-s2-RERUN1",
+      "coarse-s4-RERUN1"
+    ],
+    "boundary": "fresh-root/host-I/O/one-shot external admission versus scheduler terminal-result promotion",
+    "excluded": [
+      "setup variant construction",
+      "training path",
+      "registry",
+      "ledger",
+      "denominator",
+      "gate",
+      "completion",
+      "PLAN",
+      "UPDATE-409"
+    ]
+  },
+  "evidence": [
+    {
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s2-rerun1.json",
+      "role": "s2 scheduler spec",
+      "sha256": "a4098fe19996d6193170d692296158f2c1022911512fff22d8949c3eeec732f6",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "campaigns/core-v1/material/jobs/core-f3-material-coarse-s4-rerun1.json",
+      "role": "s4 scheduler spec",
+      "sha256": "c4877805d78b4bd4db9fd6d0fb9e673950467dd142b286786bf32ed72f246245",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN1.json",
+      "role": "fresh-root and scheduler receipt pair intake",
+      "sha256": "9375888c378788f6d381b702b6a120398c9ab48047fc5d10a6f9161731d2cf9c",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-29-RERUN1.json",
+      "role": "host-I/O diagnostic admission envelope",
+      "sha256": "3a65ca1f22410302be9bb2332faa0a5eb2ac08030070bedaccadba21d00351c3",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "reports/F3-MATERIAL-COARSE-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json",
+      "role": "s2 scheduler terminal intake",
+      "sha256": "0dcd7e9cbac08b1ed4959770cee57415f5dfd61d07b3c1ce947627f9b4f0f8fc",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "reports/F3-MATERIAL-COARSE-S4-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json",
+      "role": "s4 scheduler terminal intake",
+      "sha256": "0d84b1519a599cfdec4ba18c869302a8db8c59a40e8dc6e1275954083cd2dc1e",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "scripts/f3_material_coarse_terminal_result_intake_v1.py",
+      "role": "s2 terminal intake validator under audit",
+      "sha256": "503a5465b920f39dd0eb96141cfe24bffaa1e0ff95120b219f7a9ddfd1dc380c",
+      "content_read": true,
+      "synthetic": false
+    },
+    {
+      "path": "scripts/f3_material_coarse_s4_terminal_result_intake_v1.py",
+      "role": "s4 terminal intake validator under audit",
+      "sha256": "ba31433e07325593f02ecbd6219185364c04715fc77851774ae0df1bf6dce05a",
+      "content_read": true,
+      "synthetic": false
+    }
+  ],
+  "observations": {
+    "specs_declare_external_admission_requirements": true,
+    "specs_mint_launch_authority": false,
+    "fresh_root_scheduler_intake_status": "blocked_missing_fresh_root_scheduler_receipts",
+    "host_io_admission_status": "diagnostic_admission_blocked",
+    "fresh_root_authorization_present": false,
+    "scheduler_host_io_authorization_present": false,
+    "one_shot_namespace_authority_present": false,
+    "missing_external_admission_is_not_satisfied": true,
+    "terminal_intake_role": "result_intake_not_external_admission_consumer",
+    "terminal_intakes_are_scheduler_owned_runtime_references": true,
+    "terminal_intakes_are_non_authorizing": true,
+    "terminal_intakes_bind_static_formal_receipts": false,
+    "terminal_intakes_claim_T1": false,
+    "terminal_intakes_claim_T2": false,
+    "terminal_intakes_claim_credit": false,
+    "terminal_intakes_reject_tampered_promotion_claims": true,
+    "terminal_intakes_retain_negative_unknown_gate": true,
+    "terminal_intakes_do_not_convert_missing_admission_to_promotion": true
+  },
+  "decision": {
+    "external_admission_bypassed_for_promotion": false,
+    "promotion_admitted": false,
+    "real_fix_required": false,
+    "terminal_intake_role": "result_intake_not_external_admission_consumer"
+  },
+  "interpretation": "The two RERUN1 terminal intakes observe scheduler-owned diagnostic results only. The required fresh-root, scheduler-owned host-I/O, and one-shot external authority remain absent or explicitly non-authorizing. Both reports retain launch/formal/T1/T2/credit false, and their validators reject tampered promotion claims. Therefore the UPDATE-409 RERUN1 path has no observable promotion bypass; no production-code fix is warranted in this audit scope.",
+  "execution_constraints": {
+    "fresh_root_receipt_created": false,
+    "scheduler_host_io_receipt_created": false,
+    "external_one_shot_authority_created": false,
+    "scheduler_submit_called": false,
+    "workload_started": false,
+    "gpu_started": false,
+    "source_hdf5_opened": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "plan_mutations": 0
+  },
+  "next_safe_action": "Keep the external-admission receipts absent until a separately authorized fresh-root/host-I/O/one-shot admission path exists; do not treat either terminal intake as launch or formal promotion authority."
+}
