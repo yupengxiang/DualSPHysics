@@ -855,7 +855,7 @@ def _bind_legacy_case(plan: BatchCasePlan):
 def _execute_one(plan: BatchCasePlan, min_free_mib: int) -> dict[str, Any]:
     gpu_snapshot = _admit_gpu(plan, min_free_mib)
     source_identity = _validate_hdf5_source(plan)
-    single._revalidate_input_snapshot(plan.training_receipt_snapshot, "training receipt input")
+    legacy._revalidate_input_snapshot(plan.training_receipt_snapshot, "training receipt input")
     with _bind_legacy_case(plan):
         result = legacy.execute_plan(
             plan.legacy_plan,

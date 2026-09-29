@@ -243,6 +243,34 @@ def test_injectable_batch_worker_preserves_case_order_without_gpu_or_process_sid
     assert all(result["credit"] == 0 for result in results)
 
 
+def test_execute_one_revalidates_through_legacy_hardened_engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plans(fixture, tmp_path)[0]
+    calls: list[str] = []
+    monkeypatch.setattr(batch, "_admit_gpu", lambda plan, minimum: {"index": plan.gpu_index})
+    monkeypatch.setattr(batch, "_validate_hdf5_source", lambda plan: {"bytes": plan.case["hdf5_bytes"]})
+    monkeypatch.setattr(
+        batch.legacy,
+        "_revalidate_input_snapshot",
+        lambda snapshot, name: calls.append(name),
+    )
+    monkeypatch.setattr(
+        batch.legacy,
+        "execute_plan",
+        lambda *args, **kwargs: {
+            "status": "exited_successfully",
+            "launched": True,
+            "proof_written": True,
+        },
+    )
+
+    result = batch._execute_one(plan, batch.MIN_FREE_MIB)
+    assert calls == ["training receipt input"]
+    assert result["status"] == "exited_successfully"
+    assert result["diagnostic_only"] is True
+    assert result["credit"] == 0
+
+
 def test_gpu_snapshot_parser_accepts_shared_occupied_device() -> None:
     snapshots = batch._parse_nvidia_smi(
         "0, 12000, 37140, 49140, 83\n"
