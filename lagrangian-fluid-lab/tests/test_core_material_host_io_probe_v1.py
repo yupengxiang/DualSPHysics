@@ -10,7 +10,9 @@ import pytest
 from scripts import core_material_host_io_probe_v1 as probe
 
 
-REPORT = Path(__file__).resolve().parents[1] / "reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-28.json"
+ROOT = Path(__file__).resolve().parents[1]
+REPORT = ROOT / "reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-29-RERUN1.json"
+HISTORICAL_REPORT = ROOT / "reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-28.json"
 
 
 def _positive(tmp_path: Path) -> dict:
@@ -225,3 +227,14 @@ def test_committed_diagnostic_fixture_is_zero_credit_and_non_authorizing() -> No
     assert report["authorization_boundary"]["formal_admission"] is False
     assert report["authorization_boundary"]["qualification_credit"] == 0
     assert report["execution_controls"]["production_hdf5_opened"] is False
+
+
+def test_historical_probe_fixture_remains_immutable_after_security_rerun() -> None:
+    historical = json.loads(HISTORICAL_REPORT.read_text(encoding="utf-8"))
+    current = json.loads(REPORT.read_text(encoding="utf-8"))
+
+    assert probe.validate_report(historical) == []
+    assert probe.validate_report(current) == []
+    assert historical["status"] == "diagnostic_pass"
+    assert current["status"] == "diagnostic_pass"
+    assert current["observed_at_utc"] != historical["observed_at_utc"]

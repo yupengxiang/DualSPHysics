@@ -17,6 +17,7 @@ from scripts import f3_material_coarse_root_scheduler_intake_v1 as intake
 ROOT = Path(__file__).resolve().parents[1]
 REPORT = ROOT / intake.DEFAULT_REPORT
 ZH_REPORT = ROOT / intake.DEFAULT_ZH_CN
+HISTORICAL_REPORT = ROOT / "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json"
 
 
 def _side_effects() -> dict[str, object]:
@@ -332,6 +333,19 @@ def test_committed_machine_and_chinese_reports_are_fail_closed() -> None:
     assert value["authorization"]["T2_credit"] == 0
     assert value["authorization"]["qualification_credit"] == 0
     assert ZH_REPORT.read_text(encoding="utf-8").startswith("# F3 coarse material")
+
+
+def test_historical_intake_report_remains_immutable_after_rerun_refresh() -> None:
+    historical = json.loads(HISTORICAL_REPORT.read_text(encoding="utf-8"))
+    current = json.loads(REPORT.read_text(encoding="utf-8"))
+
+    assert intake.validate_report(historical) == []
+    assert historical["created_at"] == "2026-09-28"
+    assert current["created_at"] == "2026-09-29"
+    assert current["input_bindings"]["proposal"]["path"] == str(intake.PROPOSAL)
+    assert current["input_bindings"]["host_io_admission"]["path"] == str(
+        intake.HOST_IO_ADMISSION
+    )
 
 
 def test_direct_cli_loads_host_validator_without_false_module_failure(tmp_path: Path) -> None:

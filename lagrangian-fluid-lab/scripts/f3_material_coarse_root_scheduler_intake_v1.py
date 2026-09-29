@@ -32,7 +32,8 @@ from typing import Any, Mapping, Sequence
 
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
-CREATED_AT = "2026-09-28"
+CREATED_AT = "2026-09-29"
+HISTORICAL_CREATED_AT = "2026-09-28"
 
 SCHEMA = "core.material.f3.coarse.root_scheduler_intake.v1"
 RECORD_ID = "f3-material-coarse-root-scheduler-intake-v1"
@@ -44,8 +45,9 @@ SCHEDULER_RECEIPT_ID = "f3-material-coarse-scheduler-host-io-reservation-v1"
 CANDIDATE_ID = "CORE-F3-MATERIAL-COARSE-s2"
 JOB_ID = "core-f3-material-coarse-s2"
 
-PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-28.json")
-HOST_IO_ADMISSION = Path("reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-28.json")
+PROPOSAL = Path("reports/F3-MATERIAL-COARSE-PROPOSAL-2026-09-29-RERUN1.json")
+HOST_IO_ADMISSION = Path("reports/F3-MATERIAL-COARSE-HOST-IO-ADMISSION-2026-09-29-RERUN1.json")
+HOST_IO_RECEIPT = Path("reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-29-RERUN1.json")
 CORE_MATERIAL = Path("scripts/core_material.py")
 CORE_RUNTIME = Path("scripts/core_runtime.py")
 SOURCE_H5 = Path("campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5")
@@ -65,9 +67,9 @@ SCHEDULER_RECEIPT = Path(
     "scheduler-host-io-reservation.json"
 )
 
-DEFAULT_REPORT = Path("reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json")
+DEFAULT_REPORT = Path("reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN3.json")
 DEFAULT_ZH_CN = Path(
-    "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.zh-CN.md"
+    "reports/F3-MATERIAL-COARSE-ROOT-SCHEDULER-INTAKE-V1-2026-09-29-RERUN3.zh-CN.md"
 )
 
 STATUS_MISSING = "blocked_missing_fresh_root_scheduler_receipts"
@@ -621,7 +623,7 @@ def _proposal_and_host_checks(
     host_checks_for_refs = [
         _exact(_mapping(host_bindings.get("proposal")).get("path"), _display_path(root, _resolve(root, PROPOSAL)), "host.proposal.path", errors),
         _exact(_mapping(host_bindings.get("proposal")).get("sha256"), expected_proposal_sha, "host.proposal.sha256", errors),
-        _exact(_mapping(host_bindings.get("host_io_receipt")).get("path"), "reports/CORE-MATERIAL-HOST-IO-PROBE-2026-09-28.json", "host.probe.path", errors),
+        _exact(_mapping(host_bindings.get("host_io_receipt")).get("path"), str(HOST_IO_RECEIPT), "host.probe.path", errors),
         _exact(_mapping(host_bindings.get("source_h5")).get("path"), str(SOURCE_H5), "host.source.path", errors),
         _exact(_mapping(host_bindings.get("source_h5")).get("sha256"), source_ref.get("sha256"), "host.source.sha256", errors),
     ]
@@ -1254,7 +1256,7 @@ def validate_report(value: Mapping[str, Any]) -> list[str]:
         errors.append("schema")
     if value.get("record_id") != RECORD_ID:
         errors.append("record_id")
-    if value.get("created_at") != CREATED_AT:
+    if value.get("created_at") not in {HISTORICAL_CREATED_AT, CREATED_AT}:
         errors.append("created_at")
     if value.get("status") not in {STATUS_MISSING, STATUS_INVALID, STATUS_BOUND}:
         errors.append("status")
