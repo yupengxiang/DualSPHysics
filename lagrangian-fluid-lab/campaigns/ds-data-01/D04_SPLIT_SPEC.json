@@ -1,0 +1,311 @@
+{
+  "schema": "ds-data-01.d04.split-and-lineage.v1",
+  "generated_at_utc": "2026-09-29T17:24:36.295870+00:00",
+  "scope": "metadata-only D04 contract; no training, inference, checkpoint replay, solver launch, GPU launch, or split materialization",
+  "status": "contract_frozen_current_assignments_empty",
+  "inputs": {
+    "D02": "campaigns/ds-data-01/D02_MECHANISM_ATLAS.json",
+    "D03": "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+    "sha256": {
+      "D02_MECHANISM_ATLAS.json": "bfd145404ef1f3aa4313397b78df7eca8a75f3b9382dec8aa46e09f559b37023",
+      "D03_SCOPE_AUDIT.json": "0759912a40071429739a64337752026ed1ab9ad752808303b8a0bea10d065f97"
+    }
+  },
+  "current_snapshot": {
+    "case_count": 26,
+    "family_count": 7,
+    "role_counts": {
+      "calibration": 1,
+      "candidate": 14,
+      "diagnostic": 10,
+      "exclusion": 1
+    },
+    "d03_production_eligible_count": 0,
+    "production_split_materialized": false,
+    "assigned_split_counts": {
+      "train": 0,
+      "validation": 0,
+      "test": 0,
+      "holdout": 0
+    },
+    "deferred_candidate_case_ids": [
+      "F1_main_dambreak3d",
+      "F1_mdbc_dambreak3d",
+      "F7_official_pump3d",
+      "O3_sloshing_acc",
+      "O3_sloshing_motion",
+      "O5_solitary_wave",
+      "O5_wave_runup_refined",
+      "O6_floating_box",
+      "O6_floating_sphere",
+      "W06_narrow_fast_center",
+      "W06_narrow_slow_center",
+      "W06_standard_fast_center",
+      "W06_standard_slow_center",
+      "W06_wide_slow_center"
+    ],
+    "diagnostic_case_ids": [
+      "F4_shapes_inlet3d",
+      "O4_impinging_jet",
+      "O6_falling_wedge_vres",
+      "W06_narrow_far_partial",
+      "W06_narrow_offset_partial",
+      "W06_standard_far_partial",
+      "W06_standard_offset_partial",
+      "W06_wide_far_partial",
+      "W06_wide_fast_center",
+      "W06_wide_offset_partial"
+    ],
+    "calibration_case_ids": [
+      "F7_moving_square2d"
+    ],
+    "exclusion_case_ids": [
+      "O5_wave_runup"
+    ]
+  },
+  "role_contract": {
+    "candidate": {
+      "source_selector": "D02.dataset_role == candidate_pending_D03",
+      "current_use": "deferred_pending_qe_or_repair",
+      "future_split_gate": [
+        "D03 scope_decision is numerically_admissible_pending_Q-E or a later owner-approved accepted state",
+        "scientific/external acceptance is explicitly recorded",
+        "resolution_identity_complete is true or an owner-approved conservative lineage key exists",
+        "case passes the selected split-mode collision-component audit"
+      ],
+      "allowed_future_uses": [
+        "positive candidate pool after explicit acceptance"
+      ],
+      "forbidden_current_uses": [
+        "train",
+        "validation",
+        "test",
+        "ranking",
+        "model qualification"
+      ]
+    },
+    "diagnostic": {
+      "source_selector": "D02.dataset_role == diagnostic",
+      "current_use": "diagnostic_only",
+      "allowed_future_uses": [
+        "debugging",
+        "failure analysis",
+        "negative/diagnostic reporting"
+      ],
+      "forbidden_uses": [
+        "positive train/validation/test member",
+        "hyperparameter tuning target"
+      ]
+    },
+    "calibration": {
+      "source_selector": "D02.dataset_role == calibration",
+      "current_use": "calibration_only",
+      "allowed_future_uses": [
+        "calibration/control contrast with an explicit calibration label"
+      ],
+      "forbidden_uses": [
+        "3D production train/validation/test member",
+        "positive generalization score"
+      ]
+    },
+    "exclusion": {
+      "source_selector": "D02.dataset_role == exclusion_negative",
+      "current_use": "negative_control_only",
+      "allowed_future_uses": [
+        "documented exclusion/negative-control audit"
+      ],
+      "forbidden_uses": [
+        "positive train/validation/test member",
+        "silent removal from audit history"
+      ]
+    }
+  },
+  "parameter_contract": {
+    "required_case_fields_before_future_materialization": [
+      "family_id",
+      "geometry_id",
+      "mechanism_id",
+      "trajectory_lineage_id",
+      "source_lineage_id",
+      "parameter_lineage_id",
+      "physical_case_id",
+      "dimension",
+      "resolution_signature",
+      "solver_recipe_signature",
+      "d04_role"
+    ],
+    "parameter_axes": {
+      "family": "top-level physical mechanism family; family-held-out axis",
+      "geometry": "canonical geometry/source geometry lineage; unknown geometry is a shared conservative bucket",
+      "mechanism": "canonical mechanism, with known refined/coarse variants collapsed when they describe the same physical mechanism",
+      "trajectory": "complete solver trajectory lineage; all frames, particles, windows, labels, and derived views inherit it",
+      "source": "official/custom recipe and source tree lineage; shared recipe is not presumed independent",
+      "parameter": "exact physical parameter/replicate signature; absent numeric values are unknown, not unique",
+      "resolution": "explicit physical_case_id plus resolution_signature; current D02/D03 records do not complete this field"
+    },
+    "missing_value_policy": "unknown or omitted lineage metadata is mapped conservatively and blocks assignment; it is never randomized or treated as a new independent case",
+    "freeze_order": [
+      "freeze physical parameters and solver recipe",
+      "derive and review lineage keys",
+      "construct collision components",
+      "assign whole components to a declared split protocol",
+      "only then materialize windows or derived labels"
+    ]
+  },
+  "leakage_rules": [
+    {
+      "rule_id": "D04-R01",
+      "name": "complete_case_atomicity",
+      "rule": "A complete simulation case is the minimum split unit; never split frames, particles, time windows, trajectory prefixes, or derived labels across split labels.",
+      "rejection_code": "D04_COLLISION_SAME_TRAJECTORY"
+    },
+    {
+      "rule_id": "D04-R02",
+      "name": "family_isolation",
+      "rule": "For family-held-out evaluation, all cases sharing family_id stay in one split; family is not inferred from an observed trajectory or target label.",
+      "rejection_code": "D04_COLLISION_SAME_FAMILY"
+    },
+    {
+      "rule_id": "D04-R03",
+      "name": "geometry_isolation",
+      "rule": "Cases sharing geometry_id stay together for geometry-held-out evaluation; source-path variants are not presumed geometrically independent.",
+      "rejection_code": "D04_COLLISION_SAME_GEOMETRY"
+    },
+    {
+      "rule_id": "D04-R04",
+      "name": "mechanism_isolation",
+      "rule": "Canonical mechanism variants stay together for mechanism-held-out evaluation; refined/coarse records of one mechanism cannot be separated by naming alone.",
+      "rejection_code": "D04_COLLISION_SAME_MECHANISM"
+    },
+    {
+      "rule_id": "D04-R05",
+      "name": "trajectory_lineage_isolation",
+      "rule": "A trajectory lineage, including all restarts, output windows, particle subsets, observables, and derived products, has exactly one split label.",
+      "rejection_code": "D04_COLLISION_SAME_TRAJECTORY"
+    },
+    {
+      "rule_id": "D04-R06",
+      "name": "source_recipe_isolation",
+      "rule": "Cases sharing an official/custom source recipe or source tree are kept together unless an owner-approved manifest proves independent physical and numerical lineage.",
+      "rejection_code": "D04_COLLISION_SAME_SOURCE"
+    },
+    {
+      "rule_id": "D04-R07",
+      "name": "parameter_and_resolution_isolation",
+      "rule": "Exact physical parameters, replicate identity, numerical resolution, and solver recipe are split keys; unknown values conservatively block assignment.",
+      "rejection_code": "D04_COLLISION_SAME_PARAMETER"
+    },
+    {
+      "rule_id": "D04-R08",
+      "name": "role_gate",
+      "rule": "Only explicitly accepted candidate cases may enter a positive split; diagnostic, calibration, and exclusion roles remain outside the production split.",
+      "rejection_code": "D04_PRODUCTION_GATE_CLOSED"
+    }
+  ],
+  "split_modes": [
+    {
+      "mode": "strict_family_holdout",
+      "primary_key": "family_id",
+      "hard_keys": [
+        "family_id",
+        "geometry_id",
+        "mechanism_id",
+        "source_lineage_id",
+        "trajectory_lineage_id",
+        "parameter_lineage_id"
+      ],
+      "purpose": "test generalization to an unseen physical family",
+      "current_status": "contract_only_no_assignments"
+    },
+    {
+      "mode": "strict_geometry_holdout",
+      "primary_key": "geometry_id",
+      "hard_keys": [
+        "geometry_id",
+        "source_lineage_id",
+        "trajectory_lineage_id",
+        "parameter_lineage_id"
+      ],
+      "purpose": "test geometry extrapolation without sharing a source/trajectory/parameter lineage",
+      "current_status": "contract_only_no_assignments"
+    },
+    {
+      "mode": "strict_mechanism_holdout",
+      "primary_key": "mechanism_id",
+      "hard_keys": [
+        "mechanism_id",
+        "geometry_id",
+        "source_lineage_id",
+        "trajectory_lineage_id",
+        "parameter_lineage_id"
+      ],
+      "purpose": "test mechanism extrapolation while refusing geometry or recipe collisions",
+      "current_status": "contract_only_no_assignments"
+    },
+    {
+      "mode": "strict_trajectory_holdout",
+      "primary_key": "trajectory_lineage_id",
+      "hard_keys": [
+        "trajectory_lineage_id",
+        "geometry_id",
+        "mechanism_id",
+        "source_lineage_id",
+        "parameter_lineage_id"
+      ],
+      "purpose": "test independent trajectory lineage without sharing a physical or recipe proxy",
+      "current_status": "contract_only_no_assignments"
+    }
+  ],
+  "assignment_algorithm": {
+    "algorithm": "build connected components over the active mode hard_keys, then assign complete components only",
+    "permitted_labels": [
+      "train",
+      "validation",
+      "test",
+      "holdout"
+    ],
+    "required_preconditions": [
+      "D03 production_eligible_count > 0",
+      "role is candidate",
+      "no D04 rejection reason remains",
+      "all required lineage/parameter fields are present and reviewed",
+      "the selected mode has a recorded owner and purpose"
+    ],
+    "random_case_split": "forbidden",
+    "random_frame_split": "forbidden",
+    "particle_level_split": "forbidden",
+    "post_split_derivation": "all derived windows/labels must inherit the parent case component; re-splitting after derivation is forbidden"
+  },
+  "reason_catalog": {
+    "D04_PRODUCTION_GATE_CLOSED": "D03 reports zero production-eligible cases; no current case may receive train/validation/test labels.",
+    "D04_PENDING_QE": "The case is numerically admissible but external/scientific acceptance is not assessed; defer split assignment.",
+    "D04_SCOPE_REPAIR_REQUIRED": "D03 requires repair or reclassification before the case can enter a candidate split pool.",
+    "D04_ROLE_DIAGNOSTIC": "Diagnostic-only evidence is retained for debugging and audit, never as a positive production split member.",
+    "D04_ROLE_CALIBRATION": "Calibration/control evidence is retained for calibration only and cannot enter the 3D production split.",
+    "D04_ROLE_EXCLUSION": "The case is a retained negative control and cannot enter a positive production split.",
+    "D04_MISSING_MASS_SCOPE": "Particle loss is not scoped as a closed-system invariant; retain diagnostic-only until lifecycle accounting is explicit.",
+    "D04_OPEN_LIFECYCLE_FLUX": "Open-boundary particle flux is present; a closed trajectory/mass split gate is invalid without flux accounting.",
+    "D04_CLOSED_INVARIANT": "The current closed identity/mass invariant failed, so the candidate is deferred for repair or reclassification.",
+    "D04_PARTICLE_ID_NOT_UNIQUE": "Particle identity is not unique in the current audit; trajectory lineage cannot be treated as safe.",
+    "D04_VARIABLE_RESOLUTION_LINEAGE": "Resolution zones or node identity change; zone-aware lineage is required before split use.",
+    "D04_METADATA_DIMENSION_CONFLICT": "D02 and D03 report different dimensions; use the D02 dimension conservatively and block production assignment until reconciled.",
+    "D04_COLLISION_SAME_FAMILY": "Cases sharing a family lineage must remain in one split for family-held-out evaluation.",
+    "D04_COLLISION_SAME_GEOMETRY": "Cases sharing a geometry lineage must remain in one split for geometry-held-out evaluation.",
+    "D04_COLLISION_SAME_MECHANISM": "Cases sharing a canonical mechanism lineage must remain in one split for mechanism-held-out evaluation.",
+    "D04_COLLISION_SAME_TRAJECTORY": "All frames, particles, windows, labels, and derived views from one trajectory lineage must remain in one split.",
+    "D04_COLLISION_SAME_SOURCE": "Cases from one source recipe/tree are conservatively kept together unless an owner-approved manifest proves independence.",
+    "D04_COLLISION_SAME_PARAMETER": "Cases sharing a parameter/replicate lineage must remain in one split; unknown parameter identity is never treated as unique."
+  },
+  "review_artifacts": {
+    "lineage_registry": "campaigns/ds-data-01/D04_LINEAGE_REGISTRY.json",
+    "group_views": [
+      "family_groups",
+      "geometry_groups",
+      "mechanism_groups",
+      "trajectory_groups",
+      "source_groups",
+      "parameter_groups"
+    ],
+    "case_rejection_reasons": "D04_LINEAGE_REGISTRY.json.cases[*].split.rejection_reasons"
+  }
+}
