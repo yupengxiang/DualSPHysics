@@ -69,6 +69,29 @@ FALSE_CLAIMS = {
     "credit": 0,
 }
 
+# ``core.verification.v1`` is an established reader-only receipt schema and
+# its historical receipts predate the explicit diagnostic markers.  Preserve
+# those legal receipts, but never allow an authority-shaped field that is
+# present in a receipt to contradict the bridge's non-authorizing boundary.
+# The projection below always emits these safe values regardless of whether
+# the legacy input carried the corresponding fields.
+READER_AUTHORITY_FIELDS = {
+    "diagnostic_only": True,
+    "formal_training": False,
+    "full_product_reproduction": False,
+    "qualification_credit": 0,
+    "formal": False,
+    "formal_admission": False,
+    "formal_eligible": False,
+    "qualification": False,
+    "credit": 0,
+    "T1_numerical": False,
+    "T2_macro": False,
+    "T2_path": False,
+    "independent_reproduction": False,
+    "cross_host_reproduction": False,
+}
+
 
 class BridgeContractError(ValueError):
     """Raised when a bounded bridge input cannot be safely bound."""
@@ -238,6 +261,27 @@ def _reader_report_projection(payload: Mapping[str, object], *, label: str) -> t
     schema = payload.get("schema")
     if schema not in READER_REPORT_SCHEMAS:
         blockers.append(f"{label}_schema_unsupported:{schema!r}")
+
+    def check_authority_fields(value: Mapping[str, object], *, value_label: str) -> None:
+        for field, expected in READER_AUTHORITY_FIELDS.items():
+            actual = value.get(field)
+            if field not in value:
+                continue
+            if isinstance(expected, bool):
+                matches = type(actual) is bool and actual is expected
+            elif type(expected) is int:
+                matches = type(actual) is int and actual == expected
+            else:  # pragma: no cover - the contract currently uses bool/int only.
+                matches = actual == expected
+            if not matches:
+                blockers.append(
+                    f"{value_label}_{field}_must_be_{expected!r}"
+                )
+
+    # Do not infer authorization from a reader's claim fields.  Legacy reader
+    # receipts remain compatible when the markers are absent, while any
+    # supplied marker must explicitly agree with the diagnostic-only contract.
+    check_authority_fields(payload, value_label=label)
     passed = False
     if schema == "core.verification.v1":
         passed = payload.get("passed") is True
@@ -245,6 +289,8 @@ def _reader_report_projection(payload: Mapping[str, object], *, label: str) -> t
         operation = payload.get("operation")
         result = payload.get("reader_result")
         source_hash = operation.get("source_hash_verification") if isinstance(operation, Mapping) else None
+        if isinstance(result, Mapping):
+            check_authority_fields(result, value_label=f"{label}_reader_result")
         passed = bool(
             isinstance(operation, Mapping)
             and isinstance(source_hash, Mapping)
@@ -261,9 +307,11 @@ def _reader_report_projection(payload: Mapping[str, object], *, label: str) -> t
         blockers.append(f"{label}_verification_not_passed")
     projection = {
         "schema": schema,
-        "passed": bool(passed),
+        "passed": bool(passed and not blockers),
         "case_count": payload.get("case_count"),
         "diagnostic_only": True,
+        "formal_training": False,
+        "full_product_reproduction": False,
         "qualification_credit": 0,
         "source_payload_not_embedded": True,
     }
@@ -317,6 +365,22 @@ def _diagnostic_pair_projection(ref: Mapping[str, object], payload: Mapping[str,
         blockers.append("diagnostic_pair_qualification_credit_not_zero")
     if evidence.get("formal_training") is not False:
         blockers.append("diagnostic_pair_formal_training_marker_not_false")
+
+    observed_hosts = payload.get("observed_hosts")
+    normalized_hosts: list[str] = []
+    host_identity_contract_passed = isinstance(observed_hosts, list) and len(observed_hosts) == 2
+    if not host_identity_contract_passed:
+        blockers.append("diagnostic_pair_requires_exactly_two_host_identities")
+    elif any(type(host) is not str or not host.strip() for host in observed_hosts):
+        host_identity_contract_passed = False
+        blockers.append("diagnostic_pair_host_identity_malformed")
+    else:
+        normalized_hosts = [host.strip() for host in observed_hosts]
+        if len(set(normalized_hosts)) != len(normalized_hosts):
+            host_identity_contract_passed = False
+            blockers.append("diagnostic_pair_host_identities_not_distinct")
+    if payload.get("distinct_host_evidence") is not True:
+        blockers.append("diagnostic_pair_distinct_host_evidence_missing")
     score = payload.get("score")
     if not isinstance(score, Mapping):
         blockers.append("diagnostic_pair_score_missing")
@@ -350,8 +414,11 @@ def _diagnostic_pair_projection(ref: Mapping[str, object], payload: Mapping[str,
         "schema": DIAGNOSTIC_ROLLOUT_SCHEMA,
         "passed": bool(rollout_passed),
         "source_schema": payload.get("schema"),
-        "observed_hosts": list(payload.get("observed_hosts", [])) if isinstance(payload.get("observed_hosts"), list) else [],
-        "distinct_host_evidence": payload.get("distinct_host_evidence") is True,
+        "observed_hosts": normalized_hosts,
+        "distinct_host_evidence": bool(
+            host_identity_contract_passed and payload.get("distinct_host_evidence") is True
+        ),
+        "host_identity_contract_passed": host_identity_contract_passed,
         "case_count": len(score_cases),
         "complete_case_count": complete_cases,
         "expected_frames_by_case": expected_frames,

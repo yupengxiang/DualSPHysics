@@ -166,6 +166,52 @@ def test_v2_fixture_assembles_all_coarse_stages_without_claims(tmp_path):
     ))
 
 
+def test_reader_authority_mutation_is_rejected_and_projection_stays_diagnostic():
+    mutated = {
+        "schema": "core.verification.v1",
+        "passed": True,
+        "case_count": 32,
+        "diagnostic_only": False,
+        "formal_training": True,
+        "full_product_reproduction": True,
+        "qualification_credit": 1,
+    }
+
+    projection, blockers = bridge._reader_report_projection(
+        mutated, label="mutated reader"
+    )
+
+    assert projection["passed"] is False
+    assert projection["diagnostic_only"] is True
+    assert projection["formal_training"] is False
+    assert projection["full_product_reproduction"] is False
+    assert projection["qualification_credit"] == 0
+    assert any("diagnostic_only" in item for item in blockers)
+    assert any("formal_training" in item for item in blockers)
+    assert any("full_product_reproduction" in item for item in blockers)
+    assert any("qualification_credit" in item for item in blockers)
+
+
+def test_duplicate_second_host_mutation_is_rejected_despite_self_declared_distinctness(tmp_path):
+    fixture = _fixture(tmp_path)
+    pair = json.loads(fixture["diagnostic_pair"].read_text())
+    pair["observed_hosts"] = ["same-host", "same-host"]
+    pair["distinct_host_evidence"] = True
+
+    rollout, score, blockers = bridge._diagnostic_pair_projection(
+        {"path": "diagnostic-pair.json", "bytes": 1, "sha256": "0" * 64},
+        pair,
+    )
+
+    assert rollout["passed"] is False
+    assert score["passed"] is False
+    assert rollout["host_identity_contract_passed"] is False
+    assert rollout["distinct_host_evidence"] is False
+    assert rollout["scientific_qualification"] is False
+    assert score["qualification_credit"] == 0
+    assert any("host_identities_not_distinct" in item for item in blockers)
+
+
 def test_legacy_v1_bundle_is_explicitly_blocked_and_diagnostic(tmp_path):
     fixture = _fixture(tmp_path, bundle_schema="core.reader_bundle.v1")
     result = _assemble(fixture)

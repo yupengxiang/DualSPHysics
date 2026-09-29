@@ -13,7 +13,7 @@ from scripts import core_product_repro_bridge_v1 as bridge
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_current_a8_boundary_report_finds_only_non_authorizing_projection_gaps() -> None:
+def test_current_a8_boundary_report_has_no_live_bridge_projection_findings() -> None:
     report = audit.build_report(ROOT)
     assert report["schema"] == audit.SCHEMA
     assert report["status"] == "blocked_open_package_reproduction_boundary_gaps"
@@ -23,11 +23,7 @@ def test_current_a8_boundary_report_finds_only_non_authorizing_projection_gaps()
     assert report["credit"] == 0
     assert report["mutations"] == audit.ZERO_MUTATIONS
     assert report["execution_constraints"] == audit.EXECUTION_CONSTRAINTS
-    assert {item["id"] for item in report["findings"]} == {
-        "A8-PRB-01",
-        "A8-PRB-02",
-        "A8-PRB-03",
-    }
+    assert {item["id"] for item in report["findings"]} == {"A8-PRB-03"}
     assert report["minimal_progress_unit"]["promotion_allowed_by_this_audit"] is False
     assert audit.validate_report(report) == []
 
@@ -46,21 +42,26 @@ def test_current_v2_is_reader_only_and_contracts_remain_blocked() -> None:
     ] is False
 
 
-def test_reader_projection_probe_reproduces_missing_diagnostic_boundary() -> None:
+def test_reader_projection_probe_is_now_fail_closed() -> None:
     probe = audit._reader_projection_probe()
-    assert probe["accepted_by_current_bridge"] is True
+    assert probe["accepted_by_current_bridge"] is False
     assert probe["expected_fail_closed"] is True
-    assert probe["blockers"] == []
-    assert probe["projection"]["passed"] is True
+    assert probe["blockers"]
+    assert probe["projection"]["passed"] is False
+    assert probe["projection"]["diagnostic_only"] is True
+    assert probe["projection"]["qualification_credit"] == 0
 
 
-def test_pair_projection_probe_reproduces_missing_second_host_boundary() -> None:
+def test_pair_projection_probe_is_now_fail_closed() -> None:
     pair = json.loads(
         (ROOT / audit.INPUTS["historical_cross_host_pair"]).read_text(encoding="utf-8")
     )
     probe = audit._pair_projection_probe(pair)
-    assert probe["accepted_by_current_bridge"] is True
+    assert probe["accepted_by_current_bridge"] is False
     assert probe["expected_fail_closed"] is True
+    assert probe["blockers"]
+    assert probe["projection"]["rollout_passed"] is False
+    assert probe["projection"]["score_passed"] is False
     assert probe["projection"]["rollout_observed_hosts"] == [
         "same-physical-host",
         "same-physical-host",
@@ -91,13 +92,15 @@ def test_audit_is_metadata_only_and_does_not_reference_f3_f4_write_set() -> None
     assert all("F3" not in path and "F4" not in path for path in report["allowed_write_set"])
 
 
-def test_committed_report_matches_current_bounded_audit() -> None:
+def test_committed_report_remains_a_valid_historical_pre_fix_snapshot() -> None:
     report_path = ROOT / (
         "reports/A8-PACKAGE-REPRODUCTION-READINESS-BOUNDARY-AUDIT-V1-2026-09-29.json"
     )
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    assert report == audit.build_report(ROOT)
+    assert report["mutation_probes"]["reader_projection"]["accepted_by_current_bridge"] is True
+    assert report["mutation_probes"]["diagnostic_pair_projection"]["accepted_by_current_bridge"] is True
     assert audit.validate_report(report) == []
+    assert report != audit.build_report(ROOT)
 
 
 def test_bridge_source_remains_disjoint_from_f3_f4_artifact_writes() -> None:
