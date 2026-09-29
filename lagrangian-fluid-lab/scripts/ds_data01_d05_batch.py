@@ -33,6 +33,9 @@ SOLVER = BIN_ROOT / "DualSPHysics5.4_linux64"
 CAMPAIGN_ROOT = LAB_ROOT / "campaigns" / "ds-data-01" / "d05"
 PLAN_PATH = LAB_ROOT / "campaigns" / "ds-data-01" / "D05_BATCH_PLAN.json"
 POOL_DEFAULT = tuple(range(1, 8))
+GPU_MIN = 1
+GPU_MAX = 7
+LEASE_ROOT = CAMPAIGN_ROOT / ".gpu-leases"
 
 
 SPECS: dict[str, dict[str, Any]] = {
@@ -174,6 +177,19 @@ def environment() -> dict[str, str]:
     return value
 
 
+def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+def plan_sha256() -> str:
+    value = digest(PLAN_PATH)
+    if value is None:
+        raise RuntimeError(f"missing D05 plan: {PLAN_PATH}")
+    return value
+
+
 def selected_specs(case_ids: list[str] | None) -> list[tuple[str, dict[str, Any]]]:
     selected = list(SPECS) if not case_ids else case_ids
     unknown = sorted(set(selected) - SPECS.keys())
@@ -218,14 +234,19 @@ def plan_payload() -> dict[str, Any]:
 
 
 def write_plan() -> dict[str, Any]:
+    if PLAN_PATH.is_file():
+        return json.loads(PLAN_PATH.read_text(encoding="utf-8"))
     payload = plan_payload()
-    PLAN_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(PLAN_PATH, payload)
     return payload
 
 
 def prepare_one(case_id: str, spec: dict[str, Any]) -> dict[str, Any]:
     case_root = CAMPAIGN_ROOT / case_id
     case_root.mkdir(parents=True, exist_ok=True)
+    receipt_path = case_root / "prepare-receipt.json"
+    if receipt_path.exists():
+        raise FileExistsError(f"refusing to overwrite existing D05 preparation receipt: {receipt_path}")
     if spec["action"] == "reference_reuse_only":
         result = {
             "schema": "ds-data-01.d05.prepare.v1",
@@ -233,9 +254,10 @@ def prepare_one(case_id: str, spec: dict[str, Any]) -> dict[str, Any]:
             **spec,
             "release_role": "internal_development_only",
             "status": "reference_reuse_only",
+            "plan_sha256": plan_sha256(),
             "learning_attempts": 0,
         }
-        (case_root / "prepare-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        atomic_write_json(receipt_path, result)
         return result
     source = EXAMPLES_ROOT / spec["source"]
     if not source.is_dir():
@@ -268,6 +290,9 @@ def prepare_one(case_id: str, spec: dict[str, Any]) -> dict[str, Any]:
         "source_tree_sha256": tree_digest(source)[0],
         "generated_prefix": str(target.relative_to(LAB_ROOT)),
         "gencase_command": command,
+        "gencase_binary_sha256": digest(GENCASE),
+        "plan_sha256": plan_sha256(),
+        "generated_tree_sha256": tree_digest(generated)[0],
         "gencase_returncode": proc.returncode,
         "gencase_elapsed_seconds": round(elapsed, 4),
         "fluid_particles": int(fluid.group(1).replace(",", "")) if fluid else None,
@@ -276,7 +301,7 @@ def prepare_one(case_id: str, spec: dict[str, Any]) -> dict[str, Any]:
         "status": "prepared" if proc.returncode == 0 and target.with_suffix(".xml").is_file() else "prepare_failed",
         "learning_attempts": 0,
     }
-    (case_root / "prepare-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(receipt_path, result)
     return result
 
 
@@ -304,8 +329,8 @@ def gpu_snapshot() -> dict[int, tuple[int, int]]:
 
 
 def preflight_gpu(gpu: int) -> str:
-    if gpu == 0:
-        raise RuntimeError("GPU0 is reserved and cannot be allocated by D05")
+    if gpu < GPU_MIN or gpu > GPU_MAX:
+        raise RuntimeError(f"GPU{gpu} is outside the protected D05 pool GPU{GPU_MIN}..GPU{GPU_MAX}")
     snapshot = gpu_snapshot()
     if gpu not in snapshot:
         raise RuntimeError(f"GPU{gpu} is not visible in fresh nvidia-smi preflight")
@@ -313,6 +338,24 @@ def preflight_gpu(gpu: int) -> str:
     if used >= 500:
         raise RuntimeError(f"GPU{gpu} is not idle enough: {used} MiB used of {total} MiB")
     return f"gpu={gpu} used_mib={used} total_mib={total}"
+
+
+def acquire_gpu_lease(case_id: str, gpu: int) -> Path:
+    LEASE_ROOT.mkdir(parents=True, exist_ok=True)
+    lease = LEASE_ROOT / f"gpu-{gpu}"
+    try:
+        lease.mkdir()
+    except FileExistsError as exc:
+        raise RuntimeError(f"GPU{gpu} already has an active D05 lease") from exc
+    (lease / "owner.json").write_text(json.dumps({"case_id": case_id, "pid": os.getpid(), "gpu": gpu}, indent=2) + "\n", encoding="utf-8")
+    return lease
+
+
+def release_gpu_lease(lease: Path) -> None:
+    owner = lease / "owner.json"
+    if owner.exists():
+        owner.unlink()
+    lease.rmdir()
 
 
 def run_one(case_id: str, spec: dict[str, Any], prepared: dict[str, Any], gpu: int) -> dict[str, Any]:
@@ -326,9 +369,20 @@ def run_one(case_id: str, spec: dict[str, Any], prepared: dict[str, Any], gpu: i
             "gpu": None,
             "learning_attempts": 0,
         }
-        (CAMPAIGN_ROOT / case_id / "run-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        receipt = CAMPAIGN_ROOT / case_id / "run-receipt.json"
+        if receipt.exists():
+            raise FileExistsError(f"refusing to overwrite existing D05 run receipt: {receipt}")
+        atomic_write_json(receipt, result)
         return result
-    observation = preflight_gpu(gpu)
+    receipt = CAMPAIGN_ROOT / case_id / "run-receipt.json"
+    if receipt.exists():
+        raise FileExistsError(f"refusing to overwrite existing D05 run receipt: {receipt}")
+    lease = acquire_gpu_lease(case_id, gpu)
+    try:
+        observation = preflight_gpu(gpu)
+    except Exception:
+        release_gpu_lease(lease)
+        raise
     case_root = CAMPAIGN_ROOT / case_id
     output = case_root / "attempt-001"
     if output.exists() and any(output.iterdir()):
@@ -351,6 +405,8 @@ def run_one(case_id: str, spec: dict[str, Any], prepared: dict[str, Any], gpu: i
         "case_id": case_id,
         **spec,
         "release_role": "internal_development_only",
+        "plan_sha256": plan_sha256(),
+        "solver_binary_sha256": digest(SOLVER),
         "gpu": gpu,
         "gpu_observation_before_launch": observation,
         "command": command,
@@ -368,13 +424,14 @@ def run_one(case_id: str, spec: dict[str, Any], prepared: dict[str, Any], gpu: i
         "split": "unassigned",
         "learning_attempts": 0,
     }
-    (case_root / "run-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(receipt, result)
+    release_gpu_lease(lease)
     return result
 
 
-def receipts(kind: str) -> list[dict[str, Any]]:
+def receipts(kind: str, case_ids: list[str] | None = None) -> list[dict[str, Any]]:
     result = []
-    for case_id in SPECS:
+    for case_id in case_ids or list(SPECS):
         path = CAMPAIGN_ROOT / case_id / f"{kind}-receipt.json"
         if path.is_file():
             result.append(json.loads(path.read_text(encoding="utf-8")))
@@ -390,8 +447,36 @@ def write_summary(stage: str, items: list[dict[str, Any]]) -> Path:
         "learning_attempts": 0,
         "cases": sorted(items, key=lambda value: value["case_id"]),
     }
-    output.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    atomic_write_json(output, payload)
     return output
+
+
+def rebind_receipts(kind: str, case_ids: list[str]) -> None:
+    """Complete provenance fields for receipts emitted by an older runner."""
+    current_plan = plan_sha256()
+    for case_id in case_ids:
+        path = CAMPAIGN_ROOT / case_id / f"{kind}-receipt.json"
+        if not path.is_file():
+            continue
+        item = json.loads(path.read_text(encoding="utf-8"))
+        item.setdefault("plan_sha256", current_plan)
+        if kind == "prepare":
+            item.setdefault("gencase_binary_sha256", digest(GENCASE))
+            prefix = item.get("generated_prefix")
+            if prefix:
+                generated_root = (LAB_ROOT / prefix).parent
+                item.setdefault("generated_tree_sha256", tree_digest(generated_root)[0])
+        if kind == "run":
+            item.setdefault("solver_binary_sha256", digest(SOLVER))
+            raw_root = item.get("raw_output_root")
+            if raw_root:
+                root = LAB_ROOT / raw_root
+                if root.is_dir():
+                    raw_hash, raw_count, raw_bytes = tree_digest(root)
+                    item.setdefault("raw_tree_sha256", raw_hash)
+                    item.setdefault("raw_file_count", raw_count)
+                    item.setdefault("raw_bytes", raw_bytes)
+        atomic_write_json(path, item)
 
 
 def parse_pool(value: str) -> tuple[int, ...]:
@@ -399,8 +484,8 @@ def parse_pool(value: str) -> tuple[int, ...]:
         pool = tuple(sorted({int(item.strip()) for item in value.split(",") if item.strip()}))
     except ValueError as exc:
         raise SystemExit(f"invalid GPU pool: {value}") from exc
-    if not pool or any(gpu == 0 or gpu < 0 for gpu in pool):
-        raise SystemExit("D05 GPU pool must contain only positive GPU indices; GPU0 is forbidden")
+    if not pool or any(gpu < GPU_MIN or gpu > GPU_MAX for gpu in pool):
+        raise SystemExit(f"D05 GPU pool must stay within GPU{GPU_MIN}..GPU{GPU_MAX}; GPU0 and unknown devices are forbidden")
     return pool
 
 
@@ -425,7 +510,7 @@ def main() -> int:
             futures = {pool.submit(prepare_one, case_id, spec): case_id for case_id, spec in items}
             for future in as_completed(futures):
                 results.append(future.result())
-        summary = write_summary("prepare", receipts("prepare"))
+        summary = write_summary("prepare", receipts("prepare", [item[0] for item in items]))
         print(json.dumps({"output": str(summary), "cases": len(results), "statuses": {item["case_id"]: item["status"] for item in results}, "gpu_started": False}, ensure_ascii=False, indent=2))
         return 0 if all(item["status"] in {"prepared", "reference_reuse_only"} for item in results) else 1
     if args.stage == "run" and not args.allow_internal_batch:
@@ -436,6 +521,9 @@ def main() -> int:
         if not receipt_path.is_file():
             raise SystemExit(f"missing preparation receipt: {receipt_path}")
         prepared[case_id] = json.loads(receipt_path.read_text(encoding="utf-8"))
+        expected_status = "reference_reuse_only" if spec["action"] == "reference_reuse_only" else "prepared"
+        if prepared[case_id].get("status") != expected_status:
+            raise SystemExit(f"preparation is not admitted for {case_id}: {prepared[case_id].get('status')} != {expected_status}")
     if args.stage == "run":
         pool_ids = parse_pool(args.gpu_pool)
         solver_items = [(case_id, spec) for case_id, spec in items if spec["action"] != "reference_reuse_only"]
@@ -449,12 +537,37 @@ def main() -> int:
                 for case_id, spec in items
             }
             for future in as_completed(futures):
-                results.append(future.result())
-        summary = write_summary("run", receipts("run"))
+                case_id = futures[future]
+                try:
+                    result = future.result()
+                except Exception as exc:  # record a bounded failure instead of losing the whole batch receipt
+                    result = {
+                        "schema": "ds-data-01.d05.run.v1",
+                        "case_id": case_id,
+                        **SPECS[case_id],
+                        "release_role": "internal_development_only",
+                        "plan_sha256": plan_sha256(),
+                        "status": "run_failed",
+                        "error": repr(exc),
+                        "scientific_acceptance": "not_assessed",
+                        "split": "unassigned",
+                        "learning_attempts": 0,
+                    }
+                    failure_path = CAMPAIGN_ROOT / case_id / "run-receipt.json"
+                    if failure_path.exists():
+                        result = json.loads(failure_path.read_text(encoding="utf-8"))
+                    else:
+                        atomic_write_json(failure_path, result)
+                results.append(result)
+                write_summary("run", receipts("run", [item[0] for item in items]))
+        summary = write_summary("run", receipts("run", [item[0] for item in items]))
         print(json.dumps({"output": str(summary), "cases": len(results), "gpu_assignments": assignments, "statuses": {item["case_id"]: item["status"] for item in results}, "scientific_acceptance": "not_assessed"}, ensure_ascii=False, indent=2))
         return 0 if all(item["status"] in {"completed", "reference_reuse_only"} for item in results) else 1
-    prepare_summary = write_summary("prepare", receipts("prepare"))
-    run_summary = write_summary("run", receipts("run"))
+    selected_ids = [item[0] for item in items]
+    rebind_receipts("prepare", selected_ids)
+    rebind_receipts("run", selected_ids)
+    prepare_summary = write_summary("prepare", receipts("prepare", selected_ids))
+    run_summary = write_summary("run", receipts("run", selected_ids))
     print(json.dumps({"prepare_summary": str(prepare_summary), "run_summary": str(run_summary), "solver_started": False}, ensure_ascii=False, indent=2))
     return 0
 

@@ -43,6 +43,60 @@ def digest(path: Path) -> str | None:
     return value.hexdigest()
 
 
+def atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(path)
+
+
+def tree_digest(root: Path, ignored_top: tuple[str, ...] = ()) -> tuple[str | None, int, int]:
+    if not root.exists():
+        return None, 0, 0
+    value = hashlib.sha256()
+    count = 0
+    size = 0
+    ignored = set(ignored_top)
+    for path in sorted(item for item in root.rglob("*") if item.is_file()):
+        relative = path.relative_to(root)
+        if relative.parts and relative.parts[0] in ignored:
+            continue
+        value.update(relative.as_posix().encode())
+        value.update(b"\0")
+        value.update((digest(path) or "").encode())
+        count += 1
+        size += path.stat().st_size
+    return value.hexdigest(), count, size
+
+
+def plan_sha256() -> str:
+    value = digest(LAB_ROOT / "campaigns" / "ds-data-01" / "D05_BATCH_PLAN.json")
+    if value is None:
+        raise RuntimeError("D05_BATCH_PLAN.json is missing")
+    return value
+
+
+def validate_run_record(case_id: str, run: dict[str, Any]) -> Path:
+    if run.get("schema") != "ds-data-01.d05.run.v1":
+        raise RuntimeError(f"{case_id}: unexpected run receipt schema")
+    if run.get("release_role") != "internal_development_only":
+        raise RuntimeError(f"{case_id}: run receipt is outside the D05 internal scope")
+    if run.get("plan_sha256") != plan_sha256():
+        raise RuntimeError(f"{case_id}: run receipt does not bind the current D05 plan")
+    raw_value = run.get("raw_output_root")
+    if not raw_value:
+        raise RuntimeError(f"{case_id}: run receipt has no raw_output_root")
+    root = (LAB_ROOT / raw_value).resolve()
+    campaign_root = CAMPAIGN_ROOT.resolve()
+    if not root.is_relative_to(campaign_root):
+        raise RuntimeError(f"{case_id}: raw_output_root escapes the D05 evidence root")
+    if not root.is_dir():
+        raise RuntimeError(f"{case_id}: raw output directory is missing: {root}")
+    raw_hash = tree_digest(root, ignored_top=("csv",))[0]
+    if run.get("raw_tree_sha256") != raw_hash:
+        raise RuntimeError(f"{case_id}: raw output hash changed or is not bound to the run receipt")
+    return root
+
+
 def partvtk(case_id: str, run_root: Path) -> tuple[list[Path], Path]:
     csv_root = run_root / "csv"
     csv_root.mkdir(parents=True, exist_ok=True)
@@ -121,11 +175,11 @@ def audit(path: Path) -> dict[str, Any]:
         }
 
 
-def all_receipts() -> list[dict[str, Any]]:
+def all_receipts(case_ids: list[str]) -> list[dict[str, Any]]:
     return [
-        json.loads(path.read_text(encoding="utf-8"))
-        for path in sorted(CAMPAIGN_ROOT.glob("*/conversion-receipt.json"))
-        if path.is_file()
+        json.loads((CAMPAIGN_ROOT / case_id / "conversion-receipt.json").read_text(encoding="utf-8"))
+        for case_id in case_ids
+        if (CAMPAIGN_ROOT / case_id / "conversion-receipt.json").is_file()
     ]
 
 
@@ -150,17 +204,27 @@ def main() -> int:
                 "family": run.get("family", "F2"),
                 "status": "reference_reuse_only",
                 "release_role": "internal_development_only",
+                "plan_sha256": plan_sha256(),
+                "run_receipt_sha256": digest(CAMPAIGN_ROOT / case_id / "run-receipt.json"),
+                "scientific_acceptance": "not_assessed",
+                "split": "unassigned",
                 "learning_attempts": 0,
             }
-            (CAMPAIGN_ROOT / case_id / "conversion-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            receipt = CAMPAIGN_ROOT / case_id / "conversion-receipt.json"
+            if receipt.exists():
+                raise FileExistsError(f"refusing to overwrite existing D05 conversion receipt: {receipt}")
+            atomic_write_json(receipt, result)
             print(case_id, result["status"])
             continue
         if run.get("status") != "completed":
             raise SystemExit(f"case is not completed: {case_id} ({run.get('status')})")
-        run_root = LAB_ROOT / run["raw_output_root"]
+        run_root = validate_run_record(case_id, run)
+        output = NORMALIZED_ROOT / f"{case_id}.h5"
+        receipt = CAMPAIGN_ROOT / case_id / "conversion-receipt.json"
+        if output.exists() or receipt.exists():
+            raise FileExistsError(f"refusing to overwrite existing D05 conversion output for {case_id}")
         frames, log_path = partvtk(case_id, run_root)
         record = {"id": case_id, "family": run["family"], "mechanism": run["mechanism"], "shifting": 0}
-        output = NORMALIZED_ROOT / f"{case_id}.h5"
         convert_streaming(record, frames, output)
         result = {
             "schema": "ds-data-01.d05.conversion.v1",
@@ -168,8 +232,13 @@ def main() -> int:
             "family": run["family"],
             "mechanism": run["mechanism"],
             "release_role": "internal_development_only",
+            "plan_sha256": plan_sha256(),
+            "run_receipt_sha256": digest(CAMPAIGN_ROOT / case_id / "run-receipt.json"),
+            "run_raw_tree_sha256": run.get("raw_tree_sha256"),
+            "partvtk_binary_sha256": digest(PARTVTK),
             "partvtk_log": str(log_path.relative_to(LAB_ROOT)),
             "partvtk_log_sha256": digest(log_path),
+            "csv_tree_sha256": tree_digest(run_root / "csv")[0],
             "csv_frame_count": len(frames),
             "normalized_hdf5": str(output.relative_to(LAB_ROOT)),
             "audit": audit(output),
@@ -178,16 +247,16 @@ def main() -> int:
             "converted_at_utc": datetime.now(timezone.utc).isoformat(),
             "learning_attempts": 0,
         }
-        (CAMPAIGN_ROOT / case_id / "conversion-receipt.json").write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        atomic_write_json(receipt, result)
         print(case_id, result["audit"]["status"], result["audit"]["valid_shape"])
-    records = all_receipts()
-    CONVERSION_SUMMARY.write_text(json.dumps({
+    records = all_receipts(case_ids)
+    atomic_write_json(CONVERSION_SUMMARY, {
         "schema": "ds-data-01.d05.conversion-summary.v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "scope": "internal_development_only",
         "learning_attempts": 0,
         "cases": records,
-    }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    })
     q_i_pass = sum(item.get("audit", {}).get("status") == "Q-I-structure-pass" for item in records)
     print(json.dumps({"output": str(CONVERSION_SUMMARY), "cases": len(records), "q_i_structure_pass": q_i_pass}, ensure_ascii=False, indent=2))
     return 0 if all(item.get("status") == "reference_reuse_only" or item.get("audit", {}).get("status") == "Q-I-structure-pass" for item in records) else 1
