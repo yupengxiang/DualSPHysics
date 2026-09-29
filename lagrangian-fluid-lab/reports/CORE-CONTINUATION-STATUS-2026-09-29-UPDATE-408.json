@@ -1,0 +1,95 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-408",
+  "observed_at": "2026-09-29T12:13:33+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; shared occupancy is allowed when VRAM remains sufficient; never stop or restart an existing process"
+  },
+  "commits": [
+    "fe9bbede", "5b2a9a14", "7a6af8e3", "affe46a1", "5c8babdc", "c5457ba3", "68126394", "97660975",
+    "b35b23c1", "08b51c83", "6cf9dbb9", "20fa2ef4", "33cd65af", "c0ed6e68", "2c22f618", "d90a49d2",
+    "ff9d04a1", "5b305a0a", "9249869b", "20345211", "df2ec797", "2e0b9d97", "1d791c75", "460fd7aa",
+    "9bb1b6ac", "5acf227c", "11aa4a8c", "47b1011d", "a101668f", "4ca54d47", "36f4aac0", "522bce4a",
+    "35049f36", "e51f9ea9", "bc337db3", "5baa0adc", "274b5b0a", "638eb059", "1d9de81d", "333001ee",
+    "b6246552", "d8fe1e15"
+  ],
+  "completed_units": {
+    "f8_r008_v7_v8_rerun1": {
+      "commit": "5b2a9a14",
+      "scope": "additive v7/v8 readiness RERUN1 with immutable v6 anchor",
+      "tests": 13,
+      "historical_receipts_overwritten": 0,
+      "qualification_credit": 0,
+      "external_blockers_preserved": true
+    },
+    "f3_material_coarse_s2_s4_readiness": {
+      "commit": "fe9bbede",
+      "scope": "bounded scheduler-owned readiness sidecar for coarse s2/s4",
+      "agent_regression_tests": 103,
+      "parent_recheck_tests": 58,
+      "status": "blocked_fail_closed",
+      "fresh_one_shot_root_receipt": false,
+      "scheduler_host_io_reservation": false,
+      "qualification_credit": 0
+    },
+    "module_regression": {
+      "core_formal_and_production": 88,
+      "f1_f2": 30,
+      "f3_f4": 73,
+      "f6_f7": 20,
+      "f8_v7_v8_parent_recheck": 13,
+      "explicit_test_nodes_collected": 5403
+    }
+  },
+  "verification": {
+    "production_workloads_started": 0,
+    "protected_popen_attempts": 0,
+    "gpu_used_for_production_execution": false,
+    "production_data_read": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "existing_processes_stopped_or_restarted": 0,
+    "gpu_snapshot_mib": {
+      "gpu0_free": 48497, "gpu1_free": 48497, "gpu2_free": 48497, "gpu3_free": 48497,
+      "gpu4_free": 48497, "gpu5_free": 48497, "gpu6_free": 48497, "gpu7_free": 48497
+    }
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17", "graph_raw-seed29", "graph_raw-seed43",
+      "graph_residual-seed17", "graph_residual-seed29", "graph_residual-seed43",
+      "mlp-seed17", "mlp-seed29", "mlp-seed43"
+    ],
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "credit": 0
+  },
+  "next_coarse_path": {
+    "module": "F3 material coarse",
+    "execution_order": [
+      "obtain fresh root admission and scheduler-owned host-I/O receipts",
+      "run one real CPU-only s2 or s4 sidecar through core_runtime",
+      "validate full temporal material criteria",
+      "expand from 8 to 32 cases",
+      "replicate the qualified path to F4"
+    ],
+    "gpu_required": false,
+    "direct_worker_launch_allowed": false
+  }
+}
