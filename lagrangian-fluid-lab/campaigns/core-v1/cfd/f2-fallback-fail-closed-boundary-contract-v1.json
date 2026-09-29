@@ -1,0 +1,180 @@
+{
+  "authorization": {
+    "T1": false,
+    "T2": false,
+    "T2_macro": false,
+    "credit": 0,
+    "diagnostic_only": true,
+    "execution_authorized": false,
+    "formal": false,
+    "formal_eligible": false,
+    "formal_run_ready": false,
+    "qualification": false,
+    "qualification_credit": 0
+  },
+  "blockers": [
+    {
+      "code": "cell_00_historical_hard_failure",
+      "severity": "high"
+    },
+    {
+      "code": "static_missing_runtime_rows",
+      "severity": "high"
+    },
+    {
+      "code": "dynamic_boundary_and_open_mouth_negative_evidence",
+      "severity": "high"
+    },
+    {
+      "code": "dynamic_event_window_not_complete",
+      "severity": "high"
+    },
+    {
+      "code": "catch_event_ownership_unreviewed",
+      "severity": "high"
+    },
+    {
+      "code": "catch_new_definition_and_preflight_missing",
+      "severity": "high"
+    }
+  ],
+  "checks": {
+    "catch_event_ownership_unreviewed": true,
+    "catch_matrix_is_proposal_only": true,
+    "catch_route_is_root_review_only": true,
+    "core_gate_is_unchanged": true,
+    "dynamic_boundary_and_open_mouth_negative_evidence": true,
+    "dynamic_event_window_remains_blocked": true,
+    "dynamic_matrix_is_unsubmitted": true,
+    "no_catch_execution_authority": true,
+    "static_bridge_is_blocked": true,
+    "static_cell_00_hard_failure": true,
+    "static_missing_runtime_rows": true,
+    "static_preparation_is_not_runtime": true,
+    "static_rows_zero_credit": true
+  },
+  "contract_id": "F2_FALLBACK_FAIL_CLOSED_BOUNDARY_V1",
+  "contract_schema": "core.f2.fallback_fail_closed_boundary_contract.v1",
+  "created_at": "2026-09-29T00:00:00Z",
+  "decision": "close_local_f2_boundary_without_formal_or_execution_promotion",
+  "dependencies": {
+    "dynamic_failure_denominator": {
+      "bytes": 6526,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-failure-denominator-v1.json",
+      "role": "dynamic boundary/event failure denominator",
+      "sha256": "037b22e8148c3c0f8f72f1b47550fd808072a5e3ce9810fadd0fda9fd04eda1b"
+    },
+    "dynamic_matrix": {
+      "bytes": 8559,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-dynamic-third-family-dbc-duration-matrix-v1.json",
+      "role": "dynamic DBC fixed matrix projection",
+      "sha256": "cf356f1cf7d0b02474ce7e6d215a9ff07eea0d6293aca5c87799014367c5dcf1"
+    },
+    "pour_catch_candidate": {
+      "bytes": 8939,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2-2026-09-29-RERUN1.json",
+      "role": "pour/catch fresh candidate projection",
+      "sha256": "45af80f942c2b75bba62b3aa8278dcc26eca1e2f8cc776fd73c13f2f01021d37"
+    },
+    "pour_catch_gap_audit": {
+      "bytes": 4502,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1-2026-09-29-RERUN1.json",
+      "role": "pour/catch root-review gap projection",
+      "sha256": "f3a500028727e205f4a6073f5958518ae8048d9a895a35396923b3029e91aa84"
+    },
+    "pour_catch_route": {
+      "bytes": 5817,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "campaigns/core-v1/cfd/f2-pour-catch-route-audit-2026-09-29-RERUN1.json",
+      "role": "pour/catch route decision projection",
+      "sha256": "911a45df79e87e56f6edf90eb4a8478b91fd4f089fc2130ffbe7dbfcf5f6807c"
+    },
+    "static_full_cup_bridge": {
+      "bytes": 22423,
+      "content_opened": true,
+      "nested_artifact_paths_followed": false,
+      "path": "reports/F2-RESTING-FILL-FORMAL-RUN-READINESS-BRIDGE-V1-2026-09-28.json",
+      "role": "static/full-cup formal-readiness projection",
+      "sha256": "38c18f1f827098cdf245b770e655a89242dea902f514b00c2d3075d9963d4948"
+    }
+  },
+  "evidence": {
+    "dynamic_dbc": {
+      "boundary_method": 1,
+      "boundary_semantics": "native DBC Boundary=1",
+      "denominator": 15,
+      "event_censor_rule": "A row that reaches 5 s without motion completion, receiver contact, spill classification, settled conjunction, and 0.35 s post-settle output fails event completeness; no horizon extension is permitted in this matrix.",
+      "moving_mdbc_contact_failure": {
+        "hard_integrity_pass": false,
+        "native_exclusions": 4
+      },
+      "numerator": 0,
+      "open_mouth_geometry": true,
+      "open_tray_position_loss": {
+        "hard_integrity_pass": false,
+        "native_missing_fluid_count": 16038
+      },
+      "status": "fixed_design_cpu_preflight_anchor_only"
+    },
+    "pour_catch": {
+      "candidate_status": "root_review_only_new_definition_required",
+      "event_contract_gap": true,
+      "gap_status": "blocked_before_new_definition",
+      "proposal_credit": 0,
+      "proposal_rows": 15,
+      "route_status": "root_review_only_conditional_route",
+      "worth_preflight_now": false
+    },
+    "static_full_cup": {
+      "cell_00": {
+        "failure_categories": [
+          "cup_closed_face_endpoint",
+          "cup_saved_chord_crossing",
+          "open_cup_escape",
+          "spatial_comparison_failed"
+        ],
+        "formal_run_readiness": "blocked_by_historical_failure",
+        "status": "failed_static_gate"
+      },
+      "historical_failed_rows": 1,
+      "missing_runtime_rows": 14,
+      "registered_rows": 15,
+      "status": "blocked_fail_closed"
+    }
+  },
+  "mutations": {
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "gate_mutation": 0,
+    "ledger_mutation": 0,
+    "plan_mutation": 0,
+    "queue_mutation": 0,
+    "registry_mutation": 0
+  },
+  "read_policy": {
+    "fixed_json_allowlist_only": true,
+    "max_json_bytes": 262144,
+    "nested_artifact_paths_followed": false,
+    "production_artifact_stat_or_hash": false,
+    "production_hdf5_bi4_trajectory_opened": false,
+    "registry_ledger_denominator_gate_completion_plan_written": false,
+    "solver_worker_native_gpu_queue_started": false,
+    "xml_or_native_input_opened": false
+  },
+  "schema": "core.f2.fallback_fail_closed_boundary_contract_report.v1",
+  "scope": {
+    "dynamic_dbc": "native DBC/open-top finite envelope with boundary and event blockers retained",
+    "pour_catch": "fresh stationary-receiver hypothesis remains root-review-only",
+    "static_full_cup": "cell-00 failure plus fixed 15-row missing-runtime boundary"
+  },
+  "status": "blocked_fail_closed"
+}
