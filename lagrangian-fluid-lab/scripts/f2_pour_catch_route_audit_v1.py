@@ -19,10 +19,15 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
-ROUTE_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-route-audit-v1.json"
-CANDIDATE_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json"
-GAP_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1.json"
-REPORT_OUTPUT = LAB / "reports/F2-POUR-CATCH-ROUTE-AUDIT-2026-09-21.zh-CN.md"
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+HISTORICAL_ROUTE_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-route-audit-v1.json"
+HISTORICAL_CANDIDATE_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json"
+HISTORICAL_GAP_OUTPUT = LAB / "campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1.json"
+HISTORICAL_REPORT_OUTPUT = LAB / "reports/F2-POUR-CATCH-ROUTE-AUDIT-2026-09-21.zh-CN.md"
+ROUTE_OUTPUT = LAB / f"campaigns/core-v1/cfd/f2-pour-catch-route-audit-{CURRENT_RERUN_ID}.json"
+CANDIDATE_OUTPUT = LAB / f"campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2-{CURRENT_RERUN_ID}.json"
+GAP_OUTPUT = LAB / f"campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1-{CURRENT_RERUN_ID}.json"
+REPORT_OUTPUT = LAB / f"reports/F2-POUR-CATCH-ROUTE-AUDIT-{CURRENT_RERUN_ID}.zh-CN.md"
 
 
 def sha256(path: Path) -> str:
@@ -346,7 +351,7 @@ def build_gap(candidate: dict[str, Any]) -> dict[str, Any]:
         },
         "hash_bindings": {
             "candidate": ref(
-                "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json",
+                CANDIDATE_OUTPUT.relative_to(LAB).as_posix(),
                 "fresh route candidate card",
             ),
             "v1_root_review": ref(
@@ -390,6 +395,13 @@ def build_route(candidate: dict[str, Any], gap: dict[str, Any]) -> dict[str, Any
 
     return {
         "schema": "core.f2.pour_catch.route_decision.v1",
+        "refresh": {
+            "rerun_id": CURRENT_RERUN_ID,
+            "historical_route": HISTORICAL_ROUTE_OUTPUT.relative_to(LAB).as_posix(),
+            "historical_preserved": True,
+            "refreshed_bindings": ["evidence.completion"],
+            "reason": "current completion binding refresh; no route, denominator, or credit change",
+        },
         "status": "root_review_only_conditional_route",
         "trigger": "F6 v4 canary aggregate is 7/8; cell-08 is retained as a scientific hard failure",
         "core_gate": {
@@ -457,12 +469,12 @@ def build_route(candidate: dict[str, Any], gap: dict[str, Any]) -> dict[str, Any
             "same_input_retry": False,
         },
         "root_review_gap_audit": {
-            "path": "campaigns/core-v1/cfd/f2-pour-catch-root-review-gap-audit-v1.json",
+            "path": GAP_OUTPUT.relative_to(LAB).as_posix(),
             "sha256": sha256(GAP_OUTPUT),
             "bytes": GAP_OUTPUT.stat().st_size,
         },
         "candidate_card": {
-            "path": "campaigns/core-v1/cfd/f2-pour-catch-candidate-card-v2.json",
+            "path": CANDIDATE_OUTPUT.relative_to(LAB).as_posix(),
             "sha256": sha256(CANDIDATE_OUTPUT),
             "bytes": CANDIDATE_OUTPUT.stat().st_size,
         },
@@ -511,7 +523,7 @@ def render_report(route: dict[str, Any], candidate: dict[str, Any], gap: dict[st
     v1 = candidate["retained_v1_negative"]
     return "\n".join(
         [
-            "# F2 倾倒/接液替补路线只读审计（2026-09-21）",
+            f"# F2 倾倒/接液替补路线只读审计（{CURRENT_RERUN_ID}）",
             "",
             "F6 v4 的 8 格 canary 为 7/8，cell-08 保留科学硬失败；本审计只读复核现有 F2 资格、registry 和报告，未启动任何 GenCase、native decoder、solver、GPU 或 queue。",
             "",

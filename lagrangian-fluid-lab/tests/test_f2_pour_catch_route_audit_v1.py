@@ -160,3 +160,14 @@ def test_route_implementation_has_no_execution_entry_point() -> None:
     assert "Popen(" not in source
     assert "solver_binary" not in source
     assert "queue_mutation" in source
+
+
+def test_historical_route_outputs_are_retained_as_stale_snapshots() -> None:
+    assert audit.HISTORICAL_ROUTE_OUTPUT.exists()
+    assert audit.HISTORICAL_CANDIDATE_OUTPUT.exists()
+    assert audit.HISTORICAL_GAP_OUTPUT.exists()
+    assert audit.HISTORICAL_REPORT_OUTPUT.exists()
+    historical = _load(audit.HISTORICAL_ROUTE_OUTPUT)
+    assert historical["evidence"]["completion"]["sha256"] != audit.sha256(
+        audit.LAB / "campaigns/core-v1/completion.json"
+    )
