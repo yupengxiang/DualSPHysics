@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -50,3 +51,12 @@ def test_checker_has_no_execution_mode():
     assert "tools." not in source
     assert "solver" in source
     assert "--check" in source
+
+
+def test_historical_audit_is_retained_as_a_stale_snapshot():
+    module = load_module()
+    assert module.HISTORICAL_AUDIT.exists()
+    historical = json.loads(module.HISTORICAL_AUDIT.read_text(encoding="utf-8"))
+    assert historical["core_gate_snapshot"]["sha256"] != module.sha256(
+        module.LAB / "campaigns/core-v1/completion.json"
+    )

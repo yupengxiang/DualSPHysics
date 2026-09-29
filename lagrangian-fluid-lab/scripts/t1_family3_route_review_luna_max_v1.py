@@ -17,8 +17,13 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
-AUDIT = LAB / (
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+CURRENT_CREATED_AT_UTC = "2026-09-29T00:00:00+00:00"
+HISTORICAL_AUDIT = LAB / (
     "campaigns/core-v1/cfd/t1-family3-route-review-luna-max-v1/route-audit-v1.json"
+)
+AUDIT = LAB / (
+    f"campaigns/core-v1/cfd/t1-family3-route-review-luna-max-v1/route-audit-{CURRENT_RERUN_ID}.json"
 )
 NAMESPACE = AUDIT.parent
 
@@ -45,6 +50,43 @@ def local(relative: str) -> Path:
     return path
 
 
+def build_current_audit() -> dict[str, Any]:
+    """Refresh only current Core completion bindings in an additive audit."""
+
+    audit = load(HISTORICAL_AUDIT)
+    completion = local("campaigns/core-v1/completion.json")
+    completion_hash = sha256(completion)
+    audit["review_id"] = f"T1_FAMILY3_ROUTE_REVIEW_LUNA_MAX_{CURRENT_RERUN_ID.replace('-', '')}"
+    audit["created_at_utc"] = CURRENT_CREATED_AT_UTC
+    audit["core_gate_snapshot"]["sha256"] = completion_hash
+    for binding in audit["source_receipts"]:
+        if binding["path"] == "campaigns/core-v1/completion.json":
+            binding["sha256"] = completion_hash
+    audit["refresh"] = {
+        "rerun_id": CURRENT_RERUN_ID,
+        "historical_audit": HISTORICAL_AUDIT.relative_to(LAB).as_posix(),
+        "historical_preserved": True,
+        "refreshed_bindings": [
+            "core_gate_snapshot.completion.json",
+            "source_receipts.completion.json",
+        ],
+        "reason": "current completion binding refresh; route closure and credit unchanged",
+    }
+    return audit
+
+
+def write_current_audit(path: Path = AUDIT) -> Path:
+    path = Path(path)
+    if path.exists():
+        raise FileExistsError(f"current audit already exists: {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(build_current_audit(), ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
 def check() -> dict[str, Any]:
     audit = load(AUDIT)
     assert audit["schema"] == "core.t1_family3.route_review.route_closed_negative.v1"
@@ -62,6 +104,7 @@ def check() -> dict[str, Any]:
     }
 
     completion = load(local("campaigns/core-v1/completion.json"))
+    assert audit["core_gate_snapshot"]["sha256"] == sha256(local("campaigns/core-v1/completion.json"))
     assert completion["t1_families"] == ["F3", "F4"]
     assert completion["checks"]["three_t1_families"] is False
     assert completion["missing_t1_case_runs"] == 288
@@ -163,11 +206,14 @@ def check() -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--check", action="store_true", help="run the read-only audit")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--check", action="store_true", help="run the read-only audit")
+    mode.add_argument("--write", action="store_true", help="write the additive dated audit only")
     args = parser.parse_args()
-    if not args.check:
-        parser.error("only --check is available; this script never writes or executes")
-    print(json.dumps(check(), ensure_ascii=False, indent=2, sort_keys=True))
+    if args.write:
+        print(json.dumps({"written": str(write_current_audit())}, ensure_ascii=False, indent=2))
+    else:
+        print(json.dumps(check(), ensure_ascii=False, indent=2, sort_keys=True))
     return 0
 
 
