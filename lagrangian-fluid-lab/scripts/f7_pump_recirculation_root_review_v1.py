@@ -21,12 +21,13 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
-NAMESPACE = LAB / "campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922"
+RERUN_ID = "20260929-RERUN1"
+NAMESPACE = LAB / f"campaigns/core-v1/cfd/f7-pump-recirculation-root-review-{RERUN_ID}"
 CANDIDATE = NAMESPACE / "candidate-card-v1.json"
 SOURCE_AUDIT = NAMESPACE / "source-audit-v1.json"
 INTERFACE_REVIEW = NAMESPACE / "interface-review-v1.json"
 ROOT_RECEIPT = NAMESPACE / "root-review-receipt-v1.json"
-REPORT = LAB / "reports/F7-PUMP-RECIRCULATION-ROOT-REVIEW-2026-09-22.zh-CN.md"
+REPORT = LAB / f"reports/F7-PUMP-RECIRCULATION-ROOT-REVIEW-{RERUN_ID}.zh-CN.md"
 TEST = LAB / "tests/test_f7_pump_recirculation_root_review_v1.py"
 
 ADAPTER_SCRIPT = "scripts/f7_pump_geometry_adapter_v1.py"
@@ -325,6 +326,7 @@ def build_candidate() -> dict[str, Any]:
     runtime_payload = runtime["payload"]
     return {
         "schema": "core.f7.pump_recirculation.candidate_card.v1",
+        "rerun_id": RERUN_ID,
         "status": "root_review_only_not_admitted",
         "family": "F7",
         "scope_id": "F7_pump_recirculation_x_v1",
@@ -610,10 +612,14 @@ def build_interface_review(candidate: dict[str, Any]) -> dict[str, Any]:
 
 def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: dict[str, Any]) -> str:
     parsed = candidate["official_source_observation"]
+    candidate_path = str(CANDIDATE.relative_to(LAB))
+    source_path = str(SOURCE_AUDIT.relative_to(LAB))
+    interface_path = str(INTERFACE_REVIEW.relative_to(LAB))
+    receipt_path = str(ROOT_RECEIPT.relative_to(LAB))
     return "\n".join([
-        "# F7 预设旋转内泵循环路线根审查材料（2026-09-22）",
+        f"# F7 预设旋转内泵循环路线根审查材料（{RERUN_ID}）",
         "",
-        "本文件记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约，以及一条明确未准入的 CPU runtime canary；canary 之外没有运行 Core queue/GPU，也没有修改 Core registry、ledger、matrix 或 denominator。",
+        "本文件是对当前小型静态 root-review 包的不可覆盖 RERUN1；旧的 2026-09-22 v1 报告与回执保持不变。它记录官方 DualSPHysics `main/13_Pump` 的只读源绑定、隔离适配器/观测器合约，以及一条明确未准入的 CPU runtime canary；canary 之外没有运行 Core queue/GPU，也没有修改 Core registry、ledger、matrix 或 denominator。",
         "",
         "## 候选结论",
         "",
@@ -641,10 +647,10 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
         "本包只授权后续人工/root review 讨论：canary 的直接 CPU 运行证据保持 unqualified；不授权 Core Definition writer、Core preflight、solver/GPU/queue，不产生 T1/T2 分母或资格变化。接口审查状态为 `blocked_after_core_adapter_before_runtime_admission`。",
         "",
         "机器可读文件：",
-        "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/candidate-card-v1.json`",
-        "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/source-audit-v1.json`",
-        "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/interface-review-v1.json`",
-        "- `campaigns/core-v1/cfd/f7-pump-recirculation-root-review-20260922/root-review-receipt-v1.json`",
+        f"- `{candidate_path}`",
+        f"- `{source_path}`",
+        f"- `{interface_path}`",
+        f"- `{receipt_path}`",
         "",
         "定向回归：`pytest -q tests/test_f7_pump_recirculation_root_review_v1.py tests/test_f7_pump_geometry_adapter_v1.py tests/test_f7_pump_transport_observer_v1.py`。",
         "",
@@ -654,6 +660,7 @@ def render_report(candidate: dict[str, Any], source: dict[str, Any], interface: 
 def build_root_receipt(candidate: dict[str, Any], source: dict[str, Any], interface: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema": "core.f7.pump_recirculation.root_review_receipt.v1",
+        "rerun_id": RERUN_ID,
         "status": "root_review_only_blocked",
         "decision": "retain_candidate_for_future_root_review_without_materialization",
         "candidate_id": candidate["candidate_id"],
@@ -688,6 +695,8 @@ def build_root_receipt(candidate: dict[str, Any], source: dict[str, Any], interf
 
 
 def write_json(path: Path, value: dict[str, Any]) -> None:
+    if path.exists() or path.is_symlink():
+        raise FileExistsError(f"refusing to overwrite immutable F7 RERUN artifact: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
