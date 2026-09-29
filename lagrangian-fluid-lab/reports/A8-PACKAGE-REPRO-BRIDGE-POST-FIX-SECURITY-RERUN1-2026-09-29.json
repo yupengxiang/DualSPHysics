@@ -1,0 +1,139 @@
+{
+  "schema": "core.a8.package_repro_bridge_post_fix_security_rerun.v1",
+  "review_id": "A8-PRB-POST-FIX-RERUN1-2026-09-29",
+  "status": "passed_fail_closed_post_fix",
+  "scope": {
+    "purpose": "Independent post-fix security rerun of the hardened A8 package/reproduction bridge",
+    "historical_2182cb6d_inputs_read": false,
+    "historical_mutation_fixture_set_reused": false,
+    "read_policy": "bounded source and JSON metadata only",
+    "large_bundle_assets_opened": false,
+    "workload_started": false,
+    "gpu_started": false,
+    "queue_started": false,
+    "worker_started": false
+  },
+  "input_bindings": [
+    {
+      "path": "lagrangian-fluid-lab/scripts/core_product_repro_bridge_v1.py",
+      "bytes": 39790,
+      "sha256": "92288c290173640e59df7d5a7aeb6435133bafa8820e52d87ea9e24617ad369c",
+      "read_policy": "bounded_source_only"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-full-reproduce-v2/bundle.json",
+      "bytes": 38851,
+      "sha256": "da0fdcdc10ed56e47e94eb70dfecf864808337d3b7cf9e2d3e22c14df5e6c5ed",
+      "read_policy": "bounded_json_only"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+      "bytes": 6630,
+      "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b",
+      "read_policy": "bounded_json_only"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/core-v1/evidence/cross-host-reproduction-contract-20260920.json",
+      "bytes": 938,
+      "sha256": "a2a49f76ee282649227b40cc6c2388b597e53145417ec0469535c305ad4f9f79",
+      "read_policy": "bounded_json_only"
+    },
+    {
+      "path": "lagrangian-fluid-lab/reports/A8-INDEPENDENT-REPRODUCTION-READINESS-CONTRACT-V1-2026-09-29.json",
+      "bytes": 2771,
+      "sha256": "9fcfcc8b036187a8276e8659c3085b5db1271d2d9eb2d780c3270ff6f0c312ac",
+      "read_policy": "bounded_json_only"
+    },
+    {
+      "path": "lagrangian-fluid-lab/reports/A8-TRUSTED-ROOT-EXTERNAL-HOST-ATTESTATION-CONTRACT-V1-2026-09-29.json",
+      "bytes": 3172,
+      "sha256": "c7efd0a3ae9ef55e8f115356abd3214e9252c8012f714eacc0e1e9475ffaa638",
+      "read_policy": "bounded_json_only"
+    }
+  ],
+  "checks": {
+    "authority_mutation": {
+      "rejected": true,
+      "mutated_fields": [
+        "diagnostic_only",
+        "formal_training",
+        "full_product_reproduction",
+        "qualification_credit"
+      ],
+      "projection_passed": false,
+      "safe_projection": {
+        "diagnostic_only": true,
+        "formal_training": false,
+        "full_product_reproduction": false,
+        "qualification_credit": 0
+      },
+      "required_blocker": "authority-shaped reader fields must match diagnostic-only zero-credit values"
+    },
+    "duplicate_host_mutation": {
+      "rejected": true,
+      "mutated_observed_hosts": [
+        "h200",
+        "h200"
+      ],
+      "self_declared_distinct_host_evidence": true,
+      "rollout_passed": false,
+      "score_passed": false,
+      "required_blocker": "diagnostic_pair_host_identities_not_distinct",
+      "qualification_credit": 0
+    },
+    "current_bundle": {
+      "schema": "core.reader_bundle.v2",
+      "case_count": 32,
+      "checkpoint_count": 0,
+      "model_reproduction_supported": false,
+      "full_core_release": false,
+      "reader_only": true,
+      "qualification_credit": 0,
+      "large_assets_opened": false,
+      "interpretation": "The current bundle is a metadata/index reader package; scientific qualification remains separate."
+    },
+    "bounded_contracts": {
+      "diagnostic_pair": {
+        "diagnostic_only": true,
+        "qualification_claim": "none",
+        "qualification_credit": 0
+      },
+      "cross_host_contract": {
+        "diagnostic_only": true,
+        "formal_training_count": 0,
+        "full_product_reproduction": false
+      },
+      "readiness_contracts": {
+        "formal_admission": false,
+        "formal_training": false,
+        "full_product_reproduction": false,
+        "independent_reproduction": false,
+        "qualification_credit": 0,
+        "credit": 0,
+        "readiness_pass": false
+      }
+    }
+  },
+  "claims": {
+    "diagnostic_only": true,
+    "formal_admission": false,
+    "full_product_reproduction": false,
+    "independent_reproduction": false,
+    "qualification_credit": 0,
+    "registry_mutated": false,
+    "ledger_mutated": false,
+    "denominator_mutated": false,
+    "gate_mutated": false,
+    "completion_mutated": false
+  },
+  "verification": {
+    "pytest": {
+      "test_file": "lagrangian-fluid-lab/tests/test_a8_package_repro_bridge_post_fix_security_rerun1.py",
+      "expected_passed": 5
+    },
+    "py_compile": true,
+    "json_verify": true,
+    "git_diff_check": true
+  },
+  "interpretation": "The hardened bridge rejects both post-fix mutation probes and keeps the real current bundle and bounded contracts diagnostic-only, reader-only, and zero-credit. This rerun grants no formal capability and changes no scientific state."
+}
