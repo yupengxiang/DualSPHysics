@@ -76,6 +76,7 @@ def _legacy_projection_candidate(fixture: dict[str, object], path: Path) -> dict
         receipt["identity"].pop(key, None)
     for key in ("state_file", "lock_path", "external_claim_path"):
         receipt["consumption"].pop(key, None)
+    receipt["identity_sha256"] = projection.canonical_digest(receipt["identity"])
     receipt.pop("receipt_sha256", None)
     receipt["receipt_sha256"] = projection.canonical_digest(receipt)
     _write_json(path, receipt)
@@ -172,6 +173,7 @@ def test_nonce_and_resource_mismatch_cannot_be_supplied_as_caller_claim(
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     receipt.pop("authority")
     receipt["identity"]["nonce"] = "f" * 32
+    receipt["identity_sha256"] = projection.canonical_digest(receipt["identity"])
     receipt.pop("receipt_sha256")
     receipt["receipt_sha256"] = projection.canonical_digest(receipt)
     authority_path = Path(receipt["identity"]["external_authority"]["path"])
