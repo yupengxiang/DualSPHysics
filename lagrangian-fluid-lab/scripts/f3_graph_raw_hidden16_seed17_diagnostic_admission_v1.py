@@ -636,6 +636,7 @@ def _plan_binding(plan: launcher.RolloutPlan) -> dict[str, Any]:
 
     env = dict(plan.env)
     env["CUDA_DEVICE_ORDER"] = CUDA_DEVICE_ORDER
+    rollout_snapshot = launcher.rollout_plan_snapshot(plan)
     return {
         "schema": f"{EXTERNAL_AUTHORITY_SCHEMA}.plan",
         "root": str(plan.root),
@@ -659,6 +660,8 @@ def _plan_binding(plan: launcher.RolloutPlan) -> dict[str, Any]:
         "env_overrides": env,
         "command_sha256": _command_digest(plan.command, str(plan.root), env),
         "launcher_command_sha256": str(plan.command_sha256),
+        "rollout_snapshot": rollout_snapshot,
+        "rollout_snapshot_sha256": launcher.rollout_plan_snapshot_digest(plan),
     }
 
 
@@ -1000,6 +1003,7 @@ def _identity_core(
     command = list(plan.command)
     environment = _environment_snapshot(env)
     gpu = dict(_mapping(resource_snapshot["gpu"], "resource_admission.gpu"))
+    rollout_snapshot = launcher.rollout_plan_snapshot(plan)
     return {
         "model_kind": MODEL,
         "hidden": HIDDEN,
@@ -1011,6 +1015,8 @@ def _identity_core(
         "frames": FRAMES,
         "run_id": plan.run_id,
         "plan_sha256": _plan_binding_digest(plan),
+        "rollout_snapshot": rollout_snapshot,
+        "rollout_snapshot_sha256": launcher.rollout_plan_snapshot_digest(plan),
         "root": str(root),
         "manifest": {
             "path": str(plan.manifest),
@@ -1054,6 +1060,101 @@ def _identity_core(
         "nonce": nonce,
         "external_authority": dict(external_authority),
     }
+
+
+def _reconcile_plan_reread(
+    plan: launcher.RolloutPlan,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Reread plan inputs through stable descriptors before any admission state."""
+
+    _manifest_raw, manifest_descriptor, manifest_payload = _read_file(
+        plan.manifest,
+        "final current manifest",
+        max_bytes=MAX_JSON_BYTES,
+        parse_json=True,
+    )
+    del _manifest_raw
+    _training_raw, training_descriptor, training_payload = _read_file(
+        plan.training_receipt,
+        "final training receipt",
+        max_bytes=MAX_JSON_BYTES,
+        parse_json=True,
+    )
+    del _training_raw
+    checkpoint_descriptor = _checkpoint_descriptor(Path(str(plan.checkpoint["path"])))
+    if manifest_payload is None or training_payload is None:
+        _fail("final RolloutPlan reread payload is absent")
+    reconciliation = launcher.reconcile_plan_snapshot(
+        plan,
+        manifest_descriptor=manifest_descriptor,
+        manifest_payload=manifest_payload,
+        training_descriptor=training_descriptor,
+        training_payload=training_payload,
+        checkpoint_descriptor=checkpoint_descriptor,
+    )
+    return (
+        reconciliation,
+        manifest_descriptor,
+        training_descriptor,
+        checkpoint_descriptor,
+    )
+
+
+def _reconcile_receipt_snapshot(
+    identity: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Reread receipt inputs and cross-bind them to its sealed plan snapshot."""
+
+    snapshot = launcher.validate_rollout_plan_snapshot(
+        identity.get("rollout_snapshot"),
+        "identity.rollout_snapshot",
+    )
+    manifest_record = _mapping(snapshot["manifest"], "identity.rollout_snapshot.manifest")
+    training_record = _mapping(
+        snapshot["training_receipt"],
+        "identity.rollout_snapshot.training_receipt",
+    )
+    checkpoint_record = _mapping(
+        snapshot["checkpoint"],
+        "identity.rollout_snapshot.checkpoint",
+    )
+    manifest = _absolute(manifest_record["path"], "rollout snapshot manifest")
+    training = _absolute(training_record["path"], "rollout snapshot training receipt")
+    checkpoint = _absolute(checkpoint_record["path"], "rollout snapshot checkpoint")
+    root = _absolute(snapshot["root"], "rollout snapshot root")
+    for path, name in (
+        (manifest, "manifest"),
+        (training, "training receipt"),
+        (checkpoint, "checkpoint"),
+    ):
+        if not _under(path, root) and not _under(path, Path("/tmp")):
+            _fail(f"{name} escapes bounded roots")
+    _manifest_raw, manifest_descriptor, manifest_payload = _read_file(
+        manifest,
+        "final current manifest",
+        max_bytes=MAX_JSON_BYTES,
+        parse_json=True,
+    )
+    del _manifest_raw
+    _training_raw, training_descriptor, training_payload = _read_file(
+        training,
+        "final training receipt",
+        max_bytes=MAX_JSON_BYTES,
+        parse_json=True,
+    )
+    del _training_raw
+    checkpoint_descriptor = _checkpoint_descriptor(checkpoint)
+    if manifest_payload is None or training_payload is None:
+        _fail("final receipt reread payload is absent")
+    return launcher.reconcile_rollout_snapshot(
+        snapshot,
+        manifest_descriptor=manifest_descriptor,
+        manifest_payload=manifest_payload,
+        training_descriptor=training_descriptor,
+        training_payload=training_payload,
+        checkpoint_descriptor=checkpoint_descriptor,
+        expected_snapshot_sha256=identity.get("rollout_snapshot_sha256"),
+    )
 
 
 def _marker_core(identity_digest: str, namespace: Path, nonce: str) -> dict[str, Any]:
@@ -1137,6 +1238,15 @@ def mint_admission(
     )
     if authority_path is None:
         _fail("external scheduler authority is required; local receipt fields are not authority")
+    # This is the final stable reread boundary.  It must precede both the
+    # external authority validation/consumption path and every namespace state
+    # write, so a plan/input mismatch cannot leave a locally issued receipt.
+    (
+        rollout_reconciliation,
+        manifest_descriptor,
+        training_descriptor,
+        checkpoint_descriptor,
+    ) = _reconcile_plan_reread(plan)
     namespace_descriptor = _existing_namespace_descriptor(namespace)
     authority_metadata = _validate_external_authority(
         authority_path,
@@ -1145,20 +1255,6 @@ def mint_admission(
         plan_sha256=_plan_binding_digest(plan),
         resource_snapshot=resource_snapshot,
     )
-    manifest_raw, manifest_descriptor, manifest_payload = _read_file(plan.manifest, "current manifest", max_bytes=MAX_JSON_BYTES, parse_json=True)
-    del manifest_raw
-    if manifest_payload is None:
-        _fail("manifest payload was not opened")
-    training_raw, training_descriptor, training_payload = _read_file(plan.training_receipt, "training receipt", max_bytes=MAX_JSON_BYTES, parse_json=True)
-    del training_raw
-    if training_payload is None:
-        _fail("training receipt payload was not opened")
-    checkpoint_path = Path(str(plan.checkpoint["path"]))
-    checkpoint_descriptor = _checkpoint_descriptor(checkpoint_path)
-    if checkpoint_descriptor["sha256"] != str(plan.checkpoint["sha256"]):
-        _fail("checkpoint content SHA-256 differs from the training receipt declaration")
-    if checkpoint_descriptor["bytes"] != int(plan.checkpoint["bytes"]):
-        _fail("checkpoint bytes differ from the training receipt declaration")
     sources = {key: _source_descriptor(root_path, relative, key) for key, relative in SOURCE_RELATIVE_PATHS.items()}
     executable_path = _absolute(plan.command[0], "Python executable")
     if not _under(executable_path, root_path):
@@ -1178,6 +1274,8 @@ def mint_admission(
         nonce=selected_nonce,
         external_authority=authority_metadata,
     )
+    if rollout_reconciliation["plan_sha256"] != launcher.rollout_plan_snapshot_digest(plan):
+        _fail("final RolloutPlan reconciliation digest drifted before namespace state")
     identity_digest = canonical_digest(identity)
     marker_core = _marker_core(identity_digest, namespace, selected_nonce)
     marker_raw = (canonical_json(marker_core) + "\n").encode("utf-8")
@@ -1354,7 +1452,8 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
             "frames", "run_id", "root", "manifest", "training_receipt", "checkpoint",
             "source_sha256", "resource_snapshot", "gpu", "gpu_identity_sha256", "command",
             "environment", "executable", "owner", "namespace_descriptor", "namespace", "nonce",
-            "plan_sha256", "external_authority",
+            "plan_sha256", "rollout_snapshot", "rollout_snapshot_sha256",
+            "external_authority",
         },
         "identity",
     )
@@ -1367,6 +1466,16 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
     _exact(identity, "transitions", TRANSITIONS, "identity")
     _exact(identity, "frames", FRAMES, "identity")
     _sha(identity.get("plan_sha256"), "identity.plan_sha256")
+    rollout_snapshot = launcher.validate_rollout_plan_snapshot(
+        identity.get("rollout_snapshot"),
+        "identity.rollout_snapshot",
+    )
+    rollout_snapshot_sha256 = _sha(
+        identity.get("rollout_snapshot_sha256"),
+        "identity.rollout_snapshot_sha256",
+    )
+    if rollout_snapshot_sha256 != launcher.canonical_digest(rollout_snapshot):
+        _fail("identity.rollout_snapshot_sha256 does not bind the stable snapshot")
     _validate_nonce(identity.get("nonce"))
     namespace = _absolute(identity.get("namespace"), "identity.namespace")
     expected_name = f"f3-graph_raw500-hidden16-currentmanifest-seed{SEED}-full835-nonce{identity['nonce']}"
@@ -1480,6 +1589,44 @@ def _validate_identity_shape(identity: Mapping[str, Any]) -> None:
         }),
         "identity.environment",
     )
+
+    snapshot_manifest = _mapping(rollout_snapshot["manifest"], "identity.rollout_snapshot.manifest")
+    snapshot_training = _mapping(
+        rollout_snapshot["training_receipt"],
+        "identity.rollout_snapshot.training_receipt",
+    )
+    snapshot_checkpoint = _mapping(
+        rollout_snapshot["checkpoint"],
+        "identity.rollout_snapshot.checkpoint",
+    )
+    if snapshot_manifest["path"] != manifest["path"]:
+        _fail("identity rollout snapshot manifest path drifted")
+    if snapshot_manifest["canonical_sha256"] != manifest["canonical_sha256"]:
+        _fail("identity rollout snapshot manifest digest drifted")
+    if snapshot_manifest["file_sha256"] != manifest["file"]["sha256"]:
+        _fail("identity rollout snapshot manifest file digest drifted")
+    if snapshot_training["path"] != training["path"]:
+        _fail("identity rollout snapshot training path drifted")
+    if snapshot_training["file_sha256"] != training["file"]["sha256"]:
+        _fail("identity rollout snapshot training file digest drifted")
+    if snapshot_checkpoint["path"] != checkpoint["path"]:
+        _fail("identity rollout snapshot checkpoint path drifted")
+    if snapshot_checkpoint["sha256"] != checkpoint["sha256"]:
+        _fail("identity rollout snapshot checkpoint digest drifted")
+    if snapshot_checkpoint["bytes"] != checkpoint["bytes"]:
+        _fail("identity rollout snapshot checkpoint bytes drifted")
+    if rollout_snapshot["root"] != identity["root"]:
+        _fail("identity rollout snapshot root drifted")
+    if rollout_snapshot["namespace"] != identity["namespace"]:
+        _fail("identity rollout snapshot namespace drifted")
+    if rollout_snapshot["nonce"] != identity["nonce"]:
+        _fail("identity rollout snapshot nonce drifted")
+    if rollout_snapshot["command"] != command["argv"]:
+        _fail("identity rollout snapshot command drifted")
+    expected_snapshot_env = dict(rollout_snapshot["env_overrides"])
+    expected_snapshot_env["CUDA_DEVICE_ORDER"] = CUDA_DEVICE_ORDER
+    if canonical_json(expected_snapshot_env) != canonical_json(dict(env)):
+        _fail("identity rollout snapshot environment drifted")
 
 
 def _validate_marker(receipt: Mapping[str, Any]) -> dict[str, Any]:
