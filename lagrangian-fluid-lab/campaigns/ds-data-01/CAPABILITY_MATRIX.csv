@@ -1,0 +1,14 @@
+capability_id,capability,status,evidence,limitation,next_action
+scope_reset,dataset-only scope,complete,SCOPE_OVERRIDE.md,does not change historical ledgers,continue D01
+official_package,full DualSPHysics v5.4 examples,available,vendor/official/DualSPHysics_v5.4,package presence is not reproduction,D01 inventory
+official_inventory,all official example directories,complete,OFFICIAL_EXAMPLES_INVENTORY.json and .csv plus OFFICIAL_TO_BENCHMARK_MAP.md,source scan is not reproduction or acceptance,select D02 canaries
+existing_native_data,existing official-derived/native HDF5,available,data-official/ and campaigns/core-v1,unified for the current D02 atlas; scope audit remains,continue D03
+existing_f3,F3 reliable numerical assets,available,campaigns/core-v1 and archived F3 records,do not infer material truth from numerical nodes,carry forward with audit
+converter_pipeline,BI4/CSV/HDF5 conversion,complete for D02 canaries,lagrangian-fluid-lab/scripts/ds_data01_convert_canary.py and d02/canaries/conversion-summary.json,scope-specific physical checks still required,audit in D03
+quality_evidence,structural/numerical checks,partial,existing core quality tests plus D02_MECHANISM_ATLAS.json,old core gates include obsolete learning dependencies; physical scope checks remain,adapt per-scope checks in D03
+official_reproduction,official raw-case replay,partial,5 selected official cases reproduced in d02/canaries,coarse canaries are not production qualification,scope-audit selected cases in D03
+split_contract,leakage-safe split roles,partial,protocol/benchmark-tasks.json and prior manifests,old splits are not automatically valid for new families,freeze in D04
+model_free_evaluator,model-free read/align/score interface,available,core_benchmark.py and protocol files,requires DS-DATA-01 contract binding,adapt in D07
+material_tracer,independent material reference,diagnostic_only,existing tracer evidence,not a core production prerequisite,attach only to qualified subset
+learning_tasks,training/inference/replay,disabled,SCOPE_OVERRIDE.md,legacy receipts remain historical,no new learning process
+resource_control,actual resource ledger,partial,core runtime receipts and live GPU snapshot,old queue is not DS-DATA-01 accounting,create per-attempt ledger

@@ -1,0 +1,117 @@
+{
+  "schema": "ds-data-01.active-tasks.v1",
+  "scope": "DS-DATA-01",
+  "learning_allowed": false,
+  "tasks": [
+    {
+      "id": "D00",
+      "title": "scope reset and live state snapshot",
+      "status": "complete",
+      "evidence": [
+        "campaigns/ds-data-01/SCOPE_OVERRIDE.md",
+        "campaigns/ds-data-01/DATASET_STATUS.json",
+        "campaigns/ds-data-01/CAPABILITY_MATRIX.csv"
+      ]
+    },
+    {
+      "id": "D01",
+      "title": "inventory the complete official examples package",
+      "status": "complete",
+      "depends_on": ["D00"],
+      "evidence": [
+        "campaigns/ds-data-01/OFFICIAL_EXAMPLES_INVENTORY.json",
+        "campaigns/ds-data-01/OFFICIAL_EXAMPLES_INVENTORY.csv",
+        "campaigns/ds-data-01/OFFICIAL_TO_BENCHMARK_MAP.md"
+      ],
+      "observed": {
+        "official_groups": 14,
+        "case_directories": 107,
+        "source_reproduction": false,
+        "scientific_acceptance": false
+      }
+    },
+    {
+      "id": "D02",
+      "title": "official raw replay and multi-family mechanism atlas",
+      "status": "complete",
+      "depends_on": ["D01"],
+      "observed": {
+        "families_represented": 7,
+        "families_expected": 7,
+        "actual_cases": 26,
+        "q_i_structure_pass": 26,
+        "scientific_acceptance": false,
+        "production_eligible": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D02_MECHANISM_ATLAS.json",
+        "campaigns/ds-data-01/D02_MECHANISM_ATLAS.csv",
+        "campaigns/ds-data-01/D02_OFFICIAL_REUSE_RECEIPT.json",
+        "campaigns/ds-data-01/D02_F2_W06_REUSE_RECEIPT.json",
+        "campaigns/ds-data-01/d02/canaries/run-summary.json",
+        "campaigns/ds-data-01/d02/canaries/conversion-summary.json"
+      ]
+    },
+    {
+      "id": "D03",
+      "title": "data-specific numerical and physical acceptance",
+      "status": "in_progress",
+      "depends_on": ["D02"],
+      "observed": {
+        "cases_audited": 26,
+        "q_i_structure_pass": 25,
+        "q_n_integrity_pass": 26,
+        "external_validation_assessed": false,
+        "production_eligible": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+        "campaigns/ds-data-01/D03_SCOPE_AUDIT.csv",
+        "campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+        "campaigns/ds-data-01/D03_FAILURE_MAP.md"
+      ]
+    },
+    {
+      "id": "D04",
+      "title": "parameter design and leakage-safe split",
+      "status": "ready_after_D03",
+      "depends_on": ["D03"]
+    },
+    {
+      "id": "D05",
+      "title": "scope-qualified production batches",
+      "status": "ready_after_D04",
+      "depends_on": ["D04"]
+    },
+    {
+      "id": "D06",
+      "title": "native labels and optional material-tracer subset",
+      "status": "parallel_after_D03",
+      "depends_on": ["D03"]
+    },
+    {
+      "id": "D07",
+      "title": "model-free benchmark interface",
+      "status": "parallel_after_D03",
+      "depends_on": ["D03"]
+    },
+    {
+      "id": "D08",
+      "title": "internal dataset product and handoff",
+      "status": "pending",
+      "depends_on": ["D05", "D06", "D07"]
+    },
+    {
+      "id": "legacy-learning",
+      "title": "old L1/L2/L2-R learning tasks",
+      "status": "superseded_by_owner_scope",
+      "action": "retain historical artifacts; do not start, replay, rank, or use as a dataset gate"
+    },
+    {
+      "id": "unrelated-live-training",
+      "title": "processes outside this activity",
+      "status": "protected_unrelated",
+      "action": "observe only; do not stop by GPU number, process name, or convenience"
+    }
+  ]
+}
