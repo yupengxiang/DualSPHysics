@@ -92,6 +92,14 @@ def main() -> int:
         artifact(LAB_ROOT / "scripts" / "ds_data01_d06_labels.py", kind="repository_script"),
         artifact(LAB_ROOT / "scripts" / "ds_data01_d07_evaluator.py", kind="repository_script"),
     ])
+    for name in ("prepare-summary.json", "run-summary.json", "conversion-summary.json"):
+        artifacts.append(artifact(CAMPAIGN_ROOT / "d05" / name, kind="dataset_summary"))
+    for item in d05_plan.get("cases", []):
+        case_id = item.get("case_id")
+        if not case_id:
+            continue
+        for name in ("prepare-receipt.json", "run-receipt.json", "conversion-receipt.json"):
+            artifacts.append(artifact(CAMPAIGN_ROOT / "d05" / case_id / name, kind="dataset_receipt"))
     data_records = []
     for source_name, payload in (("D02", atlas), ("D05", {"cases": (d05_conversion or {}).get("cases", [])})):
         for item in payload.get("cases", []):
