@@ -1,0 +1,80 @@
+{
+  "schema": "core.f3.graph_residual.hidden16.seed43.security_gap_audit.v1",
+  "report_id": "f3-graph-residual-hidden16-seed43-security-gap-audit-2026-09-29",
+  "status": "closed_minimal_fail_closed",
+  "scope": {
+    "model_kind": "graph_residual",
+    "hidden": 16,
+    "seed": 43,
+    "run_id": "f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3",
+    "case_id": "F3_DEV_00_a0p903125",
+    "split": "test",
+    "transitions": 835,
+    "frames": 836,
+    "excluded_scopes": [
+      "raw seed17 SA-003",
+      "residual seed29",
+      "Core gate/registry/ledger/denominator/PLAN data"
+    ]
+  },
+  "baseline_inventory_before_change": {
+    "admission_module": {"present": false, "gap": "no residual seed43 receipt-bound admission boundary"},
+    "secure_runner_v2": {"present": false, "gap": "no residual seed43 descriptor-bound runner consumer"},
+    "seed43_specific_tests": {"present": false, "gap": "no admission or runner专项测试"},
+    "legacy_diagnostic_reports": [
+      "reports/F3-GRAPH-RESIDUAL-SEED43-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28.json",
+      "reports/F3-GRAPH-RESIDUAL-SEED43-REAL-50STEP-DIAGNOSTIC-2026-09-28.json"
+    ],
+    "legacy_reports_are_scheduler_or_gpu_proof": false
+  },
+  "bounded_file_evidence": {
+    "training_receipt": {
+      "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-training.json",
+      "sha256": "7ecf2e0a1a1415477f2fec3aa03e46df5dca974f145a7ecf18921b843d933b80",
+      "bytes": 10339,
+      "mode": "0600",
+      "owner": "workspace user",
+      "interpretation": "bounded training receipt input only; not scheduler or GPU runtime proof"
+    },
+    "checkpoint": {
+      "path": "/tmp/f3-graph_residual500-hidden16-currentmanifest-seed43-20260929-v3-checkpoint.pt",
+      "sha256": "e945606faf64b630b4328de2321bf1fde36cd76619efab574985516806edbf08",
+      "bytes": 164777,
+      "mode": "0600",
+      "owner": "workspace user",
+      "interpretation": "bounded checkpoint input only; no execution claim"
+    }
+  },
+  "minimal_closure": {
+    "admission": {
+      "path": "scripts/f3_graph_residual_hidden16_seed43_diagnostic_admission_v1.py",
+      "receipt_bound": true,
+      "external_ed25519_scheduler_reservation_required": true,
+      "descriptor_and_namespace_binding": true,
+      "one_shot_consumption": true,
+      "implicit_gpu_probe": false,
+      "credit": 0
+    },
+    "runner": {
+      "path": "scripts/f3_graph_residual_hidden16_seed43_diagnostic_runner_v2.py",
+      "receipt_bound": true,
+      "command_environment_gpu_namespace_binding": true,
+      "terminal_envelope_binding": true,
+      "popen_capability_installed": false,
+      "terminal_receipt_minting": false,
+      "production_scheduler_or_gpu_claim": false,
+      "credit": 0
+    },
+    "tests": [
+      "tests/test_f3_graph_residual_hidden16_seed43_diagnostic_admission_v1.py",
+      "tests/test_f3_graph_residual_hidden16_seed43_diagnostic_runner_v2.py"
+    ]
+  },
+  "fail_closed_invariants": {
+    "no_real_scheduler_fabrication": true,
+    "no_gpu_execution_evidence_fabrication": true,
+    "no_popen_or_wait_in_runner_tests": true,
+    "no_formal_state_or_core_gate_writes": true,
+    "synthetic_scheduler_fixture_is_test_only": true
+  }
+}
