@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import argparse
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import json
 import math
@@ -65,6 +65,12 @@ PROCESS_EXIT_SCHEMA = (
 VALIDATOR_SCHEMA = "core.f3.full_rollout_receipt_hdf5_validation.v1"
 EXECUTE_CAPABILITY_SCHEMA = (
     "core.f3.graph_raw.hidden16.audited_execute_capability.v1"
+)
+ROLLOUT_SNAPSHOT_SCHEMA = (
+    "core.f3.graph_raw.hidden16.current_manifest_rollout_snapshot.v1"
+)
+ROLLOUT_RECONCILIATION_SCHEMA = (
+    "core.f3.graph_raw.hidden16.current_manifest_rollout_reconciliation.v1"
 )
 
 DEFAULT_MANIFEST = LAB_ROOT / "campaigns" / "core-v1" / "f3-dataset-v2.json"
@@ -641,6 +647,25 @@ def _command_for(
     )
 
 
+def command_digest(
+    argv: Sequence[str],
+    cwd: Path | str,
+    env: Mapping[str, str],
+) -> str:
+    """Digest the exact launcher command identity used by ``RolloutPlan``."""
+
+    return canonical_digest(
+        {
+            "argv": list(argv),
+            "cwd": str(cwd),
+            "env_overrides": dict(env),
+            "model_kind": MODEL,
+            "hidden": HIDDEN,
+            "updates": UPDATES,
+        }
+    )
+
+
 @dataclass(frozen=True)
 class RolloutPlan:
     root: Path
@@ -652,6 +677,7 @@ class RolloutPlan:
     manifest_file_sha256: str
     training_receipt: Path
     training_receipt_sha256: str
+    training_receipt_canonical_sha256: str
     checkpoint: Mapping[str, Any]
     checkpoint_metadata: Mapping[str, Any]
     namespace: Path
@@ -661,6 +687,18 @@ class RolloutPlan:
     command_sha256: str
     python_metadata: Mapping[str, Any]
     core_learning_metadata: Mapping[str, Any]
+    stable_snapshot_sha256: str = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        # The nested mappings are intentionally retained for compatibility with
+        # the existing plan consumers.  Seal their canonical identity at plan
+        # construction time so a later mutation cannot silently become the
+        # "same" plan snapshot.
+        object.__setattr__(
+            self,
+            "stable_snapshot_sha256",
+            canonical_digest(_rollout_plan_snapshot(self)),
+        )
 
     @property
     def launch_allowed(self) -> bool:
@@ -689,6 +727,7 @@ class RolloutPlan:
             "manifest_file_sha256": self.manifest_file_sha256,
             "training_receipt": str(self.training_receipt),
             "training_receipt_sha256": self.training_receipt_sha256,
+            "training_receipt_canonical_sha256": self.training_receipt_canonical_sha256,
             "checkpoint": dict(self.checkpoint),
             "checkpoint_metadata": dict(self.checkpoint_metadata),
             "namespace": str(self.namespace),
@@ -697,6 +736,8 @@ class RolloutPlan:
             "command": list(self.command),
             "env_overrides": dict(self.env),
             "command_sha256": self.command_sha256,
+            "rollout_snapshot": rollout_plan_snapshot(self),
+            "rollout_snapshot_sha256": rollout_plan_snapshot_digest(self),
             "python_metadata": dict(self.python_metadata),
             "core_learning_metadata": dict(self.core_learning_metadata),
             **ZERO_CREDIT,
@@ -725,6 +766,333 @@ class RolloutPlan:
                 "runtime_started": False,
             },
         }
+
+
+def _rollout_plan_snapshot(plan: RolloutPlan) -> dict[str, Any]:
+    """Return the immutable, scheduler-visible identity of one rollout plan."""
+
+    return {
+        "schema": ROLLOUT_SNAPSHOT_SCHEMA,
+        "root": str(plan.root),
+        "seed": int(plan.seed),
+        "run_id": str(plan.run_id),
+        "nonce": str(plan.nonce),
+        "manifest": {
+            "path": str(plan.manifest),
+            "canonical_sha256": str(plan.manifest_sha256),
+            "file_sha256": str(plan.manifest_file_sha256),
+        },
+        "training_receipt": {
+            "path": str(plan.training_receipt),
+            "file_sha256": str(plan.training_receipt_sha256),
+            "canonical_sha256": str(plan.training_receipt_canonical_sha256),
+        },
+        "checkpoint": dict(plan.checkpoint),
+        "checkpoint_metadata": dict(plan.checkpoint_metadata),
+        "namespace": str(plan.namespace),
+        "outputs": {key: str(value) for key, value in plan.outputs.items()},
+        "command": list(plan.command),
+        "env_overrides": dict(plan.env),
+        "command_sha256": str(plan.command_sha256),
+        "python_metadata": dict(plan.python_metadata),
+        "core_learning_metadata": dict(plan.core_learning_metadata),
+        "digests": {
+            "manifest_canonical_sha256": str(plan.manifest_sha256),
+            "manifest_file_sha256": str(plan.manifest_file_sha256),
+            "training_receipt_file_sha256": str(plan.training_receipt_sha256),
+            "training_receipt_canonical_sha256": str(
+                plan.training_receipt_canonical_sha256
+            ),
+            "checkpoint_sha256": str(plan.checkpoint["sha256"]),
+            "checkpoint_bytes": int(plan.checkpoint["bytes"]),
+            "command_sha256": str(plan.command_sha256),
+        },
+    }
+
+
+def rollout_plan_snapshot(plan: RolloutPlan) -> dict[str, Any]:
+    """Return a detached copy of the sealed plan snapshot."""
+
+    if not isinstance(plan, RolloutPlan):
+        _fail("rollout snapshot requires a RolloutPlan")
+    current = _rollout_plan_snapshot(plan)
+    if canonical_digest(current) != plan.stable_snapshot_sha256:
+        _fail("RolloutPlan stable snapshot was mutated after construction")
+    return json.loads(canonical_json(current))
+
+
+def rollout_plan_snapshot_digest(plan: RolloutPlan) -> str:
+    """Return the sealed digest, rejecting mutable-plan drift first."""
+
+    rollout_plan_snapshot(plan)
+    return str(plan.stable_snapshot_sha256)
+
+
+def validate_rollout_plan_snapshot(
+    value: Any,
+    name: str = "rollout_snapshot",
+) -> dict[str, Any]:
+    """Validate a serialized snapshot without granting execution authority."""
+
+    snapshot = dict(_mapping(value, name))
+    _reject_unknown(
+        snapshot,
+        {
+            "schema", "root", "seed", "run_id", "nonce", "manifest",
+            "training_receipt", "checkpoint", "checkpoint_metadata", "namespace",
+            "outputs", "command", "env_overrides", "command_sha256",
+            "python_metadata", "core_learning_metadata", "digests",
+        },
+        name,
+    )
+    _exact(snapshot, "schema", ROLLOUT_SNAPSHOT_SCHEMA, name)
+    root = _absolute_path(_string(snapshot.get("root"), f"{name}.root"), f"{name}.root")
+    _validate_seed(snapshot.get("seed"))
+    _validate_nonce(snapshot.get("nonce"), f"{name}.nonce")
+    _string(snapshot.get("run_id"), f"{name}.run_id")
+    _absolute_path(_string(snapshot.get("namespace"), f"{name}.namespace"), f"{name}.namespace")
+
+    manifest = dict(_mapping(snapshot.get("manifest"), f"{name}.manifest"))
+    _reject_unknown(manifest, {"path", "canonical_sha256", "file_sha256"}, f"{name}.manifest")
+    _absolute_path(_string(manifest.get("path"), f"{name}.manifest.path"), f"{name}.manifest.path")
+    _sha(manifest.get("canonical_sha256"), f"{name}.manifest.canonical_sha256")
+    _sha(manifest.get("file_sha256"), f"{name}.manifest.file_sha256")
+
+    training = dict(
+        _mapping(snapshot.get("training_receipt"), f"{name}.training_receipt")
+    )
+    _reject_unknown(
+        training,
+        {"path", "file_sha256", "canonical_sha256"},
+        f"{name}.training_receipt",
+    )
+    _absolute_path(
+        _string(training.get("path"), f"{name}.training_receipt.path"),
+        f"{name}.training_receipt.path",
+    )
+    _sha(training.get("file_sha256"), f"{name}.training_receipt.file_sha256")
+    _sha(
+        training.get("canonical_sha256"),
+        f"{name}.training_receipt.canonical_sha256",
+    )
+
+    checkpoint = dict(_mapping(snapshot.get("checkpoint"), f"{name}.checkpoint"))
+    _absolute_path(_string(checkpoint.get("path"), f"{name}.checkpoint.path"), f"{name}.checkpoint.path")
+    _sha(checkpoint.get("sha256"), f"{name}.checkpoint.sha256")
+    _int(checkpoint.get("bytes"), f"{name}.checkpoint.bytes", 1)
+    checkpoint_metadata = dict(
+        _mapping(snapshot.get("checkpoint_metadata"), f"{name}.checkpoint_metadata")
+    )
+    for key in ("path", "bytes", "mode", "mtime_ns"):
+        if key not in checkpoint_metadata:
+            _fail(f"{name}.checkpoint_metadata.{key} is missing")
+    _exact(checkpoint_metadata, "path", checkpoint["path"], f"{name}.checkpoint_metadata")
+    _exact(checkpoint_metadata, "bytes", checkpoint["bytes"], f"{name}.checkpoint_metadata")
+
+    command = snapshot.get("command")
+    if not isinstance(command, list) or not command or any(
+        not isinstance(item, str) or not item for item in command
+    ):
+        _fail(f"{name}.command must be a non-empty string list")
+    env = _mapping(snapshot.get("env_overrides"), f"{name}.env_overrides")
+    if any(not isinstance(key, str) or not isinstance(value, str) for key, value in env.items()):
+        _fail(f"{name}.env_overrides must contain string pairs")
+    _sha(snapshot.get("command_sha256"), f"{name}.command_sha256")
+    if snapshot["command_sha256"] != command_digest(command, root, env):
+        _fail(f"{name}.command_sha256 does not match the exact command")
+
+    digests = dict(_mapping(snapshot.get("digests"), f"{name}.digests"))
+    _reject_unknown(
+        digests,
+        {
+            "manifest_canonical_sha256", "manifest_file_sha256",
+            "training_receipt_file_sha256", "training_receipt_canonical_sha256",
+            "checkpoint_sha256", "checkpoint_bytes", "command_sha256",
+        },
+        f"{name}.digests",
+    )
+    for key in (
+        "manifest_canonical_sha256", "manifest_file_sha256",
+        "training_receipt_file_sha256", "training_receipt_canonical_sha256",
+        "checkpoint_sha256", "command_sha256",
+    ):
+        _sha(digests.get(key), f"{name}.digests.{key}")
+    _int(digests.get("checkpoint_bytes"), f"{name}.digests.checkpoint_bytes", 1)
+    expected_digest_fields = {
+        "manifest_canonical_sha256": manifest["canonical_sha256"],
+        "manifest_file_sha256": manifest["file_sha256"],
+        "training_receipt_file_sha256": training["file_sha256"],
+        "training_receipt_canonical_sha256": training["canonical_sha256"],
+        "checkpoint_sha256": checkpoint["sha256"],
+        "checkpoint_bytes": checkpoint["bytes"],
+        "command_sha256": snapshot["command_sha256"],
+    }
+    if digests != expected_digest_fields:
+        _fail(f"{name}.digests are inconsistent with the snapshot fields")
+    return json.loads(canonical_json(snapshot))
+
+
+def reconcile_rollout_snapshot(
+    snapshot: Mapping[str, Any],
+    *,
+    manifest_descriptor: Mapping[str, Any],
+    manifest_payload: Mapping[str, Any],
+    training_descriptor: Mapping[str, Any],
+    training_payload: Mapping[str, Any],
+    checkpoint_descriptor: Mapping[str, Any],
+    expected_snapshot_sha256: str | None = None,
+) -> dict[str, Any]:
+    """Cross-bind a plan snapshot to a later stable descriptor reread.
+
+    This function is deliberately data-only: it never creates a namespace,
+    reads an authority, starts a process, or changes any external state.
+    """
+
+    expected = validate_rollout_plan_snapshot(snapshot)
+    expected_digest = canonical_digest(expected)
+    if expected_snapshot_sha256 is not None:
+        _sha(expected_snapshot_sha256, "expected_snapshot_sha256")
+        if expected_snapshot_sha256 != expected_digest:
+            _fail("RolloutPlan snapshot digest is inconsistent with its fields")
+
+    def _descriptor(value: Mapping[str, Any], name: str) -> Mapping[str, Any]:
+        _mapping(value, name)
+        _absolute_path(_string(value.get("path"), f"{name}.path"), f"{name}.path")
+        _sha(value.get("sha256"), f"{name}.sha256")
+        _int(value.get("bytes"), f"{name}.bytes", 1)
+        return value
+
+    observed_manifest = _descriptor(manifest_descriptor, "final manifest")
+    observed_training = _descriptor(training_descriptor, "final training receipt")
+    observed_checkpoint = _descriptor(checkpoint_descriptor, "final checkpoint")
+    manifest_record = _mapping(expected["manifest"], "rollout_snapshot.manifest")
+    training_record = _mapping(
+        expected["training_receipt"], "rollout_snapshot.training_receipt"
+    )
+    checkpoint_record = _mapping(expected["checkpoint"], "rollout_snapshot.checkpoint")
+
+    for label, observed, expected_path, expected_sha in (
+        (
+            "manifest",
+            observed_manifest,
+            manifest_record["path"],
+            manifest_record["file_sha256"],
+        ),
+        (
+            "training receipt",
+            observed_training,
+            training_record["path"],
+            training_record["file_sha256"],
+        ),
+        (
+            "checkpoint",
+            observed_checkpoint,
+            checkpoint_record["path"],
+            checkpoint_record["sha256"],
+        ),
+    ):
+        if observed["path"] != expected_path:
+            _fail(f"{label} path drifted from the RolloutPlan snapshot")
+        if observed["sha256"] != expected_sha:
+            _fail(f"{label} file digest drifted from the RolloutPlan snapshot")
+
+    manifest_canonical = canonical_digest(manifest_payload)
+    if manifest_canonical != manifest_record["canonical_sha256"]:
+        _fail("manifest canonical digest drifted from the RolloutPlan snapshot")
+    training_canonical = canonical_digest(training_payload)
+    if training_canonical != training_record["canonical_sha256"]:
+        _fail("training receipt canonical digest drifted from the RolloutPlan snapshot")
+    if observed_checkpoint["bytes"] != checkpoint_record["bytes"]:
+        _fail("checkpoint byte count drifted from the RolloutPlan snapshot")
+
+    checkpoint_metadata = _mapping(
+        expected["checkpoint_metadata"], "rollout_snapshot.checkpoint_metadata"
+    )
+    for key in ("path", "bytes", "mode", "mtime_ns"):
+        if observed_checkpoint.get(key) != checkpoint_metadata.get(key):
+            _fail(f"checkpoint metadata field {key} drifted from the RolloutPlan snapshot")
+
+    outputs = {
+        key: Path(value)
+        for key, value in _mapping(expected["outputs"], "rollout_snapshot.outputs").items()
+    }
+    command = expected["command"]
+    expected_command = _command_for(
+        root=Path(expected["root"]),
+        python=Path(command[0]),
+        manifest=Path(manifest_record["path"]),
+        checkpoint=Path(checkpoint_record["path"]),
+        outputs=outputs,
+    )
+    if list(expected_command) != command:
+        _fail("exact command drifted from the RolloutPlan snapshot")
+    observed_command_sha256 = command_digest(
+        command, expected["root"], expected["env_overrides"]
+    )
+    if observed_command_sha256 != expected["command_sha256"]:
+        _fail("command digest drifted from the RolloutPlan snapshot")
+
+    observed_digests = {
+        "manifest_canonical_sha256": manifest_canonical,
+        "manifest_file_sha256": observed_manifest["sha256"],
+        "training_receipt_file_sha256": observed_training["sha256"],
+        "training_receipt_canonical_sha256": training_canonical,
+        "checkpoint_sha256": observed_checkpoint["sha256"],
+        "checkpoint_bytes": observed_checkpoint["bytes"],
+        "command_sha256": observed_command_sha256,
+    }
+    if observed_digests != expected["digests"]:
+        _fail("exact manifest/training/checkpoint/command digest set drifted")
+
+    observed_snapshot = json.loads(canonical_json(expected))
+    observed_snapshot["manifest"]["canonical_sha256"] = manifest_canonical
+    observed_snapshot["manifest"]["file_sha256"] = observed_manifest["sha256"]
+    observed_snapshot["training_receipt"]["file_sha256"] = observed_training["sha256"]
+    observed_snapshot["training_receipt"]["canonical_sha256"] = training_canonical
+    observed_snapshot["checkpoint"]["sha256"] = observed_checkpoint["sha256"]
+    observed_snapshot["checkpoint"]["bytes"] = observed_checkpoint["bytes"]
+    observed_snapshot["checkpoint_metadata"]["bytes"] = observed_checkpoint["bytes"]
+    observed_snapshot["digests"] = observed_digests
+    observed_digest = canonical_digest(observed_snapshot)
+    if observed_digest != expected_digest:
+        _fail("final reread plan digest drifted from the RolloutPlan snapshot")
+    return {
+        "schema": ROLLOUT_RECONCILIATION_SCHEMA,
+        "plan_sha256": expected_digest,
+        "observed_plan_sha256": observed_digest,
+        "digests": observed_digests,
+        "command_sha256": observed_command_sha256,
+        "manifest_file_sha256": observed_manifest["sha256"],
+        "training_receipt_file_sha256": observed_training["sha256"],
+        "checkpoint_sha256": observed_checkpoint["sha256"],
+        "checkpoint_bytes": observed_checkpoint["bytes"],
+        "cross_bound": True,
+        "diagnostic_only": True,
+        "credit": 0,
+    }
+
+
+def reconcile_plan_snapshot(
+    plan: RolloutPlan,
+    *,
+    manifest_descriptor: Mapping[str, Any],
+    manifest_payload: Mapping[str, Any],
+    training_descriptor: Mapping[str, Any],
+    training_payload: Mapping[str, Any],
+    checkpoint_descriptor: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Reconcile a sealed ``RolloutPlan`` against a later stable reread."""
+
+    snapshot = rollout_plan_snapshot(plan)
+    return reconcile_rollout_snapshot(
+        snapshot,
+        manifest_descriptor=manifest_descriptor,
+        manifest_payload=manifest_payload,
+        training_descriptor=training_descriptor,
+        training_payload=training_payload,
+        checkpoint_descriptor=checkpoint_descriptor,
+        expected_snapshot_sha256=rollout_plan_snapshot_digest(plan),
+    )
 
 
 def build_plan(
@@ -793,16 +1161,7 @@ def build_plan(
         "CUDA_VISIBLE_DEVICES": str(gpu_index),
         "PYTHONDONTWRITEBYTECODE": "1",
     }
-    command_sha256 = canonical_digest(
-        {
-            "argv": list(command),
-            "cwd": str(root),
-            "env_overrides": env,
-            "model_kind": MODEL,
-            "hidden": HIDDEN,
-            "updates": UPDATES,
-        }
-    )
+    command_sha256 = command_digest(command, root, env)
     return RolloutPlan(
         root=root,
         seed=seed,
@@ -813,6 +1172,7 @@ def build_plan(
         manifest_file_sha256=str(manifest_source["sha256"]),
         training_receipt=training_path,
         training_receipt_sha256=str(training_source["sha256"]),
+        training_receipt_canonical_sha256=canonical_digest(training_payload),
         checkpoint=training["checkpoint"],
         checkpoint_metadata=training["checkpoint_metadata"],
         namespace=namespace,

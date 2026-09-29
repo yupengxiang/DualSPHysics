@@ -206,6 +206,98 @@ def test_plan_binds_current_manifest_graph_raw_and_never_opens_checkpoint(tmp_pa
     assert "graph_raw" in plan.command_sha256 or len(plan.command_sha256) == 64
 
 
+def _final_snapshot_inputs(
+    plan: launcher.RolloutPlan,
+    fixture: dict[str, object],
+) -> dict[str, object]:
+    manifest_payload, manifest_descriptor = launcher._read_bounded_json(
+        fixture["manifest"],
+        root=fixture["root"],
+        name="manifest",
+        max_bytes=launcher.MAX_MANIFEST_BYTES,
+    )
+    training_payload, training_descriptor = launcher._read_bounded_json(
+        fixture["training"],
+        root=fixture["root"],
+        name="training_receipt",
+        max_bytes=launcher.MAX_JSON_BYTES,
+    )
+    checkpoint = Path(fixture["checkpoint"])
+    checkpoint_descriptor = {
+        "path": str(checkpoint),
+        "sha256": _sha_bytes(checkpoint.read_bytes()),
+        "bytes": checkpoint.stat().st_size,
+        "mode": plan.checkpoint_metadata["mode"],
+        "mtime_ns": checkpoint.stat().st_mtime_ns,
+    }
+    return {
+        "manifest_descriptor": manifest_descriptor,
+        "manifest_payload": manifest_payload,
+        "training_descriptor": training_descriptor,
+        "training_payload": training_payload,
+        "checkpoint_descriptor": checkpoint_descriptor,
+    }
+
+
+def test_rollout_snapshot_reconciles_all_exact_digests(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, nonce="0" * 31 + "1")
+    inputs = _final_snapshot_inputs(plan, fixture)
+    reconciliation = launcher.reconcile_plan_snapshot(plan, **inputs)
+    assert reconciliation["cross_bound"] is True
+    assert reconciliation["plan_sha256"] == plan.stable_snapshot_sha256
+    assert reconciliation["observed_plan_sha256"] == plan.stable_snapshot_sha256
+    assert reconciliation["manifest_file_sha256"] == plan.manifest_file_sha256
+    assert reconciliation["training_receipt_file_sha256"] == plan.training_receipt_sha256
+    assert reconciliation["checkpoint_sha256"] == plan.checkpoint["sha256"]
+    assert reconciliation["command_sha256"] == launcher.command_digest(
+        plan.command, plan.root, plan.env
+    )
+
+
+@pytest.mark.parametrize(
+    ("domain", "message"),
+    [
+        ("manifest", "manifest file digest drifted"),
+        ("training", "training receipt file digest drifted"),
+        ("checkpoint", "checkpoint file digest drifted"),
+    ],
+)
+def test_rollout_snapshot_rejects_exact_input_digest_drift(
+    tmp_path: Path,
+    domain: str,
+    message: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, nonce="1" * 31 + "2")
+    if domain == "manifest":
+        Path(fixture["manifest"]).write_bytes(Path(fixture["manifest"]).read_bytes() + b"\n")
+    elif domain == "training":
+        Path(fixture["training"]).write_bytes(Path(fixture["training"]).read_bytes() + b"\n")
+    else:
+        Path(fixture["checkpoint"]).write_bytes(b"changed checkpoint bytes")
+    inputs = _final_snapshot_inputs(plan, fixture)
+    with pytest.raises(launcher.ContractError, match=message):
+        launcher.reconcile_plan_snapshot(plan, **inputs)
+
+
+def test_rollout_snapshot_rejects_command_and_plan_digest_drift(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path)
+    plan = _plan(fixture, tmp_path, nonce="2" * 31 + "3")
+    inputs = _final_snapshot_inputs(plan, fixture)
+    snapshot = launcher.rollout_plan_snapshot(plan)
+    snapshot["command"][-1] = "--formal"
+    with pytest.raises(launcher.ContractError, match="command_sha256"):
+        launcher.reconcile_rollout_snapshot(snapshot, **inputs)
+
+    with pytest.raises(launcher.ContractError, match="snapshot digest"):
+        launcher.reconcile_rollout_snapshot(
+            launcher.rollout_plan_snapshot(plan),
+            **inputs,
+            expected_snapshot_sha256="f" * 63 + "e",
+        )
+
+
 def test_matrix_generates_unique_fresh_nonce_namespaces(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     receipts = {seed: fixture["training"] for seed in launcher.SEEDS}
