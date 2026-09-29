@@ -413,6 +413,20 @@ def test_nonfinite_json_validation_metadata_is_rejected(tmp_path: Path) -> None:
         verify_receipt(receipt, artifact_root=tmp_path)
 
 
+def test_duplicate_json_validation_metadata_keys_are_rejected(tmp_path: Path) -> None:
+    receipt = _receipt(tmp_path)
+    row = next(
+        item for item in receipt["artifacts"]["validation"] if item["milestone"] == 8000
+    )
+    path = tmp_path / row["path"]
+    path.write_bytes(b'{"milestone":8000,"ok":false,"ok":true}\n')
+    row["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    row["bytes"] = path.stat().st_size
+
+    with pytest.raises(ReceiptContractError, match="duplicate JSON object key"):
+        verify_receipt(receipt, artifact_root=tmp_path)
+
+
 def test_single_receipt_rejects_reused_checkpoint_identity(tmp_path: Path) -> None:
     receipt = _receipt(tmp_path)
     first = deepcopy(receipt["artifacts"]["checkpoints"][0])

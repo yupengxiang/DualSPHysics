@@ -141,6 +141,17 @@ def _reject_nonfinite_json_constant(value: str, *, name: str) -> Any:
     raise _error(f"{name} contains non-finite JSON constant {value!r}")
 
 
+def _reject_duplicate_json_object_keys(
+    pairs: list[tuple[str, Any]], *, name: str
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise _error(f"{name} contains duplicate JSON object key {key!r}")
+        result[key] = value
+    return result
+
+
 def _sha256(value: Any, name: str) -> str:
     if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
         raise _error(f"{name} must be a lowercase SHA-256 digest")
@@ -358,6 +369,9 @@ def _validate_json_artifact_metadata(
                 stream,
                 parse_constant=lambda value: _reject_nonfinite_json_constant(
                     value, name=name
+                ),
+                object_pairs_hook=lambda pairs: _reject_duplicate_json_object_keys(
+                    pairs, name=name
                 ),
             )
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
