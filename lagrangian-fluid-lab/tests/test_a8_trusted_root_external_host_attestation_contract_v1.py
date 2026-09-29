@@ -120,6 +120,9 @@ def test_cli_synthetic_audit_and_validate(tmp_path: Path):
     assert payload["bindings"]["external_host_attested"] is False
     assert payload["bindings"]["full_product_receipt_present"] is False
     assert contract.main(["validate", "--report", str(report_path)]) == 0
+    report_link = tmp_path / "a8-attestation-link.json"
+    report_link.symlink_to(report_path)
+    assert contract.main(["validate", "--report", str(report_link)]) == 1
 
 
 def test_report_validator_rejects_claim_drift():
@@ -127,6 +130,32 @@ def test_report_validator_rejects_claim_drift():
     report["credit"] = 1
 
     assert "report.credit must remain 0" in contract.validate_report(report)
+
+
+def test_report_validator_rejects_forged_binding_authority_and_digest():
+    report = contract.build_report(contract.synthetic_projection())
+    report["bindings"]["external_host_attested"] = True
+    report["bindings"]["cross_binding_sha256"] = "0" * 64
+
+    errors = contract.validate_report(report)
+
+    assert "report.bindings.external_host_attested must remain false" in errors
+    assert "report.bindings.cross_binding_sha256 mismatch" in errors
+
+
+def test_cli_rejects_symlinked_projection_before_contract_evaluation(tmp_path: Path):
+    target = tmp_path / "projection.json"
+    target.write_text(json.dumps(contract.synthetic_projection()), encoding="utf-8")
+    link = tmp_path / "projection-link.json"
+    link.symlink_to(target)
+    output = tmp_path / "report.json"
+
+    assert contract.main([
+        "audit", "--input", str(link), "--output", str(output),
+    ]) == 0
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["status"] == "blocked_invalid_or_untrusted_projection"
+    assert payload["errors"][0]["code"] == "FILE_OPEN_FAILED"
 
 
 def test_report_validator_rejects_forged_status_and_structural_pass():

@@ -27,6 +27,11 @@ import re
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from scripts.core_independent_reproduction_secure_io_v1 import (
+    SecureReadError,
+    read_bounded_json_object,
+)
+
 
 SCHEMA = "core.reproduction.a8_trusted_root_external_host_attestation_input.v1"
 REPORT_SCHEMA = "core.reproduction.a8_trusted_root_external_host_attestation_report.v1"
@@ -156,6 +161,22 @@ EXECUTION_CONSTRAINTS = {
     "gate_mutation": 0,
     "completion_mutation": 0,
 }
+BINDING_FIELDS = frozenset({
+    "source_host_id",
+    "reproduction_host_id",
+    "source_data_root",
+    "reproduction_data_root",
+    "source_identity_sha256",
+    "reproduction_identity_sha256",
+    "trusted_root_review_id",
+    "root_id",
+    "external_host_attestation_id",
+    "full_product_receipt_id",
+    "cross_binding_sha256",
+    "trusted_root_authenticated",
+    "external_host_attested",
+    "full_product_receipt_present",
+})
 
 
 class ContractError(ValueError):
@@ -584,6 +605,61 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
             ):
                 if checks.get(key) is not True:
                     errors.append(f"report.checks.{key} must be true for synthetic fixture")
+        bindings = report.get("bindings")
+        if not isinstance(bindings, Mapping):
+            errors.append("structural blocked report.bindings missing")
+        else:
+            if set(bindings) != BINDING_FIELDS:
+                errors.append("structural blocked report.bindings fields are not exact")
+            for key in (
+                "trusted_root_authenticated",
+                "external_host_attested",
+                "full_product_receipt_present",
+            ):
+                if bindings.get(key) is not False:
+                    errors.append(f"report.bindings.{key} must remain false")
+            try:
+                source_host = _text(bindings.get("source_host_id"), label="report source_host_id")
+                reproduction_host = _text(
+                    bindings.get("reproduction_host_id"),
+                    label="report reproduction_host_id",
+                )
+                source_root = _root(bindings.get("source_data_root"), label="report source_data_root")
+                reproduction_root = _root(
+                    bindings.get("reproduction_data_root"),
+                    label="report reproduction_data_root",
+                )
+                _sha(bindings.get("source_identity_sha256"), label="report source identity")
+                _sha(bindings.get("reproduction_identity_sha256"), label="report reproduction identity")
+                review_id = _text(
+                    bindings.get("trusted_root_review_id"),
+                    label="report trusted_root_review_id",
+                )
+                root_id = _text(bindings.get("root_id"), label="report root_id")
+                attestation_id = _text(
+                    bindings.get("external_host_attestation_id"),
+                    label="report external_host_attestation_id",
+                )
+                receipt_id = _text(
+                    bindings.get("full_product_receipt_id"),
+                    label="report full_product_receipt_id",
+                )
+                expected_binding = _cross_binding_hash({
+                    "source_host_id": source_host,
+                    "reproduction_host_id": reproduction_host,
+                    "source_data_root": source_root,
+                    "reproduction_data_root": reproduction_root,
+                    "source_identity_sha256": bindings["source_identity_sha256"],
+                    "reproduction_identity_sha256": bindings["reproduction_identity_sha256"],
+                    "trusted_root_review_id": review_id,
+                    "root_id": root_id,
+                    "external_host_attestation_id": attestation_id,
+                    "full_product_receipt_id": receipt_id,
+                })
+                if bindings.get("cross_binding_sha256") != expected_binding:
+                    errors.append("report.bindings.cross_binding_sha256 mismatch")
+            except ContractError as error:
+                errors.append(f"report.bindings invalid: {error.code}")
     elif status == INVALID_BLOCKED_STATUS:
         if report.get("passed") is not False:
             errors.append("invalid blocked report.passed must be false")
@@ -705,15 +781,15 @@ def synthetic_projection() -> dict[str, Any]:
 
 
 def _read_projection(path: Path) -> Mapping[str, Any]:
-    raw = path.read_bytes()
-    _require(0 < len(raw) <= MAX_INPUT_BYTES, "INPUT_SIZE_OUT_OF_BOUNDS",
-             "A8 attestation projection exceeds bounded JSON input limit")
     try:
-        value = json.loads(raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ContractError("INVALID_INPUT_JSON", "A8 attestation projection is not valid JSON") from error
-    _require(isinstance(value, Mapping), "INPUT_OBJECT_REQUIRED",
-             "A8 attestation projection must be a JSON object")
+        value, _, _ = read_bounded_json_object(
+            path,
+            label="A8 attestation projection",
+            max_bytes=MAX_INPUT_BYTES,
+        )
+    except SecureReadError as error:
+        code = "INPUT_SIZE_OUT_OF_BOUNDS" if error.code == "INPUT_TOO_LARGE" else error.code
+        raise ContractError(code, str(error)) from error
     return value
 
 
@@ -750,7 +826,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             report["blockers"] = ["invalid_or_untrusted_cross_binding_projection"]
         write_json(args.output, report)
         return 0
-    report = json.loads(args.report.read_text(encoding="utf-8"))
+    try:
+        report, _, _ = read_bounded_json_object(
+            args.report,
+            label="A8 attestation report",
+            max_bytes=MAX_INPUT_BYTES,
+        )
+    except SecureReadError as error:
+        print(str(error))
+        return 1
     errors = validate_report(report)
     if errors:
         for error in errors:

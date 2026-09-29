@@ -29,6 +29,11 @@ import re
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from scripts.core_independent_reproduction_secure_io_v1 import (
+    SecureReadError,
+    read_bounded_json_object,
+)
+
 
 SCHEMA = "core.reproduction.a8_independent_readiness_input.v1"
 REPORT_SCHEMA = "core.reproduction.a8_independent_readiness_report.v1"
@@ -138,6 +143,19 @@ EXECUTION_CONSTRAINTS = {
     "gate_mutation": 0,
     "completion_mutation": 0,
 }
+BINDING_FIELDS = frozenset({
+    "source_host_id",
+    "reproduction_host_id",
+    "source_data_root",
+    "reproduction_data_root",
+    "package_sha256",
+    "source_manifest_sha256",
+    "reproduction_manifest_sha256",
+    "source_identity_sha256",
+    "reproduction_identity_sha256",
+    "trusted_root_authenticated",
+    "external_host_attested",
+})
 
 
 class ContractError(ValueError):
@@ -483,6 +501,49 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
                 errors.append("trusted-root check must remain false")
             if checks.get("external_host_attestation") is not False:
                 errors.append("external-host check must remain false")
+        bindings = report.get("bindings")
+        if not isinstance(bindings, Mapping):
+            errors.append("structural blocked report.bindings missing")
+        else:
+            if set(bindings) != BINDING_FIELDS:
+                errors.append("structural blocked report.bindings fields are not exact")
+            for key in ("trusted_root_authenticated", "external_host_attested"):
+                if bindings.get(key) is not False:
+                    errors.append(f"report.bindings.{key} must remain false")
+            try:
+                source_host = _text(bindings.get("source_host_id"), label="report source_host_id")
+                reproduction_host = _text(
+                    bindings.get("reproduction_host_id"),
+                    label="report reproduction_host_id",
+                )
+                source_root = _root(bindings.get("source_data_root"), label="report source_data_root")
+                reproduction_root = _root(
+                    bindings.get("reproduction_data_root"),
+                    label="report reproduction_data_root",
+                )
+                package_sha = _sha(bindings.get("package_sha256"), label="report package_sha256")
+                source_manifest = _sha(
+                    bindings.get("source_manifest_sha256"),
+                    label="report source_manifest_sha256",
+                )
+                reproduction_manifest = _sha(
+                    bindings.get("reproduction_manifest_sha256"),
+                    label="report reproduction_manifest_sha256",
+                )
+                expected_source = _identity_hash(source_root, source_manifest, package_sha)
+                expected_reproduction = _identity_hash(
+                    reproduction_root, reproduction_manifest, package_sha
+                )
+                if source_host == reproduction_host or source_root == reproduction_root:
+                    errors.append("report.bindings source/reproduction identities are not distinct")
+                if source_manifest == reproduction_manifest:
+                    errors.append("report.bindings source/reproduction manifests are not distinct")
+                if bindings.get("source_identity_sha256") != expected_source:
+                    errors.append("report.bindings.source_identity_sha256 mismatch")
+                if bindings.get("reproduction_identity_sha256") != expected_reproduction:
+                    errors.append("report.bindings.reproduction_identity_sha256 mismatch")
+            except ContractError as error:
+                errors.append(f"report.bindings invalid: {error.code}")
     elif status == INVALID_BLOCKED_STATUS:
         if report.get("passed") is not False:
             errors.append("invalid blocked report.passed must be false")
@@ -566,15 +627,15 @@ def synthetic_projection() -> dict[str, Any]:
 
 
 def _read_projection(path: Path) -> Mapping[str, Any]:
-    raw = path.read_bytes()
-    _require(0 < len(raw) <= MAX_INPUT_BYTES, "INPUT_SIZE_OUT_OF_BOUNDS",
-             "readiness projection exceeds the bounded JSON input limit")
     try:
-        value = json.loads(raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise ContractError("INVALID_INPUT_JSON", "readiness projection is not valid JSON") from error
-    _require(isinstance(value, Mapping), "INPUT_OBJECT_REQUIRED",
-             "readiness projection must be a JSON object")
+        value, _, _ = read_bounded_json_object(
+            path,
+            label="readiness projection",
+            max_bytes=MAX_INPUT_BYTES,
+        )
+    except SecureReadError as error:
+        code = "INPUT_SIZE_OUT_OF_BOUNDS" if error.code == "INPUT_TOO_LARGE" else error.code
+        raise ContractError(code, str(error)) from error
     return value
 
 
@@ -611,7 +672,15 @@ def main(argv: Sequence[str] | None = None) -> int:
             report["blockers"] = ["invalid_or_untrusted_readiness_projection"]
             write_json(args.output, report)
         return 0
-    report = json.loads(args.report.read_text(encoding="utf-8"))
+    try:
+        report, _, _ = read_bounded_json_object(
+            args.report,
+            label="A8 readiness report",
+            max_bytes=MAX_INPUT_BYTES,
+        )
+    except SecureReadError as error:
+        print(str(error))
+        return 1
     errors = validate_report(report)
     if errors:
         for error in errors:

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts import core_cross_host_root_review as review
 from scripts.core_cross_host_root_review import ReviewError, build_review, main
 
 
@@ -77,6 +78,45 @@ def test_metadata_fallback_is_hash_bound_and_never_formal() -> None:
     assert fallback["identity"]["checkpoint"] == report["identity"]["checkpoint_sha256"]
     assert fallback["identity"]["core_models"] == report["identity"]["core_models_sha256"]
     assert report["decision"]["formal_training_count"] == 0
+
+
+def test_environment_probe_duplicate_package_cannot_hide_lineage_drift() -> None:
+    paths = _paths()
+    ada = json.loads(paths["ada_record"].read_text())
+    h200 = json.loads(paths["h200_record"].read_text())
+    ada["packages"].append(dict(ada["packages"][0]))
+
+    with pytest.raises(ReviewError) as caught:
+        review.validate_host_pair(ada, h200)
+
+    assert caught.value.code == "PACKAGE_DUPLICATE"
+
+
+def test_malformed_gpu_uuid_cannot_satisfy_external_host_identity() -> None:
+    paths = _paths()
+    ada = json.loads(paths["ada_record"].read_text())
+    h200 = json.loads(paths["h200_record"].read_text())
+    ada["driver_query"]["stdout"] = ada["driver_query"]["stdout"].replace(
+        "GPU-", "GPU-not-a-uuid-", 1
+    )
+
+    with pytest.raises(ReviewError) as caught:
+        review.validate_host_pair(ada, h200)
+
+    assert caught.value.code == "GPU_IDENTITY_INVALID"
+
+
+def test_symlinked_json_input_is_rejected_before_cross_host_review(tmp_path: Path) -> None:
+    paths = _paths()
+    target = tmp_path / "record.json"
+    target.write_text(paths["ada_record"].read_text(), encoding="utf-8")
+    link = tmp_path / "record-link.json"
+    link.symlink_to(target)
+
+    with pytest.raises(ReviewError) as caught:
+        review._load_json(link)
+
+    assert caught.value.code == "FILE_OPEN_FAILED"
 
 
 def test_cli_writes_review_without_formal_job_or_central_mutation(tmp_path: Path) -> None:

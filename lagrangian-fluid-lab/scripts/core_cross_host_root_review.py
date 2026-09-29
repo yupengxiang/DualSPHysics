@@ -15,11 +15,18 @@ the formal-training gate.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import re
 from typing import Any, Mapping, Sequence
+
+from scripts.core_independent_reproduction_secure_io_v1 import (
+    SecureReadError,
+    absolute_path,
+    file_identity,
+    probe_identity,
+    read_bounded_json_object,
+)
 
 
 SCHEMA = "core.a8.cross_host_root_review.v1"
@@ -41,6 +48,8 @@ EXPECTED_MANIFEST = "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b57307
 EXPECTED_CHECKPOINT = "9af1dc3cb68991c38fd31b59d92895326e3abe89d5d29d33dd086d7fa462b8a8"
 EXPECTED_MODELS = "73a98b262500c30e46f14aafd2a89f2bea34116c77b6e34ce5e33e7412c38c77"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+GPU_UUID_RE = re.compile(r"^GPU-[0-9A-Fa-f-]{8,}$")
+MAX_JSON_BYTES = 16 * 1024 * 1024
 
 # The trajectory comparator is deliberately cached only by already-verified
 # content hashes.  This keeps repeated read-only reviews cheap without making
@@ -56,28 +65,41 @@ class ReviewError(ValueError):
         self.code = code
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
-        for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
-
-
-def _load_json(path: str | Path) -> tuple[dict[str, Any], Path]:
-    resolved = Path(path).expanduser().resolve()
-    value = json.loads(resolved.read_text(encoding="utf-8"))
-    if not isinstance(value, dict):
-        raise ReviewError("INVALID_JSON_OBJECT", f"JSON object required: {resolved}")
-    return value, resolved
-
-
-def _ref(path: Path, root: Path) -> dict[str, Any]:
+def _absolute_path(path: str | Path) -> Path:
     try:
-        relative = path.resolve().relative_to(root.resolve()).as_posix()
+        return absolute_path(path)
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
+
+
+def sha256_file(path: Path) -> str:
+    try:
+        return str(file_identity(path, label=f"file {path}")["sha256"])
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
+
+
+def _load_json(path: str | Path) -> tuple[dict[str, Any], Path, dict[str, Any]]:
+    try:
+        value, resolved, identity = read_bounded_json_object(
+            path,
+            label=f"JSON input {path}",
+            max_bytes=MAX_JSON_BYTES,
+        )
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
+    return value, resolved, identity
+
+
+def _ref(path: Path, root: Path, *, cache: dict[Path, dict[str, Any]] | None = None) -> dict[str, Any]:
+    candidate = _absolute_path(path)
+    review_root = _absolute_path(root)
+    try:
+        relative = candidate.relative_to(review_root).as_posix()
     except ValueError:
         raise ReviewError("NON_PORTABLE_PATH", f"evidence is outside review root: {path}")
-    return {"path": relative, "sha256": sha256_file(path), "bytes": path.stat().st_size}
+    actual = _file_identity(candidate, cache if cache is not None else {})
+    return {"path": relative, "sha256": actual["sha256"], "bytes": actual["bytes"]}
 
 
 def _require(condition: bool, code: str, message: str) -> None:
@@ -107,21 +129,43 @@ def _portable_relative(value: Any, *, role: str) -> Path:
 
 def _resolve_relative(base: Path, value: Any, *, role: str) -> Path:
     relative = _portable_relative(value, role=role)
-    base_resolved = base.resolve()
-    resolved = (base_resolved / relative).resolve()
+    base_resolved = _absolute_path(base)
+    resolved = _absolute_path(base_resolved / relative)
     try:
         resolved.relative_to(base_resolved)
     except ValueError:
         raise ReviewError("NON_PORTABLE_PATH", f"{role} path escapes its root: {value!r}")
-    _require(resolved.is_file(), "ARTIFACT_MISSING", f"{role} artifact is missing: {value!r}")
+    try:
+        probe_identity(resolved, label=role)
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
     return resolved
 
 
 def _file_identity(path: Path, cache: dict[Path, dict[str, Any]]) -> dict[str, Any]:
-    resolved = path.resolve()
-    if resolved not in cache:
-        cache[resolved] = {"sha256": sha256_file(resolved), "bytes": resolved.stat().st_size}
-    return cache[resolved]
+    resolved = _absolute_path(path)
+    try:
+        current = probe_identity(resolved, label=f"artifact {resolved}")
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
+    previous = cache.get(resolved)
+    if previous is not None:
+        if current.get("_fingerprint") != previous.get("_fingerprint"):
+            raise ReviewError(
+                "ARTIFACT_CHANGED_DURING_REVIEW",
+                f"artifact identity changed during review: {resolved}",
+            )
+        return {
+            "path": resolved,
+            "sha256": previous["sha256"],
+            "bytes": previous["bytes"],
+        }
+    try:
+        observed = file_identity(resolved, label=f"artifact {resolved}")
+    except SecureReadError as error:
+        raise ReviewError(error.code, str(error)) from error
+    cache[resolved] = observed
+    return {"path": resolved, "sha256": observed["sha256"], "bytes": observed["bytes"]}
 
 
 def _verify_file_reference(ref: Mapping[str, Any], path: Path, *, role: str,
@@ -137,7 +181,7 @@ def _verify_file_reference(ref: Mapping[str, Any], path: Path, *, role: str,
     declared_sha = _sha(ref.get("sha256"), role=f"{role} artifact")
     _require(declared_sha == actual["sha256"], "ARTIFACT_HASH_MISMATCH",
              f"{role} artifact hash differs from the file")
-    return {"path": path.resolve(), **actual}
+    return {"path": _absolute_path(path), **actual}
 
 
 def _same_identity(left: Mapping[str, Any], right: Mapping[str, Any], *, role: str) -> None:
@@ -154,6 +198,11 @@ def _gpu_uuids(record: Mapping[str, Any]) -> set[str]:
         for line in stdout.splitlines():
             fields = [part.strip() for part in line.split(",")]
             if len(fields) >= 3 and fields[-1].startswith("GPU-"):
+                if GPU_UUID_RE.fullmatch(fields[-1]) is None:
+                    raise ReviewError(
+                        "GPU_IDENTITY_INVALID",
+                        f"driver query contains an invalid GPU UUID: {fields[-1]!r}",
+                    )
                 values.add(fields[-1])
     return values
 
@@ -162,6 +211,11 @@ def _package_map(record: Mapping[str, Any]) -> dict[str, tuple[Any, Any]]:
     result: dict[str, tuple[Any, Any]] = {}
     for row in record.get("packages", []):
         if isinstance(row, Mapping) and isinstance(row.get("name"), str):
+            if row["name"] in result:
+                raise ReviewError(
+                    "PACKAGE_DUPLICATE",
+                    f"environment probe repeats package {row['name']!r}",
+                )
             result[row["name"]] = (row.get("version"), row.get("sha256"))
     return result
 
@@ -170,6 +224,11 @@ def _module_map(record: Mapping[str, Any]) -> dict[str, str]:
     result: dict[str, str] = {}
     for row in record.get("bundle_modules", []):
         if isinstance(row, Mapping) and isinstance(row.get("module"), str):
+            if row["module"] in result:
+                raise ReviewError(
+                    "MODULE_DUPLICATE",
+                    f"environment probe repeats module {row['module']!r}",
+                )
             result[row["module"]] = str(row.get("sha256", ""))
     return result
 
@@ -370,12 +429,13 @@ def _validate_execution_artifacts(execution: Mapping[str, Any], *, report_path: 
     _portable_relative(report_reference.get("relative_path"), role=f"{label} report")
     bound_report = _resolve_relative(root, report_reference.get("relative_path"),
                                      role=f"{label} report")
-    _require(bound_report == report_path.resolve(), "A8_REPORT_BINDING",
+    report_absolute = _absolute_path(report_path)
+    _require(bound_report == report_absolute, "A8_REPORT_BINDING",
              f"{label} comparison receipt points at a different report")
     report_identity = _verify_file_reference(report_reference, bound_report,
                                              role=f"{label} report", cache=cache)
 
-    attempt_root = report_path.resolve().parent.parent
+    attempt_root = report_absolute.parent.parent
     required_outputs = execution.get("required_outputs")
     _require(isinstance(required_outputs, list), "A8_REQUIRED_OUTPUTS_MISSING",
              f"{label} required-output list is missing")
@@ -404,9 +464,9 @@ def _validate_execution_artifacts(execution: Mapping[str, Any], *, report_path: 
             reference, actual, role=f"{label} required output {relative_text}", cache=cache)
     _require(observed_paths == expected_paths, "A8_REQUIRED_OUTPUT_DENOMINATOR",
              f"{label} required outputs do not close the registered artifact denominator")
-    _require(report_path.resolve() in artifacts, "A8_REPORT_NOT_IN_OUTPUTS",
+    _require(report_absolute in artifacts, "A8_REPORT_NOT_IN_OUTPUTS",
              f"{label} report is not one of the verified required outputs")
-    _same_identity(report_identity, artifacts[report_path.resolve()], role=f"{label} report")
+    _same_identity(report_identity, artifacts[report_absolute], role=f"{label} report")
 
     receipt = execution.get("receipt")
     _require(isinstance(receipt, Mapping), "A8_EXECUTION_RECEIPT_MISSING",
@@ -615,7 +675,7 @@ def validate_a8_pair(*, ada_report: Mapping[str, Any], h200_report: Mapping[str,
              "A8_HOST_BINDING", "A8 comparison observed hosts are not bound")
     paired_report = block.get("paired_report")
     _require(isinstance(paired_report, str) and paired_report
-             and Path(paired_report).resolve() == h200_report_path.resolve(), "A8_REPORT_BINDING",
+             and _absolute_path(paired_report) == _absolute_path(h200_report_path), "A8_REPORT_BINDING",
              "A8 comparison paired report is not the supplied H200 report")
 
     scope = comparison.get("scope")
@@ -708,20 +768,26 @@ def validate_a8_pair(*, ada_report: Mapping[str, Any], h200_report: Mapping[str,
     }
 
 
-def _validate_metadata(metadata_root: Path) -> dict[str, Any]:
+def _validate_metadata(
+    metadata_root: Path, *, cache: dict[Path, dict[str, Any]] | None = None
+) -> dict[str, Any]:
     """Validate the lightweight fallback bundle by content, never by path."""
     dataset = metadata_root / "dataset.json"
     checkpoint = metadata_root / "models" / "checkpoint-001.pt"
     models = metadata_root / "code" / "scripts" / "core_models.py"
     for path in (dataset, checkpoint, models):
         _require(path.is_file(), "BUNDLE_METADATA_MISSING", f"metadata fallback missing: {path}")
-    hashes = {"manifest": sha256_file(dataset), "checkpoint": sha256_file(checkpoint),
-              "core_models": sha256_file(models)}
+    identity_cache = cache if cache is not None else {}
+    hashes = {
+        "manifest": _file_identity(dataset, identity_cache)["sha256"],
+        "checkpoint": _file_identity(checkpoint, identity_cache)["sha256"],
+        "core_models": _file_identity(models, identity_cache)["sha256"],
+    }
     expected = {"manifest": EXPECTED_MANIFEST, "checkpoint": EXPECTED_CHECKPOINT,
                 "core_models": EXPECTED_MODELS}
     _require(hashes == expected, "BUNDLE_METADATA_HASH_MISMATCH",
              f"metadata fallback identity differs: {hashes}")
-    return {"root": str(metadata_root.resolve()), "identity": hashes,
+    return {"root": str(_absolute_path(metadata_root)), "identity": hashes,
             "execution_role": "identity_fallback_only"}
 
 
@@ -732,8 +798,8 @@ def build_review(*, root: str | Path, ada_record: str | Path, h200_record: str |
                  a8_ada_report: str | Path, a8_h200_report: str | Path,
                  a8_comparison: str | Path, a8_root_review: str | Path,
                  metadata_root: str | Path) -> dict[str, Any]:
-    root_path = Path(root).expanduser().resolve()
-    inputs: dict[str, tuple[dict[str, Any], Path]] = {}
+    root_path = _absolute_path(root)
+    inputs: dict[str, tuple[dict[str, Any], Path, dict[str, Any]]] = {}
     for label, path in (
         ("ada_record", ada_record), ("h200_record", h200_record),
         ("ada_spec", ada_spec), ("h200_spec", h200_spec),
@@ -768,16 +834,25 @@ def build_review(*, root: str | Path, ada_record: str | Path, h200_record: str |
     _require(h200_gpu in host_pair["h200"]["gpu_uuids"], "CANARY_GPU_UNBOUND",
              "H200 canary GPU UUID is absent from its environment probe")
     canary_pair = validate_canary_comparison(inputs["canary_comparison"][0])
-    artifact_cache: dict[Path, dict[str, Any]] = {}
+    artifact_cache: dict[Path, dict[str, Any]] = {
+        path: {"path": path, **identity}
+        for _, path, identity in inputs.values()
+    }
     a8_pair = validate_a8_pair(
         ada_report=inputs["a8_ada_report"][0], h200_report=inputs["a8_h200_report"][0],
         comparison=inputs["a8_comparison"][0], root_review=inputs["a8_root_review"][0],
         ada_report_path=inputs["a8_ada_report"][1], h200_report_path=inputs["a8_h200_report"][1],
         comparison_path=inputs["a8_comparison"][1], root_review_path=inputs["a8_root_review"][1],
         host_pair=host_pair, root=root_path, cache=artifact_cache)
-    metadata = _validate_metadata(Path(metadata_root).expanduser().resolve())
-    evidence = {label: _ref(path, root_path) for label, (_, path) in inputs.items()}
-    evidence["metadata_bundle"] = _ref(Path(metadata_root).expanduser().resolve() / "bundle.json", root_path)
+    metadata_root_path = _absolute_path(metadata_root)
+    metadata = _validate_metadata(metadata_root_path, cache=artifact_cache)
+    evidence = {
+        label: _ref(path, root_path, cache=artifact_cache)
+        for label, (_, path, _) in inputs.items()
+    }
+    evidence["metadata_bundle"] = _ref(
+        metadata_root_path / "bundle.json", root_path, cache=artifact_cache
+    )
     return {
         "schema": SCHEMA,
         "status": "pass",
@@ -827,7 +902,7 @@ def build_review(*, root: str | Path, ada_record: str | Path, h200_record: str |
 
 
 def write_json(path: str | Path, payload: Mapping[str, Any]) -> None:
-    target = Path(path).expanduser().resolve()
+    target = _absolute_path(path)
     _require(not target.exists(), "IMMUTABLE_OUTPUT_EXISTS", f"review output already exists: {target}")
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_name(target.name + ".partial")
