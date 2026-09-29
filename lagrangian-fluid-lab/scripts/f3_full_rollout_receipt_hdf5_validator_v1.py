@@ -49,7 +49,15 @@ import numpy as np
 SCHEMA = "core.f3.full_rollout_receipt_hdf5_validation.v1"
 EVALUATION_SCHEMA = "core.evaluation.v1"
 DEFAULT_EXPECTED_TRANSITIONS = 835
-MAX_HDF5_BYTES = 512 * 1024 * 1024
+# The current-manifest 835-step/34,560-particle trajectory observed on
+# 2026-09-29 is 723,147,992 bytes.  A one-GiB file budget covers that exact
+# artifact with finite headroom while keeping each of the two stable reads
+# bounded (the two returned raw snapshots total at most two GiB; the 1-MiB
+# chunk assembly adds only a separately bounded transient overhead).
+# This is deliberately a file-size cap, not an unbounded allowance: the
+# single-link, immutable-snapshot, HDF5-link, shape, finite-state, tail, and
+# future-state checks below remain mandatory.
+MAX_HDF5_BYTES = 1 * 1024 * 1024 * 1024
 MAX_HDF5_LINKS = 8192
 REQUIRED_DATASETS = frozenset(
     {"time", "position", "velocity", "particle_id", "particle_zone", "mass", "valid"}

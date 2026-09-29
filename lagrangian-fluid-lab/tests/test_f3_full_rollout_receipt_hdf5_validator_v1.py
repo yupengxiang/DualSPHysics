@@ -17,6 +17,7 @@ from scripts import f3_full_rollout_receipt_hdf5_validator_v1 as validator
 
 EXPECTED = 835
 CASE_ID = "F3_SYNTHETIC_RECEIPT"
+CURRENT_MANIFEST_TRAJECTORY_BYTES = 723_147_992
 
 
 def _metric_values(executed: int) -> list[float | None]:
@@ -134,6 +135,41 @@ def test_complete_835_transition_fixture_passes_read_only_validation(tmp_path):
     assert result["checks"]["trajectory_file_sha256"] == hashlib.sha256(before).hexdigest()
     assert result["checks"]["trajectory_filesystem_identity_stable"] is True
     assert trajectory.read_bytes() == before
+
+
+def test_current_manifest_sized_trajectory_above_512_mib_passes(tmp_path):
+    """The observed full current-manifest byte size remains a valid input."""
+    evaluation, trajectory = _write_fixture(tmp_path)
+    os.truncate(trajectory, CURRENT_MANIFEST_TRAJECTORY_BYTES)
+
+    assert trajectory.stat().st_size > 512 * 1024 * 1024
+    assert trajectory.stat().st_size < validator.MAX_HDF5_BYTES
+
+    result = validator.validate_receipt(evaluation)
+
+    assert result["passed"] is True
+    assert result["checks"]["trajectory_file_bytes"] == CURRENT_MANIFEST_TRAJECTORY_BYTES
+    assert result["checks"]["trajectory_frames"] == EXPECTED + 1
+    assert result["checks"]["trajectory_transitions"] == EXPECTED
+
+
+def test_trajectory_over_new_bounded_size_is_rejected_before_read(tmp_path):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    os.truncate(trajectory, validator.MAX_HDF5_BYTES + 1)
+
+    with pytest.raises(validator.ValidationError, match="bounded size"):
+        validator.validate_receipt(evaluation)
+
+
+def test_small_fixture_remains_below_new_bound_and_passes(tmp_path):
+    evaluation, trajectory = _write_fixture(tmp_path)
+    assert trajectory.stat().st_size < 512 * 1024 * 1024
+    assert trajectory.stat().st_size < validator.MAX_HDF5_BYTES
+
+    result = validator.validate_receipt(evaluation)
+
+    assert result["passed"] is True
+    assert result["checks"]["trajectory_file_bytes"] == trajectory.stat().st_size
 
 
 def test_maximum_steps_fixture_preserves_835_denominator_and_is_incomplete(tmp_path):
