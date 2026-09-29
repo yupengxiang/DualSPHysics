@@ -10,6 +10,12 @@ from scripts import f4_supportcap_r002_static_design_v1 as predecessor
 from scripts import f4_supportcap_r002_static_design_v2 as design
 
 
+def _load_attribution():
+    return json.loads(
+        (predecessor.LAB / predecessor.ATTRIBUTION).read_text(encoding="utf-8")
+    )
+
+
 def test_build_recipe_never_hashes_or_opens_hdf5_or_npz(monkeypatch):
     original = predecessor._sha256
     seen = []
@@ -28,7 +34,7 @@ def test_build_recipe_never_hashes_or_opens_hdf5_or_npz(monkeypatch):
 
 
 def test_r001_trace_binding_is_inherited_verbatim_from_attribution_json():
-    attribution = json.loads(predecessor.ATTRIBUTION.read_text(encoding="utf-8"))
+    attribution = _load_attribution()
     source = next(item for item in attribution["bindings"] if item["path"] == design.TRACE_PATH)
     bound = next(item for item in design.parent_bindings(attribution) if item["path"] == design.TRACE_PATH)
     assert bound == {
@@ -40,7 +46,7 @@ def test_r001_trace_binding_is_inherited_verbatim_from_attribution_json():
 
 
 def test_parent_binding_rejects_unexpected_binary_without_access():
-    attribution = json.loads(predecessor.ATTRIBUTION.read_text(encoding="utf-8"))
+    attribution = _load_attribution()
     attribution["bindings"].append({
         "path": "campaigns/elsewhere/unexpected.h5",
         "role": "unexpected binary",
@@ -75,7 +81,7 @@ def test_recipe_preserves_temporal_alignment_and_zero_runtime_authority():
 def test_written_v2_receipt_matches_current_text_sources_and_inherited_h5_metadata():
     receipt = json.loads((design.LAB / design.RECEIPT).read_text(encoding="utf-8"))
     assert receipt == design.build_recipe()
-    attribution = json.loads(predecessor.ATTRIBUTION.read_text(encoding="utf-8"))
+    attribution = _load_attribution()
     inherited = {item["path"]: item for item in attribution["bindings"]}
     for binding in receipt["bindings"]:
         source = design.LAB / binding["path"]

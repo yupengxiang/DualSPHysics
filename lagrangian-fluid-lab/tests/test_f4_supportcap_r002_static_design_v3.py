@@ -69,7 +69,9 @@ def test_v3_receipt_binds_access_guard_generator_and_tests():
 def test_written_v3_receipt_closes_text_sources_and_inherits_trace_hash_only():
     receipt = json.loads((design.LAB / design.RECEIPT).read_text(encoding="utf-8"))
     attribution = json.loads(
-        predecessor.predecessor.ATTRIBUTION.read_text(encoding="utf-8")
+        (
+            predecessor.predecessor.LAB / predecessor.predecessor.ATTRIBUTION
+        ).read_text(encoding="utf-8")
     )
     inherited = {item["path"]: item for item in attribution["bindings"]}
     for binding in receipt["bindings"]:

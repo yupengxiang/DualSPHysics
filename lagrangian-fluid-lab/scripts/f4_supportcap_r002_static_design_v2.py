@@ -25,7 +25,7 @@ from scripts import f4_supportcap_r002_static_design_v1 as predecessor
 
 RECEIPT = Path(
     "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/"
-    "r002-static-design-v2/recipe.json"
+    "r002-static-design-v2-20260929-RERUN1/recipe.json"
 )
 SCHEMA = "core.material.f4.supportcap_r002_static_temporal_alignment_design.v2"
 TRACE_PATH = str(predecessor.R001_DIR / "trace.h5")

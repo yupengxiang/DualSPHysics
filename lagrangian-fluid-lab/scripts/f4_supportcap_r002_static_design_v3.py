@@ -22,7 +22,7 @@ from scripts import f4_supportcap_r002_static_design_v2 as predecessor
 
 RECEIPT = Path(
     "campaigns/core-v1/material/candidates/f4-supportcap-affine-query-bound-v3/"
-    "r002-static-design-v3/recipe.json"
+    "r002-static-design-v3-20260929-RERUN1/recipe.json"
 )
 SCHEMA = "core.material.f4.supportcap_r002_static_temporal_alignment_design.v3"
 
