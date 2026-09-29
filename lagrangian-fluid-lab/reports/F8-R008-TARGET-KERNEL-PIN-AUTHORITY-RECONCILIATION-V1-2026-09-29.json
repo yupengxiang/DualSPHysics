@@ -1,0 +1,376 @@
+{
+  "authority_separation": {
+    "caller_claim_is_authority": false,
+    "full_value_projection_required_for_comparison": true,
+    "independent_consume_path_required": true,
+    "independent_runtime_measurement_required": true,
+    "local_observation_is_authority": false,
+    "manifest_status_alone_is_authority": false,
+    "synthetic_fixture_is_authority": false,
+    "trusted_intake_status_alone_is_runtime_authority": false
+  },
+  "authorization": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "blocking_gaps": [
+    {
+      "code": "trusted_target_pin_attestation_missing",
+      "detail": "The current trusted-pin intake has no external attestation or independent trust anchor.",
+      "next_artifact": "externally anchored target/source/build/runtime/host pin attestation"
+    },
+    {
+      "code": "target_manifest_external_evidence_missing",
+      "detail": "The current target-kernel manifest intake has no verified external manifest or artifact set.",
+      "next_artifact": "verified target-kernel manifest with source/UAPI/config/build artifacts"
+    },
+    {
+      "code": "value_level_cross_contract_join_unavailable",
+      "detail": "No current report exports a complete, independently trusted value-level join across local observation, target manifest, and trusted authority.",
+      "next_artifact": "producer-issued value projection bound to the same external authority and runtime receipt"
+    },
+    {
+      "code": "target_runtime_conformance_missing",
+      "detail": "Source/build/runtime pin equality would still not prove loaded target-kernel ABI or runtime conformance.",
+      "next_artifact": "independent target-runtime measurement and conformance receipt"
+    }
+  ],
+  "contract_role": "value_level_cross_contract_reconciliation_non_authorizing",
+  "dependencies": {
+    "local_inventory": {
+      "bytes": 12781,
+      "exists": true,
+      "path": "reports/F8-R008-TARGET-KERNEL-LOCAL-INVENTORY-V1-2026-09-28.json",
+      "role": "local_inventory",
+      "sha256": "a7c511a5be9ed0ae7efa4b546eeea5f2e72e43e2ac3c8743b2ff1972927d3976"
+    },
+    "readiness_inventory": {
+      "bytes": 42410,
+      "exists": true,
+      "path": "reports/F8-R008-TARGET-KERNEL-SOURCE-BUILD-RUNTIME-PIN-READINESS-INVENTORY-V1-2026-09-29.json",
+      "role": "readiness_inventory",
+      "sha256": "eb34f80df2ceeabb58f8e3f06fb55ecc4afaa59e034ed4b28e4b7191d0d3ec67"
+    },
+    "target_manifest_intake": {
+      "bytes": 2345,
+      "exists": true,
+      "path": "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+      "role": "target_manifest_intake",
+      "sha256": "a170e911f42a5544bdb2adea30ed96fd29f3f83b1e36a7e2481dec03a8d81f8c"
+    },
+    "trusted_pin_intake": {
+      "bytes": 2675,
+      "exists": true,
+      "path": "reports/F8-R008-TRUSTED-TARGET-PIN-INTAKE-V1.json",
+      "role": "trusted_pin_intake",
+      "sha256": "062f76b6edd86b098515d39c15c6e7bb8181b5e5090323c40644e3aa9819d412"
+    }
+  },
+  "local_observation": {
+    "fields": {
+      "build_id": {
+        "locally_proven": false,
+        "observed": false,
+        "sample_digest": null,
+        "trust_class": "local_observation_only",
+        "value": null,
+        "value_kind": "full_value"
+      },
+      "config_sha256": {
+        "locally_proven": true,
+        "observed": true,
+        "sample_digest": null,
+        "trust_class": "local_observation_only",
+        "value": "0ffca159bcee00c87b27e093889b710fe680ccfa37149e4e1ef8d5053e1e644c",
+        "value_kind": "full_value"
+      },
+      "kernel_release": {
+        "locally_proven": true,
+        "observed": true,
+        "sample_digest": null,
+        "trust_class": "local_observation_only",
+        "value": "6.8.0-138-generic",
+        "value_kind": "full_value"
+      },
+      "source_commit": {
+        "locally_proven": false,
+        "observed": false,
+        "sample_digest": null,
+        "trust_class": "local_observation_only",
+        "value": null,
+        "value_kind": "full_value"
+      },
+      "source_tree_sha256": {
+        "locally_proven": false,
+        "observed": false,
+        "sample_digest": null,
+        "trust_class": "local_observation_only",
+        "value": null,
+        "value_kind": "full_value"
+      },
+      "uapi_sha256": {
+        "locally_proven": true,
+        "observed": true,
+        "sample_digest": "ee6168f6f4d8b9d745fe6440cfb01bd13cc87472ef7b279a1140682be1090ed3",
+        "trust_class": "local_observation_only",
+        "value": null,
+        "value_kind": "sample_only"
+      }
+    },
+    "promotable": false,
+    "trust_class": "local_observation_only"
+  },
+  "non_changes": [
+    "target source/build/kernel/runtime state",
+    "production HDF5/checkpoint/trajectory",
+    "registry",
+    "ledger",
+    "denominator",
+    "gate",
+    "completion",
+    "PLAN.md",
+    "historical receipts"
+  ],
+  "pin_reconciliation": [
+    {
+      "accepted_as_authority": false,
+      "local_observed": true,
+      "local_value_exported": true,
+      "local_value_kind": "full_value",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "kernel_release",
+      "reason": "local observation cannot be promoted into a target authority pin",
+      "required": true,
+      "state": "local_observation_not_external_pin",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    },
+    {
+      "accepted_as_authority": false,
+      "local_observed": false,
+      "local_value_exported": false,
+      "local_value_kind": "full_value",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "source_commit",
+      "reason": "no external target manifest or trusted authority value is available",
+      "required": true,
+      "state": "external_authority_missing",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    },
+    {
+      "accepted_as_authority": false,
+      "local_observed": false,
+      "local_value_exported": false,
+      "local_value_kind": "full_value",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "source_tree_sha256",
+      "reason": "no external target manifest or trusted authority value is available",
+      "required": true,
+      "state": "external_authority_missing",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    },
+    {
+      "accepted_as_authority": false,
+      "local_observed": true,
+      "local_value_exported": false,
+      "local_value_kind": "sample_only",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "uapi_sha256",
+      "reason": "local sample is not a complete target pin",
+      "required": true,
+      "state": "local_sample_only_not_external_pin",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    },
+    {
+      "accepted_as_authority": false,
+      "local_observed": true,
+      "local_value_exported": true,
+      "local_value_kind": "full_value",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "config_sha256",
+      "reason": "local observation cannot be promoted into a target authority pin",
+      "required": true,
+      "state": "local_observation_not_external_pin",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    },
+    {
+      "accepted_as_authority": false,
+      "local_observed": false,
+      "local_value_exported": false,
+      "local_value_kind": "full_value",
+      "manifest_value_exported": false,
+      "manifest_verified": false,
+      "pin": "build_id",
+      "reason": "no external target manifest or trusted authority value is available",
+      "required": true,
+      "state": "external_authority_missing",
+      "trusted_authority_verified": false,
+      "trusted_value_exported": false
+    }
+  ],
+  "prohibited_operations": [
+    "target_source_build_kernel_or_runtime_read",
+    "external_artifact_reference_follow_or_open",
+    "production_hdf5_checkpoint_trajectory_read",
+    "privileged_probe_or_fanotify",
+    "native_solver_worker_gpu_queue",
+    "registry_ledger_denominator_gate_completion_plan_mutation"
+  ],
+  "read_policy": {
+    "bounded_checked_in_reports_only": true,
+    "caller_claim_promoted_to_authority": false,
+    "external_artifact_reference_followed": false,
+    "kernel_or_runtime_probe": false,
+    "local_observation_promoted_to_authority": false,
+    "native_solver_worker_gpu_queue": false,
+    "production_hdf5_checkpoint_trajectory_opened": false,
+    "target_source_or_build_opened": false
+  },
+  "record_id": "f8-r008-target-kernel-pin-authority-reconciliation-v1",
+  "schema": "core.cfd.f8.r008.target_kernel_pin_authority_reconciliation_report.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "side_effects": {
+    "checked_in_report_reads": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "external_pin_inputs_read": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "kernel_or_runtime_probe": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "privileged_probe": false,
+    "production_data_read": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "target_build_read": false,
+    "target_source_read": false,
+    "worker_started": false
+  },
+  "status": "diagnostic_only_target_kernel_pin_authority_reconciliation_blocked",
+  "summary": {
+    "authority_missing_count": 3,
+    "cross_contract_match_count": 0,
+    "drift_rejection_count": 0,
+    "local_only_count": 3,
+    "required_pin_count": 6,
+    "states": {
+      "external_authority_missing": 3,
+      "local_observation_not_external_pin": 2,
+      "local_sample_only_not_external_pin": 1
+    }
+  },
+  "target_manifest": {
+    "fields": {
+      "build_id": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      },
+      "config_sha256": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      },
+      "kernel_release": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      },
+      "source_commit": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      },
+      "source_tree_sha256": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      },
+      "uapi_sha256": {
+        "trust_class": "unavailable_external_manifest",
+        "value": null,
+        "value_exported": false,
+        "verified_by_manifest_intake": false
+      }
+    },
+    "trust_class": "external_manifest_intake_status_only",
+    "verified_field_count": 0
+  },
+  "trusted_target_authority": {
+    "fields": {
+      "build_id": {
+        "domain": "build",
+        "field": "build_id",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      },
+      "config_sha256": {
+        "domain": "build",
+        "field": "config_sha256",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      },
+      "kernel_release": {
+        "domain": "target_kernel",
+        "field": "kernel_release",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      },
+      "source_commit": {
+        "domain": "source",
+        "field": "source_commit",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      },
+      "source_tree_sha256": {
+        "domain": "source",
+        "field": "source_tree_sha256",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      },
+      "uapi_sha256": {
+        "domain": "source",
+        "field": "uapi_sha256",
+        "trust_class": "unavailable_trusted_authority",
+        "value": null,
+        "value_exported": false,
+        "verified_by_trusted_intake": false
+      }
+    },
+    "trust_class": "independent_trusted_intake_status_only",
+    "value_projection_complete": false,
+    "verified_field_count": 0
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "core.cfd.f8.r008.target_kernel_pin_authority_reconciliation.contract.v1",
+  "campaign_id": "f8-r008-target-kernel-pin-authority-reconciliation-v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "status": "diagnostic_only_target_kernel_pin_authority_reconciliation_blocked",
+  "intent": "reconcile local observation, external target-manifest status, and trusted-pin status without promoting any source to authority",
+  "inputs": {
+    "local_inventory": "reports/F8-R008-TARGET-KERNEL-LOCAL-INVENTORY-V1-2026-09-28.json",
+    "target_manifest_intake": "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+    "trusted_pin_intake": "reports/F8-R008-TRUSTED-TARGET-PIN-INTAKE-V1.json",
+    "readiness_inventory": "reports/F8-R008-TARGET-KERNEL-SOURCE-BUILD-RUNTIME-PIN-READINESS-INVENTORY-V1-2026-09-29.json"
+  },
+  "reconciliation": {
+    "required_pins": [
+      "kernel_release",
+      "source_commit",
+      "source_tree_sha256",
+      "uapi_sha256",
+      "config_sha256",
+      "build_id"
+    ],
+    "full_value_projection_required": true,
+    "local_observation_can_substitute": false,
+    "caller_claim_can_substitute": false,
+    "synthetic_fixture_can_substitute": false,
+    "manifest_status_alone_can_substitute": false,
+    "trusted_intake_status_alone_can_substitute": false,
+    "independent_runtime_measurement_required": true,
+    "independent_consume_path_required": true,
+    "drift_policy": "reject_fail_closed"
+  },
+  "execution_policy": {
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "popen": false,
+    "native": false,
+    "solver": false,
+    "worker": false,
+    "gpu": false,
+    "queue": false,
+    "target_source_build_runtime_read": false,
+    "production_hdf5_checkpoint_trajectory_read": false
+  },
+  "outputs": {
+    "script": "scripts/f8_r008_target_kernel_pin_authority_reconciliation_v1.py",
+    "test": "tests/test_f8_r008_target_kernel_pin_authority_reconciliation_v1.py",
+    "json": "reports/F8-R008-TARGET-KERNEL-PIN-AUTHORITY-RECONCILIATION-V1-2026-09-29.json",
+    "markdown": "reports/F8-R008-TARGET-KERNEL-PIN-AUTHORITY-RECONCILIATION-V1-2026-09-29.zh-CN.md"
+  },
+  "promotion": {
+    "launch_allowed": false,
+    "formal": false,
+    "T1_numerical": false,
+    "qualification_credit": 0,
+    "registry_write": false,
+    "ledger_write": false,
+    "denominator_write": false,
+    "gate_write": false,
+    "completion_write": false,
+    "historical_receipt_rewrite": false,
+    "PLAN_write": false
+  }
+}
