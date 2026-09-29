@@ -1,0 +1,419 @@
+{
+  "allowed_write_set": [
+    "scripts/a8_package_reproduction_readiness_boundary_auditor_v1.py",
+    "tests/test_a8_package_reproduction_readiness_boundary_auditor_v1.py",
+    "reports/A8-PACKAGE-REPRODUCTION-READINESS-BOUNDARY-AUDIT-V1-2026-09-29.json",
+    "reports/A8-PACKAGE-REPRODUCTION-READINESS-BOUNDARY-AUDIT-V1-2026-09-29.zh-CN.md"
+  ],
+  "conclusion": "open_projection_gaps_but_no_authorizing_evidence",
+  "contract_readiness": {
+    "checkpoint_current_binding": {
+      "artifact": {
+        "bytes": 37033,
+        "path": "reports/A8-CHECKPOINT-MODEL-REPRODUCTION-READINESS-AUDIT-V1-2026-09-28.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.a8.checkpoint_model_reproduction_readiness_audit.v1",
+        "sha256": "785955da03c0afc2488700e30650c02576114e1b69aca10b8d5bfe0b0092697e"
+      },
+      "current_ready_for_trusted_model_package": false,
+      "current_trusted_checkpoint_binding": false,
+      "status": "blocked_missing_trusted_checkpoint_binding"
+    },
+    "independent_reproduction": {
+      "artifact": {
+        "bytes": 2771,
+        "path": "reports/A8-INDEPENDENT-REPRODUCTION-READINESS-CONTRACT-V1-2026-09-29.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.reproduction.a8_independent_readiness_report.v1",
+        "sha256": "9fcfcc8b036187a8276e8659c3085b5db1271d2d9eb2d780c3270ff6f0c312ac"
+      },
+      "blockers": [
+        "trusted_root_review_missing_or_unauthenticated",
+        "external_host_attestation_missing",
+        "non_diagnostic_full_product_reproduction_missing"
+      ],
+      "credit": 0,
+      "independent_reproduction": false,
+      "readiness_pass": false,
+      "schema": "core.reproduction.a8_independent_readiness_report.v1",
+      "status": "blocked_missing_trusted_root_and_external_host_attestation"
+    },
+    "trusted_root_external_host": {
+      "artifact": {
+        "bytes": 3172,
+        "path": "reports/A8-TRUSTED-ROOT-EXTERNAL-HOST-ATTESTATION-CONTRACT-V1-2026-09-29.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.reproduction.a8_trusted_root_external_host_attestation_report.v1",
+        "sha256": "c7efd0a3ae9ef55e8f115356abd3214e9252c8012f714eacc0e1e9475ffaa638"
+      },
+      "blockers": [
+        "trusted_root_review_not_attested",
+        "external_host_attestation_not_attested",
+        "non_diagnostic_full_product_receipt_missing",
+        "synthetic_cross_binding_is_identity_only_not_evidence"
+      ],
+      "credit": 0,
+      "independent_reproduction": false,
+      "readiness_pass": false,
+      "schema": "core.reproduction.a8_trusted_root_external_host_attestation_report.v1",
+      "status": "blocked_missing_trusted_root_external_host_and_non_diagnostic_full_product_receipt"
+    }
+  },
+  "credit": 0,
+  "current_reader_bundle": {
+    "artifact": {
+      "bytes": 38851,
+      "path": "campaigns/core-v1/reproduction/a8-full-reproduce-v2/bundle.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reader_bundle.v2",
+      "sha256": "da0fdcdc10ed56e47e94eb70dfecf864808337d3b7cf9e2d3e22c14df5e6c5ed"
+    },
+    "case_count": 32,
+    "checkpoint_count": 0,
+    "checkpoint_paths_declared": [],
+    "large_asset_contents_opened": false,
+    "model_reproduction_supported": false,
+    "reader_only_current_v2": true,
+    "schema": "core.reader_bundle.v2"
+  },
+  "diagnostic_only": true,
+  "errors": [],
+  "execution_constraints": {
+    "checkpoint_opened": false,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "external_host_attested": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "json_metadata_only": true,
+    "large_hdf5_opened": false,
+    "large_npz_opened": false,
+    "ledger_mutation": 0,
+    "queue_mutation": 0,
+    "read_only": true,
+    "registry_mutation": 0,
+    "solver_started": false,
+    "trajectory_opened": false,
+    "trusted_root_authenticated": false,
+    "worker_started": false
+  },
+  "findings": [
+    {
+      "component": "core_product_repro_bridge_v1._reader_report_projection",
+      "finding": "A core.verification.v1 reader payload with passed=true and authority-shaped non-diagnostic/credit fields is accepted without a blocker.",
+      "id": "A8-PRB-01",
+      "impact": "local_package_ready can be reported from a reader receipt whose diagnostic boundary was not validated; this does not itself mint formal credit, but it is not a fail-closed readiness projection.",
+      "required_minimal_fix": "Require an exact diagnostic-only reader receipt contract with zero credit, or reject the receipt when those markers are absent or contradictory.",
+      "severity": "high",
+      "status": "open_boundary_gap"
+    },
+    {
+      "component": "core_product_repro_bridge_v1._diagnostic_pair_projection",
+      "finding": "A diagnostic pair with identical observed host ids and a self-reported distinct_host_evidence=true is accepted as a passed rollout/score projection.",
+      "id": "A8-PRB-02",
+      "impact": "the package bridge can carry self-asserted second-host evidence without an independent host identity check; this is insufficient for trusted-root or independent-reproduction admission.",
+      "required_minimal_fix": "Require a non-empty host list with pairwise-distinct identities and bind it to an independently verified second-host receipt before setting the projection passed.",
+      "severity": "high",
+      "status": "open_boundary_gap"
+    },
+    {
+      "component": "current_v2_reader_and_historical_reproduction_lineage",
+      "finding": "The current v2 bundle is reader-only with no checkpoint registry/artifact, while historical independent-reproduction receipts refer to the older v1 bundle and contain diagnostic/full-product scope contradictions.",
+      "id": "A8-PRB-03",
+      "impact": "No current trusted model-package or independent-reproduction promotion unit is available from these metadata receipts.",
+      "required_minimal_fix": "Supply a fresh current-v2 checkpoint binding and independently produced root/host receipts; historical metadata must remain non-authoritative.",
+      "severity": "confirmed_blocked",
+      "status": "fail_closed"
+    }
+  ],
+  "formal_admission": false,
+  "formal_training": false,
+  "full_product_reproduction": false,
+  "history": {
+    "cross_host_contract": {
+      "artifact": {
+        "bytes": 938,
+        "path": "campaigns/core-v1/evidence/cross-host-reproduction-contract-20260920.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.reproduction.v1",
+        "sha256": "a2a49f76ee282649227b40cc6c2388b597e53145417ec0469535c305ad4f9f79"
+      },
+      "cross_host_reproduction": true,
+      "diagnostic_only": true,
+      "formal_training_count": 0,
+      "full_product_reproduction": false,
+      "passed": true,
+      "scope": "cross-host paired diagnostic: 20-step float64 canary plus 835-transition A8 model comparison; full product release remains separate"
+    },
+    "cross_host_pair": {
+      "artifact": {
+        "bytes": 6630,
+        "path": "campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+        "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b"
+      },
+      "diagnostic_only": true,
+      "distinct_host_evidence": true,
+      "formal_training": false,
+      "observed_hosts": [
+        "h200",
+        "user-SYS-421GE-TNRT"
+      ],
+      "passed": true,
+      "qualification_credit": 0,
+      "status": "compared"
+    },
+    "independent_contract": {
+      "artifact": {
+        "bytes": 4093,
+        "path": "campaigns/core-v1/evidence/independent-reproduction-contract-20260920.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.reproduction.v1",
+        "sha256": "b33efab150d35b0c0cdc36a77a88ffc8c9ec2bf1dee2c2f4b6712d465016ae84"
+      },
+      "cross_host_reproduction": true,
+      "full_product_reproduction": true,
+      "passed": true,
+      "scope": "checkpoint-backed model reproduction; complete data-package relocation and scientific qualification remain separate gates"
+    },
+    "independent_receipt": {
+      "artifact": {
+        "bytes": 50079,
+        "path": "campaigns/core-v1/reproduction/a8-independent-relocated-v1/independent-reproduction-receipt.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.independent_reproduction.run.v1",
+        "sha256": "57d7869d72f0058fbee3cbdba22c702f5640e1cb2799f545475567aea02f23e3"
+      },
+      "different_data_root": true,
+      "host": "user-SYS-421GE-TNRT",
+      "model_cross_host_reproduction": true,
+      "model_full_product_reproduction": true,
+      "model_passed": true,
+      "result_core_gate_status": "blocked_for_full_product_release; diagnostic_model_reproduction_only",
+      "result_independent_reproduction_evidence": true,
+      "reused_existing_relocated_root": true,
+      "scope_cross_host_claim": false,
+      "scope_formal_training_count": 0,
+      "status": "independent_relocated_model_run"
+    }
+  },
+  "independent_reproduction": false,
+  "input_contracts_read": true,
+  "inputs": {
+    "checkpoint_readiness_audit": {
+      "bytes": 37033,
+      "path": "reports/A8-CHECKPOINT-MODEL-REPRODUCTION-READINESS-AUDIT-V1-2026-09-28.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.a8.checkpoint_model_reproduction_readiness_audit.v1",
+      "sha256": "785955da03c0afc2488700e30650c02576114e1b69aca10b8d5bfe0b0092697e"
+    },
+    "current_reader_bundle": {
+      "bytes": 38851,
+      "path": "campaigns/core-v1/reproduction/a8-full-reproduce-v2/bundle.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reader_bundle.v2",
+      "sha256": "da0fdcdc10ed56e47e94eb70dfecf864808337d3b7cf9e2d3e22c14df5e6c5ed"
+    },
+    "historical_cross_host_contract": {
+      "bytes": 938,
+      "path": "campaigns/core-v1/evidence/cross-host-reproduction-contract-20260920.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reproduction.v1",
+      "sha256": "a2a49f76ee282649227b40cc6c2388b597e53145417ec0469535c305ad4f9f79"
+    },
+    "historical_cross_host_pair": {
+      "bytes": 6630,
+      "path": "campaigns/core-v1/reproduction/a8-cross-host-diagnostic-pair-v1.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.a8.cross_host_diagnostic_pair_audit.v1",
+      "sha256": "c94742d50ac93871a5e37eeeb60c0e82d892f87549036191f1f4cbeadb06bf9b"
+    },
+    "historical_independent_contract": {
+      "bytes": 4093,
+      "path": "campaigns/core-v1/evidence/independent-reproduction-contract-20260920.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reproduction.v1",
+      "sha256": "b33efab150d35b0c0cdc36a77a88ffc8c9ec2bf1dee2c2f4b6712d465016ae84"
+    },
+    "historical_independent_receipt": {
+      "bytes": 50079,
+      "path": "campaigns/core-v1/reproduction/a8-independent-relocated-v1/independent-reproduction-receipt.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.independent_reproduction.run.v1",
+      "sha256": "57d7869d72f0058fbee3cbdba22c702f5640e1cb2799f545475567aea02f23e3"
+    },
+    "independent_readiness_contract": {
+      "bytes": 2771,
+      "path": "reports/A8-INDEPENDENT-REPRODUCTION-READINESS-CONTRACT-V1-2026-09-29.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reproduction.a8_independent_readiness_report.v1",
+      "sha256": "9fcfcc8b036187a8276e8659c3085b5db1271d2d9eb2d780c3270ff6f0c312ac"
+    },
+    "package_bridge_report": {
+      "bytes": 7729,
+      "path": "reports/A8-CORE-PRODUCT-V2-REPRO-BRIDGE-2026-09-28.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.product.repro_bridge_report.v1",
+      "sha256": "c91ed3fd7a122c9a6e8b68be82d95f63e49fa2b12d347cbf08d5ae646e678d83"
+    },
+    "package_bridge_source": {
+      "bytes": 36713,
+      "path": "scripts/core_product_repro_bridge_v1.py",
+      "read_policy": "bounded_source_code_hash",
+      "sha256": "40fe7d4f4241a3abc321080d3e55048664c6d70e47d14a298009b3a415743b51"
+    },
+    "package_manifest": {
+      "bytes": 14198,
+      "path": "reports/A8-CORE-PRODUCT-V2-LOCAL-PACKAGE-MANIFEST-2026-09-28.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.product.local_package_manifest.v1",
+      "sha256": "24b6d600c7a8093a356c5d842f5d1436de87f71f574eada1a9baefc42acb0952"
+    },
+    "package_reproduction_receipt": {
+      "bytes": 2110,
+      "path": "reports/A8-CORE-PRODUCT-V2-REPRO-RECEIPT-2026-09-28.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.product.repro_receipt.v1",
+      "sha256": "03c693ba4000966fb6e4b2db90f15d9baeb8da1b61bf47988f3e07420908a874"
+    },
+    "trusted_root_external_host_contract": {
+      "bytes": 3172,
+      "path": "reports/A8-TRUSTED-ROOT-EXTERNAL-HOST-ATTESTATION-CONTRACT-V1-2026-09-29.json",
+      "read_policy": "strict_bounded_json_only",
+      "schema": "core.reproduction.a8_trusted_root_external_host_attestation_report.v1",
+      "sha256": "c7efd0a3ae9ef55e8f115356abd3214e9252c8012f714eacc0e1e9475ffaa638"
+    }
+  },
+  "minimal_progress_unit": {
+    "exists": true,
+    "files": [
+      "scripts/core_product_repro_bridge_v1.py"
+    ],
+    "kind": "package_bridge_projection_hardening",
+    "promotion_allowed_by_this_audit": false,
+    "requires_external_attestation": false,
+    "requires_large_artifact_open": false,
+    "requires_solver_worker_gpu_queue": false,
+    "steps": [
+      "close A8-PRB-01 with exact reader diagnostic/zero-credit validation",
+      "close A8-PRB-02 with independent host-list and second-host receipt validation",
+      "rerun the bounded package/reproduction readiness projection"
+    ]
+  },
+  "mutation_probes": {
+    "diagnostic_pair_projection": {
+      "accepted_by_current_bridge": true,
+      "blockers": [],
+      "expected_fail_closed": true,
+      "mutated_input": {
+        "distinct_host_evidence": true,
+        "observed_hosts": [
+          "same-physical-host",
+          "same-physical-host"
+        ],
+        "payload_passed": true
+      },
+      "probe": "diagnostic_pair_self_reported_host_distinctness",
+      "projection": {
+        "rollout_distinct_host_evidence": true,
+        "rollout_observed_hosts": [
+          "same-physical-host",
+          "same-physical-host"
+        ],
+        "rollout_passed": true,
+        "score_passed": true
+      }
+    },
+    "reader_projection": {
+      "accepted_by_current_bridge": true,
+      "blockers": [],
+      "expected_fail_closed": true,
+      "mutated_input": {
+        "diagnostic_only": false,
+        "formal_training": true,
+        "full_product_reproduction": true,
+        "passed": true,
+        "qualification_credit": 1,
+        "schema": "core.verification.v1"
+      },
+      "probe": "core.verification.v1_authority_fields_ignored",
+      "projection": {
+        "diagnostic_only": true,
+        "passed": true,
+        "qualification_credit": 0
+      }
+    }
+  },
+  "mutations": {
+    "completion": 0,
+    "denominator": 0,
+    "gate": 0,
+    "ledger": 0,
+    "plan": 0,
+    "registry": 0
+  },
+  "observed_at_utc": "2026-09-29T04:56:49Z",
+  "package_readiness": {
+    "bridge_report": {
+      "artifact": {
+        "bytes": 7729,
+        "path": "reports/A8-CORE-PRODUCT-V2-REPRO-BRIDGE-2026-09-28.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.product.repro_bridge_report.v1",
+        "sha256": "c91ed3fd7a122c9a6e8b68be82d95f63e49fa2b12d347cbf08d5ae646e678d83"
+      },
+      "formal_admission": false,
+      "full_product_reproduction": null,
+      "local_package_ready": true,
+      "qualification_credit": 0,
+      "schema": "core.product.repro_bridge_report.v1",
+      "status": "diagnostic_only_local_package_ready"
+    },
+    "manifest": {
+      "artifact": {
+        "bytes": 14198,
+        "path": "reports/A8-CORE-PRODUCT-V2-LOCAL-PACKAGE-MANIFEST-2026-09-28.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.product.local_package_manifest.v1",
+        "sha256": "24b6d600c7a8093a356c5d842f5d1436de87f71f574eada1a9baefc42acb0952"
+      },
+      "coarse_chain_passed": true,
+      "diagnostic_only": true,
+      "formal_admission": false,
+      "full_artifact_integrity_verified": false,
+      "full_product_reproduction": false,
+      "large_asset_hashes_read": false,
+      "local_package_ready": true,
+      "qualification_credit": 0
+    },
+    "reproduction_receipt": {
+      "artifact": {
+        "bytes": 2110,
+        "path": "reports/A8-CORE-PRODUCT-V2-REPRO-RECEIPT-2026-09-28.json",
+        "read_policy": "strict_bounded_json_only",
+        "schema": "core.product.repro_receipt.v1",
+        "sha256": "03c693ba4000966fb6e4b2db90f15d9baeb8da1b61bf47988f3e07420908a874"
+      },
+      "cross_host_reproduction": false,
+      "formal_training_runs_counted": 0,
+      "full_product_reproduction": false,
+      "local_package_ready": true,
+      "qualification_credit": 0,
+      "schema": "core.product.repro_receipt.v1",
+      "status": "diagnostic_only_local_package_ready"
+    }
+  },
+  "passed": false,
+  "qualification_credit": 0,
+  "readiness_pass": false,
+  "schema": "core.a8.package_reproduction_readiness_boundary_audit.v1",
+  "scope": [
+    "current reader_bundle.v2 metadata",
+    "A8 package/reproduction readiness projections",
+    "trusted-root and external-host contract reports",
+    "historical second-host and independent-reproduction receipts"
+  ],
+  "status": "blocked_open_package_reproduction_boundary_gaps",
+  "version": "a8-package-reproduction-readiness-boundary-v1"
+}
