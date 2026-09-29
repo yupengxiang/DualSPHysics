@@ -57,7 +57,13 @@ CONSISTENCY = root_intake.CONSISTENCY
 DIAGNOSTIC = Path(
     "reports/F4-TALLWALL120-DEV07-MATERIAL-BASELINE24-DIAGNOSTIC-2026-09-28.json"
 )
-ROOT_INTAKE = root_intake.DEFAULT_REPORT
+# This reconciliation is a historical 2026-09-28 diagnostic receipt.  Keep
+# its input anchor immutable when the current root/scheduler intake advances
+# to a later rerun; otherwise rebuilding the historical report would silently
+# change its bound evidence domain.
+ROOT_INTAKE = Path(
+    "reports/F4-TALLWALL120-MATERIAL-ROOT-SCHEDULER-INTAKE-V1-2026-09-28.json"
+)
 CANDIDATE_RUNNER = candidate_runner.DEFAULT_OUTPUT
 DEFAULT_OUTPUT = Path(
     "reports/F4-TALLWALL120-MATERIAL-SOURCE-DRIFT-RECONCILIATION-V1-2026-09-28.json"
