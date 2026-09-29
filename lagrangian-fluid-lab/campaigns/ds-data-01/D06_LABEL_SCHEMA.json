@@ -1,0 +1,330 @@
+{
+  "schema": "ds-data-01.d06.native-labels.v1",
+  "contract_status": "active_dataset_contract_not_a_scientific_acceptance",
+  "scope": "dataset-only; native SPH trajectory labels and derived observables; no training, inference, checkpoint replay, tuning, ranking, or model qualification",
+  "source_evidence": {
+    "reference_cards": "campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+    "scope_audit": "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+    "audit_interpretation": "D03 Q-I/Q-N evidence is numerical integrity and scope classification only; Q-E and scientific acceptance remain not assessed"
+  },
+  "axis_convention": {
+    "time_axis": "T",
+    "particle_axis": "N",
+    "vector_components": 3,
+    "normalized_shapes": {
+      "time": ["T"],
+      "particle_id": ["N"],
+      "particle_zone": ["N"],
+      "valid": ["T", "N"],
+      "scalar_particle_fields": ["T", "N"],
+      "vector_particle_fields": ["T", "N", 3]
+    },
+    "identity_key": {
+      "default": "particle_id",
+      "when_any_particle_zone_is_nonzero": "(particle_zone, particle_id)",
+      "boundary": "The key identifies a numerical SPH node in the exported trajectory. It is never, by itself, a material identity or a material lineage proof."
+    },
+    "dimension": {
+      "declared_dimension_is_authoritative": true,
+      "allowed": ["2D", "3D"],
+      "position_storage": "Always store three components; for a declared 2D case only the source-defined physical plane is interpretable.",
+      "z_coordinate_rule_for_2d": "Do not promote a 2D case to 3D because of a nonzero numerical embedding coordinate or a geometric heuristic. Preserve the source/D03 calibration role and audit the declared physical plane."
+    }
+  },
+  "native_sph_fields": {
+    "time": {
+      "storage_name": "time",
+      "source_names": ["time"],
+      "dtype": "float64",
+      "shape": ["T"],
+      "unit": "s",
+      "required": true,
+      "meaning": "Saved solver output time for each frame.",
+      "audit": ["finite", "at_least_two_frames", "strictly_increasing"],
+      "not_meaning": ["not a particle label", "not a material residence-time guarantee"]
+    },
+    "particle_id": {
+      "storage_name": "particle_id",
+      "source_names": ["Idp"],
+      "dtype": "int64",
+      "shape": ["N"],
+      "unit": null,
+      "required": true,
+      "meaning": "Numerical particle identifier exported by PartVTK/trajectory conversion.",
+      "audit": ["one-dimensional", "unique_with_particle_zone_when_zone_is_used", "stable_axis_key"],
+      "not_meaning": ["not independently established material identity", "not a guarantee that a particle remains in the physical system", "not a tracer result"]
+    },
+    "particle_zone": {
+      "storage_name": "particle_zone",
+      "source_names": ["Zone"],
+      "dtype": "int16",
+      "shape": ["N"],
+      "unit": null,
+      "required": true,
+      "meaning": "Numerical zone/resolution component of the exported identity key.",
+      "audit": ["one-dimensional", "paired_with_particle_id", "zone_values_recorded"],
+      "not_meaning": ["not a material region label", "not a source-fluid provenance claim", "not a substitute for variable-resolution lineage"]
+    },
+    "valid": {
+      "storage_name": "valid",
+      "source_names": ["row_presence_in_frame"],
+      "dtype": "bool",
+      "shape": ["T", "N"],
+      "unit": null,
+      "required": true,
+      "meaning": "Whether the numerical particle key has an exported active row in that frame.",
+      "audit": ["boolean_cast_is_lossless_or_explicit", "active_rows_are_finite", "transition_counts_are_reported"],
+      "not_meaning": ["false is not automatically material exit", "false is not automatically particle destruction", "false is not a zero-valued physical field", "false is not proof of an out-of-domain destination"]
+    },
+    "position": {
+      "storage_name": "position",
+      "source_names": ["Pos.x [m]", "Pos.y [m]", "Pos.z [m]"],
+      "dtype": "float32",
+      "shape": ["T", "N", 3],
+      "unit": "m",
+      "required": true,
+      "meaning": "Native solver particle coordinates at valid frames.",
+      "audit": ["finite_on_valid_rows", "three_components"],
+      "not_meaning": ["not a reconstructed material path when identity is lost", "not an external measurement"]
+    },
+    "velocity": {
+      "storage_name": "velocity",
+      "source_names": ["Vel.x [m/s]", "Vel.y [m/s]", "Vel.z [m/s]"],
+      "dtype": "float32",
+      "shape": ["T", "N", 3],
+      "unit": "m/s",
+      "required": true,
+      "meaning": "Native solver particle velocity at valid frames.",
+      "audit": ["finite_on_valid_rows", "three_components"],
+      "not_meaning": ["not prescribed boundary/body control", "not a material tracer velocity unless an independent tracer contract is present"]
+    },
+    "density": {
+      "storage_name": "density",
+      "source_names": ["Rhop [kg/m^3]"],
+      "dtype": "float32",
+      "shape": ["T", "N"],
+      "unit": "kg/m^3",
+      "required": true,
+      "meaning": "Native SPH density estimate exported for the numerical particle.",
+      "audit": ["finite_on_valid_rows", "positive_on_valid_rows"],
+      "not_meaning": ["not external density ground truth", "not a material-class label"]
+    },
+    "mass": {
+      "storage_name": "mass",
+      "source_names": ["Mass [kg]"],
+      "dtype": "float32",
+      "shape": ["T", "N"],
+      "unit": "kg",
+      "required": true,
+      "meaning": "Numerical SPH particle mass used for active-particle mass diagnostics.",
+      "audit": ["finite_on_valid_rows", "positive_on_valid_rows", "active_sum_is_reported"],
+      "not_meaning": ["not sufficient for closed-system conservation in an open lifecycle", "not a material mass balance without scope/flux accounting"]
+    },
+    "pressure": {
+      "storage_name": "pressure",
+      "source_names": ["Press [Pa]"],
+      "dtype": "float32",
+      "shape": ["T", "N"],
+      "unit": "Pa",
+      "required": true,
+      "meaning": "Native solver pressure value exported at valid particle rows.",
+      "audit": ["finite_on_valid_rows", "range_is_reported"],
+      "not_meaning": ["not externally calibrated pressure", "not a material or phase label"]
+    },
+    "type": {
+      "storage_name": "type",
+      "source_names": ["Type"],
+      "dtype": "int8",
+      "shape": ["T", "N"],
+      "unit": null,
+      "required": true,
+      "meaning": "DualSPHysics-native particle-role code; values remain version/source dependent.",
+      "known_observed_values": {
+        "2": "floating/body-role example in existing converter diagnostics",
+        "3": "fluid-role example in existing converter diagnostics"
+      },
+      "audit": ["values_are_reported", "no_unregistered_enum_is_silently_relabelled"],
+      "not_meaning": ["not a material composition label", "not a universal enum across every official example", "not a substitute for body/geometry provenance"]
+    },
+    "mk": {
+      "storage_name": "mk",
+      "source_names": ["Mk"],
+      "dtype": "int16",
+      "shape": ["T", "N"],
+      "unit": null,
+      "required": true,
+      "meaning": "Numerical source/group partition carried by the solver output.",
+      "audit": ["values_are_reported", "source_partition_counts_are_optional_diagnostics"],
+      "not_meaning": ["not material identity", "not a validated material tracer", "not an automatic source-to-destination mass truth"]
+    }
+  },
+  "source_column_aliases": {
+    "Idp": "particle_id",
+    "Zone": "particle_zone",
+    "Pos.x [m]": "position[...,0]",
+    "Pos.y [m]": "position[...,1]",
+    "Pos.z [m]": "position[...,2]",
+    "Vel.x [m/s]": "velocity[...,0]",
+    "Vel.y [m/s]": "velocity[...,1]",
+    "Vel.z [m/s]": "velocity[...,2]",
+    "Rhop [kg/m^3]": "density",
+    "Mass [kg]": "mass",
+    "Press [Pa]": "pressure",
+    "Type": "type",
+    "Mk": "mk"
+  },
+  "trajectory_observables": {
+    "active_particle_count": {
+      "formula": "sum(valid[t, :])",
+      "unit": "count",
+      "required_for_d03_cards": true,
+      "interpretation": "Numerical active-row count only; changes are expected in open or variable-resolution scopes."
+    },
+    "active_mass": {
+      "formula": "sum(mass[t, valid[t, :]])",
+      "unit": "kg",
+      "required_for_d03_cards": true,
+      "interpretation": "Mass of active numerical rows; use as a closed invariant only when the lifecycle is explicitly closed."
+    },
+    "centroid": {
+      "formula": "mean(position[t, valid[t, :], :], axis=0)",
+      "unit": "m",
+      "required_for_d03_cards": true,
+      "interpretation": "Unweighted active-particle centroid used by D03; it is not a material-volume centroid unless that weighting and scope are separately defined."
+    },
+    "common_identity_displacement": {
+      "formula": "norm(position[last, common] - position[first, common], axis=1)",
+      "unit": "m",
+      "required_for_d03_cards": true,
+      "identity_basis": "common numerical identity key between first and last valid frames",
+      "interpretation": "Displacement of retained numerical keys; not a material transport observable when identity/material lineage is unresolved."
+    },
+    "max_speed": {
+      "formula": "max(norm(velocity[t, valid[t, :], :], axis=1))",
+      "unit": "m/s",
+      "required_for_d03_cards": true,
+      "interpretation": "Maximum native numerical-particle speed over valid rows."
+    },
+    "density_range": {
+      "formula": "min/max(density[t, valid[t, :]])",
+      "unit": "kg/m^3",
+      "required_for_d03_cards": true,
+      "interpretation": "Native SPH numerical range, not external validation."
+    },
+    "pressure_range": {
+      "formula": "min/max(pressure[t, valid[t, :]])",
+      "unit": "Pa",
+      "required_for_d03_cards": true,
+      "interpretation": "Native solver pressure range, not external validation."
+    },
+    "identity_retention_initial_to_final": {
+      "formula": "count(initial_valid ∩ final_valid) / count(initial_valid)",
+      "unit": "fraction",
+      "required": true,
+      "interpretation": "Numerical-key retention diagnostic. It must not be called material retention."
+    },
+    "introduced_identity_count": {
+      "formula": "count(ever_valid - initial_valid)",
+      "unit": "count",
+      "required": true,
+      "interpretation": "Numerical keys first observed after the initial frame; in open scopes this is compatible with inlet introduction."
+    },
+    "initial_identity_missing_at_final": {
+      "formula": "count(initial_valid - final_valid)",
+      "unit": "count",
+      "required": true,
+      "interpretation": "Numerical keys absent at the final frame; do not label them escaped, deposited, destroyed, or lost materially without additional scope evidence."
+    },
+    "zone_occupancy": {
+      "formula": "count(valid[t, :] grouped by particle_zone)",
+      "unit": "count",
+      "required_for_variable_resolution": true,
+      "interpretation": "Resolution-zone diagnostic; zone is not material provenance."
+    },
+    "closed_invariant": {
+      "formula": "Q-I pass ∧ Q-N pass ∧ no introduced key ∧ no initial key missing at final ∧ active-mass-relative-range <= tolerance",
+      "unit": "boolean",
+      "required_for_closed_candidate_scope": true,
+      "interpretation": "A numerical closed-trajectory integrity result only; it does not establish scientific acceptance or material truth."
+    }
+  },
+  "case_level_labels": {
+    "required": [
+      "case_id",
+      "family",
+      "mechanism",
+      "source",
+      "source_type",
+      "dataset_role",
+      "scope_decision",
+      "dimension",
+      "resolution_role",
+      "lifecycle_model",
+      "failure_codes",
+      "scientific_acceptance",
+      "q_e_status"
+    ],
+    "semantics": {
+      "dataset_role": "Operational role such as candidate, diagnostic, calibration, or exclusion_negative; it is not a model split and does not authorize training.",
+      "scope_decision": "D03 numerical/scope classification; preserve diagnostic and negative-control labels.",
+      "dimension": "Declared physical dimensionality from the source/case contract; do not infer production eligibility from a position-coordinate heuristic.",
+      "resolution_role": "Coarse canary, historical reuse, variable-resolution, 2D calibration, or an explicitly declared production resolution role.",
+      "lifecycle_model": "One of closed, open, variable_resolution, calibration_2d, or unknown; it must be explicit before applying a closed mass gate.",
+      "failure_codes": "D03 scope and numerical failure/diagnostic codes; an empty list is not scientific acceptance.",
+      "scientific_acceptance": "Must remain not_assessed in this dataset-only contract unless an independent owner-approved assessment exists.",
+      "q_e_status": "Must remain not_assessed_no_external_measurement_or_ground_truth_bound for the current D03 evidence."
+    }
+  },
+  "lifecycle_boundaries": {
+    "closed": {
+      "required_labels": ["lifecycle_model=closed", "closed_invariant", "identity_key"],
+      "allowed_claims": ["numerical identity and active-mass closure over the declared window when the invariant passes"],
+      "forbidden_claims": ["material conservation solely from Mk/type/particle_id", "scientific validation from Q-I/Q-N alone"]
+    },
+    "open_lifecycle": {
+      "trigger_evidence": ["D03 failure code OPEN_LIFECYCLE_FLUX_AUDIT_REQUIRED", "explicit inlet/outlet or particle introduction/removal in the case contract"],
+      "required_labels": ["lifecycle_model=open", "introduced_identity_count", "initial_identity_missing_at_final", "active_mass", "flux_accounting_status"],
+      "allowed_claims": ["numerical active-row and introduction/removal diagnostics", "scope-aware flux accounting when separately provided"],
+      "forbidden_claims": ["closed-system mass conservation gate", "valid=false means material left the system", "new numerical key means new material without independent evidence"]
+    },
+    "variable_resolution": {
+      "trigger_evidence": ["D03 failure code VARIABLE_RESOLUTION_LINEAGE_AUDIT_REQUIRED", "source recipe declares variable resolution"],
+      "required_labels": ["lifecycle_model=variable_resolution", "compound identity key", "particle_zone", "zone_occupancy", "lineage_status"],
+      "allowed_claims": ["zone-aware numerical occupancy and identity diagnostics"],
+      "forbidden_claims": ["one-to-one material lineage from particle_id", "closed identity invariant without a zone/lineage audit", "material mixing labels from zone or Mk"]
+    },
+    "two_d_calibration": {
+      "trigger_evidence": ["D03 scope_decision=calibration_only", "source/case declares 2D calibration contrast"],
+      "required_labels": ["dimension=2D", "lifecycle_model=calibration_2d", "dataset_role=calibration", "scope_decision=calibration_only"],
+      "allowed_claims": ["2D numerical calibration/control contrast", "CPU/model-free schema and evaluator tests if separately scoped"],
+      "forbidden_claims": ["3D production acceptance", "cross-dimensional performance ranking", "silently merging 2D and 3D cases in a production split"]
+    }
+  },
+  "missing_value_policy": {
+    "valid_false": "Treat fields as unavailable/censored for that numerical key and frame. Preserve the reason as unknown unless an explicit lifecycle or tracer audit supplies it.",
+    "inactive_numeric_storage": "NaN/fill values may be present outside valid rows; audits apply finite/positive checks only to valid rows.",
+    "no_event_rule": "Missing or invalid rows must never be converted into a confirmed no-event, zero displacement, material escape, or material destruction label.",
+    "unknown_is_first_class": true
+  },
+  "core_production_boundary": {
+    "native_fields_are_core": true,
+    "trajectory_observables_are_core_numerical_diagnostics": true,
+    "scope_and_quality_labels_are_required": true,
+    "material_tracer_required": false,
+    "material_tracer_failure_blocks_core": false,
+    "q_e_external_validation_assessed": false,
+    "scientific_acceptance_assessed": false,
+    "production_eligibility_claimed_here": false,
+    "explicit_rule": "A case may retain native numerical trajectories and D03 diagnostics without a material tracer. An optional tracer can add a separate diagnostic layer but cannot promote, demote, or gate the core native trajectory by itself."
+  },
+  "prohibited_shortcuts": [
+    "Do not relabel Mk as material identity.",
+    "Do not relabel particle_id or (particle_zone, particle_id) as material lineage.",
+    "Do not use Type as a universal material or phase enum.",
+    "Do not turn valid=false into a material fate label.",
+    "Do not apply a closed mass gate to an open-lifecycle case.",
+    "Do not use a 2D calibration case as a 3D production acceptance case.",
+    "Do not use a variable-resolution trajectory as a material-lineage reference without an independent lineage audit.",
+    "Do not require an optional material tracer for native-data production eligibility."
+  ]
+}

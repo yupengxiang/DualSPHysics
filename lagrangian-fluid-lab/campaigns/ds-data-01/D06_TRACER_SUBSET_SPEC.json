@@ -1,0 +1,172 @@
+{
+  "schema": "ds-data-01.d06.optional-material-tracer-subset.v1",
+  "status": "optional_diagnostic_only",
+  "scope": "A separate material-reference layer for a small, explicitly selected subset; it is not required to publish or consume the native SPH trajectory dataset.",
+  "source_evidence": {
+    "label_schema": "campaigns/ds-data-01/D06_LABEL_SCHEMA.json",
+    "reference_cards": "campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+    "scope_audit": "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+    "boundary": "D03 Q-I/Q-N checks establish numerical integrity/scope only; they do not validate material truth or external science."
+  },
+  "core_gate": {
+    "required_for_core_dataset": false,
+    "absence_is_core_failure": false,
+    "failure_or_unknown_blocks_native_trajectory": false,
+    "may_change_native_case_scope_decision": false,
+    "may_change_native_particle_labels": false,
+    "interpretation": "The native fields and D03 numerical/scope audit remain the core product. A missing, failed, partial, or contradictory tracer is retained as a tracer diagnostic and must not invalidate otherwise admissible native data."
+  },
+  "intended_use": [
+    "Compare an independently defined material-reference path with native numerical-particle observables on a small subset.",
+    "Quantify tracer coverage, censoring, unresolved lineage, and disagreement without rewriting native labels.",
+    "Support later owner-approved material transport analysis outside the current dataset-only core gate."
+  ],
+  "non_goals": [
+    "It is not a replacement for native SPH fields.",
+    "It is not a training, inference, checkpoint replay, tuning, ranking, or model-qualification input in DS-DATA-01.",
+    "It is not a claim that Mk, Type, particle_id, or particle_zone is material identity.",
+    "It is not a requirement that every family, resolution, lifecycle, or split have a tracer."
+  ],
+  "subset_selection_contract": {
+    "selection_is_explicit": true,
+    "selection_unit": "case_id plus a bounded set of tracer_id values and/or an explicit seed/region recipe",
+    "selection_must_record": [
+      "case_id",
+      "family",
+      "native_hdf5_path",
+      "native_hdf5_sha256_if_available",
+      "tracer_method",
+      "tracer_implementation_version",
+      "selection_recipe",
+      "initialization_time",
+      "initialization_region_or_ids",
+      "units",
+      "random_seed_if_any",
+      "source_and_destination_coordinate_convention",
+      "status"
+    ],
+    "default_scope": "Prefer a small 3D case with D03 Q-I-structure-pass and Q-N-integrity-pass and an explicit closed or scope-audited lifecycle. This preference is a tracer quality recommendation, not a gate on native data.",
+    "subset_size": "bounded and declared per case; no global denominator or coverage claim is implied"
+  },
+  "tracer_storage_contract": {
+    "container": "separate sidecar HDF5/JSON artifact; never silently add tracer arrays to or overwrite the native trajectory file",
+    "required_arrays": {
+      "time": {
+        "shape": ["T"],
+        "dtype": "float64",
+        "unit": "s",
+        "meaning": "Tracer sampling times, linked to native time by an explicit mapping or tolerance."
+      },
+      "tracer_id": {
+        "shape": ["K"],
+        "dtype": "int64",
+        "unit": null,
+        "meaning": "Independent tracer marker identity within this sidecar."
+      },
+      "tracer_position": {
+        "shape": ["T", "K", 3],
+        "dtype": "float32_or_float64",
+        "unit": "m",
+        "meaning": "Position produced by the independent tracer method when available."
+      },
+      "tracer_valid": {
+        "shape": ["T", "K"],
+        "dtype": "bool",
+        "unit": null,
+        "meaning": "Whether the tracer value is available at the time/marker pair. False is censored/unknown until a status code explains it."
+      },
+      "tracer_status": {
+        "shape": ["T", "K"],
+        "dtype": "string_or_integer_enum",
+        "unit": null,
+        "meaning": "Explicit tracer availability/lineage status, independent of native valid."
+      }
+    },
+    "recommended_optional_arrays": {
+      "native_particle_id_at_sample": "[T,K] numerical association only; must be paired with native_particle_zone_at_sample",
+      "native_particle_zone_at_sample": "[T,K] numerical zone association only",
+      "association_distance": "[T,K] m; distance between tracer position and associated native node when association is defined",
+      "tracer_mass": "[K] or [T,K] kg only when the tracer method defines a mass measure",
+      "material_class": "[K] independent class only when supplied by the tracer setup; never infer from Mk or Type"
+    },
+    "association_boundary": "A tracer-to-native-particle association is a diagnostic correspondence at a sample, not proof that the native numerical node is the same material parcel."
+  },
+  "status_enum": {
+    "tracked": "Tracer value available and method reports a valid track at this sample.",
+    "not_initialized": "Marker was not initialized at this time.",
+    "out_of_domain": "The tracer method explicitly reports leaving its defined domain; this is not automatically a native material exit.",
+    "censored_by_tracer_failure": "The independent tracer failed or became unresolvable; downstream material fate is unknown.",
+    "unresolved_lineage": "The tracer or mapping cannot distinguish competing numerical lineage.",
+    "zone_transition": "The tracer association crossed a numerical resolution zone; retain the event, do not call it material mixing.",
+    "unknown": "No defensible status was established. Never coerce to tracked or no-event."
+  },
+  "lifecycle_rules": {
+    "closed": {
+      "recommended": true,
+      "required_extra_evidence": ["native D03 closed_invariant_pass", "tracer coverage and terminal status audit"],
+      "allowed_outputs": ["tracer path comparison", "explicitly bounded tracked/censored fractions"],
+      "forbidden_outputs": ["material conservation claim from tracer alone", "using tracer success as native-data admission"]
+    },
+    "open_lifecycle": {
+      "allowed": true,
+      "required_labels": ["lifecycle_model=open", "flux_accounting_status", "tracer_status", "censoring_policy"],
+      "rules": [
+        "Do not require tracer active count or mass to remain constant.",
+        "Distinguish out_of_domain, inlet/not_initialized, tracer failure, and unknown.",
+        "A tracer-derived exit is an optional diagnostic and cannot repair missing native flux accounting."
+      ]
+    },
+    "variable_resolution": {
+      "allowed": true,
+      "required_labels": ["lifecycle_model=variable_resolution", "native compound identity key", "lineage_status", "zone_transition policy"],
+      "rules": [
+        "A native particle_id match is not a material lineage match.",
+        "Zone transitions and unresolved split/merge events must be explicit.",
+        "If the tracer cannot resolve lineage, use censored_by_tracer_failure or unresolved_lineage, never a confident material destination."
+      ]
+    },
+    "2d_calibration": {
+      "allowed": true,
+      "required_labels": ["dimension=2D", "dataset_role=calibration", "scope_decision=calibration_only"],
+      "rules": [
+        "The tracer is calibration/control evidence only.",
+        "Do not merge 2D tracer statistics with 3D production statistics.",
+        "2D tracer absence or failure cannot block a 3D native dataset and does not create 3D evidence."
+      ]
+    }
+  },
+  "tracer_audit_outputs": {
+    "required": [
+      "artifact_present",
+      "artifact_hash_if_present",
+      "case_id_matches_native",
+      "native_hdf5_hash_matches_if_bound",
+      "time_alignment_status",
+      "tracer_id_uniqueness",
+      "finite_tracked_positions",
+      "status_consistency",
+      "coverage_fraction_over_declared_subset",
+      "censored_fraction_over_declared_subset",
+      "unresolved_fraction_over_declared_subset",
+      "native_association_is_diagnostic_only",
+      "q_e_status",
+      "core_gate_impact"
+    ],
+    "status_consistency_rules": [
+      "tracer_valid=true requires status=tracked unless an explicit method-specific status is registered",
+      "tracer_valid=false must not be counted as a tracked no-event",
+      "censored_by_tracer_failure and unresolved_lineage are unknown/censored outcomes, not negative outcomes",
+      "coverage fractions use the declared tracer subset denominator only"
+    ],
+    "q_e_status": "not_assessed unless an independent external measurement/ground-truth binding is added later",
+    "core_gate_impact": "always diagnostic_only; never changes native production eligibility"
+  },
+  "prohibited_shortcuts": [
+    "Do not make tracer presence a required field in the native HDF5 schema.",
+    "Do not use a failed tracer to reject a numerically admissible native case.",
+    "Do not treat a tracer success as proof that all native SPH particles have material fidelity.",
+    "Do not use Mk, Type, particle_id, particle_zone, or valid as an independent material tracer without a separate method and provenance.",
+    "Do not convert tracer censoring into a material no-event or zero mass.",
+    "Do not pool open-lifecycle, variable-resolution, 2D calibration, and closed tracer statistics without explicit scope strata."
+  ]
+}
