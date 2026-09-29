@@ -1,0 +1,137 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-404",
+  "observed_at": "2026-09-29T09:06:30+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; never stop or restart an existing process"
+  },
+  "commits": [
+    "4b8b513f",
+    "851f1d7a",
+    "d3101a12",
+    "79ded19c",
+    "bd6338a6",
+    "732646e2",
+    "fd0feff3",
+    "0e4972b3",
+    "d88c1118",
+    "8758be98",
+    "692c402b",
+    "d33ed5b6"
+  ],
+  "completed_units": {
+    "raw_seed29_seed43_boundary_hardening": {
+      "commits": ["851f1d7a", "d3101a12"],
+      "specialized_tests": 17,
+      "affected_regression_tests": 78,
+      "stable_fd_and_single_link_checks": true,
+      "popen_gpu_started": false,
+      "status": "blocked_fail_closed",
+      "credit": 0
+    },
+    "residual_seed17_admission_runner_v2": {
+      "commits": ["79ded19c", "bd6338a6", "732646e2"],
+      "specialized_tests": 10,
+      "related_regression_tests": 332,
+      "diagnostic_execute_allowed": false,
+      "terminal_receipt": false,
+      "status": "blocked_fail_closed",
+      "credit": 0
+    },
+    "f4_external_receipt_intake": {
+      "commits": ["fd0feff3", "0e4972b3"],
+      "specialized_tests": 8,
+      "status": "blocked_missing_external_receipts",
+      "external_fresh_root_receipt": false,
+      "scheduler_host_io_receipt": false,
+      "solver_gpu_started": false,
+      "credit": 0
+    },
+    "raw_seed17_p1_boundary": {
+      "commits": ["d88c1118", "8758be98", "692c402b"],
+      "runner_p1_tests": 5,
+      "admission_tests": 12,
+      "runner_fixture_regression": 19,
+      "external_scheduler_authority_required": true,
+      "synthetic_authority_is_test_only": true,
+      "launch_allowed": false,
+      "popen_wait": "0/0",
+      "gpu_used_for_execution": false,
+      "credit": 0
+    },
+    "raw_seed17_v3_security_reaudit": {
+      "commit": "d33ed5b6",
+      "specialized_tests": 20,
+      "status": "blocked_fail_closed",
+      "remaining_p1": 4,
+      "remaining_p2": 1,
+      "remaining_blockers": [
+        "production scheduler trust anchor and external one-shot consume witness",
+        "launcher RolloutPlan snapshot cross-binding to final admission reread",
+        "descriptor-bound child output publication before Popen",
+        "independent runtime GPU/terminal observation"
+      ],
+      "terminal_proof": false,
+      "popen_wait": "0/0",
+      "credit": 0
+    }
+  },
+  "verification": {
+    "raw_hidden16_related_tests_passed": 264,
+    "residual_hidden16_related_tests_passed": 166,
+    "f4_tallwall120_related_tests_passed": 105,
+    "absolute_path_report_verify": true,
+    "py_compile": true,
+    "git_diff_check": true,
+    "real_workloads_started": 0,
+    "popen_attempts": 0,
+    "gpu_used_for_execution": false,
+    "production_data_read": false,
+    "processes_stopped": 0,
+    "processes_restarted": 0,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "gpu_snapshot_mib": {
+      "gpu0_free": 31226,
+      "gpu1_free": 31226,
+      "gpu2_free": 48494,
+      "gpu3_free": 48494,
+      "gpu4_free": 48494,
+      "gpu5_free": 48494,
+      "gpu6_free": 48494,
+      "gpu7_free": 48494
+    }
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": ["F3", "F4"],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "missing_t1_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "credit": 0
+  }
+}
