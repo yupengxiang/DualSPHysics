@@ -55,7 +55,11 @@ def test_runner_builds_only_registered_argv_and_rejects_scope_substitution(tmp_p
     auth_path = tmp_path / "authorization.json"
     auth_path.write_text(json.dumps(value), encoding="utf-8")
     monkeypatch.setattr(runner, "AUTHORIZATION", auth_path)
-    plan = runner.build_execution_plan()
+    # The checked-in R007 receipt is an already-consumed one-shot namespace.
+    # Use a fresh test-only registered path to exercise argv construction without
+    # weakening the production reuse guard.
+    monkeypatch.setattr(runner, "OUTPUT", tmp_path / "registered-output")
+    plan = runner.build_execution_plan(runner.OUTPUT)
     assert plan["commands"]["cpu_gencase"][0].endswith("GenCase_linux64")
     assert plan["commands"]["native_decode"][0].endswith("bi4_dump")
     assert plan["commands"]["cpu_gencase"][-1] == "-save:all"

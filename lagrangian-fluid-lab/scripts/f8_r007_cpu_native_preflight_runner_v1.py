@@ -12,7 +12,7 @@ from scripts import f8_r007_static_design_review_v1 as design
 
 LAB = Path(__file__).resolve().parents[1]
 ROOT = design.ROOT
-AUTHORIZATION = ROOT / "cpu-native-preflight-authorization-v1/authorization.json"
+AUTHORIZATION = ROOT / "cpu-native-preflight-authorization-v2/authorization.json"
 OUTPUT = LAB / design.PREFLIGHT_ROOT
 SCOPE = design.SCOPE
 

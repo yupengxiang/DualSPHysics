@@ -19,7 +19,7 @@ from scripts import f8_r008_cpu_native_preflight_authorization_v1 as authorizati
 
 
 LAB = Path(__file__).resolve().parents[1]
-AUTHORIZATION = authorization_builder.LAB / authorization_builder.OUTPUT
+AUTHORIZATION = authorization_builder.LAB / authorization_builder.ROOT / "cpu-native-preflight-authorization-v2/authorization.json"
 REQUEST = authorization_builder.LAB / authorization_builder.REQUEST
 OUTPUT = authorization_builder.LAB / authorization_builder.ROOT / "cpu-native-preflight-v3"
 SCHEMA = "core.cfd.f8.r008_cpu_native_preflight.v1"

@@ -143,7 +143,10 @@ def test_scoped_runner_records_full_scope_and_cpu_environment(tmp_path, monkeypa
 
 
 def test_authorization_builder_verifies_frozen_request_and_review():
-    value = auth.build_authorization()
+    # The checked-in R008 v3 preflight has already been consumed.  Validate the
+    # sealed authorization and plan, then assert that a fresh authorization is
+    # refused instead of pretending the one-shot namespace is unused.
+    value = execute.load_authorization()
     assert value["status"] == "authorized_for_exactly_one_r008_cpu_native_preflight"
     assert value["qualification_credit"] == 0
     assert len(value["bindings"]) >= 118
@@ -158,7 +161,9 @@ def test_authorization_builder_verifies_frozen_request_and_review():
     assert command[0] == value["runtime_bindings"]["systemd_run"]["path"]
     assert "--property=MemoryMax=4294967296" in command
     assert command[-5:] == ["--", *plan["gencase"]["payload"]]
-    assert not execute.OUTPUT.exists()
+    assert execute.OUTPUT.is_dir()
+    with pytest.raises(FileExistsError, match="runtime output namespace must remain unused"):
+        auth.build_authorization()
 
 
 def test_current_resource_gate_blocks_live_f3_and_overload():

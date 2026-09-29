@@ -14,7 +14,10 @@ LAB = Path(__file__).resolve().parents[1]
 SCOPE = LAB / "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008"
 
 
-def test_consumed_r008_preflight_is_auditable_but_cannot_be_reauthorized() -> None:
+def test_consumed_r008_preflight_is_auditable_but_cannot_be_reauthorized(monkeypatch: pytest.MonkeyPatch) -> None:
+    # The request builder stores its registered namespace as a lab-relative
+    # path; make the test independent of the caller's working directory.
+    monkeypatch.chdir(LAB)
     sealed = execute.load_authorization()
     receipt = json.loads((SCOPE / "cpu-native-preflight-v3/receipt.json").read_text())
     lock = json.loads((SCOPE / "cpu-native-preflight-v3/one-shot-lock.json").read_text())
