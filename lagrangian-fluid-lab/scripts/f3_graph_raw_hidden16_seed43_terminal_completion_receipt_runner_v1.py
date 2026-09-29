@@ -4,10 +4,11 @@
 This runner is intentionally seed43-specific and read-only with respect to the
 experiment inputs.  It does not start, stop, or restart a job.  It first binds
 the already-produced bounded diagnostic summary and verifies the bytes and
-SHA-256 of the training/evaluation JSON receipts.  Checkpoint, trajectory,
-progress, HDF5, manifest, and solver artifacts are never opened; their paths
-are checked with ``lstat`` only.  A complete result remains diagnostic-only and
-never changes formal, T1, T2, registry, ledger, denominator, or gate state.
+SHA-256 of the training/evaluation JSON receipts through a stable descriptor.
+Checkpoint, trajectory, progress, HDF5, manifest, and solver artifacts are
+never opened; their paths are checked with ``lstat`` only.  A complete result
+remains diagnostic-only and never changes formal, T1, T2, registry, ledger,
+denominator, or gate state.
 """
 
 from __future__ import annotations
@@ -21,6 +22,8 @@ import stat
 from pathlib import Path
 from typing import Any, Mapping
 
+from scripts import f3_graph_terminal_validator_security_hardening_v1 as hardening
+
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
 SUMMARY_FILENAME = "F3-GRAPH-RAW-HIDDEN16-SEED43-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28.json"
@@ -32,6 +35,7 @@ REPORT_SCHEMA = "core.f3.graph_raw.hidden16.seed43.terminal_completion_receipt.v
 REPORT_ID = "f3-graph-raw-hidden16-seed43-terminal-completion-receipt-v1"
 SUMMARY_SCHEMA = "core.f3.graph_raw.hidden16.full835.rollout_diagnostic.summary.v1"
 SUMMARY_MAX_BYTES = 256 * 1024
+MAX_JSON_BYTES = 16 * 1024 * 1024
 SHA256_RE = set("0123456789abcdef")
 MODEL_KIND = "graph_raw"
 SEED = 43
@@ -55,6 +59,13 @@ DEFAULT_TRAJECTORY = Path(
     "/tmp/f3-graph-raw500-hidden16-seed43-full835-20260928-trajectory.h5"
 )
 DEFAULT_TERMINAL_SUMMARY = DEFAULT_SUMMARY
+
+P1_SECURITY_BLOCKERS = (
+    "real sealed Popen/wait witness is not independently admitted for seed43",
+    "complete source/manifest/checkpoint/environment/executable identity is not sealed",
+    "HDF5 external/soft/VDS rejection is not independently bound to this runner",
+    "one-time output namespace reservation/consumption is not independently sealed",
+)
 
 
 class ClosureError(ValueError):
@@ -185,23 +196,35 @@ def _sha256(value: Any, name: str) -> str:
 
 
 def _absolute_path(value: Any, name: str, suffix: str | None = None) -> Path:
-    if not isinstance(value, str) or not value or "\x00" in value:
+    try:
+        raw = os.fspath(value)
+    except TypeError as error:
+        raise ClosureError(f"{name} must be a path string") from error
+    if not isinstance(raw, str) or not raw or "\x00" in raw:
         raise ClosureError(f"{name} must be a non-empty path")
-    path = Path(value)
-    if not path.is_absolute() or ".." in path.parts:
-        raise ClosureError(f"{name} must be absolute and free of parent traversal")
+    path = Path(raw)
+    if (
+        not path.is_absolute()
+        or any(part in {".", ".."} for part in path.parts)
+        or os.path.normpath(raw) != raw
+    ):
+        raise ClosureError(f"{name} must be absolute and lexical-alias free")
     if suffix is not None and path.suffix != suffix:
         raise ClosureError(f"{name} must end with {suffix}")
     return path
 
 
 def _read_summary(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
-    if path.is_symlink() or not path.is_file():
-        raise ClosureError(f"summary is not a regular non-symlink file: {path}")
-    size = path.stat().st_size
-    if size > SUMMARY_MAX_BYTES:
-        raise ClosureError(f"summary exceeds bounded input size: {size}>{SUMMARY_MAX_BYTES}")
-    raw = path.read_bytes()
+    path = _absolute_path(path, "summary", ".json")
+    try:
+        raw = hardening.secure_read_regular_file(
+            path,
+            root_value=path.parent,
+            max_bytes=SUMMARY_MAX_BYTES,
+        )
+    except hardening.SecurityBoundaryError as error:
+        raise ClosureError(str(error)) from error
+    size = len(raw)
     duplicate_records: list[dict[str, Any]] = []
     try:
         value = json.loads(
@@ -218,6 +241,9 @@ def _read_summary(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         "bytes": size,
         "sha256": hashlib.sha256(raw).hexdigest(),
         "content_opened": True,
+        "stable_fd": True,
+        "path_reopened": False,
+        "hardlinks": 1,
         "duplicate_json_keys": duplicate_records,
         "duplicate_key_policy": (
             "accepted_one_known_legacy_qualification_alias"
@@ -225,6 +251,20 @@ def _read_summary(path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
             else "strict_no_duplicates"
         ),
     }
+
+
+def _reject_symlink_components(path: Path, name: str) -> None:
+    """Reject symlinked parents even for stat-only artifact claims."""
+
+    current = Path(path.anchor or os.sep)
+    for component in path.parts[1:]:
+        current /= component
+        try:
+            metadata = os.lstat(current)
+        except OSError as error:
+            raise ClosureError(f"cannot inspect {name} component {current}: {error}") from error
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ClosureError(f"{name} contains a symlink component: {current}")
 
 
 def _lstat_identity(
@@ -252,14 +292,18 @@ def _lstat_identity(
             "exists": False,
             "symlink": False,
             "regular_file": False,
+            "hardlinks": None,
             "stat_bytes": None,
             "bytes_match": False,
             "content_opened": content_opened,
+            "stable_fd": False,
+            "path_reopened": False,
             "hash_verification": hash_verification,
             "error": f"{type(error).__name__}:{error}",
         }
     symlink = stat.S_ISLNK(metadata.st_mode)
     regular_file = stat.S_ISREG(metadata.st_mode)
+    single_link = regular_file and not symlink and metadata.st_nlink == 1
     return {
         "path": str(path),
         "claimed_bytes": claim_bytes,
@@ -267,9 +311,12 @@ def _lstat_identity(
         "exists": True,
         "symlink": symlink,
         "regular_file": regular_file,
+        "hardlinks": int(metadata.st_nlink),
         "stat_bytes": metadata.st_size,
-        "bytes_match": regular_file and not symlink and metadata.st_size == claim_bytes,
+        "bytes_match": single_link and metadata.st_size == claim_bytes,
         "content_opened": content_opened,
+        "stable_fd": False,
+        "path_reopened": False,
         "hash_verification": hash_verification,
     }
 
@@ -281,31 +328,46 @@ def _hash_allowed_json(path: Path, claim: Mapping[str, Any], name: str) -> dict[
         raise ClosureError(f"refusing to hash forbidden artifact as {name}: {path.name}")
     claim_bytes = _strict_int(claim.get("bytes"), f"{name}.bytes", 1)
     claim_sha = _sha256(claim.get("sha256"), f"{name}.sha256")
-    stat_result = _lstat_identity(
-        path,
-        claim_bytes=claim_bytes,
-        claim_sha256=claim_sha,
-        content_opened=False,
-        hash_verification="not_started",
-    )
-    if not stat_result["exists"] or not stat_result["regular_file"] or stat_result["symlink"]:
-        stat_result["hash_verification"] = "not_attempted_missing_or_non_regular"
-        return stat_result
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    actual_sha = digest.hexdigest()
-    stat_result["content_opened"] = True
-    stat_result["actual_sha256"] = actual_sha
-    stat_result["hash_match"] = actual_sha == claim_sha
-    stat_result["hash_verification"] = "verified" if stat_result["hash_match"] else "sha256_mismatch"
-    return stat_result
+    try:
+        raw = hardening.secure_read_regular_file(
+            path,
+            root_value=path.parent,
+            max_bytes=MAX_JSON_BYTES,
+            expected_bytes=claim_bytes,
+            expected_sha256=claim_sha,
+        )
+    except hardening.SecurityBoundaryError as error:
+        raise ClosureError(str(error)) from error
+    try:
+        metadata = os.lstat(path)
+    except OSError as error:
+        raise ClosureError(f"{name} path changed after stable read: {error}") from error
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_nlink != 1 or metadata.st_size != len(raw):
+        raise ClosureError(f"{name} path identity changed after stable read")
+    actual_sha = hashlib.sha256(raw).hexdigest()
+    return {
+        "path": str(path),
+        "claimed_bytes": claim_bytes,
+        "claimed_sha256": claim_sha,
+        "exists": True,
+        "symlink": False,
+        "regular_file": True,
+        "hardlinks": 1,
+        "stat_bytes": len(raw),
+        "bytes_match": True,
+        "content_opened": True,
+        "stable_fd": True,
+        "path_reopened": False,
+        "actual_sha256": actual_sha,
+        "hash_match": actual_sha == claim_sha,
+        "hash_verification": "verified",
+    }
 
 
 def _claim_only_artifact(summary: Mapping[str, Any], section: str, name: str) -> dict[str, Any]:
     claim = _mapping(summary.get(section), section)
     path = _absolute_path(claim.get("path"), f"{section}.path")
+    _reject_symlink_components(path, f"{section}.path")
     claim_bytes = _strict_int(claim.get("bytes"), f"{section}.bytes", 1)
     claim_sha = _sha256(claim.get("sha256"), f"{section}.sha256")
     result = _lstat_identity(
@@ -323,6 +385,7 @@ def _claim_only_nested(summary: Mapping[str, Any], parent: str, child: str, name
     outer = _mapping(summary.get(parent), parent)
     claim = _mapping(outer.get(child), f"{parent}.{child}")
     path = _absolute_path(claim.get("path"), f"{parent}.{child}.path")
+    _reject_symlink_components(path, f"{parent}.{child}.path")
     claim_bytes = _strict_int(claim.get("bytes"), f"{parent}.{child}.bytes", 1)
     claim_sha = _sha256(claim.get("sha256"), f"{parent}.{child}.sha256")
     result = _lstat_identity(
@@ -339,6 +402,30 @@ def _claim_only_nested(summary: Mapping[str, Any], parent: str, child: str, name
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ClosureError(message)
+
+
+def _security_boundary() -> dict[str, Any]:
+    """Describe the non-authorizing P1 boundary for this read-only binder."""
+
+    return {
+        "status": "blocked_fail_closed",
+        "execution_authorized": False,
+        "launch_allowed": False,
+        "popen_attempted": False,
+        "wait_attempted": False,
+        "controls": {
+            "bounded_json_stable_fd": True,
+            "symlink_hardlink_toctou_for_bounded_json": True,
+            "stat_only_artifact_stable_fd": False,
+            "hdf5_external_soft_vds_rejected": False,
+            "source_manifest_checkpoint_environment_executable_identity": False,
+            "sealed_real_popen_wait": False,
+            "one_time_namespace": False,
+            "formal_credit_isolation": True,
+        },
+        "blockers": list(P1_SECURITY_BLOCKERS),
+        "hardening_boundary": hardening.SCHEMA,
+    }
 
 
 def _validate_summary(summary: Mapping[str, Any]) -> dict[str, Any]:
@@ -520,6 +607,7 @@ def _build_default_report(
             "output_namespace": None,
             "reason": "existing seed43 full835 completed diagnostic summary was bindable; no duplicate evaluate launched",
         },
+        "security_boundary": _security_boundary(),
         "scope": {
             "existing_live_job_stop_count": 0,
             "existing_live_job_restart_count": 0,
@@ -602,19 +690,18 @@ def _build_default_report(
 
 def _read_bounded_json(path: Path, name: str, max_bytes: int) -> tuple[dict[str, Any], dict[str, Any]]:
     path = _absolute_path(path, name, ".json")
-    if path.is_symlink() or not path.is_file():
-        raise ReceiptError(f"{name} is not a regular non-symlink file")
-    size = path.stat().st_size
-    if size > max_bytes:
-        raise ReceiptError(f"{name} exceeds bounded reader limit: {size}>{max_bytes}")
     try:
-        raw = path.read_bytes()
+        raw = hardening.secure_read_regular_file(
+            path,
+            root_value=path.parent,
+            max_bytes=max_bytes,
+        )
         payload = json.loads(
             raw.decode("utf-8"),
             parse_constant=_reject_constant,
             object_pairs_hook=_reject_duplicate_keys,
         )
-    except (OSError, UnicodeError, json.JSONDecodeError, ClosureError) as error:
+    except (OSError, UnicodeError, json.JSONDecodeError, ClosureError, hardening.SecurityBoundaryError) as error:
         raise ReceiptError(f"{name} is not valid bounded JSON: {error}") from error
     if not isinstance(payload, Mapping):
         raise ReceiptError(f"{name} must be a JSON object")
@@ -626,18 +713,22 @@ def _read_bounded_json(path: Path, name: str, max_bytes: int) -> tuple[dict[str,
         "bytes": len(raw),
         "sha256": hashlib.sha256(raw).hexdigest(),
         "schema": payload.get("schema"),
+        "stable_fd": True,
+        "path_reopened": False,
+        "hardlinks": 1,
     }
 
 
 def _path_equal(left: Any, right: Path) -> bool:
     try:
-        return Path(str(left)).resolve() == right.resolve()
-    except (OSError, RuntimeError, TypeError):
+        return _absolute_path(left, "path comparison") == _absolute_path(right, "path comparison target")
+    except (ClosureError, OSError, RuntimeError, TypeError):
         return False
 
 
 def _explicit_stat(path: Path, name: str, expected_bytes: int | None = None) -> dict[str, Any]:
     path = _absolute_path(path, name)
+    _reject_symlink_components(path, name)
     try:
         info = path.lstat()
     except OSError as error:
@@ -646,6 +737,8 @@ def _explicit_stat(path: Path, name: str, expected_bytes: int | None = None) -> 
         raise ReceiptError(f"{name}.stat symlink is not allowed")
     if not stat.S_ISREG(info.st_mode):
         raise ReceiptError(f"{name}.stat is not a regular file")
+    if info.st_nlink != 1:
+        raise ReceiptError(f"{name}.stat must have exactly one hard link")
     actual_bytes = int(info.st_size)
     if expected_bytes is not None and actual_bytes != expected_bytes:
         raise ReceiptError(f"{name}.stat.bytes drift: {actual_bytes}!={expected_bytes}")
@@ -656,6 +749,9 @@ def _explicit_stat(path: Path, name: str, expected_bytes: int | None = None) -> 
         "bytes": actual_bytes,
         "mtime_ns": int(info.st_mtime_ns),
         "symlink": False,
+        "hardlinks": int(info.st_nlink),
+        "stable_fd": False,
+        "path_reopened": False,
     }
 
 
@@ -915,6 +1011,7 @@ def _explicit_report(
             "output_namespace": None,
             "reason": "existing complete seed43 terminal summary bound; no duplicate evaluate",
         },
+        "security_boundary": _security_boundary(),
         "qualification": {
             "diagnostic_only": True,
             "formal_eligible": False,
@@ -1012,6 +1109,22 @@ def validate_report(report: Mapping[str, Any]) -> list[str]:
         errors.append("terminal markers drift")
     if report.get("new_diagnostic_evaluate_attempted", False) is not False:
         errors.append("new diagnostic evaluate was unexpectedly attempted")
+    security = report.get("security_boundary")
+    if not isinstance(security, Mapping):
+        errors.append("security_boundary missing")
+    else:
+        if security.get("status") != "blocked_fail_closed":
+            errors.append("security_boundary must remain blocked_fail_closed")
+        for key, expected in (
+            ("execution_authorized", False),
+            ("launch_allowed", False),
+            ("popen_attempted", False),
+            ("wait_attempted", False),
+        ):
+            if security.get(key) is not expected:
+                errors.append(f"security_boundary.{key} must be {expected!r}")
+        if tuple(security.get("blockers", ())) != P1_SECURITY_BLOCKERS:
+            errors.append("security_boundary blockers drift")
     qualification = report.get("qualification")
     if isinstance(qualification, Mapping):
         if qualification.get("formal_eligible") is not False:
@@ -1058,6 +1171,7 @@ def _render_zh(report: Mapping[str, Any]) -> str:
             "",
             "- 本 runner 未停止或重启 existing live job；未启动新的 evaluate；输出命名空间为空。",
             "- progress、trajectory/HDF5、manifest、checkpoint 均未打开内容，仅对后者做 `lstat`/bytes 检查；training/evaluation JSON 仅用于 receipt SHA-256 核对。",
+            "- P1 执行边界：没有独立 admission、sealed real Popen/wait、一次性 namespace 或完整 source/manifest/checkpoint/environment/executable identity；任何不可证明路径保持 fail-closed。",
             "- registry、ledger、denominator、gate mutation 均为 `0`；formal、T1、T2、qualification、credit 均不改变。",
         ]
     )

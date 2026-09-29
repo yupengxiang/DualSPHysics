@@ -36,6 +36,11 @@ def test_seed43_existing_full835_terminal_binds() -> None:
     assert report["scope"]["ledger_mutation"] == 0
     assert report["scope"]["denominator_mutation"] == 0
     assert report["scope"]["gate_mutation"] == 0
+    assert report["security_boundary"]["status"] == "blocked_fail_closed"
+    assert report["security_boundary"]["launch_allowed"] is False
+    assert report["security_boundary"]["controls"]["sealed_real_popen_wait"] is False
+    assert report["security_boundary"]["controls"]["formal_credit_isolation"] is True
+    assert runner.validate_report(report) == []
 
 
 def test_seed43_known_legacy_summary_duplicate_is_reconciled() -> None:
@@ -125,3 +130,25 @@ def test_seed43_explicit_summary_copy_keeps_actual_receipt_hash_binding(tmp_path
             "tail_frame_count": 0,
         },
     }
+
+
+def test_seed43_bounded_json_rejects_symlink_and_hardlink_aliases(tmp_path: Path) -> None:
+    source = tmp_path / "receipt.json"
+    source.write_text('{"schema":"core.training.v1"}\n', encoding="utf-8")
+
+    symlink = tmp_path / "receipt-symlink.json"
+    symlink.symlink_to(source)
+    with pytest.raises(runner.ReceiptError, match="link|artifact"):
+        runner._read_bounded_json(symlink, "seed43 test receipt", 1024)
+
+    hardlink = tmp_path / "receipt-hardlink.json"
+    hardlink.hardlink_to(source)
+    with pytest.raises(runner.ReceiptError, match="hard link|artifact"):
+        runner._read_bounded_json(hardlink, "seed43 test receipt", 1024)
+
+
+def test_seed43_report_rejects_security_boundary_promotion() -> None:
+    report = runner.build_report()
+    report["security_boundary"]["launch_allowed"] = True
+
+    assert any("security_boundary.launch_allowed" in error for error in runner.validate_report(report))
