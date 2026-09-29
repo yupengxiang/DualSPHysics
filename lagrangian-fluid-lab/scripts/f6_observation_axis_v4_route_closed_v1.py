@@ -17,12 +17,14 @@ from typing import Any
 
 
 LAB = Path(__file__).resolve().parents[1]
+RERUN_ID = "20260929-RERUN1"
 CARD_OUTPUT = LAB / (
-    "campaigns/core-v1/cfd/f6-observation-axis-v4-third-t1-route-closed-v1.json"
+    "campaigns/core-v1/cfd/"
+    f"f6-observation-axis-v4-third-t1-route-closed-{RERUN_ID}.json"
 )
 RECEIPT_OUTPUT = LAB / (
     "campaigns/core-v1/evidence/"
-    "f6-observation-axis-v4-third-t1-route-decision-receipt-v1.json"
+    f"f6-observation-axis-v4-third-t1-route-decision-{RERUN_ID}.json"
 )
 
 PREFLIGHT_REL = (
@@ -351,7 +353,8 @@ def build_card() -> dict[str, Any]:
 
     return {
         "schema": "core.f6.observation_axis.third_t1.route_closed.candidate_card.v1",
-        "version": "v1",
+        "version": "v1-rerun1",
+        "rerun_id": RERUN_ID,
         "status": "route_closed_no_new_hypothesis",
         "family": "F6",
         "candidate_id": "F6_observation_axis_v4_third_t1_no_new_hypothesis_v1",
@@ -482,7 +485,8 @@ def build_card() -> dict[str, Any]:
 def build_receipt(card: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema": "core.f6.observation_axis.third_t1.route_decision_receipt.v1",
-        "version": "v1",
+        "version": "v1-rerun1",
+        "rerun_id": RERUN_ID,
         "status": "route_closed_no_new_hypothesis",
         "decision": "root_review_only_close_current_f6_observation_axis_search",
         "execution_host": "Luna Max",
