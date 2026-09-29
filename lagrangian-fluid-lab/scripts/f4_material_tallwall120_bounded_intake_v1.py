@@ -648,11 +648,20 @@ def evaluate_receipts(payloads: Mapping[str, Mapping[str, Any]], input_errors: S
         _check(
             "case_projection_inventory",
             case_inventory["case_projection_count"] == CASE_COUNT
+            and case_inventory["source_matrix_count"] == CASE_COUNT
             and not case_inventory["duplicate_case_ids"]
             and not case_inventory["extra_case_ids"]
-            and not case_inventory["missing_case_projection_ids"],
+            and not case_inventory["missing_case_projection_ids"]
+            and not case_inventory["missing_source_matrix_ids"],
             observed=case_inventory,
-            expected={"case_projection_count": CASE_COUNT, "duplicates": [], "extras": [], "missing": []},
+            expected={
+                "case_projection_count": CASE_COUNT,
+                "source_matrix_count": CASE_COUNT,
+                "duplicates": [],
+                "extras": [],
+                "missing_case_projection_ids": [],
+                "missing_source_matrix_ids": [],
+            },
             blocker="case_projection_inventory_drift",
         ),
     ]

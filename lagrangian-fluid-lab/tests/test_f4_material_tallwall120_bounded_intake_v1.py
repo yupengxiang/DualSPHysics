@@ -73,6 +73,30 @@ def test_every_case_is_source_bound_to_the_fixed_matrix() -> None:
     assert all("source_path_drift" in row["blocking_reasons"] for row in rows)
 
 
+def test_duplicate_source_matrix_case_id_cannot_satisfy_32_case_denominator() -> None:
+    payloads = {
+        name: json.loads((ROOT / spec["path"]).read_text(encoding="utf-8"))
+        for name, spec in module.INPUTS.items()
+    }
+    source_rows = payloads["sidecar_matrix"]["source_binding"]["source_matrix"]
+    source_rows[-1]["case_id"] = source_rows[0]["case_id"]
+
+    result = module.evaluate_receipts(payloads)
+
+    inventory = result["case_matrix"]["inventory"]
+    assert inventory["source_matrix_count"] == module.CASE_COUNT
+    assert inventory["missing_source_matrix_ids"] == [module.CASE_IDS[-1]]
+    check = next(
+        item
+        for item in result["structural_intake"]["checks"]
+        if item["check"] == "case_projection_inventory"
+    )
+    assert check["passed"] is False
+    assert "case_projection_inventory_drift" in result["blockers"]
+    assert result["authorization"]["structural_intake_ready"] is False
+    assert result["authorization"]["credit"] == 0
+
+
 def test_structural_pass_cannot_mint_launch_or_t2() -> None:
     payloads = {name: {} for name in module.INPUTS}
     # Start from the real receipts so the test remains coupled to their
