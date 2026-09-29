@@ -17,8 +17,12 @@ from typing import Any, Mapping
 
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PROPOSAL = LAB_ROOT / "campaigns/core-v1/cfd/f2-distributed-slot-transfer-proposal-v1.json"
-DEFAULT_OUTPUT = LAB_ROOT / "campaigns/core-v1/cfd/f2-distributed-slot-root-review-v1.json"
+CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+CURRENT_CREATED_AT_UTC = "2026-09-29T00:00:00+00:00"
+HISTORICAL_PROPOSAL = LAB_ROOT / "campaigns/core-v1/cfd/f2-distributed-slot-transfer-proposal-v1.json"
+HISTORICAL_OUTPUT = LAB_ROOT / "campaigns/core-v1/cfd/f2-distributed-slot-root-review-v1.json"
+DEFAULT_PROPOSAL = LAB_ROOT / f"campaigns/core-v1/cfd/f2-distributed-slot-transfer-proposal-{CURRENT_RERUN_ID}.json"
+DEFAULT_OUTPUT = LAB_ROOT / f"campaigns/core-v1/cfd/f2-distributed-slot-root-review-{CURRENT_RERUN_ID}.json"
 SCHEMA = "core.f2.distributed_slot_transfer.root_review_receipt.v1"
 PROPOSAL_SCHEMA = "core.f2.distributed_slot_transfer.proposal.v1"
 
@@ -137,7 +141,7 @@ def build_receipt(proposal_path: Path = DEFAULT_PROPOSAL, output: Path = DEFAULT
         raise FileExistsError(f"review receipt already exists: {output}")
     receipt = {
         "schema": SCHEMA,
-        "created_at_utc": "2026-09-21T00:00:00+00:00",
+        "created_at_utc": CURRENT_CREATED_AT_UTC,
         "record_id": "f2-distributed-slot-transfer-root-review-v1",
         "status": "authorized_one_fresh_definition_and_cpu_native_preflight_only",
         "review_decision": {
