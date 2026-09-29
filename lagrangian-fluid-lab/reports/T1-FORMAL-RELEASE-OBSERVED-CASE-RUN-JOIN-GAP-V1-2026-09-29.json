@@ -1,0 +1,331 @@
+{
+  "aggregate_join": {
+    "formal_run_counts": {
+      "graph_raw-seed17": 48,
+      "graph_raw-seed29": 48,
+      "graph_raw-seed43": 48,
+      "graph_residual-seed17": 48,
+      "graph_residual-seed29": 48,
+      "graph_residual-seed43": 48,
+      "mlp-seed17": 48,
+      "mlp-seed29": 48,
+      "mlp-seed43": 48
+    },
+    "formal_run_family_counts": {
+      "graph_raw-seed17": {
+        "F3": 32,
+        "F4": 16
+      },
+      "graph_raw-seed29": {
+        "F3": 32,
+        "F4": 16
+      },
+      "graph_raw-seed43": {
+        "F3": 32,
+        "F4": 16
+      },
+      "graph_residual-seed17": {
+        "F3": 32,
+        "F4": 16
+      },
+      "graph_residual-seed29": {
+        "F3": 32,
+        "F4": 16
+      },
+      "graph_residual-seed43": {
+        "F3": 32,
+        "F4": 16
+      },
+      "mlp-seed17": {
+        "F3": 32,
+        "F4": 16
+      },
+      "mlp-seed29": {
+        "F3": 32,
+        "F4": 16
+      },
+      "mlp-seed43": {
+        "F3": 32,
+        "F4": 16
+      }
+    },
+    "identity_mapping": {
+      "all_formal_runs_have_target_rows": true,
+      "f3_rows_per_formal_run_exact": true,
+      "f4_rows_per_formal_run_exact": true,
+      "formal_run_ids_exact": true,
+      "identity_join_valid": true,
+      "target_denominator_exact": true
+    },
+    "inventory_copied": false,
+    "join_valid": true,
+    "missing_case_runs": 432,
+    "observed_case_runs": 0,
+    "target_denominator": {
+      "f3_rows_per_formal_run": 32,
+      "f4_rows_per_formal_run": 16,
+      "family_counts": {
+        "F3": 288,
+        "F4": 144
+      },
+      "required_case_runs": 432,
+      "rows_per_formal_run": 48
+    }
+  },
+  "contract_schema": "core.t1.formal_release_observed_case_run_join_contract.v1",
+  "decision": {
+    "T1_numerical": false,
+    "credit": 0,
+    "formal_eligible": false,
+    "launch_allowed": false,
+    "non_authorizing_adapter": true,
+    "qualification_credit": 0,
+    "reason": "identity shape is auditable, but formal release/root admission and authority-bound observed terminal receipts are not admitted",
+    "status": "blocked_fail_closed"
+  },
+  "execution_constraints": {
+    "bounded_json_only": true,
+    "checkpoint_opened": false,
+    "completion_written": false,
+    "denominator_written": false,
+    "gate_written": false,
+    "gpu_started": false,
+    "hdf5_opened": false,
+    "historical_receipt_written": false,
+    "ledger_written": false,
+    "plan_written": false,
+    "queue_submitted": false,
+    "read_only": true,
+    "registry_written": false,
+    "trainer_imported": false,
+    "training_started": false,
+    "trajectory_opened": false,
+    "worker_started": false
+  },
+  "input_bindings": [
+    {
+      "bytes": 1284,
+      "path": "campaigns/core-v1/cfd/t1-evidence/formal-release-observed-case-run-join-v1.json",
+      "role": "aggregate join campaign contract",
+      "sha256": "8f8c98ca033fe2b3e98e93b73b8c3c9841edde02d698e58584ad6639b101ec0f"
+    },
+    {
+      "bytes": 593346,
+      "path": "reports/T1-OBSERVED-MODEL-CASE-RUN-EVIDENCE-BINDING-V1-2026-09-29.json",
+      "role": "t1_observed_case_run_binding",
+      "sha256": "a4dc231cd0fb07b1a86680d5dab22e6ebe2208185a6bba1b6085129648af69f1"
+    },
+    {
+      "bytes": 7941,
+      "path": "reports/CORE-FORMAL-TRAINING-RELEASE-ROOT-ADMISSION-GAP-2026-09-29.json",
+      "role": "formal_release_root_admission",
+      "sha256": "ebaf987e22a84d17db96478b96d5746ba55c0b7b4ee51c0310abdb427b915439"
+    }
+  ],
+  "input_paths": {
+    "formal_release_root_admission": "reports/CORE-FORMAL-TRAINING-RELEASE-ROOT-ADMISSION-GAP-2026-09-29.json",
+    "t1_observed_case_run_binding": "reports/T1-OBSERVED-MODEL-CASE-RUN-EVIDENCE-BINDING-V1-2026-09-29.json"
+  },
+  "inputs": {
+    "formal_release_root_admission": {
+      "reference": {
+        "bytes": 7941,
+        "path": "reports/CORE-FORMAL-TRAINING-RELEASE-ROOT-ADMISSION-GAP-2026-09-29.json",
+        "role": "formal_release_root_admission",
+        "sha256": "ebaf987e22a84d17db96478b96d5746ba55c0b7b4ee51c0310abdb427b915439"
+      },
+      "report_id": "core-formal-training-release-root-admission-gap-v1",
+      "schema": "core.formal_training_release_root_admission_report.v1"
+    },
+    "t1_observed_case_run_binding": {
+      "reference": {
+        "bytes": 593346,
+        "path": "reports/T1-OBSERVED-MODEL-CASE-RUN-EVIDENCE-BINDING-V1-2026-09-29.json",
+        "role": "t1_observed_case_run_binding",
+        "sha256": "a4dc231cd0fb07b1a86680d5dab22e6ebe2208185a6bba1b6085129648af69f1"
+      },
+      "report_id": "t1-observed-model-case-run-evidence-binding-v1",
+      "schema": "core.t1.observed_model_case_run.evidence_binding.v1"
+    }
+  },
+  "interpretation": "The aggregate identity join closes only the metadata mapping gap. It does not promote planned rows to observed T1 evidence, does not admit formal training, and does not issue credit.",
+  "missing_blockers": [
+    "FORMAL_RELEASE_ROOT_ADMISSION_NOT_READY",
+    "EXTERNAL_ROOT_AUTHORITY_NOT_CONSUMABLE",
+    "FORMAL_TERMINAL_EVIDENCE_NOT_COMPLETE",
+    "NO_OBSERVED_T1_MODEL_CASE_RUN_RECEIPTS",
+    "AGGREGATE_JOIN_IS_NON_AUTHORIZING"
+  ],
+  "observations": {
+    "formal_release_root_admission": {
+      "decision": {
+        "credit": 0,
+        "formal_eligible": false,
+        "launch_allowed": false,
+        "non_authorizing_adapter": true,
+        "qualification_credit": 0,
+        "status": "blocked_fail_closed"
+      },
+      "missing_blockers": [
+        "FORMAL_DATASET_RELEASE_NOT_GRANTED",
+        "TRUSTED_ROOT_ATTESTATION_MISSING",
+        "TRUSTED_ROOT_AUTHENTICATION_NOT_INTEGRATED",
+        "SOURCE_CLOSURE_RELEASE_OR_ROOT_GATE_MISSING",
+        "TERMINAL_EVIDENCE_MATRIX_MISSING",
+        "TERMINAL_ARTIFACT_REVERIFICATION_NOT_INTEGRATED",
+        "MATRIX_TRUSTED_ROOT_ROLE_REFERENCE_MISSING",
+        "MATRIX_TERMINAL_EVIDENCE_ROLE_REFERENCE_MISSING"
+      ],
+      "report_id": "core-formal-training-release-root-admission-gap-v1",
+      "root_admission_ready": false,
+      "root_authentication_integrated": false,
+      "schema": "core.formal_training_release_root_admission_report.v1",
+      "scope": {
+        "models": [
+          "graph_raw",
+          "graph_residual",
+          "mlp"
+        ],
+        "run_count": 9,
+        "run_ids": [
+          "graph_raw-seed17",
+          "graph_raw-seed29",
+          "graph_raw-seed43",
+          "graph_residual-seed17",
+          "graph_residual-seed29",
+          "graph_residual-seed43",
+          "mlp-seed17",
+          "mlp-seed29",
+          "mlp-seed43"
+        ],
+        "seeds": [
+          17,
+          29,
+          43
+        ]
+      },
+      "terminal_evidence_complete": false
+    },
+    "t1_observed_case_run_binding": {
+      "T1_numerical": false,
+      "credit": 0,
+      "fail_closed": true,
+      "formal_run_ids": [
+        "graph_raw-seed17",
+        "graph_raw-seed29",
+        "graph_raw-seed43",
+        "graph_residual-seed17",
+        "graph_residual-seed29",
+        "graph_residual-seed43",
+        "mlp-seed17",
+        "mlp-seed29",
+        "mlp-seed43"
+      ],
+      "missing_case_runs": 432,
+      "observed_case_runs": 0,
+      "projection": {
+        "duplicate_row_identities": 0,
+        "family_counts": {
+          "F3": 288,
+          "F4": 144
+        },
+        "formal_run_counts": {
+          "graph_raw-seed17": 48,
+          "graph_raw-seed29": 48,
+          "graph_raw-seed43": 48,
+          "graph_residual-seed17": 48,
+          "graph_residual-seed29": 48,
+          "graph_residual-seed43": 48,
+          "mlp-seed17": 48,
+          "mlp-seed29": 48,
+          "mlp-seed43": 48
+        },
+        "formal_run_family_counts": {
+          "graph_raw-seed17": {
+            "F3": 32,
+            "F4": 16
+          },
+          "graph_raw-seed29": {
+            "F3": 32,
+            "F4": 16
+          },
+          "graph_raw-seed43": {
+            "F3": 32,
+            "F4": 16
+          },
+          "graph_residual-seed17": {
+            "F3": 32,
+            "F4": 16
+          },
+          "graph_residual-seed29": {
+            "F3": 32,
+            "F4": 16
+          },
+          "graph_residual-seed43": {
+            "F3": 32,
+            "F4": 16
+          },
+          "mlp-seed17": {
+            "F3": 32,
+            "F4": 16
+          },
+          "mlp-seed29": {
+            "F3": 32,
+            "F4": 16
+          },
+          "mlp-seed43": {
+            "F3": 32,
+            "F4": 16
+          }
+        },
+        "identity_valid": true,
+        "rows_checked": 432,
+        "unique_row_identities": 432
+      },
+      "report_id": "t1-observed-model-case-run-evidence-binding-v1",
+      "required_case_runs": 432,
+      "schema": "core.t1.observed_model_case_run.evidence_binding.v1",
+      "status": "typed_evidence_gap_fail_closed"
+    }
+  },
+  "observed_at_utc": "2026-09-29T00:00:00Z",
+  "policy": {
+    "caller_claims_cannot_mint_trust": true,
+    "coarse_to_fine": true,
+    "external_authority_required_for_counting": true,
+    "parallel": true,
+    "reasoning_effort": "max",
+    "subagent_model": "gpt-5.6-luna"
+  },
+  "protected_state": {
+    "completion_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "ledger_mutations": 0,
+    "plan_mutations": 0,
+    "registry_mutations": 0
+  },
+  "purpose": "bounded aggregate join of the fixed formal model/seed release scope to the existing F3/F4 T1 target projection",
+  "report_id": "t1-formal-release-observed-case-run-join-gap-v1",
+  "schema": "core.t1.formal_release_observed_case_run_join_gap.v1",
+  "scope": {
+    "f3_case_count": 32,
+    "f4_evaluation_case_count": 16,
+    "families": [
+      "F3",
+      "F4"
+    ],
+    "models": [
+      "graph_raw",
+      "graph_residual",
+      "mlp"
+    ],
+    "required_case_runs": 432,
+    "rows_per_formal_run": 48,
+    "seeds": [
+      17,
+      29,
+      43
+    ]
+  }
+}
