@@ -13,6 +13,9 @@ from scripts import f8_r008_safe_bi4_decoder_v1 as decoder
 from scripts import f8_r008_safe_bi4_metadata_binding_v1 as metadata
 
 
+LAB = Path(__file__).resolve().parents[1]
+
+
 def _string(value: str | bytes) -> bytes:
     payload = value.encode("utf-8") if isinstance(value, str) else value
     return struct.pack("<I", len(payload)) + payload
@@ -95,7 +98,9 @@ def test_metadata_binding_preserves_raw_double_bits_and_is_canonical(tmp_path: P
     assert mass["float_hex_components"] == [float(0.000421875).hex()]
     assert time_value["raw_value_bytes_hex"] == struct.pack("<d", 0.10000000000000002).hex()
     assert time_value["float_hex_components"] == [float(0.10000000000000002).hex()]
-    schema = json.loads(Path("reports/F8-R008-PER-CASE-PROVENANCE-SCHEMA-V1-2026-09-24.json").read_text())
+    schema = json.loads(
+        (LAB / "reports/F8-R008-PER-CASE-PROVENANCE-SCHEMA-V1-2026-09-24.json").read_text()
+    )
     contract = schema["stage_D_decode_table_provenance"]["decoder_contract"]["metadata_binding_api"]
     assert set(contract["exact_value_record_fields"]) == record_fields
     assert len(contract["exact_value_record_fields"]) == len(record_fields)
