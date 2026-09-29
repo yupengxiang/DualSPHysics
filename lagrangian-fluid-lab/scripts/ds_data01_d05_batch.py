@@ -347,7 +347,14 @@ def acquire_gpu_lease(case_id: str, gpu: int) -> Path:
         lease.mkdir()
     except FileExistsError as exc:
         raise RuntimeError(f"GPU{gpu} already has an active D05 lease") from exc
-    (lease / "owner.json").write_text(json.dumps({"case_id": case_id, "pid": os.getpid(), "gpu": gpu}, indent=2) + "\n", encoding="utf-8")
+    try:
+        (lease / "owner.json").write_text(
+            json.dumps({"case_id": case_id, "pid": os.getpid(), "gpu": gpu}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        lease.rmdir()
+        raise
     return lease
 
 
@@ -380,53 +387,51 @@ def run_one(case_id: str, spec: dict[str, Any], prepared: dict[str, Any], gpu: i
     lease = acquire_gpu_lease(case_id, gpu)
     try:
         observation = preflight_gpu(gpu)
-    except Exception:
+        case_root = CAMPAIGN_ROOT / case_id
+        output = case_root / "attempt-001"
+        if output.exists() and any(output.iterdir()):
+            raise FileExistsError(f"refusing to overwrite D05 run attempt: {output}")
+        output.mkdir(parents=True, exist_ok=True)
+        prefix = LAB_ROOT / prepared["generated_prefix"]
+        command = [str(SOLVER), f"-gpu:{gpu}", str(prefix), str(output), f"-tmax:{spec['tmax']}", f"-tout:{spec['tout']}"]
+        log_path = case_root / "solver.stdout.log"
+        started_at = datetime.now(timezone.utc).isoformat()
+        started = time.monotonic()
+        with log_path.open("w", encoding="utf-8") as log:
+            proc = subprocess.run(command, cwd=prefix.parent, env=environment(), stdout=log, stderr=subprocess.STDOUT, check=False)
+        elapsed = time.monotonic() - started
+        text = log_path.read_text(encoding="utf-8", errors="replace")
+        parts = sorted(output.glob("data*/Part_*.bi4"))
+        completed = proc.returncode == 0 and "Finished execution (code=0)" in text and bool(parts)
+        raw_hash, raw_count, raw_bytes = tree_digest(output)
+        result = {
+            "schema": "ds-data-01.d05.run.v1",
+            "case_id": case_id,
+            **spec,
+            "release_role": "internal_development_only",
+            "plan_sha256": plan_sha256(),
+            "solver_binary_sha256": digest(SOLVER),
+            "gpu": gpu,
+            "gpu_observation_before_launch": observation,
+            "command": command,
+            "started_at_utc": started_at,
+            "returncode": proc.returncode,
+            "elapsed_seconds": round(elapsed, 4),
+            "raw_output_root": str(output.relative_to(LAB_ROOT)),
+            "frames": len(parts),
+            "raw_tree_sha256": raw_hash,
+            "raw_file_count": raw_count,
+            "raw_bytes": raw_bytes,
+            "solver_stdout_sha256": digest(log_path),
+            "status": "completed" if completed else "run_failed",
+            "scientific_acceptance": "not_assessed",
+            "split": "unassigned",
+            "learning_attempts": 0,
+        }
+        atomic_write_json(receipt, result)
+        return result
+    finally:
         release_gpu_lease(lease)
-        raise
-    case_root = CAMPAIGN_ROOT / case_id
-    output = case_root / "attempt-001"
-    if output.exists() and any(output.iterdir()):
-        raise FileExistsError(f"refusing to overwrite D05 run attempt: {output}")
-    output.mkdir(parents=True, exist_ok=True)
-    prefix = LAB_ROOT / prepared["generated_prefix"]
-    command = [str(SOLVER), f"-gpu:{gpu}", str(prefix), str(output), f"-tmax:{spec['tmax']}", f"-tout:{spec['tout']}"]
-    log_path = case_root / "solver.stdout.log"
-    started_at = datetime.now(timezone.utc).isoformat()
-    started = time.monotonic()
-    with log_path.open("w", encoding="utf-8") as log:
-        proc = subprocess.run(command, cwd=prefix.parent, env=environment(), stdout=log, stderr=subprocess.STDOUT, check=False)
-    elapsed = time.monotonic() - started
-    text = log_path.read_text(encoding="utf-8", errors="replace")
-    parts = sorted(output.glob("data*/Part_*.bi4"))
-    completed = proc.returncode == 0 and "Finished execution (code=0)" in text and bool(parts)
-    raw_hash, raw_count, raw_bytes = tree_digest(output)
-    result = {
-        "schema": "ds-data-01.d05.run.v1",
-        "case_id": case_id,
-        **spec,
-        "release_role": "internal_development_only",
-        "plan_sha256": plan_sha256(),
-        "solver_binary_sha256": digest(SOLVER),
-        "gpu": gpu,
-        "gpu_observation_before_launch": observation,
-        "command": command,
-        "started_at_utc": started_at,
-        "returncode": proc.returncode,
-        "elapsed_seconds": round(elapsed, 4),
-        "raw_output_root": str(output.relative_to(LAB_ROOT)),
-        "frames": len(parts),
-        "raw_tree_sha256": raw_hash,
-        "raw_file_count": raw_count,
-        "raw_bytes": raw_bytes,
-        "solver_stdout_sha256": digest(log_path),
-        "status": "completed" if completed else "run_failed",
-        "scientific_acceptance": "not_assessed",
-        "split": "unassigned",
-        "learning_attempts": 0,
-    }
-    atomic_write_json(receipt, result)
-    release_gpu_lease(lease)
-    return result
 
 
 def receipts(kind: str, case_ids: list[str] | None = None) -> list[dict[str, Any]]:
