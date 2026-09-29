@@ -20,11 +20,12 @@ from scripts import f8_r008_syscall_selector_domain_v1 as selector_domain
 from scripts import f8_r008_syscall_universe_baseline_v1 as syscall_baseline
 
 ROOT = Path("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008")
-V7_RECEIPT = ROOT / "t1-execution-readiness-audit-v7/receipt.json"
-OUTPUT = LAB / ROOT / "t1-execution-readiness-audit-v8/receipt.json"
+RERUN_ID = "2026-09-29-RERUN1"
+V7_RECEIPT = ROOT / "t1-execution-readiness-audit-v7-rerun1/receipt.json"
+OUTPUT = LAB / ROOT / "t1-execution-readiness-audit-v8-rerun1/receipt.json"
 SCHEMA = "core.cfd.f8.r008_execution_readiness_audit.v8"
-RECORD_ID = "f8-r008-execution-readiness-audit-v8"
-EXPECTED_V7_SHA256 = "bc0fd27b0414f7a57c792215ea14bc12888e455f988eccc9c9130b8d3a8de3e7"
+RECORD_ID = "f8-r008-execution-readiness-audit-v8-rerun1"
+EXPECTED_V7_SHA256 = "267e9d8b5c1f94ea4148e296072ee74ff41f1606a7d3c1be22424392c467a163"
 EXPECTED_V7_GAPS = {
     "trusted_worker_execution_source_and_runtime_identity_missing",
     "real_provenance_verified_15_case_t1_results_missing",
@@ -151,7 +152,40 @@ def _add_evidence(inventory: dict[str, dict[str, Any]], path: str, role: str) ->
             raise ReadinessAuditError(f"evidence path has conflicting bindings: {path}")
         current["role"] += f" | {role}"
         return
-    inventory[path] = {**reference, "role": role}
+    inventory[path] = {**reference, "role": role, "binding_kind": "current_source"}
+
+
+def _add_historical_evidence(inventory: dict[str, dict[str, Any]], item: dict[str, Any], role: str) -> None:
+    """Carry V7's immutable v6 anchor entries without current-source substitution."""
+    path = item.get("path")
+    path_obj = Path(path) if isinstance(path, str) else Path(".")
+    if (
+        not isinstance(path, str)
+        or not path
+        or path_obj.is_absolute()
+        or path_obj.as_posix() != path
+        or any(part in {"", ".", ".."} for part in path_obj.parts)
+    ):
+        raise ReadinessAuditError("historical V7 evidence path is not canonical")
+    if type(item.get("bytes")) is not int or item["bytes"] <= 0:
+        raise ReadinessAuditError(f"historical V7 evidence has an invalid byte count: {path}")
+    digest = item.get("sha256")
+    if not isinstance(digest, str) or len(digest) != 64:
+        raise ReadinessAuditError(f"historical V7 evidence has an invalid digest: {path}")
+    binding = {
+        "path": path,
+        "bytes": item["bytes"],
+        "sha256": digest,
+        "role": role,
+        "binding_kind": "historical_v6_anchor",
+    }
+    if path in inventory:
+        current = inventory[path]
+        if current["sha256"] != digest or current["bytes"] != item["bytes"]:
+            raise ReadinessAuditError(f"evidence path has conflicting historical bindings: {path}")
+        current["role"] += f" | {role}"
+        return
+    inventory[path] = binding
 
 
 def build_audit() -> dict[str, Any]:
@@ -213,10 +247,14 @@ def build_audit() -> dict[str, Any]:
     inventory: dict[str, dict[str, Any]] = {}
     for item in prior["evidence"]:
         path = item["path"]
+        role = f"transitive_v7:{item['role']}"
+        if item.get("binding_kind") == "historical_v6_anchor":
+            _add_historical_evidence(inventory, item, role)
+            continue
         _, current = predecessor._read_beneath_lab(path)
         if current["sha256"] != item["sha256"] or current["bytes"] != item["bytes"]:
             raise ReadinessAuditError(f"transitive v7 evidence binding is stale: {path}")
-        _add_evidence(inventory, path, f"transitive_v7:{item['role']}")
+        _add_evidence(inventory, path, role)
     _add_evidence(inventory, V7_RECEIPT.as_posix(), "immutable historical readiness v7 receipt")
     for path, role in NEW_EVIDENCE:
         _add_evidence(inventory, path, role)
@@ -238,6 +276,7 @@ def build_audit() -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "record_id": RECORD_ID,
+        "rerun_id": RERUN_ID,
         "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
         "status": "static_selector_domain_bound_full_runtime_readiness_blocked",
         "supersedes": {

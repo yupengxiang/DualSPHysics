@@ -11,6 +11,8 @@ from scripts import f8_r008_execution_readiness_audit_v7 as audit
 def test_v7_binds_v18_and_static_fanotify_profiles_without_readiness() -> None:
     value = audit.build_audit()
     assert value["schema"] == audit.SCHEMA
+    assert value["record_id"] == audit.RECORD_ID
+    assert value["rerun_id"] == audit.RERUN_ID
     assert value["status"] == "static_terminal_fanotify_profiles_reviewed_runtime_readiness_blocked"
     profile = value["terminal_fanotify_profile_verification"]
     assert profile["pidfd_required_for_both_groups"] is True
@@ -21,6 +23,22 @@ def test_v7_binds_v18_and_static_fanotify_profiles_without_readiness() -> None:
     assert "trusted_worker_execution_source_and_runtime_identity_missing" in codes
     assert "terminal_fanotify_profiles_lack_pinned_kernel_runtime_conformance" in codes
     assert "trusted_terminal_supervisor_and_final_fput_observer_missing" in codes
+
+
+def test_v7_reuses_v6_only_as_an_immutable_historical_anchor() -> None:
+    value = audit.build_audit()
+    anchor = value["predecessor_v6"]["historical_evidence_anchor"]
+    assert anchor["receipt_bytes"] == audit.HISTORICAL_V6_RECEIPT_BYTES
+    assert anchor["receipt_sha256"] == audit.HISTORICAL_V6_RECEIPT_SHA256
+    assert value["predecessor_v6"]["historical_evidence_reverified_against_current_tree"] is False
+    assert set(anchor["current_source_drift_paths"]) == {
+        "scripts/f8_r008_execution_readiness_audit_v5.py",
+        "scripts/f8_r008_t1_metric_matrix_review_v2.py",
+        "tests/test_f8_r008_execution_readiness_audit_v5.py",
+    }
+    evidence = {item["path"]: item for item in value["evidence"]}
+    assert evidence["scripts/f8_r008_execution_readiness_audit_v5.py"]["binding_kind"] == "historical_v6_anchor"
+    assert evidence["scripts/f8_r008_execution_readiness_audit_v7.py"]["binding_kind"] == "current_source"
 
 
 def test_v7_zero_credit_and_no_runtime_or_privileged_actions() -> None:
@@ -51,6 +69,7 @@ def test_v7_transitive_evidence_binds_v17_v18_manifest_verifier_and_predecessor(
     assert all(len(item["sha256"]) == 64 and item["bytes"] > 0 for item in evidence.values())
     assert len(evidence) == len(value["evidence"])
     assert value["supersedes"]["sha256"] == evidence[audit.V6_RECEIPT.as_posix()]["sha256"]
+    assert audit.OUTPUT.as_posix().endswith("t1-execution-readiness-audit-v7-rerun1/receipt.json")
 
 
 def test_v7_writer_is_immutable_and_verifier_detects_tampering(tmp_path: Path) -> None:

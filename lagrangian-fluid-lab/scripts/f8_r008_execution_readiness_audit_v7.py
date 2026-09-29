@@ -19,9 +19,12 @@ from scripts import f8_r008_terminal_fanotify_profile_verifier_v1 as fanotify_pr
 
 ROOT = Path("campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008")
 V6_RECEIPT = ROOT / "t1-execution-readiness-audit-v6/receipt.json"
-OUTPUT = LAB / ROOT / "t1-execution-readiness-audit-v7/receipt.json"
+RERUN_ID = "2026-09-29-RERUN1"
+OUTPUT = LAB / ROOT / "t1-execution-readiness-audit-v7-rerun1/receipt.json"
 SCHEMA = "core.cfd.f8.r008_execution_readiness_audit.v7"
-RECORD_ID = "f8-r008-execution-readiness-audit-v7"
+RECORD_ID = "f8-r008-execution-readiness-audit-v7-rerun1"
+HISTORICAL_V6_RECEIPT_BYTES = 14040
+HISTORICAL_V6_RECEIPT_SHA256 = "8cf068dc5e35cff0b8bcf012a2b916b2785e7f0fcc247cbc8ef23c073543a6ef"
 MAX_EVIDENCE_BYTES = 128 * 1024 * 1024
 V17 = fanotify_profiles.V17
 V18 = fanotify_profiles.V18
@@ -122,11 +125,53 @@ def _add_evidence(inventory: dict[str, dict[str, Any]], relative: str | Path, ro
             raise ReadinessAuditError(f"evidence path has conflicting bindings: {path}")
         current["role"] += f" | {role}"
         return
-    inventory[path] = {**reference, "role": role}
+    inventory[path] = {**reference, "role": role, "binding_kind": "current_source"}
 
 
-def build_audit() -> dict[str, Any]:
-    predecessor, predecessor_ref = _load_json(V6_RECEIPT)
+def _add_historical_evidence(
+    inventory: dict[str, dict[str, Any]], reference: dict[str, Any], role: str
+) -> None:
+    """Carry an immutable v6 binding without treating it as current source."""
+    path = reference.get("path")
+    path_obj = Path(path) if isinstance(path, str) else Path(".")
+    if (
+        not isinstance(path, str)
+        or not path
+        or path_obj.is_absolute()
+        or path_obj.as_posix() != path
+        or any(part in {"", ".", ".."} for part in path_obj.parts)
+    ):
+        raise ReadinessAuditError("historical v6 evidence path is not canonical")
+    if type(reference.get("bytes")) is not int or reference["bytes"] <= 0:
+        raise ReadinessAuditError(f"historical v6 evidence has an invalid byte count: {path}")
+    digest = reference.get("sha256")
+    if not isinstance(digest, str) or len(digest) != 64:
+        raise ReadinessAuditError(f"historical v6 evidence has an invalid digest: {path}")
+    binding = {
+        "path": path,
+        "bytes": reference["bytes"],
+        "sha256": digest,
+        "role": role,
+        "binding_kind": "historical_v6_anchor",
+    }
+    if path in inventory:
+        current = inventory[path]
+        if current["sha256"] != digest or current["bytes"] != reference["bytes"]:
+            raise ReadinessAuditError(f"evidence path has conflicting historical bindings: {path}")
+        current["role"] += f" | {role}"
+        return
+    inventory[path] = binding
+
+
+def _validate_historical_v6(
+    predecessor: dict[str, Any], predecessor_ref: dict[str, Any]
+) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
+    """Validate v6 semantics from its pinned receipt, not from mutable current files."""
+    if (
+        predecessor_ref.get("bytes") != HISTORICAL_V6_RECEIPT_BYTES
+        or predecessor_ref.get("sha256") != HISTORICAL_V6_RECEIPT_SHA256
+    ):
+        raise ReadinessAuditError("historical R008 readiness v6 receipt is not the immutable anchor")
     if not (
         predecessor.get("schema") == "core.cfd.f8.r008_execution_readiness_audit.v6"
         and predecessor.get("record_id") == "f8-r008-execution-readiness-audit-v6"
@@ -155,13 +200,13 @@ def build_audit() -> dict[str, Any]:
         if not isinstance(prior, dict) or not isinstance(prior.get("path"), str):
             raise ReadinessAuditError("historical v6 evidence inventory contains a malformed item")
         path = prior["path"]
+        canonical = Path(path)
+        if canonical.is_absolute() or canonical.as_posix() != path or any(part in {"", ".", ".."} for part in canonical.parts):
+            raise ReadinessAuditError(f"historical v6 evidence path is not canonical: {path}")
         if path in previous_by_path:
             raise ReadinessAuditError(f"historical v6 evidence inventory duplicates a path: {path}")
-        _, current_ref = _read_beneath_lab(path)
-        if type(prior.get("bytes")) is not int or not isinstance(prior.get("sha256"), str) or len(prior["sha256"]) != 64:
+        if type(prior.get("bytes")) is not int or prior["bytes"] <= 0 or not isinstance(prior.get("sha256"), str) or len(prior["sha256"]) != 64:
             raise ReadinessAuditError(f"historical v6 evidence ref has an invalid digest/size type: {path}")
-        if current_ref["sha256"] != prior.get("sha256") or current_ref["bytes"] != prior.get("bytes"):
-            raise ReadinessAuditError(f"historical v6 evidence binding is stale: {path}")
         previous_by_path[path] = prior
     for role_key in ("implementation", "test"):
         binding = predecessor.get(role_key)
@@ -170,6 +215,28 @@ def build_audit() -> dict[str, Any]:
         prior = previous_by_path.get(binding["path"])
         if prior is None or prior.get("sha256") != binding.get("sha256") or prior.get("bytes") != binding.get("bytes"):
             raise ReadinessAuditError(f"historical v6 {role_key} is not included in its evidence inventory")
+    return previous_evidence, previous_by_path
+
+
+def _historical_source_drift(previous_evidence: list[dict[str, Any]]) -> list[str]:
+    """Report current-tree drift while keeping the historical binding unchanged."""
+    drift: list[str] = []
+    for prior in previous_evidence:
+        path = prior["path"]
+        try:
+            _, current = _read_beneath_lab(path)
+        except ReadinessAuditError:
+            drift.append(path)
+            continue
+        if current["sha256"] != prior["sha256"] or current["bytes"] != prior["bytes"]:
+            drift.append(path)
+    return sorted(drift)
+
+
+def build_audit() -> dict[str, Any]:
+    predecessor, predecessor_ref = _load_json(V6_RECEIPT)
+    previous_evidence, previous_by_path = _validate_historical_v6(predecessor, predecessor_ref)
+    historical_source_drift = _historical_source_drift(previous_evidence)
 
     profile_verification = fanotify_profiles.verify_profiles()
     if not (
@@ -185,14 +252,8 @@ def build_audit() -> dict[str, Any]:
 
     inventory: dict[str, dict[str, Any]] = {}
     for prior in previous_evidence:
-        path = prior.get("path") if isinstance(prior, dict) else None
-        if not isinstance(path, str):
-            raise ReadinessAuditError("v6 evidence inventory contains a malformed path")
-        _, current_ref = _read_beneath_lab(path)
-        if current_ref["sha256"] != prior.get("sha256") or current_ref["bytes"] != prior.get("bytes"):
-            raise ReadinessAuditError(f"transitive v6 evidence binding is stale: {path}")
-        _add_evidence(inventory, path, f"transitive_v6:{prior.get('role', path)}")
-    _add_evidence(inventory, V6_RECEIPT, "immutable_historical_v6_readiness_receipt")
+        _add_historical_evidence(inventory, prior, f"transitive_v6:{prior.get('role', prior['path'])}")
+    _add_historical_evidence(inventory, predecessor_ref, "immutable_historical_v6_readiness_receipt")
     for path, role in (
         (PROFILE_MANIFEST, "proposal-only terminal fanotify profile manifest"),
         (V17, "historical V17 terminal evidence contract"),
@@ -221,6 +282,7 @@ def build_audit() -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "record_id": RECORD_ID,
+        "rerun_id": RERUN_ID,
         "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
         "status": "static_terminal_fanotify_profiles_reviewed_runtime_readiness_blocked",
         "supersedes": {
@@ -230,7 +292,15 @@ def build_audit() -> dict[str, Any]:
         },
         "predecessor_v6": {
             "receipt_preserved": True,
-            "receipt_integrity": "source_bound_evidence_reverified",
+            "receipt_integrity": "immutable_receipt_hash_verified",
+            "historical_evidence_reverified_against_current_tree": False,
+            "historical_evidence_anchor": {
+                "receipt_bytes": predecessor_ref["bytes"],
+                "receipt_sha256": predecessor_ref["sha256"],
+                "historical_binding_count": len(previous_by_path),
+                "current_source_drift_paths": historical_source_drift,
+                "current_source_drift_recorded": bool(historical_source_drift),
+            },
             "readiness_pass": False,
             "qualification_credit": 0,
         },
@@ -353,7 +423,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--write", action="store_true", help="write the immutable R008 readiness v7 receipt once at its fixed path")
+    parser.add_argument("--write", action="store_true", help="write the immutable additive R008 readiness v7 RERUN1 receipt once")
     arguments = parser.parse_args()
     if arguments.write:
         print(write_audit().relative_to(LAB))

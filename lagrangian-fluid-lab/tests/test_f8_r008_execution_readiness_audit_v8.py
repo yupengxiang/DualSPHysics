@@ -12,6 +12,8 @@ def test_v8_binds_complete_selector_partition_and_keeps_policy_blocked() -> None
     value = audit.build_audit()
     selector = value["selector_domain"]
     assert value["schema"] == audit.SCHEMA
+    assert value["record_id"] == audit.RECORD_ID
+    assert value["rerun_id"] == audit.RERUN_ID
     assert value["status"] == "static_selector_domain_bound_full_runtime_readiness_blocked"
     assert selector["raw_nr_partition_complete"] is True
     assert selector["raw_nr_minimum"] == -(1 << 31)
@@ -56,6 +58,9 @@ def test_v8_transitive_evidence_binds_v7_selector_and_source_baseline() -> None:
     assert len(evidence) == len(value["evidence"])
     assert all(type(item["bytes"]) is int and item["bytes"] > 0 and len(item["sha256"]) == 64 for item in evidence.values())
     assert value["supersedes"]["sha256"] == evidence[audit.V7_RECEIPT.as_posix()]["sha256"]
+    assert audit.OUTPUT.as_posix().endswith("t1-execution-readiness-audit-v8-rerun1/receipt.json")
+    assert evidence["scripts/f8_r008_execution_readiness_audit_v5.py"]["binding_kind"] == "historical_v6_anchor"
+    assert evidence["scripts/f8_r008_execution_readiness_audit_v8.py"]["binding_kind"] == "current_source"
 
 
 def test_v8_receipt_roundtrip_and_tampering_rejection(tmp_path: Path) -> None:
