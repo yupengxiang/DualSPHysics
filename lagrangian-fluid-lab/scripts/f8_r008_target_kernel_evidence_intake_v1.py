@@ -95,6 +95,7 @@ REPEATING_DIGEST_UNITS = (
 
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 
 
 class TargetKernelEvidenceIntakeError(ValueError):
@@ -171,10 +172,37 @@ def _assert_no_symlink_components(path: Path, label: str) -> None:
 def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[str, Any]]:
     """Read one small, single-link regular file through a stable FD."""
 
-    _assert_no_symlink_components(path, label)
-    descriptor: int | None = None
+    target = Path(os.path.abspath(os.fspath(path)))
+    _assert_no_symlink_components(target, label)
+    opened: list[int] = []
     try:
-        descriptor = os.open(os.fspath(path), os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        parts = target.parts
+        if not target.is_absolute() or len(parts) <= 1:
+            raise _error(f"{label} must name an absolute regular file", code="path_traversal")
+        if O_DIRECTORY == 0:
+            raise _error(
+                f"{label} cannot be opened safely without directory no-follow support",
+                code="path_io",
+            )
+        parent_fd = os.open(
+            target.anchor,
+            os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
+        )
+        opened.append(parent_fd)
+        for component in parts[1:-1]:
+            next_fd = os.open(
+                component,
+                os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
+                dir_fd=parent_fd,
+            )
+            opened.append(next_fd)
+            parent_fd = next_fd
+        descriptor = os.open(
+            parts[-1],
+            os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC,
+            dir_fd=parent_fd,
+        )
+        opened.append(descriptor)
     except FileNotFoundError as error:
         raise _error(f"{label} is missing: {_display_path(path)}", code="missing_file") from error
     except OSError as error:
@@ -183,11 +211,11 @@ def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[st
     try:
         before = os.fstat(descriptor)
         if not stat.S_ISREG(before.st_mode):
-            raise _error(f"{label} must be a regular file: {_display_path(path)}", code="not_regular_file")
+            raise _error(f"{label} must be a regular file: {_display_path(target)}", code="not_regular_file")
         if before.st_nlink != 1:
-            raise _error(f"{label} must have exactly one hard link: {_display_path(path)}", code="hardlink")
+            raise _error(f"{label} must have exactly one hard link: {_display_path(target)}", code="hardlink")
         if before.st_size > limit:
-            raise _error(f"{label} exceeds the {limit}-byte bound: {_display_path(path)}", code="oversize")
+            raise _error(f"{label} exceeds the {limit}-byte bound: {_display_path(target)}", code="oversize")
 
         chunks: list[bytes] = []
         total = 0
@@ -198,20 +226,20 @@ def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[st
                 break
             total += len(block)
             if total > limit:
-                raise _error(f"{label} exceeds the {limit}-byte bound: {_display_path(path)}", code="oversize")
+                raise _error(f"{label} exceeds the {limit}-byte bound: {_display_path(target)}", code="oversize")
             chunks.append(block)
 
         after = os.fstat(descriptor)
         try:
-            named = os.stat(path, follow_symlinks=False)
+            named = os.stat(parts[-1], dir_fd=parent_fd, follow_symlinks=False)
         except OSError as error:
-            raise _error(f"{label} disappeared while being read: {_display_path(path)}", code="drift") from error
+            raise _error(f"{label} disappeared while being read: {_display_path(target)}", code="drift") from error
         if (
             _identity(before) != _identity(after)
             or _identity(after) != _identity(named)
             or total != before.st_size
         ):
-            raise _error(f"{label} changed while being read: {_display_path(path)}", code="drift")
+            raise _error(f"{label} changed while being read: {_display_path(target)}", code="drift")
 
         payload = b"".join(chunks)
         return payload, {
@@ -221,9 +249,9 @@ def _read_bounded(path: Path, *, label: str, limit: int) -> tuple[bytes, dict[st
     except TargetKernelEvidenceIntakeError:
         raise
     except OSError as error:
-        raise _error(f"{label} could not be read safely: {_display_path(path)}") from error
+        raise _error(f"{label} could not be read safely: {_display_path(target)}") from error
     finally:
-        if descriptor is not None:
+        for descriptor in reversed(opened):
             os.close(descriptor)
 
 

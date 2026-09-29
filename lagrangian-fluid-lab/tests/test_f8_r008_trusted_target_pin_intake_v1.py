@@ -426,6 +426,42 @@ def test_canonical_json_duplicate_and_path_boundaries_fail_closed(tmp_path: Path
         contract.intake_paths(attestation_path, hardlink)
 
 
+def test_parent_directory_swap_after_component_check_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    attestation_path, anchor_path, _attestation, _anchor, key = _fixture(tmp_path)
+    trusted_dir = tmp_path / "trusted"
+    evil_dir = tmp_path / "evil"
+    trusted_dir.mkdir()
+    evil_dir.mkdir()
+    trusted_attestation = trusted_dir / "attestation.json"
+    attestation_path.rename(trusted_attestation)
+    (evil_dir / trusted_attestation.name).write_bytes(trusted_attestation.read_bytes())
+
+    original_open = contract.os.open
+    swapped = False
+
+    def race_open(path, flags, *args, **kwargs):
+        nonlocal swapped
+        is_target_component = kwargs.get("dir_fd") is not None and path == trusted_dir.name
+        is_legacy_target_open = kwargs.get("dir_fd") is None and path == os.fspath(trusted_attestation)
+        if not swapped and (is_target_component or is_legacy_target_open):
+            real_dir = tmp_path / "trusted-real"
+            trusted_dir.rename(real_dir)
+            trusted_dir.symlink_to(evil_dir, target_is_directory=True)
+            swapped = True
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(contract.os, "open", race_open)
+    with pytest.raises(contract.TrustedTargetPinIntakeError, match="cannot be opened safely|symlink"):
+        contract.intake_paths(
+            trusted_attestation,
+            anchor_path,
+            trust_anchor_public_key=_public_key_bytes(key),
+        )
+    assert swapped is True
+
+
 def test_report_validator_rejects_promotion_aliases() -> None:
     report = contract.build_report(
         Path("external/definitely-missing-r008-trusted-pin.json"),

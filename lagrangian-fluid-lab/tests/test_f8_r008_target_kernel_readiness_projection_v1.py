@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -81,6 +82,37 @@ def test_inconsistent_partial_pin_report_fails_closed(tmp_path: Path) -> None:
 
     with pytest.raises(projection.TargetKernelReadinessProjectionError, match="without kernel_release"):
         projection.build_projection(intake_report_path=path)
+
+
+def test_parent_directory_swap_after_component_check_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    trusted_dir = tmp_path / "trusted"
+    evil_dir = tmp_path / "evil"
+    trusted_dir.mkdir()
+    evil_dir.mkdir()
+    trusted_input = trusted_dir / "input.json"
+    trusted_input.write_text('{"source":"trusted"}', encoding="utf-8")
+    (evil_dir / trusted_input.name).write_bytes(trusted_input.read_bytes())
+
+    original_open = projection.os.open
+    swapped = False
+
+    def race_open(path, flags, *args, **kwargs):
+        nonlocal swapped
+        is_target_component = kwargs.get("dir_fd") is not None and path == trusted_dir.name
+        is_legacy_target_open = kwargs.get("dir_fd") is None and path == os.fspath(trusted_input)
+        if not swapped and (is_target_component or is_legacy_target_open):
+            real_dir = tmp_path / "trusted-real"
+            trusted_dir.rename(real_dir)
+            trusted_dir.symlink_to(evil_dir, target_is_directory=True)
+            swapped = True
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(projection.os, "open", race_open)
+    with pytest.raises(projection.TargetKernelReadinessProjectionError, match="cannot be opened safely|symlink"):
+        projection._read_bounded_json(trusted_input, label="target-kernel fixture")
+    assert swapped is True
 
 
 def test_causal_witness_scope_drift_is_not_projected(tmp_path: Path) -> None:

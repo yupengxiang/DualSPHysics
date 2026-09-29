@@ -50,6 +50,15 @@
       "test": "tests/test_f8_r008_target_kernel_readiness_projection_v1.py::test_inconsistent_partial_pin_report_fails_closed"
     },
     {
+      "id": "R008-TP-008",
+      "severity": "high",
+      "state": "fixed",
+      "domain": "path_resolution_toctou",
+      "summary": "Target-pin, evidence-intake, and readiness readers now traverse every directory component through held no-follow directory descriptors; a parent-directory replacement after the preflight component check fails closed instead of redirecting the read to an attacker-controlled tree.",
+      "implementation": "scripts/f8_r008_trusted_target_pin_intake_v1.py, scripts/f8_r008_target_kernel_evidence_intake_v1.py, and scripts/f8_r008_target_kernel_readiness_projection_v1.py",
+      "test": "tests/test_f8_r008_trusted_target_pin_intake_v1.py::test_parent_directory_swap_after_component_check_is_rejected"
+    },
+    {
       "id": "R008-TP-005",
       "severity": "pass",
       "state": "verified",

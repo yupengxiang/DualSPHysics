@@ -121,6 +121,7 @@ EXPECTED_INPUT_SHA256 = {
 
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 
 
 class TargetKernelReadinessProjectionError(ValueError):
@@ -198,11 +199,37 @@ def _assert_no_symlink_components(path: Path) -> None:
 def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Read one bounded, single-link JSON file without following links."""
 
-    target = _canonical_path(path)
+    target = Path(os.path.abspath(os.fspath(_canonical_path(path))))
     _assert_no_symlink_components(target)
-    descriptor: int | None = None
+    opened: list[int] = []
     try:
-        descriptor = os.open(os.fspath(target), os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+        parts = target.parts
+        if not target.is_absolute() or len(parts) <= 1:
+            _fail(f"{label} must name an absolute regular file", code="path_traversal")
+        if O_DIRECTORY == 0:
+            _fail(
+                f"{label} cannot be opened safely without directory no-follow support",
+                code="read_error",
+            )
+        parent_fd = os.open(
+            target.anchor,
+            os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
+        )
+        opened.append(parent_fd)
+        for component in parts[1:-1]:
+            next_fd = os.open(
+                component,
+                os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
+                dir_fd=parent_fd,
+            )
+            opened.append(next_fd)
+            parent_fd = next_fd
+        descriptor = os.open(
+            parts[-1],
+            os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC,
+            dir_fd=parent_fd,
+        )
+        opened.append(descriptor)
     except FileNotFoundError as error:
         _fail(f"{label} is missing: {_display_path(target)}", code="missing_input")
         raise AssertionError from error
@@ -230,7 +257,7 @@ def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any],
                 _fail(f"{label} exceeds the bounded JSON limit", code="oversize")
             chunks.append(block)
         after = os.fstat(descriptor)
-        named = os.stat(target, follow_symlinks=False)
+        named = os.stat(parts[-1], dir_fd=parent_fd, follow_symlinks=False)
         if _identity(before) != _identity(after) or _identity(after) != _identity(named) or total != before.st_size:
             _fail(f"{label} changed while being read", code="input_drift")
         raw = b"".join(chunks)
@@ -240,7 +267,7 @@ def _read_bounded_json(path: str | Path, *, label: str) -> tuple[dict[str, Any],
         _fail(f"{label} could not be read safely", code="read_error")
         raise AssertionError from error
     finally:
-        if descriptor is not None:
+        for descriptor in reversed(opened):
             os.close(descriptor)
 
     try:

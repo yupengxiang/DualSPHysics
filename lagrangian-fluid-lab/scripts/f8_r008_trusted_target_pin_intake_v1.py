@@ -70,6 +70,7 @@ MAX_JSON_BYTES = 512 * 1024
 O_NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
 O_CLOEXEC = getattr(os, "O_CLOEXEC", 0)
 O_NONBLOCK = getattr(os, "O_NONBLOCK", 0)
+O_DIRECTORY = getattr(os, "O_DIRECTORY", 0)
 
 SHA256_RE = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 SHA1_RE = re.compile(r"[0-9a-f]{40}\Z", re.ASCII)
@@ -413,12 +414,33 @@ def _read_bounded_json(
     """Read one explicit regular file through a stable no-follow descriptor."""
 
     _assert_no_symlink_components(path, label)
-    descriptor: int | None = None
+    opened: list[int] = []
     try:
-        descriptor = os.open(
-            os.fspath(path),
-            os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK,
+        parts = path.parts
+        _require(bool(path.is_absolute() and len(parts) > 1),
+                 f"{label} must name an absolute regular file", code="path_traversal")
+        _require(O_DIRECTORY != 0,
+                 f"{label} cannot be opened safely without directory no-follow support",
+                 code="path_io")
+        parent_fd = os.open(
+            path.anchor,
+            os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
         )
+        opened.append(parent_fd)
+        for component in parts[1:-1]:
+            next_fd = os.open(
+                component,
+                os.O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC,
+                dir_fd=parent_fd,
+            )
+            opened.append(next_fd)
+            parent_fd = next_fd
+        descriptor = os.open(
+            parts[-1],
+            os.O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK,
+            dir_fd=parent_fd,
+        )
+        opened.append(descriptor)
     except FileNotFoundError as error:
         raise _error(f"{label} is missing", code="missing_file") from error
     except OSError as error:
@@ -436,7 +458,7 @@ def _read_bounded_json(
                 break
             raw += block
         after = os.fstat(descriptor)
-        named = os.stat(path, follow_symlinks=False)
+        named = os.stat(parts[-1], dir_fd=parent_fd, follow_symlinks=False)
         identity = lambda item: (
             item.st_dev,
             item.st_ino,
@@ -478,7 +500,7 @@ def _read_bounded_json(
     except OSError as error:
         raise _error(f"{label} could not be read safely", code="path_io") from error
     finally:
-        if descriptor is not None:
+        for descriptor in reversed(opened):
             os.close(descriptor)
 
 
