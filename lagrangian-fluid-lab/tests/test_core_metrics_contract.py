@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts import core_metrics_contract as metrics
 from scripts.core_metrics_contract import (
     DEFAULT_CONTRACT,
     DEFAULT_RECEIPT,
@@ -34,9 +35,12 @@ def test_schema_covers_requested_physical_and_material_metrics() -> None:
     assert all(spec["fixed_denominator"] for spec in METRIC_DEFINITIONS.values())
 
 
-def test_committed_planning_receipt_is_hash_bound_and_zero_credit() -> None:
+def test_committed_planning_receipt_fails_closed_when_source_binding_is_stale() -> None:
     report = verify_receipt(DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT)
-    assert report["ok"] is True
+    assert report["ok"] is False
+    assert report["credit"] == 0
+    assert any(item.startswith("contract.source_closure.source_bindings[")
+               for item in report["mismatches"])
     receipt = json.loads(DEFAULT_RECEIPT.read_text(encoding="utf-8"))
     assert receipt["qualification_claim"] == "none"
     assert receipt["credit"] == 0
@@ -50,6 +54,37 @@ def test_historical_planning_bundle_is_preserved_but_stale_against_current_sourc
     report = verify_receipt(HISTORICAL_RECEIPT, root=ROOT, contract_path=HISTORICAL_CONTRACT)
     assert report["ok"] is False
     assert any(item.startswith("contract.source_closure.source_bindings[") for item in report["mismatches"])
+
+
+def test_receipt_verification_does_not_reparse_after_contract_hash(monkeypatch) -> None:
+    original = DEFAULT_CONTRACT.read_bytes()
+    original_sha256_file = metrics.sha256_file
+
+    def hash_then_replace(path: str | Path) -> str:
+        observed = original_sha256_file(path)
+        if Path(path).resolve() == DEFAULT_CONTRACT.resolve():
+            forged = json.loads(original.decode("utf-8"))
+            forged["status"] = "tampered"
+            DEFAULT_CONTRACT.write_text(json.dumps(forged), encoding="utf-8")
+        return observed
+
+    monkeypatch.setattr(metrics, "sha256_file", hash_then_replace)
+    def verify_contract_probe(contract, *, root):
+        if isinstance(contract, (str, Path)):
+            contract = metrics._load_json(contract)
+        return {"ok": True, "mismatches": [], "status": "planning_only", "credit": 0}
+
+    monkeypatch.setattr(metrics, "verify_contract", verify_contract_probe)
+    report = None
+    try:
+        report = metrics.verify_receipt(
+            DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT
+        )
+    finally:
+        DEFAULT_CONTRACT.write_bytes(original)
+
+    assert report is not None
+    assert report["ok"] is True
 
 
 def test_synthetic_fixture_uses_fixed_denominators_and_no_renormalization() -> None:

@@ -16,6 +16,19 @@ import os
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+try:
+    from scripts.core_strict_json import (
+        absolute_path_without_following_leaf,
+        read_bounded_raw_json,
+        strict_json_object,
+    )
+except ModuleNotFoundError:
+    from core_strict_json import (
+        absolute_path_without_following_leaf,
+        read_bounded_raw_json,
+        strict_json_object,
+    )
+
 
 LAB_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_NAMESPACE = "core-v1/evaluation/physical-material-metrics-contract-v1"
@@ -111,13 +124,17 @@ def sha256_file(path: str | Path) -> str:
 
 
 def _load_json(path: str | Path) -> dict[str, Any]:
+    return _read_json_with_bytes(path)[0]
+
+
+def _read_json_with_bytes(path: str | Path) -> tuple[dict[str, Any], Path, bytes]:
+    safe_path = absolute_path_without_following_leaf(path)
     try:
-        value = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raw = read_bounded_raw_json(safe_path, label=f"metrics JSON {safe_path}")
+        value = strict_json_object(raw, label=f"metrics JSON {safe_path}")
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise MetricsContractError(f"cannot read JSON: {path}") from exc
-    if not isinstance(value, dict):
-        raise MetricsContractError("JSON root must be an object")
-    return value
+    return value, safe_path, raw
 
 
 def _write_json(path: Path, value: Mapping[str, Any]) -> None:
@@ -132,7 +149,18 @@ def _write_sha256(path: Path, source: Path) -> None:
 
 
 def _ref(path: Path, root: Path) -> dict[str, Any]:
-    return {"path": path.resolve().relative_to(root.resolve()).as_posix(), "bytes": path.stat().st_size, "sha256": sha256_file(path)}
+    _, _, raw = _read_stable_file(path)
+    return {"path": path.resolve().relative_to(root.resolve()).as_posix(),
+            "bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def _read_stable_file(path: str | Path) -> tuple[Path, int, bytes]:
+    safe_path = absolute_path_without_following_leaf(path)
+    try:
+        raw = read_bounded_raw_json(safe_path, label=f"metrics source {safe_path}")
+    except (OSError, ValueError) as exc:
+        raise MetricsContractError(f"cannot read source: {path}") from exc
+    return safe_path, len(raw), raw
 
 
 def _integer(value: Any, name: str, *, positive: bool = False) -> int:
@@ -160,7 +188,9 @@ def _source_bindings(root: Path) -> list[dict[str, Any]]:
         path = (root / relative).resolve()
         if not path.is_file():
             raise MetricsContractError(f"missing source: {relative}")
-        result.append({"path": relative, "bytes": path.stat().st_size, "sha256": sha256_file(path)})
+        _, byte_count, raw = _read_stable_file(path)
+        result.append({"path": relative, "bytes": byte_count,
+                       "sha256": hashlib.sha256(raw).hexdigest()})
     return result
 
 
@@ -391,12 +421,16 @@ def build_receipt(contract: Mapping[str, Any], *, contract_path: str | Path, roo
     }
 
 
-def _sidecar_ok(path: Path) -> bool:
+def _sidecar_ok(path: Path, *, expected_sha256: str) -> bool:
     sidecar = path.with_name(path.name + ".sha256")
     if not sidecar.is_file():
         return False
-    tokens = sidecar.read_text(encoding="utf-8").split()
-    return bool(tokens) and tokens[0] == sha256_file(path)
+    try:
+        raw = read_bounded_raw_json(sidecar, label=f"metrics sidecar {sidecar}")
+        tokens = raw.decode("utf-8", errors="strict").split()
+    except (OSError, UnicodeDecodeError, ValueError):
+        return False
+    return bool(tokens) and tokens[0].lower() == expected_sha256.lower()
 
 
 def _diff(expected: Any, actual: Any, path: str = "") -> list[str]:
@@ -421,7 +455,11 @@ def verify_contract(contract: Mapping[str, Any] | str | Path, *, root: str | Pat
 
 def verify_receipt(receipt: Mapping[str, Any] | str | Path, *, root: str | Path = LAB_ROOT, contract_path: str | Path = DEFAULT_CONTRACT) -> dict[str, Any]:
     root = Path(root).resolve()
-    payload = _load_json(receipt) if isinstance(receipt, (str, Path)) else dict(receipt)
+    receipt_raw = None
+    if isinstance(receipt, (str, Path)):
+        payload, _, receipt_raw = _read_json_with_bytes(receipt)
+    else:
+        payload = dict(receipt)
     mismatches: list[str] = []
     if payload.get("schema") != RECEIPT_SCHEMA or payload.get("namespace") != DEFAULT_NAMESPACE:
         mismatches.append("schema_or_namespace")
@@ -433,25 +471,31 @@ def verify_receipt(receipt: Mapping[str, Any] | str | Path, *, root: str | Path 
     if constraints != expected_constraints:
         mismatches.append("execution_constraints")
     contract_ref = payload.get("contract")
-    target = Path(contract_path).resolve()
+    target = absolute_path_without_following_leaf(contract_path)
     if not isinstance(contract_ref, Mapping):
         mismatches.append("contract")
     else:
         referenced = Path(str(contract_ref.get("path")))
         if not referenced.is_absolute():
             referenced = root / referenced
-        if referenced.resolve() != target:
+        referenced = absolute_path_without_following_leaf(referenced)
+        if referenced != target:
             mismatches.append("contract.path")
         else:
-            if contract_ref.get("bytes") != target.stat().st_size or contract_ref.get("sha256") != sha256_file(target):
+            contract_payload, _, contract_raw = _read_json_with_bytes(target)
+            contract_sha256 = hashlib.sha256(contract_raw).hexdigest()
+            if (contract_ref.get("bytes") != len(contract_raw)
+                    or contract_ref.get("sha256") != contract_sha256):
                 mismatches.append("contract.hash")
-            report = verify_contract(target, root=root)
+            report = verify_contract(contract_payload, root=root)
             mismatches.extend(f"contract.{item}" for item in report["mismatches"])
     expected_report = evaluate_fixture(_synthetic_fixture())
     if payload.get("synthetic_report") != expected_report:
         mismatches.append("synthetic_report")
-    if isinstance(receipt, (str, Path)) and not _sidecar_ok(Path(receipt)):
-        mismatches.append("receipt.sha256_sidecar")
+    if isinstance(receipt, (str, Path)):
+        receipt_sha256 = hashlib.sha256(receipt_raw).hexdigest()
+        if not _sidecar_ok(Path(receipt), expected_sha256=receipt_sha256):
+            mismatches.append("receipt.sha256_sidecar")
     return {"ok": not mismatches, "mismatches": mismatches, "status": "planning_only" if not mismatches else "invalid", "credit": 0}
 
 
