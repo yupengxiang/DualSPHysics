@@ -1,0 +1,166 @@
+{
+  "schema": "core.continuation.status.v1",
+  "report_id": "core-continuation-status-2026-09-29-update-409",
+  "observed_at": "2026-09-29T12:41:21+08:00",
+  "status": "continuing_fail_closed",
+  "policy": {
+    "subagent_model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "parallel_delegation": true,
+    "coarse_to_fine_execution": true,
+    "historical_records_rewritten": false,
+    "gpu_policy": "use any GPU whose independently admitted VRAM/CPU/I-O budget is sufficient; shared occupancy is allowed when VRAM remains sufficient; never stop or restart an existing process"
+  },
+  "commits": [
+    "47ece642",
+    "0f664d5d",
+    "63495d58",
+    "0be6f516"
+  ],
+  "completed_units": {
+    "f3_material_coarse_s2_rerun1": {
+      "spec_commit": "47ece642",
+      "intake_commit": "63495d58",
+      "job_id": "core-f3-material-coarse-s2-rerun1",
+      "attempt_id": "20260929T122016-16ac698caed1",
+      "host": "ada",
+      "execution_status": "succeeded",
+      "returncode": 0,
+      "gpu_reserved_mib": 0,
+      "native_frame_count": 836,
+      "transition_count": 835,
+      "mass_closed": true,
+      "unknown_fraction_monotone": true,
+      "unknown_gate_pass": false,
+      "unknown_fraction_max": 0.0625,
+      "common_reliable_path_coverage": 0.947265625,
+      "qualification_claim": "none",
+      "classification": "negative_diagnostic",
+      "formal_receipt": false,
+      "credit": 0,
+      "intake_tests": 11
+    },
+    "f3_material_coarse_s4_rerun1": {
+      "spec_commit": "0f664d5d",
+      "intake_commit": "0be6f516",
+      "job_id": "core-f3-material-coarse-s4-rerun1",
+      "attempt_id": "20260929T122756-ab18fca003d8",
+      "host": "ada",
+      "execution_status": "succeeded",
+      "returncode": 0,
+      "gpu_reserved_mib": 0,
+      "native_frame_count": 836,
+      "transition_count": 835,
+      "mass_closed": true,
+      "unknown_fraction_monotone": true,
+      "unknown_gate_pass": false,
+      "unknown_fraction_max": 0.0625,
+      "common_reliable_path_coverage": 0.947265625,
+      "qualification_claim": "none",
+      "classification": "negative_diagnostic",
+      "formal_receipt": false,
+      "credit": 0,
+      "intake_tests": 12
+    }
+  },
+  "coarse_route_result": {
+    "module": "F3 material coarse",
+    "scheduler_sidecars_completed": 2,
+    "execution_path_walked_end_to_end": true,
+    "both_runs_terminally_successful": true,
+    "both_runs_passed_unknown_gate": false,
+    "diagnostic_conclusion": "Both substep settings reached a complete scheduler terminal receipt with closed mass and monotone unknown accumulation, but the maximum unknown fraction remained above the 1% acceptance gate; do not expand to 8->32 cases or promote to T1/T2 yet.",
+    "s2_intake_report": "reports/F3-MATERIAL-COARSE-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json",
+    "s4_intake_report": "reports/F3-MATERIAL-COARSE-S4-TERMINAL-RESULT-INTAKE-2026-09-29-RERUN1.json"
+  },
+  "verification": {
+    "scheduler_diagnostic_jobs_submitted": 2,
+    "scheduler_diagnostic_attempts_completed": 2,
+    "production_workloads_started": 0,
+    "production_gpu_execution": false,
+    "diagnostic_gpu_reservations": 0,
+    "production_data_read": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "existing_processes_stopped_or_restarted": 0,
+    "scheduler_queue_after_completion": {
+      "attention": 0,
+      "cancelled": 13,
+      "failed": 19,
+      "launching": 0,
+      "queued": 0,
+      "reserved": 0,
+      "running": 0,
+      "succeeded": 294
+    },
+    "gpu_snapshot_mib": {
+      "gpu0_free": 48497,
+      "gpu1_free": 48497,
+      "gpu2_free": 48497,
+      "gpu3_free": 48497,
+      "gpu4_free": 48497,
+      "gpu5_free": 48497,
+      "gpu6_free": 48497,
+      "gpu7_free": 48497,
+      "utilization_percent": 0
+    }
+  },
+  "core_formal_gates": {
+    "can_finalize": false,
+    "t1_families": [
+      "F3",
+      "F4"
+    ],
+    "macro_t2_families": [],
+    "formal_training_runs": [],
+    "missing_training_runs": [
+      "graph_raw-seed17",
+      "graph_raw-seed29",
+      "graph_raw-seed43",
+      "graph_residual-seed17",
+      "graph_residual-seed29",
+      "graph_residual-seed43",
+      "mlp-seed17",
+      "mlp-seed29",
+      "mlp-seed43"
+    ],
+    "observed_t1_case_runs": 0,
+    "required_t1_case_runs": 288,
+    "missing_t1_case_runs": 288,
+    "missing_target_t1_case_runs": 432,
+    "observed_material_case_runs": 0,
+    "required_material_case_runs": 288,
+    "missing_material_case_runs": 288,
+    "missing_target_material_case_runs": 288,
+    "independent_reproduction": false,
+    "causal_lineage_contracts": true,
+    "evidence_valid": true,
+    "credit": 0
+  },
+  "external_blockers_preserved": [
+    "fresh one-shot root admission receipt",
+    "scheduler-owned host-I/O reservation receipt",
+    "trusted external root/host/second-host evidence",
+    "formal training terminal evidence for all 9 model-seed runs",
+    "formal T1/material case-run terminal evidence and release manifest",
+    "F8 target kernel/source/build/runtime pins",
+    "independent reproduction receipt"
+  ],
+  "next_coarse_path": {
+    "module": "F3 material coarse refinement",
+    "execution_order": [
+      "retain both s2 and s4 terminal intakes as negative diagnostics",
+      "diagnose the shared unknown-path failure and bind a new fail-closed setup variant",
+      "obtain and bind the missing fresh-root and scheduler host-I/O receipts",
+      "run the next unique scheduler-owned diagnostic only after its spec is committed",
+      "expand to 8->32 cases only after the complete temporal unknown gate passes",
+      "replicate a qualified route to F4"
+    ],
+    "gpu_required": false,
+    "direct_worker_launch_allowed": false,
+    "formal_promotion_allowed": false
+  }
+}
