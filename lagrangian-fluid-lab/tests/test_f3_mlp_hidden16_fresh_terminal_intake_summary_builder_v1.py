@@ -491,6 +491,26 @@ def test_manifest_source_drift_has_distinct_blocker(tmp_path: Path) -> None:
     assert any("manifest source drift" in reason for reason in row["blocked_reasons"])
 
 
+def test_raw_history_manifest_sha_is_not_coerced_to_training_matrix_sha(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    meta, inputs, training = fixture
+    seed = 29
+    history = json.loads(inputs[seed].history_summary.read_text())
+    history["source"]["manifest"]["sha256"] = "8" * 64
+    _write_json(inputs[seed].history_summary, history)
+
+    row = builder.build_summaries(inputs, training_matrix=training, root=meta["root"])[seed]
+
+    assert row["source_bound"] is False
+    assert row["checks"]["training_history_identity"] is False
+    assert any(
+        "training matrix/history manifest source drift" in reason
+        for reason in row["blocked_reasons"]
+    )
+
+
 def test_validator_required_check_blocks(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path, with_proofs=False)
     meta, inputs, training = fixture

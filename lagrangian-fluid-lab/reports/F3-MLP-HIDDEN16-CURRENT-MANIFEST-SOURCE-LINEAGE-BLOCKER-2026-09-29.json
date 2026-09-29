@@ -1,0 +1,169 @@
+{
+  "schema": "core.f3.mlp.hidden16.current_manifest.source_lineage_blocker.v1",
+  "report_id": "f3-mlp-hidden16-current-manifest-source-lineage-blocker-2026-09-29",
+  "observed_at": "2026-09-29",
+  "status": "blocked_fail_closed",
+  "source_bound": false,
+  "diagnostic_only": true,
+  "formal": false,
+  "formal_eligible": false,
+  "credit": 0,
+  "decision": {
+    "classification": "producer_intake_contract_gap_with_mandatory_rejection",
+    "safe_minimal_fix": false,
+    "disposition": "retain_rejection",
+    "summary": "The observed drift crosses raw-file and canonical-payload hash domains. Existing evidence does not provide a typed dual-domain contract or a fresh current-manifest run identity that would make normalization safe."
+  },
+  "hash_domains": {
+    "canonical_manifest_payload": {
+      "name": "canonical_json_payload_sha256",
+      "sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "meaning": "CoreDataset/current-manifest training identity"
+    },
+    "raw_manifest_file": {
+      "name": "raw_file_bytes_sha256",
+      "sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "meaning": "bytes of campaigns/core-v1/f3-dataset-v2.json"
+    }
+  },
+  "observed_drift": {
+    "update_390_training_matrix_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+    "update_390_history_current_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+    "fresh_intake_rule": "training_matrix manifest_sha256 must equal history summary source.manifest sha256",
+    "result": "blocked_fail_closed",
+    "formal_training_runs_counted": 0
+  },
+  "evidence": [
+    {
+      "kind": "update_390_status",
+      "path": "reports/CORE-CONTINUATION-STATUS-2026-09-29-UPDATE-390.json",
+      "schema": "core.continuation.status.v1",
+      "bytes": 3004,
+      "sha256": "18a264b6e4de63b8e752d52a7445c27f0ca4ffdcd2acf8d8720e9ec17dbfdd86",
+      "relevant_fields": {
+        "blocked_reason": "training matrix/history manifest source drift",
+        "training_matrix_manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "history_current_manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+        "source_bound": false,
+        "credit": 0
+      }
+    },
+    {
+      "kind": "historical_training_matrix",
+      "path": "reports/F3-MLP-HIDDEN16-SEEDS17-29-43-TRAINING-2026-09-28.json",
+      "schema": "core.f3.mlp.hidden16.training_matrix.v1",
+      "bytes": 4127,
+      "sha256": "ee59d5d1588fba606c4273748d1283fe8f0bbc1ea3cc99b65a519782e5d1a2ae",
+      "manifest_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "run_generation": "20260928"
+    },
+    {
+      "kind": "current_manifest_identity_projection",
+      "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-IDENTITY-2026-09-29.json",
+      "schema": "core.f3.mlp.hidden16.current_manifest.identity_projection.v1",
+      "bytes": 696,
+      "sha256": "59bfd8861720d579028d3f6426c0afbeeb0cd76ee5092ff79bd487fcf8beb0c2",
+      "raw_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+      "manifest_bytes": 93710
+    },
+    {
+      "kind": "current_manifest_training_producer_intake",
+      "path": "reports/F3-MLP-HIDDEN16-CURRENT-MANIFEST-TRAINING-EVIDENCE-2026-09-29-RERUN1.json",
+      "schema": "core.f3.mlp.hidden16.current_manifest_training_evidence.v1",
+      "bytes": 10172,
+      "sha256": "aa5561dc69148a38a14d6b21c501d9214aba242707be782eeb512ba45e6300ef",
+      "contract": {
+        "receipt_manifest_sha_domain": "canonical_json_payload_sha256",
+        "manifest_file_sha256_recorded_separately": true,
+        "manifest_canonical_sha256": "5d53fd9c1bfed991027f23464d9d11f533bf7d766c960aab6986e91c83f4c768",
+        "manifest_file_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+        "source_bound": true,
+        "credit": 0
+      }
+    },
+    {
+      "kind": "historical_terminal_summary",
+      "paths": [
+        "reports/F3-MLP-HIDDEN16-SEED17-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28.json",
+        "reports/F3-MLP-HIDDEN16-SEED29-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28.json",
+        "reports/F3-MLP-HIDDEN16-SEED43-FULL835-ROLLOUT-DIAGNOSTIC-2026-09-28.json"
+      ],
+      "schemas": [
+        "core.f3.mlp.hidden16.seed17.full835_rollout_diagnostic.summary.v1",
+        "core.f3.mlp.hidden16.full835.rollout_diagnostic.summary.v1",
+        "core.f3.mlp.hidden16.full835.rollout_diagnostic.summary.v1"
+      ],
+      "file_sha256": [
+        "02c20f0f06cd065972676838255724ea24f51720ea6d89cfae818b137aaecf51",
+        "cbb5c6015b0419d1c70a2669ec8d0f4410eb9d390c9811355ccb2d30e5f12e1a",
+        "2d8a1c73226c86e7cbb5af5ccde7c28ce427c266cad9f8ffba74077f3efe3b47"
+      ],
+      "manifest_sha_domain": "raw_file_bytes_sha256",
+      "manifest_sha256": "8d87da6a4aaf3013461a757815b5eb95c1d46311dcb0657537479b573076e680",
+      "run_generation": "20260928"
+    }
+  ],
+  "contract_analysis": {
+    "producer_gap": [
+      "The legacy training matrix exposes one untyped manifest_sha256 field while the current producer now distinguishes raw file and canonical payload identity.",
+      "The legacy history summaries expose the raw manifest-file SHA and do not carry the current producer's canonical manifest identity.",
+      "The legacy fresh-terminal builder receives only the training matrix and history summary; it has no explicit current-manifest identity projection to prove that two differently named hash domains refer to the same payload."
+    ],
+    "old_receipt_rejection": [
+      "The historical training and terminal records use the 20260928 run generation and legacy checkpoint/receipt namespaces.",
+      "The current-manifest training producer binds a distinct current run generation and requires config.manifest_sha256 to equal the canonical payload SHA.",
+      "Treating the raw history SHA as interchangeable with the matrix canonical SHA would erase the producer-generation boundary and could promote an old receipt as current evidence."
+    ],
+    "safe_repair_missing": [
+      "No immutable legacy receipt or summary may be rewritten to add a hash-domain claim.",
+      "No current-manifest training receipt/rollout pair is supplied to this legacy fresh-terminal contract with a typed dual-domain identity and current run binding.",
+      "Therefore a normalization or equality relaxation cannot be source-bound and must not be implemented."
+    ]
+  },
+  "required_future_contract": [
+    "A new producer must emit manifest_file_sha256 and manifest_canonical_sha256 as separate typed fields.",
+    "Fresh terminal intake must consume an explicit current-manifest identity projection and require both domains to match it.",
+    "Current-manifest run_id, training receipt identity, checkpoint identity, nonce, and terminal proof must be checked as one fresh generation; legacy 20260928 records remain rejected.",
+    "Only after those checks pass may a new diagnostic-only source-bound summary be produced; no formal or qualification credit is implied."
+  ],
+  "verification": {
+    "targeted_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. .venv/bin/python -m pytest -q tests/test_f3_mlp_hidden16_current_manifest_training_evidence_v1.py tests/test_f3_mlp_hidden16_fresh_terminal_intake_summary_builder_v1.py",
+      "passed": 42,
+      "failed": 0
+    },
+    "full_mlp_hidden16_tests": {
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. .venv/bin/python -m pytest -q tests/test_f3_mlp_hidden16_*.py",
+      "passed": 158,
+      "failed": 0
+    },
+    "regression_assertions": [
+      "raw manifest-file SHA is rejected when supplied as a training receipt's canonical manifest identity",
+      "training matrix/history raw-versus-canonical drift remains blocked",
+      "all accepted evidence remains diagnostic-only and zero-credit"
+    ]
+  },
+  "execution_boundary": {
+    "large_live_artifacts_read": false,
+    "checkpoint_content_opened": false,
+    "trajectory_hdf5_opened": false,
+    "gpu_started": false,
+    "solver_started": false,
+    "registry_mutations": 0,
+    "ledger_mutations": 0,
+    "denominator_mutations": 0,
+    "gate_mutations": 0,
+    "completion_mutations": 0,
+    "historical_receipts_rewritten": false
+  },
+  "protected_scopes": {
+    "raw": "untouched",
+    "residual": "untouched",
+    "core_registry": "untouched",
+    "core_ledger": "untouched",
+    "denominator": "untouched",
+    "gates": "untouched",
+    "completion": "untouched"
+  }
+}

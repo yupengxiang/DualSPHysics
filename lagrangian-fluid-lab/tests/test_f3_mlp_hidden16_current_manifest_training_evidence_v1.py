@@ -112,6 +112,27 @@ def test_existing_training_receipts_bind_to_actual_manifest_only(tmp_path: Path)
     assert report["T2_macro"] is False
 
 
+def test_raw_manifest_file_sha_cannot_satisfy_canonical_training_receipt(
+    tmp_path: Path,
+) -> None:
+    manifest, canonical_sha = _manifest(tmp_path)
+    raw_sha = hashlib.sha256(manifest.read_bytes()).hexdigest()
+    receipts = _paths(tmp_path, raw_sha)
+
+    report = intake.build_report(manifest, receipts, root=tmp_path)
+
+    assert raw_sha != canonical_sha
+    assert report["status"] == "blocked_fail_closed"
+    assert report["source_bound"] is False
+    assert report["manifest"]["sha256"] == raw_sha
+    assert report["manifest"]["canonical_sha256"] == canonical_sha
+    assert any(
+        "canonical manifest payload identity" in error
+        for error in report["errors"]
+    )
+    assert report["credit"] == 0
+
+
 def test_canonical_core_training_receipt_without_top_level_status_binds(
     tmp_path: Path,
 ) -> None:
