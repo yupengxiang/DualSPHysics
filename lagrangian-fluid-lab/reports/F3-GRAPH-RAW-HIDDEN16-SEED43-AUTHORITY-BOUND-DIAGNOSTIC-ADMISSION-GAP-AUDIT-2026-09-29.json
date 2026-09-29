@@ -1,0 +1,163 @@
+{
+  "audit_mode": "bounded_seed43_authority_gap_only",
+  "contract_date": "2026-09-29",
+  "exact_gaps": [
+    {
+      "condition": "trusted Ed25519 public key 或 external scheduler root 未同时提供",
+      "consequence": "无法把任何 caller-supplied authority document 认证为真实 external scheduler authority",
+      "id": "F3-S43-AUTH-ROOT-001",
+      "required_evidence": "由部署外部安装 owner-only 32-byte Ed25519 public key 与受保护 scheduler root，并提供其 inode/权限证明",
+      "title": "生产 scheduler trust root 不可用"
+    },
+    {
+      "condition": "没有可验证的 seed43 issued one-shot authority document",
+      "consequence": "nonce、namespace inode、plan/source/resource/GPU binding 尚未获得真实 scheduler 签名见证",
+      "id": "F3-S43-AUTH-DOC-002",
+      "required_evidence": "由 external scheduler 签发当前 manifest seed43 authority，并由 admission 以 Ed25519 验签后留存不可变 digest",
+      "title": "真实 signed authority document 未提供"
+    },
+    {
+      "condition": "scheduler consume_path 下没有 durable consumed claim witness",
+      "consequence": "不能证明 authority reservation 未被其他 consumer 使用，也不能完成一次性消费闭环",
+      "id": "F3-S43-AUTH-CLAIM-003",
+      "required_evidence": "提供与 authority_id、document digest、receipt/identity digest、nonce、namespace descriptor 交叉绑定的外部 claim",
+      "title": "独立 one-shot consume claim 未提供"
+    },
+    {
+      "condition": "本审计只读小型 source/test 与 trust-path metadata，不接收或重放生产 authority",
+      "consequence": "synthetic pytest fixture 不能升级为生产 authority；launch 和 credit 必须继续关闭",
+      "id": "F3-S43-AUTH-VERIFY-004",
+      "required_evidence": "在真实 scheduler authority、key、namespace、resource snapshot 同时存在后，由受控 admission 重新完成签名/文件/消费验证并生成 terminal evidence",
+      "title": "本次 gap audit 不执行生产 authority 验签"
+    }
+  ],
+  "implementation_coverage": {
+    "admission_module_has_no_process_launch_surface": true,
+    "caller_self_claim_rejected": true,
+    "current_manifest_binding": true,
+    "ed25519_signature_verification": true,
+    "external_scheduler_authority_input": true,
+    "graph_raw_hidden16_seed43_identity": true,
+    "namespace_inode_binding": true,
+    "nonce_binding": true,
+    "one_shot_claim_validation": true,
+    "plan_digest_binding": true,
+    "resource_digest_binding": true,
+    "source_digest_binding": true,
+    "zero_credit_diagnostic_boundary": true
+  },
+  "implementation_evidence": {
+    "admission_source": {
+      "bytes": 112870,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+      "sha256": "0ec53a54c4e05c591361675bb8b344d5d8f23780a8434dcf73a06f3e1b6ee578"
+    },
+    "admission_source_sha256": "0ec53a54c4e05c591361675bb8b344d5d8f23780a8434dcf73a06f3e1b6ee578",
+    "admission_test": {
+      "bytes": 23770,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+      "sha256": "8df3c9e626b1d086f4cc60c7674eb2c037215248ac2c4a85645a7c570ec1a6a6"
+    },
+    "admission_test_sha256": "8df3c9e626b1d086f4cc60c7674eb2c037215248ac2c4a85645a7c570ec1a6a6",
+    "forbidden_call_names": [],
+    "forbidden_imports": [],
+    "missing_functions": [],
+    "required_functions_present": true,
+    "required_markers": {
+      "current_manifest": true,
+      "ed25519_signature": true,
+      "ed25519_verifier": true,
+      "external_authority_required": true,
+      "external_authority_schema": true,
+      "namespace_binding": true,
+      "nonce_binding": true,
+      "plan_binding": true,
+      "popen_false": true,
+      "resource_binding": true,
+      "seed_binding": true,
+      "self_claim_rejection": true,
+      "source_binding": true,
+      "zero_credit": true
+    },
+    "synthetic_scheduler_fixture_is_not_production": true
+  },
+  "production_observation": {
+    "authority_document_available": false,
+    "authority_documents_metadata_only": [],
+    "claim_documents_metadata_only": [],
+    "current_manifest_metadata_only": {
+      "bytes": 93710,
+      "directory": false,
+      "gid": 1001,
+      "mode": 436,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+      "present": true,
+      "regular_file": true,
+      "symlink": false,
+      "uid": 1001
+    },
+    "external_scheduler_root_metadata_only": {
+      "path": "/var/lib/dual-sph/f3-seed43-scheduler",
+      "present": false
+    },
+    "one_shot_claim_available": false,
+    "production_authority_verified": false,
+    "production_key_available": false,
+    "production_scheduler_root_available": false,
+    "trusted_scheduler_public_key_metadata_only": {
+      "path": "/etc/dual-sph/scheduler-ed25519-public.key",
+      "present": false
+    }
+  },
+  "readiness": {
+    "credit": 0,
+    "diagnostic_only": true,
+    "formal": false,
+    "gpu_execution_observed": false,
+    "launch_allowed": false,
+    "popen_attempted": false,
+    "queue_submitted": false,
+    "solver_started": false,
+    "worker_started": false
+  },
+  "report_id": "f3-graph-raw-hidden16-seed43-authority-bound-diagnostic-admission-gap-2026-09-29",
+  "requested_agent_policy": {
+    "actual_subagent_invoked": false,
+    "model": "gpt-5.6-luna",
+    "reason": "the current tool surface exposed no callable spawn_agent interface",
+    "reasoning_effort": "max"
+  },
+  "schema": "core.f3.graph_raw.hidden16.seed43.authority_bound_diagnostic_admission_gap.v1.report",
+  "scope": {
+    "current_manifest": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/core-v1/f3-dataset-v2.json",
+    "existing_admission": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+    "existing_regression": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/tests/test_f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+    "family": "F3",
+    "hidden": 16,
+    "historical_receipts_modified": false,
+    "model_kind": "graph_raw",
+    "seed": 43,
+    "shared_files_modified": false
+  },
+  "side_effects": {
+    "PLAN_writes": 0,
+    "completion_writes": 0,
+    "current_manifest_bytes_opened": 0,
+    "denominator_writes": 0,
+    "gate_writes": 0,
+    "gpu_probes": 0,
+    "ledger_writes": 0,
+    "popen_attempts": 0,
+    "production_large_files_opened": 0,
+    "queue_submissions": 0,
+    "registry_writes": 0,
+    "solver_attempts": 0,
+    "source_files_read": 2,
+    "worker_attempts": 0
+  },
+  "status": "blocked_fail_closed",
+  "write_set": [
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-AUTHORITY-BOUND-DIAGNOSTIC-ADMISSION-GAP-AUDIT-2026-09-29.json",
+    "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-AUTHORITY-BOUND-DIAGNOSTIC-ADMISSION-GAP-AUDIT-2026-09-29.zh-CN.md"
+  ]
+}

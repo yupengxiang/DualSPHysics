@@ -1,0 +1,55 @@
+{
+  "schema": "core.campaign.f3.graph_raw.hidden16.seed43.authority_bound_diagnostic_admission_gap_audit.v1",
+  "campaign_id": "f3-graph-raw-hidden16-seed43-authority-bound-diagnostic-admission-gap-audit-v1",
+  "family": "F3",
+  "model_kind": "graph_raw",
+  "hidden": 16,
+  "seed": 43,
+  "manifest": "campaigns/core-v1/f3-dataset-v2.json",
+  "existing_admission": "scripts/f3_graph_raw_hidden16_seed43_diagnostic_admission_v1.py",
+  "audit_script": "scripts/f3_graph_raw_hidden16_seed43_authority_bound_diagnostic_admission_gap_audit_v1.py",
+  "test": "tests/test_f3_graph_raw_hidden16_seed43_authority_bound_diagnostic_admission_gap_audit_v1.py",
+  "intent": "audit_existing_contract_and_emit_exact_production_authority_gap_without_duplicate_implementation",
+  "required_contract": {
+    "external_scheduler_authority": true,
+    "signature_algorithm": "ed25519",
+    "nonce_binding": true,
+    "namespace_inode_binding": true,
+    "source_digest_binding": true,
+    "resource_digest_binding": true,
+    "caller_self_claim_rejected": true,
+    "diagnostic_only": true,
+    "credit": 0
+  },
+  "execution_policy": {
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "popen": false,
+    "solver": false,
+    "worker": false,
+    "gpu": false,
+    "queue": false,
+    "production_large_file_reads": false
+  },
+  "read_policy": {
+    "source_and_test_max_bytes": 262144,
+    "current_manifest": "metadata_only",
+    "training_receipt": "not_opened",
+    "checkpoint": "not_opened",
+    "trajectory": "not_opened"
+  },
+  "outputs": {
+    "json": "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-AUTHORITY-BOUND-DIAGNOSTIC-ADMISSION-GAP-AUDIT-2026-09-29.json",
+    "markdown": "reports/F3-GRAPH-RAW-HIDDEN16-SEED43-AUTHORITY-BOUND-DIAGNOSTIC-ADMISSION-GAP-AUDIT-2026-09-29.zh-CN.md"
+  },
+  "promotion": {
+    "launch_allowed": false,
+    "formal": false,
+    "credit": 0,
+    "registry_write": false,
+    "ledger_write": false,
+    "denominator_write": false,
+    "gate_write": false,
+    "historical_receipt_rewrite": false
+  }
+}
