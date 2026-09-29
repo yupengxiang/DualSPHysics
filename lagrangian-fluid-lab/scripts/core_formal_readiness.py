@@ -239,17 +239,28 @@ def _admission_observation(payload: Mapping[str, Any], reference: Mapping[str, A
     summary = summary if isinstance(summary, Mapping) else {}
     t1_families = summary.get("t1_families")
     if isinstance(t1_families, Mapping):
-        t1_names = sorted(str(name) for name, value in t1_families.items() if value is True)
+        raw_t1_names = [name for name, value in t1_families.items() if value is True]
     elif isinstance(t1_families, list):
-        t1_names = sorted(str(name) for name in t1_families)
+        raw_t1_names = t1_families
     else:
-        t1_names = []
+        raw_t1_names = []
+    # A readiness denominator is keyed by the actual family identity.  Do not
+    # let duplicate list entries, empty values, or arbitrary objects inflate
+    # the distinct-family gate.
+    t1_names = sorted({
+        name.strip() for name in raw_t1_names
+        if isinstance(name, str) and name.strip()
+    })
     validation_counts = summary.get("validation_counts")
     if not isinstance(validation_counts, Mapping):
         validation_counts = {}
     validation_counts = {
-        str(name): int(value) for name, value in validation_counts.items()
-        if isinstance(value, int) and not isinstance(value, bool)
+        name.strip(): int(value) for name, value in validation_counts.items()
+        if isinstance(name, str)
+        and name.strip() in t1_names
+        and isinstance(value, int)
+        and not isinstance(value, bool)
+        and value >= 0
     }
     protocol = payload.get("formal_protocol")
     protocol = protocol if isinstance(protocol, Mapping) else {}

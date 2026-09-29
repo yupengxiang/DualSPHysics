@@ -128,6 +128,29 @@ def test_unknown_or_synthetic_admission_schema_rejected_before_gate_parse() -> N
         assert probe.reads == ["schema"]
 
 
+def test_admission_summary_cannot_inflate_family_or_validation_denominators() -> None:
+    observation = _admission_observation(
+        {
+            "schema": "core.formal_admission_audit.v1",
+            "status": "blocked",
+            "formal_admission": False,
+            "formal_job_count": 0,
+            "required_formal_job_count": 9,
+            "family_summary": {
+                "t1_families": ["F3", "F3", "F4", ""],
+                "validation_counts": {"F3": 4, "F4": 4, "unbound": 4, "negative": -4},
+            },
+            "blockers": [],
+        },
+        {"path": "synthetic-only", "sha256": "0" * 64, "bytes": 0},
+    )
+
+    assert observation["t1_families"] == ["F3", "F4"]
+    assert observation["t1_family_count"] == 2
+    assert observation["validation_counts"] == {"F3": 4, "F4": 4}
+    assert observation["validation_case_count"] == 8
+
+
 def test_build_readiness_blocks_synthetic_admission_without_counting_gate_fields(
     tmp_path: Path,
 ) -> None:
