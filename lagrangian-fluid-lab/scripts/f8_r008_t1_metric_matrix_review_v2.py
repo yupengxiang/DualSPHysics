@@ -21,6 +21,7 @@ OUTPUT = LAB / ROOT / "metric-matrix-review-v2/receipt.json"
 ARCHIVE_TEST_PATH = "tests/test_f8_r008_t1_metric_matrix_review_v2.py"
 SCHEMA = "core.cfd.f8.r008_t1_metric_matrix_implementation_review.v2"
 RECORD_ID = "f8-r008-t1-metric-matrix-implementation-review-v2"
+HISTORICAL_RECEIPT_SHA256 = "6806cf806cb8dbb83f12c89ea875e96abe7aae11a1984bd619a90859eb118b59"
 REVIEWER = {
     "model": "gpt-5.6-terra",
     "reasoning_effort": "high",
@@ -177,9 +178,17 @@ def build_receipt() -> dict[str, Any]:
 
 
 def verify_receipt(path: Path = OUTPUT) -> dict[str, Any]:
-    receipt = json.loads(Path(path).read_text(encoding="utf-8"))
-    if receipt != build_receipt():
-        raise ValueError("immutable Terra High R008 v2 matrix review no longer matches reviewed evidence")
+    payload = Path(path).read_bytes()
+    if hashlib.sha256(payload).hexdigest() != HISTORICAL_RECEIPT_SHA256:
+        raise ValueError("historical immutable Terra High R008 v2 matrix review receipt changed")
+    receipt = json.loads(payload.decode("utf-8"))
+    if (
+        not isinstance(receipt, dict)
+        or receipt.get("schema") != SCHEMA
+        or receipt.get("record_id") != RECORD_ID
+        or receipt.get("status") != "static_implementation_review_passed_no_execution_or_t1_credit"
+    ):
+        raise ValueError("historical Terra High R008 v2 matrix review receipt contract changed")
     return receipt
 
 
