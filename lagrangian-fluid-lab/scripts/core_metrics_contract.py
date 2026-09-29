@@ -38,7 +38,7 @@ HISTORICAL_RECEIPT = METRICS_BUNDLE_ROOT / "planning-receipt.json"
 # The source closure includes PLAN.md, so a historical planning bundle becomes
 # stale whenever the plan advances.  Keep that bundle immutable and make the
 # current binding an additive dated rerun instead of silently rewriting it.
-CURRENT_RERUN_ID = "2026-09-29-RERUN1"
+CURRENT_RERUN_ID = "2026-09-29-RERUN2"
 CURRENT_CONTRACT = METRICS_BUNDLE_ROOT / f"contract-{CURRENT_RERUN_ID}.json"
 CURRENT_RECEIPT = METRICS_BUNDLE_ROOT / f"planning-receipt-{CURRENT_RERUN_ID}.json"
 DEFAULT_CONTRACT = CURRENT_CONTRACT

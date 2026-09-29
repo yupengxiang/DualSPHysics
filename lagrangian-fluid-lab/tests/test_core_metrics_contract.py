@@ -35,17 +35,28 @@ def test_schema_covers_requested_physical_and_material_metrics() -> None:
     assert all(spec["fixed_denominator"] for spec in METRIC_DEFINITIONS.values())
 
 
-def test_committed_planning_receipt_fails_closed_when_source_binding_is_stale() -> None:
+def test_current_planning_receipt_matches_current_source() -> None:
     report = verify_receipt(DEFAULT_RECEIPT, root=ROOT, contract_path=DEFAULT_CONTRACT)
-    assert report["ok"] is False
+    assert report["ok"] is True
     assert report["credit"] == 0
-    assert any(item.startswith("contract.source_closure.source_bindings[")
-               for item in report["mismatches"])
     receipt = json.loads(DEFAULT_RECEIPT.read_text(encoding="utf-8"))
     assert receipt["qualification_claim"] == "none"
     assert receipt["credit"] == 0
     assert receipt["synthetic_report"]["status"] == "evaluated"
     assert receipt["synthetic_report"]["negative_result"] is True
+
+
+def test_previous_additive_rerun_is_retained_but_stale() -> None:
+    previous_contract = metrics.METRICS_BUNDLE_ROOT / "contract-2026-09-29-RERUN1.json"
+    previous_receipt = metrics.METRICS_BUNDLE_ROOT / "planning-receipt-2026-09-29-RERUN1.json"
+
+    assert previous_contract.is_file()
+    assert previous_receipt.is_file()
+    report = verify_receipt(previous_receipt, root=ROOT, contract_path=previous_contract)
+    assert report["ok"] is False
+    assert report["credit"] == 0
+    assert any(item.startswith("contract.source_closure.source_bindings[")
+               for item in report["mismatches"])
 
 
 def test_historical_planning_bundle_is_preserved_but_stale_against_current_source() -> None:
