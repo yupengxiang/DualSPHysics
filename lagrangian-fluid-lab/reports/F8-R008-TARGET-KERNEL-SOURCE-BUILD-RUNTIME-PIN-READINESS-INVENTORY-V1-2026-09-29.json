@@ -1,0 +1,1063 @@
+{
+  "audit_mode": "live_repository_contract_only_no_v7_v8_revalidation",
+  "authorization": {
+    "T1_numerical": false,
+    "capability_minted": false,
+    "diagnostic_only": true,
+    "execution_authority": false,
+    "formal_admission": false,
+    "qualification_credit": 0,
+    "readiness_pass": false
+  },
+  "blocking_gaps": [
+    {
+      "code": "external_target_kernel_manifest_missing",
+      "detail": "No external manifest supplies target release/source/UAPI/config/build pins or artifact references.",
+      "path": "external/f8-r008-target-kernel-evidence-manifest-v1.json"
+    },
+    {
+      "code": "external_target_artifact_set_unresolvable",
+      "detail": "Source/UAPI/config/build artifacts cannot be resolved until the external manifest is supplied and verified.",
+      "path": "external/f8-r008-target-kernel-evidence-manifest-v1.json"
+    },
+    {
+      "code": "external_trusted_pin_attestation_missing",
+      "detail": "No signed target-kernel/source/build/runtime/host pin attestation is present.",
+      "path": "external/f8-r008-trusted-target-pin-attestation-v1.json"
+    },
+    {
+      "code": "independent_trust_anchor_missing",
+      "detail": "No independent trust-anchor document or out-of-band public key is present.",
+      "path": "external/f8-r008-trusted-target-pin-trust-anchor-v1.json"
+    },
+    {
+      "code": "target_kernel_source_build_runtime_pin_set_open",
+      "detail": "All 51 field-level pin rows remain open; no target identity can be promoted.",
+      "path": "current live target contract"
+    }
+  ],
+  "external_inputs": {
+    "independent_trust_anchor": {
+      "bytes": null,
+      "error": "missing",
+      "exists": false,
+      "expected_record_id": "f8-r008-trusted-target-pin-anchor-v1",
+      "expected_schema": "core.cfd.f8.r008.trusted_target_pin_anchor.v1",
+      "out_of_band_public_key_required": true,
+      "path": "external/f8-r008-trusted-target-pin-trust-anchor-v1.json",
+      "regular": false,
+      "sha256": null
+    },
+    "target_kernel_manifest": {
+      "bytes": null,
+      "error": "missing",
+      "exists": false,
+      "expected_record_id": "f8-r008-target-kernel-evidence-manifest-v1",
+      "expected_schema": "core.cfd.f8.r008.target_kernel_evidence_manifest.v1",
+      "path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+      "regular": false,
+      "required_artifact_roles": [
+        "source",
+        "uapi",
+        "config",
+        "build"
+      ],
+      "required_target_pin_fields": [
+        "kernel_release",
+        "source_commit",
+        "source_tree_sha256",
+        "uapi_sha256",
+        "config_sha256",
+        "build_id"
+      ],
+      "sha256": null
+    },
+    "trusted_pin_attestation": {
+      "bytes": null,
+      "error": "missing",
+      "exists": false,
+      "expected_record_id": "f8-r008-trusted-target-pin-attestation-v1",
+      "expected_schema": "core.cfd.f8.r008.trusted_target_pin_attestation.v1",
+      "path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+      "regular": false,
+      "required_domains": [
+        "target_kernel",
+        "source",
+        "build",
+        "runtime_abi",
+        "host_identity"
+      ],
+      "sha256": null
+    }
+  },
+  "historical_revalidation": {
+    "reason": "only current live source, manifest boundary, and target contract were inspected",
+    "v7_revalidated": false,
+    "v8_revalidated": false
+  },
+  "live_contracts": [
+    {
+      "bytes": 33933,
+      "error": null,
+      "exists": true,
+      "path": "scripts/f8_r008_target_kernel_evidence_intake_v1.py",
+      "regular": true,
+      "role": "external target-kernel manifest intake source",
+      "sha256": "b72f098a36903e628db308766b4ef72b87ba46e53dba84ee4ac979a77d5488bc"
+    },
+    {
+      "bytes": 55249,
+      "error": null,
+      "exists": true,
+      "path": "scripts/f8_r008_trusted_target_pin_intake_v1.py",
+      "regular": true,
+      "role": "trusted target/source/build/runtime pin contract source",
+      "sha256": "5d4102afcbb1387f9fed6afc645f4e76c9b4006cb9d80d2e9989bbc582061b4c"
+    },
+    {
+      "bytes": 47602,
+      "error": null,
+      "exists": true,
+      "path": "scripts/f8_r008_target_kernel_readiness_projection_v1.py",
+      "regular": true,
+      "role": "target-kernel readiness projection source",
+      "sha256": "1715d2a5686f0fe8f2ddc282f222a9d280c10a7fdcf281e0e33a147219c5de7b"
+    },
+    {
+      "bytes": 68034,
+      "error": null,
+      "exists": true,
+      "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+      "regular": true,
+      "role": "current R008 target scope contract",
+      "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+    }
+  ],
+  "minimal_unit": {
+    "T1_numerical": false,
+    "can_advance": false,
+    "candidate": "F8/R008 external target-pin intake",
+    "execution_allowed": false,
+    "qualification_credit": 0,
+    "readiness_pass": false,
+    "reason_code": "blocked_missing_external_target_pins",
+    "required_next_inputs": [
+      "external target-kernel evidence manifest with six target pin fields and four distinct artifact references",
+      "verified source/UAPI/config/build artifact bytes matching the manifest",
+      "externally signed trusted attestation covering target_kernel, source, build, runtime_abi, and host_identity",
+      "independent trust-anchor document plus explicit out-of-band public-key binding"
+    ]
+  },
+  "non_changes": [
+    "registry",
+    "ledger",
+    "denominator",
+    "gate",
+    "completion",
+    "PLAN.md",
+    "UPDATE-410",
+    "F3 files",
+    "F4 files",
+    "A8 files"
+  ],
+  "observed_current_intake": {
+    "target_kernel_evidence_intake": {
+      "manifest": {
+        "bytes": null,
+        "exists": false,
+        "path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "sha256": null
+      },
+      "pins": {
+        "build_id_pinned": false,
+        "config_pinned": false,
+        "kernel_release_pinned": false,
+        "source_commit_pinned": false,
+        "source_tree_pinned": false,
+        "uapi_pinned": false
+      },
+      "reference": {
+        "bytes": 2345,
+        "error": null,
+        "exists": true,
+        "path": "reports/F8-R008-TARGET-KERNEL-EVIDENCE-INTAKE-V1.json",
+        "regular": true,
+        "sha256": "a170e911f42a5544bdb2adea30ed96fd29f3f83b1e36a7e2481dec03a8d81f8c"
+      },
+      "status": "blocked_missing_external_target_evidence",
+      "validation": {
+        "blockers": [
+          "external evidence manifest is missing: external/f8-r008-target-kernel-evidence-manifest-v1.json"
+        ],
+        "external_target_evidence_complete": false,
+        "manifest_present": false,
+        "manifest_valid": false
+      }
+    },
+    "trusted_target_pin_intake": {
+      "inputs": {
+        "attestation": {
+          "bytes": null,
+          "exists": false,
+          "path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+          "sha256": null
+        },
+        "trust_anchor": {
+          "bytes": null,
+          "exists": false,
+          "path": "external/f8-r008-trusted-target-pin-trust-anchor-v1.json",
+          "sha256": null
+        }
+      },
+      "pins": {
+        "build": false,
+        "host_identity": false,
+        "runtime_abi": false,
+        "source": false,
+        "target_kernel": false
+      },
+      "reference": {
+        "bytes": 2675,
+        "error": null,
+        "exists": true,
+        "path": "reports/F8-R008-TRUSTED-TARGET-PIN-INTAKE-V1.json",
+        "regular": true,
+        "sha256": "062f76b6edd86b098515d39c15c6e7bb8181b5e5090323c40644e3aa9819d412"
+      },
+      "status": "blocked_missing_external_trusted_pin_attestation",
+      "validation": {
+        "attestation_present": false,
+        "blockers": [
+          "trusted pin attestation is missing"
+        ],
+        "build_pin_complete": false,
+        "cross_bindings_valid": false,
+        "host_identity_bound": false,
+        "runtime_abi_pin_complete": false,
+        "schema_valid": false,
+        "source_pin_complete": false,
+        "target_kernel_pin_complete": false,
+        "trust_anchor_present": false
+      }
+    }
+  },
+  "pin_inventory": {
+    "closed_count": 0,
+    "open_count": 51,
+    "rows": [
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.kernel_release",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "kernel_release",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.source_commit",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "source_commit",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.source_tree_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "source_tree_sha256",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.uapi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "uapi_sha256",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.config_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "config_sha256",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_target_kernel_manifest_missing",
+        "closed": false,
+        "component": "target_kernel_manifest",
+        "contract": "manifest.target.build_id",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-target-kernel-evidence-manifest-v1.json",
+        "evidence_present": false,
+        "field": "build_id",
+        "required_evidence": "external manifest target pin plus verified artifact set",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.arch",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "arch",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.build_id",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "build_id",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.config_options_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "config_options_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.config_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "config_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.kernel_image_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "kernel_image_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.kernel_release",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "kernel_release",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.source_commit",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "source_commit",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.source_tree_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "source_tree_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.syscall_policy_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "syscall_policy_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "target_kernel",
+        "contract": "attestation.target_kernel.uapi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "uapi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.callgraph_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "callgraph_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.patchset_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "patchset_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.source_commit",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "source_commit",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.source_manifest_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "source_manifest_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.source_tree_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "source_tree_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "source",
+        "contract": "attestation.source.uapi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "uapi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.arch",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "arch",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.binary_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "binary_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.build_closure_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "build_closure_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.build_id",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "build_id",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.build_manifest_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "build_manifest_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.compiler_identity_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "compiler_identity_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.config_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "config_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "build",
+        "contract": "attestation.build.linker_identity_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "linker_identity_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.abi_payload_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "abi_payload_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.abi_schema",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "abi_schema",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.arch",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "arch",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.build_id",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "build_id",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.config_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "config_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.fanotify_abi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "fanotify_abi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.fid_abi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "fid_abi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.host_identity_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "host_identity_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.kernel_release",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "kernel_release",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.loaded_modules_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "loaded_modules_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.pidfd_abi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "pidfd_abi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.runtime_image_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "runtime_image_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.seccomp_abi_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "seccomp_abi_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.selector_max",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "selector_max",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.selector_min",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "selector_min",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "runtime_abi",
+        "contract": "attestation.runtime_abi.syscall_policy_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "syscall_policy_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "host_identity",
+        "contract": "attestation.host_identity.boot_id_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "boot_id_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "host_identity",
+        "contract": "attestation.host_identity.host_attestation_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "host_attestation_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "host_identity",
+        "contract": "attestation.host_identity.host_id",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "host_id",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "host_identity",
+        "contract": "attestation.host_identity.host_profile_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "host_profile_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      },
+      {
+        "blocker_code": "external_trusted_pin_attestation_missing",
+        "closed": false,
+        "component": "host_identity",
+        "contract": "attestation.host_identity.machine_id_sha256",
+        "current_value": null,
+        "evidence_path": "external/f8-r008-trusted-target-pin-attestation-v1.json",
+        "evidence_present": false,
+        "field": "machine_id_sha256",
+        "required_evidence": "externally signed attestation cross-bound to an independent trust anchor",
+        "runtime_verified": false,
+        "state": "missing_external_evidence"
+      }
+    ],
+    "summary": {
+      "target_kernel_manifest": {
+        "closed_count": 0,
+        "open_count": 6
+      },
+      "trusted_target_kernel_source_build_runtime_host": {
+        "closed_count": 0,
+        "open_count": 45
+      }
+    }
+  },
+  "prohibited_operations": [
+    "target_source_or_build_artifact_read",
+    "kernel_or_runtime_state_probe",
+    "privileged_or_native_probe",
+    "solver_worker_gpu_or_queue_execution",
+    "registry_ledger_denominator_gate_completion_mutation",
+    "PLAN_or_UPDATE-410_mutation",
+    "F3_F4_or_A8_file_touch"
+  ],
+  "record_id": "f8-r008-target-kernel-source-build-runtime-pin-readiness-inventory-20260929",
+  "schema": "core.cfd.f8.r008.target_kernel_source_build_runtime_pin_readiness_inventory.v1",
+  "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+  "side_effects": {
+    "checked_in_report_read": true,
+    "completion_mutation": 0,
+    "denominator_mutation": 0,
+    "external_pin_inputs_read": false,
+    "gate_mutation": 0,
+    "gpu_started": false,
+    "kernel_or_runtime_probe": false,
+    "ledger_mutation": 0,
+    "native_started": false,
+    "plan_mutation": 0,
+    "privileged_probe": false,
+    "queue_started": false,
+    "registry_mutation": 0,
+    "repository_contract_read": true,
+    "solver_started": false,
+    "target_build_read": false,
+    "target_source_read": false,
+    "worker_started": false
+  },
+  "status": "blocked_missing_external_target_kernel_source_build_runtime_pins",
+  "target_contract": {
+    "manifest_artifact_roles": [
+      "source",
+      "uapi",
+      "config",
+      "build"
+    ],
+    "manifest_record_id": "f8-r008-target-kernel-evidence-manifest-v1",
+    "manifest_schema": "core.cfd.f8.r008.target_kernel_evidence_manifest.v1",
+    "manifest_target_fields": [
+      "build_id",
+      "config_sha256",
+      "kernel_release",
+      "required_options",
+      "source_commit",
+      "source_tree_sha256",
+      "uapi_sha256"
+    ],
+    "projection_pin_fields": [
+      "build_id_pinned",
+      "config_pinned",
+      "kernel_release_pinned",
+      "source_commit_pinned",
+      "source_tree_pinned",
+      "uapi_pinned"
+    ],
+    "required_cross_bindings": [
+      "target source_commit/source_tree_sha256/uapi must bind source evidence",
+      "target/build/runtime arch, config_sha256, build_id, and kernel image must agree",
+      "runtime kernel release/ABI and host identity must bind the target execution",
+      "one-shot receipt must bind the complete pin set and independent trust root"
+    ],
+    "scope": {
+      "record_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008-t1-scope-design-v1",
+      "reference": {
+        "bytes": 68034,
+        "error": null,
+        "exists": true,
+        "path": "campaigns/core-v1/cfd/f8-oscillatory-pressure-channel-r008/t1-scope-design-v1/receipt.json",
+        "regular": true,
+        "sha256": "65671b42523cd3a5f82338cc7e2d88890af634195d7013ad969311166ab36ac8"
+      },
+      "schema": "core.cfd.f8.t1_scope_design.v1",
+      "scope_id": "F8_OSCILLATORY_PRESSURE_CHANNEL_WOMERSLEY_R008",
+      "status": "static_scope_design_candidate_ready_for_independent_review",
+      "target_pin_fields_present": false
+    },
+    "trusted_attestation_record_id": "f8-r008-trusted-target-pin-attestation-v1",
+    "trusted_attestation_schema": "core.cfd.f8.r008.trusted_target_pin_attestation.v1",
+    "trusted_domains": {
+      "build": [
+        "arch",
+        "binary_sha256",
+        "build_closure_sha256",
+        "build_id",
+        "build_manifest_sha256",
+        "compiler_identity_sha256",
+        "config_sha256",
+        "linker_identity_sha256"
+      ],
+      "host_identity": [
+        "boot_id_sha256",
+        "host_attestation_sha256",
+        "host_id",
+        "host_profile_sha256",
+        "machine_id_sha256"
+      ],
+      "runtime_abi": [
+        "abi_payload_sha256",
+        "abi_schema",
+        "arch",
+        "build_id",
+        "config_sha256",
+        "fanotify_abi_sha256",
+        "fid_abi_sha256",
+        "host_identity_sha256",
+        "kernel_release",
+        "loaded_modules_sha256",
+        "pidfd_abi_sha256",
+        "runtime_image_sha256",
+        "seccomp_abi_sha256",
+        "selector_max",
+        "selector_min",
+        "syscall_policy_sha256"
+      ],
+      "source": [
+        "callgraph_sha256",
+        "patchset_sha256",
+        "source_commit",
+        "source_manifest_sha256",
+        "source_tree_sha256",
+        "uapi_sha256"
+      ],
+      "target_kernel": [
+        "arch",
+        "build_id",
+        "config_options_sha256",
+        "config_sha256",
+        "kernel_image_sha256",
+        "kernel_release",
+        "source_commit",
+        "source_tree_sha256",
+        "syscall_policy_sha256",
+        "uapi_sha256"
+      ]
+    }
+  }
+}
