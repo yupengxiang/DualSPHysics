@@ -1,0 +1,948 @@
+{
+  "schema": "ds-data-01.d08.handoff-manifest.v1",
+  "generated_at_utc": "2026-09-29T18:26:18.738848+00:00",
+  "status": "complete_internal_handoff",
+  "package_role": "internal_development_only",
+  "scope": "dataset-only; no training, inference, checkpoint replay, tuning, ranking, model qualification, or external scientific acceptance claim",
+  "learning_attempts": 0,
+  "tasks": [
+    {
+      "id": "D00",
+      "title": "scope reset and live state snapshot",
+      "status": "complete",
+      "evidence": [
+        "campaigns/ds-data-01/SCOPE_OVERRIDE.md",
+        "campaigns/ds-data-01/DATASET_STATUS.json",
+        "campaigns/ds-data-01/CAPABILITY_MATRIX.csv"
+      ]
+    },
+    {
+      "id": "D01",
+      "title": "inventory the complete official examples package",
+      "status": "complete",
+      "depends_on": [
+        "D00"
+      ],
+      "evidence": [
+        "campaigns/ds-data-01/OFFICIAL_EXAMPLES_INVENTORY.json",
+        "campaigns/ds-data-01/OFFICIAL_EXAMPLES_INVENTORY.csv",
+        "campaigns/ds-data-01/OFFICIAL_TO_BENCHMARK_MAP.md"
+      ],
+      "observed": {
+        "official_groups": 14,
+        "case_directories": 107,
+        "source_reproduction": false,
+        "scientific_acceptance": false
+      }
+    },
+    {
+      "id": "D02",
+      "title": "official raw replay and multi-family mechanism atlas",
+      "status": "complete",
+      "depends_on": [
+        "D01"
+      ],
+      "observed": {
+        "families_represented": 7,
+        "families_expected": 7,
+        "actual_cases": 26,
+        "q_i_structure_pass": 26,
+        "scientific_acceptance": false,
+        "production_eligible": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D02_MECHANISM_ATLAS.json",
+        "campaigns/ds-data-01/D02_MECHANISM_ATLAS.csv",
+        "campaigns/ds-data-01/D02_OFFICIAL_REUSE_RECEIPT.json",
+        "campaigns/ds-data-01/D02_F2_W06_REUSE_RECEIPT.json",
+        "campaigns/ds-data-01/d02/canaries/run-summary.json",
+        "campaigns/ds-data-01/d02/canaries/conversion-summary.json"
+      ]
+    },
+    {
+      "id": "D03",
+      "title": "data-specific numerical and physical acceptance",
+      "status": "complete",
+      "depends_on": [
+        "D02"
+      ],
+      "observed": {
+        "cases_audited": 26,
+        "q_i_structure_pass": 25,
+        "q_n_integrity_pass": 26,
+        "external_validation_assessed": false,
+        "production_eligible": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+        "campaigns/ds-data-01/D03_SCOPE_AUDIT.csv",
+        "campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+        "campaigns/ds-data-01/D03_FAILURE_MAP.md"
+      ]
+    },
+    {
+      "id": "D04",
+      "title": "parameter design and leakage-safe split",
+      "status": "complete",
+      "depends_on": [
+        "D03"
+      ],
+      "observed": {
+        "cases_registered": 26,
+        "lineage_groups": 25,
+        "split_assignments": 0,
+        "production_split_materialized": false,
+        "production_eligible": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D04_SPLIT_SPEC.json",
+        "campaigns/ds-data-01/D04_LINEAGE_REGISTRY.json"
+      ]
+    },
+    {
+      "id": "D05",
+      "title": "scope-qualified internal development batches and conversion",
+      "status": "complete",
+      "depends_on": [
+        "D04"
+      ],
+      "observed": {
+        "plan_cases": 8,
+        "solver_replays": 7,
+        "reference_reuse": 1,
+        "q_i_structure_pass": 7,
+        "scientific_acceptance": false,
+        "release_role": "internal_development_only",
+        "production_eligible": 0,
+        "split_assignments": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D05_BATCH_PLAN.json",
+        "campaigns/ds-data-01/d05/prepare-summary.json",
+        "campaigns/ds-data-01/d05/run-summary.json",
+        "campaigns/ds-data-01/d05/conversion-summary.json",
+        "scripts/ds_data01_d05_batch.py",
+        "scripts/ds_data01_d05_convert.py"
+      ]
+    },
+    {
+      "id": "D06",
+      "title": "native labels and optional material-tracer subset",
+      "status": "complete",
+      "depends_on": [
+        "D03"
+      ],
+      "observed": {
+        "cases_audited": 26,
+        "label_audit_pass": 26,
+        "material_tracer_required_for_core": false,
+        "material_tracer_failures_block_core": false
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D06_LABEL_SCHEMA.json",
+        "campaigns/ds-data-01/D06_TRACER_SUBSET_SPEC.json",
+        "scripts/ds_data01_d06_labels.py"
+      ]
+    },
+    {
+      "id": "D07",
+      "title": "model-free benchmark interface",
+      "status": "complete",
+      "depends_on": [
+        "D03"
+      ],
+      "observed": {
+        "synthetic_test": "pass",
+        "cross_format_alignment": true,
+        "open_lifecycle_masking": true,
+        "scientific_acceptance_emitted": false
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D07_EVALUATOR_CONTRACT.json",
+        "scripts/ds_data01_d07_evaluator.py"
+      ]
+    },
+    {
+      "id": "D08",
+      "title": "internal dataset product and handoff",
+      "status": "complete",
+      "depends_on": [
+        "D05",
+        "D06",
+        "D07"
+      ],
+      "observed": {
+        "status": "complete_internal_handoff",
+        "compact_artifact_checks": true,
+        "trajectory_references": 33,
+        "families_represented": 7,
+        "production_split_materialized": false,
+        "scientific_acceptance": false,
+        "learning_attempts": 0
+      },
+      "evidence": [
+        "campaigns/ds-data-01/D08_HANDOFF_MANIFEST.json",
+        "campaigns/ds-data-01/D08_HANDOFF.md"
+      ]
+    },
+    {
+      "id": "legacy-learning",
+      "title": "old L1/L2/L2-R learning tasks",
+      "status": "superseded_by_owner_scope",
+      "action": "retain historical artifacts; do not start, replay, rank, or use as a dataset gate"
+    },
+    {
+      "id": "unrelated-live-training",
+      "title": "processes outside this activity",
+      "status": "protected_unrelated",
+      "action": "observe only; do not stop by GPU number, process name, or convenience"
+    }
+  ],
+  "coverage": {
+    "D02_atlas_cases": 26,
+    "D02_families": 7,
+    "D03_cases_audited": 25,
+    "D05_plan_cases": 8,
+    "D05_conversion_cases": 8,
+    "data_records_with_hdf5_references": 33,
+    "families_with_hdf5_references": {
+      "F1": 4,
+      "F2": 12,
+      "F3": 3,
+      "F4": 3,
+      "F5": 4,
+      "F6": 4,
+      "F7": 3
+    }
+  },
+  "checks": {
+    "d00_d07_compact_artifacts_present": true,
+    "d02_families_represented": true,
+    "d03_external_validation_assessed": false,
+    "d04_split_assignments_empty": true,
+    "d05_batch_plan_present": true,
+    "d05_conversion_complete": true,
+    "d06_material_tracer_required_for_core": false,
+    "d07_scientific_acceptance_not_assessed": true,
+    "learning_attempts": 0
+  },
+  "split_boundary": {
+    "assigned_split_counts": {
+      "train": 0,
+      "validation": 0,
+      "test": 0,
+      "holdout": 0
+    },
+    "production_split_materialized": false,
+    "interpretation": "all D04 assignments remain empty; this handoff is not a train/validation/test release"
+  },
+  "artifacts": [
+    {
+      "path": "campaigns/ds-data-01/README.md",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 1336,
+      "sha256": "075a962965fbbfe1ece2d1324125c283b30cd969e7eddb9db5bb1cffa75a4c38"
+    },
+    {
+      "path": "campaigns/ds-data-01/SCOPE_OVERRIDE.md",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 3100,
+      "sha256": "8fbcafa935a0d4fc288ca1f7ff4a81a5dab88e2d8018a6af4c422c6d4d67692b"
+    },
+    {
+      "path": "campaigns/ds-data-01/TASK_GRAPH.md",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 2484,
+      "sha256": "e7f792e9b136b43a7a1f4ca74bebc56fffcb38f26f5ab0ecc9d84d569c97934c"
+    },
+    {
+      "path": "campaigns/ds-data-01/CAPABILITY_MATRIX.csv",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 3231,
+      "sha256": "51f9d73f0841107fe63960922be2c3c7658977bf9f1fbf0b1bf6b6650b783d2a"
+    },
+    {
+      "path": "campaigns/ds-data-01/ACTIVE_TASKS.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 5700,
+      "sha256": "1cd4e8dfc1de925779a7a666508424ea1132da5a87602b59a91863872808de12"
+    },
+    {
+      "path": "campaigns/ds-data-01/D02_MECHANISM_ATLAS.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 80636,
+      "sha256": "bfd145404ef1f3aa4313397b78df7eca8a75f3b9382dec8aa46e09f559b37023"
+    },
+    {
+      "path": "campaigns/ds-data-01/D02_MECHANISM_ATLAS.csv",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 18066,
+      "sha256": "b8e2ad9b8b76467fdfb8ce3b36f7d2a76e26336dc143224433137cd5f405d490"
+    },
+    {
+      "path": "campaigns/ds-data-01/D03_SCOPE_AUDIT.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 175180,
+      "sha256": "0759912a40071429739a64337752026ed1ab9ad752808303b8a0bea10d065f97"
+    },
+    {
+      "path": "campaigns/ds-data-01/D03_SCOPE_AUDIT.csv",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 7692,
+      "sha256": "09eb42e8d5367a1fb3cef03d5092265df14955b43079785eba00e6df4a85a62d"
+    },
+    {
+      "path": "campaigns/ds-data-01/D03_REFERENCE_CARDS.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 92050,
+      "sha256": "4fdfe97bdd1fb98402851ac977de4ff6c9e16d57665e7598f2cee30ca47459d4"
+    },
+    {
+      "path": "campaigns/ds-data-01/D03_FAILURE_MAP.md",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 1435,
+      "sha256": "b03ba2a7b59da335d11013ac1f0e6e4b14f8301fab251ff371bd2aac485446f1"
+    },
+    {
+      "path": "campaigns/ds-data-01/D04_SPLIT_SPEC.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 13380,
+      "sha256": "c9ebd8a8d5b73c80b30f8bc3729ab7894832244faf3525214c5af71a9d7ec117"
+    },
+    {
+      "path": "campaigns/ds-data-01/D04_LINEAGE_REGISTRY.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 122107,
+      "sha256": "38edfc22a34646e4a2a438d3b7175a50a0702c3d53712ab0464506a4e6c80abc"
+    },
+    {
+      "path": "campaigns/ds-data-01/D05_BATCH_PLAN.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 5828,
+      "sha256": "5bb443c9dfdf7178aafc56462fc4c454c170e5c3ab82faa54fba5d4c977d78af"
+    },
+    {
+      "path": "campaigns/ds-data-01/D06_LABEL_SCHEMA.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 16902,
+      "sha256": "13bbcc3d16d33647ce91d27b4d453602533e723aaa6ad4d12c21b2e43cd26877"
+    },
+    {
+      "path": "campaigns/ds-data-01/D06_TRACER_SUBSET_SPEC.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 9275,
+      "sha256": "7cb9a5db7a19cda6e93c2427fe02ac6e5d5ea724ab59c8a57900cd990775876c"
+    },
+    {
+      "path": "campaigns/ds-data-01/D07_EVALUATOR_CONTRACT.json",
+      "kind": "repository_metadata",
+      "exists": true,
+      "bytes": 11157,
+      "sha256": "31994f7fe0be96586bcc01feaf16805037a2bf5e43e252e8104a47d0f861c6a9"
+    },
+    {
+      "path": "scripts/ds_data01_d05_batch.py",
+      "kind": "repository_script",
+      "exists": true,
+      "bytes": 24173,
+      "sha256": "2efda144e8aed8539fa89eb9329f8b8fb43a82f3ac6e056068e01eb6cf17a941"
+    },
+    {
+      "path": "scripts/ds_data01_d05_convert.py",
+      "kind": "repository_script",
+      "exists": true,
+      "bytes": 12021,
+      "sha256": "48bb74b214bcbc47d85ba1ad9943808b34be1771f7475b81dbb7605f0f5961e9"
+    },
+    {
+      "path": "scripts/ds_data01_d06_labels.py",
+      "kind": "repository_script",
+      "exists": true,
+      "bytes": 13320,
+      "sha256": "d41bbe431b35ddffd220d05025120222fbdc98184d851c50731e7f0967086b80"
+    },
+    {
+      "path": "scripts/ds_data01_d07_evaluator.py",
+      "kind": "repository_script",
+      "exists": true,
+      "bytes": 45073,
+      "sha256": "986bd01a79d7f067967d95e80808c7e2a5ff87484ecdd235d38c21a9bb8cc2eb"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/prepare-summary.json",
+      "kind": "dataset_summary",
+      "exists": true,
+      "bytes": 14251,
+      "sha256": "2d66e6ab7ff08799407610364533198958061ec231d983d4562ccafe76378997"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/run-summary.json",
+      "kind": "dataset_summary",
+      "exists": true,
+      "bytes": 13910,
+      "sha256": "525e60f5358aa145767bdc5eb49d3ebcc4ade53d91886e8aa3c5dd4e56959d03"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/conversion-summary.json",
+      "kind": "dataset_summary",
+      "exists": true,
+      "bytes": 15608,
+      "sha256": "be50710c90071a2872d5a4b3bbded0de41de62f022de5adfb675c525a1ca3dc3"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_main_dambreak3d_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1755,
+      "sha256": "78db0331165906f215eb8c4b3f599fd597c80e2f76c01705c2e9a70bcda3237c"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_main_dambreak3d_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1746,
+      "sha256": "f4a37de25b7fb058a14ad62107649287145cf84242dd6f8f74330b530e86a368"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_main_dambreak3d_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1943,
+      "sha256": "4eb9fa9ad4203effe34472497091742c6115fd665444abb3f1dfa7190c07676d"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_mdbc_dambreak3d_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1750,
+      "sha256": "a3cd4f5cdb673de88f0e7c474022404a433a85e29d45339c2cd71d5674e28c99"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_mdbc_dambreak3d_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1738,
+      "sha256": "557f72a20f3a6daa9ec9a17fdceed376d6e1f9be2b5e4e783e1cd410155c00ec"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F1_mdbc_dambreak3d_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1934,
+      "sha256": "a2ee8461432ea12b864d352cef922f838e6304fca9f5da7f7e45fba0b58c503e"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F2_w06_candidate_bundle/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 780,
+      "sha256": "af9ab35895cf2e8f2707955e820932301494b0cfb3cd64fce3b7c768cb292042"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F2_w06_candidate_bundle/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 423,
+      "sha256": "30ab795db6f719781c66daf3bd996fe782ee49dc009adc39c3ba12afe3a1dbb9"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F2_w06_candidate_bundle/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 463,
+      "sha256": "13c41f714acf17f082638d4c41bb037e691252205d45b4d8acc456fa3399593a"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1752,
+      "sha256": "c5099206cbfd7794359a590f502f6d3704df099663c6aca23885606697cf4c47"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1737,
+      "sha256": "7bdf826c55e470be22f739e0fb7460ee1f5f2b66d1bec48f01c30cc15f3e9b86"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1918,
+      "sha256": "1222f7f6c2ee3685b4b05ef48fdb3b4b9366b253a76c372950d744b766d218ee"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F4_shapes_inlet3d_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1769,
+      "sha256": "1764054f7a0a90d45f01968b4cf2a414820fa2388adc648c9fd86e1c149998e7"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F4_shapes_inlet3d_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1747,
+      "sha256": "e9bcb6a6f492c47a5c350d856e7907d69891b1848c15270867e34764e7da5489"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F4_shapes_inlet3d_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1935,
+      "sha256": "b5ce36a7f8938caaf0d038b458ed11d72c0b795f3d7c0f6a20ac1955107940fc"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F5_solitary_wave_kdv_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1777,
+      "sha256": "f1d82b6a3a510154a668950332a439daa682aa87c1d0affcf60676e6fd010060"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F5_solitary_wave_kdv_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1754,
+      "sha256": "0b837fea3820f5b193de3ae804986480822dcecf4ac7365554742ac3a94f457b"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F5_solitary_wave_kdv_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1943,
+      "sha256": "7e08895aeae5c58b348248c112051086908d4e2f6b34e51f256fe7062a5d87d2"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1718,
+      "sha256": "a5560502bdca6994ed1bed6d63694da34d600a78d776b5f6a2e399cf251b3885"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1708,
+      "sha256": "f093d78d8f204737c700abaa60f41fe2a4b2d29f59c4032d1bb298908d5f87ed"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1927,
+      "sha256": "a34b0325a806192a8a3b07e3edf26be8e79f7739d75e7e55125dd2e2b3af2765"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/prepare-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1669,
+      "sha256": "71aeec74d02a98b1dc5f23e4a04f86ecc6a0c06f1c933aa8c96e61c6ffeb1070"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/run-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1676,
+      "sha256": "8401e116698271fbbb48e293936dda9cd18475f4089ea6040dada21aa32012a6"
+    },
+    {
+      "path": "campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/conversion-receipt.json",
+      "kind": "dataset_receipt",
+      "exists": true,
+      "bytes": 1921,
+      "sha256": "f9b27a319214ba1b81eed3b68a4c0601dd178547c7b2b3c5525495dfcbf09108"
+    }
+  ],
+  "trajectory_evidence": [
+    {
+      "case_id": "F1_main_dambreak3d",
+      "family": "F1",
+      "source_manifest": "D02",
+      "path": "campaigns/ds-data-01/d02/normalized/F1_main_dambreak3d.h5",
+      "exists": true,
+      "bytes": 1749373,
+      "sha256": "d89dbe9a7da4f3b9ecba336085c7686a05b0328e0cce953ccc794b76d53f8dae",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "F1_mdbc_dambreak3d",
+      "family": "F1",
+      "source_manifest": "D02",
+      "path": "campaigns/ds-data-01/d02/normalized/F1_mdbc_dambreak3d.h5",
+      "exists": true,
+      "bytes": 12378833,
+      "sha256": "a845e01f2915b88a0cc93bbd4f8e3c4f596d8e43b6db5dcd3d3265bed80de2a6",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_narrow_far_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_narrow_far_partial.h5",
+      "exists": true,
+      "bytes": 9678363,
+      "sha256": "e64a5be59626990cd7d96faa17e2a5b69b7fc8d70417dcc7467f6a538d3e12c8",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_narrow_fast_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_narrow_fast_center.h5",
+      "exists": true,
+      "bytes": 9872235,
+      "sha256": "7812385c43ae87338e14f9c8d546d18a3e1bc2fccbc8bb7844d8169d00bc2ca0",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_narrow_offset_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_narrow_offset_partial.h5",
+      "exists": true,
+      "bytes": 9837817,
+      "sha256": "1b5c81502655675c91cad283ef36233ab3857e39ef96493a9a8a0bd6468a2c75",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_narrow_slow_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_narrow_slow_center.h5",
+      "exists": true,
+      "bytes": 9853567,
+      "sha256": "57918d532a156e1f5a10619a9e8272aa771fecb22eaaabdf57dec87af0d45994",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_standard_far_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_standard_far_partial.h5",
+      "exists": true,
+      "bytes": 11890565,
+      "sha256": "78e4a0f90131d9dd0b52de4b4f84a71397493cf88b30b4c9ba4d09b5d4c5dbbd",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_standard_fast_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_standard_fast_center.h5",
+      "exists": true,
+      "bytes": 12469698,
+      "sha256": "31fa265ac11571582751663c0e9598ab2013e1c6d9cb5bf1c66a0587c3d99305",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_standard_offset_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_standard_offset_partial.h5",
+      "exists": true,
+      "bytes": 12419747,
+      "sha256": "1b3ce8fc05a475833be814263900b0358957fa34430058dba94991cbf014907d",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_standard_slow_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_standard_slow_center.h5",
+      "exists": true,
+      "bytes": 12432326,
+      "sha256": "c3b13c507a268370a6edcb43406b381d46cd6ad1b75ed82a431fca9afb6fd390",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_wide_far_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_wide_far_partial.h5",
+      "exists": true,
+      "bytes": 13822536,
+      "sha256": "c906dec75e47701873975433b6b3e992297b7eade0b58f14082106ad459cbb26",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_wide_fast_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_wide_fast_center.h5",
+      "exists": true,
+      "bytes": 15130735,
+      "sha256": "ac05d0f7839a426cc181723876077e1b9abebdaf1236828e756aa936d08273c5",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_wide_offset_partial",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_wide_offset_partial.h5",
+      "exists": true,
+      "bytes": 15085538,
+      "sha256": "4fed253c8b2bfe72a649d0a7f915c66f3db4a824ba348cba9fda5f3d752e1cda",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "W06_wide_slow_center",
+      "family": "F2",
+      "source_manifest": "D02",
+      "path": "campaigns/v0.1-candidate/data/w06/W06_wide_slow_center.h5",
+      "exists": true,
+      "bytes": 15091937,
+      "sha256": "993255665f9b54c1250af39b77b7603166f76d63d82a12d5fef77ea75bbcb844",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O3_sloshing_acc",
+      "family": "F3",
+      "source_manifest": "D02",
+      "path": "data-official/O3_sloshing_acc.h5",
+      "exists": true,
+      "bytes": 191426,
+      "sha256": "c4625b7ee151bf90b48e1eb297587da1ff8d645c2ca6ddb5ef240a36dace745d",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O3_sloshing_motion",
+      "family": "F3",
+      "source_manifest": "D02",
+      "path": "data-official/O3_sloshing_motion.h5",
+      "exists": true,
+      "bytes": 191233,
+      "sha256": "d01aa876d8a159df800dddc925db5a1a68c01df53fb4be0c2c99c5617f47ecb7",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "F4_shapes_inlet3d",
+      "family": "F4",
+      "source_manifest": "D02",
+      "path": "campaigns/ds-data-01/d02/normalized/F4_shapes_inlet3d.h5",
+      "exists": true,
+      "bytes": 4187433,
+      "sha256": "facf12382a6bf8f02c1ea3aa6d873cf9696dd1458333fb2304397cc32040c5e8",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O4_impinging_jet",
+      "family": "F4",
+      "source_manifest": "D02",
+      "path": "data-official/O4_impinging_jet.h5",
+      "exists": true,
+      "bytes": 1853609,
+      "sha256": "00f253362e4a5ba4ce3203aee11e9b934dec8f1070e9ef643f24bd52ae670cdc",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O5_solitary_wave",
+      "family": "F5",
+      "source_manifest": "D02",
+      "path": "data-official/O5_solitary_wave.h5",
+      "exists": true,
+      "bytes": 2152546,
+      "sha256": "43d9cf997f6fa0d53f6588832c5379d14efb71a1a1dbdabbac0da01bc53b6883",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O5_wave_runup",
+      "family": "F5",
+      "source_manifest": "D02",
+      "path": "data-official/O5_wave_runup.h5",
+      "exists": true,
+      "bytes": 434340,
+      "sha256": "0d706033fc6dbdf63c2dcc498ac7de793cb3414080f8f8f829332e5cb1da989d",
+      "role": "exclusion_negative",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O5_wave_runup_refined",
+      "family": "F5",
+      "source_manifest": "D02",
+      "path": "data-official/O5_wave_runup_refined.h5",
+      "exists": true,
+      "bytes": 7997063,
+      "sha256": "d1a57d1c260cd63fbc09dfe1ea8d90f0042d60bf734535fb2701994a4a61776f",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O6_falling_wedge_vres",
+      "family": "F6",
+      "source_manifest": "D02",
+      "path": "data-official/O6_falling_wedge_vres.h5",
+      "exists": true,
+      "bytes": 3523444,
+      "sha256": "87da87f8f742f0b3687d5c6d4fc32576d320b5f663474c918391131a0136b2e4",
+      "role": "diagnostic",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O6_floating_box",
+      "family": "F6",
+      "source_manifest": "D02",
+      "path": "data-official/O6_floating_box.h5",
+      "exists": true,
+      "bytes": 1420799,
+      "sha256": "d251a1937752028cd59e2b9121289ff81be03530d55a254feb912a978699a78c",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "O6_floating_sphere",
+      "family": "F6",
+      "source_manifest": "D02",
+      "path": "data-official/O6_floating_sphere.h5",
+      "exists": true,
+      "bytes": 3059258,
+      "sha256": "73d2c89c4adcfd7f7dd25184083029d0cac651cf06ffc88235eb34f1eb6a9944",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "F7_moving_square2d",
+      "family": "F7",
+      "source_manifest": "D02",
+      "path": "campaigns/ds-data-01/d02/normalized/F7_moving_square2d.h5",
+      "exists": true,
+      "bytes": 12595878,
+      "sha256": "f964a9d47ec7511f260601fac5292baee506d1773ff32999c7613a0d9654227c",
+      "role": "calibration",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "F7_official_pump3d",
+      "family": "F7",
+      "source_manifest": "D02",
+      "path": "campaigns/ds-data-01/d02/normalized/F7_official_pump3d.h5",
+      "exists": true,
+      "bytes": 816032,
+      "sha256": "fbe9d457804e93ba3056431f0939c24305373f478a4591c014674d9b1d17e592",
+      "role": "candidate_pending_D03",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F1_main_dambreak3d_dp030",
+      "family": "F1",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F1_main_dambreak3d_dp030.h5",
+      "exists": true,
+      "bytes": 523103,
+      "sha256": "b04d6724dd956f8f7a4e3f8a7008a307fb68f289c6985046e5c4df4d1a3ffed5",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F1_mdbc_dambreak3d_dp030",
+      "family": "F1",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F1_mdbc_dambreak3d_dp030.h5",
+      "exists": true,
+      "bytes": 3487666,
+      "sha256": "3165d57ffc2797804481058dea4147d05d72266ef3fb2e27c38b95b2ab8e66c6",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F3_sloshing_motion_dp030",
+      "family": "F3",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F3_sloshing_motion_dp030.h5",
+      "exists": true,
+      "bytes": 49451,
+      "sha256": "0eea8f05eaf391dd169092eb2c655523fb116b2230ec18cf465ba30862af2954",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F4_shapes_inlet3d_dp030",
+      "family": "F4",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F4_shapes_inlet3d_dp030.h5",
+      "exists": true,
+      "bytes": 1278404,
+      "sha256": "729b44c5f62c211bb8d009e723c0808b8f4e5531893acca1f4b27ee505174dff",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F5_solitary_wave_kdv_dp030",
+      "family": "F5",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F5_solitary_wave_kdv_dp030.h5",
+      "exists": true,
+      "bytes": 973232,
+      "sha256": "d109d3ac0a789c64f048a5bf4c175ceb1317f42fe1f0d1678e4124ead35bfe27",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F6_floating_box_dp030",
+      "family": "F6",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F6_floating_box_dp030.h5",
+      "exists": true,
+      "bytes": 2951058164,
+      "sha256": "7c182c77baef2132f4671cda2b875cf225e872c87a2756be447b5d5ca6fedc97",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    },
+    {
+      "case_id": "B05_F7_pump3d_dp030",
+      "family": "F7",
+      "source_manifest": "D05",
+      "path": "campaigns/ds-data-01/d05/normalized/B05_F7_pump3d_dp030.h5",
+      "exists": true,
+      "bytes": 291787,
+      "sha256": "ac32c65c90dd514292ee5e0c230a5e8587ee24bcebc9fd0eebd04b839fa8aeb7",
+      "role": "internal_development_only",
+      "scientific_acceptance": "not_assessed"
+    }
+  ],
+  "handoff_actions": [
+    "Preserve the exact repository commit chain and compact artifact hashes.",
+    "Provide local trajectory evidence paths from the evidence store when a consumer needs raw/HDF5 data.",
+    "Keep diagnostic, calibration, and exclusion roles stratified; do not silently promote them.",
+    "Run D03/Q-E owner review before any future production split assignment."
+  ]
+}
