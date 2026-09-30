@@ -1,88 +1,84 @@
-# F2 evidence-bound scope validator
+# Generic DS-DATA-02 evidence-bound scope validator
 
-`lagrangian-fluid-lab/scripts/ds_data02_scope.py` is a dataset-only admission
-check. It answers one question: does a frozen F2 scope have complete,
-hash-bound evidence that is eligible for the primary process's separate
-scientific decision? It does not write `approved_index.json`, mark a recipe
-qualified, run a solver, or replace the numerical Q-N review.
+`lagrangian-fluid-lab/scripts/ds_data02_scope.py` is a dataset-only
+eligibility check. The frozen scope supplies the family, mother/parent groups,
+mechanism, geometry/control identities, state schema, and reference coverage;
+the validator does not hard-code family mechanisms or require a second
+mechanism in the same scope. A single explicitly declared background with
+three resolution views can therefore be an independent starter scope. The
+campaign-level seven-family and two-mechanism coverage requirement remains a
+separate delivery condition.
 
-The validator accepts two JSON documents:
+The input documents are `ds-data-02.scope-spec.v1` and
+`ds-data-02.scope-evidence.v1`. The scope must declare:
 
-* `ds-data-02.scope-spec.v1` freezes the recipe/schema, physical cases and
-  parent/split assignments, geometry/control and numerical input bindings,
-  complete event time, observation units and definitions, physical scales,
-  error budget, the two backgrounds and three resolution views, and the
-  required integration/save comparisons.
-* `ds-data-02.scope-evidence.v1` supplies current full typed-state Q-I rows,
-  six actual reference views, and independent integration/save comparison
-  rows. Every `path`/`sha256` binding is rehashed from bytes when the verdict
-  is produced.
+* `family_id`, `required_input_roles`, recipe/schema and solver dimension;
+* `physical_domain.cases`, including `physical_case_id`, parent/mother group,
+  split, mechanism, continuous geometry/control/parameters, physical hash,
+  per-resolution numeric settings and numerical recipe hashes;
+* `state_requirements.dataset_specs`, with actual H5 paths, rank/shape and
+  units, plus identity fields, native fluid type values and conditional
+  moving-body state. Static scopes can set `moving_boundary.mode` to
+  `not_applicable`; scopes whose actual native `type` contains a declared
+  moving value must declare the corresponding body-state dataset;
+* `physical_parameter_domains`, with units and finite min/max bounds;
+* `reference_requirements`, exactly three resolution views and an explicit
+  `coverage_mode`. The campaign registration default is two backgrounds by
+  three resolutions, while `single_background_explicit` is valid for one;
+  `full_family_default` or `declared_multi_background` covers multiple
+  backgrounds. Required source roles are frozen by the scope;
+* integration/save comparison requirements, each with physical parameter
+  `endpoint` and strict interior `internal` points and frozen
+  `required_error_metrics`.
 
-The scope document must identify every case with `case_id`,
-`physical_case_id`, `parent_group_id`, `split`, `physical_condition_hash`,
-`geometry_family_id`, `control_family_id`, nonempty continuous `geometry`,
-`control`, and `parameter_values`. Each resolution view carries frozen numeric
-settings and a numerical recipe hash. A parent group may appear in only one
-split. Resolution views remain views of that physical case; they never create
-additional physical cases. For a production F2 scope, the scope's own case
-registry and split artifact should state the intended 48 physical cases,
-24 paired parents, and 24/6/6/6/6 split counts; this validator checks the
-declared case identities, parent/split consistency, and view bindings.
+Every artifact binding is SHA-256 checked from bytes at validation time. The
+Q-I row must bind one full-state H5 and one actual Q-I report. The validator
+opens the H5 and checks the declared dataset paths, ranks/shapes, time-axis
+coverage, integer `type`/identity data, boolean or binary `valid` data,
+nonzero native fluid population, identity axis, and dataset/root units. It
+does not accept a `dataset_names` list or a row boolean as proof. The Q-I
+report is also read and its actual conclusion/status and failed checks are
+compared with the statuses frozen under `state_requirements.qi_report`; a
+`status="pass"` label in the outer row is not sufficient. Reference rows
+carry the same H5/Q-I evidence at their own resolution.
 
-The reference matrix is exactly two backgrounds (`center_catch` and
-`offset_spill`) by three resolutions. Every reference row must bind the frozen
-physical case and recipe, a completed 3-D solver with nonzero fluid, finite
-boundary and motion coverage, the complete event window, and source roles
-`geometry_xml`, `gencase_bi4`, `copied_motion`, and `solver_log`. The Q-I row
-must bind a complete increasing timeline, positive fluid count and mass,
-typed datasets (`time`, `position`, `velocity`, `density`, `mass`, `type`,
-`valid`, `particle_id`, `particle_zone`, `rigid_body_state`), zero introduced,
-revived, or type-changed identities, and saved moving-boundary pose/control
-evidence. Boundary mass, physical spill, and numerical unknown mass stay
-separate. Numerical exclusions remain evidence for the Q-I ledger and do not
-grant Q-N.
+Integration/save rows must provide `actual_error_metrics`. Each required
+metric is compared numerically with the frozen observation error budget;
+`within_budget=true`, `actual_pass`, or another self-declared label cannot
+hide an exceeded threshold. `physical_parameter_points` must identify the
+declared parameter and numeric value: an endpoint equals the frozen min/max,
+and an internal point lies strictly inside. A time or frame index by itself
+cannot satisfy either point.
 
-The scope must require both an independent integration-step comparison and an
-independent save-cadence comparison for each reference background. Each row
-binds distinct baseline/comparison numerical recipe hashes, the frozen
-baseline resolution, changed numeric fields, actual statistics, and both
-`endpoint` and `internal` observations with nonempty metrics over the full
-event window. An empty row, a label-only status, or a returned zero from an
-unbound process is insufficient.
+An old qualified scope may be reused only when `reuse` declares
+`strict_scope_equivalence: true`, `source_state_coverage: full_typed_state`,
+a hash-bound `equivalent_scope_binding`, and a hash-bound equivalence report.
+The old scope is parsed and its semantic projection (family, recipe, time,
+observations, state, parameter domains, cases, references, comparisons and
+input roles) is compared with the current frozen scope. A fluid-only H5 is
+rejected. Q-E, other-family evidence, tracers, models, and their optional
+labels are outside this dataset-only gate.
 
-Old results can be listed under `evidence.reuse` only with all of the
-following fields: `strict_scope_equivalence: true`,
-`source_state_coverage: full_typed_state`, the exact current `scope_id` and
-`scope_sha256`, the frozen recipe and time domain, every frozen physical case
-ID, and at least one hash-bound equivalence report. A fluid-only H5 or a
-qualified label is rejected. `qualified: true` and `production_eligible: true`
-are rejected anywhere in active scope/evidence content. Q-E, other-family
-evidence, material tracers, and model/prediction fields are ignored and cannot
-rescue or block the dataset-only verdict.
-
-Run the validator after the live evidence sidecars and source copies are
-immutable:
+Run after evidence is frozen:
 
 ```bash
 lagrangian-fluid-lab/.venv/bin/python \
   lagrangian-fluid-lab/scripts/ds_data02_scope.py \
-  --scope /path/to/F2-scope.json \
-  --evidence /path/to/F2-scope-evidence.json \
+  --scope /path/to/scope.json \
+  --evidence /path/to/scope-evidence.json \
   --data-root /home/jade/Projects/DualSPHysics-data/ds-data-02 \
-  --output /path/to/F2-scope-verdict.json
+  --output /path/to/scope-verdict.json
 ```
 
-Exit code `0` means `evidence_bound_eligible`; exit code `1` means the input
-was read but is ineligible; exit code `2` means the JSON input itself could
-not be read. The verdict records scope/evidence/validator hashes, every
-rehashed artifact, structured failure codes, and
-`approval_index_write: not_performed`. The primary process should accept a
-verdict only when this exact verdict hash and its scope/evidence hashes are
-inserted into the single root-owned approved index. The validator itself must
-never perform that write.
+Exit code `0` means evidence-bound eligible; `1` means read successfully but
+ineligible; `2` means invalid input. The verdict binds scope, evidence,
+validator and every artifact hash, and always reports
+`approval_index_write: not_performed`. Root alone may add an exact verdict to
+the approved index. This module does not launch or hook a runtime job.
 
-The current tests use synthetic, hash-correct structural fixtures only. They
-exercise a positive evidence-bound result, ignored optional domains, strict
-reuse, source-byte tampering, missing reference/internal evidence, split
-leakage, self-declared qualification, fluid-only reuse, and caller digest
-mismatch. They do not claim that a scientific F2 result has passed Q-N.
+The tests use small synthetic H5/report fixtures for structural verification.
+They cover H5 type tampering, missing physical parameter points, time-frame
+substitution, failed numeric metrics hidden behind a pass label, static
+other-family scopes, explicit single-background scopes, strict old-scope
+reuse, optional-domain isolation, split leakage, source tampering and digest
+binding. They make no scientific Q-N or production claim.

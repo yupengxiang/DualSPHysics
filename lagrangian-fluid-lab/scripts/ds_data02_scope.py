@@ -13,8 +13,8 @@ The input contract is intentionally explicit:
   recipe/schema, time domain, observations, physical scales, error budget and
   required integration/save comparisons.
 * ``ds-data-02.scope-evidence.v1`` binds current full-state Q-I evidence,
-  two-background three-resolution reference evidence, and independent actual
-  integration/save evidence to those frozen rules.
+  the scope-declared background-by-three-resolution reference views, and
+  independent actual integration/save evidence to those frozen rules.
 * every referenced JSON/HDF5/log/input artifact is checked by SHA-256 at
   validation time.  A path or a self-declared ``qualified=true`` is never
   evidence by itself.
@@ -41,28 +41,6 @@ EVIDENCE_SCHEMA = "ds-data-02.scope-evidence.v1"
 VERDICT_SCHEMA = "ds-data-02.scope-verdict.v1"
 CURRENT_EVIDENCE_CLASS = "current_scope_evidence"
 FULL_STATE_COVERAGE = "full_typed_state"
-PASS_QI_STATUSES = {"Q-I-structure-pass", "Q-I-pass"}
-PASS_REFERENCE_STATUS = {"actual_reference_pass"}
-PASS_COMPARISON_STATUS = {"actual_pass", "actual_complete"}
-HASH_ALGORITHM = "sha256"
-REQUIRED_SCOPE_INPUT_ROLES = {
-    "quality_contract",
-    "event_definitions",
-    "case_registry",
-    "reference_matrix",
-}
-REQUIRED_TYPED_DATASETS = {
-    "time",
-    "position",
-    "velocity",
-    "density",
-    "mass",
-    "type",
-    "valid",
-    "particle_id",
-    "particle_zone",
-    "rigid_body_state",
-}
 FORBIDDEN_TRUE_MARKER_KEYS = {"qualified", "production_eligible"}
 IGNORED_INPUT_ROOTS = {"q_e", "other_family_evidence", "material_tracer", "model", "model_or_prediction"}
 
@@ -280,12 +258,6 @@ def _list(value: Any, label: str, errors: list[dict[str, Any]], minimum: int = 1
     return value
 
 
-def _check_true_fields(mapping: Mapping[str, Any], fields: Sequence[str], label: str, errors: list[dict[str, Any]]) -> None:
-    for field in fields:
-        if mapping.get(field) is not True:
-            _fail(errors, "required_evidence_check_failed", f"{label}.{field} is not true")
-
-
 def _check_finite_positive(mapping: Mapping[str, Any], field: str, label: str, errors: list[dict[str, Any]], *, allow_zero: bool = False) -> None:
     value = mapping.get(field)
     if not _finite_number(value) or (float(value) < 0 if allow_zero else float(value) <= 0):
@@ -308,6 +280,99 @@ def _find_forbidden_markers(value: Any, path: str = "", *, ignored_roots: set[st
     return found
 
 
+def _validate_state_requirements(
+    scope: Mapping[str, Any],
+    *,
+    errors: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Validate the scope-owned typed-state contract.
+
+    Dataset names and body-state requirements are deliberately declared by the
+    scope.  A static family can omit a moving-body dataset; a scope containing
+    native type-1/type-2 particles can make that dataset conditional or
+    required.  No family-specific list is used here.
+    """
+
+    state = _mapping(scope.get("state_requirements"), "scope.state_requirements", errors)
+    if state is None:
+        return {"dataset_specs": {}, "required_datasets": [], "moving_boundary": {}, "qi_report": {}}
+    specs = _mapping(state.get("dataset_specs"), "scope.state_requirements.dataset_specs", errors)
+    required_value = state.get("required_datasets")
+    if not isinstance(required_value, list) or not required_value:
+        _fail(errors, "state_required_datasets_missing", "scope.state_requirements.required_datasets must be nonempty")
+        required = list(specs or {})
+    else:
+        if any(not _nonempty_string(item) for item in required_value):
+            _fail(errors, "state_required_datasets_invalid", "scope state required_datasets must contain nonempty names")
+        required = [str(item) for item in required_value if _nonempty_string(item)]
+        if len(set(required)) != len(required):
+            _fail(errors, "state_required_datasets_duplicate", "scope state required_datasets must be unique")
+    if specs is None:
+        specs = {}
+    for name in required:
+        spec = specs.get(name)
+        if not isinstance(spec, Mapping):
+            _fail(errors, "state_dataset_spec_missing", f"scope state dataset {name} lacks a declared path/shape/units spec")
+            continue
+        if not _nonempty_string(spec.get("path")):
+            _fail(errors, "state_dataset_path_missing", f"scope state dataset {name} lacks a path")
+        if not isinstance(spec.get("rank"), int) or isinstance(spec.get("rank"), bool) or spec["rank"] < 1:
+            _fail(errors, "state_dataset_rank_missing", f"scope state dataset {name} lacks a positive rank")
+        if not (_nonempty_string(spec.get("units")) or (isinstance(spec.get("units"), Mapping) and bool(spec["units"]))):
+            _fail(errors, "state_dataset_units_missing", f"scope state dataset {name} lacks declared units")
+    identity = _mapping(state.get("identity"), "scope.state_requirements.identity", errors)
+    if identity is not None:
+        if not _nonempty_string(identity.get("axis")):
+            _fail(errors, "state_identity_axis_missing", "scope state identity axis must be explicit")
+        for field in ("particle_id", "particle_zone", "type", "valid"):
+            if field not in identity and field in required:
+                _fail(errors, "state_identity_field_missing", f"scope identity lacks {field} mapping")
+    type_semantics = _mapping(state.get("type_semantics"), "scope.state_requirements.type_semantics", errors)
+    fluid_types: list[int] = []
+    if type_semantics is not None:
+        values = type_semantics.get("fluid_values")
+        if not isinstance(values, list) or not values:
+            _fail(errors, "state_fluid_type_values_missing", "scope must declare native fluid type values")
+        else:
+            fluid_types = [int(value) for value in values if isinstance(value, int) and not isinstance(value, bool)]
+            if len(fluid_types) != len(values):
+                _fail(errors, "state_fluid_type_values_invalid", "scope fluid type values must be integers")
+        for key in ("moving_values", "boundary_values"):
+            values = type_semantics.get(key, [])
+            if not isinstance(values, list) or any(not isinstance(value, int) or isinstance(value, bool) for value in values):
+                _fail(errors, "state_type_values_invalid", f"scope {key} must be an integer list")
+    moving = state.get("moving_boundary", {})
+    if not isinstance(moving, Mapping):
+        _fail(errors, "state_moving_boundary_invalid", "scope moving_boundary must be an object")
+        moving = {}
+    mode = moving.get("mode", "not_applicable")
+    if mode not in {"required", "conditional", "not_applicable"}:
+        _fail(errors, "state_moving_boundary_mode_invalid", "scope moving_boundary.mode must be required, conditional, or not_applicable")
+    if mode in {"required", "conditional"}:
+        dataset_name = moving.get("dataset")
+        if not _nonempty_string(dataset_name) or dataset_name not in specs:
+            _fail(errors, "state_moving_boundary_dataset_missing", "moving boundary mode requires a declared state dataset")
+    qi_report = state.get("qi_report", {})
+    if not isinstance(qi_report, Mapping):
+        _fail(errors, "state_qi_report_invalid", "scope qi_report must be an object")
+        qi_report = {}
+    accepted_statuses = qi_report.get("accepted_statuses", ["Q-I-structure-pass", "Q-I-pass"])
+    if not isinstance(accepted_statuses, list) or not accepted_statuses or any(not _nonempty_string(item) for item in accepted_statuses):
+        _fail(errors, "state_qi_statuses_invalid", "scope qi_report.accepted_statuses must be nonempty strings")
+        accepted_statuses = []
+    return {
+        "raw": state,
+        "dataset_specs": specs,
+        "required_datasets": required,
+        "identity": identity or {},
+        "type_semantics": type_semantics or {},
+        "fluid_values": fluid_types,
+        "moving_boundary": dict(moving),
+        "qi_report": dict(qi_report),
+        "accepted_qi_statuses": set(str(item) for item in accepted_statuses),
+    }
+
+
 def _case_identity(case: Mapping[str, Any]) -> tuple[str, str]:
     return str(case.get("case_id", "")), str(case.get("physical_case_id", ""))
 
@@ -322,8 +387,8 @@ def _check_scope_shape(
 ) -> dict[str, Any]:
     if scope.get("schema") != SCOPE_SCHEMA:
         _fail(errors, "scope_schema_invalid", f"scope schema must be {SCOPE_SCHEMA}")
-    if scope.get("family_id") != "F2":
-        _fail(errors, "scope_family_invalid", "scope family_id must be F2")
+    if not _nonempty_string(scope.get("family_id")):
+        _fail(errors, "scope_family_invalid", "scope family_id must be a nonempty frozen family identifier")
     if not _nonempty_string(scope.get("scope_id")):
         _fail(errors, "scope_id_missing", "scope_id must be nonempty")
 
@@ -332,8 +397,10 @@ def _check_scope_shape(
         for field in ("recipe_id", "schema", "state_schema", "view_id"):
             if not _nonempty_string(recipe.get(field)):
                 _fail(errors, "recipe_field_missing", f"scope.recipe.{field} must be nonempty")
-        if recipe.get("solver_dimension") != 3:
-            _fail(errors, "recipe_dimension_invalid", "scope recipe must freeze solver_dimension=3")
+        if not isinstance(recipe.get("solver_dimension"), int) or isinstance(recipe.get("solver_dimension"), bool) or recipe["solver_dimension"] < 2:
+            _fail(errors, "recipe_dimension_invalid", "scope recipe must freeze an integer solver_dimension >= 2")
+
+    state_info = _validate_state_requirements(scope, errors=errors)
 
     time_domain = _mapping(scope.get("time_domain"), "scope.time_domain", errors)
     if time_domain is not None:
@@ -420,7 +487,7 @@ def _check_scope_shape(
                 errors=errors,
                 bound_artifacts=bound_artifacts,
                 label=f"scope case {case_id}.input_bindings",
-                minimum=2,
+                minimum=1,
             )
 
     reference = _mapping(scope.get("reference_requirements"), "scope.reference_requirements", errors)
@@ -435,10 +502,18 @@ def _check_scope_shape(
         expected_count = len(reference_backgrounds) * len(reference_resolutions)
         if reference.get("expected_view_count") != expected_count:
             _fail(errors, "reference_count_invalid", "reference expected_view_count must equal backgrounds x resolutions")
-        if len(reference_backgrounds) != 2 or set(reference_backgrounds) != {"center_catch", "offset_spill"}:
-            _fail(errors, "reference_background_domain_invalid", "F2 scope requires center_catch and offset_spill references")
         if len(reference_resolutions) != 3:
-            _fail(errors, "reference_resolution_domain_invalid", "F2 scope requires three spatial reference resolutions")
+            _fail(errors, "reference_resolution_domain_invalid", "scope requires exactly three spatial reference resolutions")
+        coverage_mode = reference.get("coverage_mode")
+        if not _nonempty_string(coverage_mode):
+            _fail(errors, "reference_coverage_mode_missing", "scope must explicitly declare reference coverage_mode")
+        elif len(reference_backgrounds) == 1 and coverage_mode != "single_background_explicit":
+            _fail(errors, "reference_single_background_unscoped", "a one-background scope must explicitly declare single_background_explicit")
+        elif len(reference_backgrounds) > 1 and coverage_mode not in {"full_family_default", "declared_multi_background"}:
+            _fail(errors, "reference_coverage_mode_invalid", "multi-background scopes need an explicit multi-background coverage_mode")
+        required_source_roles = reference.get("required_source_roles", [])
+        if not isinstance(required_source_roles, list) or not required_source_roles or any(not _nonempty_string(item) for item in required_source_roles):
+            _fail(errors, "reference_source_roles_missing", "scope must declare required reference source roles")
         declared_reference_cases = reference.get("reference_case_ids")
         if isinstance(declared_reference_cases, Mapping):
             reference_case_ids = {str(key): str(value) for key, value in declared_reference_cases.items()}
@@ -454,6 +529,19 @@ def _check_scope_shape(
                     _fail(errors, "reference_case_domain_ambiguous", "scope must declare reference_case_ids when a background has multiple production cases")
                 elif matches:
                     reference_case_ids[background] = str(matches[0].get("case_id"))
+
+    parameter_domains = _mapping(scope.get("physical_parameter_domains"), "scope.physical_parameter_domains", errors)
+    if parameter_domains is not None:
+        for parameter, domain_spec in parameter_domains.items():
+            if not _nonempty_string(parameter) or not isinstance(domain_spec, Mapping):
+                _fail(errors, "parameter_domain_invalid", f"physical parameter domain {parameter} must be an object")
+                continue
+            lower = domain_spec.get("min")
+            upper = domain_spec.get("max")
+            if not _finite_number(lower) or not _finite_number(upper) or float(upper) <= float(lower):
+                _fail(errors, "parameter_domain_bounds_invalid", f"physical parameter domain {parameter} needs finite max > min")
+            if not _nonempty_string(domain_spec.get("units")):
+                _fail(errors, "parameter_domain_units_missing", f"physical parameter domain {parameter} needs units")
 
     comparison_requirements = _list(scope.get("comparison_requirements"), "scope.comparison_requirements", errors)
     comparison_ids: set[str] = set()
@@ -491,6 +579,22 @@ def _check_scope_shape(
             _fail(errors, "comparison_statistics_missing", f"comparison {comparison_id} needs required_statistic_fields")
         if not isinstance(requirement.get("required_observation_points"), list) or set(requirement.get("required_observation_points", [])) != {"endpoint", "internal"}:
             _fail(errors, "comparison_observation_points_invalid", f"comparison {comparison_id} must require endpoint and internal observations")
+        parameter_points = requirement.get("parameter_points")
+        if not isinstance(parameter_points, Mapping) or set(parameter_points) != {"endpoint", "internal"}:
+            _fail(errors, "comparison_parameter_points_invalid", f"comparison {comparison_id} must require physical endpoint and internal points")
+        else:
+            for point_name, point_spec in parameter_points.items():
+                if not isinstance(point_spec, Mapping) or not _nonempty_string(point_spec.get("parameter")):
+                    _fail(errors, "comparison_parameter_point_invalid", f"comparison {comparison_id}.{point_name} lacks parameter mapping")
+                elif parameter_domains is not None and point_spec.get("parameter") not in parameter_domains:
+                    _fail(errors, "comparison_parameter_outside_scope", f"comparison {comparison_id}.{point_name} references an undeclared physical parameter")
+                if point_name == "endpoint" and point_spec.get("side") not in {"min", "max"}:
+                    _fail(errors, "comparison_endpoint_side_invalid", f"comparison {comparison_id} endpoint must declare side=min or side=max")
+                if point_name == "internal" and point_spec.get("side") is not None:
+                    _fail(errors, "comparison_internal_side_invalid", f"comparison {comparison_id} internal point must be strictly inside the physical parameter domain")
+        required_error_metrics = requirement.get("required_error_metrics")
+        if not isinstance(required_error_metrics, list) or not required_error_metrics or any(not _nonempty_string(item) for item in required_error_metrics):
+            _fail(errors, "comparison_error_metrics_missing", f"comparison {comparison_id} must declare frozen error metrics")
         if _nonempty_string(requirement.get("background")) and kind in {"integration", "save"}:
             comparison_kinds_by_background.setdefault(str(requirement["background"]), set()).add(str(kind))
     if comparison_kinds != {"integration", "save"}:
@@ -499,6 +603,12 @@ def _check_scope_shape(
         if comparison_kinds_by_background.get(background) != {"integration", "save"}:
             _fail(errors, "comparison_background_incomplete", f"scope must require independent integration and save comparisons for {background}")
 
+    required_scope_roles_value = scope.get("required_input_roles")
+    if not isinstance(required_scope_roles_value, list) or not required_scope_roles_value or any(not _nonempty_string(item) for item in required_scope_roles_value):
+        _fail(errors, "scope_input_roles_declaration_missing", "scope must declare nonempty required_input_roles")
+        required_scope_roles: set[str] = set()
+    else:
+        required_scope_roles = {str(item) for item in required_scope_roles_value}
     declared_scope_bindings = scope.get("input_bindings")
     scope_bindings = _check_bindings(
         declared_scope_bindings,
@@ -507,15 +617,17 @@ def _check_scope_shape(
         errors=errors,
         bound_artifacts=bound_artifacts,
         label="scope.input_bindings",
-        minimum=len(REQUIRED_SCOPE_INPUT_ROLES),
+        minimum=max(1, len(required_scope_roles)),
     )
     roles = {item.get("role") for item in _binding_entries(declared_scope_bindings) if isinstance(item, Mapping)}
-    missing_roles = sorted(REQUIRED_SCOPE_INPUT_ROLES - roles)
+    missing_roles = sorted(required_scope_roles - roles)
     if missing_roles:
         _fail(errors, "scope_input_roles_missing", "scope input bindings do not include required frozen contracts", missing_roles=missing_roles)
 
     return {
         "recipe": recipe or {},
+        "family_id": str(scope.get("family_id", "")),
+        "state": state_info,
         "time_domain": time_domain or {},
         "observations": observations or {},
         "physical_domain": domain or {},
@@ -526,9 +638,12 @@ def _check_scope_shape(
         "reference_resolutions": reference_resolutions,
         "reference_case_ids": reference_case_ids,
         "reference_requirements": reference or {},
+        "reference_source_roles": set(str(item) for item in (reference.get("required_source_roles", []) if reference is not None else [])),
+        "parameter_domains": parameter_domains or {},
         "comparison_requirements": comparison_requirements,
         "comparison_ids": comparison_ids,
         "scope_bindings": scope_bindings,
+        "required_scope_roles": required_scope_roles,
     }
 
 
@@ -574,38 +689,40 @@ def _validate_reuse_equivalence(
     reuse: Any,
     *,
     scope: Mapping[str, Any],
-    scope_info: Mapping[str, Any],
-    scope_sha256: str,
     evidence_path: Path,
     data_root: Path | None,
     errors: list[dict[str, Any]],
     bound_artifacts: dict[str, dict[str, Any]],
 ) -> None:
-    """Validate explicit equivalence before allowing an old result to be reused.
-
-    A strict flag alone is a self-assertion.  The reusable result must bind the
-    exact current scope bytes, recipe, time domain and physical case IDs, and
-    provide a separately hashed equivalence report.  This keeps an old
-    qualified label from silently carrying a different geometry or population
-    into the current dataset.
-    """
+    """Validate an old qualified scope through an actual semantic projection."""
 
     if not isinstance(reuse, Mapping) or reuse.get("strict_scope_equivalence") is not True:
         _fail(errors, "reuse_equivalence_missing", "reused evidence needs an explicit strict_scope_equivalence declaration")
         return
     if reuse.get("source_state_coverage") != FULL_STATE_COVERAGE:
         _fail(errors, "reuse_fluid_only_forbidden", "old fluid-only HDF5 cannot be reused as full-state delivery")
-    expected_case_ids = sorted(str(case.get("case_id")) for case in scope_info["cases"])
-    if reuse.get("scope_id") != scope.get("scope_id"):
-        _fail(errors, "reuse_scope_identity_mismatch", "reused evidence scope_id differs from the supplied frozen scope")
-    if reuse.get("scope_sha256") != scope_sha256:
-        _fail(errors, "reuse_scope_hash_mismatch", "reused evidence does not bind the supplied frozen scope bytes")
-    if _canonical(reuse.get("recipe")) != _canonical(scope_info["recipe"]):
-        _fail(errors, "reuse_recipe_mismatch", "reused evidence recipe differs from the frozen scope recipe")
-    if _canonical(reuse.get("time_domain")) != _canonical(scope_info["time_domain"]):
-        _fail(errors, "reuse_time_domain_mismatch", "reused evidence time domain differs from the frozen scope")
-    if sorted(str(item) for item in reuse.get("physical_case_ids", [])) != expected_case_ids:
-        _fail(errors, "reuse_case_domain_mismatch", "reused evidence physical_case_ids differ from the frozen scope")
+    old_scope, old_scope_binding = _load_json_artifact(
+        reuse.get("equivalent_scope_binding"),
+        base_dir=evidence_path.parent,
+        data_root=data_root,
+        errors=errors,
+        bound_artifacts=bound_artifacts,
+        label="evidence.reuse.equivalent_scope_binding",
+    )
+    if old_scope is None or old_scope_binding is None:
+        _fail(errors, "reuse_scope_binding_missing", "strict reuse requires a hash-bound source scope document")
+    else:
+        projection_keys = (
+            "schema", "family_id", "recipe", "time_domain", "observations",
+            "state_requirements", "physical_parameter_domains", "physical_domain",
+            "reference_requirements", "comparison_requirements", "required_input_roles",
+        )
+        current_projection = {key: scope.get(key) for key in projection_keys}
+        old_projection = {key: old_scope.get(key) for key in projection_keys}
+        if _canonical(old_projection) != _canonical(current_projection):
+            _fail(errors, "reuse_scope_semantics_mismatch", "old qualified scope is not strictly equivalent to the supplied scope")
+        if old_scope.get("family_id") != scope.get("family_id"):
+            _fail(errors, "reuse_scope_family_mismatch", "old qualified scope belongs to a different family")
     _check_bindings(
         reuse.get("equivalence_evidence"),
         base_dir=evidence_path.parent,
@@ -615,6 +732,254 @@ def _validate_reuse_equivalence(
         label="evidence.reuse.equivalence_evidence",
         minimum=1,
     )
+
+
+def _decode_attr(value: Any) -> Any:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    if hasattr(value, "item"):
+        try:
+            return value.item()
+        except Exception:
+            pass
+    return value
+
+
+def _state_dataset_key(state_info: Mapping[str, Any], semantic_name: str) -> str:
+    """Return the logical dataset key for a semantic state field.
+
+    Scope authors may name datasets after the semantic field or map the field
+    to a logical key/path under ``state_requirements.identity``.  H5 auditing
+    uses this helper so a static family with a different naming convention is
+    not forced through one family's fixture names.
+    """
+
+    identity = state_info.get("identity", {})
+    candidate = identity.get(semantic_name, semantic_name) if isinstance(identity, Mapping) else semantic_name
+    candidate = str(candidate)
+    specs = state_info.get("dataset_specs", {})
+    if candidate in specs:
+        return candidate
+    for key, spec in (specs.items() if isinstance(specs, Mapping) else ()):
+        if isinstance(spec, Mapping) and str(spec.get("path")) == candidate:
+            return str(key)
+    return candidate
+
+
+def _load_json_artifact(
+    binding: Any,
+    *,
+    base_dir: Path,
+    data_root: Path | None,
+    errors: list[dict[str, Any]],
+    bound_artifacts: dict[str, dict[str, Any]],
+    label: str,
+) -> tuple[Mapping[str, Any] | None, dict[str, Any] | None]:
+    checked = _check_artifact(binding, base_dir=base_dir, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=label)
+    if checked is None:
+        return None, None
+    try:
+        value, _, _ = load_json(checked["path"])
+    except (OSError, ScopeInputError) as error:
+        _fail(errors, "artifact_json_invalid", f"{label} is not a valid JSON artifact: {error}")
+        return None, checked
+    return value, checked
+
+
+def _h5_state_audit(
+    h5_binding: dict[str, Any] | None,
+    *,
+    state_info: Mapping[str, Any],
+    recipe: Mapping[str, Any],
+    time_domain: Mapping[str, Any],
+    label: str,
+    errors: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Read and verify the actual hash-bound H5 shape/type/valid/units data."""
+
+    audit: dict[str, Any] = {"h5_path": h5_binding.get("path") if h5_binding else None}
+    if h5_binding is None:
+        _fail(errors, "state_h5_missing", f"{label} has no hash-bound full-state H5 source")
+        return audit
+    try:
+        import h5py  # type: ignore[import-not-found]
+        import numpy as np  # type: ignore[import-not-found]
+    except ImportError as error:
+        _fail(errors, "state_h5_reader_missing", f"cannot read full-state H5 for {label}: {error}")
+        return audit
+    specs = state_info.get("dataset_specs", {})
+    required = state_info.get("required_datasets", [])
+    try:
+        with h5py.File(h5_binding["path"], "r") as handle:
+            root_units: dict[str, Any] = {}
+            units_raw = _decode_attr(handle.attrs.get("units_json"))
+            if isinstance(units_raw, str):
+                try:
+                    parsed_units = json.loads(units_raw)
+                    if isinstance(parsed_units, Mapping):
+                        root_units = dict(parsed_units)
+                except json.JSONDecodeError:
+                    _fail(errors, "state_units_json_invalid", f"{label} root units_json is invalid")
+            solver_dimension = _decode_attr(handle.attrs.get("solver_dimension"))
+            if solver_dimension is None:
+                solver_evidence = _decode_attr(handle.attrs.get("solver_dimension_evidence"))
+                if isinstance(solver_evidence, str):
+                    try:
+                        solver_dimension = json.loads(solver_evidence).get("solver_dimension")
+                    except json.JSONDecodeError:
+                        solver_dimension = None
+            if solver_dimension is not None and int(solver_dimension) != int(recipe.get("solver_dimension")):
+                _fail(errors, "state_solver_dimension_mismatch", f"{label} H5 solver_dimension differs from frozen recipe")
+
+            datasets: dict[str, Any] = {}
+            moving_spec = state_info.get("moving_boundary", {})
+            moving_dataset_key = _state_dataset_key(state_info, str(moving_spec.get("dataset", ""))) if isinstance(moving_spec, Mapping) and moving_spec.get("dataset") else ""
+            for name in required:
+                spec = specs.get(name, {})
+                path = str(spec.get("path", name))
+                if path not in handle:
+                    _fail(errors, "state_dataset_missing", f"{label} H5 lacks required dataset {path}", dataset=name)
+                    continue
+                dataset = handle[path]
+                if not isinstance(dataset, h5py.Dataset):
+                    _fail(errors, "state_dataset_not_dataset", f"{label} H5 path {path} is not a dataset")
+                    continue
+                datasets[name] = dataset
+                rank = spec.get("rank")
+                if isinstance(rank, int) and dataset.ndim != rank:
+                    _fail(errors, "state_dataset_shape_mismatch", f"{label}.{name} rank differs from frozen state spec", expected=rank, actual=dataset.ndim)
+                last_dim = spec.get("last_dim")
+                if isinstance(last_dim, int) and (dataset.ndim == 0 or dataset.shape[-1] != last_dim):
+                    _fail(errors, "state_dataset_components_mismatch", f"{label}.{name} coordinate components differ from frozen state spec")
+                actual_units = dataset.attrs.get("units", dataset.attrs.get("unit", root_units.get(name, root_units.get(path))))
+                actual_units = _decode_attr(actual_units)
+                if actual_units is None:
+                    dataset_units_json = _decode_attr(dataset.attrs.get("units_json"))
+                    if isinstance(dataset_units_json, str):
+                        try:
+                            actual_units = json.loads(dataset_units_json)
+                        except json.JSONDecodeError:
+                            actual_units = None
+                expected_units = spec.get("units")
+                units_match = _canonical(actual_units) == _canonical(expected_units) if isinstance(expected_units, Mapping) else (_nonempty_string(actual_units) and str(actual_units) == str(expected_units))
+                if not units_match:
+                    _fail(errors, "state_dataset_units_mismatch", f"{label}.{name} units do not match frozen state units", expected=spec.get("units"), actual=actual_units)
+            time_ds = datasets.get(_state_dataset_key(state_info, "time"))
+            frames = int(time_ds.shape[0]) if time_ds is not None and time_ds.ndim == 1 else 0
+            if frames < int(time_domain.get("minimum_frames", 2)):
+                _fail(errors, "state_time_frame_floor", f"{label} H5 has fewer than the frozen minimum frames")
+            times = np.asarray(time_ds[:], dtype=float) if time_ds is not None and time_ds.ndim == 1 else np.asarray([])
+            if times.size and (not np.all(np.isfinite(times)) or np.any(np.diff(times) <= 0)):
+                _fail(errors, "state_time_axis_invalid", f"{label} H5 time axis is not finite and strictly increasing")
+            if times.size:
+                duration = max(float(time_domain.get("end_s", 1.0)) - float(time_domain.get("start_s", 0.0)), 1.0)
+                tolerance = max(1e-8, duration * 1e-4)
+                if float(times[0]) > float(time_domain.get("start_s", 0.0)) + tolerance or float(times[-1]) < float(time_domain.get("end_s", 0.0)) - tolerance:
+                    _fail(errors, "state_time_domain_incomplete", f"{label} H5 does not cover the frozen event window")
+            particle_count = 0
+            id_ds = datasets.get(_state_dataset_key(state_info, "particle_id"))
+            if id_ds is not None and id_ds.ndim == 1:
+                particle_count = int(id_ds.shape[0])
+                if id_ds.dtype.kind not in "iu":
+                    _fail(errors, "state_particle_id_type_invalid", f"{label} particle_id is not an integer dataset")
+                else:
+                    ids = np.asarray(id_ds[:])
+                    if np.unique(ids).size != ids.size:
+                        _fail(errors, "state_particle_id_duplicate", f"{label} particle_id values are not unique")
+            zone_ds = datasets.get(_state_dataset_key(state_info, "particle_zone"))
+            if zone_ds is not None and zone_ds.dtype.kind not in "iu":
+                _fail(errors, "state_particle_zone_type_invalid", f"{label} particle_zone is not an integer dataset")
+            elif zone_ds is not None and zone_ds.ndim == 1 and particle_count and zone_ds.shape[0] != particle_count:
+                _fail(errors, "state_particle_zone_shape_mismatch", f"{label} particle_zone does not share the particle axis")
+            non_time_indexed = {
+                _state_dataset_key(state_info, "particle_id"),
+                _state_dataset_key(state_info, "particle_zone"),
+            }
+            for name, dataset in datasets.items():
+                spec = specs.get(name, {})
+                time_indexed = spec.get("time_indexed", name not in non_time_indexed)
+                if time_indexed and spec.get("particle_indexed", name != moving_dataset_key):
+                    if particle_count and (dataset.ndim < 2 or dataset.shape[1] != particle_count):
+                        _fail(errors, "state_particle_shape_mismatch", f"{label}.{name} does not share the actual particle axis")
+            type_ds = datasets.get(_state_dataset_key(state_info, "type"))
+            valid_ds = datasets.get(_state_dataset_key(state_info, "valid"))
+            fluid_count = 0
+            moving_count = 0
+            moving_any_count = 0
+            if type_ds is not None:
+                if type_ds.dtype.kind not in "iu":
+                    _fail(errors, "state_type_dtype_invalid", f"{label} type is not an integer dataset")
+                if type_ds.ndim >= 2 and type_ds.shape[0] == frames and frames:
+                    first_type = np.asarray(type_ds[0, :])
+                    last_type = np.asarray(type_ds[-1, :])
+                else:
+                    first_type = np.asarray(type_ds[:])
+                    last_type = first_type
+                fluid_values = set(int(value) for value in state_info.get("fluid_values", []))
+                moving_values = set(int(value) for value in state_info.get("type_semantics", {}).get("moving_values", []))
+                boundary_values = set(int(value) for value in state_info.get("type_semantics", {}).get("boundary_values", []))
+                known_values = fluid_values | moving_values | boundary_values
+                fluid_count = int(np.isin(first_type, list(fluid_values)).sum()) if fluid_values else 0
+                moving_count = int(np.isin(first_type, list(moving_values)).sum()) if moving_values else 0
+                unknown_type_seen = False
+                if moving_values and type_ds.ndim >= 2 and type_ds.shape[0] == frames:
+                    for start in range(0, frames, 64):
+                        chunk = np.asarray(type_ds[start:min(start + 64, frames), :])
+                        if known_values and not np.all(np.isin(chunk, list(known_values))):
+                            unknown_type_seen = True
+                        moving_any_count = max(moving_any_count, int(np.isin(chunk, list(moving_values)).sum()))
+                else:
+                    moving_any_count = moving_count
+                    if known_values and not np.all(np.isin(np.asarray(type_ds[:]), list(known_values))):
+                        unknown_type_seen = True
+                if unknown_type_seen:
+                    _fail(errors, "state_type_values_invalid", f"{label} type contains values outside the scope native type semantics")
+                if fluid_count <= 0:
+                    _fail(errors, "state_fluid_population_zero", f"{label} H5 has no native fluid particles in its initial type frame")
+                moving_count = max(moving_count, moving_any_count, int(np.isin(last_type, list(moving_values)).sum()))
+            if valid_ds is not None:
+                if valid_ds.dtype.kind not in "biu":
+                    _fail(errors, "state_valid_dtype_invalid", f"{label} valid is not boolean/integer")
+                sample = np.asarray(valid_ds[0, :] if valid_ds.ndim >= 2 and valid_ds.shape[0] == frames and frames else valid_ds[:])
+                if sample.size and not np.all(np.isin(sample, [0, 1, False, True])):
+                    _fail(errors, "state_valid_values_invalid", f"{label} valid contains values outside false/true")
+                if valid_ds.ndim >= 2 and valid_ds.shape[0] == frames:
+                    for start in range(0, frames, 64):
+                        chunk = np.asarray(valid_ds[start:min(start + 64, frames), :])
+                        if chunk.size and not np.all(np.isin(chunk, [0, 1, False, True])):
+                            _fail(errors, "state_valid_values_invalid", f"{label} valid contains values outside false/true")
+                            break
+            for name, dataset in datasets.items():
+                spec = specs.get(name, {})
+                time_indexed = spec.get("time_indexed", name not in non_time_indexed)
+                if time_indexed and frames and dataset.ndim > 0 and dataset.shape[0] != frames:
+                    _fail(errors, "state_frame_shape_mismatch", f"{label}.{name} does not share the H5 time axis")
+                if dataset.dtype.kind == "f":
+                    try:
+                        if time_indexed and frames:
+                            samples = [np.asarray(dataset[0]), np.asarray(dataset[-1])]
+                        else:
+                            samples = [np.asarray(dataset[:])]
+                        if any(sample.size and not np.all(np.isfinite(sample)) for sample in samples):
+                            _fail(errors, "state_nonfinite_values", f"{label}.{name} contains nonfinite values")
+                    except (OSError, ValueError) as error:
+                        _fail(errors, "state_dataset_read_failed", f"{label}.{name} could not be sampled: {error}")
+            moving_mode = moving_spec.get("mode", "not_applicable")
+            moving_dataset = moving_dataset_key
+            if moving_count > 0 and moving_mode == "not_applicable":
+                _fail(errors, "state_moving_body_undeclared", f"{label} contains native moving type values but scope declares no moving state")
+            if moving_count > 0 and moving_mode in {"required", "conditional"} and moving_dataset not in datasets:
+                _fail(errors, "state_moving_body_missing", f"{label} native moving type values lack the declared body-state dataset")
+            if moving_mode == "required" and moving_count <= 0:
+                _fail(errors, "state_required_body_absent", f"{label} scope requires a moving body but actual native type values contain none")
+            identity_axis = str(state_info.get("identity", {}).get("axis", ""))
+            actual_identity = _decode_attr(handle.attrs.get("identity_key"))
+            if identity_axis and (not _nonempty_string(actual_identity) or str(actual_identity) != identity_axis):
+                _fail(errors, "state_identity_axis_mismatch", f"{label} H5 identity_key does not match the frozen identity axis", expected=identity_axis, actual=actual_identity)
+            audit.update({"frames": frames, "particles": particle_count, "fluid_count": fluid_count, "moving_count": moving_count, "solver_dimension": solver_dimension})
+    except (OSError, ValueError, TypeError) as error:
+        _fail(errors, "state_h5_read_failed", f"{label} H5 could not be read: {error}")
+    return audit
 
 
 def _validate_full_state_qi(
@@ -627,72 +992,73 @@ def _validate_full_state_qi(
     errors: list[dict[str, Any]],
     bound_artifacts: dict[str, dict[str, Any]],
     label: str,
+    expected_resolution: str | None = None,
 ) -> None:
     if not isinstance(qi, Mapping):
         _fail(errors, "qi_missing", f"{label} must be an object")
         return
-    if qi.get("evidence_class") != CURRENT_EVIDENCE_CLASS:
-        _fail(errors, "qi_evidence_class_invalid", f"{label} is not current scope evidence")
-    if qi.get("state_coverage") != FULL_STATE_COVERAGE:
-        _fail(errors, "qi_state_coverage_invalid", f"{label} must cover full typed state")
-    if qi.get("status") not in PASS_QI_STATUSES:
-        _fail(errors, "qi_status_invalid", f"{label}.status is not an actual Q-I pass")
-    if qi.get("resolution") != expected_case.get("qi_resolution"):
-        _fail(errors, "qi_resolution_mismatch", f"{label}.resolution differs from the frozen Q-I resolution")
-    _check_artifact(qi.get("evidence_file"), base_dir=base_dir, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.evidence_file")
-    _check_bindings(qi.get("source_bindings"), base_dir=base_dir, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.source_bindings", minimum=1)
-    if qi.get("solver_dimension") != 3 or qi.get("coordinate_components") != 3:
-        _fail(errors, "qi_dimension_invalid", f"{label} must bind actual 3-D solver and coordinates")
-    _check_finite_positive(qi, "fluid_count", label, errors)
-    _check_finite_positive(qi, "active_mass_kg", label, errors)
-    checks = qi.get("checks")
-    if not isinstance(checks, Mapping) or not checks:
-        _fail(errors, "qi_checks_empty", f"{label}.checks must contain actual checks")
+    if expected_resolution is not None and qi.get("resolution") != expected_resolution:
+        _fail(errors, "qi_resolution_mismatch", f"{label}.resolution differs from the frozen view")
+    report, report_binding = _load_json_artifact(
+        qi.get("evidence_file"),
+        base_dir=base_dir,
+        data_root=data_root,
+        errors=errors,
+        bound_artifacts=bound_artifacts,
+        label=f"{label}.qi_report",
+    )
+    if report is not None:
+        if report.get("family_id") not in {None, scope_info.get("family_id")}:
+            _fail(errors, "qi_report_family_mismatch", f"{label} report family_id differs from frozen scope")
+        report_case_id = report.get("case_id")
+        allowed_report_ids = {expected_case.get("case_id"), expected_case.get("physical_case_id")}
+        if report_case_id is not None and report_case_id not in allowed_report_ids:
+            _fail(errors, "qi_report_case_mismatch", f"{label} report case_id differs from frozen case")
+        report_qi = report.get("q_i") or report.get("qi") or report
+        if not isinstance(report_qi, Mapping):
+            _fail(errors, "qi_report_conclusion_missing", f"{label} report has no actual Q-I conclusion")
+        else:
+            status = report_qi.get("status")
+            if status not in scope_info["state"].get("accepted_qi_statuses", set()):
+                _fail(errors, "qi_report_status_invalid", f"{label} actual Q-I report conclusion is not accepted", status=status)
+            failed_checks = report_qi.get("failed_checks")
+            if isinstance(failed_checks, list) and failed_checks:
+                _fail(errors, "qi_report_failed_checks", f"{label} actual Q-I report contains failed checks", failed_checks=failed_checks)
+            checks = report_qi.get("checks")
+            if isinstance(checks, Mapping) and any(value is False for value in checks.values()):
+                _fail(errors, "qi_report_failed_checks", f"{label} actual Q-I report contains a false check")
+    source_checked = _check_bindings(qi.get("source_bindings"), base_dir=base_dir, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.source_bindings", minimum=1)
+    h5_candidates = [item for item in source_checked if item.get("path", "").lower().endswith((".h5", ".hdf5"))]
+    if len(h5_candidates) != 1:
+        _fail(errors, "state_h5_binding_ambiguous", f"{label} must bind exactly one full-state H5", count=len(h5_candidates))
+        h5_binding = h5_candidates[0] if h5_candidates else None
     else:
-        _check_true_fields(checks, (
-            "solver_log_explicit_3d", "nonzero_fluid", "positive_active_mass",
-            "time_axis", "active_state_finite", "typed_ids", "moving_boundary_pose",
-            "boundary_mass_separated", "event_ids_typed", "physical_spill_separated_from_unknown",
-        ), f"{label}.checks", errors)
-    timeline = _mapping(qi.get("full_timeline"), f"{label}.full_timeline", errors)
+        h5_binding = h5_candidates[0]
+    h5_audit = _h5_state_audit(
+        h5_binding,
+        state_info=scope_info["state"],
+        recipe=scope_info["recipe"],
+        time_domain=scope_info["time_domain"],
+        label=label,
+        errors=errors,
+    )
     expected_time = scope_info["time_domain"]
-    if timeline is not None:
-        if timeline.get("complete") is not True or timeline.get("time_axis_strictly_increasing") is not True:
-            _fail(errors, "qi_timeline_incomplete", f"{label} does not prove a complete increasing timeline")
-        if not isinstance(timeline.get("frames"), int) or timeline["frames"] < expected_time.get("minimum_frames", 2):
-            _fail(errors, "qi_timeline_frame_floor", f"{label} has fewer than the frozen minimum frames")
+    timeline = qi.get("full_timeline")
+    if isinstance(timeline, Mapping) and h5_audit.get("frames"):
+        if timeline.get("frames") is not None and int(timeline["frames"]) != int(h5_audit["frames"]):
+            _fail(errors, "qi_timeline_frame_mismatch", f"{label}.full_timeline.frames differs from actual H5 shape")
         for field in ("start_s", "end_s"):
-            if not _finite_number(timeline.get(field)) or float(timeline[field]) != float(expected_time.get(field)):
-                _fail(errors, "qi_timeline_bound_mismatch", f"{label}.full_timeline.{field} differs from frozen scope")
-    typed = _mapping(qi.get("typed_identity"), f"{label}.typed_identity", errors)
-    if typed is not None:
-        if typed.get("axis") != "(Zone,Idp)" or typed.get("introduced_count") != 0 or typed.get("revived_count") != 0 or typed.get("type_changed_count") != 0:
-            _fail(errors, "qi_typed_lifecycle_invalid", f"{label} has an incomplete typed lifecycle")
-        datasets = set(typed.get("datasets", [])) if isinstance(typed.get("datasets"), list) else set()
-        missing = sorted(REQUIRED_TYPED_DATASETS - datasets)
-        if missing:
-            _fail(errors, "qi_full_state_datasets_missing", f"{label} is not full typed state", missing=missing)
-    moving = _mapping(qi.get("moving_boundary"), f"{label}.moving_boundary", errors)
-    if moving is not None:
-        _check_finite_positive(moving, "node_count", f"{label}.moving_boundary", errors)
-        if moving.get("pose_saved") is not True or moving.get("control_bound") is not True:
-            _fail(errors, "qi_moving_boundary_unbound", f"{label} lacks actual saved moving-boundary pose/control")
-        _check_finite_positive(moving, "position_rms_max_m", f"{label}.moving_boundary", errors, allow_zero=True)
-    mass = _mapping(qi.get("mass_audit"), f"{label}.mass_audit", errors)
-    if mass is not None:
-        _check_finite_positive(mass, "initial_fluid_mass_kg", f"{label}.mass_audit", errors)
-        if mass.get("boundary_mass_separated") is not True or mass.get("unknown_separate_from_spill") is not True:
-            _fail(errors, "qi_mass_semantics_invalid", f"{label} mixes boundary, unknown and physical spill mass")
+            if field in timeline and not _finite_number(timeline.get(field)):
+                _fail(errors, "qi_timeline_value_invalid", f"{label}.full_timeline.{field} is not finite")
+    if scope_info["state"].get("fluid_values") and h5_audit.get("fluid_count", 0) <= 0:
+        _fail(errors, "qi_fluid_population_invalid", f"{label} has no actual H5 fluid population")
+    if not report_binding:
+        _fail(errors, "qi_report_binding_missing", f"{label} lacks a hash-bound actual Q-I report")
     observations = scope_info["observations"]
     observed_names = qi.get("observed_event_names")
     required_names = observations.get("required_event_names", [])
-    if not isinstance(observed_names, list) or set(observed_names) != set(required_names):
+    if required_names and (not isinstance(observed_names, list) or set(observed_names) != set(required_names)):
         _fail(errors, "qi_observations_incomplete", f"{label} does not bind every frozen observation definition")
-
-
-def _expected_case_for_background(scope_info: Mapping[str, Any], background: str) -> Mapping[str, Any] | None:
-    matches = [case for case in scope_info["cases"] if case.get("background") == background]
-    return matches[0] if len(matches) == 1 else None
 
 
 def _validate_case_rows(
@@ -750,6 +1116,7 @@ def _validate_case_rows(
             row.get("qi"), expected_case=expected, scope_info=scope_info,
             base_dir=evidence_path.parent, data_root=data_root, errors=errors,
             bound_artifacts=bound_artifacts, label=f"{label}.qi",
+            expected_resolution=str(expected.get("qi_resolution")),
         )
     missing = sorted(set(expected_by_id) - set(seen))
     if missing:
@@ -797,16 +1164,26 @@ def _validate_reference_views(
         for field in ("physical_case_id", "parent_group_id", "split", "physical_condition_hash", "geometry_family_id", "control_family_id"):
             if row.get(field) != expected.get(field):
                 _fail(errors, "reference_domain_mismatch", f"{label}.{field} differs from frozen scope")
-        if row.get("evidence_class") != CURRENT_EVIDENCE_CLASS or row.get("state_coverage") != FULL_STATE_COVERAGE:
-            _fail(errors, "reference_evidence_class_invalid", f"{label} is not current full-state evidence")
-        if row.get("status") not in PASS_REFERENCE_STATUS:
-            _fail(errors, "reference_status_invalid", f"{label}.status is not an actual reference pass")
         _validate_recipe_identity(row, scope_info["recipe"], label, errors)
+        _validate_full_state_qi(
+            row.get("qi"), expected_case=expected, scope_info=scope_info,
+            base_dir=evidence_path.parent, data_root=data_root, errors=errors,
+            bound_artifacts=bound_artifacts, label=f"{label}.qi",
+            expected_resolution=str(row.get("resolution")),
+        )
         _check_artifact(row.get("evidence_file"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.evidence_file")
-        _check_bindings(row.get("source_bindings"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.source_bindings", minimum=4)
+        _check_bindings(
+            row.get("source_bindings"),
+            base_dir=evidence_path.parent,
+            data_root=data_root,
+            errors=errors,
+            bound_artifacts=bound_artifacts,
+            label=f"{label}.source_bindings",
+            minimum=max(1, len(scope_info.get("reference_source_roles", set()))),
+        )
         _require_binding_roles(
             row.get("source_bindings"),
-            {"geometry_xml", "gencase_bi4", "copied_motion", "solver_log"},
+            set(scope_info.get("reference_source_roles", set())),
             label=f"{label}.source_bindings",
             errors=errors,
         )
@@ -818,25 +1195,92 @@ def _validate_reference_views(
             _fail(errors, "reference_numerical_hash_mismatch", f"{label}.numerical_recipe_hash differs from frozen scope")
         solver = _mapping(row.get("solver"), f"{label}.solver", errors)
         if solver is not None:
-            if solver.get("completed") is not True or solver.get("solver_dimension") != 3:
-                _fail(errors, "reference_solver_incomplete", f"{label} lacks completed 3-D solver evidence")
+            if solver.get("completed") is not True or solver.get("solver_dimension") != scope_info["recipe"].get("solver_dimension"):
+                _fail(errors, "reference_solver_incomplete", f"{label} lacks completed solver evidence for the frozen dimension")
             _check_finite_positive(solver, "total_particles", f"{label}.solver", errors)
             _check_finite_positive(solver, "fluid_count", f"{label}.solver", errors)
-            if solver.get("data2d") is not False:
-                _fail(errors, "reference_not_3d", f"{label}.solver.data2d must be false")
-            if solver.get("motion_control_covered") is not True or solver.get("finite_boundary_covered") is not True:
-                _fail(errors, "reference_geometry_control_incomplete", f"{label} lacks finite boundary or motion coverage")
+            if scope_info["recipe"].get("solver_dimension") == 3 and solver.get("data2d") is True:
+                _fail(errors, "reference_not_3d", f"{label}.solver declares 2-D output for a 3-D scope")
             timeline = _mapping(solver.get("time_domain"), f"{label}.solver.time_domain", errors)
             if timeline is not None:
                 if timeline.get("complete") is not True or timeline.get("start_s") != scope_info["time_domain"].get("start_s") or timeline.get("end_s") != scope_info["time_domain"].get("end_s"):
                     _fail(errors, "reference_time_domain_mismatch", f"{label} does not cover the frozen complete event window")
-        checks = row.get("checks")
-        if isinstance(checks, Mapping):
-            _check_true_fields(checks, ("three_dimensional", "nonzero_fluid", "population_bound", "geometry_bound", "control_bound"), f"{label}.checks", errors)
-        else:
-            _fail(errors, "reference_checks_empty", f"{label}.checks must contain actual checks")
     if seen != required_keys:
-        _fail(errors, "reference_matrix_incomplete", "two-background three-resolution reference matrix is incomplete", missing=sorted(required_keys - seen), extra=sorted(seen - required_keys))
+        _fail(errors, "reference_matrix_incomplete", "declared background-by-three-resolution reference matrix is incomplete", missing=sorted(required_keys - seen), extra=sorted(seen - required_keys))
+
+
+def _has_finite_numeric(value: Any) -> bool:
+    if _finite_number(value):
+        return True
+    if isinstance(value, Mapping):
+        return any(_has_finite_numeric(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_has_finite_numeric(item) for item in value)
+    return False
+
+
+def _validate_parameter_points(
+    row: Mapping[str, Any],
+    requirement: Mapping[str, Any],
+    *,
+    scope_info: Mapping[str, Any],
+    label: str,
+    errors: list[dict[str, Any]],
+) -> None:
+    required_points = requirement.get("parameter_points", {})
+    actual_points = row.get("physical_parameter_points")
+    if not isinstance(actual_points, Mapping):
+        _fail(errors, "comparison_parameter_points_missing", f"{label}.physical_parameter_points is missing")
+        return
+    for point_name, point_spec in required_points.items():
+        point = actual_points.get(point_name)
+        if not isinstance(point, Mapping):
+            _fail(errors, "comparison_parameter_point_empty", f"{label}.physical_parameter_points.{point_name} is empty")
+            continue
+        parameter = point_spec.get("parameter")
+        domain = scope_info["parameter_domains"].get(parameter)
+        if not isinstance(domain, Mapping) or point.get("parameter") != parameter:
+            _fail(errors, "comparison_parameter_binding_mismatch", f"{label}.{point_name} is not bound to the frozen physical parameter")
+            continue
+        value = point.get("value")
+        if not _finite_number(value):
+            _fail(errors, "comparison_parameter_value_invalid", f"{label}.{point_name}.value must be finite")
+            continue
+        lower = float(domain["min"])
+        upper = float(domain["max"])
+        tolerance = max(1e-12, abs(upper - lower) * 1e-9)
+        if point_name == "endpoint":
+            expected = upper if point_spec.get("side") == "max" else lower
+            if abs(float(value) - expected) > tolerance:
+                _fail(errors, "comparison_endpoint_not_domain_boundary", f"{label}.endpoint is not the frozen physical domain boundary")
+        elif not lower + tolerance < float(value) < upper - tolerance:
+            _fail(errors, "comparison_internal_not_domain_interior", f"{label}.internal is not strictly inside the frozen physical parameter domain")
+        if not _finite_number(point.get("sample_count")) or float(point["sample_count"]) <= 0:
+            _fail(errors, "comparison_parameter_samples_invalid", f"{label}.{point_name}.sample_count must be positive")
+        if not _has_finite_numeric(point.get("metrics")):
+            _fail(errors, "comparison_parameter_metrics_empty", f"{label}.{point_name}.metrics must contain actual numeric evidence")
+
+
+def _validate_error_metrics(
+    row: Mapping[str, Any],
+    requirement: Mapping[str, Any],
+    *,
+    scope_info: Mapping[str, Any],
+    label: str,
+    errors: list[dict[str, Any]],
+) -> None:
+    actual = row.get("actual_error_metrics")
+    if not isinstance(actual, Mapping):
+        _fail(errors, "comparison_error_metrics_missing", f"{label}.actual_error_metrics is missing")
+        return
+    budget = scope_info["observations"].get("error_budget", {})
+    for metric in requirement.get("required_error_metrics", []):
+        value = actual.get(metric)
+        threshold = budget.get(metric)
+        if not _finite_number(value) or not _finite_number(threshold) or float(value) < 0:
+            _fail(errors, "comparison_error_metric_invalid", f"{label}.actual_error_metrics.{metric} must be a finite nonnegative value")
+        elif float(value) > float(threshold):
+            _fail(errors, "comparison_error_budget_exceeded", f"{label}.actual_error_metrics.{metric} exceeds the frozen error budget", value=value, threshold=threshold)
 
 
 def _validate_comparisons(
@@ -874,10 +1318,6 @@ def _validate_comparisons(
         for field in ("parent_group_id", "split", "physical_condition_hash"):
             if row.get(field) != expected_case.get(field):
                 _fail(errors, "comparison_physical_binding_mismatch", f"{label}.{field} differs from frozen case")
-        if row.get("evidence_class") != CURRENT_EVIDENCE_CLASS or row.get("state_coverage") != FULL_STATE_COVERAGE:
-            _fail(errors, "comparison_evidence_class_invalid", f"{label} is not current full-state evidence")
-        if row.get("status") not in PASS_COMPARISON_STATUS or row.get("independent") is not True:
-            _fail(errors, "comparison_status_invalid", f"{label} is not an actual independent comparison pass")
         _validate_recipe_identity(row, scope_info["recipe"], label, errors)
         _check_artifact(row.get("evidence_file"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.evidence_file")
         _check_bindings(row.get("source_bindings"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label=f"{label}.source_bindings", minimum=1)
@@ -893,6 +1333,8 @@ def _validate_comparisons(
         required_fields = requirement.get("required_changed_numeric_fields", [])
         if not isinstance(changed_fields, list) or not set(required_fields).issubset(set(changed_fields)):
             _fail(errors, "comparison_changed_fields_missing", f"{label} does not prove the required numerical change", required=required_fields)
+        _validate_error_metrics(row, requirement, scope_info=scope_info, label=label, errors=errors)
+        _validate_parameter_points(row, requirement, scope_info=scope_info, label=label, errors=errors)
         stats = _mapping(row.get("actual_statistics"), f"{label}.actual_statistics", errors)
         if stats is not None:
             _check_finite_positive(stats, "sample_count", f"{label}.actual_statistics", errors)
@@ -956,12 +1398,8 @@ def validate_scope_documents(
     scope_info = _check_scope_shape(scope, scope_path=scope_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
     if evidence.get("schema") != EVIDENCE_SCHEMA:
         _fail(errors, "evidence_schema_invalid", f"evidence schema must be {EVIDENCE_SCHEMA}")
-    if evidence.get("family_id") != "F2" or evidence.get("scope_id") != scope.get("scope_id"):
-        _fail(errors, "evidence_scope_identity_invalid", "evidence family_id/scope_id does not match scope")
-    if evidence.get("evidence_class") != CURRENT_EVIDENCE_CLASS:
-        _fail(errors, "evidence_class_invalid", "evidence root must be current scope evidence")
-    if evidence.get("state_coverage") != FULL_STATE_COVERAGE:
-        _fail(errors, "evidence_state_coverage_invalid", "evidence root must declare full typed state coverage")
+    if evidence.get("family_id") != scope.get("family_id") or evidence.get("scope_id") != scope.get("scope_id"):
+        _fail(errors, "evidence_scope_identity_invalid", "evidence family_id/scope_id does not match the frozen scope")
     _check_scope_binding(evidence, scope_path=scope_file, scope_sha256=scope_digest, evidence_path=evidence_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
     _validate_recipe_identity(evidence, scope_info["recipe"], "evidence", errors)
     if _canonical(evidence.get("observations")) != _canonical(scope_info["observations"]):
@@ -972,8 +1410,6 @@ def validate_scope_documents(
         _validate_reuse_equivalence(
             reuse,
             scope=scope,
-            scope_info=scope_info,
-            scope_sha256=scope_digest,
             evidence_path=evidence_file,
             data_root=root,
             errors=errors,
@@ -992,7 +1428,7 @@ def validate_scope_documents(
     return {
         "schema": VERDICT_SCHEMA,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "family_id": "F2",
+        "family_id": scope.get("family_id"),
         "scope_id": scope.get("scope_id"),
         "status": "evidence-bound-eligible" if eligible else "evidence-bound-ineligible",
         "evidence_bound_eligible": eligible,
@@ -1012,7 +1448,7 @@ def validate_scope_documents(
             "reference_matrix": not any(item["code"].startswith("reference_") for item in errors),
             "independent_comparisons": not any(item["code"].startswith("comparison_") for item in errors),
             "split_and_view_leakage": not any(item["code"] in {"scope_parent_split_leak", "case_outside_scope", "reference_view_outside_scope", "comparison_outside_scope", "comparison_physical_binding_mismatch"} for item in errors),
-            "current_full_state_evidence": not any(item["code"] in {"evidence_class_invalid", "evidence_state_coverage_invalid", "qi_state_coverage_invalid", "reference_evidence_class_invalid", "comparison_evidence_class_invalid", "reuse_fluid_only_forbidden"} for item in errors),
+            "current_full_state_evidence": not any(item["code"].startswith(("state_", "qi_report_", "qi_fluid_", "qi_h5_")) or item["code"] == "reuse_fluid_only_forbidden" for item in errors),
         },
         "errors": errors,
         "ignored_inputs": ["Q-E", "other_family_evidence", "material_tracer", "model_or_prediction"],

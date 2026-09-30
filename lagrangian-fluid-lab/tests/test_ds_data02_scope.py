@@ -5,10 +5,12 @@ import hashlib
 import json
 from pathlib import Path
 
+import h5py
+import numpy as np
+
 from scripts.ds_data02_scope import (
     CURRENT_EVIDENCE_CLASS,
     FULL_STATE_COVERAGE,
-    REQUIRED_TYPED_DATASETS,
     validate_scope_documents,
     validate_scope_files,
 )
@@ -41,6 +43,73 @@ def _recipe() -> dict[str, object]:
         "view_id": "native_full_state",
         "solver_dimension": 3,
     }
+
+
+def _state_requirements(*, moving: bool = True) -> dict[str, object]:
+    specs = {
+        "time": {"path": "time", "rank": 1, "units": "s", "time_indexed": False},
+        "position": {"path": "position", "rank": 3, "last_dim": 3, "units": "m"},
+        "velocity": {"path": "velocity", "rank": 3, "last_dim": 3, "units": "m/s"},
+        "density": {"path": "density", "rank": 2, "units": "kg/m^3"},
+        "mass": {"path": "mass", "rank": 2, "units": "kg"},
+        "type": {"path": "type", "rank": 2, "units": "1"},
+        "valid": {"path": "valid", "rank": 2, "units": "1"},
+        "particle_id": {"path": "particle_id", "rank": 1, "units": "1", "time_indexed": False},
+        "particle_zone": {"path": "particle_zone", "rank": 1, "units": "1", "time_indexed": False},
+    }
+    required = list(specs)
+    if moving:
+        specs["rigid_body_state"] = {"path": "rigid_body_state", "rank": 1, "units": "state"}
+        required.append("rigid_body_state")
+    return {
+        "required_datasets": required,
+        "dataset_specs": specs,
+        "identity": {
+            "axis": "(Zone,Idp)",
+            "particle_id": "particle_id",
+            "particle_zone": "particle_zone",
+            "type": "type",
+            "valid": "valid",
+        },
+        "type_semantics": {"fluid_values": [3], "moving_values": [1, 2], "boundary_values": [0]},
+        "moving_boundary": {"mode": "conditional" if moving else "not_applicable", "dataset": "rigid_body_state" if moving else None},
+        "qi_report": {"accepted_statuses": ["Q-I-structure-pass", "Q-I-pass"]},
+    }
+
+
+def _write_state_h5(root: Path, name: str, *, moving: bool = True) -> dict[str, str]:
+    path = root / name
+    frames, particles = 5, 4
+    with h5py.File(path, "w") as handle:
+        handle.attrs["identity_key"] = "(Zone,Idp)"
+        handle.attrs["solver_dimension"] = 3
+        units = {
+            "time": "s", "position": "m", "velocity": "m/s", "density": "kg/m^3",
+            "mass": "kg", "type": "1", "valid": "1", "particle_id": "1", "particle_zone": "1",
+        }
+        if moving:
+            units["rigid_body_state"] = "state"
+        handle.attrs["units_json"] = json.dumps(units, sort_keys=True)
+        values = {
+            "time": np.linspace(0.0, 4.0, frames),
+            "position": np.zeros((frames, particles, 3), dtype=np.float32),
+            "velocity": np.zeros((frames, particles, 3), dtype=np.float32),
+            "density": np.full((frames, particles), 1000.0, dtype=np.float32),
+            "mass": np.full((frames, particles), 0.1, dtype=np.float32),
+            "type": np.tile(np.array([0, 1 if moving else 0, 3, 3], dtype=np.int8), (frames, 1)),
+            "valid": np.ones((frames, particles), dtype=bool),
+            "particle_id": np.arange(particles, dtype=np.int64),
+            "particle_zone": np.zeros(particles, dtype=np.int16),
+        }
+        for key, value in values.items():
+            dataset = handle.create_dataset(key, data=value)
+            dataset.attrs["units"] = units[key]
+        if moving:
+            dtype = np.dtype([("time_s", "f8"), ("body_id", "i4"), ("valid", "u1"), ("position_rms_m", "f8")])
+            dataset = handle.create_dataset("rigid_body_state", data=np.zeros(frames, dtype=dtype))
+            dataset.attrs["units"] = "state"
+    raw = path.read_bytes()
+    return {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest()}
 
 
 def _observations() -> dict[str, object]:
@@ -109,14 +178,19 @@ def _scope(root: Path) -> dict[str, object]:
         "schema": "ds-data-02.scope-spec.v1",
         "family_id": "F2",
         "scope_id": "F2_FIXTURE_SCOPE_V1",
+        "required_input_roles": ["quality_contract", "event_definitions", "case_registry", "reference_matrix"],
         "recipe": _recipe(),
         "time_domain": {"start_s": 0.0, "end_s": 4.0, "complete_event_window": True, "minimum_frames": 4},
+        "state_requirements": _state_requirements(),
         "observations": _observations(),
+        "physical_parameter_domains": {"receiver_x_m": {"min": 0.45, "max": 0.65, "units": "m"}},
         "physical_domain": {"cases": cases},
         "reference_requirements": {
             "backgrounds": ["center_catch", "offset_spill"],
             "resolutions": ["coarse", "medium", "fine"],
             "expected_view_count": 6,
+            "coverage_mode": "full_family_default",
+            "required_source_roles": ["geometry_xml", "gencase_bi4", "copied_motion", "solver_log"],
             "reference_case_ids": {"center_catch": cases[0]["case_id"], "offset_spill": cases[1]["case_id"]},
         },
         "comparison_requirements": [
@@ -130,6 +204,11 @@ def _scope(root: Path) -> dict[str, object]:
                 "required_changed_numeric_fields": ["internal_dt_s"],
                 "required_statistic_fields": ["internal_dt_s", "step_count"],
                 "required_observation_points": ["endpoint", "internal"],
+                "parameter_points": {
+                    "endpoint": {"parameter": "receiver_x_m", "side": "min"},
+                    "internal": {"parameter": "receiver_x_m"},
+                },
+                "required_error_metrics": ["event_time_absolute_s", "macro_relative", "integration_fraction"],
             },
             {
                 "comparison_id": "offset-integration",
@@ -141,6 +220,11 @@ def _scope(root: Path) -> dict[str, object]:
                 "required_changed_numeric_fields": ["internal_dt_s"],
                 "required_statistic_fields": ["internal_dt_s", "step_count"],
                 "required_observation_points": ["endpoint", "internal"],
+                "parameter_points": {
+                    "endpoint": {"parameter": "receiver_x_m", "side": "min"},
+                    "internal": {"parameter": "receiver_x_m"},
+                },
+                "required_error_metrics": ["event_time_absolute_s", "macro_relative", "integration_fraction"],
             },
             {
                 "comparison_id": "center-save",
@@ -152,6 +236,11 @@ def _scope(root: Path) -> dict[str, object]:
                 "required_changed_numeric_fields": ["save_interval_s"],
                 "required_statistic_fields": ["save_interval_s", "frame_count"],
                 "required_observation_points": ["endpoint", "internal"],
+                "parameter_points": {
+                    "endpoint": {"parameter": "receiver_x_m", "side": "min"},
+                    "internal": {"parameter": "receiver_x_m"},
+                },
+                "required_error_metrics": ["event_time_absolute_s", "macro_relative", "save_fraction"],
             },
             {
                 "comparison_id": "offset-save",
@@ -163,6 +252,11 @@ def _scope(root: Path) -> dict[str, object]:
                 "required_changed_numeric_fields": ["save_interval_s"],
                 "required_statistic_fields": ["save_interval_s", "frame_count"],
                 "required_observation_points": ["endpoint", "internal"],
+                "parameter_points": {
+                    "endpoint": {"parameter": "receiver_x_m", "side": "min"},
+                    "internal": {"parameter": "receiver_x_m"},
+                },
+                "required_error_metrics": ["event_time_absolute_s", "macro_relative", "save_fraction"],
             },
         ],
         "input_bindings": [
@@ -175,34 +269,29 @@ def _scope(root: Path) -> dict[str, object]:
     return scope
 
 
-def _qi(root: Path, case: dict[str, object]) -> dict[str, object]:
-    return {
-        "evidence_class": CURRENT_EVIDENCE_CLASS,
-        "state_coverage": FULL_STATE_COVERAGE,
-        "status": "Q-I-structure-pass",
-        "resolution": case["qi_resolution"],
-        "evidence_file": _binding(root, f"{case['case_id']}-qi.json", "qi_report", {"status": "Q-I-structure-pass"}),
-        "source_bindings": [_binding(root, f"{case['case_id']}-trajectory.h5", "trajectory_h5", b"FULL_TYPED_H5")],
-        "solver_dimension": 3,
-        "coordinate_components": 3,
-        "fluid_count": 100,
-        "active_mass_kg": 1.5,
-        "checks": {
-            "solver_log_explicit_3d": True,
-            "nonzero_fluid": True,
-            "positive_active_mass": True,
-            "time_axis": True,
-            "active_state_finite": True,
-            "typed_ids": True,
-            "moving_boundary_pose": True,
-            "boundary_mass_separated": True,
-            "event_ids_typed": True,
-            "physical_spill_separated_from_unknown": True,
+def _qi(root: Path, case: dict[str, object], *, resolution: str = "coarse", tag: str | None = None) -> dict[str, object]:
+    suffix = tag or resolution
+    h5_binding = _write_state_h5(root, f"{case['case_id']}-{suffix}.h5")
+    h5_binding["role"] = "trajectory_h5"
+    report_binding = _binding(
+        root,
+        f"{case['case_id']}-{suffix}-qi-report.json",
+        "qi_report",
+        {
+            "family_id": "F2",
+            "case_id": case["case_id"],
+            "q_i": {
+                "status": "Q-I-structure-pass",
+                "failed_checks": [],
+                "checks": {"actual_h5_state_read": True, "typed_lifecycle_audited": True},
+            },
         },
-        "full_timeline": {"complete": True, "frames": 401, "start_s": 0.0, "end_s": 4.0, "time_axis_strictly_increasing": True},
-        "typed_identity": {"axis": "(Zone,Idp)", "datasets": sorted(REQUIRED_TYPED_DATASETS), "introduced_count": 0, "revived_count": 0, "type_changed_count": 0},
-        "moving_boundary": {"node_count": 10, "pose_saved": True, "control_bound": True, "position_rms_max_m": 1e-8},
-        "mass_audit": {"initial_fluid_mass_kg": 1.5, "boundary_mass_separated": True, "unknown_separate_from_spill": True},
+    )
+    return {
+        "resolution": resolution,
+        "evidence_file": report_binding,
+        "source_bindings": [h5_binding],
+        "full_timeline": {"frames": 5, "start_s": 0.0, "end_s": 4.0},
         "observed_event_names": ["cup_departure", "receiver_entry", "tray_entry", "cup_residence"],
     }
 
@@ -234,6 +323,7 @@ def _evidence(root: Path, scope: dict[str, object], scope_path: Path) -> dict[st
                 "evidence_class": CURRENT_EVIDENCE_CLASS,
                 "state_coverage": FULL_STATE_COVERAGE,
                 "status": "actual_reference_pass",
+                "qi": _qi(root, case, resolution=resolution, tag=f"{case['case_id']}-{resolution}"),
                 "evidence_file": _binding(root, f"{case['case_id']}-{resolution}-reference.json", "reference_report", {"status": "actual_reference_pass"}),
                 "source_bindings": [
                     _binding(root, f"{case['case_id']}-{resolution}.xml", "geometry_xml", b"XML_INPUT"),
@@ -275,6 +365,16 @@ def _evidence(root: Path, scope: dict[str, object], scope_path: Path) -> dict[st
             "comparison_numerical_recipe_hash": (("d" if requirement["kind"] == "integration" else "e") * 64),
             "changed_numeric_fields": changed,
             "actual_statistics": stats,
+            "actual_error_metrics": {
+                "event_time_absolute_s": 0.001,
+                "macro_relative": 0.01,
+                "integration_fraction": 0.1,
+                "save_fraction": 0.1,
+            },
+            "physical_parameter_points": {
+                "endpoint": {"parameter": "receiver_x_m", "value": 0.45, "sample_count": 1, "metrics": {"event_time_absolute_s": 0.001}},
+                "internal": {"parameter": "receiver_x_m", "value": 0.55, "sample_count": 2, "metrics": {"event_time_absolute_s": 0.001}},
+            },
             "observations": {
                 "endpoint": {"sample_count": 1, "metrics": {"macro_error": 0.01}},
                 "internal": {"sample_count": 10, "metrics": {"event_time_error": 0.001}},
@@ -339,16 +439,14 @@ def test_reuse_requires_full_state_and_exact_scope_equivalence(tmp_path: Path) -
     scope_path, evidence_path = _write_fixture(tmp_path)
     scope = json.loads(scope_path.read_text())
     evidence = json.loads(evidence_path.read_text())
-    scope_hash = hashlib.sha256(scope_path.read_bytes()).hexdigest()
+    old_scope = copy.deepcopy(scope)
+    old_scope["qualified"] = True
+    old_scope_binding = _binding(tmp_path, "old-qualified-scope.json", "source_scope", old_scope)
     equivalence = _binding(tmp_path, "reuse-equivalence.json", "scope_equivalence_report", {"equivalent": True})
     evidence["reuse"] = {
         "strict_scope_equivalence": True,
         "source_state_coverage": FULL_STATE_COVERAGE,
-        "scope_id": scope["scope_id"],
-        "scope_sha256": scope_hash,
-        "recipe": _recipe(),
-        "time_domain": scope["time_domain"],
-        "physical_case_ids": [case["case_id"] for case in scope["physical_domain"]["cases"]],
+        "equivalent_scope_binding": old_scope_binding,
         "equivalence_evidence": [equivalence],
     }
     evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
@@ -386,6 +484,115 @@ def test_supplied_digest_is_checked_against_bytes(tmp_path: Path) -> None:
 
     assert verdict["evidence_bound_eligible"] is False
     assert "scope_input_hash_mismatch" in _codes(verdict)
+
+
+def test_actual_h5_fluid_type_tampering_is_rejected_even_after_hash_rebinding(tmp_path: Path) -> None:
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    evidence = json.loads(evidence_path.read_text())
+    h5_binding = evidence["cases"][0]["qi"]["source_bindings"][0]
+    h5_path = Path(h5_binding["path"])
+    with h5py.File(h5_path, "r+") as handle:
+        handle["type"][0, 2:] = 0
+    h5_binding["sha256"] = hashlib.sha256(h5_path.read_bytes()).hexdigest()
+    evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+
+    verdict = validate_scope_files(scope_path, evidence_path)
+
+    assert verdict["evidence_bound_eligible"] is False
+    assert "state_fluid_population_zero" in _codes(verdict)
+
+
+def test_time_frame_cannot_be_substituted_for_physical_parameter_internal_point(tmp_path: Path) -> None:
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    evidence = json.loads(evidence_path.read_text())
+    comparison = evidence["comparisons"][0]
+    comparison.pop("physical_parameter_points")
+    comparison["observations"]["internal"]["time_s"] = 2.0
+    evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+
+    verdict = validate_scope_files(scope_path, evidence_path)
+
+    assert verdict["evidence_bound_eligible"] is False
+    assert "comparison_parameter_points_missing" in _codes(verdict)
+
+
+def test_failed_numeric_metric_is_rejected_despite_pass_label(tmp_path: Path) -> None:
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    evidence = json.loads(evidence_path.read_text())
+    evidence["comparisons"][0]["status"] = "actual_pass"
+    evidence["comparisons"][0]["actual_error_metrics"]["integration_fraction"] = 0.9
+    evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+
+    verdict = validate_scope_files(scope_path, evidence_path)
+
+    assert verdict["evidence_bound_eligible"] is False
+    assert "comparison_error_budget_exceeded" in _codes(verdict)
+
+
+def test_static_other_family_scope_does_not_require_rigid_body_state(tmp_path: Path) -> None:
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    scope = json.loads(scope_path.read_text())
+    evidence = json.loads(evidence_path.read_text())
+    scope["family_id"] = "F1"
+    scope["state_requirements"] = _state_requirements(moving=False)
+    evidence["family_id"] = "F1"
+    for case in scope["physical_domain"]["cases"]:
+        case["mechanism_id"] = "static_obstacle"
+    for case in evidence["cases"]:
+        case["mechanism_id"] = "static_obstacle"
+        report_binding = case["qi"]["evidence_file"]
+        report_path = Path(report_binding["path"])
+        report = json.loads(report_path.read_text())
+        report["family_id"] = "F1"
+        report_path.write_text(json.dumps(report, sort_keys=True), encoding="utf-8")
+        report_binding["sha256"] = hashlib.sha256(report_path.read_bytes()).hexdigest()
+        h5_binding = case["qi"]["source_bindings"][0]
+        with h5py.File(h5_binding["path"], "r+") as handle:
+            handle["type"][..., 1] = 0
+            del handle["rigid_body_state"]
+        h5_binding["sha256"] = hashlib.sha256(Path(h5_binding["path"]).read_bytes()).hexdigest()
+    for row in evidence["reference_views"]:
+        report_binding = row["qi"]["evidence_file"]
+        report_path = Path(report_binding["path"])
+        report = json.loads(report_path.read_text())
+        report["family_id"] = "F1"
+        report_path.write_text(json.dumps(report, sort_keys=True), encoding="utf-8")
+        report_binding["sha256"] = hashlib.sha256(report_path.read_bytes()).hexdigest()
+        h5_binding = row["qi"]["source_bindings"][0]
+        with h5py.File(h5_binding["path"], "r+") as handle:
+            handle["type"][..., 1] = 0
+            del handle["rigid_body_state"]
+        h5_binding["sha256"] = hashlib.sha256(Path(h5_binding["path"]).read_bytes()).hexdigest()
+    scope_path.write_text(json.dumps(scope, indent=2), encoding="utf-8")
+    evidence["scope_binding"]["sha256"] = hashlib.sha256(scope_path.read_bytes()).hexdigest()
+    evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+
+    verdict = validate_scope_files(scope_path, evidence_path)
+
+    assert verdict["evidence_bound_eligible"] is True
+
+
+def test_explicit_single_background_scope_is_independent_of_unqualified_background(tmp_path: Path) -> None:
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    scope = json.loads(scope_path.read_text())
+    evidence = json.loads(evidence_path.read_text())
+    center_case_id = scope["physical_domain"]["cases"][0]["case_id"]
+    scope["physical_domain"]["cases"] = [scope["physical_domain"]["cases"][0]]
+    scope["reference_requirements"]["backgrounds"] = ["center_catch"]
+    scope["reference_requirements"]["expected_view_count"] = 3
+    scope["reference_requirements"]["coverage_mode"] = "single_background_explicit"
+    scope["reference_requirements"]["reference_case_ids"] = {"center_catch": center_case_id}
+    scope["comparison_requirements"] = [item for item in scope["comparison_requirements"] if item["background"] == "center_catch"]
+    evidence["cases"] = [item for item in evidence["cases"] if item["case_id"] == center_case_id]
+    evidence["reference_views"] = [item for item in evidence["reference_views"] if item["background"] == "center_catch"]
+    evidence["comparisons"] = [item for item in evidence["comparisons"] if item["background"] == "center_catch"]
+    scope_path.write_text(json.dumps(scope, indent=2), encoding="utf-8")
+    evidence["scope_binding"]["sha256"] = hashlib.sha256(scope_path.read_bytes()).hexdigest()
+    evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+
+    verdict = validate_scope_files(scope_path, evidence_path)
+
+    assert verdict["evidence_bound_eligible"] is True
 
 
 def test_tampered_source_bytes_invalidate_the_bound_verdict(tmp_path: Path) -> None:
