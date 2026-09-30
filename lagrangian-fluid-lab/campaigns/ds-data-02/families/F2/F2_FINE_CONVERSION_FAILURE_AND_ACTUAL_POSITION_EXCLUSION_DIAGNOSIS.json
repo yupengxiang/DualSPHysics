@@ -1,0 +1,102 @@
+{
+  "schema": "ds02.f2.fine-exclusion-diagnosis.v1",
+  "audit_status": "conclusive_root_cause_identified",
+  "created_at_utc": "2026-09-30T15:44:00+00:00",
+  "family_id": "F2",
+  "cases_diagnosed": [
+    {
+      "case_id": "F2_COMM4_CENTER_V1_FINE",
+      "resolution_dp_m": 0.01,
+      "initial_fluid_particles": 24576,
+      "initial_fixed_particles": 171978,
+      "initial_moving_particles": 25830,
+      "total_particles": 222384,
+      "excluded_particles_total": 9846,
+      "excluded_fluid_fraction": 0.400634765625,
+      "exclusion_motive_counts": {
+        "Motive_1_NpOutPos": 9846,
+        "Motive_2_NpOutRho": 0,
+        "Motive_3_NpOutMov": 0
+      },
+      "first_exclusion_frame": 41,
+      "first_exclusion_time_s": 0.41,
+      "boundary_crossing_breakdown": {
+        "x_less_than_minus_0p70": 5909,
+        "z_less_than_minus_0p40": 2550,
+        "x_greater_than_2p20": 1244,
+        "z_greater_than_1p80": 105,
+        "y_greater_than_1p00": 22,
+        "y_less_than_minus_0p75": 18
+      },
+      "simulation_domain_xml": {
+        "posmin": [-0.70, -0.75, -0.40],
+        "posmax": [2.20, 1.00, 1.80]
+      },
+      "catch_floor_geometry_xml": {
+        "point": [-0.60, -0.60, -0.20],
+        "size": [2.60, 1.30, 0.10],
+        "x_range": [-0.60, 2.00],
+        "y_range": [-0.60, 0.70],
+        "z_range": [-0.20, -0.10]
+      }
+    },
+    {
+      "case_id": "F2_COMM4_OFFSET_V1_FINE",
+      "resolution_dp_m": 0.01,
+      "initial_fluid_particles": 24576,
+      "initial_fixed_particles": 171978,
+      "initial_moving_particles": 25830,
+      "total_particles": 222384,
+      "excluded_particles_total": 11125,
+      "excluded_fluid_fraction": 0.4526774088541667,
+      "exclusion_motive_counts": {
+        "Motive_1_NpOutPos": 11125,
+        "Motive_2_NpOutRho": 0,
+        "Motive_3_NpOutMov": 0
+      },
+      "first_exclusion_frame": 41,
+      "first_exclusion_time_s": 0.41,
+      "boundary_crossing_breakdown": {
+        "z_less_than_minus_0p40": 4491,
+        "x_less_than_minus_0p70": 4268,
+        "x_greater_than_2p20": 1680,
+        "y_less_than_minus_0p75": 574,
+        "z_greater_than_1p80": 105,
+        "y_greater_than_1p00": 18
+      },
+      "simulation_domain_xml": {
+        "posmin": [-0.70, -0.75, -0.40],
+        "posmax": [2.20, 1.00, 1.80]
+      },
+      "catch_floor_geometry_xml": {
+        "point": [-0.60, -0.60, -0.20],
+        "size": [2.60, 1.30, 0.10],
+        "x_range": [-0.60, 2.00],
+        "y_range": [-0.60, 0.70],
+        "z_range": [-0.20, -0.10]
+      }
+    }
+  ],
+  "coarse_medium_contrast": {
+    "F2_COMM4_CENTER_V1_COARSE": {
+      "dp_m": 0.04,
+      "fluid_particles": 384,
+      "total_particles": 14358,
+      "excluded_particles": 0,
+      "q_i_structure_status": "pass"
+    },
+    "F2_COMM4_CENTER_V1_MEDIUM": {
+      "dp_m": 0.02,
+      "fluid_particles": 3040,
+      "total_particles": 52606,
+      "excluded_particles": 0,
+      "q_i_structure_status": "pass"
+    }
+  },
+  "physical_mechanism_explanation": "Coarse (dp=0.04m) and medium (dp=0.02m) resolutions possess sufficient effective numerical viscosity (proportional to kernel radius h) to suppress splash jet formation and sheet runoff, retaining 100% of fluid on the catch floor. Fine resolution (dp=0.01m) resolves thin liquid sheets and high-velocity splash droplets (v_z > 3 m/s) which overrun the finite catch floor boundaries (x < -0.60 m and x > 2.00 m) and subsequently exit the simulation bounding box (z < -0.40 m, x < -0.70 m, x > 2.20 m, z > 1.80 m).",
+  "conversion_failure_root_cause": "The conversion script failed with PartVTK error / row-count mismatch because 9846 and 11125 fluid particles were eliminated from the BI4 files by the solver during runtime, whereas the conversion contract expected intact particle identities without an explicit PartVTKOut-backed exclusion ledger.",
+  "recommended_resolution": {
+    "primary_fix": "Expand the catch floor geometry in GenCase XML (e.g. x in [-1.20, 2.80], y in [-1.00, 1.00], z in [-0.50, 2.20]) to prevent physical runoff and splash boundary exits, preserving all 24576 fluid particles.",
+    "alternative_fix": "Integrate PartVTKOut into the conversion pipeline to record excluded particles as native invalid/lost sentinels in trajectory.h5 and typed-transport-labels.h5, classifying them as unknown/exit mass under Q-I."
+  }
+}

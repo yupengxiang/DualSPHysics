@@ -1,0 +1,156 @@
+{
+  "control_family_id": "weak_dual_axis_0p06g_0p04g",
+  "family_id": "F3",
+  "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_GENC_CASE_DP0P008181818/f3-weak-gencase-dp0p008181818-v1/execution-receipt.json",
+  "geometry_family_id": "continuous_tank_0p9x0p18x0p51_open_top",
+  "mechanism_id": "dual_axis_phase",
+  "physical_binding": {
+    "control_family_id": "weak_dual_axis_0p06g_0p04g",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown identity state; no Q-N from this audit",
+      "sequence": [
+        "initial static fill",
+        "prescribed weak dual-axis acceleration",
+        "open-top finite-aperture observation"
+      ],
+      "time_end_s": 10.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "continuous_tank_0p9x0p18x0p51_open_top",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native_massfluid_from_GenCase; no mass normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "F3_WEAK_DUAL_CONTINUOUS_TANK",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "dual_axis_phase",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "F3_WEAK_DUAL_SINGLE_BACKGROUND",
+    "parameters": {
+      "acceleration_source": "F3_DualAxisPhase_WeakControl.csv",
+      "acceleration_source_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+      "angular_acceleration_m_s2": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "fluid_depth_m": 0.09,
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ],
+      "weak_peak_x_g": 0.06,
+      "weak_peak_x_m_s2": 0.5886,
+      "weak_peak_y_g": 0.04,
+      "weak_peak_y_m_s2": 0.3924
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "resolution": "dp_0p008181818_native",
+  "schema": "ds02.f3.weak-dual-owner-metadata.v1",
+  "solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/qualification-weak-dual-coarse-reference-001/execution-receipt.json",
+  "source_control": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_GENC_CASE_DP0P008181818/f3-weak-gencase-dp0p008181818-v1/F3_DualAxisPhase_WeakControl.csv",
+  "source_control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+  "source_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_GENC_CASE_DP0P008181818/f3-weak-gencase-dp0p008181818-v1/F3_DUAL_AXIS_WEAK_006G_004G_dp0p008181818_Def.xml",
+  "time_variant": "native_save_0p0025s"
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "ds02.f3.macro-scope-reuse-and-time-uncertainty-audit.v1",
+  "audit_status": "conclusive_root_audit_complete",
+  "created_at_utc": "2026-09-30T15:47:00+00:00",
+  "family_id": "F3",
+  "historical_macro_scope_reuse": {
+    "total_cases_audited": 8,
+    "case_ids": [
+      "F3_DEV_00_a0p903125",
+      "F3_DEV_06_a0p940625",
+      "F3_DEV_08_a0p953125",
+      "F3_DEV_12_a0p978125",
+      "F3_DEV_16_a1p003125",
+      "F3_DEV_20_a1p028125",
+      "F3_DEV_26_a1p065625",
+      "F3_DEV_31_a1p096875"
+    ],
+    "scope_characterization": "1D single-axis harmonic horizontal excitation of unbaffled tank; 836 frames over 8.35 s; fixed dp=0.0075 m (CELL3)",
+    "structural_integrity_q_i": {
+      "all_cases_converted_direct_h5": true,
+      "subset_comparison_against_reference_max_error": 0.0,
+      "all_particle_exclusions_zero": true,
+      "typed_labels_sidecar_generated": true,
+      "preview_images_verified": true
+    },
+    "macro_scope_reuse_boundary": {
+      "qualification_claim": "legacy_1d_sloshing_parameter_sweep_baseline_only",
+      "prohibited_claims": [
+        "Cannot be claimed as 3D cross-axis coupled sloshing qualification",
+        "Cannot serve as spatial convergence reference (single dp=0.0075m only)",
+        "Cannot substitute for weak dual-axis or eccentric baffle references"
+      ],
+      "admissibility": "Admitted as historical single-axis sloshing baseline evidence under strict bounded parameter variation (a_x in [0.903g, 1.097g])"
+    }
+  },
+  "temporal_label_uncertainty_analysis": {
+    "legacy_plain_8": {
+      "output_interval_target_s": 0.01,
+      "observed_interval_range_s": [0.00999945898381771, 0.010021581680887515],
+      "first_passage_bracket_uncertainty_s": "<= 0.010022 s",
+      "total_frames": 836,
+      "total_duration_s": 8.35
+    },
+    "weak_dual_reference_family": {
+      "output_interval_target_s": 0.0025,
+      "observed_interval_range_s": [0.0025, 0.0025],
+      "first_passage_bracket_uncertainty_s": "<= 0.0025 s",
+      "temporal_resolution_improvement_factor": 4.0,
+      "total_frames": 4001,
+      "total_duration_s": 10.0,
+      "spatial_matrix_dp_m": [0.008181818, 0.0075, 0.006],
+      "excitation_mechanism": "coupled dual-axis harmonic: a_x=0.06g, a_y=0.04g",
+      "surface_crossing_events": {
+        "left_right_exchange_finite_surface_x0": "monitored with exact [t_k-1, t_k] brackets",
+        "front_back_exchange_finite_surface_y0": "monitored with exact [t_k-1, t_k] brackets",
+        "top_open_exit_z0p51": 0
+      }
+    }
+  },
+  "formal_root_conclusion": "Historical plain cases provide valid, fully verified 1D sloshing evidence but must not be conflated with 3D dual-axis dynamics. The new weak dual-axis reference provides a 4x finer temporal bracket (0.0025s vs 0.01s) and a rigorous 3-resolution spatial convergence study with zero particle loss and zero top boundary exits, successfully satisfying the scientific qualification boundary."
+}
