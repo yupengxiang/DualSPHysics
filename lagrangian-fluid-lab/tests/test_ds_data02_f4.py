@@ -70,6 +70,14 @@ def test_native_mass_contract_is_positive_and_unscaled():
             )
 
 
+def test_length_axis_recomputes_column_native_counts():
+    for length in (0.20, 0.22):
+        for resolution in f4.RESOLUTIONS:
+            config = f4.columns_config(resolution, column_length_x_m=length)
+            assert all(abs(box["relative_mass_error"]) < 0.08
+                       for box in config["geometry"]["native_boxes"].values())
+
+
 def test_gencase_request_uses_extensionless_definition_and_runner_budget(tmp_path: Path):
     config = f4.drop_config("coarse")
     definition = tmp_path / "drop_Def.xml"
@@ -104,4 +112,3 @@ def test_source_audit_binds_hashes_actual_3d_and_finite_counts():
         assert len(mother["template_sha256"]) == 64
         assert mother["finite_wall_semantics"]["closed_faces"] == f4.CLOSED_FACES
     assert all(row["actual_3d"] for row in evidence["historical_recipe_evidence"])
-

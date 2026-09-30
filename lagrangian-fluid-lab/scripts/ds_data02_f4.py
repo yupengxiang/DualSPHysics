@@ -101,6 +101,14 @@ NATIVE_COUNTS: dict[str, dict[str, dict[str, tuple[int, int, int]]]] = {
     },
 }
 
+COLUMN_NATIVE_COUNTS_BY_LENGTH: dict[float, dict[str, dict[str, tuple[int, int, int]]]] = {
+    0.20: {
+        "left_column": {"coarse": (6, 4, 4), "medium": (7, 5, 6), "fine": (10, 8, 9)},
+        "right_column": {"coarse": (6, 4, 4), "medium": (7, 5, 6), "fine": (10, 8, 9)},
+    },
+    0.22: NATIVE_COUNTS["oblique_finite_columns"],
+}
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -356,12 +364,13 @@ def columns_config(resolution: str | float = "coarse", *, edge_gap_m: float = 0.
     right_low = [COLUMN_LEFT_LOW[0] + column_length_x_m + edge_gap_m,
                  COLUMN_RIGHT_LOW[1] + right_y_offset_m, COLUMN_RIGHT_LOW[2]]
     size = [column_length_x_m, COLUMN_SIZE[1], COLUMN_SIZE[2]]
+    count_table = COLUMN_NATIVE_COUNTS_BY_LENGTH[float(column_length_x_m)]
     boxes = {
         "left_column": _center_box(left_low, size, RESOLUTIONS[dp_name],
-                                   NATIVE_COUNTS["oblique_finite_columns"]["left_column"][dp_name],
+                                   count_table["left_column"][dp_name],
                                    "left_column"),
         "right_column": _center_box(right_low, size, RESOLUTIONS[dp_name],
-                                    NATIVE_COUNTS["oblique_finite_columns"]["right_column"][dp_name],
+                                    count_table["right_column"][dp_name],
                                     "right_column"),
     }
     for low in (left_low, right_low):
