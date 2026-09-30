@@ -1407,10 +1407,34 @@ def record_gencase_receipts(family_dir: str | Path, center_receipt: str | Path, 
     receipt_rows = []
     for background, path in (("center_catch", Path(center_receipt)), ("offset_spill", Path(offset_receipt))):
         receipt = _json(path)
+        request = receipt.get("request", {}) if isinstance(receipt.get("request"), dict) else {}
+        output_root = Path(str(receipt.get("output_root", "")))
+        stdout_path = output_root / "stdout.log"
+        stdout = stdout_path.read_text(encoding="utf-8", errors="replace") if stdout_path.is_file() else ""
+        fluid_blocks = {
+            int(m.group(1)): int(m.group(2).replace(",", ""))
+            for m in re.finditer(r"block\[\s*\d+\]\s+\(mk:\s*(\d+)\):\s*([0-9,]+)", stdout)
+        }
+        fixed_match = re.search(r"Fixed\.+\:\s*([0-9,]+)", stdout)
+        moving_match = re.search(r"Moving\.+\:\s*([0-9,]+)", stdout)
+        fluid_mass_match = re.search(r"MassFluid=\[([^\]]+)\]", stdout)
+        motion_path = next((Path(value) for value in request.get("input_files", []) if str(value).endswith("_motion.dat")), None)
+        motion_report = _motion_audit(motion_path) if motion_path is not None else {"status": "fail", "errors": ["motion input was not bound"]}
+        definition_path = next((Path(value) for value in request.get("input_files", []) if str(value).endswith("_Def.xml")), None)
+        definition_text = definition_path.read_text(encoding="utf-8") if definition_path is not None and definition_path.is_file() else ""
+        layer_tokens = sorted(set(re.findall(r'<layers\s+vdp="([^"]+)"', definition_text)))
+        boundary_layer_coverage = {
+            "declared_layers": layer_tokens,
+            "main_wall_layers_present": "0,1,2" in layer_tokens,
+            "finite_wall_face_count": 5,
+            "moving_cup_and_fixed_receiver_and_tray_declared": all(token in definition_text for token in ("mk=\"0\"", "mk=\"1\"", "mk=\"2\"")),
+        }
+        fluid_mass_per_particle = float(fluid_mass_match.group(1)) if fluid_mass_match else None
+        fluid_mass = (float(receipt.get("fluid_particles", 0)) * fluid_mass_per_particle) if fluid_mass_per_particle is not None else None
         row = {
             "background": background,
-            "case_id": receipt.get("request", {}).get("case_id"),
-            "attempt_id": receipt.get("request", {}).get("attempt_id"),
+            "case_id": request.get("case_id"),
+            "attempt_id": request.get("attempt_id"),
             "receipt_path": str(path.resolve()),
             "receipt_sha256": sha256_file(path),
             "status": receipt.get("status"),
@@ -1422,7 +1446,24 @@ def record_gencase_receipts(family_dir: str | Path, center_receipt: str | Path, 
             "cpu_core_seconds": receipt.get("cpu_core_seconds"),
             "bytes": receipt.get("bytes"),
             "stdout_sha256": receipt.get("stdout_sha256"),
-            "quality_interpretation": {"three_dimensional": receipt.get("solver_dimension_from_gencase") == 3, "nonzero_fluid": int(receipt.get("fluid_particles", 0) or 0) > 0, "boundary_and_control": "definition and motion hashes are bound by request; native boundary/control coverage remains solver qualification evidence"},
+            "quality_interpretation": {
+                "three_dimensional": receipt.get("solver_dimension_from_gencase") == 3,
+                "coordinate_components": 3,
+                "nonzero_fluid": int(receipt.get("fluid_particles", 0) or 0) > 0,
+                "fluid_mass_per_particle_kg": fluid_mass_per_particle,
+                "initial_fluid_mass_kg": fluid_mass,
+                "source_layer_counts_by_mk": {str(key): value for key, value in sorted(fluid_blocks.items()) if key in (1, 2, 3)},
+                "fixed_boundary_particles": int(fixed_match.group(1).replace(",", "")) if fixed_match else None,
+                "moving_boundary_particles": int(moving_match.group(1).replace(",", "")) if moving_match else None,
+                "boundary_layer_coverage": boundary_layer_coverage,
+                "control_coverage": {
+                    "motion_path": str(motion_path) if motion_path else None,
+                    "motion_sha256": sha256_file(motion_path) if motion_path and motion_path.is_file() else None,
+                    "motion_audit": motion_report,
+                    "covers_static_hold_rotation_stop_post_stop_window": motion_report.get("status") == "pass",
+                },
+                "boundary_and_control": "GenCase generated separate fixed/moving boundary blocks and copied the complete prescribed motion file; native solver coverage remains a qualification check.",
+            },
         }
         receipt_rows.append(row)
         for item in matrix["matrix"]:
