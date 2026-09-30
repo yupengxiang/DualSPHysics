@@ -1,0 +1,120 @@
+{
+  "case_id": "F7_PUMP_P08_FINE",
+  "family_id": "F7",
+  "lineage": {
+    "historical_pump_issue": "old D05 reported 12 missing identities and 0.324 kg; no closedness inference is made",
+    "parent": "official_pump_13_Pump"
+  },
+  "mechanism": "pump_recirculation",
+  "physical_parameters": {
+    "case_id": "F7_PUMP_P08_FINE",
+    "dp_m": 0.016,
+    "fill_fraction": 1.0,
+    "gap_fraction": 0.3,
+    "mechanism": "pump_recirculation",
+    "offset_m": -0.04,
+    "phase_deg": 0.0,
+    "physical_parent_id": "F7_PUMP_P08",
+    "registry_kind": "production",
+    "resolution": "fine",
+    "speed_scale": 1.2,
+    "split": "test",
+    "stage": "stage24",
+    "time_max_s": 12.0,
+    "time_out_s": 0.02,
+    "variant": 8
+  },
+  "physical_parent_id": "F7_PUMP_P08",
+  "qualification": {
+    "production": "closed",
+    "q_i": "pending actual shared-runner GenCase and native solver evidence",
+    "q_n": "pending; no claim from generated inputs or metadata",
+    "required_checks": [
+      "actual positive fluid count and Data2D=0",
+      "actual 3-D layers, finite initial mass, gap and motion coverage",
+      "source-zone, first-passage, residence and repeated-cycle native labels",
+      "closed mass ledger or open boundary flux/lifecycle ledger",
+      "startup, several cycles, stop/reverse/backflow observables"
+    ]
+  },
+  "recipe": {
+    "continuous_geometry_audit": null,
+    "control_csv": "production/controls/F7_PUMP_P08_FINE_motion.csv",
+    "coordinate_frame": "official DualSPHysics Pump world coordinates",
+    "definition_xml": "production/definitions/F7_PUMP_P08_FINE_Def.xml",
+    "geometry": null,
+    "lifecycle_intent": "finite_initial_fluid; closed_candidate; verify_native_open_faces_with_solver",
+    "motion": {
+      "axis_p1_m": [
+        -0.0576,
+        -0.29,
+        -0.7225
+      ],
+      "axis_p2_m": [
+        -0.0576,
+        -0.49,
+        -0.7225
+      ],
+      "axis_phase_offset_deg": 0.0,
+      "axis_units": "degrees",
+      "cycle_period_s": 5.0,
+      "forward_acceleration_deg_s2": 432.0,
+      "forward_velocity_deg_s": 216.0,
+      "kind": "piecewise_acceleration_reverse",
+      "segments": [
+        "accelerate",
+        "forward",
+        "decelerate",
+        "stop",
+        "reverse_accelerate",
+        "reverse",
+        "reverse_decelerate",
+        "stop"
+      ],
+      "time_window_s": [
+        0.0,
+        12.0
+      ]
+    },
+    "native_mk": {
+      "fixed": 0,
+      "fluid": 1,
+      "moving": 2
+    },
+    "units": {
+      "angle": "degree",
+      "density": "kg/m^3",
+      "length": "m",
+      "mass": "kg",
+      "time": "s"
+    }
+  },
+  "registry_kind": "production",
+  "registry_stage": "stage24",
+  "schema": "ds02.f7.case-manifest.v1",
+  "source_assets": {
+    "CasePump_Def.xml": {
+      "copied_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/CasePump_Def.xml",
+      "copied_sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453",
+      "copy_verified": true,
+      "source_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/CasePump_Def.xml",
+      "source_sha256": "746ae80f4c21bca62a01d59ee04d0eaaf3d1af830c36dafef4b684ca8f3c9453"
+    },
+    "pump_fixed.vtk": {
+      "copied_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_fixed.vtk",
+      "copied_sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616",
+      "copy_verified": true,
+      "source_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_fixed.vtk",
+      "source_sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616"
+    },
+    "pump_moving.vtk": {
+      "copied_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_moving.vtk",
+      "copied_sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72",
+      "copy_verified": true,
+      "source_path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/13_Pump/pump_moving.vtk",
+      "source_sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72"
+    }
+  },
+  "split": "test",
+  "status": "generator_ready; gencase_pending"
+}

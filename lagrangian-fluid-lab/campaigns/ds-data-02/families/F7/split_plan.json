@@ -1,26 +1,44 @@
 {
-  "case_count": 48,
-  "geometry_holdout": "moving-obstacle mechanism and phase/gap variants are held out from pump source geometry",
+  "geometry_control_holdout": "indices 12..23 vary the continuous obstacle gap/offset or pump axis/control phase; all resolutions of any reference parent retain one split label",
+  "physical_parent_rule": "one physical_parent_id owns one production resolution; reference parent owns all three resolution views",
+  "production_case_count": 48,
+  "production_cases_per_mechanism": 24,
   "qualification_boundary": "registry membership is not Q-I or Q-N evidence",
-  "schema": "ds02.f7.split-plan.v1",
+  "reference_case_count": 6,
+  "schema": "ds02.f7.split-plan.v2",
   "split_counts": {
-    "test": 12,
-    "train": 18,
-    "validation": 18
+    "test": 16,
+    "train": 16,
+    "validation": 16
   },
-  "split_rule": "variant modulo 3 within each mechanism/resolution block",
+  "split_counts_per_mechanism": {
+    "moving_obstacle_exchange": {
+      "test": 8,
+      "train": 8,
+      "validation": 8
+    },
+    "pump_recirculation": {
+      "test": 8,
+      "train": 8,
+      "validation": 8
+    }
+  },
+  "split_rule": "fixed NEW_SPLITS by physical parent index; applied before resolution views and never inherited from the legacy registry",
   "stages": {
     "stage24": {
-      "case_count": 16,
-      "selection": "incremental coarse variants 4..7 plus medium variants 0..3; cumulative stage8+stage24=24"
+      "cumulative_case_count": 24,
+      "incremental_case_count": 16,
+      "selection": "physical parents 4..11 per mechanism"
     },
     "stage48": {
-      "case_count": 24,
-      "selection": "incremental medium variants 4..7 plus all fine variants; cumulative stage8+stage24+stage48=48"
+      "cumulative_case_count": 48,
+      "incremental_case_count": 24,
+      "selection": "physical parents 12..23 per mechanism"
     },
     "stage8": {
-      "case_count": 8,
-      "selection": "coarse resolution, variants 0..3, four per mechanism"
+      "cumulative_case_count": 8,
+      "incremental_case_count": 8,
+      "selection": "physical parents 0..3 per mechanism"
     }
   }
 }
