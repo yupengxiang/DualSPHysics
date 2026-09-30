@@ -584,8 +584,8 @@ def _definition_xml(case: Mapping[str, Any]) -> str:
     <parameters>
 {_parameter_xml(p)}
       <simulationdomain>
-        <posmin x="-1.15" y="-0.84" z="-0.30" />
-        <posmax x="11.00" y="0.84" z="1.45" />
+        <posmin x="-1.30" y="-1.00" z="-0.40" />
+        <posmax x="11.30" y="1.00" z="1.50" />
       </simulationdomain>
     </parameters>
   </execution>
