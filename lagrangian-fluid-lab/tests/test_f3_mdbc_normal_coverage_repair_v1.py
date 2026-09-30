@@ -85,6 +85,7 @@ def test_generator_materialises_repair_inputs_without_changing_parent_bytes(tmp_
     manifest = generator._write_parent_inputs(tmp_path)
     assert len(manifest["parents"]) == 2
     assert len(manifest["repairs"]) == 3
+    assert len(manifest["fallbacks"]) == 1
     for parent in manifest["parents"]:
         repairs = [
             repair for repair in manifest["repairs"]
@@ -96,3 +97,14 @@ def test_generator_materialises_repair_inputs_without_changing_parent_bytes(tmp_
             assert repair["control"]["sha256"] == parent["control"]["sha256"]
             repair_def = Path(repair["definition"]["path"])
             assert _normal_contract(repair_def) == (3.0, True)
+    fallback = manifest["fallbacks"][0]
+    fallback_def = Path(fallback["definition"]["path"])
+    fallback_root = ET.parse(fallback_def).getroot()
+    control_node = fallback_root.find("./execution/special/accinputs/accinput/acctimesfile")
+    assert control_node is not None and control_node.get("value") == "F3_DualAxisPhase_Control.csv"
+    parameters = {
+        node.get("key"): node.get("value")
+        for node in fallback_root.findall("./execution/parameters/parameter")
+    }
+    assert parameters["TimeMax"] == "10.0"
+    assert parameters["TimeOut"] == "0.0025"
