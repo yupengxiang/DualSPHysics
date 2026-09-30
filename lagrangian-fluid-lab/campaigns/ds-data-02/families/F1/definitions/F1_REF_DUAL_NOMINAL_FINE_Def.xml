@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- DS-DATA-02 F1 generated definition; GenCase/solver has not run. -->
+<!-- mechanism=asymmetric_dual_channel; physical_case_id=F1_REF_DUAL_NOMINAL; resolution=fine -->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="20" />
+      <speedsound value="0" auto="true" />
+      <hdp value="2" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="241" fluidcount="9" />
+    <geometry>
+      <definition dp="0.008" units_comment="metres (m)">
+        <pointref x="0" y="0" z="0" />
+        <pointmin x="-1" y="-1" z="-1" />
+        <pointmax x="3.3" y="1.1" z="1.1" />
+      </definition>
+      <commands>
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <setmkbound mk="0" />
+          <setnormalinvert invert="true" />
+          <drawbox>
+            <boxfill>all^top</boxfill>
+            <point x="0" y="0" z="0" />
+            <endpoint x="3.22" y="1" z="1" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <setnormalinvert invert="false" />
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>all^bottom</boxfill>
+            <point x="1.25" y="0.34" z="0" />
+            <endpoint x="2.05" y="0.4" z="0.7" />
+            <layers vdp="0.5" />
+          </drawbox>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <runlist name="GeometryForNormals" />
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>all^top</boxfill>
+            <point x="0" y="0" z="0" />
+            <endpoint x="3.22" y="1" z="1" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <setmkvoid />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <point x="1.25" y="0.34" z="0" />
+            <endpoint x="2.05" y="0.4" z="0.7" />
+          </drawbox>
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>all^bottom</boxfill>
+            <point x="1.25" y="0.34" z="0" />
+            <endpoint x="2.05" y="0.4" z="0.7" />
+            <layers vdp="0,-1,-2" />
+          </drawbox>
+          <setmkfluid mk="0" />
+          <fillbox x="2.1" y="0.1" z="0.2">
+            <modefill>void</modefill>
+            <point x="2.1" y="0" z="0" />
+            <size x="1.12" y="1" z="0.55" />
+          </fillbox>
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <distanceh v="2.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <parameters>
+            <parameter key="SavePosDouble" value="0" />
+            <parameter key="Boundary" value="2" />
+            <parameter key="SlipMode" value="1" />
+            <parameter key="NoPenetration" value="0" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.01" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="3" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="6" />
+            <parameter key="TimeOut" value="0.01" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <parameter key="WrnPartsOut" value="1" />
+            <parameter key="MinFluidStop" value="0" />
+      <simulationdomain>
+        <posmin x="default - 25%" y="default - 25%" z="default - 25%" />
+        <posmax x="default + 25%" y="default + 25%" z="default + 50%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

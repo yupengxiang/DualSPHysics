@@ -1,0 +1,158 @@
+{
+  "family_id": "F1",
+  "generated_at_utc": "2026-09-30T07:48:34+00:00",
+  "interpretation": {
+    "canary_boundary": "The historical 0.6 s, seven-frame runs prove executable scale and identity retention only. They are not complete release-to-remerge event evidence.",
+    "dimension": "Both successful canaries are actual 3-D solver runs; the main run has lateral y extent and the mDBC run has a 3-D tank plus finite geometry normals.",
+    "finite_walls": "Both mothers retain bottom, left, right, front and back walls; the top is open. No open top is treated as an outlet.",
+    "reuse_policy": "The main XML/DBC recipe supplies the eccentric obstacle background. The mDBC XML/solver recipe supplies the numerical boundary strategy for the explicit dual-channel geometry."
+  },
+  "mother_cases": [
+    {
+      "actual_successful_run": {
+        "boundary": "DBC",
+        "complete_event_evidence": false,
+        "coordinate_components": 3,
+        "dp_m": 0.02,
+        "finite_wall_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "fixed_particles": 7846,
+        "fluid_particles": 9600,
+        "frame_count": 7,
+        "initial_flow_direction": "+x",
+        "initial_fluid_extent_m": [
+          0.38,
+          0.62,
+          0.28
+        ],
+        "initial_particle_bounds_m": [
+          [
+            0.03,
+            0.03,
+            0.03
+          ],
+          [
+            0.41,
+            0.65,
+            0.31
+          ]
+        ],
+        "initial_particle_extent_m": [
+          0.38,
+          0.62,
+          0.28
+        ],
+        "initial_particle_stats_csv": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/attempt-001/csv/Particles_stats.csv",
+        "nominal_initial_fluid_fill_box_extent_m": [
+          0.4,
+          0.67,
+          0.3
+        ],
+        "open_top": true,
+        "solver_dimension": "3D",
+        "tank_extent_m": [
+          1.6,
+          0.67,
+          0.4
+        ],
+        "time_max_s": 0.6,
+        "time_out_s": 0.1,
+        "total_particles": 17446
+      },
+      "gencase_log": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/gencase.stdout.log",
+      "gencase_log_sha256": "4e3c1977f2f14abebfa8ec7b1e8751059d43fb0a70f034cecf3a49a503a0e231",
+      "mother_id": "official_v54_eccentric_obstacle",
+      "official_source_parameters": {
+        "complete_event_window_role": "source_recipe_upper_bound",
+        "time_max_s": 1.6,
+        "time_out_s": 0.01
+      },
+      "particle_stats_csv_sha256": "09700bfddb43e169c3144c235887889591ae1edcaf45e326afc603bfa93204c7",
+      "solver_log": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/solver.stdout.log",
+      "solver_log_sha256": "72a6ea4626498748823f8aec1418d64790e87c7a887fc6858299037214ced7a4",
+      "source": "main/01_DamBreak",
+      "source_case": "CaseDambreak",
+      "source_definition": "vendor/official/DualSPHysics_v5.4/examples/main/01_DamBreak/CaseDambreak_Def.xml",
+      "source_definition_sha256": "a6bec7c5d3ece69ffcc72e1c3d7395da017dc0bf119b4cab5eae41400a24cbdd"
+    },
+    {
+      "actual_successful_run": {
+        "boundary": "mDBC",
+        "complete_event_evidence": false,
+        "coordinate_components": 3,
+        "dp_m": 0.02,
+        "finite_wall_faces": [
+          "bottom",
+          "left",
+          "right",
+          "front",
+          "back"
+        ],
+        "fixed_particles": 93042,
+        "fluid_particles": 79380,
+        "frame_count": 7,
+        "initial_flow_direction": "-x",
+        "initial_fluid_extent_m": [
+          1.18,
+          0.96,
+          0.52
+        ],
+        "initial_particle_bounds_m": [
+          [
+            2.02,
+            0.02,
+            0.02
+          ],
+          [
+            3.2,
+            0.98,
+            0.54
+          ]
+        ],
+        "initial_particle_extent_m": [
+          1.18,
+          0.96,
+          0.52
+        ],
+        "initial_particle_stats_csv": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/attempt-001/csv/Particles_stats.csv",
+        "nominal_initial_fluid_fill_box_extent_m": [
+          1.228,
+          1.0,
+          0.55
+        ],
+        "open_top": true,
+        "solver_dimension": "3D",
+        "tank_extent_m": [
+          3.22,
+          1.0,
+          1.0
+        ],
+        "time_max_s": 0.6,
+        "time_out_s": 0.1,
+        "total_particles": 172422
+      },
+      "gencase_log": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/gencase.stdout.log",
+      "gencase_log_sha256": "bef4000f341407365da84da1f6d73fa5a4b34d30a1131d25916635dcbe83a15e",
+      "mother_id": "official_v54_asymmetric_dual_channel",
+      "official_source_parameters": {
+        "complete_event_window_role": "source_recipe_upper_bound",
+        "time_max_s": 6.0,
+        "time_out_s": 0.01
+      },
+      "particle_stats_csv_sha256": "66b0e57de7f2660d4c1017abe0a5aeba1c21f23713ddd83d4e4afda9077dfde7",
+      "solver_log": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/solver.stdout.log",
+      "solver_log_sha256": "97f85f05c1a0c8a24a7ca26b9bd4193c4c1e56207dcb27a21ad97e044db2c208",
+      "source": "mdbc/04_Dambreak",
+      "source_case": "CaseDamBreak3D",
+      "source_definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "source_definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7"
+    }
+  ],
+  "read_only_lab_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab",
+  "schema": "ds-data-02.f1.source-audit.v1"
+}

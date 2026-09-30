@@ -1,0 +1,53 @@
+{
+  "background": "asymmetric_dual_channel",
+  "comparison": {
+    "acceptable_starting_budget": {
+      "event_time_fraction_of_sqrt_H_over_g": 0.02,
+      "macro_relative": 0.05
+    },
+    "integrator_and_save_are_separate_factors": true,
+    "promotion": "Record native dt statistics and compare macro observables plus event markers; do not call a downsampled trajectory an integration study.",
+    "same_background_recipe": true,
+    "same_geometry_and_initial_state": true,
+    "save_and_integration_budget_each_max_fraction": 0.2
+  },
+  "controls": [
+    {
+      "control_id": "dual_native_dt_save010",
+      "purpose": "reference adaptive integration and official save cadence",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.01
+    },
+    {
+      "control_id": "dual_fixed_dt_half_save010",
+      "purpose": "independent integration check at half the nominal initial step after runner records native DtIni",
+      "solver_parameter_overrides": {
+        "DtFixed": "runner_bound_half_native_DtIni",
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.01
+    },
+    {
+      "control_id": "dual_native_dt_save005",
+      "purpose": "independent output cadence check with identical integration controls",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.005
+    }
+  ],
+  "family_id": "F1",
+  "physical_case_id": "F1_REF_DUAL_NOMINAL",
+  "qualification_claim": "none",
+  "reason_selected": "mDBC dual-channel geometry has the larger wall-normal stencil and the longer complete event window; it is the sensitivity case.",
+  "resolution": "medium",
+  "schema": "ds-data-02.f1.integration-save-study.v1",
+  "status": "planned_not_run"
+}
