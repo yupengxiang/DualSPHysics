@@ -1,0 +1,217 @@
+{
+  "family_id": "F3",
+  "freeze_before_launch": {
+    "event_operator": "finite surface segment locator from event_definitions.json",
+    "physical_scales": {
+      "L_m": 0.9,
+      "T_gravity_s": 0.302891266408,
+      "U_m_s": 2.971363323459
+    },
+    "reconstruction_operator": "native particle mass weighted spatial bins and fixed physical window; no posthoc path projection",
+    "sampling": "all native saved fluid states for complete cases; derived views inherit parent split",
+    "thresholds": {
+      "event_time_fraction_of_feature_time": 0.02,
+      "initial_mass_relative_tolerance": 0.01,
+      "integration_error_fraction_of_total": 0.2,
+      "major_macro_relative_error": 0.05,
+      "sampling_error_fraction_of_total": 0.2
+    },
+    "uncertainty": "report finite-wall/solver-loss/unknown masses and censored events rather than assigning zero"
+  },
+  "holdout_design": {
+    "control_holdout": "new smooth time template or inter-axis phase is held out by control_family_id",
+    "geometry_holdout": "new channel layout and baffle offset are held out by geometry_family_id",
+    "historical_scope": "legacy single-axis fixed-acceleration cases remain a preserved source family and are excluded from new-mechanism holdout claims",
+    "training_support": "amplitude, frequency/natural-frequency ratio and fill fraction vary within each mechanism using frozen control/geometry hash families"
+  },
+  "integration_step_study": {
+    "cases": [
+      {
+        "integration_variant": "native_dt",
+        "mechanism_id": "dual_axis_phase",
+        "output_interval_s": 0.005,
+        "resolution_id": "medium",
+        "time_window_s": [
+          0.0,
+          10.0
+        ]
+      },
+      {
+        "integration_variant": "registered_dtmin_half",
+        "mechanism_id": "dual_axis_phase",
+        "output_interval_s": 0.005,
+        "resolution_id": "medium",
+        "time_window_s": [
+          0.0,
+          10.0
+        ]
+      },
+      {
+        "integration_variant": "native_dt",
+        "mechanism_id": "eccentric_baffle_exchange",
+        "output_interval_s": 0.005,
+        "resolution_id": "medium",
+        "time_window_s": [
+          0.0,
+          10.0
+        ]
+      },
+      {
+        "integration_variant": "registered_dtmin_half",
+        "mechanism_id": "eccentric_baffle_exchange",
+        "output_interval_s": 0.005,
+        "resolution_id": "medium",
+        "time_window_s": [
+          0.0,
+          10.0
+        ]
+      }
+    ],
+    "rules": [
+      "record actual dt_min_s, dt_max_s, median dt and total native steps from solver receipt",
+      "hold geometry/control/output cadence fixed while changing integration control",
+      "do not call output downsampling an integration-step study",
+      "Q-N remains pending until both full event-window state and step study are complete"
+    ],
+    "status": "planned_no_solver"
+  },
+  "major_observables": [
+    {
+      "formula": "M_forward(t), M_backward(t), M_net(t)=M_forward-M_backward",
+      "name": "左右/前后或分舱交换质量",
+      "observable_id": "exchange_mass",
+      "primary": true,
+      "tolerance": "5% macro budget plus event-time budget"
+    },
+    {
+      "formula": "count and mass of signed crossing events per initial source label",
+      "name": "重复通过与往返比例",
+      "observable_id": "repeat_crossing",
+      "primary": true,
+      "tolerance": "event interval error <=2% feature time where crossing is observed"
+    },
+    {
+      "formula": "robust free-surface quantiles and mass-weighted COM; fit phase only on declared periodic segment",
+      "name": "液面/质心幅值、相位和长时漂移",
+      "observable_id": "surface_com_phase",
+      "primary": true,
+      "tolerance": "amplitude and phase reported with fit residual and drift interval"
+    },
+    {
+      "formula": "mass-normalized fixed-scale 3D occupancy histogram and axial marginals",
+      "name": "三维分布",
+      "observable_id": "distribution_3d",
+      "primary": true,
+      "tolerance": "TV and common-support mass; resolution panel is required before Q-N"
+    },
+    {
+      "formula": "mass-weighted mean velocity, covariance, and 0.5*sum(m*|v|^2)",
+      "name": "速度和动能",
+      "observable_id": "velocity_energy",
+      "primary": true,
+      "tolerance": "5% macro budget; report native valid denominator"
+    },
+    {
+      "formula": "native no-penetration/shifting flags and counts from solver receipt; no inferred correction",
+      "name": "边界修正使用量",
+      "observable_id": "boundary_correction_usage",
+      "primary": false,
+      "tolerance": "descriptive gate, never hidden"
+    }
+  ],
+  "physical_axes": {
+    "drive_amplitude": {
+      "parameter": "dimensionless acceleration amplitude Gamma=a/g",
+      "planned_levels": [
+        0.6,
+        0.9,
+        1.2
+      ],
+      "role": "within-background amplitude axis; freeze against the actual continuous control file before launch",
+      "unit": "a/g"
+    },
+    "fill_fraction": {
+      "parameter": "initial fluid volume / usable tank volume",
+      "planned_levels": [
+        0.18,
+        0.27,
+        0.36
+      ],
+      "role": "continuous initial-state axis; history is approximately 0.18 and does not certify the other levels",
+      "unit": "fraction"
+    },
+    "frequency_over_natural": {
+      "parameter": "drive angular frequency / measured small-amplitude natural angular frequency",
+      "planned_levels": [
+        0.8,
+        1.0,
+        1.2
+      ],
+      "role": "resonant and off-resonant control axis; estimate natural frequency from the same geometry and fill fraction",
+      "unit": "ratio"
+    }
+  },
+  "qualification_status": "definition_frozen_for_review; no new Q-N claim",
+  "sampling_cadence_study": {
+    "base_output_interval_s": 0.0025,
+    "derived_cadences_s": [
+      0.005,
+      0.01
+    ],
+    "rules": [
+      "high-frequency trajectory is the parent; derived views are not new physical cases",
+      "finite event locator runs on parent saved intervals before downsampling",
+      "compare crossing time, exchange mass, COM phase and energy against parent",
+      "report actual final timestamp and control coverage; never pad beyond input"
+    ],
+    "status": "planned_no_solver"
+  },
+  "schema": "ds-data-02.f3.observation_plan.v1",
+  "secondary_observables": [
+    "initial representative volume, total mass, COM and effective depth by resolution",
+    "valid/invalid/lost/open-exit/closed-wall/unknown mass ledger per frame",
+    "tank-frame and world-frame COM/velocity for moving-tank cases"
+  ],
+  "two_by_three_reference_matrix": {
+    "comparison": "same control, same initial state and event frame across resolutions; no direct inheritance of old gate",
+    "matrix": [
+      {
+        "dp_m": 0.01,
+        "mechanism_id": "dual_axis_phase",
+        "resolution_id": "coarse",
+        "status": "planned_no_solver"
+      },
+      {
+        "dp_m": 0.0075,
+        "mechanism_id": "dual_axis_phase",
+        "resolution_id": "medium",
+        "status": "planned_no_solver"
+      },
+      {
+        "dp_m": 0.006,
+        "mechanism_id": "dual_axis_phase",
+        "resolution_id": "fine",
+        "status": "planned_no_solver"
+      },
+      {
+        "dp_m": 0.012,
+        "mechanism_id": "eccentric_baffle_exchange",
+        "resolution_id": "coarse",
+        "status": "planned_no_solver"
+      },
+      {
+        "dp_m": 0.008,
+        "mechanism_id": "eccentric_baffle_exchange",
+        "resolution_id": "medium",
+        "status": "planned_no_solver"
+      },
+      {
+        "dp_m": 0.006,
+        "mechanism_id": "eccentric_baffle_exchange",
+        "resolution_id": "fine",
+        "status": "planned_no_solver"
+      }
+    ],
+    "minimum": "two mechanisms x three resolutions, same continuous initial condition and numerical strategy per mechanism"
+  }
+}
