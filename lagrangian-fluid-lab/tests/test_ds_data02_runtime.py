@@ -33,6 +33,18 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'attempt cap'):
             self.check()
 
+    def test_production_uses_its_own_attempt_cap_and_full_gpu_reservation(self):
+        self.request['kind'] = 'production'
+        self.ledger['attempts'] = [dict(id=str(i), kind='qualification', status='failed') for i in range(2)]
+        self.check()
+        self.ledger['attempts'] = [dict(id=str(i), kind='production', status='completed') for i in range(3)]
+        with self.assertRaisesRegex(RuntimeError, 'production'):
+            self.check()
+        self.ledger['attempts'] = []
+        self.ledger['charges'] = [dict(id='existing', gpu_seconds=90)]
+        with self.assertRaisesRegex(RuntimeError, 'gpu_seconds'):
+            self.check()
+
     def test_existing_attempt_cannot_be_reused(self):
         self.ledger['attempts'] = [dict(id=self.request['id'], kind='qualification', status='failed')]
         with self.assertRaisesRegex(RuntimeError, 'already registered'):

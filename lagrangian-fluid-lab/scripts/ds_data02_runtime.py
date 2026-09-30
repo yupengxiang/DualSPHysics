@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Shared DS-DATA-02 process, UUID-lease, and resource accounting runner.
 
-Qualification and bounded CPU work may run here. Production stays closed until
-the scientific scope validator is implemented; this module never grants Q-N.
+Qualification and bounded CPU work may run here. Production requires an exact
+root-approved scientific scope and successful native input QA; this runner
+never grants Q-N or counts a finished solver as an accepted data product.
 """
 from __future__ import annotations
 
@@ -207,8 +208,6 @@ def validate_request(request):
             raise ValueError(f'unsafe identity: {key}')
     if request['kind'] not in {'cpu', 'qualification', 'production'}:
         raise ValueError('invalid kind')
-    if request['kind'] == 'production':
-        raise RuntimeError('production_scope_validator_implementation_pending; qualification and CPU tasks remain executable')
     if request['kind'] == 'cpu' and request.get('cpu_task_kind') not in CPU_KINDS:
         raise ValueError('CPU task is outside the dataset-only allowlist')
     command = request['command']
@@ -216,11 +215,11 @@ def validate_request(request):
         raise ValueError('command must be an argv list, never shell text')
     if request['max_wall_seconds'] <= 0 or request['cpu_threads'] < 1 or request['estimated_storage_bytes'] < 0:
         raise ValueError('invalid resource request')
-    if request['kind'] == 'qualification':
+    if request['kind'] in {'qualification', 'production'}:
         if Path(command[0]).resolve() != SOLVER.resolve() or any(arg.startswith('-cpu') for arg in command[1:]):
-            raise ValueError('qualification must use the approved GPU solver')
+            raise ValueError('solver work must use the approved GPU solver')
         if request.get('estimated_peak_gpu_mib', 0) <= 0:
-            raise ValueError('qualification requires a GPU peak estimate')
+            raise ValueError('solver work requires a GPU peak estimate')
         preflight = json.loads(Path(request['gencase_receipt']).read_text())
         if preflight.get('returncode', preflight.get('gencase_returncode')) != 0:
             raise ValueError('GenCase did not complete successfully')
@@ -245,6 +244,9 @@ def validate_request(request):
         hashes[str(path)] = sha256(path)
     if not hashes:
         raise ValueError('input provenance is mandatory')
+    if request['kind'] == 'production':
+        from ds_data02_production import authorize
+        hashes.update(authorize(request))
     return hashes
 
 
@@ -277,7 +279,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
         raise FileExistsError(f'attempt output already exists: {output}')
     reservation = dict(id=attempt, kind=request['kind'], cpu_task_kind=request.get('cpu_task_kind'),
                        cpu_threads=request['cpu_threads'], cpu_core_seconds=request['cpu_threads'] * request['max_wall_seconds'],
-                       gpu_seconds=request['max_wall_seconds'] if request['kind'] == 'qualification' else 0,
+                       gpu_seconds=request['max_wall_seconds'] if request['kind'] in {'qualification', 'production'} else 0,
                        new_storage_bytes=request['estimated_storage_bytes'], reserved_at_utc=now(),
                        launcher_pid=os.getpid(), host=socket.gethostname())
     device = None
@@ -288,15 +290,17 @@ def run_request(request_path, *, data_root=DATA_ROOT):
     receipt = dict(schema='ds02.execution-receipt.v1', request=request,
                    request_sha256=sha256(request_path), input_hashes_at_launch=hashes,
                    runner_source=str(Path(__file__).resolve()), runner_sha256=sha256(__file__),
+                   runner_git_at_launch=git_launch_state(Path(__file__).resolve().parents[2]),
                    git_at_launch=git_launch_state(request['worktree_root']), started_at_utc=None,
-                   output_root=str(output), numerical_reference_status='not_assessed')
+                   output_root=str(output), numerical_reference_status='approved_scope_at_launch' if request['kind'] == 'production' else 'not_assessed',
+                   production_product_acceptance='not_assessed')
     try:
         with ledger_locked(data_root) as ledger:
             check_reservation(ledger, reservation, tree_bytes(data_root))
             free_disk = os.statvfs(data_root).f_bavail * os.statvfs(data_root).f_frsize
             if free_disk < request['estimated_storage_bytes'] + 2 * 1024 ** 3:
                 raise RuntimeError('insufficient filesystem headroom')
-            if request['kind'] == 'qualification':
+            if request['kind'] in {'qualification', 'production'}:
                 snapshot = inventory()
                 leases = list((data_root / 'leases').glob('*.json'))
                 leased_uuids = {json.loads(p.read_text())['uuid'] for p in leases}
