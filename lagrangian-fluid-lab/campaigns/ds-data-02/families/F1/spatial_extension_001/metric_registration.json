@@ -1,0 +1,35 @@
+{
+  "schema": "ds02.f1.spatial-extension-registration.v1",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "reason": "Existing 0.020/0.015/0.010 m references show substantial COM sensitivity and nonmonotone initial represented mass; retain them and add finer diagnostic levels before qualification.",
+  "qualified": false,
+  "independent_physical_case_increment": 0,
+  "existing_levels_m": [
+    0.02,
+    0.015,
+    0.01
+  ],
+  "additional_levels_m": [
+    0.0075,
+    0.005
+  ],
+  "same_continuous_geometry_initial_state_control": true,
+  "complete_window_s": 1.6,
+  "save_interval_s": 0.01,
+  "acceptance_before_new_results": {
+    "initial_fluid_mass_relative_to_continuous_geometry_max": 0.01,
+    "center_of_mass_xyz_max_absolute_error_over_H0": 0.05,
+    "position_quantiles_max_absolute_error_over_H0": 0.05,
+    "kinetic_energy_max_absolute_error_over_initial_MgH0": 0.05,
+    "split_and_destination_mass_error_over_initial_continuous_mass": 0.05,
+    "H0_m": 0.3,
+    "continuous_initial_mass_kg": 80.4,
+    "event_timing_absolute_error_s": 0.003497487083913345
+  },
+  "limitations": [
+    "No Richardson/GCI extrapolation assumed from nonmonotone initial sampling",
+    "Macro tolerances are registered engineering acceptance bounds, not universal solver accuracy",
+    "Output 0.01 s does not qualify timing; dense-save and integration controls required",
+    "Every production parameter endpoint/interior still requires domain evidence"
+  ]
+}

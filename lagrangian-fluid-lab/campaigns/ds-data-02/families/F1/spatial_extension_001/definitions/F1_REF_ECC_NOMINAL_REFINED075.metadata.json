@@ -1,0 +1,225 @@
+{
+  "attempt_id": null,
+  "background": "eccentric_obstacle",
+  "case_id": "F1_REF_ECC_NOMINAL_REFINED075",
+  "control_family_id": "F1_CONTROL_ECCENTRIC_OBSTACLE_V1",
+  "definition_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/spatial_extension_001/definitions/F1_REF_ECC_NOMINAL_REFINED075_Def.xml",
+  "definition_sha256": "e2f6524ab00bd5c721d75a3df12beae9d9c44618b450cd185f33a1ea8ad07d15",
+  "dp_m": 0.0075,
+  "error_budget": {
+    "applicability": {
+      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+      "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget."
+    },
+    "event_time_error_absolute_seconds_at_nominal_H0": 0.003497487083913345,
+    "event_time_error_fraction_of_characteristic_time": 0.02,
+    "event_time_scale": {
+      "characteristic_time_s": 0.17487435419566724,
+      "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+      "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+      "event_control_time_out_s": 0.001,
+      "event_control_within_save_budget": true,
+      "event_control_worst_case_snapshot_quantization_s": 0.0005,
+      "nominal_H0_m": 0.3,
+      "reference_matrix_time_out_s": 0.01,
+      "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+      "save_quantization_budget_s": 0.000699497416782669,
+      "starting_absolute_budget_s": 0.003497487083913345
+    },
+    "integration_fraction_of_total_error_budget_max": 0.2,
+    "macro_observable_relative_error": 0.05,
+    "save_fraction_of_total_error_budget_max": 0.2,
+    "status": "starting_engineering_budget_pending_reference_matrix"
+  },
+  "event_window": {
+    "characteristic_length_m": 0.3,
+    "characteristic_time_s": 0.17487435419566724,
+    "characteristic_velocity_m_s": 1.7155174146594956,
+    "complete_event_window_s": 1.6,
+    "phase_basis": "front travel and remerge milestones are conservative registration targets; acceptance requires observed native data, not these estimates.",
+    "phase_targets_s": {
+      "downstream_arrival": 0.95,
+      "first_obstacle_interaction": 0.45,
+      "release": 0.0,
+      "remerge_or_return_flow": 1.35,
+      "window_end": 1.6
+    },
+    "save_interval_s": 0.01
+  },
+  "family_id": "F1",
+  "feature_samples": 16.0,
+  "feature_scale_m": 0.12,
+  "generation_status": "definition_only_not_gencase_run",
+  "geometry": {
+    "finite_wall_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "fluid_length_m": 0.4,
+    "initial_depth_m": 0.3,
+    "initial_fluid_volume_m3": 0.0804,
+    "obstacle_height_m": 0.45,
+    "obstacle_length_m": 0.12,
+    "obstacle_offset_y_m": -0.035,
+    "obstacle_width_m": 0.12,
+    "obstacle_x_m": 0.9,
+    "obstacle_y_m": 0.24000000000000005,
+    "open_top": true,
+    "tank_height_m": 0.4,
+    "tank_length_m": 1.6,
+    "tank_width_m": 0.67
+  },
+  "geometry_family_id": "F1_GEOM_ECCENTRIC_OBSTACLE_V1",
+  "independent_physical_case_increment": 0,
+  "lineage_group_id": "F1_eccentric_obstacle_v1",
+  "mechanism_id": "eccentric_obstacle",
+  "metadata_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/spatial_extension_001/definitions/F1_REF_ECC_NOMINAL_REFINED075.metadata.json",
+  "metric_registration": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/spatial_extension_001/metric_registration.json",
+  "observables": {
+    "finite_downstream_plane": {
+      "axis": "x",
+      "crossings": "signed_net_and_separate_recrossings",
+      "placement_rule": "after_remerge_zone_before_downstream_wall"
+    },
+    "native_labels": [
+      "source_label",
+      "destination_time_series",
+      "first_passage_interval",
+      "residence_time",
+      "final_category",
+      "failure_reason",
+      "unknown_mass"
+    ],
+    "primary": [
+      "free_surface_front_quantiles_x_y_z",
+      "fluid_center_of_mass_xyz",
+      "split_fraction_time_series",
+      "downstream_finite_plane_first_arrival_and_net_mass",
+      "three_dimensional_mass_and_kinetic_energy_distribution"
+    ],
+    "secondary": [
+      "velocity_quantiles",
+      "return_flow_fraction",
+      "initial_mass_and_volume_error"
+    ],
+    "split_regions": [
+      "left_of_obstacle",
+      "right_of_obstacle"
+    ],
+    "time_window_required": "release, first interaction, bypass/split, downstream arrival, remerge, and at least one observable return-flow event"
+  },
+  "paired_background_id": "F1_REF_PAIR_NOMINAL",
+  "parameter_values": {
+    "h_ratio": 1.0,
+    "obstacle_offset_y_m": -0.035,
+    "obstacle_width_m": 0.12,
+    "reservoir_length_m": 0.4
+  },
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "production_status": "not_produced",
+  "qualification_status": "unqualified_until_native_reference_evidence",
+  "recipe_id": "F1_DBC_ECCENTRIC_V1",
+  "resolution": "diagnostic_refined075",
+  "resolution_role": "additional_spatial_reference",
+  "schema": "ds-data-02.f1.generator.v1",
+  "solver_parameters": {
+    "CoefDtMin": 0.05,
+    "DensityDT": 2,
+    "DensityDTvalue": 0.1,
+    "DtAllParticles": 0,
+    "DtFixed": 0,
+    "DtIni": 0,
+    "DtMin": 0,
+    "FtPause": 0,
+    "Kernel": 1,
+    "MinFluidStop": 0,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 0,
+    "Shifting": 0,
+    "StepAlgorithm": 1,
+    "TimeMax": "1.6",
+    "TimeOut": "0.01",
+    "VerletSteps": 40,
+    "Visco": 0.1,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1
+  },
+  "source_mother": {
+    "actual_successful_run": {
+      "boundary": "DBC",
+      "complete_event_evidence": false,
+      "coordinate_components": 3,
+      "dp_m": 0.02,
+      "finite_wall_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "fixed_particles": 7846,
+      "fluid_particles": 9600,
+      "frame_count": 7,
+      "initial_flow_direction": "+x",
+      "initial_fluid_extent_m": [
+        0.38,
+        0.62,
+        0.28
+      ],
+      "initial_particle_bounds_m": [
+        [
+          0.03,
+          0.03,
+          0.03
+        ],
+        [
+          0.41,
+          0.65,
+          0.31
+        ]
+      ],
+      "initial_particle_extent_m": [
+        0.38,
+        0.62,
+        0.28
+      ],
+      "initial_particle_stats_csv": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/attempt-001/csv/Particles_stats.csv",
+      "nominal_initial_fluid_fill_box_extent_m": [
+        0.4,
+        0.67,
+        0.3
+      ],
+      "open_top": true,
+      "solver_dimension": "3D",
+      "tank_extent_m": [
+        1.6,
+        0.67,
+        0.4
+      ],
+      "time_max_s": 0.6,
+      "time_out_s": 0.1,
+      "total_particles": 17446
+    },
+    "gencase_log": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/gencase.stdout.log",
+    "gencase_log_sha256": "4e3c1977f2f14abebfa8ec7b1e8751059d43fb0a70f034cecf3a49a503a0e231",
+    "mother_id": "official_v54_eccentric_obstacle",
+    "official_source_parameters": {
+      "complete_event_window_role": "source_recipe_upper_bound",
+      "time_max_s": 1.6,
+      "time_out_s": 0.01
+    },
+    "particle_stats_csv_sha256": "09700bfddb43e169c3144c235887889591ae1edcaf45e326afc603bfa93204c7",
+    "solver_log": "campaigns/ds-data-01/d02/canaries/F1_main_dambreak3d/solver.stdout.log",
+    "solver_log_sha256": "72a6ea4626498748823f8aec1418d64790e87c7a887fc6858299037214ced7a4",
+    "source": "main/01_DamBreak",
+    "source_case": "CaseDambreak",
+    "source_definition": "vendor/official/DualSPHysics_v5.4/examples/main/01_DamBreak/CaseDambreak_Def.xml",
+    "source_definition_sha256": "a6bec7c5d3ece69ffcc72e1c3d7395da017dc0bf119b4cab5eae41400a24cbdd"
+  },
+  "view_id": "native_full_state"
+}
