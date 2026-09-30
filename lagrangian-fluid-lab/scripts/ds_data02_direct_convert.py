@@ -731,13 +731,6 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
         h5.flush()
         h5.close()
         h5 = None
-        source_unchanged = _ensure_source_unchanged(data_root, before_manifest)
-        if not source_unchanged["unchanged"]:
-            raise DirectConversionError("raw BI4 source tree changed during read-only conversion")
-        with h5py.File(partial, "r+") as completed_h5:
-            completed_h5.attrs["source_raw_tree_sha256_after"] = source_unchanged["after_tree_sha256"]
-            completed_h5.attrs["source_tree_unchanged"] = True
-            completed_h5.attrs["conversion_complete"] = True
         if run_partvtk:
             assert partvtk is not None
             validation_dir = validation_dir or output.parent / "partvtk-validation"
@@ -751,6 +744,15 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
                 validation.append(compare_partvtk_frame(partial, csv_path, index))
                 if not keep_validation_csv:
                     csv_path.unlink(missing_ok=True)
+        # Hash after decoder, PartVTK, and any reference comparison setup so
+        # the read-only claim covers the complete conversion attempt.
+        source_unchanged = _ensure_source_unchanged(data_root, before_manifest)
+        if not source_unchanged["unchanged"]:
+            raise DirectConversionError("raw BI4 source tree changed during read-only conversion")
+        with h5py.File(partial, "r+") as completed_h5:
+            completed_h5.attrs["source_raw_tree_sha256_after"] = source_unchanged["after_tree_sha256"]
+            completed_h5.attrs["source_tree_unchanged"] = True
+            completed_h5.attrs["conversion_complete"] = True
         reference_comparison = None
         if reference_hdf5 is not None:
             reference_comparison = compare_reference_hdf5(partial, reference_hdf5, particle_chunk=particle_chunk)
