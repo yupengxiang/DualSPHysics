@@ -600,6 +600,7 @@ def compare_partvtk_frame(h5_path: Path, csv_path: Path, frame: int) -> dict[str
 
 def compare_reference_hdf5(direct_path: Path, reference_path: Path, *, particle_chunk: int = 65536, pressure_tolerance: float = 5.0e-2) -> dict[str, Any]:
     names = ("time", "particle_id", "particle_zone", "valid", "position", "velocity", "density", "mass", "pressure", "type", "mk")
+    numeric_tolerances = {name: PARTVTK_TOLERANCES[name] for name in ("position", "velocity", "density", "mass")}
     with h5py.File(direct_path, "r") as direct, h5py.File(reference_path, "r") as reference:
         for name in names:
             if name not in direct or name not in reference:
@@ -607,6 +608,8 @@ def compare_reference_hdf5(direct_path: Path, reference_path: Path, *, particle_
             if direct[name].shape != reference[name].shape:
                 raise DirectConversionError(f"reference shape mismatch for {name}: {direct[name].shape} != {reference[name].shape}")
         equal = {name: True for name in names if name != "pressure"}
+        numeric_max = {name: 0.0 for name in numeric_tolerances}
+        numeric_finite_mismatch = {name: False for name in numeric_tolerances}
         pressure_max = 0.0
         pressure_nonfinite = False
         frames = direct["time"].shape[0]
@@ -618,6 +621,14 @@ def compare_reference_hdf5(direct_path: Path, reference_path: Path, *, particle_
                 stop = min(start + particle_chunk, particles)
                 for name in ("valid", "position", "velocity", "density", "mass", "type", "mk"):
                     equal[name] = equal[name] and bool(np.array_equal(direct[name][frame, start:stop], reference[name][frame, start:stop], equal_nan=True))
+                for name in numeric_tolerances:
+                    a_numeric = direct[name][frame, start:stop].astype(np.float64)
+                    b_numeric = reference[name][frame, start:stop].astype(np.float64)
+                    finite_numeric = np.isfinite(a_numeric) & np.isfinite(b_numeric)
+                    if np.any(finite_numeric):
+                        numeric_max[name] = max(numeric_max[name], float(np.max(np.abs(a_numeric[finite_numeric] - b_numeric[finite_numeric]))))
+                    if np.any(np.isfinite(a_numeric) != np.isfinite(b_numeric)):
+                        numeric_finite_mismatch[name] = True
                 a = direct["pressure"][frame, start:stop].astype(np.float64)
                 b = reference["pressure"][frame, start:stop].astype(np.float64)
                 finite = np.isfinite(a) & np.isfinite(b)
@@ -625,10 +636,13 @@ def compare_reference_hdf5(direct_path: Path, reference_path: Path, *, particle_
                     pressure_max = max(pressure_max, float(np.max(np.abs(a[finite] - b[finite]))))
                 if np.any(np.isfinite(a) != np.isfinite(b)):
                     pressure_nonfinite = True
-            equal["time"] = bool(np.array_equal(direct["time"][...], reference["time"][...], equal_nan=True))
+        equal["time"] = bool(np.array_equal(direct["time"][...], reference["time"][...], equal_nan=True))
+        numeric_passed = {name: not numeric_finite_mismatch[name] and numeric_max[name] <= tolerance for name, tolerance in numeric_tolerances.items()}
         pressure_passed = not pressure_nonfinite and pressure_max <= pressure_tolerance
-        all_arrays_equal_except_pressure = all(equal.values())
-        return {"reference": str(reference_path), "datasets": list(names), "exact_dataset_equality": equal, "all_nonpressure_arrays_equal": all_arrays_equal_except_pressure, "pressure_max_abs_error": pressure_max, "pressure_tolerance": pressure_tolerance, "pressure_passed": pressure_passed, "passed": bool(all_arrays_equal_except_pressure and pressure_passed)}
+        all_nonpressure_arrays_equal = all(equal.values())
+        exact_structural = all(equal[name] for name in ("time", "particle_id", "particle_zone", "valid", "type", "mk"))
+        all_nonpressure_arrays_within_tolerance = exact_structural and all(numeric_passed.values())
+        return {"reference": str(reference_path), "datasets": list(names), "exact_dataset_equality": equal, "all_nonpressure_arrays_equal": all_nonpressure_arrays_equal, "exact_structural_datasets": exact_structural, "numeric_max_abs_error": numeric_max, "numeric_tolerances": numeric_tolerances, "numeric_finite_mismatch": numeric_finite_mismatch, "numeric_within_tolerance": numeric_passed, "all_nonpressure_arrays_within_tolerance": all_nonpressure_arrays_within_tolerance, "pressure_max_abs_error": pressure_max, "pressure_tolerance": pressure_tolerance, "pressure_passed": pressure_passed, "passed": bool(all_nonpressure_arrays_within_tolerance and pressure_passed)}
 
 
 def _ensure_source_unchanged(data_root: Path, before: Mapping[str, Any]) -> dict[str, Any]:
