@@ -63,6 +63,7 @@ def _ledger(*, valid: bool = True) -> dict[str, object]:
         "idp": 0,
         "first_missing_frame": 2,
         "motive": "native_solver_excluded_numerical_unknown",
+        "motive_code": 1,
         "partvtkout_position_m": [0.1, 0.2, 0.3],
         "partvtkout_density_kg_m3": 998.5,
     }
@@ -101,3 +102,19 @@ def test_incomplete_native_loss_ledger_stays_structural_fail(tmp_path: Path) -> 
     assert report["q_i_status"] == "Q-I-structure-fail"
     assert "native_exclusion_ledger_incomplete" in report["structural_failures"]
     assert report["native_exclusion_ledger"]["status"] == "fail"
+
+
+def test_density_exclusion_is_accounted_without_relabeling_as_position_or_physical_exit(tmp_path):
+    trajectory, log = tmp_path / 'trajectory.h5', tmp_path / 'Run.out'
+    _write_trajectory(trajectory, excluded=True)
+    _write_log(log, excluded=1)
+    ledger = _ledger()
+    ledger['excluded_particles'][0]['motive_code'] = 2
+    ledger['excluded_particles'][0]['partvtkout_density_kg_m3'] = 699.0
+    ledger['runparts_counts'].update(npoutpos_sum=0, npoutrho_sum=1, npoutmov_sum=0)
+    report = audit_hdf5(trajectory, solver_log=log, metadata=_metadata(ledger=ledger), particle_chunk=2)
+    assert report['q_i_status'] == 'Q-I-structure-pass'
+    assert report['native_exclusion_ledger']['native_exclusion_is_numerical_unknown'] is True
+    ledger['runparts_counts']['npoutrho_sum'] = 0
+    report = audit_hdf5(trajectory, solver_log=log, metadata=_metadata(ledger=ledger), particle_chunk=2)
+    assert report['q_i_status'] == 'Q-I-structure-fail'

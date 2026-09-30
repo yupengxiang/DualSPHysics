@@ -41,8 +41,9 @@ def read_runparts(path):
     if not 0 < dtmin <= dtmax:
         raise ValueError('invalid actual native integration bounds')
     return dict(saved_frames=len(rows), initial_total_particles=initial, final_total_particles=final,
-                initial_fluid_particles=integer(rows[0]['NpfSim']), final_fluid_particles=integer(rows[-1]['NpfSim']),
-                initial_boundary_particles=integer(rows[0]['NpbSim']), final_boundary_particles=integer(rows[-1]['NpbSim']),
+                initial_native_npf_particles=integer(rows[0]['NpfSim']), final_native_npf_particles=integer(rows[-1]['NpfSim']),
+                initial_fixed_and_moving_particles=integer(rows[0]['NpbSim']), final_fixed_and_moving_particles=integer(rows[-1]['NpbSim']),
+                native_population_semantics='NpfSim includes fluid AND floating; NpbSim includes fixed AND moving (native JSph.cpp RunPARTs documentation)',
                 final_time_s=times[-1], births=births, excluded_interval_sums=out,
                 internal_steps=sum(integer(r['Steps']) for r in rows), actual_internal_dt_min_s=dtmin,
                 actual_internal_dt_max_s=dtmax,
@@ -67,6 +68,20 @@ def summarize(receipt_path):
         raise ValueError('native dimension or terminal exclusions missing')
     if integer(count.group(1)) != facts['excluded_interval_sums']['NpOut']:
         raise ValueError('terminal native log and full-interval exclusion sum disagree')
+    counts = {}
+    for key in ('CaseNfixed', 'CaseNmoving', 'CaseNfloat', 'CaseNfluid'):
+        match = re.search(r'\b' + key + r'\s*=\s*([0-9,]+)', text)
+        if match is None:
+            raise ValueError('actual native typed initial population missing: ' + key)
+        counts[key] = integer(match.group(1))
+    if counts['CaseNfluid'] + counts['CaseNfloat'] != facts['initial_native_npf_particles']:
+        raise ValueError('initial native NpfSim fluid/floating account does not close')
+    if counts['CaseNfixed'] + counts['CaseNmoving'] != facts['initial_fixed_and_moving_particles']:
+        raise ValueError('initial native NpbSim fixed/moving account does not close')
+    facts.update(initial_fluid_particles=counts['CaseNfluid'], initial_floating_particles=counts['CaseNfloat'],
+                 initial_fixed_particles=counts['CaseNfixed'], initial_moving_particles=counts['CaseNmoving'],
+                 final_fluid_particles=facts['final_native_npf_particles'] if counts['CaseNfloat'] == 0 else None,
+                 final_fluid_count_semantics='fluid-only without floating; with floating requires actual typed identity ledger')
     return dict(schema='ds02.native-window-accounting.v1',
                 case_id=receipt['request']['case_id'], attempt_id=receipt['request']['attempt_id'],
                 receipt=str(receipt_path), receipt_sha256=sha(receipt_path),

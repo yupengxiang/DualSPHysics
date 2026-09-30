@@ -593,6 +593,7 @@ def _native_exclusion_ledger_check(
         rows = []
         errors.append("excluded_particles_not_list")
     observed: dict[tuple[int, int], Mapping[str, Any]] = {}
+    motive_counts = {1: 0, 2: 0, 3: 0}
     for row in rows:
         if not isinstance(row, Mapping):
             errors.append("excluded_particle_record_not_mapping")
@@ -619,6 +620,16 @@ def _native_exclusion_ledger_check(
         motive = row.get("motive")
         if not isinstance(motive, str) or not motive.strip():
             errors.append(f"exclusion_motive_missing:{key[0]}:{key[1]}")
+        try:
+            motive_code = int(row['motive_code'])
+        except (KeyError, TypeError, ValueError):
+            motive_code = -1
+        # Native JSph.cpp SaveParticlesOut maps position/density/movement
+        # exclusions to 1/2/3. All remain numerical unknown, not physical exit.
+        if motive_code not in motive_counts:
+            errors.append(f"native_motive_code_invalid:{key[0]}:{key[1]}")
+        else:
+            motive_counts[motive_code] += 1
         try:
             position = np.asarray(row["partvtkout_position_m"], dtype=np.float64)
             density = float(row["partvtkout_density_kg_m3"])
@@ -647,10 +658,11 @@ def _native_exclusion_ledger_check(
         errors.append("solver_log_excluded_count_mismatch")
     if int(count_fields.get("npout_sum", -1)) != expected_count:
         errors.append("runparts_npout_count_mismatch")
-    if int(count_fields.get("npoutpos_sum", -1)) != expected_count:
-        errors.append("runparts_npoutpos_count_mismatch")
-    if int(count_fields.get("npoutrho_sum", -1)) != 0:
-        errors.append("runparts_npoutrho_count_mismatch")
+    for field, code in [('npoutpos_sum', 1), ('npoutrho_sum', 2), ('npoutmov_sum', 3)]:
+        if int(count_fields.get(field, 0 if field == 'npoutmov_sum' else -1)) != motive_counts[code]:
+            errors.append('runparts_' + field + '_count_mismatch')
+    if sum(motive_counts.values()) != expected_count:
+        errors.append('native_motive_total_mismatch')
     return {
         "mode": mode,
         "status": "pass" if not errors else "fail",
@@ -665,6 +677,7 @@ def _native_exclusion_ledger_check(
         "h5_full_timeline_frames": frames,
         "h5_full_timeline_checked": bool(ledger.get("h5_full_timeline_checked", False)),
         "runparts_counts": dict(count_fields),
+        "native_motive_counts": motive_counts,
         "native_exclusion_is_numerical_unknown": True,
         "physical_spill_classification": "separate_event_ledger_required",
     }
