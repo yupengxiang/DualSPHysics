@@ -88,6 +88,8 @@ def main() -> int:
         "D08_DATA_PREVIEW.json",
         "D08_RESOURCE_REPORT.md",
         "D08_RESOURCE_REPORT.json",
+        "D08_GEOMETRY_CONTROL_INDEX.md",
+        "D08_GEOMETRY_CONTROL_INDEX.json",
     ]
     artifacts = [artifact(CAMPAIGN_ROOT / name) for name in tracked_names]
     artifacts.extend([
@@ -137,6 +139,7 @@ def main() -> int:
         "d07_scientific_acceptance_not_assessed": d07.get("score_interface", {}).get("scientific_acceptance", {}).get("status") == "not_assessed",
         "d08_preview_present": all((CAMPAIGN_ROOT / name).is_file() for name in ("D08_DATA_PREVIEW.md", "D08_DATA_PREVIEW.json")),
         "d08_resource_report_present": all((CAMPAIGN_ROOT / name).is_file() for name in ("D08_RESOURCE_REPORT.md", "D08_RESOURCE_REPORT.json")),
+        "d08_geometry_control_index_present": all((CAMPAIGN_ROOT / name).is_file() for name in ("D08_GEOMETRY_CONTROL_INDEX.md", "D08_GEOMETRY_CONTROL_INDEX.json")),
         "learning_attempts": 0,
     }
     status = "complete_internal_handoff" if checks["d00_d07_compact_artifacts_present"] and checks["d05_conversion_complete"] else "pending_local_evidence_completion"
@@ -191,6 +194,7 @@ def main() -> int:
         "- D06 material tracer is optional and cannot gate native data.",
         "- D07 remains model-free and reports scientific acceptance as not assessed without external ground truth.",
         "- D08 includes a compact statistical preview and an observed resource report; large payloads remain local.",
+        "- D08 includes the geometry/control index with source lineage and explicit batch parameters.",
         "",
         "## Reproducibility",
         "",

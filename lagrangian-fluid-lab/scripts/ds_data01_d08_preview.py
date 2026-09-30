@@ -32,6 +32,8 @@ PREVIEW_JSON = CAMPAIGN_ROOT / "D08_DATA_PREVIEW.json"
 PREVIEW_MD = CAMPAIGN_ROOT / "D08_DATA_PREVIEW.md"
 RESOURCE_JSON = CAMPAIGN_ROOT / "D08_RESOURCE_REPORT.json"
 RESOURCE_MD = CAMPAIGN_ROOT / "D08_RESOURCE_REPORT.md"
+GEOMETRY_JSON = CAMPAIGN_ROOT / "D08_GEOMETRY_CONTROL_INDEX.json"
+GEOMETRY_MD = CAMPAIGN_ROOT / "D08_GEOMETRY_CONTROL_INDEX.md"
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -205,6 +207,63 @@ def build_resource(status: dict[str, Any], plan: dict[str, Any], run_summary: di
     }
 
 
+def build_geometry_control(d04: dict[str, Any], plan: dict[str, Any], run_summary: dict[str, Any]) -> dict[str, Any]:
+    run_by_id = {item.get("case_id"): item for item in run_summary.get("cases", [])}
+    lineage_cases = []
+    for item in sorted(d04.get("cases", []), key=lambda value: str(value.get("case_id", ""))):
+        lineage_cases.append({
+            "case_id": item.get("case_id"),
+            "family_id": item.get("family_id"),
+            "d04_role": item.get("d04_role"),
+            "dimension": item.get("dimension"),
+            "source": item.get("source"),
+            "source_lineage_id": item.get("source_lineage_id"),
+            "geometry_id": item.get("geometry_id"),
+            "geometry_basis": item.get("geometry_basis"),
+            "mechanism_id": item.get("mechanism_id"),
+            "trajectory_lineage_id": item.get("trajectory_lineage_id"),
+            "parameter_lineage_id": item.get("parameter_lineage_id"),
+            "resolution_lineage_id": item.get("resolution_lineage_id"),
+            "resolution_identity_complete": item.get("resolution_identity_complete"),
+            "parameter_axes": item.get("parameter_axes", {}),
+            "assigned_split": item.get("split", {}).get("assigned_split"),
+            "split_eligibility": item.get("split", {}).get("split_eligibility"),
+        })
+    batch_recipes = []
+    for item in sorted(plan.get("cases", []), key=lambda value: str(value.get("case_id", ""))):
+        run = run_by_id.get(item.get("case_id"), {})
+        batch_recipes.append({
+            "case_id": item.get("case_id"),
+            "parent_case_id": item.get("parent_case_id"),
+            "family": item.get("family"),
+            "d04_role": item.get("d04_role"),
+            "source": item.get("source"),
+            "base": item.get("base"),
+            "dimension": item.get("dimension"),
+            "dp": item.get("dp"),
+            "tmax": item.get("tmax"),
+            "tout": item.get("tout"),
+            "action": item.get("action"),
+            "gpu": run.get("gpu"),
+            "split": item.get("split"),
+            "release_role": item.get("release_role"),
+        })
+    return {
+        "schema": "ds-data-01.d08.geometry-control-index.v1",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+        "package_role": "internal_development_only",
+        "scope": "geometry, source recipe, parameter, motion/boundary control, and lineage metadata; no geometry reconstruction or material-lineage inference",
+        "control_policy": [
+            "source and base recipe fields are preserved from the official/custom case definition",
+            "dp, tmax, and tout are explicit batch parameters; missing values remain null",
+            "each case is atomic for trajectory, labels, and split inheritance",
+            "all current split assignments remain null because the D04 production gate is closed",
+        ],
+        "lineage_cases": lineage_cases,
+        "D05_batch_recipes": batch_recipes,
+    }
+
+
 def preview_markdown(preview: dict[str, Any]) -> str:
     lines = [
         "# DS-DATA-01 compact data preview",
@@ -250,6 +309,41 @@ def preview_markdown(preview: dict[str, Any]) -> str:
         "- `Q-I-structure-pass` is a numerical storage/schema gate, not an external scientific validation result.",
         "- `introduced_after_initial` and `initial_missing_at_final` are shown to expose open lifecycle and numerical loss behavior.",
         "- All D05 cases remain `internal_development_only` and `unassigned`; no train/validation/test release is implied.",
+    ])
+    return "\n".join(lines) + "\n"
+
+
+def geometry_markdown(index: dict[str, Any]) -> str:
+    lines = [
+        "# DS-DATA-01 geometry and control index",
+        "",
+        "This index preserves geometry/source lineage and explicit batch controls. It is metadata-only; it does not reconstruct geometry or infer material lineage.",
+        "",
+        "## D05 batch recipes",
+        "",
+        "| Case | Parent | Family | Role | Source | Base | dp | tmax | tout | Action | GPU |",
+        "|---|---|---|---|---|---|---:|---:|---:|---|---:|",
+    ]
+    for row in index["D05_batch_recipes"]:
+        lines.append(
+            f"| `{row['case_id']}` | `{row.get('parent_case_id') or '—'}` | {row.get('family') or '—'} | {row.get('d04_role') or '—'} | `{row.get('source') or '—'}` | `{row.get('base') or '—'}` | {row.get('dp') if row.get('dp') is not None else '—'} | {row.get('tmax') if row.get('tmax') is not None else '—'} | {row.get('tout') if row.get('tout') is not None else '—'} | {row.get('action') or '—'} | {row.get('gpu') if row.get('gpu') is not None else 'reuse'} |"
+        )
+    lines.extend([
+        "",
+        "## Lineage controls",
+        "",
+        "| Case | Geometry ID | Mechanism ID | Source lineage | Parameter lineage | Resolution complete | Split |",
+        "|---|---|---|---|---|---|---|",
+    ])
+    for row in index["lineage_cases"]:
+        lines.append(
+            f"| `{row['case_id']}` | `{row.get('geometry_id') or '—'}` | `{row.get('mechanism_id') or '—'}` | `{row.get('source_lineage_id') or '—'}` | `{row.get('parameter_lineage_id') or '—'}` | {row.get('resolution_identity_complete')} | {row.get('assigned_split') or 'unassigned'} |"
+        )
+    lines.extend([
+        "",
+        "## Control policy",
+        "",
+        *[f"- {item}" for item in index["control_policy"]],
     ])
     return "\n".join(lines) + "\n"
 
@@ -304,27 +398,35 @@ def main() -> int:
     conversion = load(D05_CONVERSION_PATH)
     preview = build_preview(atlas, d03, d04, plan, run_summary, conversion)
     resource = build_resource(status, plan, run_summary, conversion)
+    geometry_control = build_geometry_control(d04, plan, run_summary)
     if args.check:
         expected_preview = json.loads(PREVIEW_JSON.read_text(encoding="utf-8")) if PREVIEW_JSON.is_file() else None
         expected_resource = json.loads(RESOURCE_JSON.read_text(encoding="utf-8")) if RESOURCE_JSON.is_file() else None
-        if expected_preview is None or expected_resource is None:
-            raise SystemExit("missing generated preview/resource report")
+        expected_geometry = json.loads(GEOMETRY_JSON.read_text(encoding="utf-8")) if GEOMETRY_JSON.is_file() else None
+        if expected_preview is None or expected_resource is None or expected_geometry is None:
+            raise SystemExit("missing generated preview/resource/geometry-control report")
         if expected_preview.get("coverage") != preview.get("coverage"):
             raise SystemExit("preview coverage is stale")
         if expected_resource.get("D05_resource_totals") != resource.get("D05_resource_totals"):
             raise SystemExit("resource totals are stale")
-        print(json.dumps({"status": "pass", "preview": rel(PREVIEW_JSON), "resource": rel(RESOURCE_JSON)}, ensure_ascii=False, indent=2))
+        if len(expected_geometry.get("lineage_cases", [])) != len(geometry_control.get("lineage_cases", [])):
+            raise SystemExit("geometry-control lineage index is stale")
+        print(json.dumps({"status": "pass", "preview": rel(PREVIEW_JSON), "resource": rel(RESOURCE_JSON), "geometry_control": rel(GEOMETRY_JSON)}, ensure_ascii=False, indent=2))
         return 0
     atomic_write(PREVIEW_JSON, preview)
     atomic_write(RESOURCE_JSON, resource)
+    atomic_write(GEOMETRY_JSON, geometry_control)
     PREVIEW_MD.write_text(preview_markdown(preview), encoding="utf-8")
     RESOURCE_MD.write_text(resource_markdown(resource), encoding="utf-8")
+    GEOMETRY_MD.write_text(geometry_markdown(geometry_control), encoding="utf-8")
     print(json.dumps({
         "status": "written",
         "preview_json": rel(PREVIEW_JSON),
         "preview_markdown": rel(PREVIEW_MD),
         "resource_json": rel(RESOURCE_JSON),
         "resource_markdown": rel(RESOURCE_MD),
+        "geometry_control_json": rel(GEOMETRY_JSON),
+        "geometry_control_markdown": rel(GEOMETRY_MD),
     }, ensure_ascii=False, indent=2))
     return 0
 
