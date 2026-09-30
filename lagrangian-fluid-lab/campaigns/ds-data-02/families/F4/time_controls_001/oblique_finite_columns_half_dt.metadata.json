@@ -1,0 +1,271 @@
+{
+  "schema": "ds02.f4.definition.v1",
+  "family_id": "F4",
+  "mechanism_id": "oblique_finite_columns",
+  "geometry_family_id": "F4_oblique_finite_columns_finite_geometry_v1",
+  "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+  "recipe_id": "F4_oblique_finite_columns_native_dbc_v1",
+  "resolution": "fine",
+  "dp_m": 0.02,
+  "stage": "canary",
+  "time_variant": "half_dt",
+  "gravity_m_s2": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "density_kg_m3": 1000.0,
+  "continuum_geometry": {
+    "tank": {
+      "low": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        1.2,
+        0.4,
+        0.6
+      ]
+    },
+    "closed_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "open_faces": [
+      "top"
+    ]
+  },
+  "initialization_rule": {
+    "name": "center_lattice_balanced_count_v1",
+    "mass_policy": "native_rho_dp_cubed_no_rescaling",
+    "purpose": "remove inclusive-edge overcount in historical raw drawboxes",
+    "continuum_geometry_is_frozen": true
+  },
+  "controls": {
+    "step_algorithm": "Verlet",
+    "verlet_steps": 40,
+    "kernel": "Wendland",
+    "viscosity": 0.08,
+    "density_dt": 2,
+    "density_dt_value": 0.1,
+    "boundary": "DBC",
+    "cfl": 0.1,
+    "time_variant": "half_dt",
+    "time_max_s": 1.2,
+    "output_interval_s": 0.001,
+    "native_source_output_interval_s": 0.05,
+    "independent_controls": {
+      "native": {
+        "cfl": 0.2,
+        "output_interval_s": 0.001
+      },
+      "half_dt": {
+        "cfl": 0.1,
+        "output_interval_s": 0.001
+      },
+      "half_save": {
+        "cfl": 0.2,
+        "output_interval_s": 0.0005
+      }
+    }
+  },
+  "parameters": {
+    "edge_gap_m": 0.52,
+    "transverse_speed_m_per_s": 0.25,
+    "right_y_offset_m": 0.0,
+    "column_length_x_m": 0.22
+  },
+  "finite_initial_mass": true,
+  "open_inlet": false,
+  "periodic_boundary": false,
+  "qualification_status": "definition_only_until_real_gencase_and_solver_receipts",
+  "claims_excluded": [
+    "air_entrainment",
+    "droplet_or_spray_truth",
+    "capillary_breakup",
+    "material_identity_beyond_native_source_label"
+  ],
+  "observables": [
+    "precontact_center_of_mass_trajectory",
+    "first_contact_time",
+    "maximum_spread_or_deflection_extent",
+    "source_mass_fraction_in_destination_region",
+    "finite_plane_first_passage_and_residence",
+    "recontact_or_transport_completion_time",
+    "active_mass_and_linear_momentum_accounting"
+  ],
+  "case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+  "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+  "lineage_group_id": "oblique_finite_columns_frozen_geometry_control_domain",
+  "paired_background_id": "oblique_finite_columns",
+  "geometry": {
+    "left_column": {
+      "low_m": [
+        0.12,
+        0.04,
+        0.24
+      ],
+      "size_m": [
+        0.22,
+        0.16,
+        0.18
+      ],
+      "mkfluid": 0
+    },
+    "right_column": {
+      "low_m": [
+        0.86,
+        0.2,
+        0.24
+      ],
+      "size_m": [
+        0.22,
+        0.16,
+        0.18
+      ],
+      "mkfluid": 1
+    },
+    "wall_box": {
+      "low": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": [
+        1.2,
+        0.4,
+        0.6
+      ]
+    },
+    "native_boxes": {
+      "left_column": {
+        "source_name": "left_column",
+        "continuous_low_m": [
+          0.12,
+          0.04,
+          0.24
+        ],
+        "continuous_size_m": [
+          0.22,
+          0.16,
+          0.18
+        ],
+        "first_center_m": [
+          0.12,
+          0.04,
+          0.24
+        ],
+        "draw_size_m": [
+          0.2,
+          0.14,
+          0.16
+        ],
+        "counts": [
+          11,
+          8,
+          9
+        ],
+        "fluid_y_layers": 8,
+        "continuous_volume_m3": 0.0063360000000000005,
+        "native_volume_m3": 0.0063360000000000005,
+        "continuous_mass_kg": 6.336,
+        "native_mass_kg": 6.336,
+        "relative_mass_error": 0.0,
+        "particle_mass_kg": 0.008000000000000002,
+        "mass_rescaling": false
+      },
+      "right_column": {
+        "source_name": "right_column",
+        "continuous_low_m": [
+          0.86,
+          0.2,
+          0.24
+        ],
+        "continuous_size_m": [
+          0.22,
+          0.16,
+          0.18
+        ],
+        "first_center_m": [
+          0.86,
+          0.2,
+          0.24
+        ],
+        "draw_size_m": [
+          0.2,
+          0.14,
+          0.16
+        ],
+        "counts": [
+          11,
+          8,
+          9
+        ],
+        "fluid_y_layers": 8,
+        "continuous_volume_m3": 0.0063360000000000005,
+        "native_volume_m3": 0.0063360000000000005,
+        "continuous_mass_kg": 6.336,
+        "native_mass_kg": 6.336,
+        "relative_mass_error": 0.0,
+        "particle_mass_kg": 0.008000000000000002,
+        "mass_rescaling": false
+      }
+    }
+  },
+  "initial_state": {
+    "velocities_m_per_s": {
+      "mkfluid:0": [
+        1.0,
+        0.25,
+        0.0
+      ],
+      "mkfluid:1": [
+        -1.0,
+        -0.25,
+        0.0
+      ]
+    },
+    "source_labels": {
+      "mkfluid:0": "left_column",
+      "mkfluid:1": "right_column"
+    },
+    "initial_mass_by_source_kg": {
+      "left_column": 6.336,
+      "right_column": 6.336
+    },
+    "initial_mass_total_kg": 12.672,
+    "continuum_mass_by_source_kg": {
+      "left_column": 6.336,
+      "right_column": 6.336
+    }
+  },
+  "event_window": {
+    "time_start_s": 0.0,
+    "time_end_s": 1.2,
+    "sequence": [
+      "separated_initial_state",
+      "first_column_contact",
+      "maximum_deflection",
+      "recontact_or_merge",
+      "transport_tail"
+    ],
+    "expected_first_contact_range_s": [
+      0.15,
+      0.4
+    ],
+    "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring"
+  },
+  "scale_contract": {
+    "L_m": 0.16,
+    "U_m_per_s": 1.0307764064044151,
+    "T_s": 0.15522280002325312,
+    "event_time_error_budget_s": 0.0031044560004650622,
+    "macro_error_budget_fraction": 0.05,
+    "temporal_allocation_each_fraction": 0.2,
+    "threshold_policy": "all spatial regions and plane bands are max(3*dp,0.02 m); no single-particle topology"
+  }
+}
