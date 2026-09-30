@@ -455,7 +455,11 @@ def _dual_xml(case: Mapping[str, Any]) -> str:
           <fillbox x="2.1" y="0.1" z="0.2">
             <modefill>void</modefill>
             <point x="{_q(g["reservoir_start_x_m"])}" y="0" z="0" />
-            <size x="{_q(g["reservoir_length_m"])}" y="{_q(g["tank_width_m"])}" z="{_q(g["initial_depth_m"])}" />
+            <!-- Extend the fill box beyond the finite right wall.  The
+                 v5.4 fill flood needs an exterior overlap to seed all
+                 connected void cells; ending exactly on the wall produces
+                 a successful GenCase with zero fluid particles. -->
+            <size x="{_q(g["reservoir_length_m"] + g["fillbox_overrun_m"])}" y="{_q(g["tank_width_m"])}" z="{_q(g["initial_depth_m"])}" />
           </fillbox>
         </mainlist>
       </commands>
@@ -630,6 +634,10 @@ def _case_geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]
             "channel_width_lower_m": lower,
             "channel_width_upper_m": tank_w - lower - thickness,
             "channel_width_ratio_lower_to_upper": lower / (tank_w - lower - thickness),
+            # The official mDBC mother deliberately extends its initial
+            # fillbox past the finite right wall.  GenCase's void flood
+            # otherwise returns code 0 while emitting no fluid particles.
+            "fillbox_overrun_m": 0.172,
             "initial_fluid_volume_m3": reservoir_length * tank_w * initial_depth,
             "finite_wall_faces": list(MOTHERS[background].wall_faces) + ["separator_top", "separator_sides"],
             "open_top": True,
@@ -699,16 +707,33 @@ def _observables(background: str) -> dict[str, Any]:
 
 def _error_budget(background: str) -> dict[str, Any]:
     H0 = 0.30 if background == "eccentric_obstacle" else 0.55
+    characteristic_time = math.sqrt(H0 / G)
+    event_time_budget = 0.02 * characteristic_time
+    save_budget = 0.20 * event_time_budget
+    event_control_save_interval = 0.001
     return {
         "status": "starting_engineering_budget_pending_reference_matrix",
         "macro_observable_relative_error": 0.05,
         "event_time_error_fraction_of_characteristic_time": 0.02,
-        "event_time_error_absolute_seconds_at_nominal_H0": 0.02 * math.sqrt(H0 / G),
+        "event_time_error_absolute_seconds_at_nominal_H0": event_time_budget,
         "save_fraction_of_total_error_budget_max": 0.20,
         "integration_fraction_of_total_error_budget_max": 0.20,
+        "event_time_scale": {
+            "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+            "nominal_H0_m": H0,
+            "characteristic_time_s": characteristic_time,
+            "starting_absolute_budget_s": event_time_budget,
+            "save_quantization_budget_s": save_budget,
+            "reference_matrix_time_out_s": 0.01,
+            "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+            "event_control_time_out_s": event_control_save_interval,
+            "event_control_worst_case_snapshot_quantization_s": event_control_save_interval / 2.0,
+            "event_control_within_save_budget": event_control_save_interval / 2.0 <= save_budget,
+            "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+        },
         "applicability": {
             "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget.",
-            "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g); it is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+            "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
         },
     }
 
@@ -881,6 +906,7 @@ def preflight_definition(
         errors.append("unexpanded GenCase variable remains in definition")
 
     metadata: dict[str, Any] | None = None
+    dual_fillbox_crosses_right_wall = True
     if metadata_path is None:
         guess = path.with_name(path.name.replace("_Def.xml", ".metadata.json"))
         metadata_path = guess if guess.is_file() else None
@@ -897,6 +923,18 @@ def preflight_definition(
         minimum_samples = 6.0 if background == "eccentric_obstacle" else 3.0
         if samples < minimum_samples:
             errors.append(f"feature resolution {samples:.3g} is below the {minimum_samples:g}-sample floor")
+        if background == "asymmetric_dual_channel":
+            fillbox = commands.find(".//fillbox") if commands is not None else None
+            try:
+                fill_point = fillbox.find("point") if fillbox is not None else None
+                fill_size = fillbox.find("size") if fillbox is not None else None
+                tank_length = float(metadata["geometry"]["tank_length_m"])
+                fill_end = float(fill_point.attrib["x"]) + float(fill_size.attrib["x"])
+                dual_fillbox_crosses_right_wall = fill_end > tank_length + 1e-9
+            except (KeyError, TypeError, ValueError, AttributeError):
+                dual_fillbox_crosses_right_wall = False
+            if not dual_fillbox_crosses_right_wall:
+                errors.append("dual-channel fillbox must extend beyond the finite right wall for the v5.4 void flood")
         if metadata.get("source_mother", {}).get("source_definition_sha256") is None:
             errors.append("official source Definition hash is absent")
         if require_source_evidence:
@@ -922,6 +960,7 @@ def preflight_definition(
             "complete_event_window_bound": not any("TimeMax" in error or "0.6" in error for error in errors),
             "no_periodic_topology": "periodic" not in commands_text.lower(),
             "feature_resolution": not any("feature resolution" in error for error in errors),
+            "dual_fillbox_crosses_right_wall": dual_fillbox_crosses_right_wall,
             "official_lineage": not any("official source" in error for error in errors),
         },
         "errors": errors,
@@ -1028,6 +1067,14 @@ def integration_save_plan(output_dir: str | Path) -> dict[str, Any]:
                 "solver_parameter_overrides": {"DtFixed": 0, "DtIni": 0, "DtMin": 0},
                 "time_out_s": 0.005,
             },
+            {
+                "control_id": "dual_native_dt_event_save001",
+                "purpose": "complete-window high-frequency output required to resolve the 2% characteristic-time event budget",
+                "solver_parameter_overrides": {"DtFixed": 0, "DtIni": 0, "DtMin": 0},
+                "time_out_s": 0.001,
+                "timing_qualification": True,
+                "worst_case_snapshot_quantization_s": 0.0005,
+            },
         ],
         "comparison": {
             "same_geometry_and_initial_state": True,
@@ -1035,7 +1082,14 @@ def integration_save_plan(output_dir: str | Path) -> dict[str, Any]:
             "integrator_and_save_are_separate_factors": True,
             "acceptable_starting_budget": {"macro_relative": 0.05, "event_time_fraction_of_sqrt_H_over_g": 0.02},
             "save_and_integration_budget_each_max_fraction": 0.20,
-            "promotion": "Record native dt statistics and compare macro observables plus event markers; do not call a downsampled trajectory an integration study.",
+            "reference_matrix_role": "The .01 s complete-window matrix is a raw macro-observable reference; it carries no event-time qualification claim.",
+            "event_time_gate": "Run the .001 s control over the complete event window, record native dt statistics, bracket threshold crossings, and verify snapshot quantization plus integration differences within the frozen budget before promoting event timing.",
+            "cost_accounting": {
+                "save_interval_ratio_event_control_to_reference": 0.1,
+                "expected_frame_multiplier_event_control": 10.0,
+                "storage_and_conversion_must_be_reserved": True,
+            },
+            "promotion": "Compare native integration, half-native integration, and the .001 s event-output control; do not call a downsampled trajectory an integration study.",
         },
     }
     path = out / "integration_save_plan.json"
@@ -1251,7 +1305,10 @@ The historical 0.6 s runs have seven frames and are canary evidence only.  The
 reference matrix therefore binds 1.6 s for the eccentric obstacle and 6.0 s for
 the dual-channel event, with the mother save cadence of 0.01 s.  It contains
 two backgrounds at coarse/medium/fine Dp values chosen from local feature
-scales; Dp is not a metadata-only label.
+scales; Dp is not a metadata-only label.  The dual initial fillbox extends
+0.172 m beyond the finite right wall, matching the official mDBC flood-fill
+pattern; ending at the wall is a GenCase zero-fluid failure even with return
+code 0.
 
 `case_registry.jsonl` has 48 candidate physical cases (24 per background).
 They are pre-registrations: no row claims a solver attempt, HDF5, labels,
@@ -1259,7 +1316,9 @@ preview, Q-I, Q-N, or production status.  `integration_save_plan.json` keeps
 the sensitive dual-channel medium case for separate native-dt, half-dt, and
 save-cadence checks.  The starting engineering budgets are 5% for macro
 observables and 2% of sqrt(H0/g) for event times; they are not universal SPH
-tolerances.
+tolerances.  The 0.01 s matrix output is raw macro reference only; event-time
+qualification requires a complete-window 0.001 s control (worst-case snapshot
+quantisation 0.0005 s) and a recorded half-native-dt integration comparison.
 
 Next executable task: obtain the shared CPU reservation, run GenCase only for
 the six definitions, bind actual generated XML and particle counts, then submit
@@ -1457,6 +1516,52 @@ def write_runner_request(
     gencase_path.write_text(json.dumps(gencase_request, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     request["gencase_request"] = str(gencase_path)
     request["gencase_request_sha256"] = sha256_file(gencase_path)
+
+    # Keep the second mechanism independently executable as well.  This is a
+    # CPU GenCase request only; solver/GPU authority remains with the shared
+    # runner and the request is bound to the same source/input hashes.
+    second = next(row for row in matrix["matrix"] if row["case_id"] == "F1_REF_DUAL_NOMINAL_COARSE")
+    second_meta = Path(second["metadata_path"])
+    second_mother = next(row for row in source["mother_cases"] if row["source"] == "mdbc/04_Dambreak")
+    dual_gencase_request = {
+        "schema": "ds-data-02.runner.request.v1",
+        "family_id": FAMILY_ID,
+        "case_id": "F1_REF_DUAL_NOMINAL_COARSE",
+        "attempt_id": "gencase-ref-dual-coarse-v1",
+        "kind": "cpu",
+        "cpu_task_kind": "gencase",
+        "command": [
+            str(gencase_binary),
+            str(Path(second["definition_path"]).with_suffix("")),
+            "{attempt_root}/F1_REF_DUAL_NOMINAL_COARSE",
+            "-save:all",
+        ],
+        "cwd": str(gencase_binary.parent),
+        "max_wall_seconds": 120,
+        "cpu_threads": 4,
+        "estimated_storage_bytes": 256 * 1024 * 1024,
+        "input_files": [
+            str(Path(second["definition_path"])),
+            str(Path(source["read_only_lab_root"]) / second_mother["source_definition"]),
+            str(Path(second_mother["gencase_log"] if Path(second_mother["gencase_log"]).is_absolute() else Path(source["read_only_lab_root"]) / second_mother["gencase_log"])),
+            str(Path(second_mother["solver_log"] if Path(second_mother["solver_log"]).is_absolute() else Path(source["read_only_lab_root"]) / second_mother["solver_log"])),
+            str(Path(second_mother["actual_successful_run"]["initial_particle_stats_csv"] if Path(second_mother["actual_successful_run"]["initial_particle_stats_csv"]).is_absolute() else Path(source["read_only_lab_root"]) / second_mother["actual_successful_run"]["initial_particle_stats_csv"])),
+            str(second_meta),
+            str(SCRIPT_PATH),
+        ],
+        "worktree_root": str(CURRENT_WORKTREE),
+        "launch_commit": launch_commit or _git_commit(),
+        "source_mother": second_mother["mother_id"],
+        "definition_sha256": second["definition_sha256"],
+        "generation_status": "definition_written_not_gencase_run",
+        "solver_launch_forbidden": True,
+        "raw_output_root": str(Path(data_attempt_root).expanduser().resolve()),
+        "request_note": "Submit through scripts/ds_data02_runtime.py; do not run this argv directly. The shared runner creates the external attempt root and records the actual GenCase particle counts.",
+    }
+    dual_gencase_path = family / "gencase_dual_request.json"
+    dual_gencase_path.write_text(json.dumps(dual_gencase_request, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    request["gencase_dual_request"] = str(dual_gencase_path)
+    request["gencase_dual_request_sha256"] = sha256_file(dual_gencase_path)
     return request
 
 

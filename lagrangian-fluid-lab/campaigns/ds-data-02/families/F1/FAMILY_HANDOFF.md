@@ -18,7 +18,10 @@ The historical 0.6 s runs have seven frames and are canary evidence only.  The
 reference matrix therefore binds 1.6 s for the eccentric obstacle and 6.0 s for
 the dual-channel event, with the mother save cadence of 0.01 s.  It contains
 two backgrounds at coarse/medium/fine Dp values chosen from local feature
-scales; Dp is not a metadata-only label.
+scales; Dp is not a metadata-only label.  The dual initial fillbox extends
+0.172 m beyond the finite right wall, matching the official mDBC flood-fill
+pattern; ending at the wall is a GenCase zero-fluid failure even with return
+code 0.
 
 `case_registry.jsonl` has 48 candidate physical cases (24 per background).
 They are pre-registrations: no row claims a solver attempt, HDF5, labels,
@@ -26,7 +29,9 @@ preview, Q-I, Q-N, or production status.  `integration_save_plan.json` keeps
 the sensitive dual-channel medium case for separate native-dt, half-dt, and
 save-cadence checks.  The starting engineering budgets are 5% for macro
 observables and 2% of sqrt(H0/g) for event times; they are not universal SPH
-tolerances.
+tolerances.  The 0.01 s matrix output is raw macro reference only; event-time
+qualification requires a complete-window 0.001 s control (worst-case snapshot
+quantisation 0.0005 s) and a recorded half-native-dt integration comparison.
 
 Next executable task: obtain the shared CPU reservation, run GenCase only for
 the six definitions, bind actual generated XML and particle counts, then submit
