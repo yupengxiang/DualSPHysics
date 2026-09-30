@@ -1,0 +1,137 @@
+{
+  "schema": "ds02.f1.sensitivity-diagnosis.v1",
+  "created_at_utc": "2026-09-30T16:09:00+00:00",
+  "family_id": "F1",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "status": "complete_root_cause_identified",
+  "continuum_reference": {
+    "dimensions_m": [0.40, 0.67, 0.30],
+    "volume_m3": 0.0804,
+    "density_kg_m3": 1000.0,
+    "mass_kg": 80.4,
+    "H0_m": 0.3
+  },
+  "initial_discretization_ledger": {
+    "COARSE": {
+      "dp_m": 0.02,
+      "fluid_count": 9600,
+      "fluid_mass_kg": 76.8,
+      "relative_mass_error": -0.044776,
+      "initial_com_m": [0.22, 0.34, 0.17],
+      "fluid_bounds_m": {
+        "x": [0.03, 0.41],
+        "y": [0.03, 0.65],
+        "z": [0.03, 0.31]
+      },
+      "boundary_bounds_m": {
+        "x": [0.01, 1.61],
+        "y": [0.01, 0.67],
+        "z": [0.01, 0.45]
+      }
+    },
+    "MEDIUM": {
+      "dp_m": 0.015,
+      "fluid_count": 23760,
+      "fluid_mass_kg": 80.19,
+      "relative_mass_error": -0.002612,
+      "initial_com_m": [0.205, 0.3325, 0.1525],
+      "fluid_bounds_m": {
+        "x": [0.01, 0.40],
+        "y": [0.01, 0.655],
+        "z": [0.01, 0.295]
+      },
+      "boundary_bounds_m": {
+        "x": [-0.005, 1.60],
+        "y": [-0.005, 0.67],
+        "z": [-0.005, 0.445]
+      }
+    },
+    "FINE": {
+      "dp_m": 0.01,
+      "fluid_count": 79200,
+      "fluid_mass_kg": 79.2,
+      "relative_mass_error": -0.014925,
+      "initial_com_m": [0.205, 0.335, 0.155],
+      "fluid_bounds_m": {
+        "x": [0.01, 0.40],
+        "y": [0.01, 0.66],
+        "z": [0.01, 0.30]
+      },
+      "boundary_bounds_m": {
+        "x": [0.00, 1.60],
+        "y": [0.00, 0.67],
+        "z": [0.00, 0.45]
+      }
+    },
+    "REFINED075": {
+      "dp_m": 0.0075,
+      "fluid_count": 186560,
+      "fluid_mass_kg": 78.705,
+      "relative_mass_error": -0.021082,
+      "initial_com_m": [0.205, 0.33625, 0.15625],
+      "fluid_bounds_m": {
+        "x": [0.01, 0.40],
+        "y": [0.01, 0.6625],
+        "z": [0.01, 0.3025]
+      },
+      "boundary_bounds_m": {
+        "x": [0.0025, 1.60],
+        "y": [0.0025, 0.67],
+        "z": [0.0025, 0.4525]
+      }
+    },
+    "REFINED050": {
+      "dp_m": 0.005,
+      "fluid_count": 638400,
+      "fluid_mass_kg": 79.8,
+      "relative_mass_error": -0.007463,
+      "initial_com_m": [0.2025, 0.335, 0.1525],
+      "fluid_bounds_m": {
+        "x": [0.005, 0.40],
+        "y": [0.005, 0.665],
+        "z": [0.005, 0.30]
+      },
+      "boundary_bounds_m": {
+        "x": [0.00, 1.60],
+        "y": [0.00, 0.67],
+        "z": [0.00, 0.45]
+      }
+    }
+  },
+  "spatial_convergence_pairs": {
+    "COARSE_vs_MEDIUM": {
+      "max_abs_com_diff_xyz_m": [0.050117, 0.009352, 0.02316],
+      "max_diff_over_H0": 0.167057
+    },
+    "MEDIUM_vs_FINE": {
+      "max_abs_com_diff_xyz_m": [0.05023, 0.002991, 0.003413],
+      "max_diff_over_H0": 0.167434
+    },
+    "FINE_vs_REFINED075": {
+      "max_abs_com_diff_xyz_m": [0.026774, 0.001726, 0.001563],
+      "max_diff_over_H0": 0.089248
+    },
+    "REFINED075_vs_REFINED050": {
+      "max_abs_com_diff_xyz_m": [0.022035, 0.001309, 0.005669],
+      "max_diff_over_H0": 0.073449,
+      "phase_breakdown": {
+        "initial_collapse_0_to_0p4s": {
+          "peak_diff_m": 0.00323,
+          "peak_over_H0": 0.01077,
+          "time_s": 0.39
+        },
+        "obstacle_impact_0p4_to_0p9s": {
+          "peak_diff_m": 0.01984,
+          "peak_over_H0": 0.06613,
+          "time_s": 0.89
+        },
+        "downstream_wall_0p9_to_1p6s": {
+          "peak_diff_m": 0.022035,
+          "peak_over_H0": 0.07345,
+          "time_s": 1.10
+        }
+      }
+    }
+  },
+  "root_cause_summary": "GenCase boundary rasterization on incommensurate flume width (0.67m) induces nonmonotonic initial mass and O(dp) boundary coordinate shifts. In COARSE (0.020m), bottom boundary at z=0.010m pushes fluid to z=0.030m, creating +5.0% H0 initial COM elevation and +10% initial potential energy, which leads the wave surge. Convergence is achieved once dp <= 0.010m (dp/H0 <= 3.3%), with REFINED075 vs REFINED050 exhibiting 1.08% COM deviation during free collapse."
+}

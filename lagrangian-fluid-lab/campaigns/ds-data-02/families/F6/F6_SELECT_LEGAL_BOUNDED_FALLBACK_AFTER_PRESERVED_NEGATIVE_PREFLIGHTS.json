@@ -1,0 +1,93 @@
+{
+  "schema": "ds02.f6.fallback-selection.v1",
+  "created_at_utc": "2026-10-01T00:27:00+00:00",
+  "family_id": "F6",
+  "selected_fallback_id": "F6_OFFICIAL_SMALLBODY_FALLBACK_02",
+  "status": "legal_bounded_fallback_selected_and_approved",
+  "selection_basis": {
+    "official_provenance": "vendor/official/DualSPHysics_v5.4/examples/floating/01_Floating",
+    "contact_free_fsi": true,
+    "rigid_algorithm": 1,
+    "chrono_solver": false,
+    "actual_3d": true,
+    "finite_wall_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "physical_wall_planes_match": true,
+    "mechanical_preflight_pass": true
+  },
+  "negative_preflights_preserved": [
+    {
+      "phase": "QUAL_01_original_parent",
+      "failure_mode": "BoundaryOut +Y floating node excursion and mkbound=10 moving block omission",
+      "disposition": "preserved_as_negative_evidence"
+    },
+    {
+      "phase": "F6_INITIAL_MASS_ALIGNMENT_REPAIR_01",
+      "failure_mode": "construction fillbox shifted without lattice phase update; boundary support loss",
+      "disposition": "preserved_as_negative_evidence"
+    },
+    {
+      "phase": "F6_INITIAL_MASS_CELL_CENTER_REPAIR_02",
+      "failure_mode": "half-dp cell-centred origin shifted generated wall planes off physical container",
+      "disposition": "preserved_as_negative_evidence"
+    },
+    {
+      "phase": "F6_OFFICIAL_SMALLBODY_FALLBACK_01",
+      "failure_mode": "incomplete finite-wall faces and mismatched physical wall planes",
+      "disposition": "preserved_as_negative_evidence"
+    }
+  ],
+  "approved_cases": [
+    {
+      "case_id": "F6_OFFICIAL_SMALLBODY_SIMPLE_FREE_RESPONSE_F6_OFFICIAL_SMALLBODY_FALLBACK_02",
+      "mechanism_id": "simple_free_response",
+      "dp_m": 0.03,
+      "counts": {
+        "fixed": 15651,
+        "floating": 1872,
+        "fluid": 80814,
+        "moving": 0,
+        "total": 98337
+      },
+      "body": {
+        "mass_kg": 72.0,
+        "point_m": [1.70, 0.75, 0.56],
+        "size_m": [0.60, 0.50, 0.32],
+        "moments_of_inertia_kg_m2": [2.1144, 2.7744, 3.6600]
+      },
+      "continuous_mass_relative_error": -0.084271,
+      "reconciliation": "Mass deficit corresponds strictly to physical boundary standoff margin and floating body volume displacement; native particle mass is strictly 0.027 kg without artificial rescaling."
+    },
+    {
+      "case_id": "F6_OFFICIAL_SMALLBODY_WAVE_NO_CONTACT_F6_OFFICIAL_SMALLBODY_FALLBACK_02",
+      "mechanism_id": "wave_no_contact",
+      "dp_m": 0.03,
+      "counts": {
+        "fixed": 18676,
+        "floating": 1872,
+        "fluid": 99426,
+        "moving": 2940,
+        "total": 122914
+      },
+      "body": {
+        "mass_kg": 72.0,
+        "point_m": [1.70, 0.75, 0.56],
+        "size_m": [0.60, 0.50, 0.32],
+        "moments_of_inertia_kg_m2": [2.1144, 2.7744, 3.6600]
+      },
+      "continuous_mass_relative_error": -0.082066,
+      "reconciliation": "Mass deficit corresponds strictly to physical boundary standoff margin and floating body volume displacement; native particle mass is strictly 0.027 kg without artificial rescaling."
+    }
+  ],
+  "governance_decision": {
+    "root_approval": "granted",
+    "solver_qualification_authorized": true,
+    "production_claims_granted": false,
+    "scientific_scope": "official smallbody 3D contact-free FSI benchmark"
+  }
+}

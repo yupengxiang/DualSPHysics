@@ -1,0 +1,179 @@
+{
+  "schema": "ds02.f4.root-cause-review.v1",
+  "created_at_utc": "2026-10-01T00:24:00+00:00",
+  "family_id": "F4",
+  "status": "complete_root_cause_identified",
+  "q_n_status": "not_granted",
+  "mechanisms": [
+    {
+      "id": "F4_COL",
+      "name": "oblique_finite_columns",
+      "nominal_dimensions_m": [0.22, 0.12, 0.48],
+      "continuum_mass_kg": 12.672,
+      "relative_velocity_m_s": 0.50
+    },
+    {
+      "id": "F4_DROP",
+      "name": "finite_drop_pool",
+      "nominal_drop_velocity_m_s": -0.50,
+      "continuum_mass_kg": 59.072,
+      "pool_depth_m": 0.16
+    }
+  ],
+  "spatial_study": {
+    "reference_tier": "FINE",
+    "fine_dp_m": 0.02,
+    "budget_event_timing_fraction": 0.02,
+    "budget_macro_error_fraction": 0.05,
+    "cases": {
+      "F4_COL": {
+        "COARSE": {
+          "dp_m": 0.04,
+          "particles": 1733,
+          "initial_mass_kg": 12.288,
+          "mass_error_fraction": -0.030303,
+          "event_timing_offset_s": 0.059213,
+          "event_timing_budget_s": 0.003104,
+          "event_status": "fail_over_budget",
+          "max_normalized_error": 5.080373,
+          "max_error_metric": "right_column_spread_z_m",
+          "macro_status": "fail_over_macro_budget"
+        },
+        "MEDIUM": {
+          "dp_m": 0.03,
+          "particles": 3174,
+          "initial_mass_kg": 12.960,
+          "mass_error_fraction": 0.022727,
+          "event_timing_offset_s": 0.011175,
+          "event_timing_budget_s": 0.003104,
+          "event_status": "fail_over_budget",
+          "max_normalized_error": 4.565484,
+          "max_error_metric": "right_column_spread_z_m",
+          "macro_status": "fail_over_macro_budget"
+        },
+        "FINE": {
+          "dp_m": 0.02,
+          "particles": 7665,
+          "initial_mass_kg": 12.672,
+          "mass_error_fraction": 0.0,
+          "event_time_s": 0.227020,
+          "status": "reference_baseline"
+        }
+      },
+      "F4_DROP": {
+        "COARSE": {
+          "dp_m": 0.04,
+          "particles": 2469,
+          "initial_mass_kg": 59.392,
+          "mass_error_fraction": 0.005417,
+          "event_timing_offset_s": 0.021843,
+          "event_timing_budget_s": 0.002554,
+          "event_status": "fail_over_budget",
+          "max_normalized_error": 1.340311,
+          "max_error_metric": "falling_drop_spread_extent_m",
+          "macro_status": "fail_over_macro_budget"
+        },
+        "MEDIUM": {
+          "dp_m": 0.03,
+          "particles": 4844,
+          "initial_mass_kg": 58.050,
+          "mass_error_fraction": -0.017301,
+          "event_timing_offset_s": 0.001121,
+          "event_timing_budget_s": 0.002554,
+          "event_status": "within_budget",
+          "max_normalized_error": 1.954415,
+          "max_error_metric": "falling_drop_momentum_z_kg_m_s",
+          "macro_status": "fail_over_macro_budget"
+        },
+        "FINE": {
+          "dp_m": 0.02,
+          "particles": 13465,
+          "initial_mass_kg": 59.072,
+          "mass_error_fraction": 0.0,
+          "event_time_s": 0.172171,
+          "status": "reference_baseline"
+        }
+      }
+    }
+  },
+  "temporal_study": {
+    "baseline_resolution": "FINE",
+    "baseline_dt_save_s": 0.001,
+    "variants": {
+      "half_save": {
+        "dt_save_s": 0.0005,
+        "F4_COL": {
+          "event_timing_offset_s": -0.000486,
+          "max_normalized_error": 1.520441,
+          "max_error_metric": "right_column_spread_z_m",
+          "p95_normalized_error_max": 0.000231,
+          "chord_time_max_difference_s": 0.000067,
+          "chord_time_mass_weighted_mean_difference_s": 0.0000037,
+          "destination_disagreement_mass_kg": 0.0,
+          "destination_disagreement_fraction": 0.0,
+          "source_final_l1_difference_kg": 0.0
+        },
+        "F4_DROP": {
+          "event_timing_offset_s": 0.0,
+          "max_normalized_error": 0.009034,
+          "max_error_metric": "falling_drop_momentum_z_kg_m_s",
+          "p95_normalized_error_max": 0.000177,
+          "chord_time_max_difference_s": 0.000352,
+          "chord_time_mass_weighted_mean_difference_s": 0.000139,
+          "destination_disagreement_mass_kg": 0.0,
+          "destination_disagreement_fraction": 0.0,
+          "source_final_l1_difference_kg": 0.0
+        }
+      },
+      "half_dt": {
+        "cfl_factor": 0.5,
+        "F4_COL": {
+          "event_timing_offset_s": 0.000020,
+          "max_normalized_error": 2.892399,
+          "max_error_metric": "right_column_spread_z_m",
+          "p95_normalized_error_max": 0.289499,
+          "chord_time_max_difference_s": 0.717846,
+          "chord_time_mass_weighted_mean_difference_s": 0.022732,
+          "destination_disagreement_mass_kg": 0.400000,
+          "destination_disagreement_fraction": 0.031566,
+          "source_final_l1_difference_kg": 0.320000
+        },
+        "F4_DROP": {
+          "event_timing_offset_s": 0.000913,
+          "max_normalized_error": 0.048141,
+          "max_error_metric": "falling_drop_spread_extent_m",
+          "p95_normalized_error_max": 0.044900,
+          "chord_time_max_difference_s": 0.453280,
+          "chord_time_mass_weighted_mean_difference_s": 0.042368,
+          "destination_disagreement_mass_kg": 0.392000,
+          "destination_disagreement_fraction": 0.006636,
+          "source_final_l1_difference_kg": 0.176000
+        }
+      }
+    }
+  },
+  "root_causes": {
+    "grid_incommensurability": {
+      "mechanism": "Column width (0.22m) divided by coarse dp (0.04m) produces non-integer row counts (5.5 particles), causing asymmetric edge rasterization and -3.03% to +2.27% initial mass distortion.",
+      "impact": "Artificial initial momentum and potential energy offsets that propagate into collision dynamics."
+    },
+    "kernel_overlap_precontact": {
+      "mechanism": "Wendland smoothing kernel h ~ 1.5 - 2.0 dp creates interaction zones 0.12 - 0.16m wide at coarse resolution, generating repulsive pressure prior to physical boundary touch.",
+      "impact": "Pre-contact deceleration delays collision timing by +59.2ms (COL coarse) and +21.8ms (DROP coarse)."
+    },
+    "splash_sheet_under_resolution": {
+      "mechanism": "Vertical splashing sheet thickness delta ~ O(dp) is resolved by only 1-2 particles at dp >= 0.03m, where tensile blunting and numerical shear viscosity prevent high-velocity ejection.",
+      "impact": "Extreme spread_z discrepancies (5.08x budget for COL coarse, 4.56x for COL medium) while bulk COM and energy errors remain much smaller."
+    },
+    "stagnation_point_droplet_bifurcation": {
+      "mechanism": "The central collision interface forms a hydrodynamic stagnation line. Droplets near the separatrix undergo chaotic trajectory bifurcation under minute time-step perturbations (sub-millimeter shifts determine whether droplets eject immediately or circulate in the stagnation vortex).",
+      "impact": "Large single-droplet chord delays (0.45s - 0.72s) despite tight mass-weighted bulk convergence (22ms - 42ms) and < 3.2% destination disagreement."
+    }
+  },
+  "scientific_decision": {
+    "q_n_qualification": "not_granted",
+    "production_eligibility": "rejected_for_coarse_and_medium",
+    "negative_evidence_role": "Immutable baseline boundary condition; preserves actual physics of 3D splashing and droplet bifurcation.",
+    "future_refinement_requirement": "F4 convergence requires dp <= 0.010m (resolving splash sheets with >= 8 particles across thickness) and percentile-based macro envelope metrics."
+  }
+}

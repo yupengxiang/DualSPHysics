@@ -484,7 +484,13 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
     solver_root = Path(raw_solver_root).expanduser().resolve()
     if not solver_root.is_dir():
         raise ConversionError(f"solver output root is missing: {solver_root}")
-    solver_dir_candidates = [solver_root / "solver", solver_root / "solver_output", solver_root]
+    solver_dir_candidates = [
+        solver_root / "solver",
+        solver_root / "solver_output",
+        solver_root / case_id,
+        solver_root,
+        *[p for p in solver_root.iterdir() if p.is_dir()],
+    ]
     solver_dir = next((candidate for candidate in solver_dir_candidates
                        if (candidate / "Run.out").is_file() and (candidate / "RunPARTs.csv").is_file()), None)
     if solver_dir is None:
