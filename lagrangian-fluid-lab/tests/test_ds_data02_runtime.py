@@ -75,6 +75,30 @@ class RuntimeTests(unittest.TestCase):
                 ledger['charges'].append(dict(id='cpu', cpu_core_seconds=3))
             self.assertEqual(json.loads((root / 'runtime/resource-ledger.json').read_text())['charges'][0]['cpu_core_seconds'], 3)
 
+    def test_successful_gencase_with_no_fluid_cannot_launch_solver(self):
+        with tempfile.TemporaryDirectory() as directory:
+            receipt = Path(directory) / 'receipt.json'
+            request = dict(family_id='F1', case_id='ref', attempt_id='solver-1',
+                           kind='qualification', command=[str(runtime.SOLVER)], cwd=directory,
+                           worktree_root=directory, max_wall_seconds=30, cpu_threads=1,
+                           estimated_storage_bytes=100, estimated_peak_gpu_mib=100,
+                           gencase_receipt=str(receipt), input_files=[str(receipt)])
+            preflight = dict(returncode=0, total_particles=100, fluid_particles=0,
+                             solver_dimension_from_gencase=3)
+            receipt.write_text(json.dumps(preflight))
+            with self.assertRaisesRegex(ValueError, 'positive actual fluid'):
+                runtime.validate_request(request)
+            preflight.update(fluid_particles=20, solver_dimension_from_gencase=2)
+            receipt.write_text(json.dumps(preflight))
+            with self.assertRaisesRegex(ValueError, 'actual 3D'):
+                runtime.validate_request(request)
+            preflight['solver_dimension_from_gencase'] = 3
+            receipt.write_text(json.dumps(preflight))
+            self.assertIn(str(receipt), runtime.validate_request(request))
+            request['gencase_receipt_sha256'] = 'invalid'
+            with self.assertRaisesRegex(ValueError, 'receipt hash'):
+                runtime.validate_request(request)
+
 
 if __name__ == '__main__':
     unittest.main()

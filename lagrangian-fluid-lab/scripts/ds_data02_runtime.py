@@ -227,6 +227,14 @@ def validate_request(request):
         count = preflight.get('total_particles')
         if not isinstance(count, int) or count <= 0:
             raise ValueError('GenCase actual particle count is required')
+        fluid_count = preflight.get('fluid_particles')
+        if not isinstance(fluid_count, int) or fluid_count <= 0 or fluid_count > count:
+            raise ValueError('GenCase must contain a positive actual fluid particle count')
+        if preflight.get('solver_dimension_from_gencase') != 3:
+            raise ValueError('DS-DATA-02 core requires actual 3D GenCase evidence')
+        expected_hash = request.get('gencase_receipt_sha256')
+        if expected_hash and sha256(request['gencase_receipt']) != expected_hash:
+            raise ValueError('GenCase receipt hash differs from the registered request')
         if count > 5_000_000 and not request.get('oversize_cost_review'):
             raise ValueError('over five million particles requires explicit cost review')
     hashes = {}
@@ -271,6 +279,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
     started = None
     receipt = dict(schema='ds02.execution-receipt.v1', request=request,
                    request_sha256=sha256(request_path), input_hashes_at_launch=hashes,
+                   runner_source=str(Path(__file__).resolve()), runner_sha256=sha256(__file__),
                    git_at_launch=git_launch_state(request['worktree_root']), started_at_utc=None,
                    output_root=str(output), numerical_reference_status='not_assessed')
     try:
