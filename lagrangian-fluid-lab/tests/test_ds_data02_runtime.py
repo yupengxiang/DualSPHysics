@@ -62,6 +62,13 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             runtime.choose_gpu(snapshot, set(), 1000)
 
+    def test_leased_uuid_is_the_only_visible_cuda_device(self):
+        env = {'CUDA_VISIBLE_DEVICES': '0,1,2,3'}
+        command = runtime.bind_gpu_visibility(['solver', '-gpu:5', 'input', 'output'], env,
+                                             dict(index=5, uuid='GPU-leased'))
+        self.assertEqual(command, ['solver', '-gpu:0', 'input', 'output'])
+        self.assertEqual(env['CUDA_VISIBLE_DEVICES'], 'GPU-leased')
+
     def test_gencase_actual_counts_and_dimensions(self):
         text = 'Data2D=[1]\nFluid....: 12,957,384 id:(1-2)\nTotal particles: 15,027,060 (bound=2)'
         self.assertEqual(runtime.parse_gencase_output(text),

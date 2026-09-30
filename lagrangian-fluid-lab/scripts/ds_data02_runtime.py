@@ -258,6 +258,14 @@ def stop_own_process(proc):
             proc.wait()
 
 
+def bind_gpu_visibility(command, environment, device):
+    """Expose just the leased UUID; CUDA then numbers it as logical device 0."""
+    command = [arg for arg in command if not arg.startswith('-gpu')]
+    command.insert(1, '-gpu:0')
+    environment['CUDA_VISIBLE_DEVICES'] = device['uuid']
+    return command
+
+
 def run_request(request_path, *, data_root=DATA_ROOT):
     data_root = Path(data_root)
     request = json.loads(Path(request_path).read_text())
@@ -309,11 +317,12 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             # GenCase defaults to 16 threads even when OMP_NUM_THREADS is set.
             command = [arg for arg in command if not arg.startswith('-threads:')]
             command.append(f"-threads:{request['cpu_threads']}")
-        if device:
-            command = [arg for arg in command if not arg.startswith('-gpu')]
-            command.insert(1, f"-gpu:{device['index']}")
         command = [arg.replace('{attempt_root}', str(output)) for arg in command]
         env = os.environ.copy()
+        if device:
+            command = bind_gpu_visibility(command, env, device)
+            receipt['cuda_visible_devices'] = device['uuid']
+            receipt['cuda_logical_device'] = 0
         for name in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS'):
             env[name] = str(request['cpu_threads'])
         env['LD_LIBRARY_PATH'] = str(BIN_ROOT) + ':' + env.get('LD_LIBRARY_PATH', '')
