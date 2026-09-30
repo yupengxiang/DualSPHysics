@@ -1,0 +1,142 @@
+{
+  "schema": "ds-data-02.f2.commensurate-mass-semantics-correction.v1",
+  "scope_id": "F2_SCOPE_COMMENSURATE_CELLCENTER_V4",
+  "family_id": "F2",
+  "status": "strict_continuous_mass_gate_pending",
+  "qualification_claim": "none",
+  "production_claim": "none",
+  "consumed_evidence": {
+    "report_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CELL_AUDIT_V4E/commensurate-cellcenter-audit-v4e/report/commensurate-cellcenter-audit.json",
+    "report_sha256": "46c1e0523273d70b9e071df9bdb3b6804d8de506c5350abb550efe219be6d281",
+    "audit_script_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/f2_commensurate_audit.py",
+    "audit_script_sha256": "6d9fcc0527a246a81dd34593d6e23a8730ce1a10a6ec027804f4c2ea53ae94f4",
+    "report_and_audit_bytes_unchanged": true
+  },
+  "frozen_budgets": {
+    "strict_continuous_mass_relative_budget_fraction": 1e-12,
+    "strict_lattice_geometry_relative_budget_fraction": 1e-12,
+    "native_float32_serialization_relative_budget_fraction": 1e-12
+  },
+  "semantics": {
+    "continuous_mass_error": "fluid_mass_kg / expected_mass_kg - 1; expected_mass_kg is the exact continuous 0.32*0.24*0.32 m^3 volume times rho0=1000 kg/m^3",
+    "lattice_geometry_error": "expected_lattice_mass_kg / continuous_mass_kg - 1; this is the exact cell-centre population geometry error before output serialization",
+    "native_float32_serialization_error": "fluid_mass_kg / expected_native_float32_mass_kg - 1; expected_native_float32_mass_kg uses the serialized native particle mass and native count",
+    "report_mass_within_budget": "the consumed report field mass_within_budget evaluates only abs(native_storage_relative_error) against metadata.mass_error_budget_fraction; it is not a strict continuous-mass verdict",
+    "no_normalization": true,
+    "no_threshold_relaxation": true
+  },
+  "cases": [
+    {
+      "case_id": "F2_COMM4_CENTER_V1_COARSE",
+      "background": "center_catch",
+      "resolution": "coarse",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.576001152000092,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576001152,
+      "continuous_mass_relative_error": 4.6875003656410286e-08,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": 3.774758283725532e-15,
+      "strict_continuous_mass_verdict": "FAIL_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "blocked_on_strict_continuous_mass_gate"
+    },
+    {
+      "case_id": "F2_COMM4_CENTER_V1_MEDIUM",
+      "background": "center_catch",
+      "resolution": "medium",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.57600122879828,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576001228800003,
+      "continuous_mass_relative_error": 4.99999297520759e-08,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": -7.016609515630989e-14,
+      "strict_continuous_mass_verdict": "FAIL_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "blocked_on_strict_continuous_mass_gate"
+    },
+    {
+      "case_id": "F2_COMM4_CENTER_V1_FINE",
+      "background": "center_catch",
+      "resolution": "fine",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.576000000007053,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576,
+      "continuous_mass_relative_error": 2.8688162956314045e-13,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": 2.8688162956314045e-13,
+      "strict_continuous_mass_verdict": "PASS_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "mass_gate_passed_full_solver_qi_qn_pending"
+    },
+    {
+      "case_id": "F2_COMM4_OFFSET_V1_COARSE",
+      "background": "offset_spill",
+      "resolution": "coarse",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.576001152000092,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576001152,
+      "continuous_mass_relative_error": 4.6875003656410286e-08,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": 3.774758283725532e-15,
+      "strict_continuous_mass_verdict": "FAIL_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "blocked_on_strict_continuous_mass_gate"
+    },
+    {
+      "case_id": "F2_COMM4_OFFSET_V1_MEDIUM",
+      "background": "offset_spill",
+      "resolution": "medium",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.57600122879828,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576001228800003,
+      "continuous_mass_relative_error": 4.99999297520759e-08,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": -7.016609515630989e-14,
+      "strict_continuous_mass_verdict": "FAIL_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "blocked_on_strict_continuous_mass_gate"
+    },
+    {
+      "case_id": "F2_COMM4_OFFSET_V1_FINE",
+      "background": "offset_spill",
+      "resolution": "fine",
+      "continuous_mass_kg": 24.576,
+      "fluid_mass_kg": 24.576000000007053,
+      "expected_lattice_mass_kg": 24.576000000000004,
+      "expected_native_float32_mass_kg": 24.576,
+      "continuous_mass_relative_error": 2.8688162956314045e-13,
+      "lattice_geometry_relative_error": 2.220446049250313e-16,
+      "native_float32_serialization_relative_error": 2.8688162956314045e-13,
+      "strict_continuous_mass_verdict": "PASS_STRICT_CONTINUOUS_MASS",
+      "lattice_geometry_verdict": "PASS_STRICT_LATTICE_GEOMETRY",
+      "native_serialization_verdict": "PASS_NATIVE_SERIALIZATION",
+      "qualification_status": "mass_gate_passed_full_solver_qi_qn_pending"
+    }
+  ],
+  "summary": {
+    "strict_continuous_mass_failures": [
+      "F2_COMM4_CENTER_V1_COARSE",
+      "F2_COMM4_CENTER_V1_MEDIUM",
+      "F2_COMM4_OFFSET_V1_COARSE",
+      "F2_COMM4_OFFSET_V1_MEDIUM"
+    ],
+    "strict_continuous_mass_passes": [
+      "F2_COMM4_CENTER_V1_FINE",
+      "F2_COMM4_OFFSET_V1_FINE"
+    ],
+    "all_lattice_geometry_pass": true,
+    "all_native_serialization_pass": true,
+    "qualification_gap": "Four coarse/medium views fail the unchanged strict continuous-mass budget; fine views pass this one gate but all six still require actual solver full-state conversion, Q-I, independent internal integration/save evidence, and separate Q-N review.",
+    "not_a_qi_or_qn_verdict": true
+  }
+}

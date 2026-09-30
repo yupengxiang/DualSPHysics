@@ -105,3 +105,30 @@ def test_solver_requests_bind_completed_gencase_prefix_and_native_artifacts() ->
         assert request["gencase_artifacts"]["copied_motion"]["path"].endswith("_motion.dat")
         assert request["physical_condition_hash"]
         assert request["numerical_recipe_hash"]
+
+
+def test_mass_correction_keeps_continuous_and_native_serialization_gates_separate() -> None:
+    correction_path = SCOPE_ROOT / "mass_semantics_correction.json"
+    correction = json.loads(correction_path.read_text(encoding="utf-8"))
+    assert correction["status"] == "strict_continuous_mass_gate_pending"
+    assert correction["qualification_claim"] == "none"
+    assert correction["frozen_budgets"]["strict_continuous_mass_relative_budget_fraction"] == 1e-12
+    assert correction["semantics"]["no_threshold_relaxation"] is True
+    assert correction["semantics"]["no_normalization"] is True
+    assert "not a strict continuous-mass verdict" in correction["semantics"]["report_mass_within_budget"]
+    assert correction["consumed_evidence"]["report_and_audit_bytes_unchanged"] is True
+    cases = correction["cases"]
+    assert len(cases) == 6
+    strict_failures = [case for case in cases if case["strict_continuous_mass_verdict"].startswith("FAIL")]
+    strict_passes = [case for case in cases if case["strict_continuous_mass_verdict"].startswith("PASS")]
+    assert len(strict_failures) == 4
+    assert {case["resolution"] for case in strict_failures} == {"coarse", "medium"}
+    assert len(strict_passes) == 2
+    assert {case["resolution"] for case in strict_passes} == {"fine"}
+    assert all(case["lattice_geometry_verdict"] == "PASS_STRICT_LATTICE_GEOMETRY" for case in cases)
+    assert all(case["native_serialization_verdict"] == "PASS_NATIVE_SERIALIZATION" for case in cases)
+    coarse = next(case for case in cases if case["resolution"] == "coarse")
+    assert abs(coarse["fluid_mass_kg"] - 24.576001152) < 1e-12
+    assert coarse["continuous_mass_relative_error"] > 1e-12
+    assert abs(coarse["native_float32_serialization_relative_error"]) < 1e-12
+    assert correction["summary"]["not_a_qi_or_qn_verdict"] is True
