@@ -1,0 +1,118 @@
+{
+  "error_budget": {
+    "event_time_relative_to_characteristic_period": 0.02,
+    "freeze_before_solver": true,
+    "integrator_share": 0.2,
+    "primary_macro_observable_relative": 0.05,
+    "save_sampling_share": 0.2,
+    "spatial_discretization_share": 0.6
+  },
+  "family_id": "F6",
+  "independent_integrator_study": {
+    "background": "simple_free_response",
+    "dp_m": 0.06,
+    "same_geometry_control_window": true,
+    "status": "planned_pending_solver",
+    "variants": [
+      {
+        "DtFixed": 0.0,
+        "label": "native_adaptive"
+      },
+      {
+        "DtFixed": 0.0005,
+        "label": "fixed_half_millisecond"
+      }
+    ]
+  },
+  "independent_save_study": {
+    "background": "simple_free_response",
+    "downsampling_is_not_integrator_evidence": true,
+    "integration": "same native adaptive integrator",
+    "status": "planned_pending_solver",
+    "variants_s": [
+      0.025,
+      0.05,
+      0.1
+    ]
+  },
+  "physical_scales": {
+    "fluid_density_kg_m3": 1000.0,
+    "length_L_m": 0.8,
+    "time_T_s": "sqrt(L/g)",
+    "velocity_U_m_s": "sqrt(g*L) for dimensionless reporting"
+  },
+  "primary_observables": [
+    "equilibrium_draft",
+    "heave_and_orientation",
+    "natural_period",
+    "wave_response_amplitude",
+    "decay_ratio",
+    "fluid_mass_and_momentum",
+    "rigid_force_and_torque"
+  ],
+  "q_status": {
+    "Q_E": "optional Test14 or analytical displacement anchor; not a gate for Q-N",
+    "Q_I": "pending actual solver/native state",
+    "Q_N": "pending 2x3 and integrator/save comparisons"
+  },
+  "sampling": {
+    "event_detection": "linear interpolation between native frames; preserve censored and unknown categories",
+    "native_full_state": {
+      "floating_info": 0.01,
+      "forces": 0.01,
+      "position_velocity_density_pressure": 0.05
+    }
+  },
+  "schema": "ds-data-02.f6.observation_plan.v1",
+  "secondary_observables": [
+    "particle_type3_fluid_mass",
+    "particle_type2_floating_mass",
+    "fluid_source_destination",
+    "first_passage",
+    "residence_time",
+    "wall_clearance",
+    "contact_event_flag"
+  ],
+  "spatial_matrix": {
+    "simple_free_response": [
+      {
+        "dp_m": 0.08,
+        "feature_cells": 7,
+        "purpose": "initialization and cost bound",
+        "resolution_id": "coarse"
+      },
+      {
+        "dp_m": 0.06,
+        "feature_cells": 10,
+        "purpose": "parent qualification candidate",
+        "resolution_id": "medium"
+      },
+      {
+        "dp_m": 0.045,
+        "feature_cells": 14,
+        "purpose": "spatial reference",
+        "resolution_id": "fine"
+      }
+    ],
+    "wave_no_contact": [
+      {
+        "dp_m": 0.08,
+        "feature_cells": 7,
+        "purpose": "initialization and cost bound",
+        "resolution_id": "coarse"
+      },
+      {
+        "dp_m": 0.06,
+        "feature_cells": 10,
+        "purpose": "parent qualification candidate",
+        "resolution_id": "medium"
+      },
+      {
+        "dp_m": 0.045,
+        "feature_cells": 14,
+        "purpose": "spatial reference",
+        "resolution_id": "fine"
+      }
+    ]
+  }
+}

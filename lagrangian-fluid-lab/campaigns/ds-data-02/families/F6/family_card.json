@@ -1,0 +1,107 @@
+{
+  "family_id": "F6",
+  "generator": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6.py",
+    "version": "ds_data02_f6.v1"
+  },
+  "historical_reuse": {
+    "old_f6_1357m_identity_is_not_entry": true,
+    "reused_count": 0,
+    "strict_equivalence_required": true
+  },
+  "mechanisms": {
+    "simple_free_response": {
+      "control_family_id": "F6_CTRL_INITIAL_RELEASE",
+      "coordinate_frame_id": "tank_attached_inertial",
+      "description": "有限三维槽内箱浮体，初始偏离静水排水平衡后无外部驱动释放，观察 heave/roll/pitch 的衰减响应。",
+      "event_sequence": [
+        "initial_still_water",
+        "release_at_zero",
+        "first_downcrossing",
+        "successive_response_peaks",
+        "decay_tail",
+        "final_mass_and_momentum_audit"
+      ],
+      "geometry_family_id": "F6_BOX_TANK_FREE_BODY",
+      "mechanism_id": "simple_free_response",
+      "name_zh": "简单三维自由浮体响应",
+      "source_template": "main/11_Floating/CaseFloating_Def.xml"
+    },
+    "wave_no_contact": {
+      "control_family_id": "F6_CTRL_REGULAR_PISTON_WAVE",
+      "coordinate_frame_id": "world_tank_and_tank_attached_observations",
+      "description": "有限三维槽内 piston regular wave 激励自由箱浮体；浮体与侧壁、挡板和 Chrono 接触均不启用。",
+      "event_sequence": [
+        "initial_still_water",
+        "wave_ramp",
+        "first_wave_arrival",
+        "steady_wave_cycles",
+        "last_cycle_and_decay",
+        "final_mass_and_momentum_audit"
+      ],
+      "geometry_family_id": "F6_BOX_TANK_WAVE_PADDLE",
+      "mechanism_id": "wave_no_contact",
+      "name_zh": "无接触规则波浮体激励",
+      "source_template": "main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml"
+    }
+  },
+  "model_runtime_loaded": false,
+  "name": "自由浮体与水入体交互",
+  "pilot_sizes": [
+    8,
+    24,
+    48
+  ],
+  "quality_layers": {
+    "Q_E": "optional external/analytical anchor",
+    "Q_I": "actual generated 3D/native structure and rigid/fluid ledgers",
+    "Q_N": "recipe+domain+window+observable numeric reference"
+  },
+  "resolution_ladders": {
+    "simple_free_response": [
+      {
+        "dp_m": 0.08,
+        "feature_cells": 7,
+        "purpose": "initialization and cost bound",
+        "resolution_id": "coarse"
+      },
+      {
+        "dp_m": 0.06,
+        "feature_cells": 10,
+        "purpose": "parent qualification candidate",
+        "resolution_id": "medium"
+      },
+      {
+        "dp_m": 0.045,
+        "feature_cells": 14,
+        "purpose": "spatial reference",
+        "resolution_id": "fine"
+      }
+    ],
+    "wave_no_contact": [
+      {
+        "dp_m": 0.08,
+        "feature_cells": 7,
+        "purpose": "initialization and cost bound",
+        "resolution_id": "coarse"
+      },
+      {
+        "dp_m": 0.06,
+        "feature_cells": 10,
+        "purpose": "parent qualification candidate",
+        "resolution_id": "medium"
+      },
+      {
+        "dp_m": 0.045,
+        "feature_cells": 14,
+        "purpose": "spatial reference",
+        "resolution_id": "fine"
+      }
+    ]
+  },
+  "schema": "ds-data-02.f6.family_card.v1",
+  "solver_policy": "F6 owner never starts solver/GPU; only shared runtime may submit qualification requests",
+  "status": "definitions_frozen_parent_gencase_pending",
+  "target_independent_cases": 48,
+  "training_launch_allowed": false
+}
