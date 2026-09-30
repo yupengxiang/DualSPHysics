@@ -1087,6 +1087,18 @@ def _artifact_native_accounting(native_rows: Sequence[Mapping[str, Any]], solver
     return None
 
 
+def _solver_root_from_metadata(metadata: Mapping[str, Any]) -> Path:
+    source_binding = metadata.get("source_binding", {})
+    solver_log = source_binding.get("solver_log", {}) if isinstance(source_binding, Mapping) else {}
+    solver_log_path = solver_log.get("path") if isinstance(solver_log, Mapping) else None
+    if not solver_log_path:
+        raise ScienceAuditError("F4 metadata has no bound native solver log")
+    path = Path(str(solver_log_path)).resolve()
+    if path.name != "Run.out" or not path.is_file():
+        raise ScienceAuditError(f"bound native solver log is missing or not Run.out: {path}")
+    return path.parent
+
+
 def audit_manifest(
     *,
     manifest_path: Path,
@@ -1126,7 +1138,7 @@ def audit_manifest(
         if not isinstance(binding, Mapping):
             raise ScienceAuditError(f"metadata lacks physical binding: {metadata_path}")
         _, source_to_mk = _source_mapping(metadata)
-        solver_root = Path(metadata["solver_root"])
+        solver_root = _solver_root_from_metadata(metadata)
         runparts_path = solver_root / "RunPARTs.csv"
         partout_data = solver_root / "data"
         artifact_output = output_dir / "artifacts" / artifact_id
