@@ -12,11 +12,9 @@
 - Q-I、Q-N、production 严格 pending；不能用 Definition、canary、短预览或旧 training permission 代替实际 solver/native 证据。
 
 ## Actual parent evidence
-- Parent audit status: **pass**; F6 owner launched no solver/GPU.
-- Qualification requests: `qualification_requests/simple_free_response.json`, `qualification_requests/wave_no_contact.json`.
+
+- Parent audit status: **pending_or_fail**; F6 owner launched no solver/GPU.
+- Qualification requests: none until parent audit passes.
 - GenCase checks include actual 3D/data2d=false, positive type-3 fluid and type-2 floating ledgers, effective transverse layers, finite walls, control coverage, draft/density ratio, rigid mass/inertia, no Chrono/contact solver, and all input hashes.
-- Q-I/Q-N/production remain pending until root dispatches complete-window solver and postprocessors; the old 13.57M-identity candidate remains excluded from reuse.
-- Parent audit status: **pass**; F6 owner launched no solver/GPU.
-- Qualification requests: `qualification_requests/simple_free_response.json`, `qualification_requests/wave_no_contact.json`.
-- GenCase checks include actual 3D/data2d=false, positive type-3 fluid and type-2 floating ledgers, effective transverse layers, finite walls, control coverage, draft/density ratio, rigid mass/inertia, no Chrono/contact solver, and all input hashes.
+- The bounded final candidate is `parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02`; its separate CPU audit and root-only GPU requests remain pending solver review.
 - Q-I/Q-N/production remain pending until root dispatches complete-window solver and postprocessors; the old 13.57M-identity candidate remains excluded from reuse.
