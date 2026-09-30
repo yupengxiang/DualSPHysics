@@ -454,11 +454,10 @@ def _dual_xml(case: Mapping[str, Any]) -> str:
           <setmkfluid mk="0" />
           <fillbox x="2.1" y="0.1" z="0.2">
             <modefill>void</modefill>
-            <point x="{_q(g["reservoir_start_x_m"])}" y="0" z="0" />
-            <!-- Extend the fill box beyond the finite right wall.  The
-                 v5.4 fill flood needs an exterior overlap to seed all
-                 connected void cells; ending exactly on the wall produces
-                 a successful GenCase with zero fluid particles. -->
+            <point x="{_q(g["reservoir_start_x_m"] - g["fillbox_start_margin_m"])}" y="0" z="0" />
+            <!-- Bracket the separator end and finite right wall.  The v5.4
+                 void flood needs both overlaps; a box ending at either
+                 interface can return code 0 with zero fluid particles. -->
             <size x="{_q(g["reservoir_length_m"] + g["fillbox_overrun_m"])}" y="{_q(g["tank_width_m"])}" z="{_q(g["initial_depth_m"])}" />
           </fillbox>
         </mainlist>
@@ -635,8 +634,10 @@ def _case_geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]
             "channel_width_upper_m": tank_w - lower - thickness,
             "channel_width_ratio_lower_to_upper": lower / (tank_w - lower - thickness),
             # The official mDBC mother deliberately extends its initial
-            # fillbox past the finite right wall.  GenCase's void flood
-            # otherwise returns code 0 while emitting no fluid particles.
+            # fillbox across both the separator end and the finite right
+            # wall.  GenCase's void flood otherwise returns code 0 while
+            # emitting no fluid particles.
+            "fillbox_start_margin_m": 0.108,
             "fillbox_overrun_m": 0.172,
             "initial_fluid_volume_m3": reservoir_length * tank_w * initial_depth,
             "finite_wall_faces": list(MOTHERS[background].wall_faces) + ["separator_top", "separator_sides"],
@@ -907,6 +908,7 @@ def preflight_definition(
 
     metadata: dict[str, Any] | None = None
     dual_fillbox_crosses_right_wall = True
+    dual_fillbox_brackets_separator = True
     if metadata_path is None:
         guess = path.with_name(path.name.replace("_Def.xml", ".metadata.json"))
         metadata_path = guess if guess.is_file() else None
@@ -929,12 +931,18 @@ def preflight_definition(
                 fill_point = fillbox.find("point") if fillbox is not None else None
                 fill_size = fillbox.find("size") if fillbox is not None else None
                 tank_length = float(metadata["geometry"]["tank_length_m"])
-                fill_end = float(fill_point.attrib["x"]) + float(fill_size.attrib["x"])
+                separator_end = float(metadata["geometry"]["separator_end_x_m"])
+                fill_start = float(fill_point.attrib["x"])
+                fill_end = fill_start + float(fill_size.attrib["x"])
                 dual_fillbox_crosses_right_wall = fill_end > tank_length + 1e-9
+                dual_fillbox_brackets_separator = fill_start < separator_end - 1e-9
             except (KeyError, TypeError, ValueError, AttributeError):
                 dual_fillbox_crosses_right_wall = False
+                dual_fillbox_brackets_separator = False
             if not dual_fillbox_crosses_right_wall:
                 errors.append("dual-channel fillbox must extend beyond the finite right wall for the v5.4 void flood")
+            if not dual_fillbox_brackets_separator:
+                errors.append("dual-channel fillbox must overlap upstream of the separator end for the v5.4 void flood")
         if metadata.get("source_mother", {}).get("source_definition_sha256") is None:
             errors.append("official source Definition hash is absent")
         if require_source_evidence:
@@ -961,6 +969,7 @@ def preflight_definition(
             "no_periodic_topology": "periodic" not in commands_text.lower(),
             "feature_resolution": not any("feature resolution" in error for error in errors),
             "dual_fillbox_crosses_right_wall": dual_fillbox_crosses_right_wall,
+            "dual_fillbox_brackets_separator": dual_fillbox_brackets_separator,
             "official_lineage": not any("official source" in error for error in errors),
         },
         "errors": errors,
@@ -1305,10 +1314,10 @@ The historical 0.6 s runs have seven frames and are canary evidence only.  The
 reference matrix therefore binds 1.6 s for the eccentric obstacle and 6.0 s for
 the dual-channel event, with the mother save cadence of 0.01 s.  It contains
 two backgrounds at coarse/medium/fine Dp values chosen from local feature
-scales; Dp is not a metadata-only label.  The dual initial fillbox extends
-0.172 m beyond the finite right wall, matching the official mDBC flood-fill
-pattern; ending at the wall is a GenCase zero-fluid failure even with return
-code 0.
+scales; Dp is not a metadata-only label.  The dual initial fillbox starts
+0.108 m upstream of the separator end and extends 0.172 m beyond the finite
+right wall, matching the official mDBC flood-fill pattern; ending at either
+interface is a GenCase zero-fluid failure even with return code 0.
 
 `case_registry.jsonl` has 48 candidate physical cases (24 per background).
 They are pre-registrations: no row claims a solver attempt, HDF5, labels,

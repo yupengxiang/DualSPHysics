@@ -71,11 +71,10 @@
           <setmkfluid mk="0" />
           <fillbox x="2.1" y="0.1" z="0.2">
             <modefill>void</modefill>
-            <point x="2.1" y="0" z="0" />
-            <!-- Extend the fill box beyond the finite right wall.  The
-                 v5.4 fill flood needs an exterior overlap to seed all
-                 connected void cells; ending exactly on the wall produces
-                 a successful GenCase with zero fluid particles. -->
+            <point x="1.992" y="0" z="0" />
+            <!-- Bracket the separator end and finite right wall.  The v5.4
+                 void flood needs both overlaps; a box ending at either
+                 interface can return code 0 with zero fluid particles. -->
             <size x="1.292" y="1" z="0.55" />
           </fillbox>
         </mainlist>
