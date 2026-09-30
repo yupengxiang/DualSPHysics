@@ -1,0 +1,3400 @@
+{
+  "design_contract": {
+    "cell_center_rule": "each band point=continuous_low+dp/2 and size=extent-dp; centres run low+dp/2 through high-dp/2",
+    "continuous_fluid_low_m": [
+      0.0525,
+      -0.12,
+      0.7
+    ],
+    "continuous_fluid_size_m": [
+      0.32,
+      0.24,
+      0.32
+    ],
+    "continuous_fluid_volume_m3": 0.024576,
+    "continuous_mass_kg": 24.576,
+    "control": "copied source motion bytes; -105 degree prescribed rotation over 4 s; finite moving cup plus receiver and catch tray",
+    "grid_phase_rule": "pointmin is a dp-specific numerical lattice origin; continuous wall planes, cup/receiver/tray geometry and motion are unchanged",
+    "mass_budget_fraction": 1e-12,
+    "mass_semantics": "audit reports exact lattice mass and immutable PartVTK float serialization separately; no normalization or reweighting",
+    "resolutions": {
+      "coarse": {
+        "cells_xyz": [
+          8,
+          6,
+          8
+        ],
+        "dp_m": 0.04,
+        "fluid_particles": 384,
+        "particles_per_band": 128
+      },
+      "fine": {
+        "cells_xyz": [
+          32,
+          24,
+          32
+        ],
+        "dp_m": 0.01,
+        "fluid_particles": 24576,
+        "particles_per_band": 8192
+      },
+      "medium": {
+        "cells_xyz": [
+          16,
+          12,
+          16
+        ],
+        "dp_m": 0.02,
+        "fluid_particles": 3072,
+        "particles_per_band": 1024
+      }
+    },
+    "rho0_kg_m3": 1000.0,
+    "source_axis": "y",
+    "source_band_count": 3,
+    "source_band_rule": "three disjoint [low+i*0.08, low+(i+1)*0.08) bands; each command owns exactly one native Mk",
+    "source_band_width_m": 0.08
+  },
+  "failure_history_boundary": {
+    "new_scope_reason": "two prior initialization repair modes were exhausted; this scope uses a disjoint three-band drawbox cell-centre construction with per-dp numerical grid phase",
+    "old_population_canaries_not_reclassified": true,
+    "old_registry_and_reports_preserved": true
+  },
+  "family_id": "F2",
+  "gencase_cases": [
+    {
+      "background": "center_catch",
+      "case_id": "F2_COMM4_CENTER_V1_COARSE",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_COARSE/F2_COMM4_CENTER_V1_COARSE_Def.xml",
+        "sha256": "a7eb64a1e4352bbc391fed36a75100a7cf64de12da992d80abf5b17ad6d853f0"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 384,
+        "fluid_particles": 384,
+        "status": "completed",
+        "total_particles": 14358
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CENTER_V1_COARSE/gencase-f2-f2-comm4-coarse-v4/execution-receipt.json",
+        "sha256": "5ae189792658c7083cc158cee331a85e70c36f6fb400009e9b4d0491ca3ca5c9"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_COARSE_request.json",
+        "sha256": "a4c0d47f67092202157cbdcdf303e900d1375aff00ea9f8f58283672ea7940c1"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 8,
+            "expected_count": 8,
+            "first_m": 0.072499998,
+            "last_m": 0.35249999,
+            "max_nearest_error_m": 1.0000000050247593e-08,
+            "pass": true
+          },
+          {
+            "actual_count": 6,
+            "expected_count": 6,
+            "first_m": -0.1,
+            "last_m": 0.1,
+            "max_nearest_error_m": 1.000000013351432e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 8,
+            "expected_count": 8,
+            "first_m": 0.72000003,
+            "last_m": 1.0,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.576001152000092,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 128,
+          "2": 128,
+          "3": 128
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.04000000100000001,
+          0.039999998999999994,
+          0.04,
+          0.039999998999999994,
+          0.04000000100000001
+        ],
+        "native_storage_relative_error": 3.774758283725532e-15,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 2,
+            "y_values_m": [
+              -0.1,
+              -0.059999999
+            ]
+          },
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 2,
+            "y_values_m": [
+              -0.02,
+              0.02
+            ]
+          },
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 2,
+            "y_values_m": [
+              0.059999999,
+              0.1
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.51249999,
+              0.22,
+              1.12
+            ],
+            "bounds_low_m": [
+              -0.087499999,
+              -0.22,
+              0.56
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 756,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 756,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 2160
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.6325001,
+              0.38,
+              0.44
+            ],
+            "bounds_low_m": [
+              0.35249999,
+              -0.38,
+              -0.079999998
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 1092,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 812,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y+": {
+                "coordinate_target_m": 0.3,
+                "count": 1716,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y-": {
+                "coordinate_target_m": -0.3,
+                "count": 1716,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 2544,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 5082
+          },
+          "tray": {
+            "bounds_high_m": [
+              1.9924999,
+              0.69999999,
+              -0.2
+            ],
+            "bounds_low_m": [
+              -0.60750002,
+              -0.62,
+              -0.28
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 6732,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999692307693,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 6732
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_COARSE/F2_COMM4_CENTER_V1_COARSE.metadata.json",
+        "sha256": "5b0b676d6385c2415ada275d6c49e402e2f5698eb4b5bbd7263be8a24d41849c"
+      },
+      "physical_case_id": "F2_COMM4_CENTER_V1",
+      "resolution": "coarse",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "eb96bda5ae963135dbff202649e463f09637fd939d9e8016b9360c447477be04",
+        "physical_condition_hash": "5b920067d91ca11206bc403574e9d4e5cbe88b50f1debe98d4a1514a66948af3"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_COARSE_qualification_request.json",
+        "sha256": "3724eaa709e6002023d6774dbd515cabc7e0b93b5554a97012a1eb6cda5ce389"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.51249999,
+            0.22,
+            1.12
+          ],
+          "bounds_low_m": [
+            -0.087499999,
+            -0.22,
+            0.56
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 756,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 756,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 840,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 840,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 840,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 2160
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.6325001,
+            0.38,
+            0.44
+          ],
+          "bounds_low_m": [
+            0.35249999,
+            -0.38,
+            -0.079999998
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 1092,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 812,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y+": {
+              "coordinate_target_m": 0.3,
+              "count": 1716,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y-": {
+              "coordinate_target_m": -0.3,
+              "count": 1716,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 2544,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 5082
+        },
+        "tray": {
+          "bounds_high_m": [
+            1.9924999,
+            0.69999999,
+            -0.2
+          ],
+          "bounds_low_m": [
+            -0.60750002,
+            -0.62,
+            -0.28
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 6732,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999692307693,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 6732
+        }
+      }
+    },
+    {
+      "background": "center_catch",
+      "case_id": "F2_COMM4_CENTER_V1_MEDIUM",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_MEDIUM/F2_COMM4_CENTER_V1_MEDIUM_Def.xml",
+        "sha256": "af8c91b771915d541dd3fe50e230ca4db8f84cd493da259883ed9986047036a8"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 3072,
+        "fluid_particles": 3072,
+        "status": "completed",
+        "total_particles": 52638
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CENTER_V1_MEDIUM/gencase-f2-f2-comm4-medium-v4/execution-receipt.json",
+        "sha256": "f376c2d5cc153fb988d065b012feb5ad83d04197c25fe6a650df508f7a3cb1ab"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_MEDIUM_request.json",
+        "sha256": "9dc2f327d53e53de5e148a70d5649c90f2a96c7adbebf5ea6119404dec5a1438"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 16,
+            "expected_count": 16,
+            "first_m": 0.0625,
+            "last_m": 0.36250001,
+            "max_nearest_error_m": 9.999999994736442e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 12,
+            "expected_count": 12,
+            "first_m": -0.11,
+            "last_m": 0.11,
+            "max_nearest_error_m": 3.999999997894577e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 16,
+            "expected_count": 16,
+            "first_m": 0.70999998,
+            "last_m": 1.01,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.57600122879828,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 1024,
+          "2": 1024,
+          "3": 1024
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.019999996000000006,
+          0.020000003999999988,
+          0.019999999000000004,
+          0.020000002000000003,
+          0.0199999992,
+          0.0199999996,
+          0.0199999992,
+          0.020000002000000003,
+          0.019999999000000004,
+          0.020000003999999988,
+          0.019999996000000006
+        ],
+        "native_storage_relative_error": -7.016609515630989e-14,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 4,
+            "y_values_m": [
+              -0.11,
+              -0.090000004,
+              -0.07,
+              -0.050000001
+            ]
+          },
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 4,
+            "y_values_m": [
+              -0.029999999,
+              -0.0099999998,
+              0.0099999998,
+              0.029999999
+            ]
+          },
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 4,
+            "y_values_m": [
+              0.050000001,
+              0.07,
+              0.090000004,
+              0.11
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.46250001,
+              0.19,
+              1.11
+            ],
+            "bounds_low_m": [
+              -0.037500001,
+              -0.19,
+              0.61000001
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 1956,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 1956,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 2460,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 2460,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 2040,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 7080
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.5825,
+              0.33000001,
+              0.44999999
+            ],
+            "bounds_low_m": [
+              0.4025,
+              -0.33000001,
+              -0.029999999
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 2762,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 2124,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y+": {
+                "coordinate_target_m": 0.3,
+                "count": 3624,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y-": {
+                "coordinate_target_m": -0.3,
+                "count": 4812,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 6594,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 16548
+          },
+          "tray": {
+            "bounds_high_m": [
+              2.0025001,
+              0.70999998,
+              -0.19
+            ],
+            "bounds_low_m": [
+              -0.59750003,
+              -0.58999997,
+              -0.23
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 25938,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999615384616,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 25938
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_MEDIUM/F2_COMM4_CENTER_V1_MEDIUM.metadata.json",
+        "sha256": "26f4f11246c3234f0cc6eadc0b137cd5064f10c87e76b29aedca3ae4db8f6f38"
+      },
+      "physical_case_id": "F2_COMM4_CENTER_V1",
+      "resolution": "medium",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "def183c7f8fddc8737d7e547cfd14927a0af327ff3fc1fd2840e6cacd80c1746",
+        "physical_condition_hash": "5b920067d91ca11206bc403574e9d4e5cbe88b50f1debe98d4a1514a66948af3"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_MEDIUM_qualification_request.json",
+        "sha256": "0c93ab30d536604d3adadfad67046bbbc824a1e2dfc8672f6de3c6cfe79f2e3c"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.46250001,
+            0.19,
+            1.11
+          ],
+          "bounds_low_m": [
+            -0.037500001,
+            -0.19,
+            0.61000001
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 1956,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 1956,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 2460,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 2460,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 2040,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 7080
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.5825,
+            0.33000001,
+            0.44999999
+          ],
+          "bounds_low_m": [
+            0.4025,
+            -0.33000001,
+            -0.029999999
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 2762,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 2124,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y+": {
+              "coordinate_target_m": 0.3,
+              "count": 3624,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y-": {
+              "coordinate_target_m": -0.3,
+              "count": 4812,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 6594,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 16548
+        },
+        "tray": {
+          "bounds_high_m": [
+            2.0025001,
+            0.70999998,
+            -0.19
+          ],
+          "bounds_low_m": [
+            -0.59750003,
+            -0.58999997,
+            -0.23
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 25938,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999615384616,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 25938
+        }
+      }
+    },
+    {
+      "background": "center_catch",
+      "case_id": "F2_COMM4_CENTER_V1_FINE",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE_Def.xml",
+        "sha256": "d8ec2e1667784a71d6124a3e4415df3d61be5eded10134d647b9ce7d0e731641"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 24576,
+        "fluid_particles": 24576,
+        "status": "completed",
+        "total_particles": 222384
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CENTER_V1_FINE/gencase-f2-f2-comm4-fine-v4/execution-receipt.json",
+        "sha256": "98e6ba1bb27b0d42cca57abaa51ad155e4c73c5c72a0fe149acdb57e81935770"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_FINE_request.json",
+        "sha256": "480071c50a72aef64e672acc75bbae0f147c0cfcf9be423c6f7e8e5c489de79c"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 32,
+            "expected_count": 32,
+            "first_m": 0.057500001,
+            "last_m": 0.36750001,
+            "max_nearest_error_m": 1.0000000050247593e-08,
+            "pass": true
+          },
+          {
+            "actual_count": 24,
+            "expected_count": 24,
+            "first_m": -0.115,
+            "last_m": 0.115,
+            "max_nearest_error_m": 3.0000000122987203e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 32,
+            "expected_count": 32,
+            "first_m": 0.70499998,
+            "last_m": 1.015,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.576000000007053,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 8192,
+          "2": 8192,
+          "3": 8192
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.010000000000000009,
+          0.010000000999999994,
+          0.009999997999999996,
+          0.00999999800000001,
+          0.010000004999999992,
+          0.009999998000000003,
+          0.009999998000000003,
+          0.010000001999999994,
+          0.010000000000000002,
+          0.010000000000000002,
+          0.0100000001,
+          0.0099999998,
+          0.0100000001,
+          0.010000000000000002,
+          0.010000000000000002,
+          0.010000001999999994,
+          0.009999998000000003,
+          0.009999998000000003,
+          0.010000004999999992,
+          0.00999999800000001,
+          0.009999997999999996,
+          0.010000000999999994,
+          0.010000000000000009
+        ],
+        "native_storage_relative_error": 2.8688162956314045e-13,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 8,
+            "y_values_m": [
+              -0.115,
+              -0.105,
+              -0.094999999,
+              -0.085000001,
+              -0.075000003,
+              -0.064999998,
+              -0.055,
+              -0.045000002
+            ]
+          },
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 8,
+            "y_values_m": [
+              -0.035,
+              -0.025,
+              -0.015,
+              -0.0049999999,
+              0.0049999999,
+              0.015,
+              0.025,
+              0.035
+            ]
+          },
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 8,
+            "y_values_m": [
+              0.045000002,
+              0.055,
+              0.064999998,
+              0.075000003,
+              0.085000001,
+              0.094999999,
+              0.105,
+              0.115
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.44749999,
+              0.175,
+              1.105
+            ],
+            "bounds_low_m": [
+              -0.022500001,
+              -0.16500001,
+              0.63499999
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 5790,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 4110,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 5436,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 7326,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 5502,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 25830
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.5675,
+              0.32499999,
+              0.45500001
+            ],
+            "bounds_low_m": [
+              0.42750001,
+              -0.315,
+              -0.015
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 10290,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 10290,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y+": {
+                "coordinate_target_m": 0.3,
+                "count": 12270,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y-": {
+                "coordinate_target_m": -0.3,
+                "count": 17175,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 23469,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 69405
+          },
+          "tray": {
+            "bounds_high_m": [
+              1.9974999,
+              0.70499998,
+              -0.19499999
+            ],
+            "bounds_low_m": [
+              -0.60250002,
+              -0.59500003,
+              -0.215
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 102573,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999692307693,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 102573
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE.metadata.json",
+        "sha256": "bd98d64ef3c7f643aaca4304ed8fb74cbd2a1f114652bb7acbf98b7e425d085c"
+      },
+      "physical_case_id": "F2_COMM4_CENTER_V1",
+      "resolution": "fine",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "55c2c32c5f35b30356c7b0b40e5e76cb4ea10453392523219602ef17ce16bd81",
+        "physical_condition_hash": "5b920067d91ca11206bc403574e9d4e5cbe88b50f1debe98d4a1514a66948af3"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_FINE_qualification_request.json",
+        "sha256": "364ca37e6db80291ec81b7088e7b16fa1ce91c73e936616d6f05888690ae0641"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.44749999,
+            0.175,
+            1.105
+          ],
+          "bounds_low_m": [
+            -0.022500001,
+            -0.16500001,
+            0.63499999
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 5790,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 4110,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 5436,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 7326,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 5502,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 25830
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.5675,
+            0.32499999,
+            0.45500001
+          ],
+          "bounds_low_m": [
+            0.42750001,
+            -0.315,
+            -0.015
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 10290,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 10290,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y+": {
+              "coordinate_target_m": 0.3,
+              "count": 12270,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y-": {
+              "coordinate_target_m": -0.3,
+              "count": 17175,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 23469,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 69405
+        },
+        "tray": {
+          "bounds_high_m": [
+            1.9974999,
+            0.70499998,
+            -0.19499999
+          ],
+          "bounds_low_m": [
+            -0.60250002,
+            -0.59500003,
+            -0.215
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 102573,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999692307693,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 102573
+        }
+      }
+    },
+    {
+      "background": "offset_spill",
+      "case_id": "F2_COMM4_OFFSET_V1_COARSE",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_COARSE/F2_COMM4_OFFSET_V1_COARSE_Def.xml",
+        "sha256": "350394dfd6c3b5986c3a10c15da55ada0fabbee60bfc21fc72c2aef5322db878"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 384,
+        "fluid_particles": 384,
+        "status": "completed",
+        "total_particles": 14366
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_OFFSET_V1_COARSE/gencase-f2-f2-comm4-coarse-v4/execution-receipt.json",
+        "sha256": "ce0e23a66b23e9eb059319b5a418ae4ae13b6142d2d95efcc2ee14276e3fc102"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_COARSE_request.json",
+        "sha256": "061dff6ad9708a5272d5383a95b019bf1b24ae338d283fe2e5d2eb760f1e8490"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 8,
+            "expected_count": 8,
+            "first_m": 0.072499998,
+            "last_m": 0.35249999,
+            "max_nearest_error_m": 1.0000000050247593e-08,
+            "pass": true
+          },
+          {
+            "actual_count": 6,
+            "expected_count": 6,
+            "first_m": -0.1,
+            "last_m": 0.1,
+            "max_nearest_error_m": 1.000000013351432e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 8,
+            "expected_count": 8,
+            "first_m": 0.72000003,
+            "last_m": 1.0,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.576001152000092,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 128,
+          "2": 128,
+          "3": 128
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.04000000100000001,
+          0.039999998999999994,
+          0.04,
+          0.039999998999999994,
+          0.04000000100000001
+        ],
+        "native_storage_relative_error": 3.774758283725532e-15,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 2,
+            "y_values_m": [
+              -0.1,
+              -0.059999999
+            ]
+          },
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 2,
+            "y_values_m": [
+              -0.02,
+              0.02
+            ]
+          },
+          {
+            "count": 128,
+            "expected_count": 128,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 2,
+            "y_values_m": [
+              0.059999999,
+              0.1
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.51249999,
+              0.22,
+              1.12
+            ],
+            "bounds_low_m": [
+              -0.087499999,
+              -0.22,
+              0.56
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 756,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 756,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 840,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 2160
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.6325001,
+              0.62,
+              0.44
+            ],
+            "bounds_low_m": [
+              0.35249999,
+              -0.18000001,
+              -0.079999998
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 1096,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 802,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y+": {
+                "coordinate_target_m": 0.52,
+                "count": 1203,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "y-": {
+                "coordinate_target_m": -0.08,
+                "count": 1148,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 2552,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 5090
+          },
+          "tray": {
+            "bounds_high_m": [
+              1.9924999,
+              0.69999999,
+              -0.2
+            ],
+            "bounds_low_m": [
+              -0.60750002,
+              -0.62,
+              -0.28
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 6732,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999692307693,
+                "tolerance_m": 0.09
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 6732
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_COARSE/F2_COMM4_OFFSET_V1_COARSE.metadata.json",
+        "sha256": "764662b770d10f74037bd174402791732b3e68d635cb1848cb8c7ba48f4555cc"
+      },
+      "physical_case_id": "F2_COMM4_OFFSET_V1",
+      "resolution": "coarse",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "5f74dbe4d12d66539bca19a138d14689d27e5aff934ea28c959183033ca88cc7",
+        "physical_condition_hash": "353ceffd84579895cd7fc0fab875906562126eaae178dea3502aa13f4bc5a515"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_COARSE_qualification_request.json",
+        "sha256": "3c65dc277b9fd3a40ba1ae4d547e847990ef6580b071a8796ec9aaa40e545681"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.51249999,
+            0.22,
+            1.12
+          ],
+          "bounds_low_m": [
+            -0.087499999,
+            -0.22,
+            0.56
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 756,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 756,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 840,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 840,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 840,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 2160
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.6325001,
+            0.62,
+            0.44
+          ],
+          "bounds_low_m": [
+            0.35249999,
+            -0.18000001,
+            -0.079999998
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 1096,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 802,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y+": {
+              "coordinate_target_m": 0.52,
+              "count": 1203,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "y-": {
+              "coordinate_target_m": -0.08,
+              "count": 1148,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 2552,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 5090
+        },
+        "tray": {
+          "bounds_high_m": [
+            1.9924999,
+            0.69999999,
+            -0.2
+          ],
+          "bounds_low_m": [
+            -0.60750002,
+            -0.62,
+            -0.28
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 6732,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999692307693,
+              "tolerance_m": 0.09
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 6732
+        }
+      }
+    },
+    {
+      "background": "offset_spill",
+      "case_id": "F2_COMM4_OFFSET_V1_MEDIUM",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_MEDIUM/F2_COMM4_OFFSET_V1_MEDIUM_Def.xml",
+        "sha256": "c33401a74b09a6e0ced28b7499ff7f9e3bc5f4394bacb60fe3b5710d9b78660d"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 3072,
+        "fluid_particles": 3072,
+        "status": "completed",
+        "total_particles": 54138
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_OFFSET_V1_MEDIUM/gencase-f2-f2-comm4-medium-v4/execution-receipt.json",
+        "sha256": "4a1c6f8e557610320c05d4b0b31d0e0e03484e5eaeffc404f93435e4a57f754f"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_MEDIUM_request.json",
+        "sha256": "6d4f4ced8cf36f4535f2e999aa7c23f67e8b8d2a65e63d26995a064f256b66c1"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 16,
+            "expected_count": 16,
+            "first_m": 0.0625,
+            "last_m": 0.36250001,
+            "max_nearest_error_m": 9.999999994736442e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 12,
+            "expected_count": 12,
+            "first_m": -0.11,
+            "last_m": 0.11,
+            "max_nearest_error_m": 3.999999997894577e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 16,
+            "expected_count": 16,
+            "first_m": 0.70999998,
+            "last_m": 1.01,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.57600122879828,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 1024,
+          "2": 1024,
+          "3": 1024
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.019999996000000006,
+          0.020000003999999988,
+          0.019999999000000004,
+          0.020000002000000003,
+          0.0199999992,
+          0.0199999996,
+          0.0199999992,
+          0.020000002000000003,
+          0.019999999000000004,
+          0.020000003999999988,
+          0.019999996000000006
+        ],
+        "native_storage_relative_error": -7.016609515630989e-14,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 4,
+            "y_values_m": [
+              -0.11,
+              -0.090000004,
+              -0.07,
+              -0.050000001
+            ]
+          },
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 4,
+            "y_values_m": [
+              -0.029999999,
+              -0.0099999998,
+              0.0099999998,
+              0.029999999
+            ]
+          },
+          {
+            "count": 1024,
+            "expected_count": 1024,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 4,
+            "y_values_m": [
+              0.050000001,
+              0.07,
+              0.090000004,
+              0.11
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.46250001,
+              0.19,
+              1.11
+            ],
+            "bounds_low_m": [
+              -0.037500001,
+              -0.19,
+              0.61000001
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 1956,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 1956,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 2460,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 2460,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 2040,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 7080
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.5825,
+              0.56999999,
+              0.44999999
+            ],
+            "bounds_low_m": [
+              0.4025,
+              -0.11,
+              -0.029999999
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 2862,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 2224,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y+": {
+                "coordinate_target_m": 0.52,
+                "count": 3624,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "y-": {
+                "coordinate_target_m": -0.08,
+                "count": 4812,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 6834,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 18048
+          },
+          "tray": {
+            "bounds_high_m": [
+              2.0025001,
+              0.70999998,
+              -0.19
+            ],
+            "bounds_low_m": [
+              -0.59750003,
+              -0.58999997,
+              -0.23
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 25938,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999615384616,
+                "tolerance_m": 0.045
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 25938
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_MEDIUM/F2_COMM4_OFFSET_V1_MEDIUM.metadata.json",
+        "sha256": "acb9cb3af10df18b65ecdf581a99300519b701c6e4322499435ad6236a264084"
+      },
+      "physical_case_id": "F2_COMM4_OFFSET_V1",
+      "resolution": "medium",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "593462b4a4547715671b775af738c97ad9c6d0cb352bf4ae302418ec8d3d3d70",
+        "physical_condition_hash": "353ceffd84579895cd7fc0fab875906562126eaae178dea3502aa13f4bc5a515"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_MEDIUM_qualification_request.json",
+        "sha256": "89fdaf93d6dbdfc7ae0e32881ff597977d77b68f899e28352659bc8daaca9da5"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.46250001,
+            0.19,
+            1.11
+          ],
+          "bounds_low_m": [
+            -0.037500001,
+            -0.19,
+            0.61000001
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 1956,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 1956,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 2460,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 2460,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 2040,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 7080
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.5825,
+            0.56999999,
+            0.44999999
+          ],
+          "bounds_low_m": [
+            0.4025,
+            -0.11,
+            -0.029999999
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 2862,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 2224,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y+": {
+              "coordinate_target_m": 0.52,
+              "count": 3624,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "y-": {
+              "coordinate_target_m": -0.08,
+              "count": 4812,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 6834,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 18048
+        },
+        "tray": {
+          "bounds_high_m": [
+            2.0025001,
+            0.70999998,
+            -0.19
+          ],
+          "bounds_low_m": [
+            -0.59750003,
+            -0.58999997,
+            -0.23
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 25938,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999615384616,
+              "tolerance_m": 0.045
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 25938
+        }
+      }
+    },
+    {
+      "background": "offset_spill",
+      "case_id": "F2_COMM4_OFFSET_V1_FINE",
+      "definition": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_FINE/F2_COMM4_OFFSET_V1_FINE_Def.xml",
+        "sha256": "56accf8860f5d1f307c35b0e06ca670aaa07437a6ad6f4aaec1cf0b1bc183fd3"
+      },
+      "gencase": {
+        "dimension": 3,
+        "expected_fluid_particles": 24576,
+        "fluid_particles": 24576,
+        "status": "completed",
+        "total_particles": 222384
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_OFFSET_V1_FINE/gencase-f2-f2-comm4-fine-v4/execution-receipt.json",
+        "sha256": "e39162963eb6f46ef1fa29a8e86a54691a9a8ba531fe6e1deba2b114e9df29bb"
+      },
+      "gencase_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_FINE_request.json",
+        "sha256": "e4a271fc916d07be4b19cc9a98edff786416c09f01317b4b2021389e78d2d1b0"
+      },
+      "initial_partvtk_audit": {
+        "axis_checks": [
+          {
+            "actual_count": 32,
+            "expected_count": 32,
+            "first_m": 0.057500001,
+            "last_m": 0.36750001,
+            "max_nearest_error_m": 1.0000000050247593e-08,
+            "pass": true
+          },
+          {
+            "actual_count": 24,
+            "expected_count": 24,
+            "first_m": -0.115,
+            "last_m": 0.115,
+            "max_nearest_error_m": 3.0000000122987203e-09,
+            "pass": true
+          },
+          {
+            "actual_count": 32,
+            "expected_count": 32,
+            "first_m": 0.70499998,
+            "last_m": 1.015,
+            "max_nearest_error_m": 3.0000000039720476e-08,
+            "pass": true
+          }
+        ],
+        "checks": {
+          "axis_lattice": true,
+          "finite_wall_faces": true,
+          "fluid_boundary_nonoverlap": true,
+          "fluid_count": true,
+          "fluid_position_unique": true,
+          "interface_spacing": true,
+          "mass_within_budget": true,
+          "source_band_counts": true,
+          "source_mk_count": true,
+          "three_d": true,
+          "typed_id_unique": true
+        },
+        "expected_mass_kg": 24.576000000000004,
+        "fluid_boundary_overlap_count": 0,
+        "fluid_mass_kg": 24.576000000007053,
+        "fluid_mks": [
+          1,
+          2,
+          3
+        ],
+        "fluid_per_native_mk": {
+          "1": 8192,
+          "2": 8192,
+          "3": 8192
+        },
+        "fluid_position_duplicates": 0,
+        "interface_dy_m": [
+          0.010000000000000009,
+          0.010000000999999994,
+          0.009999997999999996,
+          0.00999999800000001,
+          0.010000004999999992,
+          0.009999998000000003,
+          0.009999998000000003,
+          0.010000001999999994,
+          0.010000000000000002,
+          0.010000000000000002,
+          0.0100000001,
+          0.0099999998,
+          0.0100000001,
+          0.010000000000000002,
+          0.010000000000000002,
+          0.010000001999999994,
+          0.009999998000000003,
+          0.009999998000000003,
+          0.010000004999999992,
+          0.00999999800000001,
+          0.009999997999999996,
+          0.010000000999999994,
+          0.010000000000000009
+        ],
+        "native_storage_relative_error": 2.8688162956314045e-13,
+        "physical_lattice_relative_error": 2.220446049250313e-16,
+        "source_band_checks": [
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 1,
+            "pass": true,
+            "source_index": 0,
+            "y_count": 8,
+            "y_values_m": [
+              -0.115,
+              -0.105,
+              -0.094999999,
+              -0.085000001,
+              -0.075000003,
+              -0.064999998,
+              -0.055,
+              -0.045000002
+            ]
+          },
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 2,
+            "pass": true,
+            "source_index": 1,
+            "y_count": 8,
+            "y_values_m": [
+              -0.035,
+              -0.025,
+              -0.015,
+              -0.0049999999,
+              0.0049999999,
+              0.015,
+              0.025,
+              0.035
+            ]
+          },
+          {
+            "count": 8192,
+            "expected_count": 8192,
+            "native_mk": 3,
+            "pass": true,
+            "source_index": 2,
+            "y_count": 8,
+            "y_values_m": [
+              0.045000002,
+              0.055,
+              0.064999998,
+              0.075000003,
+              0.085000001,
+              0.094999999,
+              0.105,
+              0.115
+            ]
+          }
+        ],
+        "status": "PASS_INITIAL_STRUCTURE",
+        "typed_id_duplicates": 0,
+        "wall_evidence": {
+          "cup": {
+            "bounds_high_m": [
+              0.44749999,
+              0.175,
+              1.105
+            ],
+            "bounds_low_m": [
+              -0.022500001,
+              -0.16500001,
+              0.63499999
+            ],
+            "declared_mk": 0,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 0.425,
+                "count": 5790,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "x-": {
+                "coordinate_target_m": 0.0,
+                "count": 4110,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y+": {
+                "coordinate_target_m": 0.15,
+                "count": 5436,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y-": {
+                "coordinate_target_m": -0.15,
+                "count": 7326,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "z-": {
+                "coordinate_target_m": 0.65,
+                "count": 5502,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              1,
+              17
+            ],
+            "point_count": 25830
+          },
+          "receiver": {
+            "bounds_high_m": [
+              1.5675,
+              0.54500002,
+              0.45500001
+            ],
+            "bounds_low_m": [
+              0.42750001,
+              -0.094999999,
+              -0.015
+            ],
+            "declared_mk": 1,
+            "face_coverage": {
+              "x+": {
+                "coordinate_target_m": 1.55,
+                "count": 10290,
+                "normal": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "x-": {
+                "coordinate_target_m": 0.45,
+                "count": 10290,
+                "normal": [
+                  -1.0,
+                  0.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y+": {
+                "coordinate_target_m": 0.52,
+                "count": 12270,
+                "normal": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "y-": {
+                "coordinate_target_m": -0.08,
+                "count": 17175,
+                "normal": [
+                  0.0,
+                  -1.0,
+                  0.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              },
+              "z-": {
+                "coordinate_target_m": 0.0,
+                "count": 23469,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 1.0,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              18
+            ],
+            "point_count": 69405
+          },
+          "tray": {
+            "bounds_high_m": [
+              1.9974999,
+              0.70499998,
+              -0.19499999
+            ],
+            "bounds_low_m": [
+              -0.60250002,
+              -0.59500003,
+              -0.215
+            ],
+            "declared_mk": 2,
+            "face_coverage": {
+              "z-": {
+                "coordinate_target_m": -0.2,
+                "count": 102573,
+                "normal": [
+                  0.0,
+                  0.0,
+                  -1.0
+                ],
+                "span_fraction": 0.9999999692307693,
+                "tolerance_m": 0.0225
+              }
+            },
+            "finite_faces_pass": true,
+            "native_type_mk": [
+              0,
+              19
+            ],
+            "point_count": 102573
+          }
+        }
+      },
+      "metadata": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_FINE/F2_COMM4_OFFSET_V1_FINE.metadata.json",
+        "sha256": "90ff439509963d8e3993b9c7750b7772cdbdfa2e6a180613b09bb703e89821f7"
+      },
+      "physical_case_id": "F2_COMM4_OFFSET_V1",
+      "resolution": "fine",
+      "semantic_hashes": {
+        "numerical_recipe_hash": "6f6a009f87ca92899ace6daa315746c340b1a7029998c19b3cabab3d39196bef",
+        "physical_condition_hash": "353ceffd84579895cd7fc0fab875906562126eaae178dea3502aa13f4bc5a515"
+      },
+      "solver_qualification_request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_FINE_qualification_request.json",
+        "sha256": "85846849adcca7220af7af7706f8a771d90ab94e5df19f492062fe14fda18cb7"
+      },
+      "wall_identity_from_audit": {
+        "cup": {
+          "bounds_high_m": [
+            0.44749999,
+            0.175,
+            1.105
+          ],
+          "bounds_low_m": [
+            -0.022500001,
+            -0.16500001,
+            0.63499999
+          ],
+          "declared_mk": 0,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 0.425,
+              "count": 5790,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "x-": {
+              "coordinate_target_m": 0.0,
+              "count": 4110,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y+": {
+              "coordinate_target_m": 0.15,
+              "count": 5436,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y-": {
+              "coordinate_target_m": -0.15,
+              "count": 7326,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "z-": {
+              "coordinate_target_m": 0.65,
+              "count": 5502,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            1,
+            17
+          ],
+          "point_count": 25830
+        },
+        "receiver": {
+          "bounds_high_m": [
+            1.5675,
+            0.54500002,
+            0.45500001
+          ],
+          "bounds_low_m": [
+            0.42750001,
+            -0.094999999,
+            -0.015
+          ],
+          "declared_mk": 1,
+          "face_coverage": {
+            "x+": {
+              "coordinate_target_m": 1.55,
+              "count": 10290,
+              "normal": [
+                1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "x-": {
+              "coordinate_target_m": 0.45,
+              "count": 10290,
+              "normal": [
+                -1.0,
+                0.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y+": {
+              "coordinate_target_m": 0.52,
+              "count": 12270,
+              "normal": [
+                0.0,
+                1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "y-": {
+              "coordinate_target_m": -0.08,
+              "count": 17175,
+              "normal": [
+                0.0,
+                -1.0,
+                0.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            },
+            "z-": {
+              "coordinate_target_m": 0.0,
+              "count": 23469,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 1.0,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            18
+          ],
+          "point_count": 69405
+        },
+        "tray": {
+          "bounds_high_m": [
+            1.9974999,
+            0.70499998,
+            -0.19499999
+          ],
+          "bounds_low_m": [
+            -0.60250002,
+            -0.59500003,
+            -0.215
+          ],
+          "declared_mk": 2,
+          "face_coverage": {
+            "z-": {
+              "coordinate_target_m": -0.2,
+              "count": 102573,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ],
+              "span_fraction": 0.9999999692307693,
+              "tolerance_m": 0.0225
+            }
+          },
+          "finite_faces_pass": true,
+          "native_type_mk": [
+            0,
+            19
+          ],
+          "point_count": 102573
+        }
+      }
+    }
+  ],
+  "immutable_inputs": {
+    "audit_script": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/f2_commensurate_audit.py",
+      "sha256": "6d9fcc0527a246a81dd34593d6e23a8730ce1a10a6ec027804f4c2ea53ae94f4"
+    },
+    "manifest": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/manifest.json",
+      "sha256": "eb103eb6d421ef8f42efa9c73b2c110c29ebf03f518e79f089eac8501405aa25"
+    },
+    "semantic_hash_script": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/f2_commensurate_semantic_hashes.py",
+      "sha256": "e34f4f1b4fd2cb7c357f53df15019d49d7a89b774e4c1761e34fe34f67814fca"
+    },
+    "semantic_hashes": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/semantic_hashes.json",
+      "sha256": "9ca0f9c3da0dd92e4da70072c8b64a12c36c4300740e2ef33b0ff7d32afd7a39"
+    },
+    "successful_audit_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CELL_AUDIT_V4E/commensurate-cellcenter-audit-v4e/execution-receipt.json",
+      "sha256": "3290bedb33560f5c509800b0a1d40f772fe59f0509840fa713cae68cdbee1181"
+    },
+    "successful_audit_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COMM4_CELL_AUDIT_V4E/commensurate-cellcenter-audit-v4e/report/commensurate-cellcenter-audit.json",
+      "sha256": "46c1e0523273d70b9e071df9bdb3b6804d8de506c5350abb550efe219be6d281"
+    },
+    "successful_audit_request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CELL_AUDIT_V4E_request.json",
+      "sha256": "7ab775ec6d67c417087fc73c17baba22faad2fbc54c257f9ccc067d96e373615"
+    }
+  },
+  "initial_partvtk_audit": {
+    "all_six_cases_passed": true,
+    "moving_body_state": "initial-frame wall evidence only; no solver trajectory or QI/QN conclusion",
+    "report_status": "PASS_INITIAL_STRUCTURE",
+    "request_limits": {
+      "cpu_threads": 4,
+      "estimated_storage_bytes": 8589934592,
+      "gpu_seconds": 0,
+      "max_wall_seconds": 600
+    },
+    "typed_identity": "PartVTK Zone+Idp; Type=3 fluid and native Mk preserved",
+    "wall_identity": "cup native Type=1 Mk=17; receiver Type=0 Mk=18; tray Type=0 Mk=19; finite face coverage checked from actual PartVTK coordinates"
+  },
+  "next_ready": {
+    "gpu_authority": "primary/root process only",
+    "remaining_gate": "full-state/QI and numerical/QN evidence; this handoff does not grant either",
+    "root_may_register": "independent solver qualification requests using these exact completed GenCase artifacts and the semantic sidecar"
+  },
+  "production_claim": "none",
+  "qualification_claim": "none",
+  "registry_role": "new_scope_new_physical_mothers_outside_original_F2_48_registry",
+  "schema": "ds-data-02.f2.commensurate-cellcenter-handoff.v1",
+  "scientific_budget": {
+    "event_window_s": [
+      0.0,
+      4.0
+    ],
+    "internal_integrator_study": {
+      "baseline_recipe": "source adaptive recipe above; actual solver dt is to be measured from native output",
+      "budget": "root schedules full 4 s qualification per six view; no shortened 0.6 s substitute",
+      "independent_comparison_required": true,
+      "policy": "a smaller actual internal step must be registered as a separate numerical_recipe_hash and verified from solver timestep evidence; changing only DtMin is insufficient"
+    },
+    "observed_structure_is_initial_frame_only": true,
+    "physical_control_window_s": 4.0,
+    "reference_save_cadence_s": 0.01,
+    "source_solver_recipe_at_gen_case": {
+      "CoefDtMin": 0.05,
+      "DtAllParticles": 0,
+      "DtFixed_s": 0.0,
+      "DtIni_s": 0.0,
+      "DtMin_s": 0.0,
+      "PartsOutMax": 1,
+      "TimeMax_s": 4.0,
+      "TimeOut_s": 0.01,
+      "cflnumber": 0.2,
+      "hdp": 1.3
+    },
+    "space_reference_views": {
+      "backgrounds": [
+        "center_catch",
+        "offset_spill"
+      ],
+      "dp_m": [
+        0.04,
+        0.02,
+        0.01
+      ]
+    }
+  },
+  "scope_id": "F2_SCOPE_COMMENSURATE_CELLCENTER_V4",
+  "semantic_hashes": {
+    "per_background": {
+      "center_catch": {
+        "numerical_recipe_hash_by_resolution": {
+          "coarse": "eb96bda5ae963135dbff202649e463f09637fd939d9e8016b9360c447477be04",
+          "fine": "55c2c32c5f35b30356c7b0b40e5e76cb4ea10453392523219602ef17ce16bd81",
+          "medium": "def183c7f8fddc8737d7e547cfd14927a0af327ff3fc1fd2840e6cacd80c1746"
+        },
+        "physical_condition_hashes": [
+          "5b920067d91ca11206bc403574e9d4e5cbe88b50f1debe98d4a1514a66948af3"
+        ]
+      },
+      "offset_spill": {
+        "numerical_recipe_hash_by_resolution": {
+          "coarse": "5f74dbe4d12d66539bca19a138d14689d27e5aff934ea28c959183033ca88cc7",
+          "fine": "6f6a009f87ca92899ace6daa315746c340b1a7029998c19b3cabab3d39196bef",
+          "medium": "593462b4a4547715671b775af738c97ad9c6d0cb352bf4ae302418ec8d3d3d70"
+        },
+        "physical_condition_hashes": [
+          "353ceffd84579895cd7fc0fab875906562126eaae178dea3502aa13f4bc5a515"
+        ]
+      }
+    },
+    "scope": "same physical condition requires identical physical_condition_hash; dp/grid phase/population mode/solver execution parameters belong only to numerical_recipe_hash",
+    "script": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/f2_commensurate_semantic_hashes.py",
+    "sidecar_sha256": "9ca0f9c3da0dd92e4da70072c8b64a12c36c4300740e2ef33b0ff7d32afd7a39"
+  },
+  "solver_qualification_requests": {
+    "gpu_authority": "primary process via shared runner",
+    "input_prefix_rule": "gencase_input_prefix and command[1] are actual completed GenCase prefix; XML/BI4/copied_motion hashes are bound separately",
+    "request_count": 6,
+    "requests": [
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_COARSE_qualification_request.json",
+        "sha256": "3724eaa709e6002023d6774dbd515cabc7e0b93b5554a97012a1eb6cda5ce389"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_FINE_qualification_request.json",
+        "sha256": "364ca37e6db80291ec81b7088e7b16fa1ce91c73e936616d6f05888690ae0641"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_MEDIUM_qualification_request.json",
+        "sha256": "0c93ab30d536604d3adadfad67046bbbc824a1e2dfc8672f6de3c6cfe79f2e3c"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_COARSE_qualification_request.json",
+        "sha256": "3c65dc277b9fd3a40ba1ae4d547e847990ef6580b071a8796ec9aaa40e545681"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_FINE_qualification_request.json",
+        "sha256": "85846849adcca7220af7af7706f8a771d90ab94e5df19f492062fe14fda18cb7"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_MEDIUM_qualification_request.json",
+        "sha256": "89fdaf93d6dbdfc7ae0e32881ff597977d77b68f899e28352659bc8daaca9da5"
+      }
+    ],
+    "status": "registered_ready_to_schedule_no_solver_launch"
+  },
+  "source_provenance": {
+    "historical_sources_read_only": true,
+    "new_physical_mothers": [
+      "F2_COMM4_CENTER_V1",
+      "F2_COMM4_OFFSET_V1"
+    ],
+    "original_48_registry_unchanged": true,
+    "source_geometry_control_reused": "F2_REF_CENTER_NOMINAL_MEDIUM and F2_REF_OFFSET_NOMINAL_MEDIUM XML/motion bytes; new fluid construction only"
+  },
+  "status": "PASS_INITIAL_STRUCTURE_ONLY"
+}

@@ -41,6 +41,14 @@ DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
 SOURCE_ROOT = FAMILY_ROOT / "definitions"
 
 RESOLUTIONS: dict[str, float] = {"coarse": 0.04, "medium": 0.02, "fine": 0.01}
+# Numerical grid phases for the cell-centre scope. Each origin is just below
+# the historical domain minimum and makes low+dp/2 an exact lattice node.
+# Continuous wall/source coordinates remain those of the source XML.
+GRID_ORIGINS: dict[str, tuple[float, float, float]] = {
+    "coarse": (-0.8075, -0.82, -0.48),
+    "medium": (-0.8175, -0.81, -0.45),
+    "fine": (-0.8025, -0.805, -0.455),
+}
 BACKGROUND_SOURCE = {
     "center_catch": SOURCE_ROOT / "F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
     "offset_spill": SOURCE_ROOT / "F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
@@ -133,28 +141,75 @@ def canonical_physical_xml(text: str) -> str:
     return text
 
 
-def fluid_commands(dp: float) -> str:
+def fluid_commands(dp: float, population_mode: str = "fluid_direct") -> str:
+    """Return the three disjoint fluid source commands.
+
+    ``fluid_direct`` is retained only for the already-consumed V1 definitions.
+    GenCase 5.4 accepts ``fillbox`` as a flood-fill operation, so the new V2
+    scope uses the documented ``modefill=void`` form with ``mkbound=0``.  The
+    two modes are deliberately explicit in generated metadata and requests;
+    a completed GenCase receipt never silently changes meaning when this
+    generator evolves.
+    """
+    if population_mode not in {"fluid_direct", "void_mkbound", "drawbox_commensurate", "drawbox_cellcenter"}:
+        raise ValueError(f"unknown population mode {population_mode}")
     x_low, y_low, z_low = FLUID_LOW
     x_size, y_size, z_size = FLUID_SIZE
     lines: list[str] = []
     for mk in range(SOURCE_BAND_COUNT):
         band_low_y = y_low + mk * SOURCE_BAND_WIDTH
-        point = (x_low + dp / 2.0, band_low_y + dp / 2.0, z_low + dp / 2.0)
-        size = (x_size - dp, SOURCE_BAND_WIDTH - dp, z_size - dp)
-        lines.extend(
-            [
-                f'          <setmkfluid mk="{mk}" />',
-                f'          <fillbox x="{q(dp)}" y="{q(dp)}" z="{q(dp)}">',
-                '            <modefill>fluid</modefill>',
-                f'            <point x="{q(point[0])}" y="{q(point[1])}" z="{q(point[2])}" />',
-                f'            <size x="{q(size[0])}" y="{q(size[1])}" z="{q(size[2])}" />',
-                '          </fillbox>',
-            ]
+        # The cell-centre mode supplies low+dp/2 directly. Its pointmin phase
+        # is aligned per resolution before GenCase runs, so no endpoint is
+        # rounded out and no interface source is duplicated.
+        point = (
+            x_low if population_mode == "drawbox_commensurate" else x_low + dp / 2.0,
+            band_low_y if population_mode == "drawbox_commensurate" else band_low_y + dp / 2.0,
+            z_low if population_mode == "drawbox_commensurate" else z_low + dp / 2.0,
         )
+        size = (x_size - dp, SOURCE_BAND_WIDTH - dp, z_size - dp)
+        lines.append(f'          <setmkfluid mk="{mk}" />')
+        if population_mode in {"drawbox_commensurate", "drawbox_cellcenter"}:
+            lines.extend(
+                [
+                    '          <drawbox>',
+                    '            <boxfill>solid</boxfill>',
+                    f'            <point x="{q(point[0])}" y="{q(point[1])}" z="{q(point[2])}" />',
+                    f'            <size x="{q(size[0])}" y="{q(size[1])}" z="{q(size[2])}" />',
+                    '          </drawbox>',
+                ]
+            )
+        else:
+            fillbox = (
+                f'          <fillbox x="{q(dp)}" y="{q(dp)}" z="{q(dp)}" mkbound="0">'
+                if population_mode == "void_mkbound"
+                else f'          <fillbox x="{q(dp)}" y="{q(dp)}" z="{q(dp)}">'
+            )
+            lines.extend(
+                [
+                    fillbox,
+                    (
+                        '            <modefill>void</modefill>'
+                        if population_mode == "void_mkbound"
+                        else '            <modefill>fluid</modefill>'
+                    ),
+                    f'            <point x="{q(point[0])}" y="{q(point[1])}" z="{q(point[2])}" />',
+                    f'            <size x="{q(size[0])}" y="{q(size[1])}" z="{q(size[2])}" />',
+                    '          </fillbox>',
+                ]
+            )
     return "\n".join(lines)
 
 
-def materialize_case(background: str, resolution: str, output_dir: Path) -> dict[str, Any]:
+def materialize_case(
+    background: str,
+    resolution: str,
+    output_dir: Path,
+    *,
+    scope_id: str = SCOPE_ID,
+    case_prefix: str = "F2_COMM",
+    physical_prefix: str = "F2_COMM",
+    population_mode: str = "fluid_direct",
+) -> dict[str, Any]:
     if background not in BACKGROUND_SOURCE:
         raise ValueError(f"unknown background {background}")
     if resolution not in RESOLUTIONS:
@@ -167,16 +222,24 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
     dp = RESOLUTIONS[resolution]
     expected = expected_population(dp)
     short = BACKGROUND_SHORT[background]
-    case_id = f"F2_COMM_{short}_V1_{resolution.upper()}"
-    physical_case_id = f"F2_COMM_{short}_V1"
+    case_id = f"{case_prefix}_{short}_V1_{resolution.upper()}"
+    physical_case_id = f"{physical_prefix}_{short}_V1"
     motion_name = f"{case_id}_motion.dat"
     transformed = re.sub(r'<definition dp="[^"]+"', f'<definition dp="{q(dp)}"', source_text, count=1)
+    if population_mode == "drawbox_cellcenter":
+        origin = GRID_ORIGINS[resolution]
+        transformed = re.sub(
+            r'<pointmin x="[^"]+" y="[^"]+" z="[^"]+"\s*/>',
+            f'<pointmin x="{q(origin[0])}" y="{q(origin[1])}" z="{q(origin[2])}" />',
+            transformed,
+            count=1,
+        )
     transformed = transformed.replace(source_motion.name, motion_name)
     transformed = transformed.replace(
         '<!-- mechanism=' + ("center_catch" if background == "center_catch" else "offset_spill") + '; physical_case_id=F2_REF_' + ("CENTER" if background == "center_catch" else "OFFSET") + '_NOMINAL; resolution=' + resolution + ' -->',
-        f'<!-- mechanism={background}; physical_case_id={physical_case_id}; resolution={resolution}; scope={SCOPE_ID} -->',
+        f'<!-- mechanism={background}; physical_case_id={physical_case_id}; resolution={resolution}; scope={scope_id} -->',
     )
-    transformed, replacements = FLUID_REGION_RE.subn(fluid_commands(dp), transformed, count=1)
+    transformed, replacements = FLUID_REGION_RE.subn(fluid_commands(dp, population_mode), transformed, count=1)
     if replacements != 1:
         raise ValueError(f"fluid region was not replaced for {case_id}")
     y_low = FLUID_LOW[1]
@@ -189,7 +252,7 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
     metadata = {
         "schema": SCHEMA,
         "family_id": FAMILY_ID,
-        "scope_id": SCOPE_ID,
+        "scope_id": scope_id,
         "status": "new_scope_definition_only_not_gencase_run",
         "qualification_claim": "none",
         "production_claim": "none",
@@ -199,7 +262,7 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
         "dp_m": dp,
         "case_id": case_id,
         "physical_case_id": physical_case_id,
-        "paired_physical_case_id": "F2_COMM_CENTER_V1" if background == "offset_spill" else "F2_COMM_OFFSET_V1",
+        "paired_physical_case_id": f"{physical_prefix}_CENTER_V1" if background == "offset_spill" else f"{physical_prefix}_OFFSET_V1",
         "source_definition": {"path": str(source_xml), "sha256": sha256(source_xml)},
         "source_motion": {"path": str(source_motion), "sha256": sha256(source_motion)},
         "definition": {"path": str(definition_path), "sha256": sha256(definition_path)},
@@ -213,6 +276,8 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
             "source_band_width_m": SOURCE_BAND_WIDTH,
             "source_band_bounds_y_m": [[y_low + i * SOURCE_BAND_WIDTH, y_low + (i + 1) * SOURCE_BAND_WIDTH] for i in range(SOURCE_BAND_COUNT)],
             "cell_center_rule": "point=continuous_low+dp/2; size=continuous_extent-dp; generated centers span low+dp/2 through high-dp/2",
+            "numerical_grid_origin_m": list(GRID_ORIGINS[resolution]) if population_mode == "drawbox_cellcenter" else None,
+            "grid_origin_semantics": "pointmin is a numerical lattice phase selected per dp; continuous wall planes and source geometry remain source XML coordinates",
             "cup_receiver_tray": "copied from the corresponding historical F2 source definition; only new commensurate fluid population and new case/scope identity are changed",
             "fluid_wall_clearance_m": {"x_low": 0.0525, "x_high": 0.0525, "y_low": 0.03, "y_high": 0.03, "z_low": 0.05, "z_high": 0.08},
         },
@@ -221,6 +286,17 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
             "solver_parameters_copied_from_source_without_change": True,
             "control_amplitude_deg": -105.0,
             "event_window_s": 4.0,
+        },
+        "population_construction": {
+            "mode": population_mode,
+            "source_axis": "y",
+            "source_band_interfaces_are_disjoint": True,
+            "fluid_command_contract": {
+                "fluid_direct": "fillbox modefill=fluid; point is low+dp/2 and size is extent-dp",
+                "void_mkbound": "fillbox modefill=void mkbound=0; point is low+dp/2 and size is extent-dp",
+                "drawbox_commensurate": "drawbox solid; point is continuous low edge and size is extent-dp, yielding centres low+dp/2 through high-dp/2",
+                "drawbox_cellcenter": "drawbox solid; point is low+dp/2 and size is extent-dp on the aligned numerical grid, yielding centres low+dp/2 through high-dp/2",
+            }[population_mode],
         },
         "expected_population": expected,
         "mass_error_budget_fraction": MASS_BUDGET_FRACTION,
@@ -235,7 +311,13 @@ def materialize_case(background: str, resolution: str, output_dir: Path) -> dict
     return metadata
 
 
-def runner_request(metadata: Mapping[str, Any], output_root: Path, attempt_id: str) -> dict[str, Any]:
+def runner_request(
+    metadata: Mapping[str, Any],
+    output_root: Path,
+    attempt_id: str,
+    *,
+    scope_id: str = SCOPE_ID,
+) -> dict[str, Any]:
     definition = Path(metadata["definition"]["path"]).resolve()
     motion = Path(metadata["motion"]["path"]).resolve()
     source_xml = Path(metadata["source_definition"]["path"]).resolve()
@@ -259,7 +341,7 @@ def runner_request(metadata: Mapping[str, Any], output_root: Path, attempt_id: s
         "solver_launch_forbidden": True,
         "generation_status": "new_scope_commensurate_definition_written_not_gencase_run",
         "registry_role": "new_scope_new_physical_mothers_outside_original_F2_48_registry",
-        "scope_id": SCOPE_ID,
+        "scope_id": scope_id,
         "input_files": [str(Path(__file__).resolve()), str(source_xml), str(source_motion), str(definition), str(motion), str(metadata_path)],
         "source_definition_sha256": metadata["source_definition"]["sha256"],
         "source_motion_sha256": metadata["source_motion"]["sha256"],
@@ -272,16 +354,33 @@ def runner_request(metadata: Mapping[str, Any], output_root: Path, attempt_id: s
     return request
 
 
-def design(output_root: Path) -> dict[str, Any]:
-    definition_root = FAMILY_ROOT / "commensurate_cellcenter" / "definitions"
-    request_root = FAMILY_ROOT / "commensurate_cellcenter" / "requests"
+def design(
+    output_root: Path,
+    *,
+    scope_id: str = SCOPE_ID,
+    case_prefix: str = "F2_COMM",
+    physical_prefix: str = "F2_COMM",
+    population_mode: str = "fluid_direct",
+    output_subdir: str = "commensurate_cellcenter",
+    attempt_suffix: str = "v1",
+) -> dict[str, Any]:
+    definition_root = FAMILY_ROOT / output_subdir / "definitions"
+    request_root = FAMILY_ROOT / output_subdir / "requests"
     manifest_cases: list[dict[str, Any]] = []
     for background in ("center_catch", "offset_spill"):
         for resolution in ("coarse", "medium", "fine"):
-            case_dir = definition_root / f"F2_COMM_{BACKGROUND_SHORT[background]}_V1_{resolution.upper()}"
-            metadata = materialize_case(background, resolution, case_dir)
-            attempt_id = f"gencase-f2-comm-{BACKGROUND_SHORT[background].lower()}-{resolution}-v1"
-            request = runner_request(metadata, output_root / metadata["case_id"], attempt_id)
+            case_dir = definition_root / f"{case_prefix}_{BACKGROUND_SHORT[background]}_V1_{resolution.upper()}"
+            metadata = materialize_case(
+                background,
+                resolution,
+                case_dir,
+                scope_id=scope_id,
+                case_prefix=case_prefix,
+                physical_prefix=physical_prefix,
+                population_mode=population_mode,
+            )
+            attempt_id = f"gencase-f2-{case_prefix.lower().replace('_', '-')}-{resolution}-{attempt_suffix}"
+            request = runner_request(metadata, output_root / metadata["case_id"], attempt_id, scope_id=scope_id)
             request_path = request_root / f"{metadata['case_id']}_request.json"
             write_json(request_path, request)
             manifest_cases.append({
@@ -297,7 +396,7 @@ def design(output_root: Path) -> dict[str, Any]:
     manifest = {
         "schema": "ds-data-02.f2.commensurate-fallback-manifest.v1",
         "family_id": FAMILY_ID,
-        "scope_id": SCOPE_ID,
+        "scope_id": scope_id,
         "status": "new_scope_gencase_requests_registered_not_run",
         "qualification_claim": "none",
         "production_claim": "none",
@@ -308,8 +407,11 @@ def design(output_root: Path) -> dict[str, Any]:
         "cases": manifest_cases,
         "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "git_commit": git_commit(),
+        "population_mode": population_mode,
+        "case_prefix": case_prefix,
+        "physical_prefix": physical_prefix,
     }
-    manifest_path = FAMILY_ROOT / "commensurate_cellcenter" / "manifest.json"
+    manifest_path = FAMILY_ROOT / output_subdir / "manifest.json"
     write_json(manifest_path, manifest)
     return {"manifest_path": str(manifest_path), "manifest_sha256": sha256(manifest_path), "case_count": len(manifest_cases), "cases": manifest_cases}
 
@@ -319,9 +421,23 @@ def main() -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("design")
     p.add_argument("--output-root", type=Path, default=DATA_ROOT / "families/F2/F2_COMMENSURATE_CELLCENTER")
+    p.add_argument("--scope-id", default=SCOPE_ID)
+    p.add_argument("--case-prefix", default="F2_COMM")
+    p.add_argument("--physical-prefix", default="F2_COMM")
+    p.add_argument("--population-mode", choices=("fluid_direct", "void_mkbound", "drawbox_commensurate", "drawbox_cellcenter"), default="fluid_direct")
+    p.add_argument("--output-subdir", default="commensurate_cellcenter")
+    p.add_argument("--attempt-suffix", default="v1")
     args = parser.parse_args()
     if args.command == "design":
-        result = design(args.output_root)
+        result = design(
+            args.output_root,
+            scope_id=args.scope_id,
+            case_prefix=args.case_prefix,
+            physical_prefix=args.physical_prefix,
+            population_mode=args.population_mode,
+            output_subdir=args.output_subdir,
+            attempt_suffix=args.attempt_suffix,
+        )
         print(json.dumps({"status": "designed", **result}, ensure_ascii=False, indent=2))
         return 0
     return 1
