@@ -1,0 +1,26 @@
+{
+  "family_id": "infra",
+  "case_id": "F1_REF_ECC_NOMINAL_COARSE",
+  "attempt_id": "ds02-infra-f1-bi4-bind-condition-v1",
+  "kind": "cpu",
+  "cpu_task_kind": "tests",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-c",
+    "import hashlib, json\nfrom pathlib import Path\nimport h5py\nfrom scripts.ds_data02_convert import load_provenance\nsolver=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_COARSE/qualification-complete-event-001/execution-receipt.json')\ngencase=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_COARSE/gencase-ref-ecc-coarse-v1/execution-receipt.json')\nowner=Path('/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_ECC_NOMINAL_COARSE.metadata.json')\ntarget=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_COARSE/ds02-infra-f1-bi4-conversion-v3')\nh5_path=target / \"trajectory.h5\"\nreport_path=target / \"conversion-report.json\"\nprovenance=load_provenance(solver,gencase,owner)\nbindings=provenance[\"condition_bindings\"]\ndef digest(path):\n    h=hashlib.sha256()\n    with path.open(\"rb\") as stream:\n        for block in iter(lambda: stream.read(1024*1024), b\"\"):\n            h.update(block)\n    return h.hexdigest()\nold_hash=digest(h5_path)\nwith h5py.File(h5_path,\"r+\") as handle:\n    handle.attrs[\"geometry_sha256\"]=bindings[\"geometry_sha256\"]\n    handle.attrs[\"geometry_hash_scope\"]=\"owner metadata physical geometry and geometry_family_id; excludes resolution dp and particle mesh\"\n    handle.attrs[\"geometry_binding_json\"]=json.dumps(bindings[\"geometry\"],ensure_ascii=False,sort_keys=True)\n    handle.attrs[\"control_sha256\"]=bindings[\"control_sha256\"]\n    handle.attrs[\"control_hash_scope\"]=\"owner solver parameters, parameter values, event window, physical initial state, and generated XML motion/execution declarations\"\n    handle.attrs[\"control_binding_json\"]=json.dumps(bindings[\"control\"],ensure_ascii=False,sort_keys=True)\n    handle.attrs[\"condition_binding_missing_requirements\"]=json.dumps(bindings[\"missing_requirements\"],ensure_ascii=False)\nnew_hash=digest(h5_path)\nreport=json.loads(report_path.read_text(encoding=\"utf-8\"))\nreport[\"source_provenance\"][\"condition_bindings\"]=bindings\nreport[\"output_hdf5_sha256\"]=new_hash\nreport[\"output_hdf5_bytes\"]=h5_path.stat().st_size\nreport[\"condition_binding_patch\"]={\"status\":\"metadata_only\",\"old_hdf5_sha256\":old_hash,\"new_hdf5_sha256\":new_hash,\"reason\":\"add evaluator condition bindings from existing source provenance; trajectory datasets unchanged\"}\nreport_path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+\"\\n\",encoding=\"utf-8\")\nprint(json.dumps({\"status\":\"completed\",\"target\":str(h5_path),\"old_hdf5_sha256\":old_hash,\"new_hdf5_sha256\":new_hash,\"geometry_sha256\":bindings[\"geometry_sha256\"],\"control_sha256\":bindings[\"control_sha256\"]},ensure_ascii=False))\n"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "max_wall_seconds": 60,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 2097152,
+  "estimated_peak_gpu_mib": 0,
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_convert.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_ECC_NOMINAL_COARSE.metadata.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_COARSE/gencase-ref-ecc-coarse-v1/F1_REF_ECC_NOMINAL_COARSE.xml",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_ECC_NOMINAL_COARSE_Def.xml"
+  ],
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "request_note": "Metadata-only binding patch for the already converted coarse HDF5; no solver, model, GPU, or trajectory data rewrite."
+}
