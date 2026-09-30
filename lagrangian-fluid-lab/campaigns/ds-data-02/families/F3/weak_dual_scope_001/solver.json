@@ -1,0 +1,95 @@
+{
+  "attempt_id": "qualification-weak-dual-scope-001",
+  "case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-mdbc_noslip:1",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/gencase-weak-dual-scope-001/F3_DUAL_AXIS_WEAK_006G_004G",
+    "{attempt_root}/solver_output",
+    "-tmax:10",
+    "-tout:0.0025"
+  ],
+  "complete_event_window_s": [
+    0.0,
+    10.0
+  ],
+  "coordinate_frame_id": "fixed_tank_acceleration",
+  "cost_estimate": {
+    "actual_fluid_particles": 34560,
+    "actual_total_particles": 108000,
+    "basis": "actual fallback GenCase receipt plus conservative native H5/BI4 reservation",
+    "estimated_gpu_seconds": 2400,
+    "estimated_storage_bytes": 34359738368,
+    "requested_window_s": 10.0,
+    "storage_basis": "native output upper-bound reservation 32 GiB"
+  },
+  "cpu_threads": 4,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001",
+  "definition_commit_binding": "1000627b",
+  "estimated_peak_gpu_mib": 8192,
+  "estimated_storage_bytes": 25769803776,
+  "event_timing_qualified": false,
+  "fallback_evidence": {
+    "actual_fluid_particles": 34560,
+    "actual_total_particles": 108000,
+    "boundary_particles": 73440,
+    "dual_axis_control_hash_preserved": true,
+    "historical_split_or_trajectory_modified": false,
+    "initial_fluid_solid_intersection_count": 0,
+    "normal_zero_count_preflight": 0
+  },
+  "fallback_id": "dual_axis_phase_on_qualified_cell3_geometry",
+  "family_id": "F3",
+  "gencase_actual_particles": {
+    "fluid": 34560,
+    "total": 108000
+  },
+  "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/gencase-weak-dual-scope-001/execution-receipt.json",
+  "gencase_receipt_sha256": "bf116ec5b319644374d00ca241ee8a210d79ea6758d20f6cb4e6fba9a55129c2",
+  "gencase_runner_sha256": "1b010e941f2dbef9c2a299cb72f2fbcd2b9a19bf1cf20015756d40fbe1fdf48d",
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/gencase-weak-dual-scope-001/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/gencase-weak-dual-scope-001/F3_DUAL_AXIS_WEAK_006G_004G.xml",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/gencase-weak-dual-scope-001/F3_DUAL_AXIS_WEAK_006G_004G.bi4",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001/F3_DUAL_AXIS_WEAK_006G_004G_Def.xml",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001/F3_DualAxisPhase_WeakControl.csv",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001/registration.json"
+  ],
+  "kind": "qualification",
+  "max_wall_seconds": 900,
+  "mechanism_id": "dual_axis_phase",
+  "observables": [
+    "exchange_mass",
+    "repeat_crossing",
+    "surface_com_phase",
+    "distribution_3d",
+    "velocity_energy",
+    "boundary_correction_usage",
+    "initial_mass_ledger",
+    "normal_coverage_audit"
+  ],
+  "output_interval_s": 0.0025,
+  "parent_gencase_git_at_launch": {
+    "commit": "6f361b5cc6da1acc757edd781c292efbfa53b78d",
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor"
+  },
+  "qualification_launch_authority": "shared_ds_data02_runtime_only; F3 owner does not launch GPU",
+  "qualification_scope": "one complete 0-10 s native solver receipt for Q-I review of the dual-axis mechanism on the already qualified CELL3 geometry; no historical trajectory/split is modified; this request grants no Q-N",
+  "qualification_status": "pending_root_shared_gpu_dispatch",
+  "raw_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/case/attempt",
+  "recipe_id": "F3_DS02_dual_axis_phase_qualified_cell3_fallback_v1",
+  "request_file": "qualification_requests/dual_axis_qualified_fallback.json",
+  "request_note": "Submit only through shared scripts/ds_data02_runtime.py. Use actual GenCase prefix from gencase receipt. This is the legal F3 fallback after dual new-parent normal coverage exhausted repair01 and repair02; preserve old assets and split.",
+  "resolution": "medium_qualified_fallback",
+  "schema": "ds-data-02.runner.request.v1",
+  "solver_dimension_required": 3,
+  "solver_launch_forbidden": false,
+  "source_mother": "F3_DS02_dual_axis_phase_parent",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics",
+  "root_resource_review": "Complete native all-type 4001-frame output reserved at 32GiB; real prior equivalent solves ~290-366GPU seconds; do not overwrite old attempts.",
+  "qualified": false,
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "qualification_claim": "none; actual stronger-control exclusions do not transfer qualification to this new weak physical control",
+  "source_parent_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001/F3_DUAL_AXIS_WEAK_006G_004G_Def.xml"
+}
