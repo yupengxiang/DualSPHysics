@@ -55,7 +55,7 @@ def _write_fixture(tmp_path: Path) -> dict[str, Path]:
     (solver_dir / "RunPARTs.csv").write_text(
         "Part;TimeStep [s];Steps\n"
         "0;0.0;0\n"
-        "1;1.0;1\n",
+        "1;1.000000123;1\n",
         encoding="utf-8",
     )
     generated_xml = tmp_path / "Case.xml"
@@ -135,6 +135,8 @@ def test_converter_preserves_typed_identity_units_and_actual_dimension(tmp_path:
         assert handle.attrs["identity_key"] == "(Zone,Idp)"
         assert handle.attrs["solver_dimension"] == 3
         assert handle.attrs["coordinate_frame_inference_from_coordinate_values"] == 0
+        assert handle["time"][:].tolist() == pytest.approx([0.0, 1.000000123])
+        assert "RunPARTs.csv" in handle.attrs["time_source"]
     json.loads(paths["report"].read_text(encoding="utf-8"))
 
 
