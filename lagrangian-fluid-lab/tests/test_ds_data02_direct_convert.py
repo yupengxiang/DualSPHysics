@@ -208,3 +208,30 @@ def test_finite_initial_exclusion_keeps_full_typed_axis_and_valid_mask(tmp_path:
         assert ledger["count"] == 1
         assert ledger["type_counts"] == {"0": 0, "1": 0, "2": 1, "3": 0}
     assert report["typed_identity"]["initial_exclusion_ledger"]["count"] == 1
+
+
+def test_reference_comparison_reports_strict_and_numeric_equality_separately(tmp_path: Path) -> None:
+    direct = tmp_path / "direct.h5"
+    reference = tmp_path / "reference.h5"
+    # Reuse the compact structural fixture from the integrity suite locally.
+    frames, particles = 2, 4
+    for path in (direct, reference):
+        with h5py.File(path, "w") as h5:
+            h5.create_dataset("time", data=np.arange(frames, dtype="f8"))
+            h5.create_dataset("particle_id", data=np.arange(particles, dtype="u4"))
+            h5.create_dataset("particle_zone", data=np.zeros(particles, dtype="i2"))
+            h5.create_dataset("valid", data=np.ones((frames, particles), dtype=bool))
+            h5.create_dataset("position", data=np.zeros((frames, particles, 3), dtype="f4"))
+            h5.create_dataset("velocity", data=np.zeros((frames, particles, 3), dtype="f4"))
+            h5.create_dataset("density", data=np.full((frames, particles), 1000, dtype="f4"))
+            h5.create_dataset("mass", data=np.ones((frames, particles), dtype="f4"))
+            h5.create_dataset("pressure", data=np.zeros((frames, particles), dtype="f4"))
+            h5.create_dataset("type", data=np.full((frames, particles), 3, dtype="i1"))
+            h5.create_dataset("mk", data=np.ones((frames, particles), dtype="i2"))
+    with h5py.File(direct, "r+") as h5:
+        h5["position"][0, 0, 0] = 1.0e-7
+    result = compare_reference_hdf5(direct, reference, particle_chunk=2)
+    assert result["all_nonpressure_arrays_equal"] is False
+    assert result["exact_structural_datasets"] is True
+    assert result["numeric_within_tolerance"]["position"] is True
+    assert result["passed"] is True
