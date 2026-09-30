@@ -80,6 +80,9 @@ def _write_fake_decoder(path: Path) -> None:
             pos = np.arange(12, dtype=np.float32).reshape(4, 3) + frame
             vel = np.full((4, 3), frame + 1, dtype=np.float32)
             rho = np.asarray([1000, 1001, 1002, 1003], dtype=np.float32) + frame
+            if (source.parent / "drop_frame_zero").exists() and frame == 0:
+                keep = np.asarray([0, 1, 3])
+                ids, pos, vel, rho = ids[keep], pos[keep], vel[keep], rho[keep]
             ids.tofile(data / "Idp.bin")
             pos.tofile(data / "Pos.bin")
             vel.tofile(data / "Vel.bin")
@@ -179,3 +182,29 @@ def test_pressure_uses_native_eos_constants() -> None:
     pressure = eos_pressure(np.asarray([1000.0, 1001.0], dtype=np.float32), {"B": 100.0, "Rhop0": 1000.0, "Gamma": 2.0})
     assert pressure[0] == pytest.approx(0.0)
     assert pressure[1] == pytest.approx(0.2001, rel=1e-4)
+
+
+def test_finite_initial_exclusion_keeps_full_typed_axis_and_valid_mask(tmp_path: Path) -> None:
+    source = _write_provenance(tmp_path)
+    (source["data"] / "drop_frame_zero").write_text("type-2 initial cohort intentionally absent\n", encoding="utf-8")
+    output = tmp_path / "excluded.h5"
+    report = convert_direct(
+        data_root=source["data"],
+        generated_xml=source["xml"],
+        output=output,
+        report_path=tmp_path / "excluded-report.json",
+        decoder=source["decoder"],
+        solver_log=source["solver_log"],
+        solver_receipt=source["solver_receipt"],
+        gencase_receipt=source["gencase_receipt"],
+        owner_metadata=source["owner"],
+        run_partvtk=False,
+    )
+    with h5py.File(output, "r") as h5:
+        assert h5["particle_id"][...].tolist() == [0, 1, 2, 3]
+        assert h5["initial_type"][...].tolist() == [0, 1, 2, 3]
+        assert h5["valid"][0].tolist() == [True, True, False, True]
+        ledger = json.loads(h5.attrs["initial_exclusion_ledger_json"])
+        assert ledger["count"] == 1
+        assert ledger["type_counts"] == {"0": 0, "1": 0, "2": 1, "3": 0}
+    assert report["typed_identity"]["initial_exclusion_ledger"]["count"] == 1
