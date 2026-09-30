@@ -8,6 +8,11 @@
   "solver_launch_authority": "primary_process_via_shared_runner_only",
   "planner_launches_solver": false,
   "input_policy": "each stage is materialized only after all six actual upstream receipts and required artifacts exist; placeholder input paths are rejected",
+  "compatibility_policy": "conversion uses an F2-derived generator-schema alias only after source owner metadata, GenCase receipt, and completed solver receipt hashes are validated; consumed bytes remain unchanged",
+  "conversion_engine_policy": {
+    "direct": "preferred for fine/native evidence: integration BI4 streaming converter with PartVTK first/middle/last checks",
+    "wrapper": "legacy full-frame PartVTK CSV path retained only as bounded diagnostic evidence"
+  },
   "resource_plan": {
     "per_request": {
       "cpu_threads": 4,
@@ -43,9 +48,9 @@
       }
     ]
   },
-  "materialize_command": "lagrangian-fluid-lab/.venv/bin/python campaigns/ds-data-02/families/F2/f2_commensurate_postsolver.py materialize --stage STAGE --solver-receipt RECEIPT ... --output-dir OUTPUT_DIR",
+  "materialize_command": "lagrangian-fluid-lab/.venv/bin/python campaigns/ds-data-02/families/F2/f2_commensurate_postsolver.py materialize --stage STAGE --solver-receipt RECEIPT ... --compatibility-manifest COMPAT_MANIFEST --conversion-engine direct --output-dir OUTPUT_DIR",
   "next_stage_commands": {
-    "conversion": "provide all six --solver-receipt arguments",
+    "conversion": "provide all six --solver-receipt arguments, the F2 compatibility manifest, and --conversion-engine direct",
     "labels": "use --prior-manifest postsolver-conversion-manifest.json",
     "qi": "use --prior-manifest postsolver-labels-manifest.json",
     "preview": "use --prior-manifest postsolver-qi-manifest.json"
