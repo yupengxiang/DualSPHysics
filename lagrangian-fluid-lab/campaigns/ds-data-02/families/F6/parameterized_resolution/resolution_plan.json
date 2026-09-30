@@ -1,0 +1,1428 @@
+{
+  "actual_final_dimensions": {
+    "simple_free_response": [
+      5.46,
+      1.56,
+      1.26
+    ],
+    "wave_no_contact": [
+      6.0,
+      1.56,
+      1.26
+    ]
+  },
+  "dp_m": {
+    "coarse": 0.06,
+    "fine": 0.02,
+    "medium": 0.03
+  },
+  "event_time_sampling": {
+    "complete_event_window_s": [
+      0.0,
+      12.0
+    ],
+    "control_dt_s": 0.01,
+    "coordinate_frames": {
+      "simple_free_response": "tank_attached_inertial",
+      "wave_no_contact": "world_tank_and_tank_attached_observations"
+    },
+    "events": {
+      "simple_free_response": [
+        "initial_still_water",
+        "release_at_zero",
+        "successive_heave_roll_pitch_extrema",
+        "decay_tail",
+        "final_mass_momentum_audit"
+      ],
+      "wave_no_contact": [
+        "initial_still_water",
+        "wave_ramp",
+        "first_wave_arrival",
+        "steady_wave_cycles",
+        "last_cycle_decay",
+        "final_mass_momentum_audit"
+      ]
+    },
+    "native_save_dt_s": 0.05
+  },
+  "family_id": "F6",
+  "frozen_parent_source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6.py",
+    "sha256": "6a6dfacde41770dbe86b188af75d691c0b84e52bb397409ffed818490d8d235b"
+  },
+  "generator": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_resolution.py",
+    "sha256": "1580890369ae43d8ff3938e55a0ef84269cac17ba127be7574a202527d4b9df3"
+  },
+  "geometry_boundary_mass_audit": {
+    "finite_wall_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "ghost_policy": "fixed particles are a finite boundary representation; numerical ghost fluid is not counted as fluid",
+    "high_low_face_rule": "actual generated fixed particle low/high x/y planes plus bottom plane; ratio and counts recorded per candidate",
+    "open_faces": [
+      "top"
+    ],
+    "representmass_policy": "report native MassFluid*type3 count, MassPart/MassBound Type=2 per-particle mass, aggregate massbody and source analytic inertia separately; never rescale",
+    "volume_error_policy": "record fluid continuous-volume mass error, floating discrete-volume error, aggregate mass error and generated inertia versus source analytic box inertia; all QI/QN gates remain pending"
+  },
+  "geometry_contract": "wall, fluid fill, floating body, paddle, mass and source inertia are byte/number-bound from the repaired parent; pointmax=physical wall+dp is computational margin only",
+  "historical_reuse": {
+    "old_f6_1357m_identity_reused": false,
+    "old_parent_qual01_qual02_reused_for_solver": false,
+    "repaired_parent_12s_terminal_reused_for_native_postprocessing": true,
+    "semantics": "the native audit reads the terminal grid-repair raw BI4/Run files; it does not relaunch or mutate the old failed attempts or the historical 13.57M-particle identity"
+  },
+  "integrator_save_registration": {
+    "fixed_rule": "materialize numeric DtFixed only after complete-window baseline RunPARTs.csv/Run.out; DtFixed <= 0.5*measured stable minimum dt",
+    "same_geometry_control_window": true,
+    "save_study_is_not_integrator_evidence": true,
+    "save_variants_s": [
+      0.025,
+      0.05,
+      0.1
+    ],
+    "status": "registered_pending_measured_baseline",
+    "variants": [
+      "native_adaptive_baseline",
+      "fixed_half_measured_stable_baseline_min"
+    ]
+  },
+  "lineage_comparison": {
+    "simple_free_response": {
+      "comparison_semantics": "old parent/QUAL01/QUAL02 receipts remain failed or non-equivalent evidence; final grid repair is a new physical mother geometry and successful 12 s run, not automatic Q-N",
+      "final_gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02/execution-receipt.json",
+        "sha256": "5758c230ebd4e6d9d24c493fa9ba5c4c44412fb32615ebcad2731a02966f384f",
+        "status": "completed"
+      },
+      "final_grid_repair_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.3
+          ],
+          "size_m": [
+            5.26,
+            1.36,
+            0.52
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+        "physical_wall_size_m": [
+          5.46,
+          1.56,
+          1.26
+        ],
+        "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+        "sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+      },
+      "final_solver_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01/execution-receipt.json",
+        "sha256": "234ba9baf096f981a359858992ef929ceee510760c0d5410b57c6c7ec4eb0cee",
+        "status": "completed"
+      },
+      "old_parent_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.3
+          ],
+          "size_m": [
+            5.38,
+            1.48,
+            0.52
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Def.xml",
+        "physical_wall_size_m": [
+          5.5,
+          1.6,
+          1.3
+        ],
+        "sha256": "089c3043892b4e72f18aca5d526485816c73ccd9fdbb3b1a45c44e4901eec4fb"
+      },
+      "old_parent_solver_attempts": [
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01",
+          "receipt_sha256": "5266aa7baa27e7da52a642061f2b6d263d147beab0519cd31ace28ecc231d061",
+          "returncode": 1,
+          "status": "failed"
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02",
+          "receipt_sha256": "52181de00745a07e08fe0ccf87aeab6763f73aa962caaf73312ad269217e38d4",
+          "returncode": 1,
+          "status": "failed"
+        }
+      ],
+      "repair_and_final_attempts": [
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01",
+          "fluid_particles": 14696,
+          "receipt_sha256": "0f568f15abe91d2141fd67dbcdae4dc0f13f6ef2d0ff3e2cbc8f60ed8b7eb515",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20614
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "577d410e99d5a652b7e09b5762648420a6452730c8ee0ac175c5382b497ea81d",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 23326
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "5758c230ebd4e6d9d24c493fa9ba5c4c44412fb32615ebcad2731a02966f384f",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 23326
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": null,
+          "receipt_sha256": "234ba9baf096f981a359858992ef929ceee510760c0d5410b57c6c7ec4eb0cee",
+          "returncode": 0,
+          "solver_dimension": null,
+          "status": "completed",
+          "total_particles": null
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "d366b8ffb74e1e9d9363751b57f3b580213b64c3090c99eb4e47a187b301ceba",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20890
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "2f12070d14de26cdfafa6f393a2cd451c1aa468f144aa501f9f955a108fd8ce4",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20614
+        }
+      ]
+    },
+    "wave_no_contact": {
+      "comparison_semantics": "old parent/QUAL01/QUAL02 receipts remain failed or non-equivalent evidence; final grid repair is a new physical mother geometry and successful 12 s run, not automatic Q-N",
+      "final_gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02/execution-receipt.json",
+        "sha256": "7c356630750117ebf558ad886cd2c4f285fd26857e1c7b28afcc391ef4867d62",
+        "status": "completed"
+      },
+      "final_grid_repair_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.28
+          ],
+          "size_m": [
+            5.78,
+            1.36,
+            0.49
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+        "physical_wall_size_m": [
+          6.0,
+          1.56,
+          1.26
+        ],
+        "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+        "sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+      },
+      "final_solver_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01/execution-receipt.json",
+        "sha256": "1453bb4ca7dff5d59ea2dceff35b3afaf5bfdd2dc8ce652d2e7e219385c12574",
+        "status": "completed"
+      },
+      "old_parent_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.28
+          ],
+          "size_m": [
+            5.78,
+            1.48,
+            0.49
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Def.xml",
+        "physical_wall_size_m": [
+          6.0,
+          1.6,
+          1.3
+        ],
+        "sha256": "35811bd77231dd217bf67cefa70d71d91164ddf862cdcfce32f1f402184db8d9"
+      },
+      "old_parent_solver_attempts": [
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01",
+          "receipt_sha256": "158ff1581beadf85cecd3d1cb6e64e26fca6409ddcbc7f9ea0a48d912a97cce7",
+          "returncode": 1,
+          "status": "failed"
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02",
+          "receipt_sha256": "d706ceb97b6a5ae1fb630f465a95626f49e43cb3d49d3be1f1ae7ecec8f48b3e",
+          "returncode": 1,
+          "status": "failed"
+        }
+      ],
+      "repair_and_final_attempts": [
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01",
+          "fluid_particles": 14135,
+          "receipt_sha256": "1f69e83736c7e1b7d288547e0a50d9be80b54cc4030f31bc338e5baf05872cf9",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 21555
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "73a49a7183f741cfeec0174c06e811ebfd0ef90751726a18b93817e90c584de9",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 24474
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "7c356630750117ebf558ad886cd2c4f285fd26857e1c7b28afcc391ef4867d62",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 24474
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": null,
+          "receipt_sha256": "1453bb4ca7dff5d59ea2dceff35b3afaf5bfdd2dc8ce652d2e7e219385c12574",
+          "returncode": 0,
+          "solver_dimension": null,
+          "status": "completed",
+          "total_particles": null
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "7b55b77d0a555684f1da15e3663c5ae84849f31b78efe929de41d5486ad0efec",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 22435
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "035c4078f513602688bae364146cd9792dd6e95c0220906ff1b1173339d6ae6f",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 21555
+        }
+      ]
+    }
+  },
+  "matrix": [
+    {
+      "actual_counts": {
+        "fixed": 7398,
+        "floating": 1232,
+        "fluid": 14696,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_COARSE",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.06,
+      "estimated_counts": {
+        "fixed": 9646,
+        "floating": 889,
+        "fluid": 17222,
+        "moving": 0,
+        "total": 27757
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/gencase-audit.json",
+        "sha256": "260c0e0c7f475be49445d1d6aa117fc9f3c4f5e37e2979b91d27f1f001fe5eb9",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_COARSE/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_GENCASE_01/execution-receipt.json",
+        "sha256": "3778a5cd33c3cf18d0556e34d176104000dca2e901f2dbdf500a20dc83d5a5a9",
+        "status": "pass"
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Def.xml",
+          "sha256": "7ad57e1222db326b732c706df38cb86914e05f3b23f94a02309b4a013413a6c1",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.52,
+        1.62,
+        1.32
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.3859999999999997,
+        "fluid_mass_relative": -0.1466545085422294
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_COARSE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_coarse_gencase.json",
+        "sha256": "21a6561f6323da851200c3a30b3e8dae4c457c67597c5ea36cb2873993d2f83c"
+      },
+      "resolution_id": "coarse",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    },
+    {
+      "actual_counts": {
+        "fixed": 29355,
+        "floating": 8232,
+        "fluid": 118380,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.03,
+      "estimated_counts": {
+        "fixed": 38584,
+        "floating": 7111,
+        "fluid": 137773,
+        "moving": 0,
+        "total": 183468
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/gencase-audit.json",
+        "sha256": "4cdc17693f08bb1f5b4a6a6fbc5a832bf4a8fa488ec0e668681448b501c08869",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_GENCASE_01/execution-receipt.json",
+        "sha256": "0ce522b72ac8b56ef3fb8887c7d3aa44c008d98de58eb2862c04fbbb7331aa92",
+        "status": "pass"
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Def.xml",
+          "sha256": "083cea07819afbe31f0926c748e42765939be3b63db651469d9cf81f425fa712",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.49,
+        1.59,
+        1.29
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.15762499999999968,
+        "fluid_mass_relative": -0.14076075735939308
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_medium_gencase.json",
+        "sha256": "04af55bc2b66555cab9e73093722861995e49528bb90a95e558729cc5d5f8b9f"
+      },
+      "resolution_id": "medium",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    },
+    {
+      "actual_counts": {
+        "fixed": 65872,
+        "floating": 26691,
+        "fluid": 424869,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_FINE",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.02,
+      "estimated_counts": {
+        "fixed": 86814,
+        "floating": 24000,
+        "fluid": 464984,
+        "moving": 0,
+        "total": 575798
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/gencase-audit.json",
+        "sha256": "cf0b00b66505d28979546f71af0ab8853d0dded8a2efaa9f4a176b7dd5c56cf8",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_FINE/F6_SIMPLE_FREE_RESPONSE_RES_FINE_GENCASE_01/execution-receipt.json",
+        "sha256": "5f767218cd1046f4f1c6cbe5a5402796708a26b3fddfe15b22fa9a57f661624c",
+        "status": "pass"
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Def.xml",
+          "sha256": "b455152c777cf9f12be9b4915ff96e674d4566fe6138649f65eb76271b3f2aeb",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.4799999999999995,
+        1.58,
+        1.28
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11212500000000003,
+        "fluid_mass_relative": -0.08627178569585181
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_FINE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_fine_gencase.json",
+        "sha256": "e23fc94ca9421a4ca149f91818d567b4fe0463a22992dec10b45574cdd85cb29"
+      },
+      "resolution_id": "fine",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    },
+    {
+      "actual_counts": {
+        "fixed": 8019,
+        "floating": 1320,
+        "fluid": 14135,
+        "moving": 1000
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_COARSE",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.06,
+      "estimated_counts": {
+        "fixed": 10492,
+        "floating": 889,
+        "fluid": 17832,
+        "moving": 889,
+        "total": 30102
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/gencase-audit.json",
+        "sha256": "74273dafb4a2f95f5b1d348656fe8e7ffb1094d7ea70cf360bfeb95de47f9553",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_COARSE/F6_WAVE_NO_CONTACT_RES_COARSE_GENCASE_01/execution-receipt.json",
+        "sha256": "97e697af43584710f937ee18990a7123231232eb63a0c7836b309d091980a403",
+        "status": "pass"
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Def.xml",
+          "sha256": "962359a66c915c633cf9c2589c46f6efe1fe24c7d03c0832b686c20fe4043f2c",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.06,
+        1.62,
+        1.32
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.48499999999999965,
+        "fluid_mass_relative": -0.20734037559660556
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_COARSE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_coarse_gencase.json",
+        "sha256": "90b25f35f754b06c865c8bf3b0608cd59f356cfc56761f43585b493d85d58930"
+      },
+      "resolution_id": "coarse",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    },
+    {
+      "actual_counts": {
+        "fixed": 31821,
+        "floating": 7938,
+        "fluid": 123318,
+        "moving": 6120
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_MEDIUM",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.03,
+      "estimated_counts": {
+        "fixed": 41968,
+        "floating": 7111,
+        "fluid": 142659,
+        "moving": 7111,
+        "total": 198849
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/gencase-audit.json",
+        "sha256": "35345ef564d79b32b8bce2714e034c333b526deff4d71f2eb4d63f5bce027a05",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_MEDIUM/F6_WAVE_NO_CONTACT_RES_MEDIUM_GENCASE_01/execution-receipt.json",
+        "sha256": "d48a7c576810ca08319afa3d29401549fea9c506423cfcc6585f67e6d1ad0d89",
+        "status": "pass"
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Def.xml",
+          "sha256": "f6fe0508c780e56cc3f58cb3eaf490c42f2ade76c7145e91d0d7e8a2006de810",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.03,
+        1.59,
+        1.29
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11628124999999967,
+        "fluid_mass_relative": -0.13557481816255923
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_MEDIUM_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_medium_gencase.json",
+        "sha256": "14bbf6a4e60d7cae8da44ae24febd5f6a65ac1e975c1b1c4893c495e367885cf"
+      },
+      "resolution_id": "medium",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    },
+    {
+      "actual_counts": {
+        "fixed": 71407,
+        "floating": 26691,
+        "fluid": 450394,
+        "moving": 23100
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_FINE",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.02,
+      "estimated_counts": {
+        "fixed": 94428,
+        "floating": 24000,
+        "fluid": 481474,
+        "moving": 24000,
+        "total": 623902
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/gencase-audit.json",
+        "sha256": "84b326189ac234f61d30816dcb1b21c613d84d747c6864376be1761a596af9d6",
+        "status": "pass"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_FINE/F6_WAVE_NO_CONTACT_RES_FINE_GENCASE_01/execution-receipt.json",
+        "sha256": "29bd30b7fcc4c1c0d8e8eea6baeb66f6e5f603b95731b1eded1d7fe79809b115",
+        "status": "pass"
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Def.xml",
+          "sha256": "625e16debb10aa1cf630d6bcbc6cb1fc4ddec575433fcb1c634108540971a93f",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.02,
+        1.58,
+        1.28
+      ],
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11212500000000003,
+        "fluid_mass_relative": -0.06455177226599995
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_FINE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_fine_gencase.json",
+        "sha256": "433d963cbba9158ff122856d7078852395a622a127bc22cd938cefaea1c6f9d4"
+      },
+      "resolution_id": "fine",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_pass"
+    }
+  ],
+  "q_status": "QI/QN pending; this plan and GenCase receipts do not qualify a solver recipe",
+  "repair_parent": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+  "requested_reference_dimension_note": {
+    "decision": "use parsed repaired physical dimensions and preserve them at every resolution",
+    "note": "The current repaired F6 Definitions contain wall dimensions 5.46x1.56x1.26 m (simple) and 6.00x1.56x1.26 m (wave). The strings 2.76 and 0.90 do not occur as physical wall dimensions in these inputs; 2.76 is a control/log time value. No .12 candidate or .90-to-.84 snap is substituted."
+  },
+  "resolution_ids": [
+    "coarse",
+    "medium",
+    "fine"
+  ],
+  "resolution_study_status": "gencase_audited_pending_solver",
+  "same_continuous_geometry": true,
+  "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+  "source_mass_inertia_volume": {
+    "simple_free_response": {
+      "density_ratio_to_water": 0.5208333333333334,
+      "mass_kg": 100.0,
+      "source_inertia_kg_m2": [
+        [
+          4.333333333333333,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.666666666666668,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          8.333333333333334
+        ]
+      ],
+      "volume_m3": 0.192
+    },
+    "wave_no_contact": {
+      "density_ratio_to_water": 0.4947916666666667,
+      "mass_kg": 95.0,
+      "source_inertia_kg_m2": [
+        [
+          4.116666666666666,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.333333333333335,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          7.916666666666667
+        ]
+      ],
+      "volume_m3": 0.192
+    }
+  },
+  "status": "gencase_audited_pending_solver"
+}

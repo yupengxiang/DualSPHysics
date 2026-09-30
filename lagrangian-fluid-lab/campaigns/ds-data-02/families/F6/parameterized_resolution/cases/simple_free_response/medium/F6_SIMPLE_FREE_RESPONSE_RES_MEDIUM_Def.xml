@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- F6 fixed-geometry resolution medium; physical wall/body/fluid/paddle values are copied from F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02; pointmax is computational wall+dp margin only. -->
+<!-- DS-DATA-02 F6 generated parent: simple_free_response; official syntax reference: main/11_Floating/CaseFloating_Def.xml. -->
+<case>
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <rhopgradient value="3" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.2" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="230" fluidcount="9">
+            <mkorientfluid mk="0" orient="Xyz" />
+        </mkconfig>
+        <geometry>
+            <definition dp="0.03">
+                <pointref x="0" y="0" z="0" />
+                <pointmin x="-0.2" y="-0.2" z="-0.1" />
+                <pointmax x="5.49" y="1.59" z="1.29" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | real | bound</setshapemode>
+                    <setdrawmode mode="face" />
+                    <setmkbound mk="20" />
+                    <drawbox cmt="Finite tank walls">
+                        <boxfill>bottom|left|right|front|back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="5.46" y="1.56" z="1.26" />
+                    </drawbox>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="50" />
+                    <drawbox cmt="Free rigid body">
+                        <boxfill>solid</boxfill>
+                        <point x="2.1" y="0.5" z="0.36" />
+                        <size x="0.8" y="0.6" z="0.4" />
+                    </drawbox>
+                    <setmkfluid mk="0" />
+                    <fillbox x="1" y="0.8" z="0.3">
+                        <modefill>void</modefill>
+                        <point x="0.06" y="0.06" z="0.06" />
+                        <size x="5.26" y="1.36" z="0.52" />
+                    </fillbox>
+                    <shapeout file="" reset="true" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <floatings>
+            <floating mkbound="50">
+                <massbody value="100" />
+                <translationDOF x="1" y="1" z="1" />
+                <rotationDOF x="1" y="1" z="1" />
+            </floating>
+        </floatings>
+
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="2" />
+            <parameter key="Visco" value="0.000001" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" comment="native SPH rigid body; external contact backend is disabled" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtFixedFile" value="NONE" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="12" />
+            <parameter key="TimeOut" value="0.05" />
+            <parameter key="PartsOutMax" value="1" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain>
+                <posmin x="default" y="default" z="default" />
+                <posmax x="default" y="default" z="default + 20%" />
+            </simulationdomain>
+        </parameters>
+    </execution>
+</case>
