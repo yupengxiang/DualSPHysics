@@ -11,3 +11,5 @@ Never launch a solver outside the shared DS-DATA-02 runner. GPU work requires a 
 Scientific Q-N qualification is tied to recipe, geometry/control domain, time window, observables, and actual evidence. Old Q-N-integrity-pass is a mass diagnostic. A canary or boolean gate is not numerical-reference evidence. Q-E and optional material tracers do not gate all native numerical data.
 
 Commit completed scoped work locally. The primary integrates and publishes activity branches. Keep actual launch commit and input hashes in receipts. Every checkpoint lists the next executable tasks and continues the authorized work. Do not claim product completion from code/tests/JSON alone.
+
+Once a completed artifact is referenced by labels, evaluation, previews, or a manifest, preserve its bytes. Add semantic sidecars or create a separately named enriched copy; do not patch a consumed HDF5 in place. Any earlier metadata patch must have a recorded hash transition, and downstream artifacts must be rebound to the final immutable version before delivery.
