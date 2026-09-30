@@ -84,9 +84,15 @@ def test_generator_materialises_repair_inputs_without_changing_parent_bytes(tmp_
     generator = _load_generator()
     manifest = generator._write_parent_inputs(tmp_path)
     assert len(manifest["parents"]) == 2
-    assert len(manifest["repairs"]) == 2
-    for parent, repair in zip(manifest["parents"], manifest["repairs"]):
-        assert repair["parent_definition_sha256"] == parent["definition"]["sha256"]
-        assert repair["control"]["sha256"] == parent["control"]["sha256"]
-        repair_def = Path(repair["definition"]["path"])
-        assert _normal_contract(repair_def) == (3.0, True)
+    assert len(manifest["repairs"]) == 3
+    for parent in manifest["parents"]:
+        repairs = [
+            repair for repair in manifest["repairs"]
+            if repair["parent_case_id"] == parent["case_id"]
+        ]
+        assert repairs
+        for repair in repairs:
+            assert repair["parent_definition_sha256"] == parent["definition"]["sha256"]
+            assert repair["control"]["sha256"] == parent["control"]["sha256"]
+            repair_def = Path(repair["definition"]["path"])
+            assert _normal_contract(repair_def) == (3.0, True)

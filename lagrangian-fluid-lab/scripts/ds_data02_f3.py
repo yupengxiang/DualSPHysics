@@ -1634,6 +1634,7 @@ def _write_dual_axis_definition(
     *,
     normal_distanceh: float = 2.0,
     normal_save_shapes: bool = False,
+    normal_boxfill: str = "all^top",
 ) -> dict[str, Any]:
     path = directory / "F3_DualAxisPhase_Def.xml"
     control_name = "F3_DualAxisPhase_Control.csv"
@@ -1648,7 +1649,7 @@ def _write_dual_axis_definition(
     _xml_child(normal_list, "setshapemode", text="actual | bound")
     _xml_child(normal_list, "setnormalinvert", {"invert": "true"})
     _xml_child(normal_list, "setmkbound", {"mk": 0})
-    _xml_drawbox(normal_list, "all^top", [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="-0.5")
+    _xml_drawbox(normal_list, normal_boxfill, [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="-0.5")
     _xml_child(normal_list, "shapeout", {"file": "hdp"})
     _xml_child(normal_list, "resetdraw")
     main = _xml_child(commands, "mainlist")
@@ -1857,6 +1858,52 @@ def _repair_input_record(
     return repair
 
 
+def _write_dual_normal_face_repair(
+    parent: Mapping[str, Any],
+    repair_directory: Path,
+    canonical_directory: Path,
+) -> dict[str, Any]:
+    """Write the final bounded normal-coverage repair for the dual parent."""
+    repair = _write_dual_axis_definition(
+        repair_directory,
+        normal_distanceh=3.0,
+        normal_save_shapes=True,
+        normal_boxfill="bottom | left | right | front | back",
+    )
+    source = canonical_directory / "F3_DualAxisPhase_Control.csv"
+    target = repair_directory / source.name
+    shutil.copyfile(source, target)
+    control = dict(repair["control"])
+    control.update({
+        "path": str(target.resolve()),
+        "sha256": sha256_file(target),
+        "bytes": target.stat().st_size,
+        "copied_from": str(source.resolve()),
+        "source_sha256": sha256_file(source),
+    })
+    repair["control"] = control
+    repair.update({
+        "repair_id": "dual_axis_phase_normal_coverage_repair02",
+        "parent_case_id": parent["case_id"],
+        "parent_definition_sha256": parent["definition"]["sha256"],
+        "repair01_definition_sha256": sha256_file(
+            repair_directory.parent / "dual_axis_phase_normal_repair01" / "F3_DualAxisPhase_Def.xml"
+        ),
+        "repair_hypothesis": "all^top normal selector leaves residual outer side/corner boundary particles without a shape association; explicit finite closed faces match the successful mDBC reference",
+        "changed_parameters": {
+            "normal_geometry.boxfill": {
+                "repair01": "all^top",
+                "repair": "bottom | left | right | front | back",
+            },
+            "norgeometry.distanceh": {"repair01": 3.0, "repair": 3.0},
+            "norgeometry.svshapes": {"repair01": True, "repair": True},
+        },
+        "geometry_and_control_contract": "same main particle geometry, fill seed/box, control and execution parameters; only the normal-list face selector changed",
+        "qualification_status": "GenCase_pending_solver_QI_pending_QN_pending",
+    })
+    return repair
+
+
 def _write_normal_coverage_repairs(
     parent_root: Path,
     canonical_parents: Sequence[Mapping[str, Any]],
@@ -1868,6 +1915,12 @@ def _write_normal_coverage_repairs(
         canonical_directory = parent_root / mechanism_id
         repair_directory = parent_root / f"{mechanism_id}_normal_repair01"
         repairs.append(_repair_input_record(parent, repair_directory, canonical_directory))
+        if mechanism_id == "dual_axis_phase":
+            repairs.append(_write_dual_normal_face_repair(
+                parent,
+                parent_root / "dual_axis_phase_normal_repair02",
+                canonical_directory,
+            ))
     return repairs
 
 
