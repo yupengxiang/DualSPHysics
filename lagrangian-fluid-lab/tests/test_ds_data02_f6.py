@@ -78,7 +78,38 @@ def test_bounded_repairs_bind_wave_motion_and_select_new_gencase_attempt(tmp_pat
     }
     repair = F6.read_json(output / "repair_evidence.json")
     assert repair["reused_count"] == 0
-    assert {row["bounded_repair_number"] for row in repair["records"]} == {1}
+    assert {row["bounded_repair_number"] for row in repair["records"]} == {1, 2}
+
+
+def test_grid_alignment_repair_is_hash_bound_and_keeps_native_companions(tmp_path: Path) -> None:
+    output = tmp_path / "F6"
+    F6.generate_family(output)
+    repair_root = output / "parent_inputs/repairs" / F6.BOUNDARY_GRID_REPAIR_ID
+    manifest = F6.read_json(repair_root / "repair_manifest.json")
+    assert manifest["root_cause_id"] == "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS"
+    for row in manifest["parents"]:
+        mechanism = row["mechanism_id"]
+        definition = Path(row["definition"]["path"])
+        root = ET.parse(definition).getroot()
+        geometry = root.find("./casedef/geometry/definition")
+        wall = next(node for node in root.findall("./casedef/geometry/commands/mainlist/drawbox") if node.get("cmt") == "Finite tank walls")
+        assert geometry is not None
+        pointmax_node = geometry.find("pointmax")
+        assert pointmax_node is not None
+        pointmax = tuple(float(pointmax_node.get(axis)) for axis in ("x", "y", "z"))
+        size = wall.find("size")
+        assert size is not None
+        wall_size = tuple(float(size.get(axis)) for axis in ("x", "y", "z"))
+        assert pointmax == tuple(F6.BOUNDARY_GRID_POINTMAX[mechanism][axis] for axis in ("x", "y", "z"))
+        assert wall_size == tuple(F6.BOUNDARY_GRID_TANK[mechanism][axis] for axis in ("x", "y", "z"))
+        assert row["source_inputs_unchanged"]
+        assert row["control"]["sha256"] == F6.sha256_file(Path(row["control"]["path"]))
+        assert row["native"]["sha256"] == F6.sha256_file(Path(row["native"]["path"]))
+        assert row["normal"]["sha256"] == F6.sha256_file(Path(row["normal"]["path"]))
+        request = F6.read_json(Path(row["request"]["path"]))
+        assert request["attempt_id"].endswith("_GENCASE_01")
+        assert request["solver_dimension_required"] == 3
+        assert any(str(definition) == path for path in request["input_files"])
 
 
 def test_qualification_request_is_explicitly_pending_and_hash_bound() -> None:

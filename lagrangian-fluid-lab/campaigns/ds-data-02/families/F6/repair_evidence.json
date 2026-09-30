@@ -1,5 +1,10 @@
 {
   "family_id": "F6",
+  "grid_repair_attempts": {
+    "simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+    "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01"
+  },
+  "grid_repair_manifest": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/repair_manifest.json",
   "new_parent_attempts": {
     "simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02",
     "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02"
@@ -21,10 +26,10 @@
       "repair": "Move the generated box to z=0.36 with center z=0.56 so its 0.22 m initial draft is resolved against the 0.208 m hydrostatic draft; add a draft-to-equilibrium audit. This preserves the finite 3D free-body mechanism and does not widen RhopOut or suppress boundary aborts.",
       "representative_evidence": [
         {
-          "exists": false,
-          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01/Run.out",
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01/solver_output/Run.out",
           "role": "native solver log",
-          "sha256": null
+          "sha256": "e1a5d2eadc50e820980078173317eac578738a73b562c15fda0d7e1b32647093"
         },
         {
           "exists": true,
@@ -55,13 +60,71 @@
       "repair": "Bind mkbound=10 to casedef motion objreal ref=10 with begin mov=1 and mvnull id=1, then require a positive generated moving-particle count before qualification. The piston wave remains regular, finite, 3D, and no-contact.",
       "representative_evidence": [
         {
-          "exists": false,
-          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01/Run.out",
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01/solver_output/Run.out",
           "role": "native solver log",
-          "sha256": null
+          "sha256": "c6e3206e12f32a9ae364cc6ce9efd20cf2da8ab02bc5a629e9e2b576a7b74c29"
         }
       ],
       "root_cause_id": "F6_WAVE_PADDLE_FIXED_MARKER_NO_MOTION_BINDING"
+    },
+    {
+      "bounded_repair_number": 2,
+      "candidate_repair_manifest": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/repair_manifest.json",
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "failed_attempt_id": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02",
+      "observed_failure": "After the initial draft repair, the complete-window retry still excluded only type-2 floating particles through +Y; the native Run.out and Error_BoundaryOut.vtk retain the failure without widening RhopOut or suppressing boundary aborts.",
+      "receipt": {
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02/execution-receipt.json",
+        "role": "shared GPU failure receipt",
+        "sha256": "52181de00745a07e08fe0ccf87aeab6763f73aa962caaf73312ad269217e38d4"
+      },
+      "repair": "Snap the finite tank wall endpoints to the nearest lower dp planes and place pointmax one dp beyond them; retain fluid clearance and all controls, then require the formal GenCase audit before any root GPU dispatch.",
+      "representative_evidence": [
+        {
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02/solver_output/Run.out",
+          "role": "native solver log",
+          "sha256": "02e79e75386b3ecefd986a054f701ca9278910b878fb9e6e8f74f240cb0ad318"
+        },
+        {
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02/solver_output/Error_BoundaryOut.vtk",
+          "role": "native boundary-exclusion geometry",
+          "sha256": "38c48b6f484089fc4e520e4112cacd1d433524acca4fd11bfd56e8f5b0193ac5"
+        }
+      ],
+      "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS"
+    },
+    {
+      "bounded_repair_number": 2,
+      "candidate_repair_manifest": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/repair_manifest.json",
+      "case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "failed_attempt_id": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02",
+      "observed_failure": "After the moving-paddle binding repair, the complete-window retry excluded only type-2 floating particles through +Y; WavePaddle control initialized, so the remaining failure is the common finite-domain wall geometry path.",
+      "receipt": {
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02/execution-receipt.json",
+        "role": "shared GPU failure receipt",
+        "sha256": "d706ceb97b6a5ae1fb630f465a95626f49e43cb3d49d3be1f1ae7ecec8f48b3e"
+      },
+      "repair": "Snap the finite tank wall endpoints to the nearest lower dp planes and place pointmax one dp beyond them; retain moving-paddle binding, fluid clearance and all controls, then require the formal GenCase audit before any root GPU dispatch.",
+      "representative_evidence": [
+        {
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02/solver_output/Run.out",
+          "role": "native solver log",
+          "sha256": "896abc68d052c9130f6574e51a3dff3d8c9e563c6011ccba6b4a9d449fe1c733"
+        },
+        {
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02/solver_output/Error_BoundaryOut.vtk",
+          "role": "native boundary-exclusion geometry",
+          "sha256": "d66ef4aa6e6cfbae6bc517ef69c95c3cbe0cdd44d8b5563d2dfab66ba88a61f4"
+        }
+      ],
+      "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS"
     }
   ],
   "repair_policy": {

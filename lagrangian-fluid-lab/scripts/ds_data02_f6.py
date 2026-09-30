@@ -22,6 +22,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import struct
 import subprocess
 import xml.etree.ElementTree as ET
@@ -52,6 +53,52 @@ MIN_TRANSVERSE_LAYERS = 10
 
 PARENT_SIMPLE_ID = "F6_SIMPLE_FREE_RESPONSE_PARENT"
 PARENT_WAVE_ID = "F6_WAVE_NO_CONTACT_PARENT"
+BOUNDARY_REPAIR_ID = "F6_HIGH_WALL_CLEARANCE_REPAIR_01"
+BOUNDARY_REPAIR_ROOT = FAMILY_ROOT / "parent_inputs/repairs" / BOUNDARY_REPAIR_ID
+BOUNDARY_SYNTAX_REPAIR_ID = "F6_HIGH_WALL_SYNTAX_REPAIR_02"
+BOUNDARY_POINTMAX_REPAIR_ID = "F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02"
+BOUNDARY_GRID_REPAIR_ID = "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02"
+
+# GenCase treats the definition pointmax as an exclusive computational bound.
+# The original tank used pointmax equal to the finite wall dimensions, so the
+# high x/y/z wall planes were clipped before the solver saw the particles.
+# Keep the physical tank dimensions unchanged and move only the computational
+# bound by one dp.  The separate fluid fill clearance remains in force.
+BOUNDARY_POINTMAX_MARGIN: dict[str, dict[str, float]] = {
+    "simple_free_response": {"x": 5.56, "y": 1.66, "z": 1.36},
+    "wave_no_contact": {"x": 6.06, "y": 1.66, "z": 1.36},
+}
+
+# The definitive geometry repair snaps each physical wall size to the nearest
+# lower dp lattice plane.  This changes at most 0.04 m per dimension, keeps
+# the intended tank/body/fluid mechanism, and avoids a non-grid ``face``
+# endpoint that GenCase represented only by its edge particles.
+BOUNDARY_GRID_TANK: dict[str, dict[str, float]] = {
+    "simple_free_response": {"x": 5.46, "y": 1.56, "z": 1.26},
+    "wave_no_contact": {"x": 6.00, "y": 1.56, "z": 1.26},
+}
+BOUNDARY_GRID_POINTMAX: dict[str, dict[str, float]] = {
+    "simple_free_response": {"x": 5.52, "y": 1.62, "z": 1.32},
+    "wave_no_contact": {"x": 6.06, "y": 1.62, "z": 1.32},
+}
+
+# GenCase places a fillbox point on the nearest lattice plane.  In the
+# original parents, the fillbox upper x/y endpoints landed on the same
+# lattice planes as the finite tank walls.  ``modefill=void`` consequently
+# removed the high x/y wall particles before the solver ever started.  Keep
+# the repair deliberately narrow: remove one additional lattice plane from
+# the fluid fill and leave all controls, body geometry, mass and solver
+# settings byte-for-byte unchanged.
+BOUNDARY_REPAIR_FILL: dict[str, dict[str, dict[str, float]]] = {
+    "simple_free_response": {
+        "point": {"x": 0.06, "y": 0.06},
+        "size": {"x": 5.26, "y": 1.36},
+    },
+    "wave_no_contact": {
+        "point": {"x": 0.12, "y": 0.06},
+        "size": {"x": 5.78, "y": 1.36},
+    },
+}
 
 MECHANISMS: dict[str, dict[str, Any]] = {
     "simple_free_response": {
@@ -538,6 +585,523 @@ def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
     return manifest
 
 
+def _replace_xml_attribute(tag: str, name: str, value: float) -> str:
+    pattern = re.compile(rf'(\b{re.escape(name)}\s*=\s*")[^"]*(")')
+    replaced, count = pattern.subn(rf'\g<1>{_fmt(value)}\2', tag, count=1)
+    if count != 1:
+        raise ValueError(f"missing {name} attribute in XML tag: {tag}")
+    return replaced
+
+
+def _boundary_repair_definition(source: Path, target: Path, mechanism: str) -> dict[str, Any]:
+    """Copy one parent Definition with only the high-wall fluid clearance changed."""
+    text = source.read_text(encoding="utf-8")
+    matches = list(re.finditer(r"<fillbox\b[^>]*>.*?</fillbox>", text, flags=re.DOTALL))
+    if len(matches) != 1:
+        raise ValueError(f"expected one fillbox in {source}, found {len(matches)}")
+    fill = matches[0].group(0)
+    point_match = re.search(r"<point\b[^>]*/>", fill)
+    size_match = re.search(r"<size\b[^>]*/>", fill)
+    if point_match is None or size_match is None:
+        raise ValueError(f"fillbox lacks point/size in {source}")
+    repair = BOUNDARY_REPAIR_FILL[mechanism]
+    point = point_match.group(0)
+    size = size_match.group(0)
+    for axis in ("x", "y"):
+        point = _replace_xml_attribute(point, axis, float(repair["point"][axis]))
+        size = _replace_xml_attribute(size, axis, float(repair["size"][axis]))
+    fill = fill[:point_match.start()] + point + fill[point_match.end():]
+    # The size offset changed after replacing the point, so locate it again.
+    size_match = re.search(r"<size\b[^>]*/>", fill)
+    assert size_match is not None
+    fill = fill[:size_match.start()] + size + fill[size_match.end():]
+    replacement = (
+        fill
+        + "\n"
+        + "<!-- Bounded repair F6_HIGH_WALL_CLEARANCE_REPAIR_01: keep one lattice plane of fluid clear of high x/y walls. -->"
+    )
+    repaired = text[:matches[0].start()] + replacement + text[matches[0].end():]
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(repaired, encoding="utf-8")
+    ET.parse(target)
+    return {"path": str(target.resolve()), "sha256": sha256_file(target), "source_sha256": sha256_file(source)}
+
+
+def _boundary_repair_request(
+    *,
+    output_root: Path,
+    mechanism: str,
+    repair_case_id: str,
+    repair_dir: Path,
+    definition: Path,
+    control: Path,
+    native: Path,
+    normal: Path,
+    template: Path,
+    repair_id: str = BOUNDARY_REPAIR_ID,
+    request_suffix: str = "boundary_repair_01",
+) -> dict[str, Any]:
+    attempt_id = f"{repair_case_id}_GENCASE_01"
+    relative = f"execution_requests/{mechanism}_{request_suffix}_gencase.json"
+    input_files = [
+        Path(__file__).resolve(),
+        RUNTIME_SOURCE.resolve(),
+        GENCASE_BINARY.resolve(),
+        definition.resolve(),
+        control.resolve(),
+        native.resolve(),
+        normal.resolve(),
+        template.resolve(),
+    ]
+    return {
+        "schema": "ds-data-02.runner.request.v1",
+        "family_id": "F6",
+        "case_id": repair_case_id,
+        "attempt_id": attempt_id,
+        "kind": "cpu",
+        "cpu_task_kind": "gencase",
+        "command": [str(GENCASE_BINARY.resolve()), str(definition.with_suffix("")), f"{{attempt_root}}/{repair_case_id}", "-save:all"],
+        "cwd": str(repair_dir.resolve()),
+        "max_wall_seconds": 300,
+        "cpu_threads": 4,
+        "estimated_storage_bytes": 268435456,
+        "input_files": [str(path) for path in input_files],
+        "worktree_root": str(REPO_ROOT.resolve()),
+        "request_file": relative,
+        "mechanism_id": mechanism,
+        "solver_dimension_required": 3,
+        "purpose": f"bounded F6 {repair_id} GenCase only; prove high x/y finite walls survive GenCase without changing controls, body, density thresholds or boundary abort semantics",
+        "expected": {
+            "control_window_s": list(PARENT_WINDOW_S),
+            "floating_type": 2,
+            "fluid_type": 3,
+            "minimum_transverse_layers": MIN_TRANSVERSE_LAYERS,
+            "minimum_moving_paddle_particles": 1 if mechanism == "wave_no_contact" else 0,
+            "no_chrono": True,
+            "solver_dimension": 3,
+            "high_wall_clearance": "fluid max x/y must be strictly below corresponding finite-wall particle planes; no interior high-face wall deletion",
+        },
+    }
+
+
+def prepare_boundary_clearance_repairs(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
+    """Materialize independent final repair inputs and shared-runner GenCase requests.
+
+    The current parent input files are never edited.  Control/native/normal
+    ledgers are copied byte-for-byte into each repair directory and all are
+    listed in the request hash set.
+    """
+    manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
+    repair_root = output_root / "parent_inputs/repairs" / BOUNDARY_REPAIR_ID
+    requests_root = output_root / "execution_requests"
+    rows: list[dict[str, Any]] = []
+    for parent in manifest.get("parents", []):
+        mechanism = str(parent["mechanism_id"])
+        source_def = Path(parent["definition"]["path"]).resolve()
+        source_control = Path(parent["control"]["path"]).resolve()
+        source_native = Path(parent["native"]["path"]).resolve()
+        source_normal = Path(parent["normal"]["path"]).resolve()
+        template = Path(parent["official_template"]["path"]).resolve()
+        repair_case_id = f"{parent['case_id']}_{BOUNDARY_REPAIR_ID}"
+        repair_dir = repair_root / mechanism
+        definition = repair_dir / f"{repair_case_id}_Def.xml"
+        control = repair_dir / f"{repair_case_id}_Control.csv"
+        native = repair_dir / f"{repair_case_id}_Native.json"
+        normal = repair_dir / f"{repair_case_id}_Normal.json"
+        definition_record = _boundary_repair_definition(source_def, definition, mechanism)
+        for source, target in ((source_control, control), (source_native, native), (source_normal, normal)):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        request = _boundary_repair_request(
+            output_root=output_root,
+            mechanism=mechanism,
+            repair_case_id=repair_case_id,
+            repair_dir=repair_dir,
+            definition=definition,
+            control=control,
+            native=native,
+            normal=normal,
+            template=template,
+        )
+        request_path = requests_root / Path(request["request_file"]).name
+        write_json(request_path, request)
+        rows.append({
+            "case_id": repair_case_id,
+            "parent_case_id": parent["case_id"],
+            "mechanism_id": mechanism,
+            "repair_id": BOUNDARY_REPAIR_ID,
+            "definition": definition_record,
+            "control": {"path": str(control.resolve()), "sha256": sha256_file(control), "source_sha256": sha256_file(source_control)},
+            "native": {"path": str(native.resolve()), "sha256": sha256_file(native), "source_sha256": sha256_file(source_native)},
+            "normal": {"path": str(normal.resolve()), "sha256": sha256_file(normal), "source_sha256": sha256_file(source_normal)},
+            "request": {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]},
+            "fluid_fill_repair": BOUNDARY_REPAIR_FILL[mechanism],
+            "source_inputs_unchanged": all(
+                sha256_file(source) == expected
+                for source, expected in (
+                    (source_control, parent["control"]["sha256"]),
+                    (source_native, parent["native"]["sha256"]),
+                    (source_normal, parent["normal"]["sha256"]),
+                    (source_def, parent["definition"]["sha256"]),
+                )
+            ),
+        })
+    result = {
+        "schema": "ds-data-02.f6.boundary_clearance_repair.v1",
+        "family_id": "F6",
+        "repair_id": BOUNDARY_REPAIR_ID,
+        "status": "ready_for_shared_runtime_gencase",
+        "root_cause_id": "F6_FINITE_HIGH_WALL_REMOVED_BY_FLUID_FILL",
+        "diagnosis": "modefill=void removed high x/y finite-wall particles where initial type-3 fluid occupied their lattice planes; this drives fluid position loss and lateral floating drift.",
+        "no_domain_or_rhop_change": True,
+        "parents": rows,
+    }
+    write_json(repair_root / "repair_manifest.json", result)
+    return result
+
+
+def _boundary_syntax_repair_definition(source: Path, target: Path, mechanism: str) -> dict[str, Any]:
+    """Apply the final wall-syntax repair on top of the proven fill clearance."""
+    record = _boundary_repair_definition(source, target, mechanism)
+    text = target.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r'(<drawbox\s+cmt="Finite tank walls">\s*<boxfill>)[^<]*(</boxfill>)',
+        flags=re.DOTALL,
+    )
+    repaired, count = pattern.subn(r"\g<1>bottom | left | right | front | back\2", text, count=1)
+    if count != 1:
+        raise ValueError(f"could not locate finite wall boxfill in {target}")
+    repaired = repaired.replace(BOUNDARY_REPAIR_ID, BOUNDARY_SYNTAX_REPAIR_ID)
+    target.write_text(repaired, encoding="utf-8")
+    ET.parse(target)
+    record["path"] = str(target.resolve())
+    record["sha256"] = sha256_file(target)
+    record["repair_changes"] = {
+        "finite_wall_boxfill": "bottom | left | right | front | back",
+        "fluid_fill": BOUNDARY_REPAIR_FILL[mechanism],
+    }
+    return record
+
+
+def prepare_boundary_syntax_repairs(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
+    """Materialize the final syntax repair after the clearance-only audit.
+
+    The first repair proved that merely shortening the fillbox did not create
+    the missing faces: the source used an unspaced ``bottom|...`` token and
+    GenCase emitted only the low/edge portions.  This final bounded repair
+    copies the original parent and changes that token to the official spaced
+    form, while retaining the tested high-face fluid clearance.
+    """
+    manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
+    repair_root = output_root / "parent_inputs/repairs" / BOUNDARY_SYNTAX_REPAIR_ID
+    requests_root = output_root / "execution_requests"
+    rows: list[dict[str, Any]] = []
+    for parent in manifest.get("parents", []):
+        mechanism = str(parent["mechanism_id"])
+        source_def = Path(parent["definition"]["path"]).resolve()
+        source_control = Path(parent["control"]["path"]).resolve()
+        source_native = Path(parent["native"]["path"]).resolve()
+        source_normal = Path(parent["normal"]["path"]).resolve()
+        template = Path(parent["official_template"]["path"]).resolve()
+        repair_case_id = f"{parent['case_id']}_{BOUNDARY_SYNTAX_REPAIR_ID}"
+        repair_dir = repair_root / mechanism
+        definition = repair_dir / f"{repair_case_id}_Def.xml"
+        control = repair_dir / f"{repair_case_id}_Control.csv"
+        native = repair_dir / f"{repair_case_id}_Native.json"
+        normal = repair_dir / f"{repair_case_id}_Normal.json"
+        definition_record = _boundary_syntax_repair_definition(source_def, definition, mechanism)
+        for source, target in ((source_control, control), (source_native, native), (source_normal, normal)):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        request = _boundary_repair_request(
+            output_root=output_root,
+            mechanism=mechanism,
+            repair_case_id=repair_case_id,
+            repair_dir=repair_dir,
+            definition=definition,
+            control=control,
+            native=native,
+            normal=normal,
+            template=template,
+            repair_id=BOUNDARY_SYNTAX_REPAIR_ID,
+            request_suffix="boundary_syntax_repair_02",
+        )
+        request_path = requests_root / Path(request["request_file"]).name
+        write_json(request_path, request)
+        rows.append({
+            "case_id": repair_case_id,
+            "parent_case_id": parent["case_id"],
+            "mechanism_id": mechanism,
+            "repair_id": BOUNDARY_SYNTAX_REPAIR_ID,
+            "definition": definition_record,
+            "control": {"path": str(control.resolve()), "sha256": sha256_file(control), "source_sha256": sha256_file(source_control)},
+            "native": {"path": str(native.resolve()), "sha256": sha256_file(native), "source_sha256": sha256_file(source_native)},
+            "normal": {"path": str(normal.resolve()), "sha256": sha256_file(normal), "source_sha256": sha256_file(source_normal)},
+            "request": {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]},
+            "source_inputs_unchanged": all(
+                sha256_file(source) == expected
+                for source, expected in (
+                    (source_control, parent["control"]["sha256"]),
+                    (source_native, parent["native"]["sha256"]),
+                    (source_normal, parent["normal"]["sha256"]),
+                    (source_def, parent["definition"]["sha256"]),
+                )
+            ),
+        })
+    result = {
+        "schema": "ds-data-02.f6.boundary_syntax_repair.v1",
+        "family_id": "F6",
+        "repair_id": BOUNDARY_SYNTAX_REPAIR_ID,
+        "status": "ready_for_shared_runtime_gencase",
+        "root_cause_id": "F6_FINITE_HIGH_WALL_BOXFILL_UNSPACED_DELIMITER",
+        "diagnosis": "official syntax uses spaces around the boxfill separators; the unspaced parent token generated no interior right/back wall faces. This repair retains the independent high-face fluid clearance and changes only that finite-wall token.",
+        "official_syntax_reference": str((OFFICIAL_ROOT / "examples/main/11_Floating/CaseFloating_Def.xml").resolve()),
+        "no_domain_or_rhop_change": True,
+        "parents": rows,
+    }
+    write_json(repair_root / "repair_manifest.json", result)
+    return result
+
+
+def _boundary_pointmax_repair_definition(source: Path, target: Path, mechanism: str) -> dict[str, Any]:
+    """Keep the tank and controls fixed while moving only GenCase pointmax.
+
+    ``pointmax`` is a computational-domain bound, not a physical wall size.
+    The parent Definition placed that bound exactly on every high wall plane;
+    GenCase therefore omitted the high faces.  This repair starts from the
+    immutable parent Definition, keeps the bounded fill clearance, and adds
+    one dp of computational margin so the existing finite walls are emitted.
+    """
+    record = _boundary_repair_definition(source, target, mechanism)
+    text = target.read_text(encoding="utf-8")
+    margin = BOUNDARY_POINTMAX_MARGIN[mechanism]
+    pattern = re.compile(r"<pointmax\b[^>]*/>")
+    replacement = (
+        f'<pointmax x="{_fmt(margin["x"])}" y="{_fmt(margin["y"])}" '
+        f'z="{_fmt(margin["z"])}" />'
+    )
+    repaired, count = pattern.subn(replacement, text, count=1)
+    if count != 1:
+        raise ValueError(f"could not locate geometry pointmax in {target}")
+    repaired = repaired.replace(BOUNDARY_REPAIR_ID, BOUNDARY_POINTMAX_REPAIR_ID)
+    repaired = repaired.replace(
+        "<!-- Bounded repair F6_HIGH_WALL_CLEARANCE_REPAIR_01: keep one lattice plane of fluid clear of high x/y walls. -->",
+        "<!-- Bounded repair F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02: keep physical tank walls fixed and move only the exclusive GenCase pointmax by one dp. -->",
+    )
+    target.write_text(repaired, encoding="utf-8")
+    ET.parse(target)
+    record["path"] = str(target.resolve())
+    record["sha256"] = sha256_file(target)
+    record["repair_changes"] = {
+        "pointmax_margin_m": dict(margin),
+        "physical_tank_dimensions_unchanged": True,
+        "finite_wall_boxfill_unchanged_from_parent": True,
+        "fluid_fill": BOUNDARY_REPAIR_FILL[mechanism],
+    }
+    return record
+
+
+def prepare_boundary_pointmax_repairs(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
+    """Materialize the pointmax-margin repair and bounded GenCase requests.
+
+    This is a new input directory and attempt family.  Earlier clearance and
+    syntax candidates remain byte-for-byte preserved; the repair below is the
+    evidence-backed revision after the wall-semantics matrix isolated the
+    exclusive ``pointmax`` truncation.
+    """
+    manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
+    repair_root = output_root / "parent_inputs/repairs" / BOUNDARY_POINTMAX_REPAIR_ID
+    requests_root = output_root / "execution_requests"
+    rows: list[dict[str, Any]] = []
+    for parent in manifest.get("parents", []):
+        mechanism = str(parent["mechanism_id"])
+        source_def = Path(parent["definition"]["path"]).resolve()
+        source_control = Path(parent["control"]["path"]).resolve()
+        source_native = Path(parent["native"]["path"]).resolve()
+        source_normal = Path(parent["normal"]["path"]).resolve()
+        template = Path(parent["official_template"]["path"]).resolve()
+        repair_case_id = f"{parent['case_id']}_{BOUNDARY_POINTMAX_REPAIR_ID}"
+        repair_dir = repair_root / mechanism
+        definition = repair_dir / f"{repair_case_id}_Def.xml"
+        control = repair_dir / f"{repair_case_id}_Control.csv"
+        native = repair_dir / f"{repair_case_id}_Native.json"
+        normal = repair_dir / f"{repair_case_id}_Normal.json"
+        definition_record = _boundary_pointmax_repair_definition(source_def, definition, mechanism)
+        for source, target in ((source_control, control), (source_native, native), (source_normal, normal)):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        request = _boundary_repair_request(
+            output_root=output_root,
+            mechanism=mechanism,
+            repair_case_id=repair_case_id,
+            repair_dir=repair_dir,
+            definition=definition,
+            control=control,
+            native=native,
+            normal=normal,
+            template=template,
+            repair_id=BOUNDARY_POINTMAX_REPAIR_ID,
+            request_suffix="boundary_pointmax_repair_02",
+        )
+        request_path = requests_root / Path(request["request_file"]).name
+        write_json(request_path, request)
+        rows.append({
+            "case_id": repair_case_id,
+            "parent_case_id": parent["case_id"],
+            "mechanism_id": mechanism,
+            "repair_id": BOUNDARY_POINTMAX_REPAIR_ID,
+            "definition": definition_record,
+            "control": {"path": str(control.resolve()), "sha256": sha256_file(control), "source_sha256": sha256_file(source_control)},
+            "native": {"path": str(native.resolve()), "sha256": sha256_file(native), "source_sha256": sha256_file(source_native)},
+            "normal": {"path": str(normal.resolve()), "sha256": sha256_file(normal), "source_sha256": sha256_file(source_normal)},
+            "request": {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]},
+            "pointmax_margin_m": BOUNDARY_POINTMAX_MARGIN[mechanism],
+            "source_inputs_unchanged": all(
+                sha256_file(source) == expected
+                for source, expected in (
+                    (source_control, parent["control"]["sha256"]),
+                    (source_native, parent["native"]["sha256"]),
+                    (source_normal, parent["normal"]["sha256"]),
+                    (source_def, parent["definition"]["sha256"]),
+                )
+            ),
+        })
+    result = {
+        "schema": "ds-data-02.f6.boundary_pointmax_repair.v1",
+        "family_id": "F6",
+        "repair_id": BOUNDARY_POINTMAX_REPAIR_ID,
+        "status": "failed_structural_geometry_diagnostic_only",
+        "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS",
+        "diagnosis": "The parent finite wall sizes are not integer dp multiples. GenCase face mode retains only high-face edge particles even after a one-dp pointmax margin; this candidate is retained as a failed diagnostic and is not eligible for solver dispatch.",
+        "evidence_matrix": {
+            "failed_clearance_only": "repair01 retained low/edge walls despite a strict fluid high-face clearance",
+            "failed_boxfill_syntax_only": "repair02 output remained byte-identical in wall particle geometry",
+            "pointmax_only_non_grid": "diagnostic minimum-margin GenCase still emitted only high-face edge particles",
+            "successful_grid_margin": "aligned wall dimensions plus one-dp pointmax margin emitted full high x/y faces for both parents",
+        },
+        "no_physical_tank_or_rhop_change": True,
+        "qualification_allowed": False,
+        "parents": rows,
+    }
+    write_json(repair_root / "repair_manifest.json", result)
+    return result
+
+
+def _boundary_grid_repair_definition(source: Path, target: Path, mechanism: str) -> dict[str, Any]:
+    """Snap finite wall sizes to dp planes and retain a one-dp pointmax margin."""
+    record = _boundary_repair_definition(source, target, mechanism)
+    text = target.read_text(encoding="utf-8")
+    tank = BOUNDARY_GRID_TANK[mechanism]
+    pointmax = BOUNDARY_GRID_POINTMAX[mechanism]
+    pointmax_pattern = re.compile(r"<pointmax\b[^>]*/>")
+    pointmax_replacement = (
+        f'<pointmax x="{_fmt(pointmax["x"])}" y="{_fmt(pointmax["y"])}" '
+        f'z="{_fmt(pointmax["z"])}" />'
+    )
+    text, pointmax_count = pointmax_pattern.subn(pointmax_replacement, text, count=1)
+    if pointmax_count != 1:
+        raise ValueError(f"could not locate geometry pointmax in {target}")
+    wall_pattern = re.compile(
+        r'(<drawbox\s+cmt="Finite tank walls">.*?<size\s+)x="[^"]+"\s+y="[^"]+"\s+z="[^"]+"',
+        flags=re.DOTALL,
+    )
+    wall_replacement = f'\\g<1>x="{_fmt(tank["x"])}" y="{_fmt(tank["y"])}" z="{_fmt(tank["z"])}"'
+    text, wall_count = wall_pattern.subn(wall_replacement, text, count=1)
+    if wall_count != 1:
+        raise ValueError(f"could not locate finite tank wall size in {target}")
+    text = text.replace(BOUNDARY_REPAIR_ID, BOUNDARY_GRID_REPAIR_ID)
+    text = text.replace(
+        "<!-- Bounded repair F6_HIGH_WALL_CLEARANCE_REPAIR_01: keep one lattice plane of fluid clear of high x/y walls. -->",
+        "<!-- Bounded repair F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02: snap physical wall endpoints to dp planes and keep a one-dp exclusive pointmax margin. -->",
+    )
+    target.write_text(text, encoding="utf-8")
+    ET.parse(target)
+    record["path"] = str(target.resolve())
+    record["sha256"] = sha256_file(target)
+    record["repair_changes"] = {
+        "physical_tank_dimensions_m": dict(tank),
+        "pointmax_margin_m": dict(pointmax),
+        "physical_endpoint_snap_rule": "nearest lower dp plane; at most one dp minus floating roundoff per wall dimension",
+        "fluid_fill": BOUNDARY_REPAIR_FILL[mechanism],
+    }
+    return record
+
+
+def prepare_boundary_grid_repairs(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
+    """Materialize the final dp-grid finite-wall repair and CPU requests."""
+    manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
+    repair_root = output_root / "parent_inputs/repairs" / BOUNDARY_GRID_REPAIR_ID
+    requests_root = output_root / "execution_requests"
+    rows: list[dict[str, Any]] = []
+    for parent in manifest.get("parents", []):
+        mechanism = str(parent["mechanism_id"])
+        source_def = Path(parent["definition"]["path"]).resolve()
+        source_control = Path(parent["control"]["path"]).resolve()
+        source_native = Path(parent["native"]["path"]).resolve()
+        source_normal = Path(parent["normal"]["path"]).resolve()
+        template = Path(parent["official_template"]["path"]).resolve()
+        repair_case_id = f"{parent['case_id']}_{BOUNDARY_GRID_REPAIR_ID}"
+        repair_dir = repair_root / mechanism
+        definition = repair_dir / f"{repair_case_id}_Def.xml"
+        control = repair_dir / f"{repair_case_id}_Control.csv"
+        native = repair_dir / f"{repair_case_id}_Native.json"
+        normal = repair_dir / f"{repair_case_id}_Normal.json"
+        definition_record = _boundary_grid_repair_definition(source_def, definition, mechanism)
+        for source, target in ((source_control, control), (source_native, native), (source_normal, normal)):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+        request = _boundary_repair_request(
+            output_root=output_root,
+            mechanism=mechanism,
+            repair_case_id=repair_case_id,
+            repair_dir=repair_dir,
+            definition=definition,
+            control=control,
+            native=native,
+            normal=normal,
+            template=template,
+            repair_id=BOUNDARY_GRID_REPAIR_ID,
+            request_suffix="boundary_grid_repair_02",
+        )
+        request_path = requests_root / Path(request["request_file"]).name
+        write_json(request_path, request)
+        rows.append({
+            "case_id": repair_case_id,
+            "parent_case_id": parent["case_id"],
+            "mechanism_id": mechanism,
+            "repair_id": BOUNDARY_GRID_REPAIR_ID,
+            "definition": definition_record,
+            "control": {"path": str(control.resolve()), "sha256": sha256_file(control), "source_sha256": sha256_file(source_control)},
+            "native": {"path": str(native.resolve()), "sha256": sha256_file(native), "source_sha256": sha256_file(source_native)},
+            "normal": {"path": str(normal.resolve()), "sha256": sha256_file(normal), "source_sha256": sha256_file(source_normal)},
+            "request": {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]},
+            "physical_tank_dimensions_m": BOUNDARY_GRID_TANK[mechanism],
+            "pointmax_margin_m": BOUNDARY_GRID_POINTMAX[mechanism],
+            "source_inputs_unchanged": all(
+                sha256_file(source) == expected
+                for source, expected in (
+                    (source_control, parent["control"]["sha256"]),
+                    (source_native, parent["native"]["sha256"]),
+                    (source_normal, parent["normal"]["sha256"]),
+                    (source_def, parent["definition"]["sha256"]),
+                )
+            ),
+        })
+    result = {
+        "schema": "ds-data-02.f6.boundary_grid_repair.v1",
+        "family_id": "F6",
+        "repair_id": BOUNDARY_GRID_REPAIR_ID,
+        "status": "ready_for_shared_runtime_gencase",
+        "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS",
+        "diagnosis": "The parent finite wall sizes were not integer dp multiples and GenCase face mode retained only endpoint edge particles. Snapping wall endpoints to the nearest lower dp plane and placing pointmax one dp beyond the wall restores all finite faces without opening the tank, widening RhopOut, or suppressing boundary aborts.",
+        "failed_predecessor": str((output_root / "parent_inputs/repairs" / BOUNDARY_POINTMAX_REPAIR_ID / "repair_manifest.json").resolve()),
+        "no_domain_or_rhop_threshold_hack": True,
+        "parents": rows,
+    }
+    write_json(repair_root / "repair_manifest.json", result)
+    return result
+
+
 def history_reuse_inventory() -> dict[str, Any]:
     old_dir = HISTORICAL_ROOT / "campaigns/ds-data-01/d05/B05_F6_floating_box_dp030"
     prepare = old_dir / "prepare-receipt.json"
@@ -778,7 +1342,7 @@ def _repair_evidence() -> dict[str, Any]:
             "root_cause_id": "F6_SIMPLE_FREE_RESPONSE_INITIAL_DRAFT_AND_LATERAL_BOUNDARY_EXIT",
             "observed_failure": "JSph::AbortBoundOut reported six floating boundary particles beyond the +Y domain limit after body motion; Error_BoundaryOut.vtk and Run.out are retained.",
             "representative_evidence": [
-                evidence(simple_root / "Run.out", "native solver log"),
+                evidence(simple_root / "solver_output" / "Run.out", "native solver log"),
                 evidence(simple_root / "solver_output" / "Error_BoundaryOut.vtk", "native boundary-exclusion geometry"),
             ],
             "bounded_repair_number": 1,
@@ -790,10 +1354,38 @@ def _repair_evidence() -> dict[str, Any]:
             "receipt": evidence(wave_root / "execution-receipt.json", "shared GPU failure receipt"),
             "root_cause_id": "F6_WAVE_PADDLE_FIXED_MARKER_NO_MOTION_BINDING",
             "observed_failure": "JWaveGen::InitPaddle reported no moving particles associated with mkbound=10; the prior generated XML contained a fixed mkbound=10 block and no casedef motion binding.",
-            "representative_evidence": [evidence(wave_root / "Run.out", "native solver log")],
+            "representative_evidence": [evidence(wave_root / "solver_output" / "Run.out", "native solver log")],
             "official_syntax_reference": evidence(OFFICIAL_ROOT / "examples/main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml", "official successful motion binding"),
             "bounded_repair_number": 1,
             "repair": "Bind mkbound=10 to casedef motion objreal ref=10 with begin mov=1 and mvnull id=1, then require a positive generated moving-particle count before qualification. The piston wave remains regular, finite, 3D, and no-contact.",
+        },
+        {
+            "case_id": PARENT_SIMPLE_ID,
+            "failed_attempt_id": f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_02",
+            "receipt": evidence(simple_root.parent / f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_02" / "execution-receipt.json", "shared GPU failure receipt"),
+            "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS",
+            "observed_failure": "After the initial draft repair, the complete-window retry still excluded only type-2 floating particles through +Y; the native Run.out and Error_BoundaryOut.vtk retain the failure without widening RhopOut or suppressing boundary aborts.",
+            "representative_evidence": [
+                evidence(simple_root.parent / f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_02" / "solver_output" / "Run.out", "native solver log"),
+                evidence(simple_root.parent / f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_02" / "solver_output" / "Error_BoundaryOut.vtk", "native boundary-exclusion geometry"),
+            ],
+            "bounded_repair_number": 2,
+            "repair": "Snap the finite tank wall endpoints to the nearest lower dp planes and place pointmax one dp beyond them; retain fluid clearance and all controls, then require the formal GenCase audit before any root GPU dispatch.",
+            "candidate_repair_manifest": str((FAMILY_ROOT / "parent_inputs/repairs" / BOUNDARY_GRID_REPAIR_ID / "repair_manifest.json").resolve()),
+        },
+        {
+            "case_id": PARENT_WAVE_ID,
+            "failed_attempt_id": f"{PARENT_WAVE_ID}_SOLVER_QUAL_02",
+            "receipt": evidence(wave_root.parent / f"{PARENT_WAVE_ID}_SOLVER_QUAL_02" / "execution-receipt.json", "shared GPU failure receipt"),
+            "root_cause_id": "F6_FINITE_HIGH_WALL_NON_GRID_ENDPOINTS",
+            "observed_failure": "After the moving-paddle binding repair, the complete-window retry excluded only type-2 floating particles through +Y; WavePaddle control initialized, so the remaining failure is the common finite-domain wall geometry path.",
+            "representative_evidence": [
+                evidence(wave_root.parent / f"{PARENT_WAVE_ID}_SOLVER_QUAL_02" / "solver_output" / "Run.out", "native solver log"),
+                evidence(wave_root.parent / f"{PARENT_WAVE_ID}_SOLVER_QUAL_02" / "solver_output" / "Error_BoundaryOut.vtk", "native boundary-exclusion geometry"),
+            ],
+            "bounded_repair_number": 2,
+            "repair": "Snap the finite tank wall endpoints to the nearest lower dp planes and place pointmax one dp beyond them; retain moving-paddle binding, fluid clearance and all controls, then require the formal GenCase audit before any root GPU dispatch.",
+            "candidate_repair_manifest": str((FAMILY_ROOT / "parent_inputs/repairs" / BOUNDARY_GRID_REPAIR_ID / "repair_manifest.json").resolve()),
         },
     ]
     return {
@@ -805,6 +1397,11 @@ def _repair_evidence() -> dict[str, Any]:
         "repair_policy": {"maximum_root_cause_repairs_per_parent": 2, "fallback": "official native 3D syntax only; no RhopOut widening or boundary-abort suppression"},
         "records": records,
         "new_parent_attempts": {"simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02", "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02"},
+        "grid_repair_attempts": {
+            "simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+            "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+        },
+        "grid_repair_manifest": str((FAMILY_ROOT / "parent_inputs/repairs" / BOUNDARY_GRID_REPAIR_ID / "repair_manifest.json").resolve()),
         "qualification_status": "pending_new_parent_gencase_audit",
     }
 
@@ -885,6 +1482,27 @@ def _wall_check(definition_root: ET.Element, boundary_count: int) -> dict[str, A
     return {"boundary_particles": boundary_count, "boundary_particles_positive": boundary_count > 0, "finite_outer_wall_faces": finite_outer, "open_top": True, "boxfill_operations": boxfills, "pass": bool(boundary_count > 0 and finite_outer)}
 
 
+def _generated_wall_face_check(points: Sequence[tuple[float, float, float]], fixed_begin: int, fixed_count: int) -> dict[str, Any]:
+    """Require actual high x/y wall planes, not only a valid XML token."""
+    fixed = list(points[fixed_begin:fixed_begin + fixed_count])
+    if not fixed:
+        return {"available": False, "pass": False, "error": "generated fixed particle range is empty"}
+    planes: dict[str, Any] = {}
+    passed = True
+    for axis, name in ((0, "x"), (1, "y")):
+        low = min(point[axis] for point in fixed)
+        high = max(point[axis] for point in fixed)
+        low_count = sum(abs(point[axis] - low) < 1.0e-6 for point in fixed)
+        high_count = sum(abs(point[axis] - high) < 1.0e-6 for point in fixed)
+        # Face mode can legitimately have a different count at edges due to
+        # overlaps, but a missing high face leaves only O(edge) particles.
+        ratio = high_count / low_count if low_count else 0.0
+        face_pass = low_count > 0 and ratio >= 0.75
+        passed = passed and face_pass
+        planes[name] = {"low_m": low, "high_m": high, "low_count": low_count, "high_count": high_count, "high_to_low_count_ratio": ratio, "pass": face_pass}
+    return {"available": True, "planes": planes, "pass": passed}
+
+
 def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, Any]:
     compact = _compact_receipt(receipt_path)
     result: dict[str, Any] = {"case_id": parent["case_id"], "mechanism_id": parent["mechanism_id"], "receipt": compact, "receipt_sha256": sha256_file(receipt_path) if receipt_path.is_file() else None, "checks": {}, "errors": []}
@@ -912,6 +1530,9 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
             raise ValueError("generated XML lacks fluid or floating block")
         fluid_begin, fluid_count = int(fluid.get("begin", "0")), int(fluid.get("count", "0"))
         float_begin, float_count = int(floating.get("begin", "0")), int(floating.get("count", "0"))
+        fixed_node = particles.find("fixed")
+        fixed_begin = int(fixed_node.get("begin", "0")) if fixed_node is not None else 0
+        fixed_count = int(fixed_node.get("count", "0")) if fixed_node is not None else 0
         moving_nodes = [node for node in particles if node.tag == "moving"]
         moving_count = sum(int(node.get("count", "0")) for node in moving_nodes)
         paddle_mkbound = int((parent.get("paddle") or {}).get("mkbound", 10)) if parent.get("paddle") else None
@@ -955,6 +1576,7 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
         declared_paths = [parent["definition"]["path"], parent["control"]["path"], parent["native"]["path"], parent["normal"]["path"], parent["official_template"]["path"], str(GENCASE_BINARY.resolve())]
         hash_binding = all(input_after.get(str(Path(path).resolve())) == sha256_file(Path(path)) for path in declared_paths)
         wall = _wall_check(ET.parse(Path(parent["definition"]["path"])).getroot(), boundary_count)
+        generated_wall = _generated_wall_face_check(points, fixed_begin, fixed_count)
         control = _control_coverage(Path(parent["control"]["path"]))
         fluid_mass = massfluid * fluid_count
         expected_particle_mass = density * dp ** 3
@@ -966,6 +1588,7 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
             "effective_transverse_layers": len(y_layers) >= MIN_TRANSVERSE_LAYERS,
             "control_coverage": bool(control.get("coverage_pass")),
             "finite_walls": wall["pass"],
+            "complete_high_wall_faces": generated_wall["pass"],
             "initial_fluid_mass_positive": fluid_mass > 0,
             "fluid_particle_mass_consistent": expected_particle_mass > 0 and abs(massfluid - expected_particle_mass) / expected_particle_mass < 1e-9,
             "rigid_mass_positive": massbody > 0,
@@ -982,6 +1605,7 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
         result["checks"] = checks
         result["control"] = control
         result["wall"] = wall
+        result["generated_wall_geometry"] = generated_wall
         result["mass"] = {"fluid_density_kg_m3": density, "fluid_mass_kg": fluid_mass, "floating_mass_kg": massbody, "floating_density_ratio": massbody / (body_volume * density) if body_volume > 0 else None, "inertia_kg_m2": inertia}
         result["status"] = "pass" if all(checks.values()) else "fail"
         result["errors"].extend(name for name, passed in checks.items() if not passed)
@@ -1087,8 +1711,17 @@ def _update_after_audit(output_root: Path, audit: Mapping[str, Any], qualificati
     marker = "## Actual parent evidence"
     if marker not in text:
         text = text.rstrip() + "\n\n" + marker + "\n\n"
-    lines = [f"- Parent audit status: **{audit.get('status')}**; F6 owner launched no solver/GPU.", f"- Qualification requests: {', '.join('`'+str(x)+'`' for x in qualification.get('request_files', [])) or 'none until parent audit passes'}.", "- GenCase checks include actual 3D/data2d=false, positive type-3 fluid and type-2 floating ledgers, effective transverse layers, finite walls, control coverage, draft/density ratio, rigid mass/inertia, no Chrono/contact solver, and all input hashes.", "- Q-I/Q-N/production remain pending until root dispatches complete-window solver and postprocessors; the old 13.57M-identity candidate remains excluded from reuse."]
-    handoff.write_text(text.rstrip() + "\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    lines = [
+        f"- Parent audit status: **{audit.get('status')}**; F6 owner launched no solver/GPU.",
+        f"- Qualification requests: {', '.join('`'+str(x)+'`' for x in qualification.get('request_files', [])) or 'none until parent audit passes'}.",
+        "- GenCase checks include actual 3D/data2d=false, positive type-3 fluid and type-2 floating ledgers, effective transverse layers, finite walls, control coverage, draft/density ratio, rigid mass/inertia, no Chrono/contact solver, and all input hashes.",
+        "- The bounded final candidate is `parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02`; its separate CPU audit and root-only GPU requests remain pending solver review.",
+        "- Q-I/Q-N/production remain pending until root dispatches complete-window solver and postprocessors; the old 13.57M-identity candidate remains excluded from reuse.",
+    ]
+    # Re-running the audit should replace this state block rather than append
+    # duplicate claims to a handoff generated by a prior audit.
+    prefix = text.split(marker, 1)[0].rstrip()
+    handoff.write_text(prefix + "\n\n" + marker + "\n\n" + "\n".join(lines) + "\n", encoding="utf-8")
 
 
 def audit_parents(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
@@ -1127,6 +1760,8 @@ def generate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
         stale_request.replace(request_archive / f"{stale_request.stem}_superseded.json")
     history = history_reuse_inventory(); write_json(output_root / "history_reuse_inventory.json", history)
     rows = _split_registry(); manifest = _write_parent_inputs(output_root)
+    prepare_boundary_pointmax_repairs(output_root)
+    prepare_boundary_grid_repairs(output_root)
     write_json(output_root / "family_card.json", _family_card(history)); write_json(output_root / "event_definitions.json", _event_definitions()); write_json(output_root / "observation_plan.json", _observation_plan()); write_json(output_root / "reference_evidence.json", _reference_evidence(history)); write_json(output_root / "qualified_recipes.json", _qualified_recipes()); write_json(output_root / "split_plan.json", _split_plan(rows)); write_json(output_root / "labels/label_schema.json", _label_schema())
     write_json(output_root / "repair_evidence.json", _repair_evidence())
     queue = _execution_queue(output_root, manifest); write_json(output_root / "execution_queue.json", queue)
