@@ -1,0 +1,68 @@
+{
+  "schema": "ds02.f3.weak-full-transport-config.v1",
+  "family_id": "F3",
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "left",
+      "label": "initial fluid particles with tank-frame x < 0",
+      "bounds": [[-0.45, 0.0], [-0.09, 0.09], [0.0, 0.51]]
+    },
+    {
+      "id": "right",
+      "label": "initial fluid particles with tank-frame x >= 0",
+      "bounds": [[0.0, 0.45], [-0.09, 0.09], [0.0, 0.51]]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "left",
+      "label": "tank-frame x < 0",
+      "bounds": [[-0.45, 0.0], [-0.09, 0.09], [0.0, 0.51]]
+    },
+    {
+      "id": "right",
+      "label": "tank-frame x >= 0",
+      "bounds": [[0.0, 0.45], [-0.09, 0.09], [0.0, 0.51]]
+    }
+  ],
+  "events": [
+    {
+      "id": "left_right_exchange",
+      "label": "finite x=0 in-domain exchange",
+      "axis": 0,
+      "value": 0.0,
+      "aperture_bounds": [[-0.09, 0.09], [0.0, 0.51]],
+      "signed_direction": "left_to_right positive, right_to_left negative",
+      "classification": "in_domain_transport_interface"
+    },
+    {
+      "id": "front_back_exchange",
+      "label": "finite y=0 in-domain exchange",
+      "axis": 1,
+      "value": 0.0,
+      "aperture_bounds": [[-0.45, 0.45], [0.0, 0.51]],
+      "signed_direction": "front_to_back positive, back_to_front negative",
+      "classification": "in_domain_transport_interface"
+    },
+    {
+      "id": "top_open_exit",
+      "label": "finite legal top open exit",
+      "axis": 2,
+      "value": 0.51,
+      "aperture_bounds": [[-0.45, 0.45], [-0.09, 0.09]],
+      "signed_direction": "outward positive",
+      "classification": "legal_open_exit_diagnostic"
+    }
+  ],
+  "semantics": {
+    "event_time": "saved-frame bracket plus linear chord estimate",
+    "mass": "native HDF5 mass in kg; no normalization",
+    "residence": "piecewise-linear chord occupancy in destination regions, seconds",
+    "unknown": "preserved as unknown_mass_kg; never inferred as physical exit",
+    "claim_boundary": "complete label artifact is Q-I/reference evidence only; Q-N and production remain unassessed"
+  }
+}
