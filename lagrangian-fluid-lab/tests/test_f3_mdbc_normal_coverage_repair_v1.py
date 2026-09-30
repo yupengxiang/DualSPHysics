@@ -66,9 +66,13 @@ def test_repair_changes_only_normal_association_contract() -> None:
 def test_repair_evidence_binds_actual_solver_output_paths_and_keeps_qn_pending() -> None:
     evidence = json.loads(EVIDENCE.read_text(encoding="utf-8"))
     assert evidence["root_cause_class"] == "mdbc_normal_association_coverage"
-    assert evidence["repair_budget"]["used_repairs"] == 1
-    assert evidence["repair_budget"]["remaining_repairs"] == 1
-    assert evidence["status"].endswith("solver_qi_pending_qn_pending")
+    assert evidence["repair_budget"]["dual_axis_phase"]["used_repairs"] == 2
+    assert evidence["repair_budget"]["dual_axis_phase"]["remaining_repairs"] == 0
+    assert evidence["repair_budget"]["eccentric_baffle_exchange"]["used_repairs"] == 1
+    assert evidence["status"].endswith("solver_pending_qi_pending_qn_pending")
+    assert evidence["bounded_cpu_normal_results"]["eccentric_baffle_exchange_repair01"]["zero_normals"] == 0
+    assert evidence["bounded_cpu_normal_results"]["dual_axis_phase_repair02"]["zero_normals"] == 3076
+    assert evidence["fallback"]["normal_preflight"]["solver_dimension"] == 3
     for row in evidence["parents"]:
         run_out = Path(row["native_evidence"]["run_out"]["path"])
         assert "/solver_output/Run.out" in str(run_out)
