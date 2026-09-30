@@ -1,0 +1,38 @@
+{
+  "schema": "ds02.f4.science-operators.v2",
+  "operator_version": "f4-fixed-source-support-v2",
+  "scope": "actual F4 typed HDF5 reference evidence; every curve is bound to physical and control hashes",
+  "physical_support": {
+    "support_radius_m": 0.02,
+    "support_radius_semantics": "fixed physical distance, independent of dp; max(3*dp,0.02 m) is retained only as a labelled resolution diagnostic",
+    "minimum_cross_support_pairs": 3,
+    "minimum_support_mass_fraction_of_smaller_source": 0.01,
+    "contact_definition": "at least the registered cross-source pair and mass thresholds are true in the converted typed active particle positions; initial source boxes are never used as contact evidence",
+    "recontact_definition": "a false interval after first sourced contact followed by a later sourced contact; right-censored when absent",
+    "spread_definition": "axis-aligned extent of each typed source group over active finite-mass particles",
+    "calibration": "translation, rotation, and deterministic subsampling fixtures are run through the same support detector and recorded with the audit"
+  },
+  "transport": {
+    "plane": "finite physical y/z aperture derived from the registered source geometry, not an infinite x plane",
+    "crossing": "typed identity-resolved signed crossings with native mass in kg; repeated crossings and first-passage brackets are retained",
+    "residence_mass_time_unit": "kg*s",
+    "residence_particle_time_unit": "s",
+    "missing_identity_policy": "unknown state; missing particles are excluded from active aperture sums and never counted as physical exit"
+  },
+  "comparison": {
+    "spatial_reference": "fine/native per physical case",
+    "temporal_reference": "fine/native per physical case",
+    "time_alignment": "linear interpolation at actual time values over the overlap window; frame index equality is not assumed",
+    "macro_error_budget_fraction": 0.05,
+    "event_time_error_budget_fraction": 0.02,
+    "temporal_item_allocation_fraction": 0.2,
+    "macro_scales": "native mass, registered L, M*U momentum, and M*U^2 energy; no trajectory mass normalization",
+    "status_policy": "observed pass/fail/fail-over-budget is evidence only and grants neither Q-N nor production eligibility"
+  },
+  "preview": {
+    "projection": "actual solver Cartesian x/z with y as color",
+    "downsample": "deterministic display-only sample; full HDF5 remains the audit input",
+    "required": "first/middle/final keyframes and at least one frame-sequence GIF"
+  },
+  "claim_boundary": "Q-I lifecycle and scientific reference evidence are reported separately; Q-N and production are not assessed"
+}
