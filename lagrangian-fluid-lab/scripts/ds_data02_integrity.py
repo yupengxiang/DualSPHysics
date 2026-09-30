@@ -652,7 +652,15 @@ def audit_hdf5(
             active_count: list[int] = []
             fluid_count: list[int] = []
             floating_count: list[int] = []
-            static_identity_valid = isinstance(valid_ds, h5py.Dataset) and tuple(valid_ds.shape) == (frames, particles)
+            required_shapes_valid = all(
+                shape_checks.get(name, {}).get("status") == "pass"
+                for name in REQUIRED_DATASETS
+            )
+            static_identity_valid = (
+                required_shapes_valid
+                and isinstance(valid_ds, h5py.Dataset)
+                and tuple(valid_ds.shape) == (frames, particles)
+            )
             initial_active = np.zeros(particles, dtype=bool)
             previous_active = np.zeros(particles, dtype=bool)
             ever_seen = np.zeros(particles, dtype=bool)
