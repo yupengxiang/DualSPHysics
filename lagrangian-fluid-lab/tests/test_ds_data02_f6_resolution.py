@@ -102,3 +102,29 @@ def test_postprocess_plan_declares_native_type_mass_and_orientation_limit(tmp_pa
     F6R.write_json(output / "native_audit_plan.json", plan)
     observed = F6R.read_json(output / "native_audit_plan.json")
     assert any("quaternion" in item for item in observed["unsupported"])
+
+
+def test_initial_mass_budget_separates_lattice_support_and_body_occupancy() -> None:
+    case = {
+        "fluid_fill": {"point_m": [0.0, 0.0, 0.0], "size_m": [0.5, 0.5, 0.5]},
+        "body": {"point_m": [0.1, 0.1, 0.1], "size_m": [0.2, 0.2, 0.2]},
+        "paddle": None,
+    }
+    points = [(x, y, z) for x in (0.1, 0.2, 0.3, 0.4) for y in (0.1, 0.2, 0.3, 0.4) for z in (0.1, 0.2, 0.3, 0.4)]
+    wall = {
+        "planes": {
+            "x": {"low_m": 0.0, "high_m": 0.5},
+            "y": {"low_m": 0.0, "high_m": 0.5},
+            "bottom": {"low_m": 0.0},
+        }
+    }
+    budget = F6R._initial_mass_budget(case, points, [], [], 0.1, 1000.0, 1.0, wall)
+    assert budget["nominal_fillbox_volume_m3"] == 0.125
+    assert abs(budget["occupancy_overlap_volume_m3"]["floating_body"] - 0.008) < 1e-12
+    assert budget["fluid_center_lattice"]["candidate_particle_count"] == 64
+    assert budget["raw_nominal_fillbox_mass_relative_error"] < budget["lattice_target_mass_relative_error"]
+    assert budget["continuous_physical_fill_tolerance_pass"] is False
+    assert budget["effective_center_lattice_tolerance_pass"] is False
+    assert budget["support_adjusted_mass_relative_error"] == budget["lattice_target_mass_relative_error"]
+    assert budget["initial_mass_tolerance_basis"] == "continuous_physical_fill_after_occupancy"
+    assert budget["formula_conclusion"].startswith("the previous raw fillbox-volume denominator")
