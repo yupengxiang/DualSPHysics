@@ -620,6 +620,7 @@ def main() -> int:
     if manifest.get("schema") not in {
         "ds-data-02.f2.native-resolution-diagnostic-input.v1",
         "ds-data-02.f2.native-resolution-diagnostic-input.v2",
+        "ds-data-02.f2.native-resolution-diagnostic-input.v3",
     }:
         raise DiagnosticError("diagnostic manifest schema is invalid")
     output = args.output.expanduser().resolve()
