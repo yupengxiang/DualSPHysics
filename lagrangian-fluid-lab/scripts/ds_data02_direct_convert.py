@@ -221,7 +221,15 @@ def parse_particle_blocks(generated_xml: Path) -> dict[str, Any]:
         if seen[begin : begin + count].any():
             raise DirectConversionError("overlapping particle blocks in generated XML")
         seen[begin : begin + count] = True
-        blocks.append({"tag": child.tag, "type": TYPE_BY_TAG[child.tag], "mk": mk, "begin": begin, "count": count})
+        mkfluid = child.get("mkfluid")
+        blocks.append({
+            "tag": child.tag,
+            "type": TYPE_BY_TAG[child.tag],
+            "mk": mk,
+            "mkfluid": None if mkfluid is None else int(mkfluid),
+            "begin": begin,
+            "count": count,
+        })
     if not blocks or not seen.all():
         missing = np.flatnonzero(~seen)
         raise DirectConversionError(f"typed particle ranges do not cover np={total_n}; first missing={missing[:5].tolist()}")
@@ -365,9 +373,161 @@ def _verify_receipt(path: Path, label: str) -> dict[str, Any]:
     return value
 
 
+PHYSICAL_BINDING_SCHEMA = "ds-data-02.physical-binding.v1"
+_PHYSICAL_BINDING_REQUIRED = {
+    "family_id",
+    "physical_case_id",
+    "mechanism_id",
+    "geometry_family_id",
+    "control_family_id",
+    "geometry",
+    "initial_state",
+    "controls",
+    "gravity_m_s2",
+    "density_kg_m3",
+    "parameters",
+    "event_window",
+}
+_PHYSICAL_CONTROL_KEYS = {
+    "step_algorithm",
+    "kernel",
+    "viscosity",
+    "density_dt",
+    "density_dt_value",
+    "boundary",
+}
+_PHYSICAL_GEOMETRY_OBJECT_KEYS = {
+    "low_m",
+    "size_m",
+    "mkfluid",
+    "label",
+}
+_PHYSICAL_EVENT_KEYS = {
+    "time_start_s",
+    "time_end_s",
+    "sequence",
+    "expected_first_contact_range_s",
+    "right_censor_policy",
+}
+
+
+def _validate_physical_binding(binding: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate the explicit, resolution-independent physical contract.
+
+    A physical binding is deliberately a small allowlisted object.  Resolution,
+    particle spacing, CFL, save cadence, integrator step count, and view/recipe
+    labels belong to the numerical scope and must not be smuggled into this
+    hash.  Conversely, unknown fields are rejected so a future metadata field
+    cannot silently acquire cross-resolution semantics.
+    """
+    if binding.get("schema") != PHYSICAL_BINDING_SCHEMA:
+        raise DirectConversionError(
+            f"physical_binding.schema must be {PHYSICAL_BINDING_SCHEMA!r}"
+        )
+    missing = sorted(_PHYSICAL_BINDING_REQUIRED - set(binding))
+    if missing:
+        raise DirectConversionError(f"physical_binding is missing explicit fields: {missing}")
+    allowed = _PHYSICAL_BINDING_REQUIRED | {
+        "schema",
+        "lineage_group_id",
+        "paired_background_id",
+        "open_inlet",
+        "periodic_boundary",
+        "mass_policy",
+    }
+    unknown = sorted(set(binding) - allowed)
+    if unknown:
+        raise DirectConversionError(
+            "physical_binding has unclassified fields; classify them as physical or "
+            f"numerical before hashing: {unknown}"
+        )
+    controls = binding["controls"]
+    if not isinstance(controls, Mapping):
+        raise DirectConversionError("physical_binding.controls must be an object")
+    unknown_controls = sorted(set(controls) - _PHYSICAL_CONTROL_KEYS)
+    if unknown_controls:
+        raise DirectConversionError(
+            "physical_binding.controls contains numerical/unclassified fields: "
+            f"{unknown_controls}"
+        )
+    geometry = binding["geometry"]
+    if not isinstance(geometry, Mapping) or not geometry:
+        raise DirectConversionError("physical_binding.geometry must contain continuous regions")
+    for name, region in geometry.items():
+        if not isinstance(region, Mapping):
+            raise DirectConversionError(f"physical geometry region {name!r} is not an object")
+        unknown_region = sorted(set(region) - _PHYSICAL_GEOMETRY_OBJECT_KEYS)
+        if unknown_region:
+            raise DirectConversionError(
+                f"physical geometry region {name!r} has unclassified fields: {unknown_region}"
+            )
+        for key in ("low_m", "size_m"):
+            if key not in region:
+                raise DirectConversionError(f"physical geometry region {name!r} lacks {key}")
+    initial_state = binding["initial_state"]
+    if not isinstance(initial_state, Mapping):
+        raise DirectConversionError("physical_binding.initial_state must be an object")
+    allowed_initial = {
+        "source_regions",
+        "velocities_m_per_s",
+        "source_labels",
+        "initial_mass_by_source_kg",
+        "continuum_mass_by_source_kg",
+        "initial_mass_total_kg",
+        "mass_policy",
+    }
+    unknown_initial = sorted(set(initial_state) - allowed_initial)
+    if unknown_initial:
+        raise DirectConversionError(
+            "physical_binding.initial_state has unclassified fields: "
+            f"{unknown_initial}"
+        )
+    # Initial source regions and velocities/masses are physical.  Explicitly
+    # disallow the lattice-only native_boxes and resolution-dependent counts.
+    if "native_boxes" in initial_state or "particle_counts" in initial_state:
+        raise DirectConversionError(
+            "physical_binding.initial_state cannot contain native lattice/count fields"
+        )
+    event_window = binding["event_window"]
+    if not isinstance(event_window, Mapping):
+        raise DirectConversionError("physical_binding.event_window must be an object")
+    unknown_events = sorted(set(event_window) - _PHYSICAL_EVENT_KEYS)
+    if unknown_events:
+        raise DirectConversionError(
+            "physical_binding.event_window contains save/numerical/unclassified fields: "
+            f"{unknown_events}"
+        )
+    return dict(binding)
+
+
 def _physical_condition_scope(owner: Mapping[str, Any]) -> dict[str, Any]:
-    keys = ("family_id", "physical_case_id", "lineage_group_id", "paired_background_id", "mechanism_id", "geometry_family_id", "geometry", "control_family_id", "recipe_id", "event_window", "view_id")
-    return {key: owner[key] for key in keys if key in owner}
+    explicit = owner.get("physical_binding")
+    if explicit is not None:
+        return _validate_physical_binding(explicit)
+    # Legacy owner metadata is retained for historical conversion evidence, but
+    # excludes recipe/view labels and the full event window.  Such artifacts do
+    # not acquire a new cross-resolution qualification claim without the
+    # explicit physical_binding.v1 object above.
+    keys = (
+        "family_id",
+        "physical_case_id",
+        "lineage_group_id",
+        "paired_background_id",
+        "mechanism_id",
+        "geometry_family_id",
+        "geometry",
+        "control_family_id",
+        "gravity_m_s2",
+        "density_kg_m3",
+        "parameters",
+        "initial_state",
+        "continuum_geometry",
+    )
+    return {
+        "schema": "legacy-owner-scope.v0",
+        "semantic_binding_status": "legacy_incomplete; no cross-resolution physical claim",
+        **{key: owner[key] for key in keys if key in owner},
+    }
 
 
 def _numerical_scope(owner: Mapping[str, Any], generated_xml: Path, first: DecodedFrame, solver_receipt: Mapping[str, Any]) -> dict[str, Any]:
@@ -504,7 +664,19 @@ def _write_frame(h5: h5py.File, index: int, frame: DecodedFrame, base_ids: np.nd
     h5["pressure"][index] = pressure
     h5["type"][index] = types
     h5["mk"][index] = mks
-    return {"frame": index, "time": frame.time, "active_particles": int(valid.sum()), "missing_particles": int((~valid).sum()), "type_counts": {str(int(kind)): int(np.sum(base_type[indices] == kind)) for kind in range(4)}}
+    missing = ~valid
+    missing_ids = base_ids[missing]
+    return {
+        "frame": index,
+        "time": frame.time,
+        "active_particles": int(valid.sum()),
+        "missing_particles": int(missing.sum()),
+        "missing_id_first": [int(value) for value in missing_ids[:8]],
+        "missing_ids_sha256": hashlib.sha256(missing_ids.tobytes()).hexdigest(),
+        "missing_type_counts": {str(int(kind)): int(np.sum(base_type[missing] == kind)) for kind in range(4)},
+        "missing_mk_counts": {str(int(mk)): int(np.sum(base_mk[missing] == mk)) for mk in sorted(set(base_mk.tolist())) if np.any(base_mk[missing] == mk)},
+        "type_counts": {str(int(kind)): int(np.sum(base_type[indices] == kind)) for kind in range(4)},
+    }
 
 
 def _csv_path_from_prefix(prefix: Path, frame: int) -> Path:
@@ -687,6 +859,11 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
     h5: h5py.File | None = None
     validation = []
     frame_summary = []
+    transient_missing_by_type: dict[str, int] = {str(kind): 0 for kind in range(4)}
+    transient_missing_by_mk: dict[str, int] = {}
+    first_missing_frame_by_type: dict[str, int] = {}
+    first_missing_frame_by_mk: dict[str, int] = {}
+    transient_missing_frame_count = 0
     try:
         first = decode_frame(paths[0], decoder, scratch, 0)
         case_np = _as_int(first.metadata, "CaseNp")
@@ -764,7 +941,18 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
             if int(_as_int(frame.metadata, "Piece", default=0)) != int(_as_int(first.metadata, "Piece", default=0)):
                 raise DirectConversionError(f"Zone/Piece changed at frame {index}")
             mass = _mass_for_types(base_type, frame.metadata)
-            frame_summary.append(_write_frame(h5, index, frame, base_ids, base_type, base_mk, mass))
+            summary = _write_frame(h5, index, frame, base_ids, base_type, base_mk, mass)
+            frame_summary.append(summary)
+            if summary["missing_particles"]:
+                transient_missing_frame_count += 1
+                for key, count in summary["missing_type_counts"].items():
+                    transient_missing_by_type[key] = transient_missing_by_type.get(key, 0) + int(count)
+                    if int(count) and key not in first_missing_frame_by_type:
+                        first_missing_frame_by_type[key] = index
+                for key, count in summary["missing_mk_counts"].items():
+                    transient_missing_by_mk[key] = transient_missing_by_mk.get(key, 0) + int(count)
+                    if int(count) and key not in first_missing_frame_by_mk:
+                        first_missing_frame_by_mk[key] = index
         h5.flush()
         h5.close()
         h5 = None
@@ -809,7 +997,18 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
             "units": {"time": "s", "position": "m", "velocity": "m/s", "density": "kg/m^3", "mass": "kg", "pressure": "Pa"},
             "typed_identity": {"key": "(Zone,Idp)", "zone_source": "BI4 Piece", "blocks": blocks["blocks"], "observed_types": sorted(set(base_type.tolist())), "observed_mks": sorted(set(base_mk.tolist())), "initial_mass_min_kg": float(initial_mass.min()), "initial_mass_max_kg": float(initial_mass.max()), "mass_semantics": "per-frame native MassFluid/MassBound, type-aware; PartVTK cross-check", "initial_exclusion_ledger": initial_exclusion_ledger},
             "time_evidence": {"source": "BI4 decoder TimeStep", "first_s": frame_summary[0]["time"], "last_s": frame_summary[-1]["time"], "strictly_increasing": True},
-            "lifecycle": {"contract": "closed fixed identity axis", "introduced_ids": "rejected", "open_birth_adaptive_multi_piece": "rejected", "frame_summary": frame_summary},
+            "lifecycle": {
+                "contract": "closed fixed identity axis",
+                "introduced_ids": "rejected",
+                "open_birth_adaptive_multi_piece": "rejected",
+                "transient_missing_frame_count": transient_missing_frame_count,
+                "transient_missing_by_type_frame_events": transient_missing_by_type,
+                "transient_missing_by_mk_frame_events": transient_missing_by_mk,
+                "first_missing_frame_by_type": first_missing_frame_by_type,
+                "first_missing_frame_by_mk": first_missing_frame_by_mk,
+                "missing_semantics": "native solver output omission; identity and typed initial mass are retained, location/state is unknown",
+                "frame_summary": frame_summary,
+            },
             "source_provenance": {"data_root": str(data_root), "raw_tree": source_unchanged, "decoder": {"path": str(decoder), "sha256": sha256_file(decoder)}, "generated_xml": {"path": str(generated_xml), "sha256": sha256_file(generated_xml)}, "geometry_reference_sha256": geometry_sha256, "control_reference_sha256": control_sha256, "geometry_sha256": geometry_sha256, "control_sha256": control_sha256, "solver_receipt": {"path": str(solver_receipt), "sha256": sha256_file(solver_receipt)}, "gencase_receipt": {"path": str(gencase_receipt), "sha256": sha256_file(gencase_receipt)}, "owner_metadata": {"path": str(owner_metadata), "sha256": sha256_file(owner_metadata)}, "partvtk": None if partvtk is None else {"path": str(partvtk), "sha256": sha256_file(partvtk)}},
             "hash_scopes": {"physical_condition": physical_scope, "physical_condition_sha256": canonical_hash(physical_scope), "numerical_parameters": numerical_scope, "numerical_parameters_sha256": canonical_hash(numerical_scope)},
             "unsupported_contract": dynamic_contract,

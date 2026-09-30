@@ -13,7 +13,9 @@ import pytest
 
 from scripts.ds_data02_direct_convert import (
     DirectConversionError,
+    PHYSICAL_BINDING_SCHEMA,
     _assign_types,
+    _physical_condition_scope,
     _reject_dynamic_contract,
     compare_reference_hdf5,
     convert_direct,
@@ -21,6 +23,66 @@ from scripts.ds_data02_direct_convert import (
     parse_particle_blocks,
     raw_tree_manifest,
 )
+
+
+def _physical_binding_fixture() -> dict:
+    return {
+        "schema": PHYSICAL_BINDING_SCHEMA,
+        "family_id": "F-test",
+        "physical_case_id": "P-test",
+        "mechanism_id": "drop",
+        "geometry_family_id": "g-family",
+        "control_family_id": "c-family",
+        "geometry": {"fluid": {"low_m": [0.0, 0.0, 0.0], "size_m": [1.0, 1.0, 1.0], "mkfluid": 0, "label": "source"}},
+        "initial_state": {
+            "source_regions": {"fluid": {"low_m": [0.0, 0.0, 0.0], "size_m": [1.0, 1.0, 1.0], "mkfluid": 0, "label": "source"}},
+            "velocities_m_per_s": {"mkfluid:0": [0.0, 0.0, 0.0]},
+            "source_labels": {"mkfluid:0": "source"},
+            "initial_mass_by_source_kg": {"source": 1.0},
+            "continuum_mass_by_source_kg": {"source": 1.0},
+            "initial_mass_total_kg": 1.0,
+            "mass_policy": "native_rho_dp_cubed_no_rescaling",
+        },
+        "controls": {
+            "step_algorithm": "Verlet",
+            "kernel": "Wendland",
+            "viscosity": 0.08,
+            "density_dt": 2,
+            "density_dt_value": 0.1,
+            "boundary": "DBC",
+        },
+        "gravity_m_s2": [0.0, 0.0, -9.81],
+        "density_kg_m3": 1000.0,
+        "parameters": {"speed_m_per_s": 1.0},
+        "event_window": {
+            "time_start_s": 0.0,
+            "time_end_s": 1.0,
+            "sequence": ["start", "end"],
+            "expected_first_contact_range_s": [0.1, 0.5],
+            "right_censor_policy": "record",
+        },
+    }
+
+
+def test_physical_binding_ignores_resolution_and_save_views() -> None:
+    binding = _physical_binding_fixture()
+    coarse = {"physical_binding": binding, "resolution": "coarse", "dp_m": 0.04, "time_variant": "native"}
+    fine = {"physical_binding": binding, "resolution": "fine", "dp_m": 0.02, "time_variant": "half_save"}
+    assert _physical_condition_scope(coarse) == _physical_condition_scope(fine)
+
+
+def test_physical_binding_changes_when_physical_control_changes() -> None:
+    first = _physical_binding_fixture()
+    second = _physical_binding_fixture()
+    second["controls"]["viscosity"] = 0.12
+    assert _physical_condition_scope({"physical_binding": first}) != _physical_condition_scope({"physical_binding": second})
+
+
+def test_physical_binding_rejects_unclassified_numeric_view_fields() -> None:
+    binding = _physical_binding_fixture()
+    binding["controls"]["output_interval_s"] = 0.001
+    with pytest.raises(DirectConversionError, match="numerical/unclassified"):
+        _physical_condition_scope({"physical_binding": binding})
 
 
 def _write_generated_xml(path: Path, *, dynamic_tag: str | None = None) -> None:

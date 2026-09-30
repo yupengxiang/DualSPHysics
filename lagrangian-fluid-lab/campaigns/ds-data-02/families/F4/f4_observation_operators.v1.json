@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.f4.observation-operators.v1",
+  "operator_version": "f4-fixed-physical-scale-v1",
+  "scope": "registered before reading converted F4 HDF5; same physical operators across coarse, medium, fine, half_dt, and half_save",
+  "fixed_physical_tolerance_m": 0.02,
+  "historical_resolution_dependent_rule": "max(3*dp_m, 0.02 m)",
+  "macro_error_budget_fraction": 0.05,
+  "feature_time_error_budget_fraction": 0.02,
+  "mass_semantics": "native MassFluid and typed identity mass; continuum mass is a separate ledger; no normalization",
+  "source_destination": {
+    "source_identity": "initial_type=3 and native mk mapped through generated XML mkfluid-to-mk binding",
+    "source_regions": "explicit continuum source boxes in physical_binding.initial_state.source_regions",
+    "destination_regions": "explicit physical source boxes plus the derived fixed inter-column gap for oblique_finite_columns",
+    "quantity": "raw active native mass by source and destination region, with unnormalized source mass fractions only as derived values"
+  },
+  "contact_spread_recontact": {
+    "contact": "any source particle enters its fixed physical target box expanded by fixed_physical_tolerance_m",
+    "spread": "maximum axis-aligned extent of each source identity group over active particles",
+    "recontact": "a false contact interval followed by a later true contact; right-censored if absent",
+    "diagnostic": "repeat contact/spread/recontact using max(3*dp_m, 0.02 m), reported only as resolution-dependent diagnostic"
+  },
+  "transport_plane": {
+    "finite_drop_pool": "downstream x boundary of the fixed pool box",
+    "oblique_finite_columns": "midpoint x plane between fixed left and right column boxes",
+    "crossing": "identity-resolved signed crossings; first passage and mass-weighted residence are right-censored when unobserved"
+  },
+  "lifecycle": {
+    "missing_particle_policy": "retain typed identity and valid mask; report unknown position/state mass separately; never infer spill or redistribution",
+    "open_birth_adaptive_policy": "direct converter rejects these contracts"
+  },
+  "qualification_boundary": "operator output is actual reference evidence; this file grants neither Q-I nor Q-N nor production eligibility"
+}

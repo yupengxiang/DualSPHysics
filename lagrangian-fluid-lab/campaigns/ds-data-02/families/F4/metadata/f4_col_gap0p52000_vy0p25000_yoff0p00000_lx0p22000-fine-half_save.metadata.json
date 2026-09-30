@@ -1,0 +1,221 @@
+{
+  "dp_m": 0.02,
+  "family_id": "F4",
+  "initialization_evidence": {
+    "continuum_initial_mass_total_kg": 12.672,
+    "continuum_mass_by_source_kg": {
+      "left_column": 6.336,
+      "right_column": 6.336
+    },
+    "native_initial_mass_by_source_kg": {
+      "left_column": 6.336,
+      "right_column": 6.336
+    },
+    "native_initial_mass_total_kg": 12.672,
+    "semantics": "native lattice initialization error is reported separately; no mass normalization"
+  },
+  "mechanism_id": "oblique_finite_columns",
+  "physical_binding": {
+    "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+    "controls": {
+      "boundary": "DBC",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": "Wendland",
+      "step_algorithm": "Verlet",
+      "viscosity": 0.08
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.15,
+        0.4
+      ],
+      "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring",
+      "sequence": [
+        "separated_initial_state",
+        "first_column_contact",
+        "maximum_deflection",
+        "recontact_or_merge",
+        "transport_tail"
+      ],
+      "time_end_s": 1.2,
+      "time_start_s": 0.0
+    },
+    "family_id": "F4",
+    "geometry": {
+      "left_column": {
+        "label": "left_column",
+        "low_m": [
+          0.12,
+          0.04,
+          0.24
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.22,
+          0.16,
+          0.18
+        ]
+      },
+      "right_column": {
+        "label": "right_column",
+        "low_m": [
+          0.86,
+          0.2,
+          0.24
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.22,
+          0.16,
+          0.18
+        ]
+      },
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "wall_box": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      }
+    },
+    "geometry_family_id": "F4_oblique_finite_columns_finite_geometry_v1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "left_column": 6.336,
+        "right_column": 6.336
+      },
+      "initial_mass_by_source_kg": {
+        "left_column": 6.336,
+        "right_column": 6.336
+      },
+      "initial_mass_total_kg": 12.672,
+      "mass_policy": "native_rho_dp_cubed_no_rescaling",
+      "source_labels": {
+        "mkfluid:0": "left_column",
+        "mkfluid:1": "right_column"
+      },
+      "source_regions": {
+        "left_column": {
+          "label": "left_column",
+          "low_m": [
+            0.12,
+            0.04,
+            0.24
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.22,
+            0.16,
+            0.18
+          ]
+        },
+        "right_column": {
+          "label": "right_column",
+          "low_m": [
+            0.86,
+            0.2,
+            0.24
+          ],
+          "mkfluid": 1,
+          "size_m": [
+            0.22,
+            0.16,
+            0.18
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "mkfluid:0": [
+          1.0,
+          0.25,
+          0.0
+        ],
+        "mkfluid:1": [
+          -1.0,
+          -0.25,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "oblique_finite_columns_frozen_geometry_control_domain",
+    "mass_policy": "native_rho_dp_cubed_no_rescaling",
+    "mechanism_id": "oblique_finite_columns",
+    "open_inlet": false,
+    "paired_background_id": "oblique_finite_columns",
+    "parameters": {
+      "column_length_x_m": 0.22,
+      "edge_gap_m": 0.52,
+      "right_y_offset_m": 0.0,
+      "transverse_speed_m_per_s": 0.25
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "dbc97c0081fa8622c1f5da4348e2b78a56eca55bdcdcc39f1e601976dbdcca85",
+  "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+  "q_i_status": "not_granted",
+  "q_n_status": "not_assessed",
+  "qualification_status": "conversion_and_observation_evidence_only",
+  "resolution": "fine",
+  "schema": "ds02.f4.direct-binding.v1",
+  "source_binding": {
+    "binding_statement": "physical_binding is copied from explicit continuum geometry, initial state, physical controls, and event-time semantics; generated XML and native lattice fields remain numerical provenance",
+    "definition_xml": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/oblique_finite_columns_fine_Def.xml",
+      "sha256": "5bb55db56cc8f47fe60868018ee2431670fca69f21061451bb05d86ec17b0ca7"
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/gencase-oblique_finite_columns-fine-half_save-001/execution-receipt.json",
+      "sha256": "dc48530810ba3bc08b69a3e44a3bc728361f3035766b024c531189b936c7ffb5"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/gencase-oblique_finite_columns-fine-half_save-001/F4_oblique_columns_fine.xml",
+      "sha256": "79b61e35be18d6f29e6d871a051913fe7eaecfe0c64c90da0de7b285c473dc51"
+    },
+    "owner_metadata_source": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/time_controls_001/oblique_finite_columns_half_save.metadata.json",
+      "sha256": "f085dc4ec20243c707bddea188796e022ee4775236465d905742fc550db06adc"
+    },
+    "solver_log": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/qualification-oblique_finite_columns-fine-half_save-001/solver/Run.out",
+      "sha256": "0d54cb001a1361a65d5abb13af5c32d7ff932a6196214268ff649e9d4246175f"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/qualification-oblique_finite_columns-fine-half_save-001/execution-receipt.json",
+      "sha256": "70f2954981999cb7cf12b9f72d478d13c2e015708ad3c44a412584c33db71e4a"
+    }
+  },
+  "time_variant": "half_save",
+  "typed_identity_binding": {
+    "fluid_mkfluid_to_native_mk": {
+      "0": 1,
+      "1": 2
+    },
+    "source": "generated XML typed fluid ranges; converter preserves native mk and (Zone,Idp)"
+  }
+}
