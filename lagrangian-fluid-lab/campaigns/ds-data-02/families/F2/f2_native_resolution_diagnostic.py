@@ -395,7 +395,7 @@ def fixed_wall_evidence(rows: list[dict[str, str]], boxes: Mapping[int, Mapping[
     return evidence
 
 
-def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[str, str]], *, time_s: float, control_angle_rad: float, origin: np.ndarray, axis: np.ndarray, box: Mapping[str, Any], dp: float) -> dict[str, Any]:
+def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[str, str]], *, time_s: float, control_angle_rad: float, control_sign: float, origin: np.ndarray, axis: np.ndarray, box: Mapping[str, Any], dp: float) -> dict[str, Any]:
     initial = [row for row in initial_rows if int(row["Type"]) == 1]
     current = [row for row in frame_rows if int(row["Type"]) == 1]
     initial_by_key = {(int(row["Zone"]), int(row["Idp"])): row_position(row) for row in initial}
@@ -407,19 +407,21 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
         raise DiagnosticError("moving cup has no shared typed identities for pose fit")
     centroid0 = p0.mean(axis=0)
     centroid = p.mean(axis=0)
-    translation = centroid - centroid0
     # Fit the rotation after removing rigid translation.  The old implementation
     # passed the fixed axis origin directly, which silently biases the angle when
     # a body translates in x/y/z.
     fitted = fit_rotation(p0 - centroid0, p - centroid, np.zeros(3), axis)
+    forward = rotation_matrix(axis, fitted)
+    rotated_centroid = (centroid0 - origin) @ forward.T + origin
+    translation = centroid - rotated_centroid
     inverse = rotation_matrix(axis, -fitted)
     local = (p - translation - origin) @ inverse.T + origin
     low = np.asarray(box["low_m"], dtype=np.float64)
     size = np.asarray(box["size_m"], dtype=np.float64)
     high = low + size
     coverage = face_coverage(local, low, size, dp, ("z-", "z+"))
-    angle_residual = math.atan2(math.sin(fitted - control_angle_rad), math.cos(fitted - control_angle_rad))
-    forward = rotation_matrix(axis, fitted)
+    expected_angle = float(control_sign) * control_angle_rad
+    angle_residual = math.atan2(math.sin(fitted - expected_angle), math.cos(fitted - expected_angle))
     predicted = (p0 - origin) @ forward.T + origin + translation
     residual = np.linalg.norm(p - predicted, axis=1)
     current_velocity = np.asarray([row_velocity(row) for row in current], dtype=np.float64)
@@ -431,6 +433,8 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
         "typed_identity_intersection": len(shared),
         "fit_angle_rad": float(fitted),
         "prescribed_angle_rad": float(control_angle_rad),
+        "native_control_sign": float(control_sign),
+        "expected_native_angle_rad": float(expected_angle),
         "angle_residual_rad": float(angle_residual),
         "initial_centroid_m": centroid0.tolist(),
         "current_centroid_m": centroid.tolist(),
@@ -450,7 +454,7 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
     }
 
 
-def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root: Path, posed_frame_indices: Iterable[int]) -> dict[str, Any]:
+def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root: Path, posed_frame_indices: Iterable[int], motion_control_sign: float) -> dict[str, Any]:
     case_id = str(case["case_id"])
     dp = float(case["dp_m"])
     solver_output = require_file(Path(str(case["solver_output"])) / "RunPARTs.csv", f"{case_id} RunPARTs.csv").parent
@@ -536,7 +540,7 @@ def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root
     for index, _, rows in posed_frame_records:
         time_value = runparts[index]["time_s"] if index < len(runparts) else float(index)
         control_angle = float(np.interp(time_value, motion_times, motion_angles))
-        pose_rows.append(cup_pose_evidence(rows, initial_rows, time_s=time_value, control_angle_rad=control_angle, origin=origin, axis=axis, box=cup_box, dp=dp))
+        pose_rows.append(cup_pose_evidence(rows, initial_rows, time_s=time_value, control_angle_rad=control_angle, control_sign=motion_control_sign, origin=origin, axis=axis, box=cup_box, dp=dp))
     fixed = fixed_wall_evidence(initial_rows, boxes["bounds"], dp)
     receipt_data = {"solver": json.loads(solver_receipt.read_text()), "gencase": json.loads(gencase_receipt.read_text())}
     return {
@@ -626,6 +630,9 @@ def main() -> int:
     posed_frame_indices = manifest.get("posed_frame_indices", [1, 2, 3])
     if not isinstance(posed_frame_indices, list) or not posed_frame_indices:
         raise DiagnosticError("diagnostic manifest must contain posed_frame_indices")
+    motion_control_sign = float(manifest.get("motion_control_sign", -1.0))
+    if not math.isfinite(motion_control_sign) or motion_control_sign not in {-1.0, 1.0}:
+        raise DiagnosticError("motion_control_sign must be +1 or -1")
     report = {
         "schema": "ds-data-02.f2.native-resolution-diagnostic.v2" if manifest.get("schema", "").endswith(".v2") else "ds-data-02.f2.native-resolution-diagnostic.v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -635,7 +642,8 @@ def main() -> int:
             "partvtkout": {"path": str(partvtkout), "sha256": sha256(partvtkout)},
         },
         "posed_frame_indices": [int(index) for index in posed_frame_indices],
-        "cases": [audit_case(case, partvtk=partvtk, partvtkout=partvtkout, root=output.parent / "artifacts", posed_frame_indices=posed_frame_indices) for case in cases],
+        "motion_control_sign": motion_control_sign,
+        "cases": [audit_case(case, partvtk=partvtk, partvtkout=partvtkout, root=output.parent / "artifacts", posed_frame_indices=posed_frame_indices, motion_control_sign=motion_control_sign) for case in cases],
         "status": "diagnostic_complete_pending_scientific_review",
         "qualification_claim": "none",
         "production_claim": "none",
