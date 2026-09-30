@@ -1,0 +1,101 @@
+{
+  "schema": "ds02.f7.repair-evidence.v1",
+  "evidence_boundary": "bounded CPU GenCase debugging only; no Q-I, Q-N or production claim",
+  "repair_budget": {
+    "root_cause_classes": 2,
+    "class_1": "native draw-control resolution",
+    "class_2": "native fluid seed and coarse pump fill",
+    "fallback": "final recipes retain finite positive fluid and are ready for later solver qualification"
+  },
+  "class_1_native_draw_control_resolution": {
+    "observed_attempts": [
+      {
+        "attempt": "F7_PUMP_COARSE_V080_F080_O00_GENCASE_01",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_COARSE_V080_F080_O00/F7_PUMP_COARSE_V080_F080_O00_GENCASE_01/execution-receipt.json",
+        "result": "completed with total_particles=4816 and fluid_particles=0; relative draw controls were not copied"
+      },
+      {
+        "attempt": "F7_PUMP_COARSE_V080_F080_O00_GENCASE_02",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_COARSE_V080_F080_O00/F7_PUMP_COARSE_V080_F080_O00_GENCASE_02/execution-receipt.json",
+        "result": "completed with total_particles=4816 and fluid_particles=0; absolute controls still did not satisfy the runner cwd lookup"
+      }
+    ],
+    "repair": "copy verified official VTK controls beside the generated definitions and reference native names from the shared runner cwd",
+    "verification": "final Pump receipts include copied pump_fixed.vtk and pump_moving.vtk hashes and no GenCase control-copy warning"
+  },
+  "class_2_native_fluid_seed_and_coarse_fill": {
+    "observed_attempts": [
+      {
+        "attempt": "F7_PUMP_COARSE_V080_F080_O00_GENCASE_03",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_COARSE_V080_F080_O00/F7_PUMP_COARSE_V080_F080_O00_GENCASE_03/execution-receipt.json",
+        "result": "controls copied but coarse 0.80 fill variant produced fluid_particles=0"
+      },
+      {
+        "attempt": "F7_OBSTACLE_COARSE_V080_F080_O00_GENCASE_04",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_COARSE_V080_F080_O00/F7_OBSTACLE_COARSE_V080_F080_O00_GENCASE_04/execution-receipt.json",
+        "result": "boundary particles were generated but the fill seed on the lower boundary produced fluid_particles=0"
+      }
+    ],
+    "repair": "measure the official coarse pump lower positive-fill threshold, keep native variants at 0.90..1.00, and place the obstacle fill seed at the interior volume midpoint",
+    "verification": "final 2x3 matrix has positive fluid counts and multiple z layers in gencase_evidence.json"
+  },
+  "final_matrix": {
+    "receipt_attempt": "GENCASE_03",
+    "receipts": [
+      {
+        "case_id": "F7_PUMP_COARSE_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_COARSE_V080_F090_O00/F7_PUMP_COARSE_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "6a2693a935735596f861280023294ce39b0f97d5b6ff870d6e4c03eaf79840ce",
+        "fluid_particles": 1632,
+        "total_particles": 6448,
+        "z_layers": 44,
+        "initial_mass_kg": 25.5
+      },
+      {
+        "case_id": "F7_PUMP_MEDIUM_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_MEDIUM_V080_F090_O00/F7_PUMP_MEDIUM_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "385e4b5ca173586c2a9e02ffc917860d23d54721c33473b3d97cc83411df7627",
+        "fluid_particles": 3417,
+        "total_particles": 11412,
+        "z_layers": 55,
+        "initial_mass_kg": 27.336000000000002
+      },
+      {
+        "case_id": "F7_PUMP_FINE_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_FINE_V080_F090_O00/F7_PUMP_FINE_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "60a9a88a7984be987974d2c795db318348746267a2d1b3c3e2bf1abfa45bd2cf",
+        "fluid_particles": 6625,
+        "total_particles": 19662,
+        "z_layers": 69,
+        "initial_mass_kg": 27.136
+      },
+      {
+        "case_id": "F7_OBSTACLE_COARSE_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_COARSE_V080_F090_O00/F7_OBSTACLE_COARSE_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "2ed3793fe71a5affb7e276e5072baa11b2d6efde9a41800af0a0b0ea84e3e62b",
+        "fluid_particles": 384,
+        "total_particles": 8491,
+        "z_layers": 24,
+        "initial_mass_kg": 6.0
+      },
+      {
+        "case_id": "F7_OBSTACLE_MEDIUM_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_MEDIUM_V080_F090_O00/F7_OBSTACLE_MEDIUM_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "9370788a7387b89a110b604f1abbc6316308976a39bf975b3a20ea99acb44251",
+        "fluid_particles": 1344,
+        "total_particles": 13488,
+        "z_layers": 30,
+        "initial_mass_kg": 10.752
+      },
+      {
+        "case_id": "F7_OBSTACLE_FINE_V080_F090_O00",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_FINE_V080_F090_O00/F7_OBSTACLE_FINE_V080_F090_O00_GENCASE_03/execution-receipt.json",
+        "receipt_sha256": "3974a390d21dbd8feecc82d0e3ffab2ad03e27caa8f0822380264f45cfa3bdc2",
+        "fluid_particles": 3042,
+        "total_particles": 21927,
+        "z_layers": 38,
+        "initial_mass_kg": 12.460032
+      }
+    ]
+  }
+}
