@@ -84,6 +84,10 @@ def main() -> int:
         "D06_LABEL_SCHEMA.json",
         "D06_TRACER_SUBSET_SPEC.json",
         "D07_EVALUATOR_CONTRACT.json",
+        "D08_DATA_PREVIEW.md",
+        "D08_DATA_PREVIEW.json",
+        "D08_RESOURCE_REPORT.md",
+        "D08_RESOURCE_REPORT.json",
     ]
     artifacts = [artifact(CAMPAIGN_ROOT / name) for name in tracked_names]
     artifacts.extend([
@@ -91,6 +95,7 @@ def main() -> int:
         artifact(LAB_ROOT / "scripts" / "ds_data01_d05_convert.py", kind="repository_script"),
         artifact(LAB_ROOT / "scripts" / "ds_data01_d06_labels.py", kind="repository_script"),
         artifact(LAB_ROOT / "scripts" / "ds_data01_d07_evaluator.py", kind="repository_script"),
+        artifact(LAB_ROOT / "scripts" / "ds_data01_d08_preview.py", kind="repository_script"),
     ])
     for name in ("prepare-summary.json", "run-summary.json", "conversion-summary.json"):
         artifacts.append(artifact(CAMPAIGN_ROOT / "d05" / name, kind="dataset_summary"))
@@ -130,6 +135,8 @@ def main() -> int:
         "d05_conversion_complete": d05_complete,
         "d06_material_tracer_required_for_core": d06.get("core_policy", {}).get("material_tracer_required", False),
         "d07_scientific_acceptance_not_assessed": d07.get("score_interface", {}).get("scientific_acceptance", {}).get("status") == "not_assessed",
+        "d08_preview_present": all((CAMPAIGN_ROOT / name).is_file() for name in ("D08_DATA_PREVIEW.md", "D08_DATA_PREVIEW.json")),
+        "d08_resource_report_present": all((CAMPAIGN_ROOT / name).is_file() for name in ("D08_RESOURCE_REPORT.md", "D08_RESOURCE_REPORT.json")),
         "learning_attempts": 0,
     }
     status = "complete_internal_handoff" if checks["d00_d07_compact_artifacts_present"] and checks["d05_conversion_complete"] else "pending_local_evidence_completion"
@@ -183,6 +190,7 @@ def main() -> int:
         "- D04 split assignments remain empty; no production train/validation/test release was materialized.",
         "- D06 material tracer is optional and cannot gate native data.",
         "- D07 remains model-free and reports scientific acceptance as not assessed without external ground truth.",
+        "- D08 includes a compact statistical preview and an observed resource report; large payloads remain local.",
         "",
         "## Reproducibility",
         "",
