@@ -18,6 +18,7 @@ never silently inferred from a filename or from non-zero z coordinates.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -170,20 +171,21 @@ def _semantic_value(handle: h5py.File, metadata: Mapping[str, Any], *names: str)
     return None, None
 
 
-def _read_log(path: str | os.PathLike[str] | None) -> tuple[str | None, str | None, str | None]:
+def _read_log(path: str | os.PathLike[str] | None) -> tuple[str | None, str | None, str | None, int | None, str | None]:
     if path is None:
-        return None, None, None
+        return None, None, None, None, None
     log_path = Path(path)
     try:
         with log_path.open("rb") as stream:
             raw = stream.read(MAX_LOG_BYTES + 1)
     except OSError as error:
-        return str(log_path), None, f"solver log could not be read: {error}"
+        return str(log_path), None, f"solver log could not be read: {error}", None, None
     truncated = len(raw) > MAX_LOG_BYTES
-    text = raw[:MAX_LOG_BYTES].decode("utf-8", errors="replace")
+    payload = raw[:MAX_LOG_BYTES]
+    text = payload.decode("utf-8", errors="replace")
     if truncated:
         text += "\n[truncated after 16 MiB]"
-    return str(log_path), text, None
+    return str(log_path), text, None, len(raw), hashlib.sha256(raw).hexdigest()
 
 
 def _first_number(pattern: re.Pattern[str], text: str) -> int | float | None:
@@ -199,11 +201,13 @@ def _first_number(pattern: re.Pattern[str], text: str) -> int | float | None:
 
 
 def _solver_log_evidence(solver_log: str | os.PathLike[str] | None) -> dict[str, Any]:
-    path, text, error = _read_log(solver_log)
+    path, text, error, byte_count, digest = _read_log(solver_log)
     result: dict[str, Any] = {
         "path": path,
         "available": text is not None,
         "parse_error": error,
+        "bytes_read": byte_count,
+        "sha256": digest,
         "dimension": {
             "status": "missing",
             "solver_dimension": None,
@@ -310,6 +314,10 @@ def estimate_hdf5_audit(path: str | os.PathLike[str], *, particle_chunk: int = D
         # identity axes and lifecycle booleans.  It intentionally excludes
         # Python interpreter/HDF5 cache overhead.
         lifecycle_bytes = 8 * (particle_count or 0) + 8 * (particle_count or 0)
+        identity_axis_bytes = 0
+        for name in ("particle_id", "particle_zone"):
+            if name in handle and isinstance(handle[name], h5py.Dataset):
+                identity_axis_bytes += _dataset_nbytes(handle[name])
         return {
             "path": str(input_path),
             "file_bytes": int(input_path.stat().st_size),
@@ -322,7 +330,8 @@ def estimate_hdf5_audit(path: str | os.PathLike[str], *, particle_chunk: int = D
             "dataset_bytes": dataset_bytes,
             "estimated_read_bytes": int(sum(dataset_bytes.get(name, 0) for name in
                                              REQUIRED_DATASETS + OPTIONAL_DATASETS)),
-            "estimated_peak_working_set_bytes": int(per_chunk + lifecycle_bytes),
+            "identity_axis_bytes": int(identity_axis_bytes),
+            "estimated_peak_working_set_bytes": int(per_chunk + lifecycle_bytes + identity_axis_bytes),
             "full_trajectory_materialized": False,
             "method": "dataset metadata plus one particle chunk per frame",
         }
