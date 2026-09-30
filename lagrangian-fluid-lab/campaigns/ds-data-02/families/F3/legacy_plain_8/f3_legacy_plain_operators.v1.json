@@ -1,0 +1,36 @@
+{
+  "schema": "ds02.f3.legacy-plain-operators.v1",
+  "family_id": "F3",
+  "scope": "historical plain single-axis fixed-tank acceleration only; transport labels are an additive data view and do not transfer the historical gate to dual-axis or baffle mechanisms",
+  "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+  "finite_surfaces": [
+    {
+      "event_id": "left_right_exchange",
+      "classification": "in_domain_transport_interface",
+      "surface": "x=0; y in [-0.09,0.09], z in [0,0.51]",
+      "signed_direction": "left_to_right positive, right_to_left negative",
+      "locator": "saved-frame linear chord with actual native time"
+    },
+    {
+      "event_id": "top_open_exit",
+      "classification": "legal_open_exit_diagnostic",
+      "surface": "z=0.51; x in [-0.45,0.45], y in [-0.09,0.09]",
+      "signed_direction": "outward positive",
+      "locator": "saved-frame linear chord with actual native time"
+    }
+  ],
+  "required_label_fields": [
+    "source_label",
+    "destination_time_series",
+    "first_passage_interval",
+    "forward_backward_mass_kg",
+    "cumulative_net_flux_kg",
+    "residence_time_s",
+    "final_category",
+    "failure_reason",
+    "unknown_mass_kg"
+  ],
+  "mass_policy": "native per-typed-identity mass in kg; no normalization",
+  "lifecycle_policy": "fixed initial typed identity axis; missing/revival/open birth remains explicitly classified",
+  "claim_boundary": "Q-I/data label evidence only; Q-N and production remain unassessed"
+}

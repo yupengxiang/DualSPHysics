@@ -1,0 +1,58 @@
+{
+  "schema": "ds02.f3.legacy-plain-full-transport-config.v1",
+  "family_id": "F3",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "left",
+      "label": "initial fluid particles with tank-frame x < 0",
+      "bounds": [[-0.45, 0.0], [-0.09, 0.09], [0.0, 0.51]]
+    },
+    {
+      "id": "right",
+      "label": "initial fluid particles with tank-frame x >= 0",
+      "bounds": [[0.0, 0.45], [-0.09, 0.09], [0.0, 0.51]]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "left",
+      "label": "tank-frame x < 0",
+      "bounds": [[-0.45, 0.0], [-0.09, 0.09], [0.0, 0.51]]
+    },
+    {
+      "id": "right",
+      "label": "tank-frame x >= 0",
+      "bounds": [[0.0, 0.45], [-0.09, 0.09], [0.0, 0.51]]
+    }
+  ],
+  "events": [
+    {
+      "id": "left_right_exchange",
+      "label": "finite x=0 in-domain exchange",
+      "axis": 0,
+      "value": 0.0,
+      "aperture_bounds": [[-0.09, 0.09], [0.0, 0.51]],
+      "signed_direction": "left_to_right positive, right_to_left negative",
+      "classification": "in_domain_transport_interface"
+    },
+    {
+      "id": "top_open_exit",
+      "label": "finite legal top open exit",
+      "axis": 2,
+      "value": 0.51,
+      "aperture_bounds": [[-0.45, 0.45], [-0.09, 0.09]],
+      "signed_direction": "outward positive",
+      "classification": "legal_open_exit_diagnostic"
+    }
+  ],
+  "semantics": {
+    "event_time": "saved-frame bracket plus linear chord estimate",
+    "mass": "native HDF5 mass in kg; no normalization",
+    "residence": "piecewise-linear chord occupancy in destination regions, seconds",
+    "unknown": "native state not classifiable; never inferred as physical exit",
+    "claim_boundary": "complete label artifact is Q-I/reference evidence only; Q-N and production remain unassessed"
+  }
+}
