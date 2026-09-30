@@ -159,7 +159,43 @@ def _compact_receipt(path: Path) -> dict[str, Any]:
     }
 
 
-def _next_parent_attempt(case_id: str, maximum: int = 4) -> tuple[str, list[dict[str, Any]]]:
+def _parent_input_hashes(parent: Mapping[str, Any]) -> dict[str, str]:
+    """Return the immutable inputs that make a GenCase receipt reusable.
+
+    A completed receipt is only reusable when it was produced from the
+    current Definition and its companion ledgers.  This matters after a
+    bounded repair: retaining the old receipt is useful evidence, but using
+    its generated particles for a new qualification would silently bypass
+    the repair.
+    """
+    paths = [
+        Path(parent["definition"]["path"]).resolve(),
+        Path(parent["control"]["path"]).resolve(),
+        Path(parent["native"]["path"]).resolve(),
+        Path(parent["normal"]["path"]).resolve(),
+        Path(parent["official_template"]["path"]).resolve(),
+        GENCASE_BINARY.resolve(),
+    ]
+    return {str(path): sha256_file(path) for path in paths if path.is_file()}
+
+
+def _receipt_hashes_match(compact: Mapping[str, Any], required_hashes: Mapping[str, str] | None) -> bool:
+    if not required_hashes:
+        return True
+    observed = compact.get("input_hashes_after_run")
+    if not isinstance(observed, Mapping):
+        observed = compact.get("input_hashes_at_launch")
+    if not isinstance(observed, Mapping):
+        return False
+    return all(observed.get(path) == digest for path, digest in required_hashes.items())
+
+
+def _next_parent_attempt(
+    case_id: str,
+    maximum: int = 4,
+    *,
+    required_hashes: Mapping[str, str] | None = None,
+) -> tuple[str, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     latest = 0
     for number in range(1, maximum + 1):
@@ -169,7 +205,11 @@ def _next_parent_attempt(case_id: str, maximum: int = 4) -> tuple[str, list[dict
             break
         latest = number
         attempts.append({"attempt_id": attempt_id, **compact})
-        if compact.get("status") == "completed" and int(compact.get("fluid_particles") or 0) > 0:
+        if (
+            compact.get("status") == "completed"
+            and int(compact.get("fluid_particles") or 0) > 0
+            and _receipt_hashes_match(compact, required_hashes)
+        ):
             return attempt_id, attempts
     number = min(latest + 1, maximum)
     return f"{case_id}_GENCASE_{number:02d}", attempts
@@ -217,11 +257,16 @@ def _parent_specs() -> dict[str, dict[str, Any]]:
             "body": {
                 "kind": "box",
                 "mkbound": 50,
-                "point_m": [2.10, 0.50, 0.48],
+                # Place the body on the resolved hydrostatic branch.  The
+                # former z=0.48 placement left only one particle spacing of
+                # fluid below the body for a 100 kg body whose equilibrium
+                # draft is about 0.21 m; the first solver run then drove the
+                # body out through the +Y simulation limit.
+                "point_m": [2.10, 0.50, 0.36],
                 "size_m": [0.80, 0.60, 0.40],
                 "mass_kg": 100.0,
-                "initial_pose": {"center_m": [2.50, 0.80, 0.68], "orientation_euler_deg": [0.0, 0.0, 0.0]},
-                "initial_offset_m": {"heave": 0.10, "roll": 0.0, "pitch": 0.0},
+                "initial_pose": {"center_m": [2.50, 0.80, 0.56], "orientation_euler_deg": [0.0, 0.0, 0.0]},
+                "initial_offset_m": {"heave": 0.04, "roll": 0.0, "pitch": 0.0},
             },
             "fluid_fill": {"seed_m": [1.0, 0.80, 0.30], "point_m": [0.06, 0.06, 0.06], "size_m": [5.38, 1.48, 0.52]},
             "control": {"mode": "initial_release", "release_time_s": 0.0, "wave_height_m": 0.0, "wave_period_s": None},
@@ -236,11 +281,14 @@ def _parent_specs() -> dict[str, dict[str, Any]]:
             "body": {
                 "kind": "box",
                 "mkbound": 50,
-                "point_m": [2.60, 0.50, 0.50],
+                # The wave body uses the same resolved still-water draft;
+                # its old z=0.50 position was only about 0.07 m immersed
+                # against an equilibrium draft near 0.20 m.
+                "point_m": [2.60, 0.50, 0.36],
                 "size_m": [0.80, 0.60, 0.40],
                 "mass_kg": 95.0,
-                "initial_pose": {"center_m": [3.00, 0.80, 0.70], "orientation_euler_deg": [0.0, 0.0, 0.0]},
-                "initial_offset_m": {"heave": 0.15, "roll": 0.0, "pitch": 0.0},
+                "initial_pose": {"center_m": [3.00, 0.80, 0.56], "orientation_euler_deg": [0.0, 0.0, 0.0]},
+                "initial_offset_m": {"heave": 0.0, "roll": 0.0, "pitch": 0.0},
             },
             "fluid_fill": {"seed_m": [1.0, 0.80, 0.28], "point_m": [0.12, 0.06, 0.06], "size_m": [5.78, 1.48, 0.49]},
             "paddle": {"point_m": [0.0, 0.0, 0.0], "size_m": [0.10, 1.60, 1.20], "mkbound": 10},
@@ -255,7 +303,7 @@ def _write_control(path: Path, spec: Mapping[str, Any]) -> dict[str, Any]:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
         handle.write("# DS-DATA-02 F6 control ledger; first column is physical time in seconds\n")
-        writer = csv.writer(handle)
+        writer = csv.writer(handle, lineterminator="\n")
         writer.writerow(["time_s", "mode", "release_time_s", "heave_offset_m", "wave_height_m", "wave_period_s", "ramp_periods"])
         for index in range(PARENT_CONTROL_ROWS):
             time_s = index * PARENT_CONTROL_DT_S
@@ -331,9 +379,20 @@ def _definition_xml(spec: Mapping[str, Any]) -> str:
     wall_fill = "bottom|left|right|front|back"
     paddle = spec.get("paddle")
     paddle_block = ""
+    motion_block = ""
     if paddle:
         pp, ps = paddle["point_m"], paddle["size_m"]
         paddle_block = f'''\n                    <setdrawmode mode="full" />\n                    <setmkbound mk="{int(paddle["mkbound"])}" />\n                    <drawbox cmt="Wave piston">\n                        <boxfill>solid</boxfill>\n                        <point x="{_fmt(pp[0])}" y="{_fmt(pp[1])}" z="{_fmt(pp[2])}" />\n                        <size x="{_fmt(ps[0])}" y="{_fmt(ps[1])}" z="{_fmt(ps[2])}" />\n                    </drawbox>'''
+        # The wavepaddle marker must be bound to an objreal motion.  Without
+        # this official binding GenCase emits mkbound=10 as fixed particles,
+        # and JWaveGen aborts with "No moving particles associated...".
+        motion_block = '''
+        <motion>
+            <objreal ref="10">
+                <begin mov="1" start="0" />
+                <mvnull id="1" />
+            </objreal>
+        </motion>'''
     wave_special = ""
     if paddle:
         control = spec["control"]
@@ -398,6 +457,7 @@ def _definition_xml(spec: Mapping[str, Any]) -> str:
                 <rotationDOF x="1" y="1" z="1" />
             </floating>
         </floatings>
+{motion_block}
     </casedef>
     <execution>{wave_special}
         <parameters>
@@ -464,6 +524,7 @@ def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
             "definition": definition, "control": control, "native": native, "normal": normal,
             "official_template": template, "dp_m": spec["dp_m"], "water_level_m": spec["water_level_m"],
             "tank": spec["tank"], "body": spec["body"], "fluid_fill": spec["fluid_fill"],
+            "paddle": spec.get("paddle"), "control_spec": spec["control"],
             "coordinate_frame_id": MECHANISMS[mechanism]["coordinate_frame_id"],
             "solver_dimension_required": 3, "no_chrono": True,
         })
@@ -573,8 +634,28 @@ def _observation_plan() -> dict[str, Any]:
         "secondary_observables": ["particle_type3_fluid_mass", "particle_type2_floating_mass", "fluid_source_destination", "first_passage", "residence_time", "wall_clearance", "contact_event_flag"],
         "spatial_matrix": {mechanism: RESOLUTION_LADDERS[mechanism] for mechanism in MECHANISMS},
         "two_by_three_reference_matrix": {"backgrounds": list(MECHANISMS), "resolutions": ["coarse", "medium", "fine"], "status": "planned_pending_solver"},
-        "independent_integrator_study": {"background": "simple_free_response", "dp_m": 0.060, "variants": [{"DtFixed": 0.0, "label": "native_adaptive"}, {"DtFixed": 0.5e-3, "label": "fixed_half_millisecond"}], "same_geometry_control_window": True, "status": "planned_pending_solver"},
-        "integration_step_study": {"status": "planned_pending_solver", "cases": [{"background": "simple_free_response", "resolution_id": "medium", "variants": ["native_adaptive", "fixed_half_millisecond"], "window_s": list(PARENT_WINDOW_S)}, {"background": "wave_no_contact", "resolution_id": "medium", "variants": ["native_adaptive", "fixed_half_millisecond"], "window_s": list(PARENT_WINDOW_S)}], "rules": ["record actual dt_min, dt_max, median dt and total native steps", "hold geometry/control/output cadence fixed", "downsampling is not an integration-step study", "Q-N remains pending until both full state and step study complete"]},
+        "independent_integrator_study": {
+            "background": "simple_free_response", "dp_m": 0.060,
+            "variants": [
+                {"DtFixed": 0.0, "label": "native_adaptive_baseline"},
+                {"DtFixed": "0.5*measured_stable_baseline_dt_min_s", "label": "fixed_half_measured_baseline_min"},
+            ],
+            "baseline_measurement": {
+                "source": "same complete-window native parent RunPARTs.csv/Run.out",
+                "stable_baseline_definition": "exclude startup and any failed/out-of-domain segment; use the minimum finite positive native integration dt in the stable segment",
+                "materialization_rule": "do not dispatch the fixed variant until the numeric baseline_stable_dt_min_s is recorded; set DtFixed <= 0.5*baseline_stable_dt_min_s",
+            },
+            "verification": ["compare actual RunPARTs dt_min, dt_max, median_dt and native_step_count for both variants", "fixed variant must demonstrate a smaller actual dt distribution; native step count is reported and checked for the fixed time window", "same geometry, control, complete event window and save cadence"],
+            "same_geometry_control_window": True, "status": "planned_pending_solver_and_baseline_measurement",
+        },
+        "integration_step_study": {
+            "status": "planned_pending_solver_and_baseline_measurement",
+            "cases": [
+                {"background": "simple_free_response", "resolution_id": "medium", "variants": ["native_adaptive_baseline", "fixed_half_measured_baseline_min"], "window_s": list(PARENT_WINDOW_S)},
+                {"background": "wave_no_contact", "resolution_id": "medium", "variants": ["native_adaptive_baseline", "fixed_half_measured_baseline_min"], "window_s": list(PARENT_WINDOW_S)},
+            ],
+            "rules": ["measure a stable native baseline from the complete parent before materializing fixed DtFixed", "fixed DtFixed must be numeric and <= 0.5*the measured stable baseline minimum dt", "record actual RunPARTs dt_min, dt_max, median dt and total native steps for both runs", "hold geometry/control/output cadence fixed", "downsampling is not an integration-step study", "Q-N remains pending until both full state and step study complete"],
+        },
         "independent_save_study": {"background": "simple_free_response", "integration": "same native adaptive integrator", "variants_s": [0.025, 0.05, 0.10], "status": "planned_pending_solver", "downsampling_is_not_integrator_evidence": True},
         "sampling_cadence_study": {"status": "planned_pending_solver", "background": "simple_free_response", "integration": "same native adaptive integrator", "output_intervals_s": [0.025, 0.05, 0.10], "rules": ["same complete event window", "derived downsampling inherits parent split", "do not claim cadence comparison as timestep comparison"]},
         "sampling": {"native_full_state": {"position_velocity_density_pressure": PARENT_OUTPUT_DT_S, "floating_info": 0.01, "forces": 0.01}, "event_detection": "linear interpolation between native frames; preserve censored and unknown categories"},
@@ -681,6 +762,53 @@ def _reference_evidence(history: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _repair_evidence() -> dict[str, Any]:
+    """Record the two failed qualification attempts and their bounded fixes."""
+    simple_root = RAW_OUTPUT_ROOT.parent.parent / PARENT_SIMPLE_ID / f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_01"
+    wave_root = RAW_OUTPUT_ROOT.parent.parent / PARENT_WAVE_ID / f"{PARENT_WAVE_ID}_SOLVER_QUAL_01"
+
+    def evidence(path: Path, role: str) -> dict[str, Any]:
+        return {"path": str(path), "role": role, "exists": path.is_file(), "sha256": sha256_file(path) if path.is_file() else None}
+
+    records: list[dict[str, Any]] = [
+        {
+            "case_id": PARENT_SIMPLE_ID,
+            "failed_attempt_id": f"{PARENT_SIMPLE_ID}_SOLVER_QUAL_01",
+            "receipt": evidence(simple_root / "execution-receipt.json", "shared GPU failure receipt"),
+            "root_cause_id": "F6_SIMPLE_FREE_RESPONSE_INITIAL_DRAFT_AND_LATERAL_BOUNDARY_EXIT",
+            "observed_failure": "JSph::AbortBoundOut reported six floating boundary particles beyond the +Y domain limit after body motion; Error_BoundaryOut.vtk and Run.out are retained.",
+            "representative_evidence": [
+                evidence(simple_root / "Run.out", "native solver log"),
+                evidence(simple_root / "solver_output" / "Error_BoundaryOut.vtk", "native boundary-exclusion geometry"),
+            ],
+            "bounded_repair_number": 1,
+            "repair": "Move the generated box to z=0.36 with center z=0.56 so its 0.22 m initial draft is resolved against the 0.208 m hydrostatic draft; add a draft-to-equilibrium audit. This preserves the finite 3D free-body mechanism and does not widen RhopOut or suppress boundary aborts.",
+        },
+        {
+            "case_id": PARENT_WAVE_ID,
+            "failed_attempt_id": f"{PARENT_WAVE_ID}_SOLVER_QUAL_01",
+            "receipt": evidence(wave_root / "execution-receipt.json", "shared GPU failure receipt"),
+            "root_cause_id": "F6_WAVE_PADDLE_FIXED_MARKER_NO_MOTION_BINDING",
+            "observed_failure": "JWaveGen::InitPaddle reported no moving particles associated with mkbound=10; the prior generated XML contained a fixed mkbound=10 block and no casedef motion binding.",
+            "representative_evidence": [evidence(wave_root / "Run.out", "native solver log")],
+            "official_syntax_reference": evidence(OFFICIAL_ROOT / "examples/main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml", "official successful motion binding"),
+            "bounded_repair_number": 1,
+            "repair": "Bind mkbound=10 to casedef motion objreal ref=10 with begin mov=1 and mvnull id=1, then require a positive generated moving-particle count before qualification. The piston wave remains regular, finite, 3D, and no-contact.",
+        },
+    ]
+    return {
+        "schema": "ds-data-02.f6.repair_evidence.v1",
+        "family_id": "F6",
+        "old_qualification_results_preserved": True,
+        "reused_count": 0,
+        "solver_launched_by_f6": False,
+        "repair_policy": {"maximum_root_cause_repairs_per_parent": 2, "fallback": "official native 3D syntax only; no RhopOut widening or boundary-abort suppression"},
+        "records": records,
+        "new_parent_attempts": {"simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02", "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02"},
+        "qualification_status": "pending_new_parent_gencase_audit",
+    }
+
+
 def _split_plan(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     return {
         "schema": "ds-data-02.f6.split_plan.v1", "family_id": "F6", "status": "candidate_development_test_split_pending_quality_gates",
@@ -707,14 +835,22 @@ def _gencase_request(parent: Mapping[str, Any], attempt_id: str) -> dict[str, An
         "cwd": str(definition.parent), "max_wall_seconds": 300, "cpu_threads": 4, "estimated_storage_bytes": 256 * 1024 * 1024,
         "input_files": [str(path) for path in input_files], "worktree_root": str(REPO_ROOT.resolve()),
         "purpose": "bounded F6 parent GenCase only; no solver/GPU; verify positive fluid, actual3D, type2/type3 ledgers, transverse layers, finite walls, mass/inertia and controls",
-        "expected": {"solver_dimension": 3, "minimum_transverse_layers": MIN_TRANSVERSE_LAYERS, "control_window_s": list(PARENT_WINDOW_S), "fluid_type": 3, "floating_type": 2, "no_chrono": True},
+        "expected": {
+            "solver_dimension": 3, "minimum_transverse_layers": MIN_TRANSVERSE_LAYERS,
+            "control_window_s": list(PARENT_WINDOW_S), "fluid_type": 3, "floating_type": 2,
+            "no_chrono": True, "hydrostatic_draft_ratio_bounds": [0.75, 1.25],
+            "paddle_mkbound": int(parent["paddle"]["mkbound"]) if parent.get("paddle") else None,
+            "minimum_moving_paddle_particles": 1 if parent.get("paddle") else 0,
+        },
     }
 
 
 def _execution_queue(output_root: Path, manifest: Mapping[str, Any]) -> dict[str, Any]:
     requests: list[dict[str, Any]] = []
     for parent in manifest.get("parents", []):
-        attempt_id, _ = _next_parent_attempt(str(parent["case_id"]))
+        attempt_id, _ = _next_parent_attempt(
+            str(parent["case_id"]), required_hashes=_parent_input_hashes(parent)
+        )
         request = _gencase_request(parent, attempt_id)
         request["request_file"] = f"execution_requests/{parent['mechanism_id']}_gencase.json"
         write_json(output_root / request["request_file"], request)
@@ -776,6 +912,14 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
             raise ValueError("generated XML lacks fluid or floating block")
         fluid_begin, fluid_count = int(fluid.get("begin", "0")), int(fluid.get("count", "0"))
         float_begin, float_count = int(floating.get("begin", "0")), int(floating.get("count", "0"))
+        moving_nodes = [node for node in particles if node.tag == "moving"]
+        moving_count = sum(int(node.get("count", "0")) for node in moving_nodes)
+        paddle_mkbound = int((parent.get("paddle") or {}).get("mkbound", 10)) if parent.get("paddle") else None
+        paddle_moving_count = sum(
+            int(node.get("count", "0"))
+            for node in moving_nodes
+            if paddle_mkbound is not None and node.get("mkbound") == str(paddle_mkbound)
+        )
         boundary_count = sum(int(node.get("count", "0")) for node in particles if node.tag in {"fixed", "moving"})
         points = _vtk_points(generated_vtk)
         fluid_points = points[fluid_begin:fluid_begin + fluid_count]
@@ -801,9 +945,12 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
         body_top = body_bounds[2][1] if body_bounds else None
         water_level = float(parent["water_level_m"])
         draft = max(0.0, min(water_level, body_top) - body_bottom) if body_bottom is not None and body_top is not None else 0.0
+        expected_draft = massbody / (density * float(parent["body"]["size_m"][0]) * float(parent["body"]["size_m"][1])) if density > 0 else 0.0
+        draft_ratio = draft / expected_draft if expected_draft > 0 else math.nan
         text = generated_xml.read_text(encoding="utf-8", errors="replace").lower()
         definition_text = Path(parent["definition"]["path"]).read_text(encoding="utf-8", errors="replace").lower()
         rigid_algorithm = next((node.get("value") for node in root.findall("./execution/parameters/parameter") if node.get("key") == "RigidAlgorithm"), None)
+        motion_binding = root.find("./casedef/motion/objreal[@ref='10']") is not None or "<objreal ref=\"10\"" in definition_text
         input_after = receipt.get("input_hashes_after_run") if isinstance(receipt.get("input_hashes_after_run"), Mapping) else {}
         declared_paths = [parent["definition"]["path"], parent["control"]["path"], parent["native"]["path"], parent["normal"]["path"], parent["official_template"]["path"], str(GENCASE_BINARY.resolve())]
         hash_binding = all(input_after.get(str(Path(path).resolve())) == sha256_file(Path(path)) for path in declared_paths)
@@ -824,11 +971,14 @@ def _audit_parent(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, An
             "rigid_mass_positive": massbody > 0,
             "rigid_inertia_positive_defined": len(inertia) == 3 and all(inertia[i][i] > 0 for i in range(3)) and all(math.isfinite(v) for row in inertia for v in row),
             "draft_finite_and_bounded": math.isfinite(draft) and draft >= 0 and body_bounds is not None,
+            "hydrostatic_draft_consistent": math.isfinite(draft_ratio) and 0.75 <= draft_ratio <= 1.25,
+            "wave_paddle_moving_particles": (paddle_moving_count > 0) if paddle_mkbound is not None else True,
+            "wave_paddle_motion_binding": motion_binding if paddle_mkbound is not None else True,
             "no_chrono_or_contact_solver": "chrono" not in definition_text and "chrono" not in text and rigid_algorithm == "1",
             "input_hash_binding": hash_binding,
             "native_normal_outputs_present": generated_xml.is_file() and prefix.with_suffix(".bi4").is_file() and generated_vtk.is_file() and generated_normal.is_file(),
         }
-        result["generated"] = {"xml_path": str(generated_xml), "xml_sha256": sha256_file(generated_xml), "bi4_path": str(prefix.with_suffix(".bi4")), "vtk_path": str(generated_vtk), "normal_geometry_path": str(generated_normal), "total_particles": int(compact.get("total_particles") or 0), "fluid_particles_receipt": int(compact.get("fluid_particles") or 0), "fluid_particles_xml": fluid_count, "floating_particles_xml": float_count, "fluid_type_code": 3, "floating_type_code": 2, "solver_dimension_from_gencase": compact.get("solver_dimension_from_gencase"), "data2d": data2d, "dp_m": dp, "fluid_mass_per_particle_kg": massfluid, "initial_fluid_mass_kg": fluid_mass, "floating_mass_kg": massbody, "floating_center_m": center, "floating_inertia_kg_m2": inertia, "body_volume_m3": body_volume, "floating_density_ratio": massbody / (body_volume * density) if body_volume > 0 and density > 0 else None, "body_bounds_m": body_bounds, "initial_draft_m": draft, "transverse_layer_count": len(y_layers), "transverse_layer_coordinates_m": y_layers, "fluid_position_bounds_m": [[min(p[a] for p in fluid_points), max(p[a] for p in fluid_points)] for a in range(3)] if fluid_points else None, "type_mass_ledger": {"type_3_fluid": {"count": fluid_count, "mass_kg": fluid_mass}, "type_2_floating": {"count": float_count, "mass_kg": massbody, "inertia_kg_m2": inertia}}, "rigid_state_definition": {"pose": True, "orientation": True, "linear_velocity": True, "angular_velocity": True, "mass": True, "inertia": bool(inertia), "force": "FloatingInfo/ComputeForces postprocessor required", "torque": "FloatingInfo/ComputeForces postprocessor required", "contact_event_flag": True}}
+        result["generated"] = {"xml_path": str(generated_xml), "xml_sha256": sha256_file(generated_xml), "bi4_path": str(prefix.with_suffix(".bi4")), "vtk_path": str(generated_vtk), "normal_geometry_path": str(generated_normal), "total_particles": int(compact.get("total_particles") or 0), "fluid_particles_receipt": int(compact.get("fluid_particles") or 0), "fluid_particles_xml": fluid_count, "floating_particles_xml": float_count, "moving_particles_xml": moving_count, "paddle_moving_particles_xml": paddle_moving_count, "paddle_mkbound": paddle_mkbound, "paddle_motion_binding": motion_binding, "solver_dimension_from_gencase": compact.get("solver_dimension_from_gencase"), "data2d": data2d, "dp_m": dp, "fluid_mass_per_particle_kg": massfluid, "initial_fluid_mass_kg": fluid_mass, "floating_mass_kg": massbody, "floating_center_m": center, "floating_inertia_kg_m2": inertia, "body_volume_m3": body_volume, "floating_density_ratio": massbody / (body_volume * density) if body_volume > 0 and density > 0 else None, "body_bounds_m": body_bounds, "initial_draft_m": draft, "expected_hydrostatic_draft_m": expected_draft, "draft_to_expected_ratio": draft_ratio, "transverse_layer_count": len(y_layers), "transverse_layer_coordinates_m": y_layers, "fluid_position_bounds_m": [[min(p[a] for p in fluid_points), max(p[a] for p in fluid_points)] for a in range(3)] if fluid_points else None, "type_mass_ledger": {"type_3_fluid": {"count": fluid_count, "mass_kg": fluid_mass}, "type_2_floating": {"count": float_count, "mass_kg": massbody, "inertia_kg_m2": inertia}}, "rigid_state_definition": {"pose": True, "orientation": True, "linear_velocity": True, "angular_velocity": True, "mass": True, "inertia": bool(inertia), "force": "FloatingInfo/ComputeForces postprocessor required", "torque": "FloatingInfo/ComputeForces postprocessor required", "contact_event_flag": True}}
         result["checks"] = checks
         result["control"] = control
         result["wall"] = wall
@@ -845,6 +995,20 @@ def _git_head() -> str:
         return subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True, check=True).stdout.strip()
     except (OSError, subprocess.CalledProcessError):
         return "unknown"
+
+
+def _next_qualification_attempt(case_id: str, maximum: int = 99) -> str:
+    """Allocate a qualification attempt without overwriting a failed run."""
+    case_root = RAW_OUTPUT_ROOT.parent.parent / case_id
+    numbers: list[int] = []
+    pattern = re.compile(rf"^{re.escape(case_id)}_SOLVER_QUAL_(\d{{2}})$")
+    if case_root.is_dir():
+        for receipt_path in case_root.glob(f"{case_id}_SOLVER_QUAL_*/execution-receipt.json"):
+            match = pattern.match(receipt_path.parent.name)
+            if match:
+                numbers.append(int(match.group(1)))
+    next_number = min(max(numbers, default=0) + 1, maximum)
+    return f"{case_id}_SOLVER_QUAL_{next_number:02d}"
 
 
 def _qualification_request(output_root: Path, parent: Mapping[str, Any], audit: Mapping[str, Any], history: Mapping[str, Any]) -> dict[str, Any]:
@@ -869,7 +1033,7 @@ def _qualification_request(output_root: Path, parent: Mapping[str, Any], audit: 
         Path(parent["definition"]["path"]).resolve(), Path(parent["control"]["path"]).resolve(), Path(parent["native"]["path"]).resolve(), Path(parent["normal"]["path"]).resolve(), Path(parent["official_template"]["path"]).resolve(), GENCASE_BINARY.resolve(), FLOATING_INFO_BINARY.resolve(), COMPUTE_FORCES_BINARY.resolve(), receipt_path, *generated_files,
     ]
     return {
-        "schema": "ds-data-02.runner.request.v1", "family_id": "F6", "case_id": parent["case_id"], "attempt_id": f"{parent['case_id']}_SOLVER_QUAL_01", "kind": "qualification",
+        "schema": "ds-data-02.runner.request.v1", "family_id": "F6", "case_id": parent["case_id"], "attempt_id": _next_qualification_attempt(str(parent["case_id"])), "kind": "qualification",
         "command": [str(SOLVER_BINARY.resolve()), str(prefix), "{attempt_root}/solver_output", f"-tmax:{_fmt(PARENT_WINDOW_S[1])}", f"-tout:{_fmt(PARENT_OUTPUT_DT_S)}"], "cwd": str(SOLVER_BINARY.parent.resolve()), "max_wall_seconds": max(600, math.ceil(estimated_gpu_seconds * 2.0)), "cpu_threads": 4, "estimated_storage_bytes": estimated_storage, "estimated_peak_gpu_mib": 8192,
         "complete_event_window_s": list(PARENT_WINDOW_S), "output_interval_s": PARENT_OUTPUT_DT_S, "solver_dimension_required": 3, "mechanism_id": parent["mechanism_id"], "coordinate_frame_id": parent["coordinate_frame_id"], "resolution": "medium_parent",
         "gencase_receipt": str(receipt_path), "gencase_receipt_sha256": sha256_file(receipt_path), "gencase_runner_sha256": receipt.get("runner_sha256"), "parent_gencase_git_at_launch": receipt.get("git_at_launch"), "gencase_actual_particles": {"total": actual_total, "fluid": actual_fluid, "floating": int(audit["generated"]["floating_particles_xml"])},
@@ -931,7 +1095,9 @@ def audit_parents(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
     manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
     audits: list[dict[str, Any]] = []
     for parent in manifest.get("parents", []):
-        selected, attempts = _next_parent_attempt(str(parent["case_id"]))
+        selected, attempts = _next_parent_attempt(
+            str(parent["case_id"]), required_hashes=_parent_input_hashes(parent)
+        )
         row = _audit_parent(parent, _runner_receipt_path(str(parent["case_id"]), selected)); row["selected_attempt"] = selected; row["attempts"] = attempts; row["repair_history"] = [{"attempt_id": x["attempt_id"], "status": x.get("status"), "fluid_particles": x.get("fluid_particles"), "diagnosis": "structural GenCase failure; inspect receipt before one bounded definition repair"} for x in attempts if x.get("status") != "completed" or int(x.get("fluid_particles") or 0) <= 0]; row["repair_count"] = len(row["repair_history"]); audits.append(row)
     result = {"schema": "ds-data-02.f6.parent_gencase_audit.v1", "family_id": "F6", "status": "pass" if audits and all(row.get("status") == "pass" for row in audits) else "pending_or_fail", "solver_launched_by_f6": False, "parents": audits, "repair_policy": {"maximum_root_cause_repairs_per_parent": 2, "fallback": "official native simple floating input; no Chrono/contact debugging"}}
     audit_path = output_root / "parent_inputs/gencase_audit.json"; write_json(audit_path, result)
@@ -947,9 +1113,22 @@ def audit_parents(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
 
 def generate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
     output_root.mkdir(parents=True, exist_ok=True)
+    # A regenerated Definition invalidates any prior parent audit and solver
+    # request in this checkout.  External raw receipts remain immutable and
+    # are deliberately left under RAW_OUTPUT_ROOT for evidence accounting.
+    stale_audit = output_root / "parent_inputs/gencase_audit.json"
+    if stale_audit.exists():
+        archive_dir = output_root / "parent_inputs/archive"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        stale_audit.replace(archive_dir / "gencase_audit_GENCASE_01_superseded.json")
+    request_archive = output_root / "qualification_requests/superseded"
+    for stale_request in (output_root / "qualification_requests").glob("*.json"):
+        request_archive.mkdir(parents=True, exist_ok=True)
+        stale_request.replace(request_archive / f"{stale_request.stem}_superseded.json")
     history = history_reuse_inventory(); write_json(output_root / "history_reuse_inventory.json", history)
     rows = _split_registry(); manifest = _write_parent_inputs(output_root)
     write_json(output_root / "family_card.json", _family_card(history)); write_json(output_root / "event_definitions.json", _event_definitions()); write_json(output_root / "observation_plan.json", _observation_plan()); write_json(output_root / "reference_evidence.json", _reference_evidence(history)); write_json(output_root / "qualified_recipes.json", _qualified_recipes()); write_json(output_root / "split_plan.json", _split_plan(rows)); write_json(output_root / "labels/label_schema.json", _label_schema())
+    write_json(output_root / "repair_evidence.json", _repair_evidence())
     queue = _execution_queue(output_root, manifest); write_json(output_root / "execution_queue.json", queue)
     (output_root / "case_registry.jsonl").write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
     manifests = output_root / "case_manifests"; manifests.mkdir(parents=True, exist_ok=True)
@@ -957,12 +1136,12 @@ def generate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
         write_json(manifests / f"{row['case_id']}.json", {"schema": "ds-data-02.f6.case_manifest.v1", "case": row, "event_definitions": "../event_definitions.json", "observation_plan": "../observation_plan.json", "label_schema": "../labels/label_schema.json", "portable_copy": {"status": "not_started", "destination_root": str(RAW_OUTPUT_ROOT), "requires_actual_native_solver_output": True}})
     (output_root / "preview").mkdir(parents=True, exist_ok=True); (output_root / "preview/README.md").write_text("# F6 preview\n\nNo real preview is claimed before shared solver output. Required preview frames are still-water, release/wave arrival, peak response, and final decay, with solver/postprocessor hashes.\n", encoding="utf-8")
     (output_root / "labels").mkdir(parents=True, exist_ok=True); (output_root / "labels/README.md").write_text("# F6 labels\n\nNative fluid type-3 and floating type-2 labels plus complete rigid-body state are pending shared solver output. Unknown and censored transport mass remain explicit.\n", encoding="utf-8")
-    (output_root / "FAMILY_HANDOFF.md").write_text("# F6 DS-DATA-02 checkpoint / F6 交接\n\n本 checkpoint 冻结两个真正三维、无 Chrono/contact 的 F6 parent Definition：简单自由响应与无接触规则波激励。每个 parent 有 control/native/normal 文件，GenCase 请求由 shared runtime 执行；F6 owner 不启动 solver/GPU。\n\n## Current state\n\n- 旧 DS-DATA-01 13.57M identity 浮箱轨迹已审计但 `reused_count=0`，仅用于成本锚点。\n- 两背景三分辨率、完整 0–12 s 事件窗、独立积分/保存采样计划、观测误差预算和 48 独立 nested 8/24/48 split 已冻结。\n- 最短执行链：通过 shared runtime 提交 `execution_requests/simple_free_response_gencase.json` 和 `execution_requests/wave_no_contact_gencase.json`；完成后运行 `ds_data02_f6.py audit-parents`；仅对通过的 parent 提交 qualification request。\n- Q-I、Q-N、production 严格 pending；不能用 Definition、canary、短预览或旧 training permission 代替实际 solver/native 证据。\n", encoding="utf-8")
+    (output_root / "FAMILY_HANDOFF.md").write_text("# F6 DS-DATA-02 checkpoint / F6 交接\n\n本 checkpoint 冻结两个真正三维、无 Chrono/contact 的 F6 parent Definition：简单自由响应与无接触规则波激励。每个 parent 有 control/native/normal 文件，GenCase 请求由 shared runtime 执行；F6 owner 不启动 solver/GPU。\n\n## Current state\n\n- 旧 DS-DATA-01 13.57M identity 浮箱轨迹已审计但 `reused_count=0`，仅用于成本锚点。\n- 两背景三分辨率、完整 0–12 s 事件窗、独立积分/保存采样计划、观测误差预算和 48 独立 nested 8/24/48 split 已冻结。\n- QUAL_01 失败证据已写入 `repair_evidence.json`：simple parent 的 floating boundary +Y 越界保留 Error_BoundaryOut.vtk；wave parent 的 mkbound=10 没有 moving block。修复各计为根因第 1 次，不扩大 RhopOut、不屏蔽 boundary abort。\n- 当前最短执行链是通过 shared runtime 提交 `execution_requests/simple_free_response_gencase.json` 与 `execution_requests/wave_no_contact_gencase.json`（均为 GENCASE_02）；完成后运行 `ds_data02_f6.py audit-parents`；仅对通过的 parent 生成新的 SOLVER_QUAL_02 请求。\n- 积分步长试验必须先从同一完整 parent 的 RunPARTs.csv/Run.out 测得稳定 baseline 最小 dt，再把固定 DtFixed 物化为不超过其一半；实际 dt 分布和 native step count 与保存帧对照分开核查。\n- Q-I、Q-N、production 严格 pending；不能用 Definition、canary、短预览或旧 training permission 代替实际 solver/native 证据。\n", encoding="utf-8")
     return {"status": "generated", "output": str(output_root), "history_reused_count": history["reused_count"], "registry_rows": len(rows), "cpu_request_files": queue["cpu_requests"]}
 
 
 def validate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
-    required = ["family_card.json", "history_reuse_inventory.json", "event_definitions.json", "observation_plan.json", "reference_evidence.json", "qualified_recipes.json", "split_plan.json", "case_registry.jsonl", "labels/label_schema.json", "execution_queue.json", "FAMILY_HANDOFF.md", "parent_inputs/parent_input_manifest.json"]
+    required = ["family_card.json", "history_reuse_inventory.json", "event_definitions.json", "observation_plan.json", "reference_evidence.json", "repair_evidence.json", "qualified_recipes.json", "split_plan.json", "case_registry.jsonl", "labels/label_schema.json", "execution_queue.json", "FAMILY_HANDOFF.md", "parent_inputs/parent_input_manifest.json"]
     missing = [item for item in required if not (output_root / item).is_file()]
     errors: list[str] = []; rows: list[dict[str, Any]] = []
     registry = output_root / "case_registry.jsonl"

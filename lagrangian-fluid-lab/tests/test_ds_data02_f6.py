@@ -55,6 +55,28 @@ def test_parent_definitions_are_native_three_d_no_contact_and_controls_are_full_
         assert parent["normal"]["sha256"] == F6.sha256_file(Path(parent["normal"]["path"]))
 
 
+def test_bounded_repairs_bind_wave_motion_and_select_new_gencase_attempt(tmp_path: Path) -> None:
+    output = tmp_path / "F6"
+    F6.generate_family(output)
+    manifest = F6.read_json(output / "parent_inputs/parent_input_manifest.json")
+    parents = {row["mechanism_id"]: row for row in manifest["parents"]}
+    simple_root = ET.parse(parents["simple_free_response"]["definition"]["path"]).getroot()
+    wave_root = ET.parse(parents["wave_no_contact"]["definition"]["path"]).getroot()
+    assert simple_root.find("./casedef/motion") is None
+    assert wave_root.find("./casedef/motion/objreal[@ref='10']") is not None
+    assert wave_root.find("./execution/special/wavepaddles/piston/mkbound[@value='10']") is not None
+    assert F6._parent_specs()["simple_free_response"]["body"]["point_m"][2] == 0.36
+    assert F6._parent_specs()["wave_no_contact"]["body"]["point_m"][2] == 0.36
+    queue = F6.read_json(output / "execution_queue.json")
+    assert {row["attempt_id"] for row in queue["cpu_requests"]} == {
+        "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02",
+        "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02",
+    }
+    repair = F6.read_json(output / "repair_evidence.json")
+    assert repair["reused_count"] == 0
+    assert {row["bounded_repair_number"] for row in repair["records"]} == {1}
+
+
 def test_qualification_request_is_explicitly_pending_and_hash_bound() -> None:
     output = F6.FAMILY_ROOT
     if not (output / "qualification_requests/simple_free_response.json").is_file():

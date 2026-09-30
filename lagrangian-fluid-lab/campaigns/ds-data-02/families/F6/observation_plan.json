@@ -28,18 +28,28 @@
   },
   "independent_integrator_study": {
     "background": "simple_free_response",
+    "baseline_measurement": {
+      "materialization_rule": "do not dispatch the fixed variant until the numeric baseline_stable_dt_min_s is recorded; set DtFixed <= 0.5*baseline_stable_dt_min_s",
+      "source": "same complete-window native parent RunPARTs.csv/Run.out",
+      "stable_baseline_definition": "exclude startup and any failed/out-of-domain segment; use the minimum finite positive native integration dt in the stable segment"
+    },
     "dp_m": 0.06,
     "same_geometry_control_window": true,
-    "status": "planned_pending_solver",
+    "status": "planned_pending_solver_and_baseline_measurement",
     "variants": [
       {
         "DtFixed": 0.0,
-        "label": "native_adaptive"
+        "label": "native_adaptive_baseline"
       },
       {
-        "DtFixed": 0.0005,
-        "label": "fixed_half_millisecond"
+        "DtFixed": "0.5*measured_stable_baseline_dt_min_s",
+        "label": "fixed_half_measured_baseline_min"
       }
+    ],
+    "verification": [
+      "compare actual RunPARTs dt_min, dt_max, median_dt and native_step_count for both variants",
+      "fixed variant must demonstrate a smaller actual dt distribution; native step count is reported and checked for the fixed time window",
+      "same geometry, control, complete event window and save cadence"
     ]
   },
   "independent_save_study": {
@@ -59,8 +69,8 @@
         "background": "simple_free_response",
         "resolution_id": "medium",
         "variants": [
-          "native_adaptive",
-          "fixed_half_millisecond"
+          "native_adaptive_baseline",
+          "fixed_half_measured_baseline_min"
         ],
         "window_s": [
           0.0,
@@ -71,8 +81,8 @@
         "background": "wave_no_contact",
         "resolution_id": "medium",
         "variants": [
-          "native_adaptive",
-          "fixed_half_millisecond"
+          "native_adaptive_baseline",
+          "fixed_half_measured_baseline_min"
         ],
         "window_s": [
           0.0,
@@ -81,12 +91,14 @@
       }
     ],
     "rules": [
-      "record actual dt_min, dt_max, median dt and total native steps",
+      "measure a stable native baseline from the complete parent before materializing fixed DtFixed",
+      "fixed DtFixed must be numeric and <= 0.5*the measured stable baseline minimum dt",
+      "record actual RunPARTs dt_min, dt_max, median dt and total native steps for both runs",
       "hold geometry/control/output cadence fixed",
       "downsampling is not an integration-step study",
       "Q-N remains pending until both full state and step study complete"
     ],
-    "status": "planned_pending_solver"
+    "status": "planned_pending_solver_and_baseline_measurement"
   },
   "major_observables": [
     {
