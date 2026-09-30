@@ -1,0 +1,57 @@
+{
+  "schema": "ds-data-02.f2.commensurate-postsolver-plan.v1",
+  "family_id": "F2",
+  "scope_id": "F2_SCOPE_COMMENSURATE_CELLCENTER_V4",
+  "status": "deferred_until_six_solver_receipts_are_terminal",
+  "qualification_claim": "none",
+  "production_claim": "none",
+  "solver_launch_authority": "primary_process_via_shared_runner_only",
+  "planner_launches_solver": false,
+  "input_policy": "each stage is materialized only after all six actual upstream receipts and required artifacts exist; placeholder input paths are rejected",
+  "resource_plan": {
+    "per_request": {
+      "cpu_threads": 4,
+      "max_wall_seconds": 600,
+      "estimated_storage_bytes": 8589934592
+    },
+    "conversion_concurrency": 2,
+    "gpu_requests": 0,
+    "stages": [
+      {
+        "stage": "conversion",
+        "cpu_task_kind": "conversion",
+        "output": "trajectory.h5 + conversion-report.json",
+        "requires": "six completed solver receipts and native solver logs/BI4"
+      },
+      {
+        "stage": "labels",
+        "cpu_task_kind": "labels",
+        "output": "f2-native-labels.h5 + f2-native-observations.json",
+        "requires": "six completed conversion receipts and full-state HDF5"
+      },
+      {
+        "stage": "qi",
+        "cpu_task_kind": "audit",
+        "output": "full-qi-audit.json + PartVTKOut evidence",
+        "requires": "six completed label and conversion receipts plus solver logs, gencase prefix, XML/BI4/motion"
+      },
+      {
+        "stage": "preview",
+        "cpu_task_kind": "preview",
+        "output": "preview-manifest.json with actual frame references",
+        "requires": "six completed Q-I receipts, labels, and full-state HDF5"
+      }
+    ]
+  },
+  "materialize_command": "lagrangian-fluid-lab/.venv/bin/python campaigns/ds-data-02/families/F2/f2_commensurate_postsolver.py materialize --stage STAGE --solver-receipt RECEIPT ... --output-dir OUTPUT_DIR",
+  "next_stage_commands": {
+    "conversion": "provide all six --solver-receipt arguments",
+    "labels": "use --prior-manifest postsolver-conversion-manifest.json",
+    "qi": "use --prior-manifest postsolver-labels-manifest.json",
+    "preview": "use --prior-manifest postsolver-qi-manifest.json"
+  },
+  "mass_semantics_correction": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/mass_semantics_correction.json",
+    "sha256": "c972d664afd78d3aa4ff6aaa54374dbd5993b1d8603f6141c8a27a933d9362ec"
+  }
+}
