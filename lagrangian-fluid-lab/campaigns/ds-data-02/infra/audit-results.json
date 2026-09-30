@@ -1,0 +1,898 @@
+{
+  "schema": "ds-data-02.infra.audit-evidence.v1",
+  "generated_at_utc": "2026-09-30T07:57:57.693659+00:00",
+  "branch": "codex/ds-data-02-infra",
+  "implementation_commit_at_full_audit": "771e361227960ef53e3504fae445010bfe52b806",
+  "source_manifest": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json",
+  "source_hash_policy": {
+    "large_hdf5_sha256": "omitted",
+    "runner_input_hash": "not_requested_for_large_hdf5",
+    "reason": "The shared runner hashes every input file before and after a request. These source HDF5 files are consumed read-only by the auditor; hashing the F6 source would rescan about 3 GB without adding Q-I evidence."
+  },
+  "claim_boundary": {
+    "scope": "Q-I integrity audit only",
+    "q_n_status": "not_assessed",
+    "scientific_acceptance": "not_assessed",
+    "production_eligibility": "not_evaluated",
+    "no_solver_or_model_started_by_auditor": true,
+    "full_trajectory_materialized": false,
+    "large_hdf5_runner_hashes_omitted": true
+  },
+  "validation": {
+    "pytest_command": "lagrangian-fluid-lab/.venv/bin/python -m pytest -q lagrangian-fluid-lab/tests/test_ds_data02_integrity.py",
+    "pytest_passed": 8,
+    "py_compile_passed": true,
+    "request_validation": {
+      "validated_requests": 5,
+      "hashed_input_bytes_excluding_large_hdf5": true
+    }
+  },
+  "f6_metadata_only_estimate": {
+    "case_id": "F6_floating_box_dp030",
+    "attempt_id": "ds02-infra-f6-floating-box-estimate-v2",
+    "estimate_output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F6_floating_box_dp030/ds02-infra-f6-floating-box-estimate-v2/estimate.json",
+    "estimate_output_sha256": "59bdd27a9d0f336840479ebcf97368a281e88ac3224972ba92146951e5fb64a1",
+    "mode": "estimate_only",
+    "q_i_status": "not_run",
+    "q_n_status": "not_assessed",
+    "cost_estimate": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/normalized/B05_F6_floating_box_dp030.h5",
+      "file_bytes": 2951058164,
+      "frames": 9,
+      "particles": 13577000,
+      "particle_chunk": 65536,
+      "logical_dataset_bytes": 5023490072,
+      "dataset_storage_bytes": 2950301446,
+      "dataset_bytes": {
+        "density": 488772000,
+        "mass": 488772000,
+        "mk": 244386000,
+        "particle_id": 108616000,
+        "particle_zone": 27154000,
+        "position": 1466316000,
+        "pressure": 488772000,
+        "time": 72,
+        "type": 122193000,
+        "valid": 122193000,
+        "velocity": 1466316000
+      },
+      "estimated_read_bytes": 5023490072,
+      "identity_axis_bytes": 135770000,
+      "lifecycle_state_bytes": 448041000,
+      "identity_key_workspace_bytes": 325848000,
+      "estimated_peak_working_set_bytes": 912280440,
+      "full_trajectory_materialized": false,
+      "method": "dataset metadata plus one particle chunk per frame"
+    },
+    "resource_usage": {
+      "before": {
+        "self": {
+          "user_cpu_seconds": 0.116062,
+          "system_cpu_seconds": 0.021823,
+          "max_rss_kib": 44032,
+          "minor_page_faults": 5783,
+          "major_page_faults": 0,
+          "in_block": 0,
+          "out_block": 0,
+          "voluntary_context_switches": 3,
+          "involuntary_context_switches": 5
+        },
+        "children": {
+          "user_cpu_seconds": 0.001387,
+          "system_cpu_seconds": 0.0,
+          "max_rss_kib": 38912,
+          "minor_page_faults": 86,
+          "major_page_faults": 0,
+          "in_block": 0,
+          "out_block": 0,
+          "voluntary_context_switches": 1,
+          "involuntary_context_switches": 0
+        }
+      },
+      "after": {
+        "self": {
+          "user_cpu_seconds": 0.12416999999999999,
+          "system_cpu_seconds": 0.02384,
+          "max_rss_kib": 51200,
+          "minor_page_faults": 7421,
+          "major_page_faults": 0,
+          "in_block": 0,
+          "out_block": 0,
+          "voluntary_context_switches": 3,
+          "involuntary_context_switches": 5
+        },
+        "children": {
+          "user_cpu_seconds": 0.001387,
+          "system_cpu_seconds": 0.0,
+          "max_rss_kib": 38912,
+          "minor_page_faults": 86,
+          "major_page_faults": 0,
+          "in_block": 0,
+          "out_block": 0,
+          "voluntary_context_switches": 1,
+          "involuntary_context_switches": 0
+        }
+      }
+    },
+    "runner": {
+      "status": "completed",
+      "elapsed_seconds": 0.2732830881141126,
+      "cpu_core_seconds": 0.297311,
+      "output_bytes": 6786,
+      "request_sha256": "866e0e1394066a3eec99cae8e4e31b95c58609e97048adee500d4331c23db8b2",
+      "git_at_launch": {
+        "commit": "771e361227960ef53e3504fae445010bfe52b806",
+        "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "input_hashes_at_launch": {
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/solver.stdout.log": "e53eef4165178b58c3f6aeec4da1e63c7659e2b17b63af8924cd0f75136e9b44"
+      },
+      "input_hashes_after_run": {
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+        "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/solver.stdout.log": "e53eef4165178b58c3f6aeec4da1e63c7659e2b17b63af8924cd0f75136e9b44"
+      },
+      "numerical_reference_status": "not_assessed"
+    }
+  },
+  "audits": [
+    {
+      "case_id": "F3_coarse_baffled_exchange",
+      "attempt_id": "ds02-infra-f3-coarse-audit",
+      "source_hdf5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/data/r3-g2-f1-f3/R3_F3_baffled_exchange_massmatched_coarse.h5",
+        "file_size_bytes": 5986425,
+        "frames": 91,
+        "particles": 2300,
+        "metadata_only_manifest": true,
+        "sha256": null,
+        "sha256_status": "omitted_large_source_not_runner_hashed"
+      },
+      "audit_output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F3_coarse_baffled_exchange/ds02-infra-f3-coarse-audit/audit.json",
+      "audit_output_sha256": "e2243f3b74c58b7efbebccc538bca6b7d176813ae10ad95780be9de3f5681951",
+      "q_i_status": "Q-I-incomplete",
+      "q_n_status": "not_assessed",
+      "scientific_acceptance": "not_assessed",
+      "production_eligibility": "not_evaluated",
+      "structural_failures": [],
+      "missing_requirements": [
+        "boundary_or_lifecycle_semantics",
+        "closed_or_open_lifecycle_declaration",
+        "control",
+        "coordinate_frame",
+        "geometry",
+        "units:density",
+        "units:mass",
+        "units:position",
+        "units:pressure",
+        "units:time",
+        "units:velocity"
+      ],
+      "solver_log": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.out",
+        "bytes_read": 25572,
+        "sha256": "877f6e9116030760b9a2091d855e7824a68878d5b0a79e72859673498ba2b88b",
+        "dimension": {
+          "status": "pass",
+          "solver_dimension": 3,
+          "source": "solver_log_explicit_banner",
+          "evidence_lines": [
+            "**3D-Simulation parameters:"
+          ],
+          "coordinate_components": 3,
+          "inference_from_coordinate_values": false
+        },
+        "counts": {
+          "initial_total": 4580,
+          "initial_fluid_type3": 2300,
+          "initial_floating_type2": 0,
+          "excluded_particles": 0
+        }
+      },
+      "dimensions": {
+        "frames": 91,
+        "particles": 2300,
+        "coordinate_components": 3
+      },
+      "time": {
+        "status": "pass",
+        "finite": true,
+        "strictly_increasing": true,
+        "count": 91,
+        "start_s": 0.0,
+        "end_s": 0.900115
+      },
+      "valid": {
+        "dtype": "bool",
+        "binary": true,
+        "status": "pass"
+      },
+      "finite_active": {
+        "position": true,
+        "velocity": true,
+        "density": true,
+        "mass": true,
+        "pressure": true
+      },
+      "positive_active_mass": true,
+      "positive_active_density": true,
+      "lifecycle": {
+        "identity_axis": "(Zone,Idp)",
+        "initial_active_count": 2300,
+        "final_active_count": 2300,
+        "ever_seen_count": 2300,
+        "introduced_after_initial_count": 0,
+        "missing_at_any_later_frame_count": 0,
+        "revived_identity_count": 0,
+        "initial_missing_at_final_count": 0,
+        "initial_to_final_retention": 1.0,
+        "type_changed_identity_count": 0,
+        "per_frame_identity_changed_rows": 0,
+        "full_timeline_checked": true
+      },
+      "frame_counts": {
+        "active": {
+          "count": 91,
+          "first": 2300,
+          "last": 2300,
+          "min": 2300,
+          "max": 2300
+        },
+        "fluid_type3": {
+          "count": 91,
+          "first": 2300,
+          "last": 2300,
+          "min": 2300,
+          "max": 2300
+        },
+        "floating_type2": {
+          "count": 91,
+          "first": 0,
+          "last": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "fluid_mass_ledger": {
+        "type_code": 3,
+        "status": "pass",
+        "initial_count": 2300,
+        "initial_mass_kg": 98.61249849200249,
+        "final_initial_cohort_retained_count": 2300,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "solver_excluded_particles": 0,
+        "separate_from_type2": true
+      },
+      "floating_mass_ledger": {
+        "type_code": 2,
+        "status": "not_present",
+        "initial_count": 0,
+        "initial_mass_kg": 0.0,
+        "final_initial_cohort_retained_count": 0,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "excluded_from_fluid_ledger": true
+      },
+      "solver_log_consistency": {
+        "status": "pass",
+        "comparisons": [
+          {
+            "field": "initial_fluid_type3",
+            "log": 2300,
+            "hdf5": 2300,
+            "match": true
+          },
+          {
+            "field": "initial_floating_type2",
+            "log": 0,
+            "hdf5": 0,
+            "match": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "frames": 91,
+        "particles": 2300,
+        "particle_chunk": 65536,
+        "logical_dataset_bytes": 8395728,
+        "dataset_storage_bytes": 5910707,
+        "estimated_read_bytes": 8395728,
+        "estimated_peak_working_set_bytes": 151800,
+        "full_trajectory_materialized": false,
+        "method": "dataset metadata plus one particle chunk per frame"
+      },
+      "audit_parameters": {
+        "particle_chunk": 65536,
+        "full_trajectory_materialized": false
+      },
+      "resource_usage": {
+        "before": {
+          "self": {
+            "user_cpu_seconds": 0.12442399999999999,
+            "system_cpu_seconds": 0.014929999999999999,
+            "max_rss_kib": 44032,
+            "minor_page_faults": 5749,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 3
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.002515,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        },
+        "after": {
+          "self": {
+            "user_cpu_seconds": 0.43648699999999996,
+            "system_cpu_seconds": 0.01698,
+            "max_rss_kib": 49152,
+            "minor_page_faults": 6402,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 5
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.002515,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        }
+      },
+      "runner": {
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 0.5330193510744721,
+        "cpu_core_seconds": 0.603756,
+        "output_bytes": 24782,
+        "request_sha256": "027218dea261668c265edbf85840f66e0943caa98ab5ef874a29802cf4f4454a",
+        "git_at_launch": {
+          "commit": "063ef72b9daff004eab2f8400fae73871d2a7915",
+          "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "input_hashes_at_launch": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "4fd22596a076134f127277c943b696997b0c19db10792657be269199cc3949cb",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.out": "877f6e9116030760b9a2091d855e7824a68878d5b0a79e72859673498ba2b88b"
+        },
+        "input_hashes_after_run": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "4fd22596a076134f127277c943b696997b0c19db10792657be269199cc3949cb",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/runs/R3_F3_baffled_exchange_massmatched_coarse/attempts/20260907T013508.916178Z-1e9f99b5.complete/Run.out": "877f6e9116030760b9a2091d855e7824a68878d5b0a79e72859673498ba2b88b"
+        },
+        "termination_reason": null,
+        "numerical_reference_status": "not_assessed"
+      }
+    },
+    {
+      "case_id": "F7_pump_dp030",
+      "attempt_id": "ds02-infra-f7-pump-audit",
+      "source_hdf5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/normalized/B05_F7_pump3d_dp030.h5",
+        "file_size_bytes": 291787,
+        "frames": 7,
+        "particles": 1401,
+        "metadata_only_manifest": true,
+        "sha256": null,
+        "sha256_status": "omitted_large_source_not_runner_hashed"
+      },
+      "audit_output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F7_pump_dp030/ds02-infra-f7-pump-audit/audit.json",
+      "audit_output_sha256": "ef6fb6690e3020105cf87dedcbc765756f07ba4f950ff3c05413c72c64af42b7",
+      "q_i_status": "Q-I-incomplete",
+      "q_n_status": "not_assessed",
+      "scientific_acceptance": "not_assessed",
+      "production_eligibility": "not_evaluated",
+      "structural_failures": [],
+      "missing_requirements": [
+        "boundary_or_lifecycle_semantics",
+        "closed_or_open_lifecycle_declaration",
+        "control",
+        "coordinate_frame",
+        "geometry",
+        "units:density",
+        "units:mass",
+        "units:position",
+        "units:pressure",
+        "units:time",
+        "units:velocity"
+      ],
+      "solver_log": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/solver.stdout.log",
+        "bytes_read": 17661,
+        "sha256": "618071f3704a9596f3c71dc6da1883e38ea0ad0dd4774c3a97bfcc1b9bd18ee6",
+        "dimension": {
+          "status": "pass",
+          "solver_dimension": 3,
+          "source": "solver_log_explicit_banner",
+          "evidence_lines": [
+            "**3D-Simulation parameters:"
+          ],
+          "coordinate_components": 3,
+          "inference_from_coordinate_values": false
+        },
+        "counts": {
+          "initial_total": 4671,
+          "initial_fluid_type3": 1401,
+          "initial_floating_type2": 0,
+          "excluded_particles": 12
+        }
+      },
+      "dimensions": {
+        "frames": 7,
+        "particles": 1401,
+        "coordinate_components": 3
+      },
+      "time": {
+        "status": "pass",
+        "finite": true,
+        "strictly_increasing": true,
+        "count": 7,
+        "start_s": 0.0,
+        "end_s": 0.600214
+      },
+      "valid": {
+        "dtype": "bool",
+        "binary": true,
+        "status": "pass"
+      },
+      "finite_active": {
+        "position": true,
+        "velocity": true,
+        "density": true,
+        "mass": true,
+        "pressure": true
+      },
+      "positive_active_mass": true,
+      "positive_active_density": true,
+      "lifecycle": {
+        "identity_axis": "(Zone,Idp)",
+        "initial_active_count": 1401,
+        "final_active_count": 1389,
+        "ever_seen_count": 1401,
+        "introduced_after_initial_count": 0,
+        "missing_at_any_later_frame_count": 12,
+        "revived_identity_count": 0,
+        "initial_missing_at_final_count": 12,
+        "initial_to_final_retention": 0.9914346895074947,
+        "type_changed_identity_count": 0,
+        "per_frame_identity_changed_rows": 0,
+        "full_timeline_checked": true
+      },
+      "frame_counts": {
+        "active": {
+          "count": 7,
+          "first": 1401,
+          "last": 1389,
+          "min": 1389,
+          "max": 1401
+        },
+        "fluid_type3": {
+          "count": 7,
+          "first": 1401,
+          "last": 1389,
+          "min": 1389,
+          "max": 1401
+        },
+        "floating_type2": {
+          "count": 7,
+          "first": 0,
+          "last": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "fluid_mass_ledger": {
+        "type_code": 3,
+        "status": "pass",
+        "initial_count": 1401,
+        "initial_mass_kg": 37.82700098119676,
+        "final_initial_cohort_retained_count": 1389,
+        "initial_cohort_missing_at_final_count": 12,
+        "initial_cohort_missing_mass_kg": 0.3240000084042549,
+        "solver_excluded_particles": 12,
+        "separate_from_type2": true
+      },
+      "floating_mass_ledger": {
+        "type_code": 2,
+        "status": "not_present",
+        "initial_count": 0,
+        "initial_mass_kg": 0.0,
+        "final_initial_cohort_retained_count": 0,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "excluded_from_fluid_ledger": true
+      },
+      "solver_log_consistency": {
+        "status": "pass",
+        "comparisons": [
+          {
+            "field": "initial_fluid_type3",
+            "log": 1401,
+            "hdf5": 1401,
+            "match": true
+          },
+          {
+            "field": "initial_floating_type2",
+            "log": 0,
+            "hdf5": 0,
+            "match": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "frames": 7,
+        "particles": 1401,
+        "particle_chunk": 65536,
+        "logical_dataset_bytes": 406346,
+        "dataset_storage_bytes": 259726,
+        "estimated_read_bytes": 406346,
+        "estimated_peak_working_set_bytes": 92466,
+        "full_trajectory_materialized": false,
+        "method": "dataset metadata plus one particle chunk per frame"
+      },
+      "audit_parameters": {
+        "particle_chunk": 65536,
+        "full_trajectory_materialized": false
+      },
+      "resource_usage": {
+        "before": {
+          "self": {
+            "user_cpu_seconds": 0.121554,
+            "system_cpu_seconds": 0.017077,
+            "max_rss_kib": 44032,
+            "minor_page_faults": 5805,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 3
+          },
+          "children": {
+            "user_cpu_seconds": 0.0008929999999999999,
+            "system_cpu_seconds": 0.0008929999999999999,
+            "max_rss_kib": 38912,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        },
+        "after": {
+          "self": {
+            "user_cpu_seconds": 0.15937199999999999,
+            "system_cpu_seconds": 0.017077,
+            "max_rss_kib": 48128,
+            "minor_page_faults": 6234,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 4
+          },
+          "children": {
+            "user_cpu_seconds": 0.0008929999999999999,
+            "system_cpu_seconds": 0.0008929999999999999,
+            "max_rss_kib": 38912,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        }
+      },
+      "runner": {
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 0.2758503349032253,
+        "cpu_core_seconds": 0.324307,
+        "output_bytes": 16257,
+        "request_sha256": "4d721e7f3d3f9f7a9c41383fcd46bcc6af36d561165ca9356ee1def43ec1b58d",
+        "git_at_launch": {
+          "commit": "063ef72b9daff004eab2f8400fae73871d2a7915",
+          "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "input_hashes_at_launch": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "4fd22596a076134f127277c943b696997b0c19db10792657be269199cc3949cb",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/solver.stdout.log": "618071f3704a9596f3c71dc6da1883e38ea0ad0dd4774c3a97bfcc1b9bd18ee6"
+        },
+        "input_hashes_after_run": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "4fd22596a076134f127277c943b696997b0c19db10792657be269199cc3949cb",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F7_pump3d_dp030/solver.stdout.log": "618071f3704a9596f3c71dc6da1883e38ea0ad0dd4774c3a97bfcc1b9bd18ee6"
+        },
+        "termination_reason": null,
+        "numerical_reference_status": "not_assessed"
+      }
+    },
+    {
+      "case_id": "F6_floating_box_dp030",
+      "attempt_id": "ds02-infra-f6-floating-box-audit",
+      "source_hdf5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/normalized/B05_F6_floating_box_dp030.h5",
+        "file_size_bytes": 2951058164,
+        "frames": 9,
+        "particles": 13577000,
+        "metadata_only_manifest": true,
+        "sha256": null,
+        "sha256_status": "omitted_large_source_not_runner_hashed"
+      },
+      "audit_output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F6_floating_box_dp030/ds02-infra-f6-floating-box-audit/audit.json",
+      "audit_output_sha256": "66331d8221f40b0ef441c03ae17539de3b2dc56de4a05a3ce41275144b28a771",
+      "q_i_status": "Q-I-incomplete",
+      "q_n_status": "not_assessed",
+      "scientific_acceptance": "not_assessed",
+      "production_eligibility": "not_evaluated",
+      "structural_failures": [],
+      "missing_requirements": [
+        "boundary_or_lifecycle_semantics",
+        "closed_or_open_lifecycle_declaration",
+        "control",
+        "coordinate_frame",
+        "geometry",
+        "rigid_body_state_for_type2",
+        "units:density",
+        "units:mass",
+        "units:position",
+        "units:pressure",
+        "units:time",
+        "units:velocity"
+      ],
+      "solver_log": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/solver.stdout.log",
+        "bytes_read": 18610,
+        "sha256": "e53eef4165178b58c3f6aeec4da1e63c7659e2b17b63af8924cd0f75136e9b44",
+        "dimension": {
+          "status": "pass",
+          "solver_dimension": 3,
+          "source": "solver_log_explicit_banner",
+          "evidence_lines": [
+            "**3D-Simulation parameters:"
+          ],
+          "coordinate_components": 3,
+          "inference_from_coordinate_values": false
+        },
+        "counts": {
+          "initial_total": 15027060,
+          "initial_fluid_type3": 12957384,
+          "initial_floating_type2": 619616,
+          "excluded_particles": 0
+        }
+      },
+      "dimensions": {
+        "frames": 9,
+        "particles": 13577000,
+        "coordinate_components": 3
+      },
+      "time": {
+        "status": "pass",
+        "finite": true,
+        "strictly_increasing": true,
+        "count": 9,
+        "start_s": 0.0,
+        "end_s": 0.800037
+      },
+      "valid": {
+        "dtype": "bool",
+        "binary": true,
+        "status": "pass"
+      },
+      "finite_active": {
+        "position": true,
+        "velocity": true,
+        "density": true,
+        "mass": true,
+        "pressure": true
+      },
+      "positive_active_mass": true,
+      "positive_active_density": true,
+      "lifecycle": {
+        "identity_axis": "(Zone,Idp)",
+        "initial_active_count": 13577000,
+        "final_active_count": 13577000,
+        "ever_seen_count": 13577000,
+        "introduced_after_initial_count": 0,
+        "missing_at_any_later_frame_count": 0,
+        "revived_identity_count": 0,
+        "initial_missing_at_final_count": 0,
+        "initial_to_final_retention": 1.0,
+        "type_changed_identity_count": 0,
+        "per_frame_identity_changed_rows": 0,
+        "full_timeline_checked": true
+      },
+      "frame_counts": {
+        "active": {
+          "count": 9,
+          "first": 13577000,
+          "last": 13577000,
+          "min": 13577000,
+          "max": 13577000
+        },
+        "fluid_type3": {
+          "count": 9,
+          "first": 12957384,
+          "last": 12957384,
+          "min": 12957384,
+          "max": 12957384
+        },
+        "floating_type2": {
+          "count": 9,
+          "first": 619616,
+          "last": 619616,
+          "min": 619616,
+          "max": 619616
+        }
+      },
+      "fluid_mass_ledger": {
+        "type_code": 3,
+        "status": "pass",
+        "initial_count": 12957384,
+        "initial_mass_kg": 349849.3770747632,
+        "final_initial_cohort_retained_count": 12957384,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "solver_excluded_particles": 0,
+        "separate_from_type2": true
+      },
+      "floating_mass_ledger": {
+        "type_code": 2,
+        "status": "pass",
+        "initial_count": 619616,
+        "initial_mass_kg": 16729.6324339509,
+        "final_initial_cohort_retained_count": 619616,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "excluded_from_fluid_ledger": true
+      },
+      "solver_log_consistency": {
+        "status": "pass",
+        "comparisons": [
+          {
+            "field": "initial_fluid_type3",
+            "log": 12957384,
+            "hdf5": 12957384,
+            "match": true
+          },
+          {
+            "field": "initial_floating_type2",
+            "log": 619616,
+            "hdf5": 619616,
+            "match": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "frames": 9,
+        "particles": 13577000,
+        "particle_chunk": 65536,
+        "logical_dataset_bytes": 5023490072,
+        "dataset_storage_bytes": 2950301446,
+        "estimated_read_bytes": 5023490072,
+        "estimated_peak_working_set_bytes": 912280440,
+        "full_trajectory_materialized": false,
+        "method": "dataset metadata plus one particle chunk per frame"
+      },
+      "audit_parameters": {
+        "particle_chunk": 65536,
+        "full_trajectory_materialized": false
+      },
+      "resource_usage": {
+        "before": {
+          "self": {
+            "user_cpu_seconds": 0.11221099999999999,
+            "system_cpu_seconds": 0.026049,
+            "max_rss_kib": 44032,
+            "minor_page_faults": 5756,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 3
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.0012959999999999998,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        },
+        "after": {
+          "self": {
+            "user_cpu_seconds": 33.949226,
+            "system_cpu_seconds": 4.580355,
+            "max_rss_kib": 570416,
+            "minor_page_faults": 223623,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 130
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.0012959999999999998,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 86,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        }
+      },
+      "runner": {
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 38.69176808884367,
+        "cpu_core_seconds": 39.28721899999999,
+        "output_bytes": 17285,
+        "request_sha256": "350fc556b0a48dd38a70eaa976f801885032eb9651643254a13755430b4dbad3",
+        "git_at_launch": {
+          "commit": "771e361227960ef53e3504fae445010bfe52b806",
+          "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "input_hashes_at_launch": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/solver.stdout.log": "e53eef4165178b58c3f6aeec4da1e63c7659e2b17b63af8924cd0f75136e9b44"
+        },
+        "input_hashes_after_run": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "61a1056217c404ee5b385de0b976877b9a2bb38a4734ccecad7b4333aae36c43",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F6_floating_box_dp030/solver.stdout.log": "e53eef4165178b58c3f6aeec4da1e63c7659e2b17b63af8924cd0f75136e9b44"
+        },
+        "termination_reason": null,
+        "numerical_reference_status": "not_assessed"
+      }
+    }
+  ]
+}
