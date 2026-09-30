@@ -1111,8 +1111,14 @@ def audit_manifest(
 ) -> dict[str, Any]:
     """Run all actual F4 reference audits into a new unique attempt directory."""
 
-    if output_dir.exists() and any(output_dir.iterdir()):
-        raise ScienceAuditError(f"refusing to overwrite non-empty output attempt: {output_dir}")
+    if output_dir.exists():
+        # The shared runner creates the attempt directory and its stdout log
+        # before launching this process.  Those two runner-owned files are
+        # safe; every science artifact is still required to be new.
+        runner_owned = {"stdout.log", "execution-receipt.json"}
+        leftovers = [path for path in output_dir.iterdir() if path.name not in runner_owned]
+        if leftovers:
+            raise ScienceAuditError(f"refusing to overwrite non-empty output attempt: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
     operators = _load_object(operators_path)
     if operators.get("schema") != OPERATORS_SCHEMA:
