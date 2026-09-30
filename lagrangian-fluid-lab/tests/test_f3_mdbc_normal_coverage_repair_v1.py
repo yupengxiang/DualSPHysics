@@ -13,6 +13,7 @@ LAB = Path(__file__).resolve().parents[1]
 FAMILY = LAB / "campaigns/ds-data-02/families/F3"
 PARENTS = FAMILY / "parent_inputs"
 EVIDENCE = PARENTS / "normal_coverage_repair_evidence.json"
+PREFLIGHT_AUDIT = PARENTS / "repair_preflight_audit.json"
 
 
 def _sha256(path: Path) -> str:
@@ -127,3 +128,17 @@ def test_solver_requests_bind_actual_gencase_prefix_and_receipt() -> None:
         assert _sha256(receipt) == request["gencase_receipt_sha256"]
         assert request["estimated_storage_bytes"] == 32 * 1024**3
         assert all(Path(path).is_file() for path in request["input_files"])
+
+
+def test_bounded_cpu_preflight_audit_closes_structural_checks_without_qn() -> None:
+    audit = json.loads(PREFLIGHT_AUDIT.read_text(encoding="utf-8"))
+    assert audit["status"] == "pass"
+    assert audit["solver_launched"] is False
+    assert audit["qualification_status"] == "pending_root_gpu_dispatch"
+    assert len(audit["parents"]) == 4
+    for row in audit["parents"]:
+        assert row["status"] == "pass"
+        assert all(row["checks"].values())
+        assert row["generated"]["solver_dimension_from_gencase_receipt"] == 3
+        assert row["generated"]["fluid_particles_receipt"] > 0
+        assert row["generated"]["transverse_layer_count"] >= 20
