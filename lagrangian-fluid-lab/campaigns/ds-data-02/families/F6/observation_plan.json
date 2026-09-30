@@ -8,6 +8,24 @@
     "spatial_discretization_share": 0.6
   },
   "family_id": "F6",
+  "freeze_before_launch": {
+    "frozen_before_solver": true,
+    "physical_scales": {
+      "L_m": 0.8,
+      "T_gravity_s": 0.2855686245854129,
+      "U_gravity_m_s": 2.8014282071829006
+    },
+    "reconstruction_operator": "native particle mass-weighted moments on fixed physical bins; no post-hoc trajectory projection",
+    "sampling": "all native saved fluid states plus FloatingInfo/ComputeForces state; derived views inherit parent split",
+    "thresholds": {
+      "event_time_fraction_of_feature_time": 0.02,
+      "initial_mass_relative_tolerance": 0.01,
+      "integration_error_fraction_of_total": 0.2,
+      "major_macro_relative_error": 0.05,
+      "sampling_error_fraction_of_total": 0.2
+    },
+    "uncertainty": "report wall, solver-loss, contact-flag and unknown masses rather than assigning zero"
+  },
   "independent_integrator_study": {
     "background": "simple_free_response",
     "dp_m": 0.06,
@@ -34,6 +52,156 @@
       0.05,
       0.1
     ]
+  },
+  "integration_step_study": {
+    "cases": [
+      {
+        "background": "simple_free_response",
+        "resolution_id": "medium",
+        "variants": [
+          "native_adaptive",
+          "fixed_half_millisecond"
+        ],
+        "window_s": [
+          0.0,
+          12.0
+        ]
+      },
+      {
+        "background": "wave_no_contact",
+        "resolution_id": "medium",
+        "variants": [
+          "native_adaptive",
+          "fixed_half_millisecond"
+        ],
+        "window_s": [
+          0.0,
+          12.0
+        ]
+      }
+    ],
+    "rules": [
+      "record actual dt_min, dt_max, median dt and total native steps",
+      "hold geometry/control/output cadence fixed",
+      "downsampling is not an integration-step study",
+      "Q-N remains pending until both full state and step study complete"
+    ],
+    "status": "planned_pending_solver"
+  },
+  "major_observables": [
+    {
+      "formula": "mass-weighted body centre and waterline intersection",
+      "observable_id": "equilibrium_draft",
+      "tolerance": "5% macro budget"
+    },
+    {
+      "formula": "FloatingInfo pose/orientation relative to initial pose",
+      "observable_id": "heave_and_orientation",
+      "tolerance": "5% macro budget and 2% event-time budget"
+    },
+    {
+      "formula": "successive extrema / crest arrivals with declared segment",
+      "observable_id": "natural_or_wave_period",
+      "tolerance": "event timing <=2% characteristic period"
+    },
+    {
+      "formula": "peak envelope ratio over final three local periods",
+      "observable_id": "decay_ratio",
+      "tolerance": "5% macro budget"
+    },
+    {
+      "formula": "separate type-3 fluid and type-2 floating ledgers plus force/torque",
+      "observable_id": "fluid_rigid_mass_momentum",
+      "tolerance": "initial mass relative tolerance 1%"
+    }
+  ],
+  "physical_axes": {
+    "body_density_ratio": {
+      "endpoint_levels": [
+        0.36,
+        0.72,
+        0.78
+      ],
+      "internal_levels": [
+        0.5
+      ],
+      "parameter": "floating body mass / (rho_water * geometric volume)",
+      "scope": "free response and wave excitation",
+      "training_levels": [
+        0.42,
+        0.5,
+        0.58
+      ],
+      "unit": "ratio"
+    },
+    "initial_draft_or_heave": {
+      "endpoint_levels_m": [
+        0.16,
+        0.26
+      ],
+      "internal_levels_m": [
+        0.08
+      ],
+      "parameter": "initial heave offset relative to waterline",
+      "scope": "free response primarily; wave parent keeps initial pose fixed",
+      "training_levels_m": [
+        0.04,
+        0.08,
+        0.12
+      ],
+      "unit": "m"
+    },
+    "initial_pitch": {
+      "endpoint_levels_deg": [
+        -4.0,
+        4.0
+      ],
+      "internal_levels_deg": [
+        0.0
+      ],
+      "parameter": "initial pitch about body centre",
+      "scope": "both backgrounds",
+      "training_levels_deg": [
+        -2.0,
+        0.0,
+        2.0
+      ],
+      "unit": "deg"
+    },
+    "wave_height": {
+      "endpoint_levels_m": [
+        0.12,
+        0.14
+      ],
+      "internal_levels_m": [
+        0.08
+      ],
+      "parameter": "regular piston wave height",
+      "scope": "wave_no_contact only",
+      "training_levels_m": [
+        0.06,
+        0.08,
+        0.1
+      ],
+      "unit": "m"
+    },
+    "wave_period": {
+      "endpoint_levels_s": [
+        0.95,
+        1.55
+      ],
+      "internal_levels_s": [
+        1.25
+      ],
+      "parameter": "regular wave period",
+      "scope": "wave_no_contact only",
+      "training_levels_s": [
+        1.1,
+        1.25,
+        1.4
+      ],
+      "unit": "s"
+    }
   },
   "physical_scales": {
     "fluid_density_kg_m3": 1000.0,
@@ -62,6 +230,21 @@
       "forces": 0.01,
       "position_velocity_density_pressure": 0.05
     }
+  },
+  "sampling_cadence_study": {
+    "background": "simple_free_response",
+    "integration": "same native adaptive integrator",
+    "output_intervals_s": [
+      0.025,
+      0.05,
+      0.1
+    ],
+    "rules": [
+      "same complete event window",
+      "derived downsampling inherits parent split",
+      "do not claim cadence comparison as timestep comparison"
+    ],
+    "status": "planned_pending_solver"
   },
   "schema": "ds-data-02.f6.observation_plan.v1",
   "secondary_observables": [
@@ -114,5 +297,17 @@
         "resolution_id": "fine"
       }
     ]
+  },
+  "two_by_three_reference_matrix": {
+    "backgrounds": [
+      "simple_free_response",
+      "wave_no_contact"
+    ],
+    "resolutions": [
+      "coarse",
+      "medium",
+      "fine"
+    ],
+    "status": "planned_pending_solver"
   }
 }

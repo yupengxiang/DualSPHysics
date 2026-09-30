@@ -524,6 +524,13 @@ def _event_definitions() -> dict[str, Any]:
         "schema": "ds-data-02.f6.event_definitions.v1", "family_id": "F6",
         "full_event_window_s": list(PARENT_WINDOW_S),
         "complete_window_rule": "include still-water startup, release or wave ramp, at least six distinguishable response/wave periods where the mechanism permits, and a final decay/mass audit; no 0.8 s short clip is sufficient",
+        "coordinate_frames": [
+            {"frame_id": "tank_attached_inertial", "kind": "fixed tank", "position_semantics": "native particle and rigid-body positions in the finite tank frame", "control_semantics": "gravity is explicit; no prescribed tank translation", "world_transform": "identity"},
+            {"frame_id": "world_tank_and_tank_attached_observations", "kind": "world plus tank-attached event frame", "position_semantics": "native world state; event planes are evaluated in the tank frame", "control_semantics": "piston displacement is prescribed in world time", "world_transform": "p_world=R_tank(t)p_tank+c_tank; R_tank=I for this parent"},
+        ],
+        "finite_surfaces": ["bottom", "left", "right", "front", "back", "open_top"],
+        "source_regions": [{"source_label": "initial_fluid", "region": "initial type-3 fluid set", "mass_denominator": "sum(initial fluid mass)"}, {"source_label": "paddle_side", "region": "wave parent upstream half", "mass_denominator": "initial fluid mass in upstream mask"}],
+        "required_labels": ["source_label", "destination_time_series", "first_passage_interval", "residence_time", "final_category", "failure_reason", "unknown_mass"],
         "mechanisms": [
             {
                 **MECHANISMS["simple_free_response"],
@@ -543,14 +550,33 @@ def _event_definitions() -> dict[str, Any]:
 
 
 def _observation_plan() -> dict[str, Any]:
+    physical_axes = {
+        "body_density_ratio": {"parameter": "floating body mass / (rho_water * geometric volume)", "training_levels": [0.42, 0.50, 0.58], "internal_levels": [0.50], "endpoint_levels": [0.36, 0.72, 0.78], "unit": "ratio", "scope": "free response and wave excitation"},
+        "initial_draft_or_heave": {"parameter": "initial heave offset relative to waterline", "training_levels_m": [0.04, 0.08, 0.12], "internal_levels_m": [0.08], "endpoint_levels_m": [0.16, 0.26], "unit": "m", "scope": "free response primarily; wave parent keeps initial pose fixed"},
+        "wave_height": {"parameter": "regular piston wave height", "training_levels_m": [0.06, 0.08, 0.10], "internal_levels_m": [0.08], "endpoint_levels_m": [0.12, 0.14], "unit": "m", "scope": "wave_no_contact only"},
+        "wave_period": {"parameter": "regular wave period", "training_levels_s": [1.10, 1.25, 1.40], "internal_levels_s": [1.25], "endpoint_levels_s": [0.95, 1.55], "unit": "s", "scope": "wave_no_contact only"},
+        "initial_pitch": {"parameter": "initial pitch about body centre", "training_levels_deg": [-2.0, 0.0, 2.0], "internal_levels_deg": [0.0], "endpoint_levels_deg": [-4.0, 4.0], "unit": "deg", "scope": "both backgrounds"},
+    }
+    freeze = {"physical_scales": {"L_m": 0.8, "T_gravity_s": math.sqrt(0.8 / 9.81), "U_gravity_m_s": math.sqrt(9.81 * 0.8)}, "reconstruction_operator": "native particle mass-weighted moments on fixed physical bins; no post-hoc trajectory projection", "sampling": "all native saved fluid states plus FloatingInfo/ComputeForces state; derived views inherit parent split", "thresholds": {"event_time_fraction_of_feature_time": 0.02, "initial_mass_relative_tolerance": 0.01, "integration_error_fraction_of_total": 0.20, "major_macro_relative_error": 0.05, "sampling_error_fraction_of_total": 0.20}, "uncertainty": "report wall, solver-loss, contact-flag and unknown masses rather than assigning zero", "frozen_before_solver": True}
     return {
         "schema": "ds-data-02.f6.observation_plan.v1", "family_id": "F6",
+        "freeze_before_launch": freeze, "physical_axes": physical_axes,
         "physical_scales": {"length_L_m": 0.8, "velocity_U_m_s": "sqrt(g*L) for dimensionless reporting", "time_T_s": "sqrt(L/g)", "fluid_density_kg_m3": 1000.0},
         "primary_observables": ["equilibrium_draft", "heave_and_orientation", "natural_period", "wave_response_amplitude", "decay_ratio", "fluid_mass_and_momentum", "rigid_force_and_torque"],
+        "major_observables": [
+            {"observable_id": "equilibrium_draft", "formula": "mass-weighted body centre and waterline intersection", "tolerance": "5% macro budget"},
+            {"observable_id": "heave_and_orientation", "formula": "FloatingInfo pose/orientation relative to initial pose", "tolerance": "5% macro budget and 2% event-time budget"},
+            {"observable_id": "natural_or_wave_period", "formula": "successive extrema / crest arrivals with declared segment", "tolerance": "event timing <=2% characteristic period"},
+            {"observable_id": "decay_ratio", "formula": "peak envelope ratio over final three local periods", "tolerance": "5% macro budget"},
+            {"observable_id": "fluid_rigid_mass_momentum", "formula": "separate type-3 fluid and type-2 floating ledgers plus force/torque", "tolerance": "initial mass relative tolerance 1%"},
+        ],
         "secondary_observables": ["particle_type3_fluid_mass", "particle_type2_floating_mass", "fluid_source_destination", "first_passage", "residence_time", "wall_clearance", "contact_event_flag"],
         "spatial_matrix": {mechanism: RESOLUTION_LADDERS[mechanism] for mechanism in MECHANISMS},
+        "two_by_three_reference_matrix": {"backgrounds": list(MECHANISMS), "resolutions": ["coarse", "medium", "fine"], "status": "planned_pending_solver"},
         "independent_integrator_study": {"background": "simple_free_response", "dp_m": 0.060, "variants": [{"DtFixed": 0.0, "label": "native_adaptive"}, {"DtFixed": 0.5e-3, "label": "fixed_half_millisecond"}], "same_geometry_control_window": True, "status": "planned_pending_solver"},
+        "integration_step_study": {"status": "planned_pending_solver", "cases": [{"background": "simple_free_response", "resolution_id": "medium", "variants": ["native_adaptive", "fixed_half_millisecond"], "window_s": list(PARENT_WINDOW_S)}, {"background": "wave_no_contact", "resolution_id": "medium", "variants": ["native_adaptive", "fixed_half_millisecond"], "window_s": list(PARENT_WINDOW_S)}], "rules": ["record actual dt_min, dt_max, median dt and total native steps", "hold geometry/control/output cadence fixed", "downsampling is not an integration-step study", "Q-N remains pending until both full state and step study complete"]},
         "independent_save_study": {"background": "simple_free_response", "integration": "same native adaptive integrator", "variants_s": [0.025, 0.05, 0.10], "status": "planned_pending_solver", "downsampling_is_not_integrator_evidence": True},
+        "sampling_cadence_study": {"status": "planned_pending_solver", "background": "simple_free_response", "integration": "same native adaptive integrator", "output_intervals_s": [0.025, 0.05, 0.10], "rules": ["same complete event window", "derived downsampling inherits parent split", "do not claim cadence comparison as timestep comparison"]},
         "sampling": {"native_full_state": {"position_velocity_density_pressure": PARENT_OUTPUT_DT_S, "floating_info": 0.01, "forces": 0.01}, "event_detection": "linear interpolation between native frames; preserve censored and unknown categories"},
         "error_budget": {"primary_macro_observable_relative": 0.05, "event_time_relative_to_characteristic_period": 0.02, "spatial_discretization_share": 0.60, "integrator_share": 0.20, "save_sampling_share": 0.20, "freeze_before_solver": True},
         "q_status": {"Q_I": "pending actual solver/native state", "Q_N": "pending 2x3 and integrator/save comparisons", "Q_E": "optional Test14 or analytical displacement anchor; not a gate for Q-N"},
@@ -615,11 +641,14 @@ def _split_registry() -> list[dict[str, Any]]:
 def _family_card(history: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "schema": "ds-data-02.f6.family_card.v1", "family_id": "F6", "name": "自由浮体与水入体交互",
-        "generator": {"path": str(Path(__file__).resolve()), "version": GENERATOR_VERSION},
+        "generator": {"path": str(Path(__file__).resolve()), "version": GENERATOR_VERSION}, "generator_version": GENERATOR_VERSION,
         "status": "definitions_frozen_parent_gencase_pending", "target_independent_cases": 48, "pilot_sizes": [8, 24, 48],
         "mechanisms": MECHANISMS, "resolution_ladders": RESOLUTION_LADDERS,
+        "physical_axes": "observation_plan.json:physical_axes; endpoints and internal points are frozen before solver dispatch",
+        "coordinate_frame_contract": "event_definitions.json:coordinate_frames; fixed tank frame and world/tank-attached wave frame remain separate",
         "historical_reuse": {"reused_count": history.get("reused_count", 0), "strict_equivalence_required": True, "old_f6_1357m_identity_is_not_entry": True},
-        "quality_layers": {"Q_I": "actual generated 3D/native structure and rigid/fluid ledgers", "Q_N": "recipe+domain+window+observable numeric reference", "Q_E": "optional external/analytical anchor"},
+        "quality_layers": {"Q_I": "actual generated 3D/native structure and rigid/fluid ledgers", "Q_N": "recipe+domain+window+observable numeric reference", "Q_E": "optional external/analytical anchor"}, "scope_gates": {"Q_I": "actual solver/native output required", "Q_N": "2x3 plus independent timestep/save studies required", "Q_E": "optional and never blocks native Q-N"},
+        "training_and_inference": {"training": False, "inference": False, "weights_loaded": False},
         "solver_policy": "F6 owner never starts solver/GPU; only shared runtime may submit qualification requests",
         "model_runtime_loaded": False, "training_launch_allowed": False,
     }
@@ -655,9 +684,12 @@ def _reference_evidence(history: Mapping[str, Any]) -> dict[str, Any]:
 def _split_plan(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     return {
         "schema": "ds-data-02.f6.split_plan.v1", "family_id": "F6", "status": "candidate_development_test_split_pending_quality_gates",
+        "coverage": {"actual_new_case_count": 0, "reused_count": 0, "target_total_unique_physical_cases": 48, "mechanism_balance": {mechanism: sum(row["mechanism_id"] == mechanism for row in rows) for mechanism in MECHANISMS}, "new_geometry_or_control_holdout": sum(row["split"] == "geometry_control_ood_test" for row in rows)},
         "counts": {"train": 24, "validation": 6, "id_test": 6, "parameter_ood_test": 6, "geometry_control_ood_test": 6, "total": 48},
         "nested_subsets": {"pilot_8": [row["case_id"] for row in rows[:8]], "pilot_24": [row["case_id"] for row in rows[:24]], "final_48": [row["case_id"] for row in rows]},
-        "leakage_rules": ["physical_case_id is unique", "resolution/restart/window/view share parent split", "geometry OOD uses geometry_family_id", "control OOD uses control_family_id", "hidden test generation is not claimed"],
+        "leakage_rules": ["physical_case_id is unique", "resolution/restart/window/view share parent split", "geometry OOD uses geometry_family_id", "control OOD uses control_family_id", "template/source provenance does not define physical identity", "hidden test generation is not claimed"],
+        "legacy_policy": {"reused_count": 0, "old_ds_data_01_f6_identity": "preserved as excluded performance reference; no split rewrite"},
+        "new_slot_counts": {"train": 24, "validation": 6, "id_test": 6, "parameter_ood": 6, "geometry_control_ood": 6},
         "axis_design": {"mechanism": "two backgrounds", "density_and_draft": "body density ratio and initial heave/pitch", "wave": "height and period for wave mechanism", "geometry_holdout": "wide/shallow/rounded-proxy finite tank variants", "control_holdout": "ramp/phase/wave-control templates"},
         "rows": len(rows),
     }
@@ -834,7 +866,7 @@ def _qualification_request(output_root: Path, parent: Mapping[str, Any], audit: 
     generated_files = [prefix.with_suffix(".xml"), prefix.with_suffix(".bi4"), prefix.with_name(prefix.name + "_All.vtk"), prefix.with_name(prefix.name + "__Actual.vtk"), prefix.with_name(prefix.name + "_Fluid.vtk")]
     input_files = [
         Path(__file__).resolve(), RUNTIME_SOURCE.resolve(), output_root / "event_definitions.json", output_root / "observation_plan.json", output_root / "split_plan.json", output_root / "parent_inputs/parent_input_manifest.json", output_root / "parent_inputs/gencase_audit.json",
-        Path(parent["definition"]["path"]).resolve(), Path(parent["control"]["path"]).resolve(), Path(parent["native"]["path"]).resolve(), Path(parent["normal"]["path"]).resolve(), Path(parent["official_template"]["path"]).resolve(), GENCASE_BINARY.resolve(), receipt_path, *generated_files,
+        Path(parent["definition"]["path"]).resolve(), Path(parent["control"]["path"]).resolve(), Path(parent["native"]["path"]).resolve(), Path(parent["normal"]["path"]).resolve(), Path(parent["official_template"]["path"]).resolve(), GENCASE_BINARY.resolve(), FLOATING_INFO_BINARY.resolve(), COMPUTE_FORCES_BINARY.resolve(), receipt_path, *generated_files,
     ]
     return {
         "schema": "ds-data-02.runner.request.v1", "family_id": "F6", "case_id": parent["case_id"], "attempt_id": f"{parent['case_id']}_SOLVER_QUAL_01", "kind": "qualification",
