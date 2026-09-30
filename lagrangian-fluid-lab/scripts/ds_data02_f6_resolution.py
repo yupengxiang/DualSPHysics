@@ -1236,19 +1236,31 @@ def refresh_evidence(output_root: Path = RESOLUTION_ROOT) -> dict[str, Any]:
     output_root = Path(output_root)
     manifest_path = output_root / "resolution_manifest.json"
     plan_path = output_root / "resolution_plan.json"
+    # Preserve consumed base artifacts and publish corrected semantics as
+    # additive v002 sidecars.
+    manifest_v2_path = output_root / "resolution_manifest_002.json"
+    plan_v2_path = output_root / "resolution_plan_002.json"
+    evidence_v2_path = output_root / "resolution_evidence_002.json"
+    native_plan_v2_path = output_root / "native_audit_plan_002.json"
+    initialization_audit_path = output_root / "gencase-initialization-audit-002.json"
     if not manifest_path.is_file() or not plan_path.is_file():
         raise FileNotFoundError("prepare the fixed-geometry resolution study first")
     manifest = read_json(manifest_path)
     plan = read_json(plan_path)
+    base_manifest_sha256 = sha256_file(manifest_path)
+    base_plan_sha256 = sha256_file(plan_path)
     gencase_rows: list[dict[str, Any]] = []
     for row in manifest.get("rows", []):
         case_dir = output_root / "cases" / str(row["mechanism_id"]) / str(row["resolution_id"])
         request = read_json(Path(row["request"]["path"]))
         receipt_path = RAW_RESOLUTION_ROOT / str(row["case_id"]) / str(request["attempt_id"]) / "execution-receipt.json"
         audit = audit_gencase(case_dir, receipt_path)
-        audit_path = case_dir / "gencase-audit.json"
+        old_audit_path = case_dir / "gencase-audit.json"
+        old_audit_sha256 = sha256_file(old_audit_path) if old_audit_path.is_file() else None
+        audit_path = case_dir / "gencase-audit-002.json"
         write_json(audit_path, audit)
         row["status"] = f"gencase_{audit.get('status')}"
+        row["previous_gencase_audit"] = {"path": str(old_audit_path.resolve()), "sha256": old_audit_sha256, "immutable": True}
         row["gencase_receipt"] = {"path": str(receipt_path), "sha256": sha256_file(receipt_path) if receipt_path.is_file() else None, "status": audit.get("status")}
         row["gencase_audit"] = {"path": str(audit_path.resolve()), "sha256": sha256_file(audit_path), "status": audit.get("status"), "checks": audit.get("checks", {})}
         if isinstance(audit.get("generated"), Mapping):
@@ -1268,7 +1280,8 @@ def refresh_evidence(output_root: Path = RESOLUTION_ROOT) -> dict[str, Any]:
         gencase_rows.append(row)
     manifest["rows"] = gencase_rows
     manifest["status"] = "gencase_audited_pending_solver" if all(row["status"] == "gencase_pass" for row in gencase_rows) else "gencase_audit_mixed_or_pending"
-    write_json(manifest_path, manifest)
+    manifest["schema"] = f"{SCHEMA}.manifest-002"
+    manifest["immutable_base_artifact"] = {"path": str(manifest_path.resolve()), "sha256": base_manifest_sha256, "preserved": True}
     plan["matrix"] = gencase_rows
     plan["status"] = manifest["status"]
     plan["historical_reuse"] = {
@@ -1342,7 +1355,7 @@ def refresh_evidence(output_root: Path = RESOLUTION_ROOT) -> dict[str, Any]:
         "repair_attempt": repair_attempt,
         "cases": mass_cases,
     }
-    mass_review_path = output_root / "initial_mass_review.json"
+    mass_review_path = output_root / "initial_mass_review_002.json"
     write_json(mass_review_path, mass_review)
     plan["initialization_mass_review"] = {
         "status": mass_review["status"],
@@ -1360,7 +1373,9 @@ def refresh_evidence(output_root: Path = RESOLUTION_ROOT) -> dict[str, Any]:
         "same_geometry_control_window": True, "save_variants_s": [0.025, 0.05, 0.10], "save_study_is_not_integrator_evidence": True,
     }
     plan["resolution_study_status"] = "gencase_audited_pending_solver"
-    write_json(plan_path, plan)
+    plan["schema"] = f"{SCHEMA}.plan-002"
+    plan["immutable_base_artifact"] = {"path": str(plan_path.resolve()), "sha256": base_plan_sha256, "preserved": True}
+    write_json(plan_v2_path, plan)
 
     native_plan_path = output_root / "native_audit_plan.json"
     native_plan = read_json(native_plan_path) if native_plan_path.is_file() else prepare_postprocess_requests(output_root)
@@ -1422,9 +1437,44 @@ def refresh_evidence(output_root: Path = RESOLUTION_ROOT) -> dict[str, Any]:
     native_plan["requests_terminal"] = native_evidence
     native_pass = [item.get("audit", {}).get("status") == "pass" for item in native_evidence]
     native_plan["status"] = "terminal_native_audit_pass" if native_evidence and all(native_pass) else "native_audit_pending_or_failed"
-    write_json(native_plan_path, native_plan)
-    result = {"schema": POSTPROCESS_SCHEMA, "family_id": "F6", "status": "evidence_bound", "resolution_plan": str(plan_path.resolve()), "initial_mass_review": {"path": str(mass_review_path.resolve()), "sha256": sha256_file(mass_review_path), "status": mass_review["status"]}, "gencase": [{"case_id": row["case_id"], "status": row["status"], "actual_counts": row.get("actual_counts"), "initial_mass_budget": row.get("initial_mass_budget"), "audit": row["gencase_audit"]} for row in gencase_rows], "native": native_evidence, "native_plan_status": native_plan["status"], "qualification_claim": "none; complete-window parent solver and postprocessor evidence remains QI/QN pending"}
-    write_json(output_root / "resolution_evidence.json", result)
+    native_plan["schema"] = f"{POSTPROCESS_SCHEMA}.plan-002"
+    if native_plan_path.is_file():
+        native_plan["immutable_base_artifact"] = {"path": str(native_plan_path.resolve()), "sha256": sha256_file(native_plan_path), "preserved": True}
+    write_json(native_plan_v2_path, native_plan)
+    initialization_audit = {
+        "schema": "ds-data-02.f6.gencase-initialization-audit.v002",
+        "family_id": "F6",
+        "status": "strict_continuous_budget_failed_support_exclusion_audited",
+        "strict_continuous_budget_pass": mass_pass,
+        "effective_center_lattice_budget_pass": effective_mass_pass,
+        "mass_rescaling": False,
+        "immutable_base_artifacts": {
+            "manifest": {"path": str(manifest_path.resolve()), "sha256": base_manifest_sha256},
+            "plan": {"path": str(plan_path.resolve()), "sha256": base_plan_sha256},
+        },
+        "formula_and_geometry_semantics": mass_review["conclusion"],
+        "rows": [{
+            "case_id": row["case_id"],
+            "mechanism_id": row["mechanism_id"],
+            "resolution_id": row["resolution_id"],
+            "old_audit": row.get("previous_gencase_audit"),
+            "new_audit": row.get("gencase_audit"),
+            "receipt": row.get("gencase_receipt"),
+            "continuous_mass_relative_error": (row.get("initial_mass_budget") or {}).get("continuous_after_occupancy_mass_relative_error"),
+            "support_adjusted_mass_relative_error": (row.get("initial_mass_budget") or {}).get("support_adjusted_mass_relative_error"),
+            "boundary_support_exclusion_relative_to_continuous_fill": (row.get("initial_mass_budget") or {}).get("boundary_support_exclusion_relative_to_continuous_fill"),
+        } for row in gencase_rows],
+        "repair_attempt": repair_attempt,
+        "qualification_claim": "none; strict continuous initial-mass budget remains pending/failed and no QI/QN or GPU qualification is granted",
+    }
+    write_json(initialization_audit_path, initialization_audit)
+    manifest["initialization_audit"] = {"path": str(initialization_audit_path.resolve()), "sha256": sha256_file(initialization_audit_path)}
+    plan["initialization_audit"] = {"path": str(initialization_audit_path.resolve()), "sha256": sha256_file(initialization_audit_path)}
+    # Rewrite only the new sidecars after adding their cross-reference metadata.
+    write_json(manifest_v2_path, manifest)
+    write_json(plan_v2_path, plan)
+    result = {"schema": f"{POSTPROCESS_SCHEMA}.evidence-002", "family_id": "F6", "status": "evidence_bound", "resolution_plan": str(plan_v2_path.resolve()), "initialization_audit": {"path": str(initialization_audit_path.resolve()), "sha256": sha256_file(initialization_audit_path)}, "initial_mass_review": {"path": str(mass_review_path.resolve()), "sha256": sha256_file(mass_review_path), "status": mass_review["status"]}, "gencase": [{"case_id": row["case_id"], "status": row["status"], "actual_counts": row.get("actual_counts"), "initial_mass_budget": row.get("initial_mass_budget"), "audit": row["gencase_audit"]} for row in gencase_rows], "native": native_evidence, "native_plan": str(native_plan_v2_path.resolve()), "native_plan_status": native_plan["status"], "qualification_claim": "none; complete-window parent and postprocessor evidence remains QI/QN pending"}
+    write_json(evidence_v2_path, result)
     return result
 
 

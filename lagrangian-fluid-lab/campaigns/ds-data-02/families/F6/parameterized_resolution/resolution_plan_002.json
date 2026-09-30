@@ -1,0 +1,3887 @@
+{
+  "actual_final_dimensions": {
+    "simple_free_response": [
+      5.46,
+      1.56,
+      1.26
+    ],
+    "wave_no_contact": [
+      6.0,
+      1.56,
+      1.26
+    ]
+  },
+  "dp_m": {
+    "coarse": 0.06,
+    "fine": 0.02,
+    "medium": 0.03
+  },
+  "event_time_sampling": {
+    "complete_event_window_s": [
+      0.0,
+      12.0
+    ],
+    "control_dt_s": 0.01,
+    "coordinate_frames": {
+      "simple_free_response": "tank_attached_inertial",
+      "wave_no_contact": "world_tank_and_tank_attached_observations"
+    },
+    "events": {
+      "simple_free_response": [
+        "initial_still_water",
+        "release_at_zero",
+        "successive_heave_roll_pitch_extrema",
+        "decay_tail",
+        "final_mass_momentum_audit"
+      ],
+      "wave_no_contact": [
+        "initial_still_water",
+        "wave_ramp",
+        "first_wave_arrival",
+        "steady_wave_cycles",
+        "last_cycle_decay",
+        "final_mass_momentum_audit"
+      ]
+    },
+    "native_save_dt_s": 0.05
+  },
+  "family_id": "F6",
+  "frozen_parent_source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6.py",
+    "sha256": "6a6dfacde41770dbe86b188af75d691c0b84e52bb397409ffed818490d8d235b"
+  },
+  "generator": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_resolution.py",
+    "sha256": "37c863f672928dba9f2c817b76f4a44d83137e8d832b7a76b917a72bfa352a14"
+  },
+  "geometry_boundary_mass_audit": {
+    "finite_wall_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back"
+    ],
+    "ghost_policy": "fixed particles are a finite boundary representation; numerical ghost fluid is not counted as fluid",
+    "high_low_face_rule": "actual generated fixed particle low/high x/y planes plus bottom plane; ratio and counts recorded per candidate",
+    "initial_mass_reference": "strict contract: Nfluid*MassFluid versus frozen continuous liquid volume after floating/paddle occupancy; diagnostic: actual center-lattice envelope after finite-wall/support exclusion",
+    "initial_mass_relative_tolerance": 0.01,
+    "open_faces": [
+      "top"
+    ],
+    "representmass_policy": "report native MassFluid*type3 count, MassPart/MassBound Type=2 per-particle mass, aggregate massbody and source analytic inertia separately; never rescale",
+    "volume_error_policy": "record raw fillbox comparison, actual center-lattice envelope, continuous floating/paddle occupancy, finite-wall clearance, floating discrete-volume error, aggregate mass error and generated inertia versus source analytic box inertia; do not treat boundary support exclusion as missing fluid"
+  },
+  "geometry_contract": "wall, fluid fill, floating body, paddle, mass and source inertia are byte/number-bound from the repaired parent; pointmax=physical wall+dp is computational margin only",
+  "historical_reuse": {
+    "old_f6_1357m_identity_reused": false,
+    "old_parent_qual01_qual02_reused_for_solver": false,
+    "repaired_parent_12s_terminal_reused_for_native_postprocessing": true,
+    "semantics": "the native audit reads the terminal grid-repair raw BI4/Run files; it does not relaunch or mutate the old failed attempts or the historical 13.57M-particle identity"
+  },
+  "immutable_base_artifact": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/resolution_plan.json",
+    "preserved": true,
+    "sha256": "32df4e64e2974da6f4427a5dbf8b41305002e2d7c729c8d193fb51aece444e7c"
+  },
+  "initialization_audit": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/gencase-initialization-audit-002.json",
+    "sha256": "dc7c006f4734f524f25e3e3bbe73e193002c96765e8e7e52184afe7a1603cb34"
+  },
+  "initialization_mass_review": {
+    "input_repair_adopted": false,
+    "input_repair_registered": true,
+    "mass_rescaling": false,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/initial_mass_review_002.json",
+    "reference": "continuous physical fill after floating/paddle occupancy is the strict quality denominator; center-lattice target and wall support exclusion remain separate diagnostics. The one CPU-verified half-dp construction repair is retained but not adopted.",
+    "repair_attempt": {
+      "adopted": false,
+      "decision": "one bounded half-dp construction-fill repair was CPU-verified and is retained as negative evidence; it is not adopted because wall-clipped x/y support remains and it does not change the strict continuous residual",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/F6_INITIAL_MASS_ALIGNMENT_REPAIR_01/repair_evidence.json",
+      "registered": true,
+      "sha256": "bcc9197c08ce8b083647e45890b3337e8c8b7f4dd722647298dc6072a2d7bea0",
+      "status": "repair_gencase_terminal_strict_failed"
+    },
+    "sha256": "f198a9341f80efe6fb4f7d670998c5f0e185334ff21a99e37c05b50367edee8d",
+    "status": "strict_continuous_budget_failed_support_exclusion_audited"
+  },
+  "integrator_save_registration": {
+    "fixed_rule": "materialize numeric DtFixed only after complete-window baseline RunPARTs.csv/Run.out; DtFixed <= 0.5*measured stable minimum dt",
+    "same_geometry_control_window": true,
+    "save_study_is_not_integrator_evidence": true,
+    "save_variants_s": [
+      0.025,
+      0.05,
+      0.1
+    ],
+    "status": "registered_pending_measured_baseline",
+    "variants": [
+      "native_adaptive_baseline",
+      "fixed_half_measured_stable_baseline_min"
+    ]
+  },
+  "lineage_comparison": {
+    "simple_free_response": {
+      "comparison_semantics": "old parent/QUAL01/QUAL02 receipts remain failed or non-equivalent evidence; final grid repair is a new physical mother geometry and successful 12 s run, not automatic Q-N",
+      "final_gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02/execution-receipt.json",
+        "sha256": "5758c230ebd4e6d9d24c493fa9ba5c4c44412fb32615ebcad2731a02966f384f",
+        "status": "completed"
+      },
+      "final_grid_repair_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.3
+          ],
+          "size_m": [
+            5.26,
+            1.36,
+            0.52
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+        "physical_wall_size_m": [
+          5.46,
+          1.56,
+          1.26
+        ],
+        "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+        "sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+      },
+      "final_solver_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01/execution-receipt.json",
+        "sha256": "234ba9baf096f981a359858992ef929ceee510760c0d5410b57c6c7ec4eb0cee",
+        "status": "completed"
+      },
+      "old_parent_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.3
+          ],
+          "size_m": [
+            5.38,
+            1.48,
+            0.52
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Def.xml",
+        "physical_wall_size_m": [
+          5.5,
+          1.6,
+          1.3
+        ],
+        "sha256": "089c3043892b4e72f18aca5d526485816c73ccd9fdbb3b1a45c44e4901eec4fb"
+      },
+      "old_parent_solver_attempts": [
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01",
+          "receipt_sha256": "5266aa7baa27e7da52a642061f2b6d263d147beab0519cd31ace28ecc231d061",
+          "returncode": 1,
+          "status": "failed"
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_02",
+          "receipt_sha256": "52181de00745a07e08fe0ccf87aeab6763f73aa962caaf73312ad269217e38d4",
+          "returncode": 1,
+          "status": "failed"
+        }
+      ],
+      "repair_and_final_attempts": [
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01",
+          "fluid_particles": 14696,
+          "receipt_sha256": "0f568f15abe91d2141fd67dbcdae4dc0f13f6ef2d0ff3e2cbc8f60ed8b7eb515",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20614
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "577d410e99d5a652b7e09b5762648420a6452730c8ee0ac175c5382b497ea81d",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 23326
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "5758c230ebd4e6d9d24c493fa9ba5c4c44412fb32615ebcad2731a02966f384f",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 23326
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": null,
+          "receipt_sha256": "234ba9baf096f981a359858992ef929ceee510760c0d5410b57c6c7ec4eb0cee",
+          "returncode": 0,
+          "solver_dimension": null,
+          "status": "completed",
+          "total_particles": null
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "d366b8ffb74e1e9d9363751b57f3b580213b64c3090c99eb4e47a187b301ceba",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20890
+        },
+        {
+          "attempt": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02_GENCASE_01",
+          "case_root": "F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02",
+          "fluid_particles": 14696,
+          "receipt_sha256": "2f12070d14de26cdfafa6f393a2cd451c1aa468f144aa501f9f955a108fd8ce4",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 20614
+        }
+      ]
+    },
+    "wave_no_contact": {
+      "comparison_semantics": "old parent/QUAL01/QUAL02 receipts remain failed or non-equivalent evidence; final grid repair is a new physical mother geometry and successful 12 s run, not automatic Q-N",
+      "final_gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02/execution-receipt.json",
+        "sha256": "7c356630750117ebf558ad886cd2c4f285fd26857e1c7b28afcc391ef4867d62",
+        "status": "completed"
+      },
+      "final_grid_repair_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.28
+          ],
+          "size_m": [
+            5.78,
+            1.36,
+            0.49
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+        "physical_wall_size_m": [
+          6.0,
+          1.56,
+          1.26
+        ],
+        "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+        "sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+      },
+      "final_solver_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01/execution-receipt.json",
+        "sha256": "1453bb4ca7dff5d59ea2dceff35b3afaf5bfdd2dc8ce652d2e7e219385c12574",
+        "status": "completed"
+      },
+      "old_parent_definition": {
+        "fluid_fill": {
+          "point_m": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "seed_m": [
+            1.0,
+            0.8,
+            0.28
+          ],
+          "size_m": [
+            5.78,
+            1.48,
+            0.49
+          ]
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Def.xml",
+        "physical_wall_size_m": [
+          6.0,
+          1.6,
+          1.3
+        ],
+        "sha256": "35811bd77231dd217bf67cefa70d71d91164ddf862cdcfce32f1f402184db8d9"
+      },
+      "old_parent_solver_attempts": [
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01",
+          "receipt_sha256": "158ff1581beadf85cecd3d1cb6e64e26fca6409ddcbc7f9ea0a48d912a97cce7",
+          "returncode": 1,
+          "status": "failed"
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_02",
+          "receipt_sha256": "d706ceb97b6a5ae1fb630f465a95626f49e43cb3d49d3be1f1ae7ecec8f48b3e",
+          "returncode": 1,
+          "status": "failed"
+        }
+      ],
+      "repair_and_final_attempts": [
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_CLEARANCE_REPAIR_01",
+          "fluid_particles": 14135,
+          "receipt_sha256": "1f69e83736c7e1b7d288547e0a50d9be80b54cc4030f31bc338e5baf05872cf9",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 21555
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "73a49a7183f741cfeec0174c06e811ebfd0ef90751726a18b93817e90c584de9",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 24474
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_GENCASE_02",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "7c356630750117ebf558ad886cd2c4f285fd26857e1c7b28afcc391ef4867d62",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 24474
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_SOLVER_QUAL_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+          "fluid_particles": null,
+          "receipt_sha256": "1453bb4ca7dff5d59ea2dceff35b3afaf5bfdd2dc8ce652d2e7e219385c12574",
+          "returncode": 0,
+          "solver_dimension": null,
+          "status": "completed",
+          "total_particles": null
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_POINTMAX_MARGIN_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "7b55b77d0a555684f1da15e3663c5ae84849f31b78efe929de41d5486ad0efec",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 22435
+        },
+        {
+          "attempt": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02_GENCASE_01",
+          "case_root": "F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_SYNTAX_REPAIR_02",
+          "fluid_particles": 14135,
+          "receipt_sha256": "035c4078f513602688bae364146cd9792dd6e95c0220906ff1b1173339d6ae6f",
+          "returncode": 0,
+          "solver_dimension": 3,
+          "status": "completed",
+          "total_particles": 21555
+        }
+      ]
+    }
+  },
+  "matrix": [
+    {
+      "actual_counts": {
+        "fixed": 7398,
+        "floating": 1232,
+        "fluid": 14696,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_COARSE",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.06,
+      "estimated_counts": {
+        "fixed": 9646,
+        "floating": 889,
+        "fluid": 17222,
+        "moving": 0,
+        "total": 27757
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/gencase-audit-002.json",
+        "sha256": "27948a456b63854f35fb9b6de8eb20404a11cb9f5c75634897029dfc4ed4010a",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_COARSE/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_GENCASE_01/execution-receipt.json",
+        "sha256": "3778a5cd33c3cf18d0556e34d176104000dca2e901f2dbdf500a20dc83d5a5a9",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3174.336,
+        "actual_fluid_particle_count": 14696,
+        "actual_fluid_volume_from_particle_mass_m3": 3.1743359999999994,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.11412533423051735,
+        "boundary_support_exclusion_relative_to_fillbox": 0.11088553584639482,
+        "boundary_support_exclusion_volume_m3": 0.4124800000000004,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.12172188479450363,
+        "continuous_fluid_mass_after_occupancy_kg": 3614.272,
+        "continuous_fluid_volume_after_occupancy_m3": 3.614272,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.027456000000000202,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.1,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            2.9000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.08999999731779099,
+            5.31000020980835
+          ],
+          [
+            0.08999999731779099,
+            1.4099999952316284
+          ],
+          [
+            0.08999999731779099,
+            0.5700000214576721
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.11999999731779099,
+            5.28000020980835
+          ],
+          [
+            0.11999999731779099,
+            1.3799999952316284
+          ],
+          [
+            0.11999999731779099,
+            0.5400000214576721
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.12,
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999,
+              0.54000002,
+              0.60000002,
+              0.66000003,
+              0.72000003,
+              0.77999997,
+              0.83999997,
+              0.89999998,
+              0.95999998,
+              1.01999998,
+              1.08000004,
+              1.13999999,
+              1.20000005,
+              1.25999999,
+              1.32000005,
+              1.38,
+              1.44000006,
+              1.5,
+              1.55999994,
+              1.62,
+              1.67999995,
+              1.74000001,
+              1.79999995,
+              1.86000001,
+              1.91999996,
+              1.98000002,
+              2.03999996,
+              2.0999999,
+              2.16000009,
+              2.22000003,
+              2.27999997,
+              2.33999991,
+              2.4000001,
+              2.46000004,
+              2.51999998,
+              2.57999992,
+              2.6400001,
+              2.70000005,
+              2.75999999,
+              2.81999993,
+              2.88000011,
+              2.94000006,
+              3.0,
+              3.05999994,
+              3.11999989,
+              3.18000007,
+              3.24000001,
+              3.29999995,
+              3.3599999,
+              3.42000008,
+              3.48000002,
+              3.53999996,
+              3.5999999,
+              3.66000009,
+              3.72000003,
+              3.77999997,
+              3.83999991,
+              3.9000001,
+              3.96000004,
+              4.01999998,
+              4.07999992,
+              4.13999987,
+              4.19999981,
+              4.26000023,
+              4.32000017,
+              4.38000011,
+              4.44000006,
+              4.5,
+              4.55999994,
+              4.61999989,
+              4.67999983,
+              4.73999977,
+              4.80000019,
+              4.86000013,
+              4.92000008,
+              4.98000002,
+              5.03999996,
+              5.0999999,
+              5.15999985,
+              5.21999979,
+              5.28000021
+            ],
+            [
+              0.12,
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999,
+              0.54000002,
+              0.60000002,
+              0.66000003,
+              0.72000003,
+              0.77999997,
+              0.83999997,
+              0.89999998,
+              0.95999998,
+              1.01999998,
+              1.08000004,
+              1.13999999,
+              1.20000005,
+              1.25999999,
+              1.32000005,
+              1.38
+            ],
+            [
+              0.12,
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999,
+              0.54000002
+            ]
+          ],
+          "axis_counts": [
+            87,
+            22,
+            8
+          ],
+          "candidate_lattice_volume_m3": 3.3073919999999997,
+          "candidate_particle_count": 15312,
+          "envelope_lower_m": [
+            0.09,
+            0.09,
+            0.09
+          ],
+          "envelope_size_m": [
+            5.22000021,
+            1.3199999999999998,
+            0.4800000200000001
+          ],
+          "envelope_upper_m": [
+            5.31000021,
+            1.41,
+            0.57000002
+          ],
+          "grid_spacing_m": 0.06
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.13305600000000029,
+        "lattice_target_fluid_mass_kg": 3201.792,
+        "lattice_target_fluid_volume_m3": 3.2017919999999997,
+        "lattice_target_mass_relative_error": -0.008575197889182151,
+        "liquid_surface_z_m": 0.5800000000000001,
+        "moving_particle_count_seen": 0,
+        "nominal_fillbox_mass_kg": 3719.872,
+        "nominal_fillbox_volume_m3": 3.719872,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.10560000000000008,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.1466545085422294,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3201.792,
+        "support_adjusted_continuous_fluid_volume_m3": 3.2017919999999997,
+        "support_adjusted_mass_relative_error": -0.008575197889182151,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.1499998283386228,
+          "x_low_m": 0.08999999731779099,
+          "y_high_m": 0.14999994754791257,
+          "y_low_m": 0.08999999731779099,
+          "z_bottom_m": 0.08999999731779099
+        }
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Def.xml",
+          "sha256": "7ad57e1222db326b732c706df38cb86914e05f3b23f94a02309b4a013413a6c1",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/F6_SIMPLE_FREE_RESPONSE_RES_COARSE_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.52,
+        1.62,
+        1.32
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/coarse/gencase-audit.json",
+        "sha256": "260c0e0c7f475be49445d1d6aa117fc9f3c4f5e37e2979b91d27f1f001fe5eb9"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.3859999999999997,
+        "fluid_mass_relative_construction_fillbox": -0.1466545085422294,
+        "fluid_mass_relative_continuous_physical": -0.1466545085422294,
+        "fluid_mass_relative_effective_center_lattice": -0.008575197889182151,
+        "fluid_mass_relative_lattice_target": -0.008575197889182151
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_COARSE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_coarse_gencase.json",
+        "sha256": "21a6561f6323da851200c3a30b3e8dae4c457c67597c5ea36cb2873993d2f83c"
+      },
+      "resolution_id": "coarse",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    },
+    {
+      "actual_counts": {
+        "fixed": 29355,
+        "floating": 8232,
+        "fluid": 118380,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.03,
+      "estimated_counts": {
+        "fixed": 38584,
+        "floating": 7111,
+        "fluid": 137773,
+        "moving": 0,
+        "total": 183468
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/gencase-audit-002.json",
+        "sha256": "1af855313b5229a0f74aec758b652131375e35f047ec162962ad743ede12eaf2",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_GENCASE_01/execution-receipt.json",
+        "sha256": "0ce522b72ac8b56ef3fb8887c7d3aa44c008d98de58eb2862c04fbbb7331aa92",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3196.2599999999998,
+        "actual_fluid_particle_count": 118380,
+        "actual_fluid_volume_from_particle_mass_m3": 3.1962599999999997,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.11412533423051735,
+        "boundary_support_exclusion_relative_to_fillbox": 0.11088553584639482,
+        "boundary_support_exclusion_volume_m3": 0.4124800000000004,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.11565593292369813,
+        "continuous_fluid_mass_after_occupancy_kg": 3614.272,
+        "continuous_fluid_volume_after_occupancy_m3": 3.614272,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.005531999999999926,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.1,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            2.9000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.07500000357627869,
+            5.295000209808349
+          ],
+          [
+            0.07500000357627869,
+            1.3949999952316283
+          ],
+          [
+            0.07500000357627869,
+            0.5550000214576721
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.09000000357627869,
+            5.28000020980835
+          ],
+          [
+            0.09000000357627869,
+            1.3799999952316284
+          ],
+          [
+            0.09000000357627869,
+            0.5400000214576721
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.09,
+              0.12,
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999,
+              0.54000002,
+              0.56999999,
+              0.60000002,
+              0.63,
+              0.66000003,
+              0.69,
+              0.72000003,
+              0.75,
+              0.77999997,
+              0.81,
+              0.83999997,
+              0.87,
+              0.89999998,
+              0.93000001,
+              0.95999998,
+              0.99000001,
+              1.01999998,
+              1.04999995,
+              1.08000004,
+              1.11000001,
+              1.13999999,
+              1.16999996,
+              1.20000005,
+              1.23000002,
+              1.25999999,
+              1.28999996,
+              1.32000005,
+              1.35000002,
+              1.38,
+              1.40999997,
+              1.44000006,
+              1.47000003,
+              1.5,
+              1.52999997,
+              1.55999994,
+              1.59000003,
+              1.62,
+              1.64999998,
+              1.67999995,
+              1.71000004,
+              1.74000001,
+              1.76999998,
+              1.79999995,
+              1.83000004,
+              1.86000001,
+              1.88999999,
+              1.91999996,
+              1.95000005,
+              1.98000002,
+              2.00999999,
+              2.03999996,
+              2.06999993,
+              2.0999999,
+              2.13000011,
+              2.16000009,
+              2.19000006,
+              2.22000003,
+              2.25,
+              2.27999997,
+              2.30999994,
+              2.33999991,
+              2.36999989,
+              2.4000001,
+              2.43000007,
+              2.46000004,
+              2.49000001,
+              2.51999998,
+              2.54999995,
+              2.57999992,
+              2.6099999,
+              2.6400001,
+              2.67000008,
+              2.70000005,
+              2.73000002,
+              2.75999999,
+              2.78999996,
+              2.81999993,
+              2.8499999,
+              2.88000011,
+              2.91000009,
+              2.94000006,
+              2.97000003,
+              3.0,
+              3.02999997,
+              3.05999994,
+              3.08999991,
+              3.11999989,
+              3.1500001,
+              3.18000007,
+              3.21000004,
+              3.24000001,
+              3.26999998,
+              3.29999995,
+              3.32999992,
+              3.3599999,
+              3.3900001,
+              3.42000008,
+              3.45000005,
+              3.48000002,
+              3.50999999,
+              3.53999996,
+              3.56999993,
+              3.5999999,
+              3.63000011,
+              3.66000009,
+              3.69000006,
+              3.72000003,
+              3.75,
+              3.77999997,
+              3.80999994,
+              3.83999991,
+              3.86999989,
+              3.9000001,
+              3.93000007,
+              3.96000004,
+              3.99000001,
+              4.01999998,
+              4.05000019,
+              4.07999992,
+              4.11000013,
+              4.13999987,
+              4.17000008,
+              4.19999981,
+              4.23000002,
+              4.26000023,
+              4.28999996,
+              4.32000017,
+              4.3499999,
+              4.38000011,
+              4.40999985,
+              4.44000006,
+              4.46999979,
+              4.5,
+              4.53000021,
+              4.55999994,
+              4.59000015,
+              4.61999989,
+              4.6500001,
+              4.67999983,
+              4.71000004,
+              4.73999977,
+              4.76999998,
+              4.80000019,
+              4.82999992,
+              4.86000013,
+              4.88999987,
+              4.92000008,
+              4.94999981,
+              4.98000002,
+              5.01000023,
+              5.03999996,
+              5.07000017,
+              5.0999999,
+              5.13000011,
+              5.15999985,
+              5.19000006,
+              5.21999979,
+              5.25,
+              5.28000021
+            ],
+            [
+              0.09,
+              0.12,
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999,
+              0.54000002,
+              0.56999999,
+              0.60000002,
+              0.63,
+              0.66000003,
+              0.69,
+              0.72000003,
+              0.75,
+              0.77999997,
+              0.81,
+              0.83999997,
+              0.87,
+              0.89999998,
+              0.93000001,
+              0.95999998,
+              0.99000001,
+              1.01999998,
+              1.04999995,
+              1.08000004,
+              1.11000001,
+              1.13999999,
+              1.16999996,
+              1.20000005,
+              1.23000002,
+              1.25999999,
+              1.28999996,
+              1.32000005,
+              1.35000002,
+              1.38
+            ],
+            [
+              0.09,
+              0.12,
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999,
+              0.54000002
+            ]
+          ],
+          "axis_counts": [
+            174,
+            44,
+            16
+          ],
+          "candidate_lattice_volume_m3": 3.3073919999999997,
+          "candidate_particle_count": 122496,
+          "envelope_lower_m": [
+            0.075,
+            0.075,
+            0.075
+          ],
+          "envelope_size_m": [
+            5.220000209999999,
+            1.3199999999999998,
+            0.48000002
+          ],
+          "envelope_upper_m": [
+            5.2950002099999995,
+            1.3949999999999998,
+            0.55500002
+          ],
+          "grid_spacing_m": 0.03
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.11113200000000001,
+        "lattice_target_fluid_mass_kg": 3201.792,
+        "lattice_target_fluid_volume_m3": 3.2017919999999997,
+        "lattice_target_mass_relative_error": -0.0017277824418325816,
+        "liquid_surface_z_m": 0.5800000000000001,
+        "moving_particle_count_seen": 0,
+        "nominal_fillbox_mass_kg": 3719.872,
+        "nominal_fillbox_volume_m3": 3.719872,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.10560000000000008,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.14076075735939308,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3201.792,
+        "support_adjusted_continuous_fluid_volume_m3": 3.2017919999999997,
+        "support_adjusted_mass_relative_error": -0.0017277824418325816,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.16499982833862337,
+          "x_low_m": 0.07500000357627869,
+          "y_high_m": 0.1649999475479127,
+          "y_low_m": 0.07500000357627869,
+          "z_bottom_m": 0.07500000357627869
+        }
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Def.xml",
+          "sha256": "083cea07819afbe31f0926c748e42765939be3b63db651469d9cf81f425fa712",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.49,
+        1.59,
+        1.29
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/medium/gencase-audit.json",
+        "sha256": "4cdc17693f08bb1f5b4a6a6fbc5a832bf4a8fa488ec0e668681448b501c08869"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.15762499999999968,
+        "fluid_mass_relative_construction_fillbox": -0.14076075735939308,
+        "fluid_mass_relative_continuous_physical": -0.14076075735939308,
+        "fluid_mass_relative_effective_center_lattice": -0.0017277824418325816,
+        "fluid_mass_relative_lattice_target": -0.0017277824418325816
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_MEDIUM_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_medium_gencase.json",
+        "sha256": "04af55bc2b66555cab9e73093722861995e49528bb90a95e558729cc5d5f8b9f"
+      },
+      "resolution_id": "medium",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    },
+    {
+      "actual_counts": {
+        "fixed": 65872,
+        "floating": 26691,
+        "fluid": 424869,
+        "moving": 0
+      },
+      "body": {
+        "mass_kg": 100.0,
+        "mkbound": 50,
+        "point_m": [
+          2.1,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.333333333333333,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.666666666666668,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            8.333333333333334
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_RES_FINE",
+      "continuous_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "dp_m": 0.02,
+      "estimated_counts": {
+        "fixed": 86814,
+        "floating": 24000,
+        "fluid": 464984,
+        "moving": 0,
+        "total": 575798
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3719.872,
+        "point_m": [
+          0.06,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.3
+        ],
+        "size_m": [
+          5.26,
+          1.36,
+          0.52
+        ],
+        "volume_m3": 3.719872
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/gencase-audit-002.json",
+        "sha256": "4fcfa49bcf353534a912d0d78493dc7c97f262e3c54fe89a6f03edfd6c29802d",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_RES_FINE/F6_SIMPLE_FREE_RESPONSE_RES_FINE_GENCASE_01/execution-receipt.json",
+        "sha256": "5f767218cd1046f4f1c6cbe5a5402796708a26b3fddfe15b22fa9a57f661624c",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3398.952,
+        "actual_fluid_particle_count": 424869,
+        "actual_fluid_volume_from_particle_mass_m3": 3.3989520000000004,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.057846227400704615,
+        "boundary_support_exclusion_relative_to_fillbox": 0.05620408444161505,
+        "boundary_support_exclusion_volume_m3": 0.20907199999999948,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.05957492961238109,
+        "continuous_fluid_mass_after_occupancy_kg": 3614.272,
+        "continuous_fluid_volume_after_occupancy_m3": 3.614272,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.006248000000000087,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.06,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.26,
+            1.36,
+            0.52
+          ],
+          "upper": [
+            5.319999999999999,
+            1.4200000000000002,
+            0.5800000000000001
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.1,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            2.9000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.06999999821186066,
+            5.310000190734863
+          ],
+          [
+            0.06999999821186066,
+            1.409999976158142
+          ],
+          [
+            0.06999999821186066,
+            0.5700000023841858
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.07999999821186066,
+            5.300000190734863
+          ],
+          [
+            0.07999999821186066,
+            1.399999976158142
+          ],
+          [
+            0.07999999821186066,
+            0.5600000023841858
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.08,
+              0.1,
+              0.12,
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002,
+              0.56,
+              0.57999998,
+              0.60000002,
+              0.62,
+              0.63999999,
+              0.66000003,
+              0.68000001,
+              0.69999999,
+              0.72000003,
+              0.74000001,
+              0.75999999,
+              0.77999997,
+              0.80000001,
+              0.81999999,
+              0.83999997,
+              0.86000001,
+              0.88,
+              0.89999998,
+              0.92000002,
+              0.94,
+              0.95999998,
+              0.98000002,
+              1.0,
+              1.01999998,
+              1.03999996,
+              1.05999994,
+              1.08000004,
+              1.10000002,
+              1.12,
+              1.13999999,
+              1.15999997,
+              1.17999995,
+              1.20000005,
+              1.22000003,
+              1.24000001,
+              1.25999999,
+              1.27999997,
+              1.29999995,
+              1.32000005,
+              1.34000003,
+              1.36000001,
+              1.38,
+              1.39999998,
+              1.41999996,
+              1.44000006,
+              1.46000004,
+              1.48000002,
+              1.5,
+              1.51999998,
+              1.53999996,
+              1.55999994,
+              1.58000004,
+              1.60000002,
+              1.62,
+              1.63999999,
+              1.65999997,
+              1.67999995,
+              1.70000005,
+              1.72000003,
+              1.74000001,
+              1.75999999,
+              1.77999997,
+              1.79999995,
+              1.82000005,
+              1.84000003,
+              1.86000001,
+              1.88,
+              1.89999998,
+              1.91999996,
+              1.94000006,
+              1.96000004,
+              1.98000002,
+              2.0,
+              2.01999998,
+              2.03999996,
+              2.05999994,
+              2.07999992,
+              2.0999999,
+              2.11999989,
+              2.1400001,
+              2.16000009,
+              2.18000007,
+              2.20000005,
+              2.22000003,
+              2.24000001,
+              2.25999999,
+              2.27999997,
+              2.29999995,
+              2.31999993,
+              2.33999991,
+              2.3599999,
+              2.38000011,
+              2.4000001,
+              2.42000008,
+              2.44000006,
+              2.46000004,
+              2.48000002,
+              2.5,
+              2.51999998,
+              2.53999996,
+              2.55999994,
+              2.57999992,
+              2.5999999,
+              2.61999989,
+              2.6400001,
+              2.66000009,
+              2.68000007,
+              2.70000005,
+              2.72000003,
+              2.74000001,
+              2.75999999,
+              2.77999997,
+              2.79999995,
+              2.81999993,
+              2.83999991,
+              2.8599999,
+              2.88000011,
+              2.9000001,
+              2.92000008,
+              2.94000006,
+              2.96000004,
+              2.98000002,
+              3.0,
+              3.01999998,
+              3.03999996,
+              3.05999994,
+              3.07999992,
+              3.0999999,
+              3.11999989,
+              3.1400001,
+              3.16000009,
+              3.18000007,
+              3.20000005,
+              3.22000003,
+              3.24000001,
+              3.25999999,
+              3.27999997,
+              3.29999995,
+              3.31999993,
+              3.33999991,
+              3.3599999,
+              3.38000011,
+              3.4000001,
+              3.42000008,
+              3.44000006,
+              3.46000004,
+              3.48000002,
+              3.5,
+              3.51999998,
+              3.53999996,
+              3.55999994,
+              3.57999992,
+              3.5999999,
+              3.61999989,
+              3.6400001,
+              3.66000009,
+              3.68000007,
+              3.70000005,
+              3.72000003,
+              3.74000001,
+              3.75999999,
+              3.77999997,
+              3.79999995,
+              3.81999993,
+              3.83999991,
+              3.8599999,
+              3.88000011,
+              3.9000001,
+              3.92000008,
+              3.94000006,
+              3.96000004,
+              3.98000002,
+              4.0,
+              4.01999998,
+              4.03999996,
+              4.05999994,
+              4.07999992,
+              4.0999999,
+              4.11999989,
+              4.13999987,
+              4.15999985,
+              4.17999983,
+              4.19999981,
+              4.21999979,
+              4.23999977,
+              4.26000023,
+              4.28000021,
+              4.30000019,
+              4.32000017,
+              4.34000015,
+              4.36000013,
+              4.38000011,
+              4.4000001,
+              4.42000008,
+              4.44000006,
+              4.46000004,
+              4.48000002,
+              4.5,
+              4.51999998,
+              4.53999996,
+              4.55999994,
+              4.57999992,
+              4.5999999,
+              4.61999989,
+              4.63999987,
+              4.65999985,
+              4.67999983,
+              4.69999981,
+              4.71999979,
+              4.73999977,
+              4.76000023,
+              4.78000021,
+              4.80000019,
+              4.82000017,
+              4.84000015,
+              4.86000013,
+              4.88000011,
+              4.9000001,
+              4.92000008,
+              4.94000006,
+              4.96000004,
+              4.98000002,
+              5.0,
+              5.01999998,
+              5.03999996,
+              5.05999994,
+              5.07999992,
+              5.0999999,
+              5.11999989,
+              5.13999987,
+              5.15999985,
+              5.17999983,
+              5.19999981,
+              5.21999979,
+              5.23999977,
+              5.26000023,
+              5.28000021,
+              5.30000019
+            ],
+            [
+              0.08,
+              0.1,
+              0.12,
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002,
+              0.56,
+              0.57999998,
+              0.60000002,
+              0.62,
+              0.63999999,
+              0.66000003,
+              0.68000001,
+              0.69999999,
+              0.72000003,
+              0.74000001,
+              0.75999999,
+              0.77999997,
+              0.80000001,
+              0.81999999,
+              0.83999997,
+              0.86000001,
+              0.88,
+              0.89999998,
+              0.92000002,
+              0.94,
+              0.95999998,
+              0.98000002,
+              1.0,
+              1.01999998,
+              1.03999996,
+              1.05999994,
+              1.08000004,
+              1.10000002,
+              1.12,
+              1.13999999,
+              1.15999997,
+              1.17999995,
+              1.20000005,
+              1.22000003,
+              1.24000001,
+              1.25999999,
+              1.27999997,
+              1.29999995,
+              1.32000005,
+              1.34000003,
+              1.36000001,
+              1.38,
+              1.39999998
+            ],
+            [
+              0.08,
+              0.1,
+              0.12,
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002,
+              0.56
+            ]
+          ],
+          "axis_counts": [
+            262,
+            67,
+            25
+          ],
+          "candidate_lattice_volume_m3": 3.5108000000000006,
+          "candidate_particle_count": 438850,
+          "envelope_lower_m": [
+            0.07,
+            0.07,
+            0.07
+          ],
+          "envelope_size_m": [
+            5.24000019,
+            1.33999998,
+            0.5
+          ],
+          "envelope_upper_m": [
+            5.31000019,
+            1.40999998,
+            0.5700000000000001
+          ],
+          "grid_spacing_m": 0.02
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.11184800000000017,
+        "lattice_target_fluid_mass_kg": 3405.2000000000007,
+        "lattice_target_fluid_volume_m3": 3.4052000000000007,
+        "lattice_target_mass_relative_error": -0.0018348408316694043,
+        "liquid_surface_z_m": 0.5800000000000001,
+        "moving_particle_count_seen": 0,
+        "nominal_fillbox_mass_kg": 3719.872,
+        "nominal_fillbox_volume_m3": 3.719872,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.10560000000000008,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.08627178569585181,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3405.2000000000007,
+        "support_adjusted_continuous_fluid_volume_m3": 3.4052000000000007,
+        "support_adjusted_mass_relative_error": -0.0018348408316694043,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.1499998474121096,
+          "x_low_m": 0.06999999821186066,
+          "y_high_m": 0.14999996662139892,
+          "y_low_m": 0.06999999821186066,
+          "z_bottom_m": 0.06999999821186066
+        }
+      },
+      "mechanism_id": "simple_free_response",
+      "paddle": null,
+      "parent_case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Control.csv",
+          "sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "19e1fc2333ea1ea5e6b03fc35941c9949106a0ab10d9ffb648f4603bbc0ff670"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Def.xml",
+          "sha256": "b455152c777cf9f12be9b4915ff96e674d4566fe6138649f65eb76271b3f2aeb",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "b8f9b5d5c919fbf3075646f0d00b4ba2e7cba893462136549739eaa977822628"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Native.json",
+          "sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "1b269353ec59b41c6ebc9f034d83c50ccdf2ebddb4b77b3ed8d9e15cb56cdfe7"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/F6_SIMPLE_FREE_RESPONSE_RES_FINE_Normal.json",
+          "sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "f2b0c28fc196aa58cd21a636eb604000dca622458f56385f32c86b1e4e22c6e3"
+        }
+      },
+      "physical_geometry_hash": "1252d88a6467628e361701e6f4c45015b6d90b620f79b67139adddc30298043d",
+      "physical_wall_size_m": [
+        5.46,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        5.4799999999999995,
+        1.58,
+        1.28
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/simple_free_response/fine/gencase-audit.json",
+        "sha256": "cf0b00b66505d28979546f71af0ab8853d0dded8a2efaa9f4a176b7dd5c56cf8"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11212500000000003,
+        "fluid_mass_relative_construction_fillbox": -0.08627178569585181,
+        "fluid_mass_relative_continuous_physical": -0.08627178569585181,
+        "fluid_mass_relative_effective_center_lattice": -0.0018348408316694043,
+        "fluid_mass_relative_lattice_target": -0.0018348408316694043
+      },
+      "request": {
+        "attempt_id": "F6_SIMPLE_FREE_RESPONSE_RES_FINE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/simple_free_response_fine_gencase.json",
+        "sha256": "e23fc94ca9421a4ca149f91818d567b4fe0463a22992dec10b45574cdd85cb29"
+      },
+      "resolution_id": "fine",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    },
+    {
+      "actual_counts": {
+        "fixed": 8019,
+        "floating": 1320,
+        "fluid": 14135,
+        "moving": 1000
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_COARSE",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.06,
+      "estimated_counts": {
+        "fixed": 10492,
+        "floating": 889,
+        "fluid": 17832,
+        "moving": 889,
+        "total": 30102
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/gencase-audit-002.json",
+        "sha256": "1eb04b3fb86d794883d036f30f15effb96d1c9b9055cc9000925890fbb004db1",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_COARSE/F6_WAVE_NO_CONTACT_RES_COARSE_GENCASE_01/execution-receipt.json",
+        "sha256": "97e697af43584710f937ee18990a7123231232eb63a0c7836b309d091980a403",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3053.16,
+        "actual_fluid_particle_count": 14135,
+        "actual_fluid_volume_from_particle_mass_m3": 3.0531599999999997,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.18393699715363995,
+        "boundary_support_exclusion_relative_to_fillbox": 0.17958186734901602,
+        "boundary_support_exclusion_volume_m3": 0.6917120000000012,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.1881171900594376,
+        "continuous_fluid_mass_after_occupancy_kg": 3760.5920000000006,
+        "continuous_fluid_volume_after_occupancy_m3": 3.7605920000000004,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.01571999999999961,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.6,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            3.4000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.15000000715255737,
+            5.850000171661377
+          ],
+          [
+            0.08999999731779099,
+            1.4099999952316284
+          ],
+          [
+            0.08999999731779099,
+            0.509999989271164
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.18000000715255737,
+            5.820000171661377
+          ],
+          [
+            0.11999999731779099,
+            1.3799999952316284
+          ],
+          [
+            0.11999999731779099,
+            0.47999998927116394
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999,
+              0.54000002,
+              0.60000002,
+              0.66000003,
+              0.72000003,
+              0.77999997,
+              0.83999997,
+              0.89999998,
+              0.95999998,
+              1.01999998,
+              1.08000004,
+              1.13999999,
+              1.20000005,
+              1.25999999,
+              1.32000005,
+              1.38,
+              1.44000006,
+              1.5,
+              1.55999994,
+              1.62,
+              1.67999995,
+              1.74000001,
+              1.79999995,
+              1.86000001,
+              1.91999996,
+              1.98000002,
+              2.03999996,
+              2.0999999,
+              2.16000009,
+              2.22000003,
+              2.27999997,
+              2.33999991,
+              2.4000001,
+              2.46000004,
+              2.51999998,
+              2.57999992,
+              2.6400001,
+              2.70000005,
+              2.75999999,
+              2.81999993,
+              2.88000011,
+              2.94000006,
+              3.0,
+              3.05999994,
+              3.11999989,
+              3.18000007,
+              3.24000001,
+              3.29999995,
+              3.3599999,
+              3.42000008,
+              3.48000002,
+              3.53999996,
+              3.5999999,
+              3.66000009,
+              3.72000003,
+              3.77999997,
+              3.83999991,
+              3.9000001,
+              3.96000004,
+              4.01999998,
+              4.07999992,
+              4.13999987,
+              4.19999981,
+              4.26000023,
+              4.32000017,
+              4.38000011,
+              4.44000006,
+              4.5,
+              4.55999994,
+              4.61999989,
+              4.67999983,
+              4.73999977,
+              4.80000019,
+              4.86000013,
+              4.92000008,
+              4.98000002,
+              5.03999996,
+              5.0999999,
+              5.15999985,
+              5.21999979,
+              5.28000021,
+              5.34000015,
+              5.4000001,
+              5.46000004,
+              5.51999998,
+              5.57999992,
+              5.63999987,
+              5.69999981,
+              5.76000023,
+              5.82000017
+            ],
+            [
+              0.12,
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999,
+              0.54000002,
+              0.60000002,
+              0.66000003,
+              0.72000003,
+              0.77999997,
+              0.83999997,
+              0.89999998,
+              0.95999998,
+              1.01999998,
+              1.08000004,
+              1.13999999,
+              1.20000005,
+              1.25999999,
+              1.32000005,
+              1.38
+            ],
+            [
+              0.12,
+              0.18000001,
+              0.23999999,
+              0.30000001,
+              0.36000001,
+              0.41999999,
+              0.47999999
+            ]
+          ],
+          "axis_counts": [
+            95,
+            22,
+            7
+          ],
+          "candidate_lattice_volume_m3": 3.1600799999999993,
+          "candidate_particle_count": 14630,
+          "envelope_lower_m": [
+            0.15000001,
+            0.09,
+            0.09
+          ],
+          "envelope_size_m": [
+            5.70000016,
+            1.3199999999999998,
+            0.41999999
+          ],
+          "envelope_upper_m": [
+            5.85000017,
+            1.41,
+            0.50999999
+          ],
+          "grid_spacing_m": 0.06
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.10691999999999968,
+        "lattice_target_fluid_mass_kg": 3068.879999999999,
+        "lattice_target_fluid_volume_m3": 3.068879999999999,
+        "lattice_target_mass_relative_error": -0.005122389927269655,
+        "liquid_surface_z_m": 0.55,
+        "moving_particle_count_seen": 1000,
+        "nominal_fillbox_mass_kg": 3851.7920000000004,
+        "nominal_fillbox_volume_m3": 3.8517920000000005,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.09120000000000007,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.20734037559660556,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3068.879999999999,
+        "support_adjusted_continuous_fluid_volume_m3": 3.068879999999999,
+        "support_adjusted_mass_relative_error": -0.005122389927269655,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.1499998283386228,
+          "x_low_m": 0.15000000715255737,
+          "y_high_m": 0.14999994754791257,
+          "y_low_m": 0.08999999731779099,
+          "z_bottom_m": 0.08999999731779099
+        }
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Def.xml",
+          "sha256": "962359a66c915c633cf9c2589c46f6efe1fe24c7d03c0832b686c20fe4043f2c",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/F6_WAVE_NO_CONTACT_RES_COARSE_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.06,
+        1.62,
+        1.32
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/coarse/gencase-audit.json",
+        "sha256": "74273dafb4a2f95f5b1d348656fe8e7ffb1094d7ea70cf360bfeb95de47f9553"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.48499999999999965,
+        "fluid_mass_relative_construction_fillbox": -0.20734037559660556,
+        "fluid_mass_relative_continuous_physical": -0.20734037559660556,
+        "fluid_mass_relative_effective_center_lattice": -0.005122389927269655,
+        "fluid_mass_relative_lattice_target": -0.005122389927269655
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_COARSE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_coarse_gencase.json",
+        "sha256": "90b25f35f754b06c865c8bf3b0608cd59f356cfc56761f43585b493d85d58930"
+      },
+      "resolution_id": "coarse",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    },
+    {
+      "actual_counts": {
+        "fixed": 31821,
+        "floating": 7938,
+        "fluid": 123318,
+        "moving": 6120
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_MEDIUM",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.03,
+      "estimated_counts": {
+        "fixed": 41968,
+        "floating": 7111,
+        "fluid": 142659,
+        "moving": 7111,
+        "total": 198849
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/gencase-audit-002.json",
+        "sha256": "6797de2baa9aae5f20e17cf5448c70a3d8a478efde70fb9a88801a0129e9142b",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_MEDIUM/F6_WAVE_NO_CONTACT_RES_MEDIUM_GENCASE_01/execution-receipt.json",
+        "sha256": "d48a7c576810ca08319afa3d29401549fea9c506423cfcc6585f67e6d1ad0d89",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3329.586,
+        "actual_fluid_particle_count": 123318,
+        "actual_fluid_volume_from_particle_mass_m3": 3.3295859999999995,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.11443730136106255,
+        "boundary_support_exclusion_relative_to_fillbox": 0.11172773607713005,
+        "boundary_support_exclusion_volume_m3": 0.43035200000000096,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.11461121014989151,
+        "continuous_fluid_mass_after_occupancy_kg": 3760.5920000000006,
+        "continuous_fluid_volume_after_occupancy_m3": 3.7605920000000004,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.0006540000000000296,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.6,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            3.4000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.13500000596046446,
+            5.895000114440918
+          ],
+          [
+            0.07500000357627869,
+            1.3949999952316283
+          ],
+          [
+            0.07500000357627869,
+            0.5249999904632568
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.15000000596046448,
+            5.880000114440918
+          ],
+          [
+            0.09000000357627869,
+            1.3799999952316284
+          ],
+          [
+            0.09000000357627869,
+            0.5099999904632568
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999,
+              0.54000002,
+              0.56999999,
+              0.60000002,
+              0.63,
+              0.66000003,
+              0.69,
+              0.72000003,
+              0.75,
+              0.77999997,
+              0.81,
+              0.83999997,
+              0.87,
+              0.89999998,
+              0.93000001,
+              0.95999998,
+              0.99000001,
+              1.01999998,
+              1.04999995,
+              1.08000004,
+              1.11000001,
+              1.13999999,
+              1.16999996,
+              1.20000005,
+              1.23000002,
+              1.25999999,
+              1.28999996,
+              1.32000005,
+              1.35000002,
+              1.38,
+              1.40999997,
+              1.44000006,
+              1.47000003,
+              1.5,
+              1.52999997,
+              1.55999994,
+              1.59000003,
+              1.62,
+              1.64999998,
+              1.67999995,
+              1.71000004,
+              1.74000001,
+              1.76999998,
+              1.79999995,
+              1.83000004,
+              1.86000001,
+              1.88999999,
+              1.91999996,
+              1.95000005,
+              1.98000002,
+              2.00999999,
+              2.03999996,
+              2.06999993,
+              2.0999999,
+              2.13000011,
+              2.16000009,
+              2.19000006,
+              2.22000003,
+              2.25,
+              2.27999997,
+              2.30999994,
+              2.33999991,
+              2.36999989,
+              2.4000001,
+              2.43000007,
+              2.46000004,
+              2.49000001,
+              2.51999998,
+              2.54999995,
+              2.57999992,
+              2.6099999,
+              2.6400001,
+              2.67000008,
+              2.70000005,
+              2.73000002,
+              2.75999999,
+              2.78999996,
+              2.81999993,
+              2.8499999,
+              2.88000011,
+              2.91000009,
+              2.94000006,
+              2.97000003,
+              3.0,
+              3.02999997,
+              3.05999994,
+              3.08999991,
+              3.11999989,
+              3.1500001,
+              3.18000007,
+              3.21000004,
+              3.24000001,
+              3.26999998,
+              3.29999995,
+              3.32999992,
+              3.3599999,
+              3.3900001,
+              3.42000008,
+              3.45000005,
+              3.48000002,
+              3.50999999,
+              3.53999996,
+              3.56999993,
+              3.5999999,
+              3.63000011,
+              3.66000009,
+              3.69000006,
+              3.72000003,
+              3.75,
+              3.77999997,
+              3.80999994,
+              3.83999991,
+              3.86999989,
+              3.9000001,
+              3.93000007,
+              3.96000004,
+              3.99000001,
+              4.01999998,
+              4.05000019,
+              4.07999992,
+              4.11000013,
+              4.13999987,
+              4.17000008,
+              4.19999981,
+              4.23000002,
+              4.26000023,
+              4.28999996,
+              4.32000017,
+              4.3499999,
+              4.38000011,
+              4.40999985,
+              4.44000006,
+              4.46999979,
+              4.5,
+              4.53000021,
+              4.55999994,
+              4.59000015,
+              4.61999989,
+              4.6500001,
+              4.67999983,
+              4.71000004,
+              4.73999977,
+              4.76999998,
+              4.80000019,
+              4.82999992,
+              4.86000013,
+              4.88999987,
+              4.92000008,
+              4.94999981,
+              4.98000002,
+              5.01000023,
+              5.03999996,
+              5.07000017,
+              5.0999999,
+              5.13000011,
+              5.15999985,
+              5.19000006,
+              5.21999979,
+              5.25,
+              5.28000021,
+              5.30999994,
+              5.34000015,
+              5.36999989,
+              5.4000001,
+              5.42999983,
+              5.46000004,
+              5.48999977,
+              5.51999998,
+              5.55000019,
+              5.57999992,
+              5.61000013,
+              5.63999987,
+              5.67000008,
+              5.69999981,
+              5.73000002,
+              5.76000023,
+              5.78999996,
+              5.82000017,
+              5.8499999,
+              5.88000011
+            ],
+            [
+              0.09,
+              0.12,
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999,
+              0.54000002,
+              0.56999999,
+              0.60000002,
+              0.63,
+              0.66000003,
+              0.69,
+              0.72000003,
+              0.75,
+              0.77999997,
+              0.81,
+              0.83999997,
+              0.87,
+              0.89999998,
+              0.93000001,
+              0.95999998,
+              0.99000001,
+              1.01999998,
+              1.04999995,
+              1.08000004,
+              1.11000001,
+              1.13999999,
+              1.16999996,
+              1.20000005,
+              1.23000002,
+              1.25999999,
+              1.28999996,
+              1.32000005,
+              1.35000002,
+              1.38
+            ],
+            [
+              0.09,
+              0.12,
+              0.15000001,
+              0.18000001,
+              0.20999999,
+              0.23999999,
+              0.27000001,
+              0.30000001,
+              0.33000001,
+              0.36000001,
+              0.38999999,
+              0.41999999,
+              0.44999999,
+              0.47999999,
+              0.50999999
+            ]
+          ],
+          "axis_counts": [
+            192,
+            44,
+            15
+          ],
+          "candidate_lattice_volume_m3": 3.4214399999999996,
+          "candidate_particle_count": 126720,
+          "envelope_lower_m": [
+            0.13500001,
+            0.075,
+            0.075
+          ],
+          "envelope_size_m": [
+            5.7600001,
+            1.3199999999999998,
+            0.44999998999999996
+          ],
+          "envelope_upper_m": [
+            5.89500011,
+            1.3949999999999998,
+            0.52499999
+          ],
+          "grid_spacing_m": 0.03
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.0918540000000001,
+        "lattice_target_fluid_mass_kg": 3330.2399999999993,
+        "lattice_target_fluid_volume_m3": 3.3302399999999994,
+        "lattice_target_mass_relative_error": -0.00019638224272111593,
+        "liquid_surface_z_m": 0.55,
+        "moving_particle_count_seen": 6120,
+        "nominal_fillbox_mass_kg": 3851.7920000000004,
+        "nominal_fillbox_volume_m3": 3.8517920000000005,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.09120000000000007,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.13557481816255923,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3330.2399999999993,
+        "support_adjusted_continuous_fluid_volume_m3": 3.3302399999999994,
+        "support_adjusted_mass_relative_error": -0.00019638224272111593,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.10499988555908235,
+          "x_low_m": 0.13500000596046446,
+          "y_high_m": 0.1649999475479127,
+          "y_low_m": 0.07500000357627869,
+          "z_bottom_m": 0.07500000357627869
+        }
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Def.xml",
+          "sha256": "f6fe0508c780e56cc3f58cb3eaf490c42f2ade76c7145e91d0d7e8a2006de810",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/F6_WAVE_NO_CONTACT_RES_MEDIUM_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.03,
+        1.59,
+        1.29
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/medium/gencase-audit.json",
+        "sha256": "35345ef564d79b32b8bce2714e034c333b526deff4d71f2eb4d63f5bce027a05"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11628124999999967,
+        "fluid_mass_relative_construction_fillbox": -0.13557481816255923,
+        "fluid_mass_relative_continuous_physical": -0.13557481816255923,
+        "fluid_mass_relative_effective_center_lattice": -0.00019638224272111593,
+        "fluid_mass_relative_lattice_target": -0.00019638224272111593
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_MEDIUM_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_medium_gencase.json",
+        "sha256": "14bbf6a4e60d7cae8da44ae24febd5f6a65ac1e975c1b1c4893c495e367885cf"
+      },
+      "resolution_id": "medium",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    },
+    {
+      "actual_counts": {
+        "fixed": 71407,
+        "floating": 26691,
+        "fluid": 450394,
+        "moving": 23100
+      },
+      "body": {
+        "mass_kg": 95.0,
+        "mkbound": 50,
+        "point_m": [
+          2.6,
+          0.5,
+          0.36
+        ],
+        "size_m": [
+          0.8,
+          0.6,
+          0.4
+        ],
+        "source_inertia_kg_m2": [
+          [
+            4.116666666666666,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            6.333333333333335,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            7.916666666666667
+          ]
+        ],
+        "volume_m3": 0.192
+      },
+      "case_id": "F6_WAVE_NO_CONTACT_RES_FINE",
+      "continuous_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "dp_m": 0.02,
+      "estimated_counts": {
+        "fixed": 94428,
+        "floating": 24000,
+        "fluid": 481474,
+        "moving": 24000,
+        "total": 623902
+      },
+      "estimated_storage_bytes": 268435456,
+      "family_id": "F6",
+      "fluid_fill": {
+        "continuous_mass_kg": 3851.7920000000004,
+        "point_m": [
+          0.12,
+          0.06,
+          0.06
+        ],
+        "seed_m": [
+          1.0,
+          0.8,
+          0.28
+        ],
+        "size_m": [
+          5.78,
+          1.36,
+          0.49
+        ],
+        "volume_m3": 3.8517920000000005
+      },
+      "gencase_audit": {
+        "checks": {
+          "actual_3d": true,
+          "all_requested_input_hashes_recorded": true,
+          "control_companion_hash_bound": true,
+          "definition_companion_hash_bound": true,
+          "effective_transverse_layers": true,
+          "finite_wall_faces_and_bottom": true,
+          "fluid_mass_per_particle_native": true,
+          "generated_inertia_defined": true,
+          "generated_mass_positive": true,
+          "generated_type2_masspart_positive": true,
+          "initial_mass_within_continuous_budget": false,
+          "initial_mass_within_effective_center_lattice_budget": true,
+          "initial_mass_within_lattice_budget": true,
+          "native_companion_hash_bound": true,
+          "normal_companion_hash_bound": true,
+          "normal_geometry_present": true,
+          "positive_floating_type2": true,
+          "positive_fluid_type3": true,
+          "source_hash_recorded": true,
+          "source_mass_positive": true,
+          "wave_actual_moving_particles": true
+        },
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/gencase-audit-002.json",
+        "sha256": "51d231b619bdfaa27da725c491db3601cf5066fe6e4c0c8d801a938795a8642f",
+        "status": "fail"
+      },
+      "gencase_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_RES_FINE/F6_WAVE_NO_CONTACT_RES_FINE_GENCASE_01/execution-receipt.json",
+        "sha256": "29bd30b7fcc4c1c0d8e8eea6baeb66f6e5f603b95731b1eded1d7fe79809b115",
+        "status": "fail"
+      },
+      "initial_mass_budget": {
+        "actual_fluid_mass_kg": 3603.152,
+        "actual_fluid_particle_count": 450394,
+        "actual_fluid_volume_from_particle_mass_m3": 3.6031520000000006,
+        "boundary_support_exclusion_relative_to_continuous_fill": 0.03907895352646604,
+        "boundary_support_exclusion_relative_to_fillbox": 0.03815366977240722,
+        "boundary_support_exclusion_volume_m3": 0.14695999999999998,
+        "construction_fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "continuous_after_occupancy_mass_relative_error": -0.041865748796998004,
+        "continuous_fluid_mass_after_occupancy_kg": 3760.5920000000006,
+        "continuous_fluid_volume_after_occupancy_m3": 3.7605920000000004,
+        "continuous_occupancy_vs_lattice_exclusion_residual_m3": 0.01047999999999992,
+        "continuous_physical_fill_tolerance_pass": false,
+        "effective_center_lattice_tolerance_pass": true,
+        "fillbox_bounds_m": {
+          "lower": [
+            0.12,
+            0.06,
+            0.06
+          ],
+          "size": [
+            5.78,
+            1.36,
+            0.49
+          ],
+          "upper": [
+            5.9,
+            1.4200000000000002,
+            0.55
+          ]
+        },
+        "floating_body_bounds_m": {
+          "lower": [
+            2.6,
+            0.5,
+            0.36
+          ],
+          "upper": [
+            3.4000000000000004,
+            1.1,
+            0.76
+          ]
+        },
+        "fluid_cell_envelope_bounds_m": [
+          [
+            0.13000000059604644,
+            5.890000114440918
+          ],
+          [
+            0.06999999821186066,
+            1.409999976158142
+          ],
+          [
+            0.06999999821186066,
+            0.5500000214576721
+          ]
+        ],
+        "fluid_center_bounds_m": [
+          [
+            0.14000000059604645,
+            5.880000114440918
+          ],
+          [
+            0.07999999821186066,
+            1.399999976158142
+          ],
+          [
+            0.07999999821186066,
+            0.5400000214576721
+          ]
+        ],
+        "fluid_center_lattice": {
+          "axis_coordinates_m": [
+            [
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002,
+              0.56,
+              0.57999998,
+              0.60000002,
+              0.62,
+              0.63999999,
+              0.66000003,
+              0.68000001,
+              0.69999999,
+              0.72000003,
+              0.74000001,
+              0.75999999,
+              0.77999997,
+              0.80000001,
+              0.81999999,
+              0.83999997,
+              0.86000001,
+              0.88,
+              0.89999998,
+              0.92000002,
+              0.94,
+              0.95999998,
+              0.98000002,
+              1.0,
+              1.01999998,
+              1.03999996,
+              1.05999994,
+              1.08000004,
+              1.10000002,
+              1.12,
+              1.13999999,
+              1.15999997,
+              1.17999995,
+              1.20000005,
+              1.22000003,
+              1.24000001,
+              1.25999999,
+              1.27999997,
+              1.29999995,
+              1.32000005,
+              1.34000003,
+              1.36000001,
+              1.38,
+              1.39999998,
+              1.41999996,
+              1.44000006,
+              1.46000004,
+              1.48000002,
+              1.5,
+              1.51999998,
+              1.53999996,
+              1.55999994,
+              1.58000004,
+              1.60000002,
+              1.62,
+              1.63999999,
+              1.65999997,
+              1.67999995,
+              1.70000005,
+              1.72000003,
+              1.74000001,
+              1.75999999,
+              1.77999997,
+              1.79999995,
+              1.82000005,
+              1.84000003,
+              1.86000001,
+              1.88,
+              1.89999998,
+              1.91999996,
+              1.94000006,
+              1.96000004,
+              1.98000002,
+              2.0,
+              2.01999998,
+              2.03999996,
+              2.05999994,
+              2.07999992,
+              2.0999999,
+              2.11999989,
+              2.1400001,
+              2.16000009,
+              2.18000007,
+              2.20000005,
+              2.22000003,
+              2.24000001,
+              2.25999999,
+              2.27999997,
+              2.29999995,
+              2.31999993,
+              2.33999991,
+              2.3599999,
+              2.38000011,
+              2.4000001,
+              2.42000008,
+              2.44000006,
+              2.46000004,
+              2.48000002,
+              2.5,
+              2.51999998,
+              2.53999996,
+              2.55999994,
+              2.57999992,
+              2.5999999,
+              2.61999989,
+              2.6400001,
+              2.66000009,
+              2.68000007,
+              2.70000005,
+              2.72000003,
+              2.74000001,
+              2.75999999,
+              2.77999997,
+              2.79999995,
+              2.81999993,
+              2.83999991,
+              2.8599999,
+              2.88000011,
+              2.9000001,
+              2.92000008,
+              2.94000006,
+              2.96000004,
+              2.98000002,
+              3.0,
+              3.01999998,
+              3.03999996,
+              3.05999994,
+              3.07999992,
+              3.0999999,
+              3.11999989,
+              3.1400001,
+              3.16000009,
+              3.18000007,
+              3.20000005,
+              3.22000003,
+              3.24000001,
+              3.25999999,
+              3.27999997,
+              3.29999995,
+              3.31999993,
+              3.33999991,
+              3.3599999,
+              3.38000011,
+              3.4000001,
+              3.42000008,
+              3.44000006,
+              3.46000004,
+              3.48000002,
+              3.5,
+              3.51999998,
+              3.53999996,
+              3.55999994,
+              3.57999992,
+              3.5999999,
+              3.61999989,
+              3.6400001,
+              3.66000009,
+              3.68000007,
+              3.70000005,
+              3.72000003,
+              3.74000001,
+              3.75999999,
+              3.77999997,
+              3.79999995,
+              3.81999993,
+              3.83999991,
+              3.8599999,
+              3.88000011,
+              3.9000001,
+              3.92000008,
+              3.94000006,
+              3.96000004,
+              3.98000002,
+              4.0,
+              4.01999998,
+              4.03999996,
+              4.05999994,
+              4.07999992,
+              4.0999999,
+              4.11999989,
+              4.13999987,
+              4.15999985,
+              4.17999983,
+              4.19999981,
+              4.21999979,
+              4.23999977,
+              4.26000023,
+              4.28000021,
+              4.30000019,
+              4.32000017,
+              4.34000015,
+              4.36000013,
+              4.38000011,
+              4.4000001,
+              4.42000008,
+              4.44000006,
+              4.46000004,
+              4.48000002,
+              4.5,
+              4.51999998,
+              4.53999996,
+              4.55999994,
+              4.57999992,
+              4.5999999,
+              4.61999989,
+              4.63999987,
+              4.65999985,
+              4.67999983,
+              4.69999981,
+              4.71999979,
+              4.73999977,
+              4.76000023,
+              4.78000021,
+              4.80000019,
+              4.82000017,
+              4.84000015,
+              4.86000013,
+              4.88000011,
+              4.9000001,
+              4.92000008,
+              4.94000006,
+              4.96000004,
+              4.98000002,
+              5.0,
+              5.01999998,
+              5.03999996,
+              5.05999994,
+              5.07999992,
+              5.0999999,
+              5.11999989,
+              5.13999987,
+              5.15999985,
+              5.17999983,
+              5.19999981,
+              5.21999979,
+              5.23999977,
+              5.26000023,
+              5.28000021,
+              5.30000019,
+              5.32000017,
+              5.34000015,
+              5.36000013,
+              5.38000011,
+              5.4000001,
+              5.42000008,
+              5.44000006,
+              5.46000004,
+              5.48000002,
+              5.5,
+              5.51999998,
+              5.53999996,
+              5.55999994,
+              5.57999992,
+              5.5999999,
+              5.61999989,
+              5.63999987,
+              5.65999985,
+              5.67999983,
+              5.69999981,
+              5.71999979,
+              5.73999977,
+              5.76000023,
+              5.78000021,
+              5.80000019,
+              5.82000017,
+              5.84000015,
+              5.86000013,
+              5.88000011
+            ],
+            [
+              0.08,
+              0.1,
+              0.12,
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002,
+              0.56,
+              0.57999998,
+              0.60000002,
+              0.62,
+              0.63999999,
+              0.66000003,
+              0.68000001,
+              0.69999999,
+              0.72000003,
+              0.74000001,
+              0.75999999,
+              0.77999997,
+              0.80000001,
+              0.81999999,
+              0.83999997,
+              0.86000001,
+              0.88,
+              0.89999998,
+              0.92000002,
+              0.94,
+              0.95999998,
+              0.98000002,
+              1.0,
+              1.01999998,
+              1.03999996,
+              1.05999994,
+              1.08000004,
+              1.10000002,
+              1.12,
+              1.13999999,
+              1.15999997,
+              1.17999995,
+              1.20000005,
+              1.22000003,
+              1.24000001,
+              1.25999999,
+              1.27999997,
+              1.29999995,
+              1.32000005,
+              1.34000003,
+              1.36000001,
+              1.38,
+              1.39999998
+            ],
+            [
+              0.08,
+              0.1,
+              0.12,
+              0.14,
+              0.16,
+              0.18000001,
+              0.2,
+              0.22,
+              0.23999999,
+              0.25999999,
+              0.28,
+              0.30000001,
+              0.31999999,
+              0.34,
+              0.36000001,
+              0.38,
+              0.40000001,
+              0.41999999,
+              0.44,
+              0.46000001,
+              0.47999999,
+              0.5,
+              0.51999998,
+              0.54000002
+            ]
+          ],
+          "axis_counts": [
+            288,
+            67,
+            24
+          ],
+          "candidate_lattice_volume_m3": 3.7048320000000006,
+          "candidate_particle_count": 463104,
+          "envelope_lower_m": [
+            0.13,
+            0.07,
+            0.07
+          ],
+          "envelope_size_m": [
+            5.76000011,
+            1.33999998,
+            0.48000002
+          ],
+          "envelope_upper_m": [
+            5.89000011,
+            1.40999998,
+            0.55000002
+          ],
+          "grid_spacing_m": 0.02
+        },
+        "formula_conclusion": "the previous raw fillbox-volume denominator included occupied floating/paddle volume; after subtracting occupancy, the strict continuous residual remains a separate 1% contract check, while the center-lattice residual quantifies expected finite-wall/support exclusion and is not allowed to hide the strict result",
+        "initial_mass_relative_tolerance": 0.01,
+        "initial_mass_tolerance_basis": "continuous_physical_fill_after_occupancy",
+        "initial_mass_tolerance_pass": false,
+        "lattice_body_and_solid_excluded_volume_m3": 0.10167999999999999,
+        "lattice_target_fluid_mass_kg": 3613.6320000000005,
+        "lattice_target_fluid_volume_m3": 3.6136320000000004,
+        "lattice_target_mass_relative_error": -0.0029001292882065988,
+        "liquid_surface_z_m": 0.55,
+        "moving_particle_count_seen": 23100,
+        "nominal_fillbox_mass_kg": 3851.7920000000004,
+        "nominal_fillbox_volume_m3": 3.8517920000000005,
+        "occupancy_overlap_volume_m3": {
+          "floating_body": 0.09120000000000007,
+          "moving_paddle": 0.0
+        },
+        "raw_nominal_fillbox_mass_relative_error": -0.06455177226599995,
+        "reference_semantics": "Nfluid*MassFluid is compared with the actual center-lattice envelope minus continuous floating/paddle occupancy; raw fillbox volume includes expected boundary/lattice support and occupied-body regions",
+        "support_adjusted_continuous_fluid_mass_kg": 3613.6320000000005,
+        "support_adjusted_continuous_fluid_volume_m3": 3.6136320000000004,
+        "support_adjusted_mass_relative_error": -0.0029001292882065988,
+        "wall_fluid_cell_clearance_m": {
+          "top_is_open": true,
+          "x_high_m": 0.10999988555908224,
+          "x_low_m": 0.13000000059604644,
+          "y_high_m": 0.14999996662139892,
+          "y_low_m": 0.06999999821186066,
+          "z_bottom_m": 0.06999999821186066
+        }
+      },
+      "mechanism_id": "wave_no_contact",
+      "paddle": {
+        "mkbound": 10,
+        "point_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          0.1,
+          1.6,
+          1.2
+        ]
+      },
+      "parent_case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "paths": {
+        "control": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Control.csv",
+          "sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Control.csv",
+          "source_sha256": "749cc2e571ec109537aecec3e0598950a60ffee6611fbf5ab5abb6aa51997bab"
+        },
+        "definition": {
+          "byte_identical": false,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Def.xml",
+          "sha256": "625e16debb10aa1cf630d6bcbc6cb1fc4ddec575433fcb1c634108540971a93f",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Def.xml",
+          "source_sha256": "5174dee55ea1df72d284666c5272a6e20bd86972dccf979209c9aa13db1423de"
+        },
+        "native": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Native.json",
+          "sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Native.json",
+          "source_sha256": "b53462bf9ba1b6c986308a49cc6b2cebc85894d6cb034d0106f40d9ea9cc7e5a"
+        },
+        "normal": {
+          "byte_identical": true,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/F6_WAVE_NO_CONTACT_RES_FINE_Normal.json",
+          "sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897",
+          "source_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/repairs/F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02_Normal.json",
+          "source_sha256": "b6ba3675a9d46c62d96180c047420fe6eb23f7b96f10052b38b998572a83d897"
+        }
+      },
+      "physical_geometry_hash": "5db0b4cdb089bde90433f45d4613857e0e1799740cb6a9bb759e74b3b931a93b",
+      "physical_wall_size_m": [
+        6.0,
+        1.56,
+        1.26
+      ],
+      "pointmax_m": [
+        6.02,
+        1.58,
+        1.28
+      ],
+      "previous_gencase_audit": {
+        "immutable": true,
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/cases/wave_no_contact/fine/gencase-audit.json",
+        "sha256": "84b326189ac234f61d30816dcb1b21c613d84d747c6864376be1761a596af9d6"
+      },
+      "repair_id": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+      "representation_errors": {
+        "body_mass_relative": 0.0,
+        "body_volume_relative": 0.11212500000000003,
+        "fluid_mass_relative_construction_fillbox": -0.06455177226599995,
+        "fluid_mass_relative_continuous_physical": -0.06455177226599995,
+        "fluid_mass_relative_effective_center_lattice": -0.0029001292882065988,
+        "fluid_mass_relative_lattice_target": -0.0029001292882065988
+      },
+      "request": {
+        "attempt_id": "F6_WAVE_NO_CONTACT_RES_FINE_GENCASE_01",
+        "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parameterized_resolution/execution_requests/wave_no_contact_fine_gencase.json",
+        "sha256": "433d963cbba9158ff122856d7078852395a622a127bc22cd938cefaea1c6f9d4"
+      },
+      "resolution_id": "fine",
+      "schema": "ds-data-02.f6.fixed-geometry-resolution.v1",
+      "status": "gencase_fail"
+    }
+  ],
+  "q_status": "QI/QN pending; this plan and GenCase receipts do not qualify a solver recipe",
+  "repair_parent": "F6_HIGH_WALL_GRID_ALIGNMENT_REPAIR_02",
+  "requested_reference_dimension_note": {
+    "decision": "use parsed repaired physical dimensions and preserve them at every resolution",
+    "note": "The current repaired F6 Definitions contain wall dimensions 5.46x1.56x1.26 m (simple) and 6.00x1.56x1.26 m (wave). The strings 2.76 and 0.90 do not occur as physical wall dimensions in these inputs; 2.76 is a control/log time value. No .12 candidate or .90-to-.84 snap is substituted."
+  },
+  "resolution_ids": [
+    "coarse",
+    "medium",
+    "fine"
+  ],
+  "resolution_study_status": "gencase_audited_pending_solver",
+  "same_continuous_geometry": true,
+  "schema": "ds-data-02.f6.fixed-geometry-resolution.v1.plan-002",
+  "source_mass_inertia_volume": {
+    "simple_free_response": {
+      "density_ratio_to_water": 0.5208333333333334,
+      "mass_kg": 100.0,
+      "source_inertia_kg_m2": [
+        [
+          4.333333333333333,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.666666666666668,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          8.333333333333334
+        ]
+      ],
+      "volume_m3": 0.192
+    },
+    "wave_no_contact": {
+      "density_ratio_to_water": 0.4947916666666667,
+      "mass_kg": 95.0,
+      "source_inertia_kg_m2": [
+        [
+          4.116666666666666,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          6.333333333333335,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          7.916666666666667
+        ]
+      ],
+      "volume_m3": 0.192
+    }
+  },
+  "status": "gencase_audit_mixed_or_pending"
+}
