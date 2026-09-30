@@ -634,8 +634,10 @@ def main() -> int:
     motion_control_sign = float(manifest.get("motion_control_sign", -1.0))
     if not math.isfinite(motion_control_sign) or motion_control_sign not in {-1.0, 1.0}:
         raise DiagnosticError("motion_control_sign must be +1 or -1")
+    input_schema = str(manifest.get("schema"))
+    report_schema = input_schema.replace("-input", "")
     report = {
-        "schema": "ds-data-02.f2.native-resolution-diagnostic.v2" if manifest.get("schema", "").endswith(".v2") else "ds-data-02.f2.native-resolution-diagnostic.v1",
+        "schema": report_schema,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "manifest": {"path": str(manifest_path), "sha256": sha256(manifest_path)},
         "binary_bindings": {
