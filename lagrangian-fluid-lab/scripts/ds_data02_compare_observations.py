@@ -45,6 +45,22 @@ def fluid_max_speed(h):
     return maximum
 
 
+def static_physical_control(attrs):
+    """Restrict this comparator to explicit static-wall native histories.
+
+    Existing control hashes include numerical settings. Keep those immutable
+    and derive a separately named semantic binding for static comparisons.
+    Moving controls need a parsed physical motion operator, not hash stripping.
+    """
+    motion = json.loads(attrs['motion_control_semantics_json'])
+    if not motion.get('element_empty'):
+        raise ValueError('moving control comparison requires an explicit physical motion operator')
+    binding = json.loads(attrs['control_binding_json'])
+    event = {k: v for k, v in binding['event_window'].items() if k != 'save_interval_s'}
+    return {k: binding[k] for k in ('control_family_id', 'initial_state', 'parameter_values')} | {
+        'event_window': event, 'physical_motion': 'empty generated XML motion element'}
+
+
 def compare(reference_path, candidate_path, *, H0, continuous_mass, cadence, max_offset):
     reference, candidate = [json.loads(Path(p).read_text()) for p in (reference_path, candidate_path)]
     if H0 <= 0 or continuous_mass <= 0 or cadence <= 0 or max_offset < 0:
@@ -57,6 +73,12 @@ def compare(reference_path, candidate_path, *, H0, continuous_mass, cadence, max
     with h5py.File(sources[0], 'r') as a, h5py.File(sources[1], 'r') as b:
         if a.attrs['coordinate_frame'] != b.attrs['coordinate_frame']:
             raise ValueError('coordinate frames differ')
+        geometry_hash = a.attrs.get('geometry_sha256')
+        if not geometry_hash or geometry_hash != b.attrs.get('geometry_sha256'):
+            raise ValueError('continuous physical geometry bindings differ or are missing')
+        physical_controls = [static_physical_control(h.attrs) for h in (a, b)]
+        if physical_controls[0] != physical_controls[1]:
+            raise ValueError('physical initial state or control bindings differ')
         same_ids = all(np.array_equal(a[k][:], b[k][:]) for k in ('particle_zone', 'particle_id'))
         if same_ids and a['position'].shape[1] == b['position'].shape[1]:
             native_initial_equal = all(np.array_equal(a[k][0], b[k][0]) for k in
@@ -80,6 +102,8 @@ def compare(reference_path, candidate_path, *, H0, continuous_mass, cadence, max
         normalization=dict(H0_m=H0, continuous_initial_mass_kg=continuous_mass,
                            gravitational_energy_J=continuous_mass * 9.81 * H0,
                            numerical_initial_mass_kg=[d['numerical_initial_mass_kg'] for d in (reference, candidate)]),
+        physical_geometry_sha256=str(geometry_hash),
+        static_physical_control_binding=physical_controls[0],
         same_native_initial_state=native_initial_equal,
         saved_nominal_bin_count=len(keys[0]), maximum_actual_timestamp_difference_s=float(time_differences.max()),
         maximum_full_state_fluid_speed_m_s=max_speed,
