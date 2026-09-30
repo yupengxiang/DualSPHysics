@@ -139,6 +139,33 @@ def decode_frame(*, binary: Path, data_dir: Path, frame_first: int, frame_last: 
     }
 
 
+def decode_selected_frames(*, binary: Path, data_dir: Path, frame_indices: Iterable[int], output_dir: Path, prefix: str) -> dict[str, Any]:
+    """Decode selected native frames without treating a save index as a time step."""
+    indices = sorted({int(index) for index in frame_indices})
+    if not indices:
+        raise DiagnosticError("at least one selected native frame is required")
+    frames: list[dict[str, Any]] = []
+    logs: list[dict[str, Any]] = []
+    for index in indices:
+        result = decode_frame(
+            binary=binary,
+            data_dir=data_dir,
+            frame_first=index,
+            frame_last=index,
+            output_dir=output_dir,
+            prefix=f"{prefix}_{index:04d}",
+        )
+        frames.extend(result["frames"])
+        logs.append(result["log"])
+    return {
+        "command_kind": "official_partvtk_selected_frames",
+        "binary": {"path": str(binary), "sha256": sha256(binary)},
+        "returncode": 0,
+        "frames": frames,
+        "logs": logs,
+    }
+
+
 def decode_exclusions(*, binary: Path, data_dir: Path, output_dir: Path, prefix: str) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / f"{prefix}.csv"
@@ -336,11 +363,12 @@ def face_coverage(points: np.ndarray, low: np.ndarray, size: np.ndarray, dp: flo
 
 
 def fixed_wall_evidence(rows: list[dict[str, str]], boxes: Mapping[int, Mapping[str, Any]], dp: float) -> dict[str, Any]:
-    groups = group_points(rows, types={0})
+    fixed_groups = group_points(rows, types={0})
+    moving_groups = group_points(rows, types={1})
     evidence: dict[str, Any] = {}
-    for mk, name, faces in ((0, "cup_initial_fixed", ("x-", "x+", "y-", "y+", "z-", "z+")),
-                            (1, "receiver", ("x-", "x+", "y-", "y+", "z-")),
-                            (2, "tray", ("z-",))):
+    for mk, name, faces, groups in ((0, "moving_cup_frame0", ("x-", "x+", "y-", "y+", "z-", "z+"), moving_groups),
+                                    (1, "receiver", ("x-", "x+", "y-", "y+", "z-"), fixed_groups),
+                                    (2, "tray", ("z-",), fixed_groups)):
         box = boxes.get(mk)
         if not isinstance(box, Mapping):
             evidence[name] = {"status": "missing_declared_box", "mk": mk}
@@ -375,14 +403,27 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
     shared = sorted(set(initial_by_key) & set(current_by_key))
     p0 = np.asarray([initial_by_key[key] for key in shared], dtype=np.float64)
     p = np.asarray([current_by_key[key] for key in shared], dtype=np.float64)
-    fitted = fit_rotation(p0, p, origin, axis)
+    if not len(shared):
+        raise DiagnosticError("moving cup has no shared typed identities for pose fit")
+    centroid0 = p0.mean(axis=0)
+    centroid = p.mean(axis=0)
+    translation = centroid - centroid0
+    # Fit the rotation after removing rigid translation.  The old implementation
+    # passed the fixed axis origin directly, which silently biases the angle when
+    # a body translates in x/y/z.
+    fitted = fit_rotation(p0 - centroid0, p - centroid, np.zeros(3), axis)
     inverse = rotation_matrix(axis, -fitted)
-    local = (p - origin) @ inverse.T + origin
+    local = (p - translation - origin) @ inverse.T + origin
     low = np.asarray(box["low_m"], dtype=np.float64)
     size = np.asarray(box["size_m"], dtype=np.float64)
     high = low + size
     coverage = face_coverage(local, low, size, dp, ("z-", "z+"))
     angle_residual = math.atan2(math.sin(fitted - control_angle_rad), math.cos(fitted - control_angle_rad))
+    forward = rotation_matrix(axis, fitted)
+    predicted = (p0 - origin) @ forward.T + origin + translation
+    residual = np.linalg.norm(p - predicted, axis=1)
+    current_velocity = np.asarray([row_velocity(row) for row in current], dtype=np.float64)
+    displacement = np.linalg.norm(p - p0, axis=1)
     return {
         "time_s": float(time_s),
         "moving_node_count_initial": len(initial),
@@ -391,6 +432,14 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
         "fit_angle_rad": float(fitted),
         "prescribed_angle_rad": float(control_angle_rad),
         "angle_residual_rad": float(angle_residual),
+        "initial_centroid_m": centroid0.tolist(),
+        "current_centroid_m": centroid.tolist(),
+        "translation_m": translation.tolist(),
+        "mean_velocity_m_s": current_velocity.mean(axis=0).tolist() if len(current_velocity) else None,
+        "max_velocity_m_s": float(np.linalg.norm(current_velocity, axis=1).max()) if len(current_velocity) else None,
+        "position_rms_residual_m": float(np.sqrt(np.mean(residual ** 2))) if len(residual) else None,
+        "position_max_residual_m": float(residual.max()) if len(residual) else None,
+        "max_node_displacement_m": float(displacement.max()) if len(displacement) else None,
         "local_bounds_low_m": local.min(axis=0).tolist() if len(local) else None,
         "local_bounds_high_m": local.max(axis=0).tolist() if len(local) else None,
         "declared_initial_bounds_low_m": low.tolist(),
@@ -401,7 +450,7 @@ def cup_pose_evidence(frame_rows: list[dict[str, str]], initial_rows: list[dict[
     }
 
 
-def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root: Path) -> dict[str, Any]:
+def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root: Path, posed_frame_indices: Iterable[int]) -> dict[str, Any]:
     case_id = str(case["case_id"])
     dp = float(case["dp_m"])
     solver_output = require_file(Path(str(case["solver_output"])) / "RunPARTs.csv", f"{case_id} RunPARTs.csv").parent
@@ -415,6 +464,17 @@ def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root
     boxes = parse_boxes(generated_xml)
     frame_dir = root / "partvtk" / case_id
     first = decode_frame(binary=partvtk, data_dir=data_dir, frame_first=0, frame_last=3, output_dir=frame_dir, prefix="Particles")
+    max_frame = len(runparts) - 1
+    posed_indices = sorted({int(index) for index in posed_frame_indices})
+    if any(index <= 0 or index > max_frame for index in posed_indices):
+        raise DiagnosticError(f"{case_id} posed frame indices exceed RunPARTs range: {posed_indices}")
+    posed = decode_selected_frames(
+        binary=partvtk,
+        data_dir=data_dir,
+        frame_indices=posed_indices,
+        output_dir=frame_dir,
+        prefix="Posed",
+    )
     exclusion = decode_exclusions(binary=partvtkout, data_dir=data_dir, output_dir=root / "partvtkout" / case_id, prefix="excluded_particles")
     frame_records: list[tuple[int, dict[str, str], list[dict[str, str]]]] = []
     for item in first["frames"]:
@@ -427,23 +487,37 @@ def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root
     volume_from_particles = float(len(fluid_rows) * dp ** 3)
     declared_mass = declared_volume * 1000.0
     mass_error_fraction = (volume_from_particles / declared_volume - 1.0) if declared_volume else None
-    id_to_zone: dict[int, set[int]] = {}
-    for row in fluid_rows:
-        id_to_zone.setdefault(int(row["Idp"]), set()).add(int(row["Zone"]))
+    id_to_identity: dict[int, set[tuple[int, int, int]]] = {}
+    for row in initial_rows:
+        id_to_identity.setdefault(int(row["Idp"]), set()).add(
+            (int(row["Zone"]), int(row["Type"]), int(row["Mk"]))
+        )
     exclusion_rows: list[dict[str, Any]] = []
     motive_totals: Counter[str] = Counter()
     unresolved_parts: list[int] = []
+    typed_totals: Counter[str] = Counter()
     for row in exclusion["rows"]:
         part = int(row["part_out"])
         time_value = runparts[part]["time_s"] if 0 <= part < len(runparts) else None
         if time_value is None:
             unresolved_parts.append(part)
-        zones = sorted(id_to_zone.get(int(row["idp"]), set()))
+        identities = sorted(id_to_identity.get(int(row["idp"]), set()))
+        zones = sorted({identity[0] for identity in identities})
+        types = sorted({identity[1] for identity in identities})
+        mks = sorted({identity[2] for identity in identities})
+        for identity in identities:
+            typed_totals["%d/%d/%d" % identity] += 1
         motive_totals[str(row["motive"])] += 1
         exclusion_rows.append({
             **row,
             "zone_candidates": zones,
-            "typed_identity": {"zone": zones[0] if len(zones) == 1 else None, "idp": int(row["idp"])},
+            "typed_identity": {
+                "zone": zones[0] if len(zones) == 1 else None,
+                "idp": int(row["idp"]),
+                "type": types[0] if len(types) == 1 else None,
+                "mk": mks[0] if len(mks) == 1 else None,
+                "initial_zone_type_mk": [list(identity) for identity in identities],
+            },
             "first_missing_frame": part,
             "first_missing_time_s": time_value,
             "motive_class": "native_solver_excluded_numerical_unknown",
@@ -455,7 +529,11 @@ def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root
     if cup_box is None:
         raise DiagnosticError(f"{case_id} has no moving cup bound box")
     pose_rows: list[dict[str, Any]] = []
-    for index, _, rows in frame_records[1:]:
+    posed_frame_records: list[tuple[int, dict[str, str], list[dict[str, str]]]] = []
+    for item in posed["frames"]:
+        summary, rows = parse_csv_rows(Path(item["path"]))
+        posed_frame_records.append((int(item["index"]), summary, rows))
+    for index, _, rows in posed_frame_records:
         time_value = runparts[index]["time_s"] if index < len(runparts) else float(index)
         control_angle = float(np.interp(time_value, motion_times, motion_angles))
         pose_rows.append(cup_pose_evidence(rows, initial_rows, time_s=time_value, control_angle_rad=control_angle, origin=origin, axis=axis, box=cup_box, dp=dp))
@@ -489,10 +567,12 @@ def audit_case(case: Mapping[str, Any], *, partvtk: Path, partvtkout: Path, root
             "mass_is_reported_without_normalization": True,
         },
         "partvtk_initial_decode": first,
+        "partvtk_posed_decode": posed,
         "partvtkout_exclusion_decode": {
             "execution": {key: value for key, value in exclusion.items() if key != "rows"},
             "row_count": len(exclusion["rows"]),
             "motive_totals": dict(sorted(motive_totals.items())),
+            "typed_identity_totals": dict(sorted(typed_totals.items())),
             "unresolved_first_missing_parts": sorted(set(unresolved_parts)),
             "records": exclusion_rows,
             "positions_velocity_density_are_native_partvtkout": True,
@@ -533,22 +613,29 @@ def main() -> int:
     partvtkout = require_file(args.partvtkout, "PartVTKOut binary")
     manifest_path = require_file(args.manifest, "diagnostic manifest")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    if manifest.get("schema") != "ds-data-02.f2.native-resolution-diagnostic-input.v1":
+    if manifest.get("schema") not in {
+        "ds-data-02.f2.native-resolution-diagnostic-input.v1",
+        "ds-data-02.f2.native-resolution-diagnostic-input.v2",
+    }:
         raise DiagnosticError("diagnostic manifest schema is invalid")
     output = args.output.expanduser().resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     cases = manifest.get("cases")
     if not isinstance(cases, list) or len(cases) != 4:
         raise DiagnosticError("diagnostic manifest must contain exactly four medium/fine cases")
+    posed_frame_indices = manifest.get("posed_frame_indices", [1, 2, 3])
+    if not isinstance(posed_frame_indices, list) or not posed_frame_indices:
+        raise DiagnosticError("diagnostic manifest must contain posed_frame_indices")
     report = {
-        "schema": "ds-data-02.f2.native-resolution-diagnostic.v1",
+        "schema": "ds-data-02.f2.native-resolution-diagnostic.v2" if manifest.get("schema", "").endswith(".v2") else "ds-data-02.f2.native-resolution-diagnostic.v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "manifest": {"path": str(manifest_path), "sha256": sha256(manifest_path)},
         "binary_bindings": {
             "partvtk": {"path": str(partvtk), "sha256": sha256(partvtk)},
             "partvtkout": {"path": str(partvtkout), "sha256": sha256(partvtkout)},
         },
-        "cases": [audit_case(case, partvtk=partvtk, partvtkout=partvtkout, root=output.parent / "artifacts") for case in cases],
+        "posed_frame_indices": [int(index) for index in posed_frame_indices],
+        "cases": [audit_case(case, partvtk=partvtk, partvtkout=partvtkout, root=output.parent / "artifacts", posed_frame_indices=posed_frame_indices) for case in cases],
         "status": "diagnostic_complete_pending_scientific_review",
         "qualification_claim": "none",
         "production_claim": "none",
