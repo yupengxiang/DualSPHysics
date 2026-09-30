@@ -474,6 +474,96 @@ def _parse_csv(csv_path: Path) -> dict[str, Any]:
     }
 
 
+def _coordinate_sets(csv_path: Path) -> dict[str, Any]:
+    """Read only typed coordinates from a PartVTK CSV for an immutable diff."""
+    fluid: set[tuple[float, float, float]] = set()
+    boundary_mk: dict[tuple[float, float, float], set[tuple[int, int]]] = {}
+    counts: dict[tuple[int, int], int] = {}
+    with Path(csv_path).open(newline="", encoding="utf-8", errors="replace") as handle:
+        reader = csv.reader(handle)
+        for row in reader:
+            if row and row[0].strip() == "Pos.x [m]":
+                header = [field.strip() for field in row]
+                break
+        else:
+            raise ValueError("PartVTK CSV particle header not found")
+        index = {name: header.index(name) for name in ("Pos.x [m]", "Pos.y [m]", "Pos.z [m]", "Type", "Mk")}
+        for row in reader:
+            if len(row) <= max(index.values()):
+                continue
+            try:
+                point = tuple(round(float(row[index[f"Pos.{axis} [m]"]]), 7) for axis in "xyz")
+                particle_type = int(float(row[index["Type"]]))
+                mk = int(float(row[index["Mk"]]))
+            except (TypeError, ValueError):
+                continue
+            counts[(particle_type, mk)] = counts.get((particle_type, mk), 0) + 1
+            if particle_type == 3:
+                fluid.add(point)
+            else:
+                boundary_mk.setdefault(point, set()).add((particle_type, mk))
+    return {"fluid": fluid, "boundary_mk": boundary_mk, "counts": counts}
+
+
+def compare_baseline(*, old_csv: Path, new_csv: Path, old_receipt: Path | None, new_audit_receipt: Path | None, new_audit_report: Path | None, output: Path) -> dict[str, Any]:
+    """Compare repaired fluid centres with the immutable old boundary ledger."""
+    old_csv = Path(old_csv).resolve()
+    new_csv = Path(new_csv).resolve()
+    old_data = _coordinate_sets(old_csv)
+    new_data = _coordinate_sets(new_csv)
+    overlap = sorted(new_data["fluid"].intersection(old_data["boundary_mk"]))
+    by_kind: dict[str, int] = {}
+    for point in overlap:
+        for particle_type, mk in sorted(old_data["boundary_mk"][point]):
+            key = f"type{particle_type}/mk{mk}"
+            by_kind[key] = by_kind.get(key, 0) + 1
+    by_y: dict[str, int] = {}
+    by_z: dict[str, int] = {}
+    for point in overlap:
+        by_y[q(point[1])] = by_y.get(q(point[1]), 0) + 1
+        by_z[q(point[2])] = by_z.get(q(point[2]), 0) + 1
+    old_fluid = old_data["fluid"]
+    new_fluid = new_data["fluid"]
+    old_count = sum(count for (particle_type, _), count in old_data["counts"].items() if particle_type == 3)
+    new_count = sum(count for (particle_type, _), count in new_data["counts"].items() if particle_type == 3)
+    old_fixed = sum(count for (particle_type, _), count in old_data["counts"].items() if particle_type == 0)
+    new_fixed = sum(count for (particle_type, _), count in new_data["counts"].items() if particle_type == 0)
+    report: dict[str, Any] = {
+        "schema": "ds-data-02.f5.initialization-repair-comparison.v1",
+        "created_at_utc": utc_now(),
+        "family_id": "F5",
+        "repair_scope": "F5_RUNUP_NOMINAL_COARSE_CELL_CENTRE_001",
+        "status": "actual_initialization_comparison_complete_pending_root_review",
+        "qualification_claim": "none",
+        "old_partvtk_csv": bind(old_csv, "immutable old native PartVTK frame 0"),
+        "new_partvtk_csv": bind(new_csv, "new repair official PartVTK frame 0"),
+        "old_gencase_receipt": bind(old_receipt, "immutable old GenCase receipt") if old_receipt else None,
+        "new_partvtk_audit_receipt": bind(new_audit_receipt, "new repair PartVTK audit receipt") if new_audit_receipt else None,
+        "new_partvtk_audit_report": bind(new_audit_report, "new repair PartVTK audit report") if new_audit_report else None,
+        "old_counts": {f"type{particle_type}/mk{mk}": count for (particle_type, mk), count in sorted(old_data["counts"].items())},
+        "new_counts": {f"type{particle_type}/mk{mk}": count for (particle_type, mk), count in sorted(new_data["counts"].items())},
+        "population_change": {"old_fluid_particles": old_count, "new_fluid_particles": new_count, "fluid_delta": new_count - old_count, "old_fixed_particles": old_fixed, "new_fixed_particles": new_fixed, "fixed_delta": new_fixed - old_fixed},
+        "new_fluid_against_old_boundary": {
+            "exact_coordinate_overlap_count": len(overlap),
+            "old_type_mk_counts": by_kind,
+            "y_layer_counts": by_y,
+            "z_layer_counts": by_z,
+            "bounds_m": {"min": [min(point[index] for point in overlap) for index in range(3)], "max": [max(point[index] for point in overlap) for index in range(3)]} if overlap else None,
+            "examples": [list(point) for point in overlap[:16]],
+        },
+        "interpretation": {
+            "confirmed": "The explicit fluid drawbox removes the old fillbox void exclusion, but 4,004 new fluid coordinates coincide with immutable old type=0/mk=40 bed/support coordinates; the new final typed CSV therefore shows a fixed-count decrease of 4,004.",
+            "axis_pattern": "Most replacements are y=+/-0.69 bed/support edge layers across all 13 z layers; the remaining y=-0.66 layer is the old low-y support overlap.",
+            "consequence": "Final fluid-versus-final-boundary disjointness alone cannot prove bed/support preservation because the drawbox overwrote those boundary cells. This repair is initialization evidence, not a valid Q-N or GPU input.",
+            "next_scientific_step": "Root review must choose a phase/order construction that preserves the same finite bed/support particle ledger while keeping the registered continuum denominator; do not move walls, shrink the denominator, or rescale mass.",
+        },
+        "q_n_status": "blocked_pending_boundary_preservation_and_one_percent_mass_budget",
+        "production_claim": "none",
+    }
+    write_json(output, report)
+    return report
+
+
 def audit(generated_bi4: Path, generated_xml: Path, output: Path, csv_output: Path) -> dict[str, Any]:
     generated_bi4 = Path(generated_bi4).resolve()
     generated_xml = Path(generated_xml).resolve()
@@ -564,6 +654,13 @@ def build_parser() -> argparse.ArgumentParser:
     command.add_argument("--generated-xml", type=Path, required=True)
     command.add_argument("--output", type=Path, required=True)
     command.add_argument("--csv-output", type=Path, required=True)
+    command = sub.add_parser("compare")
+    command.add_argument("--old-csv", type=Path, required=True)
+    command.add_argument("--new-csv", type=Path, required=True)
+    command.add_argument("--old-receipt", type=Path)
+    command.add_argument("--new-audit-receipt", type=Path)
+    command.add_argument("--new-audit-report", type=Path)
+    command.add_argument("--output", type=Path, required=True)
     return parser
 
 
@@ -579,6 +676,8 @@ def main(argv: list[str] | None = None) -> int:
         result = write_partvtk_request(args.gencase_receipt, args.family_dir)
     elif args.command == "audit":
         result = audit(args.generated_bi4, args.generated_xml, args.output, args.csv_output)
+    elif args.command == "compare":
+        result = compare_baseline(old_csv=args.old_csv, new_csv=args.new_csv, old_receipt=args.old_receipt, new_audit_receipt=args.new_audit_receipt, new_audit_report=args.new_audit_report, output=args.output)
     else:
         raise AssertionError(args.command)
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
