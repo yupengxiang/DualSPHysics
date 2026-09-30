@@ -1,0 +1,79 @@
+{
+  "family_id": "F3",
+  "qualification_policy": "scope-bound; historical gate does not transfer across control or geometry families",
+  "recipes": [
+    {
+      "control_family_id": "F3_CTRL_LEGACY_SINGLE_AXIS",
+      "coordinate_frame_id": "fixed_tank_acceleration",
+      "gate_path": "campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+      "gate_sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4",
+      "geometry_family_id": "F3_CELL3_PLAIN",
+      "mechanism_id": "legacy_plain_sloshing",
+      "observables": [
+        "3d_mass_distribution",
+        "velocity",
+        "kinetic_energy",
+        "COM",
+        "finite-wall audit"
+      ],
+      "output_interval_s": 0.01,
+      "production_resolution_m": 0.0075,
+      "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+      "reference_resolutions_m": [
+        0.00818181818181818,
+        0.0075,
+        0.006
+      ],
+      "scope_id": "F3_LEGACY_PLAIN_FIXED_ACCELERATION",
+      "solver_dimension": 3,
+      "status": "historical_gate_passed_reuse_scope",
+      "time_window_s": [
+        0.0,
+        8.35
+      ],
+      "transfer_reason": "old gate is plain single-axis fixed-tank control; new dual-axis/baffle scopes require fresh matrices",
+      "transfer_to_new_mechanisms": false
+    },
+    {
+      "control_family_id": "F3_CTRL_DUAL_AXIS_PHASE",
+      "coordinate_frame_id": "fixed_tank_acceleration",
+      "geometry_family_id": "F3_CELL3_PLAIN",
+      "mechanism_id": "dual_axis_phase",
+      "recipe_id": "F3_DS02_dual_axis_phase_v1",
+      "reference_ladder_m": [
+        0.01,
+        0.0075,
+        0.006
+      ],
+      "scope_id": "F3_DS02_DUAL_AXIS_PHASE_V1",
+      "solver_dimension": "pending_actual_solver_output",
+      "status": "definition_ready_generation_pending",
+      "status_reason": "requires 2x3 matrix, integration-step and cadence evidence",
+      "time_window_s": [
+        0.0,
+        10.0
+      ]
+    },
+    {
+      "control_family_id": "F3_CTRL_MOVING_TANK_WORLD",
+      "coordinate_frame_id": "moving_tank_world",
+      "geometry_family_id": "F3_BAFFLE_ECCENTRIC_CHANNEL",
+      "mechanism_id": "eccentric_baffle_exchange",
+      "recipe_id": "F3_DS02_eccentric_baffle_exchange_v1",
+      "reference_ladder_m": [
+        0.012,
+        0.008,
+        0.006
+      ],
+      "scope_id": "F3_DS02_ECCENTRIC_BAFFLE_EXCHANGE_V1",
+      "solver_dimension": "pending_actual_solver_output",
+      "status": "definition_ready_generation_pending",
+      "status_reason": "requires actual baffle geometry, tank pose, exchange labels, 2x3 and integration/cadence evidence",
+      "time_window_s": [
+        0.0,
+        10.0
+      ]
+    }
+  ],
+  "schema": "ds-data-02.f3.qualified_recipes.v1"
+}

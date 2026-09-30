@@ -1,0 +1,184 @@
+{
+  "coordinate_frames": [
+    {
+      "control_semantics": "linear/angular acceleration prescribed about acccentre; gravity is explicit and remains -9.81 m/s^2",
+      "frame_id": "fixed_tank_acceleration",
+      "kind": "tank_attached",
+      "position_semantics": "native solver position in fixed tank coordinates",
+      "world_transform": "not inferred; no inertial-world trajectory claim"
+    },
+    {
+      "control_semantics": "tank translation/rotation trajectory prescribed in world time; fluid-relative event coordinates obtained by inverse rigid transform",
+      "frame_id": "moving_tank_world",
+      "kind": "inertial_world",
+      "position_semantics": "native solver/world position plus saved tank pose at every frame",
+      "world_transform": "p_world = R_tank(t) p_tank + c_tank(t); event planes are defined in p_tank"
+    }
+  ],
+  "event_time_window": {
+    "definition": "full drive plus at least three dominant periods when a periodic template is declared, then a stopped-control reflow tail",
+    "history_reuse_rule": "8.35 s is reusable only for the same finite prescribed control and observation scope; it is not an automatic window for new mechanisms",
+    "history_window_s": [
+      0.0,
+      8.35
+    ],
+    "periodic_requirement": "if frequency_ratio or phase control makes a non-periodic template, report complete finite control and explicit censored tail instead",
+    "planned_window_s": [
+      0.0,
+      10.0
+    ]
+  },
+  "family_id": "F3",
+  "finite_surfaces": [
+    {
+      "applies_to": [
+        "dual_axis_phase",
+        "eccentric_baffle_exchange"
+      ],
+      "event_id": "left_right_exchange",
+      "normal_in_tank_frame": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "signed_direction": "left_to_right positive, right_to_left negative",
+      "surface": "x=0; y in [-0.09,0.09], z in [0,0.51], excluding solid baffle faces"
+    },
+    {
+      "applies_to": [
+        "dual_axis_phase"
+      ],
+      "event_id": "front_back_exchange",
+      "normal_in_tank_frame": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "signed_direction": "front_to_back positive, back_to_front negative",
+      "surface": "y=0; x in [-0.45,0.45], z in [0,0.51], finite wetted opening only"
+    },
+    {
+      "applies_to": [
+        "eccentric_baffle_exchange"
+      ],
+      "event_id": "baffle_channel_entry",
+      "normal_in_tank_frame": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "signed_direction": "source compartment toward channel positive",
+      "surface": "upstream face of each finite channel; aperture bounds are geometry assets, never an infinite plane"
+    },
+    {
+      "applies_to": [
+        "eccentric_baffle_exchange"
+      ],
+      "event_id": "baffle_channel_exit",
+      "normal_in_tank_frame": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "signed_direction": "channel toward destination compartment positive",
+      "surface": "downstream face of each finite channel; channel index is part of event key"
+    },
+    {
+      "applies_to": [
+        "dual_axis_phase",
+        "eccentric_baffle_exchange"
+      ],
+      "event_id": "top_open_exit",
+      "normal_in_tank_frame": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "signed_direction": "outward positive",
+      "surface": "finite top rim z=0.51; report legal open exit separately from closed-wall violation"
+    }
+  ],
+  "locator": {
+    "algorithm": "saved-frame interval linear chord intersection in the event frame",
+    "multiple_crossings": "each crossing is an event; net flux is signed mass sum; forward/backward totals are separate",
+    "no_posthoc_projection": true,
+    "ordering": "sort same-interval events by tau, then surface_id, then numerical_id",
+    "out_of_domain": "closed wall, legal top exit, solver-invalid, numerical loss, and unknown are mutually exclusive categories",
+    "tau_definition": "tau=(plane_value-p0)/(p1-p0), retain 0<=tau<=1 and interpolate time linearly"
+  },
+  "required_labels": [
+    {
+      "dtype": "fixed string or enum",
+      "field": "source_label",
+      "semantics": "continuous initial identity region"
+    },
+    {
+      "dtype": "int8 [time,particle]",
+      "field": "destination_time_series",
+      "semantics": "region at every saved frame; final location is separate from ever-arrived"
+    },
+    {
+      "dtype": "float64 [particle,event]",
+      "field": "first_passage_interval",
+      "semantics": "first crossing time, NaN only for censored/no event with censor flag"
+    },
+    {
+      "dtype": "float64 [time,event]",
+      "field": "cumulative_net_flux_kg",
+      "semantics": "signed sum of native particle masses"
+    },
+    {
+      "dtype": "float64 [time,event,2]",
+      "field": "forward_backward_mass_kg",
+      "semantics": "repeat crossings retained without creating new particles"
+    },
+    {
+      "dtype": "float64 [particle,region]",
+      "field": "residence_time_s",
+      "semantics": "integral of valid occupancy; interval-censoring is explicit"
+    },
+    {
+      "dtype": "enum",
+      "field": "final_category",
+      "semantics": "final region, legal_open_exit, closed_wall, invalid, numerical_loss, unknown"
+    },
+    {
+      "dtype": "enum/string",
+      "field": "failure_reason",
+      "semantics": "root cause or censor code, unknown is not zero"
+    },
+    {
+      "dtype": "float64 [time]",
+      "field": "unknown_mass_kg",
+      "semantics": "mass not classifiable from native state or missing event support"
+    }
+  ],
+  "schema": "ds-data-02.f3.event_definitions.v1",
+  "source_regions": [
+    {
+      "denominator": "sum of initial fluid mass for all particles in region",
+      "region": "initial fluid particles with tank-frame x < 0",
+      "source_label": "left"
+    },
+    {
+      "denominator": "sum of initial fluid mass for all particles in region",
+      "region": "initial fluid particles with tank-frame x >= 0",
+      "source_label": "right"
+    },
+    {
+      "denominator": "sum of initial fluid mass for all particles in region",
+      "region": "initial fluid particles with tank-frame y < 0",
+      "source_label": "front"
+    },
+    {
+      "denominator": "sum of initial fluid mass for all particles in region",
+      "region": "initial fluid particles with tank-frame y >= 0",
+      "source_label": "back"
+    },
+    {
+      "denominator": "initial mass per connected component; channel particles remain source-labelled by initial component",
+      "region": "baffle geometry connected components at t=0, with explicit channel ownership",
+      "source_label": "compartment_A_B_C"
+    }
+  ]
+}
