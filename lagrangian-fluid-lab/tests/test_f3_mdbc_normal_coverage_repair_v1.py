@@ -112,3 +112,18 @@ def test_generator_materialises_repair_inputs_without_changing_parent_bytes(tmp_
     }
     assert parameters["TimeMax"] == "10.0"
     assert parameters["TimeOut"] == "0.0025"
+
+
+def test_solver_requests_bind_actual_gencase_prefix_and_receipt() -> None:
+    request_dir = FAMILY / "qualification_requests"
+    for name in ("eccentric_baffle_normal_repair01.json", "dual_axis_qualified_fallback.json"):
+        request = json.loads((request_dir / name).read_text(encoding="utf-8"))
+        assert request["kind"] == "qualification"
+        assert request["command"][0].endswith("DualSPHysics5.4_linux64")
+        assert "{attempt_root}" in request["command"][3]
+        assert request["command"][2].startswith("/home/jade/Projects/DualSPHysics-data/")
+        receipt = Path(request["gencase_receipt"])
+        assert receipt.is_file()
+        assert _sha256(receipt) == request["gencase_receipt_sha256"]
+        assert request["estimated_storage_bytes"] == 32 * 1024**3
+        assert all(Path(path).is_file() for path in request["input_files"])
