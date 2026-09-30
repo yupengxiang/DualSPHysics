@@ -1,0 +1,74 @@
+{
+  "family_id": "F6",
+  "new_parent_attempts": {
+    "simple_free_response": "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02",
+    "wave_no_contact": "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02"
+  },
+  "old_qualification_results_preserved": true,
+  "qualification_status": "pending_new_parent_gencase_audit",
+  "records": [
+    {
+      "bounded_repair_number": 1,
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "failed_attempt_id": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01",
+      "observed_failure": "JSph::AbortBoundOut reported six floating boundary particles beyond the +Y domain limit after body motion; Error_BoundaryOut.vtk and Run.out are retained.",
+      "receipt": {
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01/execution-receipt.json",
+        "role": "shared GPU failure receipt",
+        "sha256": "5266aa7baa27e7da52a642061f2b6d263d147beab0519cd31ace28ecc231d061"
+      },
+      "repair": "Move the generated box to z=0.36 with center z=0.56 so its 0.22 m initial draft is resolved against the 0.208 m hydrostatic draft; add a draft-to-equilibrium audit. This preserves the finite 3D free-body mechanism and does not widen RhopOut or suppress boundary aborts.",
+      "representative_evidence": [
+        {
+          "exists": false,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01/Run.out",
+          "role": "native solver log",
+          "sha256": null
+        },
+        {
+          "exists": true,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01/solver_output/Error_BoundaryOut.vtk",
+          "role": "native boundary-exclusion geometry",
+          "sha256": "6496d1ee92f0ee643746e32187cf1d4f35acd76adffb1115dcd9207c143ac2ab"
+        }
+      ],
+      "root_cause_id": "F6_SIMPLE_FREE_RESPONSE_INITIAL_DRAFT_AND_LATERAL_BOUNDARY_EXIT"
+    },
+    {
+      "bounded_repair_number": 1,
+      "case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "failed_attempt_id": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01",
+      "observed_failure": "JWaveGen::InitPaddle reported no moving particles associated with mkbound=10; the prior generated XML contained a fixed mkbound=10 block and no casedef motion binding.",
+      "official_syntax_reference": {
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml",
+        "role": "official successful motion binding",
+        "sha256": "389d0df21fc36879fe72695c04249061936d9cdada0969677f14d026ff96fe59"
+      },
+      "receipt": {
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01/execution-receipt.json",
+        "role": "shared GPU failure receipt",
+        "sha256": "158ff1581beadf85cecd3d1cb6e64e26fca6409ddcbc7f9ea0a48d912a97cce7"
+      },
+      "repair": "Bind mkbound=10 to casedef motion objreal ref=10 with begin mov=1 and mvnull id=1, then require a positive generated moving-particle count before qualification. The piston wave remains regular, finite, 3D, and no-contact.",
+      "representative_evidence": [
+        {
+          "exists": false,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01/Run.out",
+          "role": "native solver log",
+          "sha256": null
+        }
+      ],
+      "root_cause_id": "F6_WAVE_PADDLE_FIXED_MARKER_NO_MOTION_BINDING"
+    }
+  ],
+  "repair_policy": {
+    "fallback": "official native 3D syntax only; no RhopOut widening or boundary-abort suppression",
+    "maximum_root_cause_repairs_per_parent": 2
+  },
+  "reused_count": 0,
+  "schema": "ds-data-02.f6.repair_evidence.v1",
+  "solver_launched_by_f6": false
+}
