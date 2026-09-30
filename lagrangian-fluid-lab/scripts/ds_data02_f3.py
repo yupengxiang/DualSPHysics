@@ -21,6 +21,7 @@ import hashlib
 import json
 import math
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -31,7 +32,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 SCHEMA = "ds-data-02.f3.family.v1"
-GENERATOR_VERSION = "ds_data02_f3.v2"
+GENERATOR_VERSION = "ds_data02_f3.v3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FAMILY_ROOT = REPO_ROOT / "campaigns/ds-data-02/families/F3"
 HISTORICAL_ROOT = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab")
@@ -1628,7 +1629,12 @@ def _append_parent_parameters(root: ET.Element, *, time_out_s: float = 0.0025) -
     _xml_child(domain, "posmax", {"x": "default+150%", "y": "default+150%", "z": "default+150%"})
 
 
-def _write_dual_axis_definition(directory: Path) -> dict[str, Any]:
+def _write_dual_axis_definition(
+    directory: Path,
+    *,
+    normal_distanceh: float = 2.0,
+    normal_save_shapes: bool = False,
+) -> dict[str, Any]:
     path = directory / "F3_DualAxisPhase_Def.xml"
     control_name = "F3_DualAxisPhase_Control.csv"
     root = ET.Element("case")
@@ -1662,7 +1668,9 @@ def _write_dual_axis_definition(directory: Path) -> dict[str, Any]:
     normals = _xml_child(casedef, "normals", {"active": "true"})
     norgeometry = _xml_child(normals, "norgeometry")
     _xml_child(norgeometry, "geometryfile", {"file": "[CaseName]_hdp_Actual.vtk"})
-    _xml_child(norgeometry, "distanceh", {"v": 2.0})
+    _xml_child(norgeometry, "distanceh", {"v": f"{normal_distanceh:.1f}"})
+    if normal_save_shapes:
+        _xml_child(norgeometry, "svshapes", {"v": "true"})
     execution = root.find("execution")
     if execution is None:
         execution = _xml_child(root, "execution")
@@ -1698,7 +1706,12 @@ def _write_dual_axis_definition(directory: Path) -> dict[str, Any]:
     }
 
 
-def _write_baffle_definition(directory: Path) -> dict[str, Any]:
+def _write_baffle_definition(
+    directory: Path,
+    *,
+    normal_distanceh: float = 2.0,
+    normal_save_shapes: bool = False,
+) -> dict[str, Any]:
     path = directory / "F3_EccentricBaffle_Def.xml"
     motion_name = "F3_EccentricBaffle_Motion.txt"
     root = ET.Element("case")
@@ -1750,7 +1763,9 @@ def _write_baffle_definition(directory: Path) -> dict[str, Any]:
     normals = _xml_child(casedef, "normals", {"active": "true"})
     norgeometry = _xml_child(normals, "norgeometry")
     _xml_child(norgeometry, "geometryfile", {"file": "[CaseName]_hdp_Actual.vtk"})
-    _xml_child(norgeometry, "distanceh", {"v": 2.0})
+    _xml_child(norgeometry, "distanceh", {"v": f"{normal_distanceh:.1f}"})
+    if normal_save_shapes:
+        _xml_child(norgeometry, "svshapes", {"v": "true"})
     motion = _xml_child(casedef, "motion")
     objreal = _xml_child(motion, "objreal", {"ref": 0})
     _xml_child(objreal, "begin", {"mov": 1, "start": 0, "finish": PARENT_INPUT_TIME_WINDOW_S[1]})
@@ -1786,10 +1801,88 @@ def _write_baffle_definition(directory: Path) -> dict[str, Any]:
     }
 
 
+def _repair_input_record(
+    parent: Mapping[str, Any],
+    repair_directory: Path,
+    canonical_directory: Path,
+) -> dict[str, Any]:
+    """Write an additive mDBC normal-coverage repair beside a parent.
+
+    The geometry, fill, motion/control values and solver parameters stay
+    byte-for-byte identical to the parent.  Only the normal association
+    radius and shape-vector debug switch change, because the QUAL02 evidence
+    showed systematic zero normal vectors in the outer boundary layers.
+    """
+    mechanism_id = str(parent["mechanism_id"])
+    if mechanism_id == "dual_axis_phase":
+        repair = _write_dual_axis_definition(
+            repair_directory, normal_distanceh=3.0, normal_save_shapes=True
+        )
+        filename = "F3_DualAxisPhase_Control.csv"
+    elif mechanism_id == "eccentric_baffle_exchange":
+        repair = _write_baffle_definition(
+            repair_directory, normal_distanceh=3.0, normal_save_shapes=True
+        )
+        filename = "F3_EccentricBaffle_Motion.txt"
+    else:
+        raise ValueError(f"unsupported F3 repair mechanism: {mechanism_id}")
+
+    # Reuse the exact control/motion bytes from the canonical parent.  The
+    # repair directory is a new input identity, while the driving signal is
+    # explicitly unchanged and hash-bound.
+    source = canonical_directory / filename
+    target = repair_directory / filename
+    shutil.copyfile(source, target)
+    control = dict(repair["control"])
+    control.update({
+        "path": str(target.resolve()),
+        "sha256": sha256_file(target),
+        "bytes": target.stat().st_size,
+        "copied_from": str(source.resolve()),
+        "source_sha256": sha256_file(source),
+    })
+    repair["control"] = control
+    repair.update({
+        "repair_id": f"{mechanism_id}_normal_coverage_repair01",
+        "parent_case_id": parent["case_id"],
+        "parent_definition_sha256": parent["definition"]["sha256"],
+        "repair_hypothesis": "mDBC normal association radius was too short for the four-layer finite wall; svshapes records the associated shape vectors",
+        "changed_parameters": {
+            "norgeometry.distanceh": {"parent": 2.0, "repair": 3.0},
+            "norgeometry.svshapes": {"parent": False, "repair": True},
+        },
+        "geometry_and_control_contract": "same geometry commands, fill seed/box, motion or acceleration control and execution parameters; no domain or density threshold change",
+        "qualification_status": "GenCase_pending_solver_QI_pending_QN_pending",
+    })
+    return repair
+
+
+def _write_normal_coverage_repairs(
+    parent_root: Path,
+    canonical_parents: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Materialise independent repair01 source inputs and their hash ledger."""
+    repairs: list[dict[str, Any]] = []
+    for parent in canonical_parents:
+        mechanism_id = str(parent["mechanism_id"])
+        canonical_directory = parent_root / mechanism_id
+        repair_directory = parent_root / f"{mechanism_id}_normal_repair01"
+        repairs.append(_repair_input_record(parent, repair_directory, canonical_directory))
+    return repairs
+
+
 def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
     parent_root = output_root / "parent_inputs"
+    previous_manifest: dict[str, Any] = {}
+    manifest_path = parent_root / "parent_input_manifest.json"
+    if manifest_path.is_file():
+        try:
+            previous_manifest = read_json(manifest_path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            previous_manifest = {}
     dual = _write_dual_axis_definition(parent_root / "dual_axis_phase")
     baffle = _write_baffle_definition(parent_root / "eccentric_baffle_exchange")
+    repairs = _write_normal_coverage_repairs(parent_root, [dual, baffle])
     manifest = {
         "schema": "ds-data-02.f3.parent_inputs.v1",
         "family_id": "F3",
@@ -1804,8 +1897,23 @@ def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
             "initial_mass_contract": "native MassFluid times fluid count compared with density times fluid region after GenCase; no mass rescaling",
         },
         "parents": [dual, baffle],
+        "repairs": repairs,
     }
-    _write_json(parent_root / "parent_input_manifest.json", manifest)
+    # `audit-parents` adds immutable receipt pointers after GenCase.  A later
+    # source regeneration must retain those pointers instead of silently
+    # replacing a receipted parent with a definition-only record.
+    previous_by_case = {
+        str(row.get("case_id")): row
+        for row in previous_manifest.get("parents", [])
+        if isinstance(row, Mapping) and row.get("case_id")
+    }
+    for parent in manifest["parents"]:
+        old = previous_by_case.get(str(parent.get("case_id")))
+        if isinstance(old, Mapping) and old.get("gencase_audit"):
+            parent["gencase_audit"] = old["gencase_audit"]
+    if previous_manifest.get("gencase_audit"):
+        manifest["gencase_audit"] = previous_manifest["gencase_audit"]
+    _write_json(manifest_path, manifest)
     return manifest
 
 
