@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsphysics.local/ds-data-02/hdf5-schema-v1",
+  "title": "DS-DATA-02 chunked numerical particle trajectory",
+  "description": "Q-I storage contract for an already materialized HDF5 trajectory. This schema does not grant Q-N or production eligibility.",
+  "type": "object",
+  "required": ["schema", "datasets", "identity", "dimension_evidence", "quality_boundary"],
+  "properties": {
+    "schema": {
+      "const": "ds-data-02.hdf5-schema.v1"
+    },
+    "datasets": {
+      "type": "object",
+      "required": [
+        "time",
+        "particle_id",
+        "particle_zone",
+        "valid",
+        "position",
+        "velocity",
+        "density",
+        "mass",
+        "type"
+      ],
+      "properties": {
+        "time": {
+          "$ref": "#/$defs/dataset",
+          "description": "One finite, strictly increasing saved time per frame; unit s."
+        },
+        "particle_id": {
+          "$ref": "#/$defs/dataset",
+          "description": "Static Idp axis when per-frame identity arrays are absent."
+        },
+        "particle_zone": {
+          "$ref": "#/$defs/dataset",
+          "description": "Static Zone axis paired with particle_id."
+        },
+        "particle_id_by_frame": {
+          "$ref": "#/$defs/dataset",
+          "description": "Optional per-frame Idp axis; must be paired with particle_zone_by_frame."
+        },
+        "particle_zone_by_frame": {
+          "$ref": "#/$defs/dataset",
+          "description": "Optional per-frame Zone axis; must be paired with particle_id_by_frame."
+        },
+        "valid": {
+          "$ref": "#/$defs/dataset",
+          "description": "Binary 0/1 activity mask. False rows are padding and are excluded from finite/positive checks."
+        },
+        "position": {
+          "$ref": "#/$defs/vector_dataset",
+          "description": "Position in an explicitly named coordinate frame, unit m."
+        },
+        "velocity": {
+          "$ref": "#/$defs/vector_dataset",
+          "description": "Velocity in the same explicitly named coordinate frame, unit m/s."
+        },
+        "density": {
+          "$ref": "#/$defs/dataset",
+          "description": "Active values finite and >0, unit kg/m^3."
+        },
+        "mass": {
+          "$ref": "#/$defs/dataset",
+          "description": "Active values finite and >0, unit kg."
+        },
+        "pressure": {
+          "$ref": "#/$defs/dataset",
+          "description": "Optional active pressure field; if present its unit and source must be explicit."
+        },
+        "type": {
+          "$ref": "#/$defs/dataset",
+          "description": "Particle class. Type 3 is fluid and type 2 is floating body; their mass ledgers are separate."
+        },
+        "mk": {
+          "$ref": "#/$defs/dataset",
+          "description": "Optional material/zone marker; it is not a substitute for typed (Zone,Idp) identity."
+        }
+      },
+      "additionalProperties": true
+    },
+    "identity": {
+      "type": "object",
+      "required": ["key", "typed_unique", "lifecycle_full_timeline"],
+      "properties": {
+        "key": {
+          "const": "(Zone,Idp)"
+        },
+        "typed_unique": {
+          "type": "boolean"
+        },
+        "lifecycle_full_timeline": {
+          "type": "boolean"
+        },
+        "lineage_for_adaptive_replacement": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "dimension_evidence": {
+      "type": "object",
+      "required": ["status", "coordinate_components", "inference_from_coordinate_values"],
+      "properties": {
+        "status": {
+          "enum": ["pass", "fail", "missing"]
+        },
+        "solver_dimension": {
+          "type": ["integer", "null"],
+          "enum": [null, 2, 3]
+        },
+        "coordinate_components": {
+          "const": 3
+        },
+        "inference_from_coordinate_values": {
+          "const": false
+        },
+        "evidence_lines": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "quality_boundary": {
+      "type": "object",
+      "required": ["q_i_only", "q_n", "production_eligibility"],
+      "properties": {
+        "q_i_only": {
+          "const": true
+        },
+        "q_n": {
+          "const": "not_assessed"
+        },
+        "production_eligibility": {
+          "const": "not_evaluated"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "dataset": {
+      "type": "object",
+      "required": ["shape", "dtype"],
+      "properties": {
+        "shape": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "dtype": {
+          "type": "string"
+        },
+        "chunks": {
+          "type": ["array", "null"]
+        },
+        "unit": {
+          "type": ["string", "null"]
+        },
+        "source": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "vector_dataset": {
+      "$ref": "#/$defs/dataset"
+    }
+  },
+  "x-semantics": {
+    "fluid_type_code": 3,
+    "floating_type_code": 2,
+    "closed_system": "Check every frame for missing and revived identities; first/last retention alone is insufficient.",
+    "dimension": "solver_dimension must come from an explicit solver output/parameter or bound metadata; coordinate_components=3 and z values are not evidence of 3D.",
+    "missing_information": "Absent units, coordinate frame, geometry, control, rigid-body state, or boundary/flux semantics remains missing evidence.",
+    "memory": "Readers must process the time/particle axis in bounded chunks and must not load a complete trajectory into memory."
+  }
+}
