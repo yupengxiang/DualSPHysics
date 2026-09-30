@@ -49,8 +49,13 @@ def _write_fixture(tmp_path: Path) -> dict[str, Path]:
     )
     (solver_dir / "Run.csv").write_text(
         "#Run;PhysicalTime;PartFiles\n"
-        "0;0.0;2\n"
-        "1;1.0;2\n",
+        "0;1.0;2\n",
+        encoding="utf-8",
+    )
+    (solver_dir / "RunPARTs.csv").write_text(
+        "Part;TimeStep [s];Steps\n"
+        "0;0.0;0\n"
+        "1;1.0;1\n",
         encoding="utf-8",
     )
     generated_xml = tmp_path / "Case.xml"

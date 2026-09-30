@@ -235,6 +235,7 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
     solver_dir = solver_root / "solver"
     run_out = _existing_path(solver_dir / "Run.out", "solver Run.out")
     run_csv = _existing_path(solver_dir / "Run.csv", "solver Run.csv")
+    run_parts_csv = _existing_path(solver_dir / "RunPARTs.csv", "solver RunPARTs.csv")
     data_root = solver_dir / "data"
     solver_inputs = solver.get("request", {}).get("input_files", [])
     listed_generated_xml = next((Path(str(value)).expanduser().resolve() for value in solver_inputs
@@ -286,6 +287,7 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
         "definition_xml_path": str(definition_xml),
         "run_out_path": str(run_out),
         "run_csv_path": str(run_csv),
+        "run_parts_csv_path": str(run_parts_csv),
         "data_root": str(data_root),
         "raw_manifest": raw,
         "dimension_evidence": dimension,
@@ -317,6 +319,7 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
             "definition_xml": _sha256(definition_xml),
             "solver_run_out": _sha256(run_out),
             "solver_run_csv": _sha256(run_csv),
+            "solver_run_parts_csv": _sha256(run_parts_csv),
         },
     }
 
@@ -381,16 +384,22 @@ def _csv_manifest(paths: Iterable[Path], csv_root: Path) -> dict[str, Any]:
     }
 
 
-def _run_times(run_csv: Path) -> list[float]:
-    with run_csv.open(newline="", encoding="utf-8", errors="replace") as stream:
+def _run_times(run_parts_csv: Path) -> list[float]:
+    with run_parts_csv.open(newline="", encoding="utf-8", errors="replace") as stream:
         reader = csv.DictReader(stream, delimiter=";")
+        fields = reader.fieldnames or []
+        time_field = next((field for field in fields if field.strip().lower().startswith("timestep")), None)
+        if time_field is None:
+            time_field = next((field for field in fields if field.strip().lower() == "physicaltime"), None)
+        if time_field is None:
+            raise ConversionError(f"solver per-frame CSV has no TimeStep/PhysicalTime column: {run_parts_csv}")
         values = []
         for row in reader:
-            value = row.get("PhysicalTime")
+            value = row.get(time_field)
             if value not in (None, ""):
                 values.append(float(value.replace(",", "")))
     if not values:
-        raise ConversionError(f"Run.csv has no PhysicalTime values: {run_csv}")
+        raise ConversionError(f"solver per-frame CSV has no time values: {run_parts_csv}")
     return values
 
 
@@ -478,7 +487,7 @@ def _verify_output(path: Path, provenance: Mapping[str, Any], run_times: list[fl
                 raise ConversionError(f"converted dataset {name} has shape {handle[name].shape}, expected {shape}")
         times = np.asarray(handle["time"][:], dtype=np.float64)
         if len(run_times) != expected_frames or not np.allclose(times, run_times, rtol=0.0, atol=2e-6):
-            raise ConversionError("converted times do not match solver Run.csv PhysicalTime values")
+            raise ConversionError("converted times do not match solver RunPARTs.csv TimeStep values")
         valid = np.asarray(handle["valid"][:], dtype=bool)
         complete = bool(valid.shape == (expected_frames, expected_particles) and valid.all())
         if not complete:
@@ -560,9 +569,9 @@ def convert_bi4(*, solver_receipt: Path, gencase_receipt: Path, owner_metadata: 
         partvtk_result = {"path": str(partvtk.resolve()), "sha256": _sha256(partvtk.resolve()), "command": [], "returncode": 0, "stdout_log": None, "stdout_sha256": None}
     frames = _csv_frames(csv_dir, frame_count)
     csv_manifest = _csv_manifest(frames, csv_dir)
-    run_times = _run_times(Path(provenance["run_csv_path"]))
+    run_times = _run_times(Path(provenance["run_parts_csv_path"]))
     if len(run_times) != frame_count:
-        raise ConversionError(f"Run.csv has {len(run_times)} physical-time rows, expected {frame_count}")
+        raise ConversionError(f"RunPARTs.csv has {len(run_times)} TimeStep rows, expected {frame_count}")
     record = {
         "id": provenance["case_id"], "family": provenance["family_id"],
         "mechanism": provenance.get("mechanism_id") or "unknown",
