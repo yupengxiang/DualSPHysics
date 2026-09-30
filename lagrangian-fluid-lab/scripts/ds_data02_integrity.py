@@ -311,13 +311,17 @@ def estimate_hdf5_audit(path: str | os.PathLike[str], *, particle_chunk: int = D
                 if dataset.ndim >= 2:
                     per_chunk += width * int(dataset.dtype.itemsize) * (3 if dataset.ndim == 3 else 1)
         # The estimate is an upper bound for one particle chunk plus static
-        # identity axes and lifecycle booleans.  It intentionally excludes
-        # Python interpreter/HDF5 cache overhead.
-        lifecycle_bytes = 8 * (particle_count or 0) + 8 * (particle_count or 0)
+        # identity axes, the typed-key uniqueness workspace, and lifecycle
+        # state.  It intentionally excludes Python interpreter/HDF5 cache
+        # overhead, so callers should reserve additional headroom.
+        lifecycle_bytes = (particle_count or 0) * (9 + 8 + 16)
         identity_axis_bytes = 0
         for name in ("particle_id", "particle_zone"):
             if name in handle and isinstance(handle[name], h5py.Dataset):
                 identity_axis_bytes += _dataset_nbytes(handle[name])
+        # _identity_axis converts Zone to int64, creates one uint64 typed key
+        # array, and np.unique may retain a sorted copy while checking it.
+        identity_key_workspace_bytes = 24 * (particle_count or 0)
         return {
             "path": str(input_path),
             "file_bytes": int(input_path.stat().st_size),
@@ -331,7 +335,11 @@ def estimate_hdf5_audit(path: str | os.PathLike[str], *, particle_chunk: int = D
             "estimated_read_bytes": int(sum(dataset_bytes.get(name, 0) for name in
                                              REQUIRED_DATASETS + OPTIONAL_DATASETS)),
             "identity_axis_bytes": int(identity_axis_bytes),
-            "estimated_peak_working_set_bytes": int(per_chunk + lifecycle_bytes + identity_axis_bytes),
+            "lifecycle_state_bytes": int(lifecycle_bytes),
+            "identity_key_workspace_bytes": int(identity_key_workspace_bytes),
+            "estimated_peak_working_set_bytes": int(
+                per_chunk + lifecycle_bytes + identity_axis_bytes + identity_key_workspace_bytes
+            ),
             "full_trajectory_materialized": False,
             "method": "dataset metadata plus one particle chunk per frame",
         }
