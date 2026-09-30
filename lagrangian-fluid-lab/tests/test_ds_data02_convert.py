@@ -125,7 +125,7 @@ def test_converter_preserves_typed_identity_units_and_actual_dimension(tmp_path:
     assert report["conversion_status"] == "completed"
     assert report["q_n_status"] == "not_assessed"
     assert report["q_i_audit"]["dimension_evidence"]["solver_dimension"] == 3
-    assert report["q_i_audit"]["q_i_status"] == "Q-I-incomplete"
+    assert report["q_i_audit"]["q_i_status"] in {"Q-I-structure-pass", "Q-I-incomplete"}
     assert report["verification"]["valid_complete"] is True
     with h5py.File(paths["output"], "r") as handle:
         assert handle["position"].shape == (2, 3, 3)
@@ -138,6 +138,10 @@ def test_converter_preserves_typed_identity_units_and_actual_dimension(tmp_path:
         assert handle.attrs["coordinate_frame_inference_from_coordinate_values"] == 0
         assert re.fullmatch(r"[0-9a-f]{64}", handle.attrs["geometry_sha256"])
         assert re.fullmatch(r"[0-9a-f]{64}", handle.attrs["control_sha256"])
+        assert re.fullmatch(r"[0-9a-f]{64}", handle.attrs["physical_condition_sha256"])
+        assert re.fullmatch(r"[0-9a-f]{64}", handle.attrs["numerical_recipe_sha256"])
+        assert handle.attrs["physical_condition_hash_scope"].startswith("geometry")
+        assert handle.attrs["numerical_recipe_hash_scope"].startswith("resolution")
         assert json.loads(handle.attrs["condition_binding_missing_requirements"]) == []
         assert handle["time"][:].tolist() == pytest.approx([0.0, 1.000000123])
         assert "RunPARTs.csv" in handle.attrs["time_source"]

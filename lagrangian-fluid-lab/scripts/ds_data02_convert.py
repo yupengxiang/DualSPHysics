@@ -137,6 +137,153 @@ def _receipt_input(receipt: Mapping[str, Any], predicate: Any, label: str) -> Pa
     raise ConversionError(f"{label} was not listed in the receipt input files")
 
 
+def _receipt_inputs(receipt: Mapping[str, Any], predicate: Any) -> list[Path]:
+    """Return all existing receipt inputs satisfying ``predicate``.
+
+    Qualification receipts bind the immutable completed GenCase XML/BI4 and
+    the copied motion file.  Keeping this helper separate from
+    :func:`_receipt_input` lets family owners bind a motion asset without
+    depending on an F1-specific filename or metadata schema.
+    """
+    request = receipt.get("request")
+    values = request.get("input_files", []) if isinstance(request, Mapping) else []
+    result: list[Path] = []
+    for value in values:
+        path = Path(str(value)).expanduser().resolve()
+        if predicate(path) and path.is_file() and path not in result:
+            result.append(path)
+    return result
+
+
+def _motion_input(receipts: Iterable[Mapping[str, Any]], generated_xml: Path | None = None) -> Path | None:
+    """Find the copied native motion control bound by one of the receipts."""
+    candidates: list[Path] = []
+    for receipt in receipts:
+        candidates.extend(_receipt_inputs(
+            receipt,
+            lambda path: path.suffix.lower() in {".dat", ".csv"}
+            and "motion" in path.name.lower(),
+        ))
+    if not candidates:
+        return None
+    if generated_xml is not None:
+        declared = ET.parse(generated_xml).getroot().find(".//mvrotfile/file")
+        declared_name = declared.get("name") if declared is not None else None
+        if declared_name:
+            copied = [path for path in candidates
+                      if path.name == Path(declared_name).name and path.parent == generated_xml.parent]
+            if copied:
+                return copied[0]
+    # The generated case's copied control is the most concrete binding.  A
+    # duplicate entry in the GenCase and solver receipts is harmless.
+    return sorted(set(candidates), key=lambda path: str(path))[0]
+
+
+def _parse_motion_control(path: Path | None, generated_xml: Path) -> dict[str, Any] | None:
+    """Parse a native mvrotfile control and its rotation axis, if present."""
+    root = ET.parse(generated_xml).getroot()
+    rotation = root.find(".//mvrotfile")
+    if rotation is None:
+        return None
+    file_node = rotation.find("./file")
+    declared_name = file_node.get("name") if file_node is not None else None
+    if path is None and declared_name:
+        candidate = (generated_xml.parent / declared_name).resolve()
+        path = candidate if candidate.is_file() else None
+    if path is None or not path.is_file():
+        raise ConversionError("generated mvrotfile has no existing copied motion input")
+    p1_node = rotation.find("./axisp1")
+    p2_node = rotation.find("./axisp2")
+    if p1_node is None or p2_node is None:
+        raise ConversionError("generated mvrotfile is missing axisp1/axisp2")
+    try:
+        p1 = np.asarray([float(p1_node.attrib[key]) for key in ("x", "y", "z")], dtype=np.float64)
+        p2 = np.asarray([float(p2_node.attrib[key]) for key in ("x", "y", "z")], dtype=np.float64)
+    except (KeyError, TypeError, ValueError) as error:
+        raise ConversionError("generated mvrotfile contains an invalid rotation axis") from error
+    axis = p2 - p1
+    norm = float(np.linalg.norm(axis))
+    if not np.isfinite(norm) or norm <= 0:
+        raise ConversionError("generated mvrotfile rotation axis has zero length")
+    axis /= norm
+    times: list[float] = []
+    values: list[float] = []
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        pieces = [piece.strip() for piece in re.split(r"[;,\s]+", line) if piece.strip()]
+        if len(pieces) < 2:
+            raise ConversionError(f"motion control row {line_number} has fewer than two columns: {path}")
+        try:
+            time_value, angle_value = float(pieces[0]), float(pieces[1])
+        except ValueError as error:
+            raise ConversionError(f"motion control row {line_number} is not numeric: {path}") from error
+        if not np.isfinite(time_value) or not np.isfinite(angle_value):
+            raise ConversionError(f"motion control row {line_number} is non-finite: {path}")
+        times.append(time_value)
+        values.append(angle_value)
+    if len(times) < 2 or not np.all(np.diff(np.asarray(times)) > 0):
+        raise ConversionError(f"motion control times are not strictly increasing: {path}")
+    units = str(rotation.attrib.get("anglesunits", "degrees")).strip().lower()
+    if units.startswith("rad"):
+        angles_rad = np.asarray(values, dtype=np.float64)
+    elif units.startswith("deg"):
+        angles_rad = np.deg2rad(np.asarray(values, dtype=np.float64))
+    else:
+        raise ConversionError(f"unsupported mvrotfile angle units {units!r}: {generated_xml}")
+    time_array = np.asarray(times, dtype=np.float64)
+    omega = np.gradient(angles_rad, time_array, edge_order=1)
+    return {
+        "kind": "rotation",
+        "control_path": str(path.resolve()),
+        "control_sha256": _sha256(path),
+        "declared_name": declared_name,
+        "anglesunits": units,
+        "axis_origin_m": [float(value) for value in p1],
+        "axis_unit": [float(value) for value in axis],
+        "control_time_s": [float(time_array[0]), float(time_array[-1])],
+        "control_rows": int(len(time_array)),
+        "angle_start_rad": float(angles_rad[0]),
+        "angle_end_rad": float(angles_rad[-1]),
+        "angle_range_rad": [float(angles_rad.min()), float(angles_rad.max())],
+        "omega_min_rad_s": float(omega.min()),
+        "omega_max_rad_s": float(omega.max()),
+        # Arrays are intentionally retained in provenance only in memory.  A
+        # converted HDF5 stores the frame-aligned values in rigid_body_state.
+        "_times": time_array,
+        "_angles_rad": angles_rad,
+        "_omega_rad_s": omega,
+    }
+
+
+def _solver_population(run_out: Path, gencase: Mapping[str, Any]) -> dict[str, Any]:
+    """Collect native fixed/moving/fluid population and exclusion facts."""
+    text = run_out.read_text(errors="replace")
+    patterns = {
+        "initial_total": r"Particles of simulation\s*\(initial\)\s*:\s*([0-9,]+)",
+        "excluded_particles": r"Excluded particles[^:]*:\s*([0-9,]+)",
+        "case_nfixed": r"CaseNfixed\s*=\s*([0-9,]+)",
+        "case_nmoving": r"CaseNmoving\s*=\s*([0-9,]+)",
+        "case_nfluid": r"CaseNfluid\s*=\s*([0-9,]+)",
+        "part_files": r"PART files[^:]*:\s*([0-9,]+)",
+        "steps": r"Steps of simulation[^:]*:\s*([0-9,]+)",
+        "dt_adjusted_to_dtmin": r"DTs adjusted to DtMin[^:]*:\s*([0-9,]+)",
+    }
+    result: dict[str, Any] = {}
+    for key, pattern in patterns.items():
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            result[key] = int(match.group(1).replace(",", ""))
+    result.update({
+        "gencase_total_particles": int(gencase.get("total_particles", 0)),
+        "gencase_fluid_particles": int(gencase.get("fluid_particles", 0)),
+        "gencase_solver_dimension": gencase.get("solver_dimension_from_gencase"),
+        "source": str(run_out),
+    })
+    return result
+
+
 def _read_dimension(run_out: Path, generated_xml: Path, owner: Mapping[str, Any], gencase: Mapping[str, Any]) -> dict[str, Any]:
     text = run_out.read_text(errors="replace")
     matches = {int(match.group(1)) for match in DIMENSION_RE.finditer(text)}
@@ -173,7 +320,8 @@ def _read_dimension(run_out: Path, generated_xml: Path, owner: Mapping[str, Any]
     }
 
 
-def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any], motion: ET.Element | None) -> dict[str, Any]:
+def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any], motion: ET.Element | None,
+                        motion_control: Mapping[str, Any] | None = None) -> dict[str, Any]:
     """Build resolution-independent physical condition bindings.
 
     The generated definition XML contains resolution-dependent ``dp``, ``h``,
@@ -187,7 +335,10 @@ def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any],
         "geometry_family_id": owner.get("geometry_family_id"),
         "geometry": _json_value(owner.get("geometry")),
     }
-    actual = owner.get("source_mother", {}).get("actual_successful_run", {})
+    source_mother = owner.get("source_mother", {})
+    actual = source_mother.get("actual_successful_run", {})
+    if not isinstance(actual, Mapping):
+        actual = {}
     initial_keys = (
         "boundary", "coordinate_components", "finite_wall_faces", "initial_flow_direction",
         "initial_fluid_extent_m", "nominal_initial_fluid_fill_box_extent_m", "open_top",
@@ -201,10 +352,17 @@ def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any],
         "parameter_values": _json_value(owner.get("parameter_values", {})),
         "event_window": _json_value(owner.get("event_window", {})),
         "initial_state": initial_state,
+        "source_mother": _json_value(source_mother),
+        "physical_case_id": owner.get("physical_case_id"),
+        "lineage_group_id": owner.get("lineage_group_id"),
+        "paired_background_id": owner.get("paired_background_id"),
+        "view_id": owner.get("view_id"),
         "motion_control": {
             "element_present": motion is not None,
             "element_empty": motion is not None and len(motion) == 0 and not motion.attrib,
             "execution_parameters": _json_value(parameters),
+            "parsed_control": _json_value({key: value for key, value in (motion_control or {}).items()
+                                            if not str(key).startswith("_")}),
         },
     }
     missing = []
@@ -212,11 +370,42 @@ def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any],
         missing.append("geometry_semantic_content")
     if not control_binding["solver_parameters"]:
         missing.append("control_semantic_content")
+    parsed_motion = {
+        str(key): value for key, value in (motion_control or {}).items()
+        if not str(key).startswith("_") and str(key) not in {"control_path"}
+    }
+    # Keep the historical composite control hash for compatibility, but also
+    # publish hashes with an explicit numerical/physical split.  This lets
+    # independent DtFixed/save-cadence studies compare the same physical
+    # condition without pretending that their numerical recipes are identical.
+    physical_condition = {
+        "family_id": owner.get("family_id"),
+        "physical_case_id": owner.get("physical_case_id"),
+        "geometry_family_id": owner.get("geometry_family_id"),
+        "geometry": _json_value(owner.get("geometry", {})),
+        "parameter_values": _json_value(owner.get("parameter_values", {})),
+        "event_window": _json_value(owner.get("event_window", {})),
+        "control_family_id": owner.get("control_family_id"),
+        "motion_control": _json_value(parsed_motion),
+    }
+    numerical_recipe = {
+        "family_id": owner.get("family_id"),
+        "resolution": owner.get("resolution"),
+        "solver_parameters": _json_value(owner.get("solver_parameters", {})),
+        "generated_xml_execution_parameters": _json_value(parameters),
+        "solver_dimension": _json_value(source_mother.get("solver_dimension")),
+    }
     return {
         "geometry": geometry_binding,
         "geometry_sha256": _canonical_sha256(geometry_binding),
         "control": control_binding,
         "control_sha256": _canonical_sha256(control_binding),
+        "physical_condition": physical_condition,
+        "physical_condition_sha256": _canonical_sha256(physical_condition),
+        "physical_condition_hash_scope": "geometry, physical case/parameter values, event window, control family, copied motion semantic content; excludes resolution and solver numerical parameters",
+        "numerical_recipe": numerical_recipe,
+        "numerical_recipe_sha256": _canonical_sha256(numerical_recipe),
+        "numerical_recipe_hash_scope": "resolution, solver parameters, generated execution parameters, and solver dimension declaration",
         "missing_requirements": missing,
     }
 
@@ -271,30 +460,43 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
                     owner_metadata_path: Path) -> dict[str, Any]:
     solver = _load_json(solver_receipt_path, "solver receipt")
     gencase = _load_json(gencase_receipt_path, "GenCase receipt")
-    owner = _load_json(owner_metadata_path, "F1 owner metadata")
+    owner = _load_json(owner_metadata_path, "family owner metadata")
     if solver.get("schema") != "ds02.execution-receipt.v1" or solver.get("status") != "completed":
         raise ConversionError("solver receipt is not a completed shared-runner receipt")
     if gencase.get("schema") != "ds02.execution-receipt.v1" or gencase.get("status") != "completed":
         raise ConversionError("GenCase receipt is not a completed shared-runner receipt")
     if solver.get("request", {}).get("kind") != "qualification":
         raise ConversionError("source solver receipt is not a qualification attempt")
-    case_id = str(solver.get("request", {}).get("case_id", ""))
+    solver_request = solver.get("request", {})
+    gencase_request = gencase.get("request", {})
+    owner_case_id = str(owner.get("case_id", ""))
+    case_id = str(solver_request.get("case_id", owner_case_id))
     if not CASE_ID_RE.fullmatch(case_id):
         raise ConversionError(f"invalid case id in solver receipt: {case_id!r}")
+    if owner_case_id and owner_case_id != case_id:
+        raise ConversionError(f"family owner metadata case_id differs from solver receipt: {owner_case_id!r} != {case_id!r}")
+    owner_schema = str(owner.get("schema", ""))
+    if not owner_schema.startswith("ds-data-02.") or not owner_schema.endswith("generator.v1"):
+        raise ConversionError(f"owner metadata is not a DS-DATA-02 generator record: {owner_schema!r}")
     raw_solver_root = solver.get("output_root")
     if not isinstance(raw_solver_root, str) or not raw_solver_root:
         raise ConversionError("solver receipt has no output_root directory")
     solver_root = Path(raw_solver_root).expanduser().resolve()
     if not solver_root.is_dir():
         raise ConversionError(f"solver output root is missing: {solver_root}")
-    solver_dir = solver_root / "solver"
+    solver_dir_candidates = [solver_root / "solver", solver_root / "solver_output", solver_root]
+    solver_dir = next((candidate for candidate in solver_dir_candidates
+                       if (candidate / "Run.out").is_file() and (candidate / "RunPARTs.csv").is_file()), None)
+    if solver_dir is None:
+        raise ConversionError(f"solver output has no Run.out/RunPARTs.csv directory: {solver_root}")
     run_out = _existing_path(solver_dir / "Run.out", "solver Run.out")
     run_csv = _existing_path(solver_dir / "Run.csv", "solver Run.csv")
     run_parts_csv = _existing_path(solver_dir / "RunPARTs.csv", "solver RunPARTs.csv")
     data_root = solver_dir / "data"
-    solver_inputs = solver.get("request", {}).get("input_files", [])
+    solver_inputs = solver_request.get("input_files", [])
     listed_generated_xml = next((Path(str(value)).expanduser().resolve() for value in solver_inputs
-                                 if Path(str(value)).suffix.lower() == ".xml"), None)
+                                 if Path(str(value)).suffix.lower() == ".xml"
+                                 and not Path(str(value)).name.endswith("_Def.xml")), None)
     generated_xml = _existing_path(listed_generated_xml, "generated case XML") if listed_generated_xml else None
     if generated_xml is None:
         raise ConversionError("solver receipt did not list generated case XML")
@@ -303,9 +505,9 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
     if gencase_receipt_from_solver is not None and gencase_receipt_from_solver != gencase_receipt_path.resolve():
         raise ConversionError("explicit GenCase receipt differs from the solver receipt binding")
     definition_xml = _receipt_input(gencase, lambda path: path.name.endswith("_Def.xml"), "GenCase definition XML")
-    owner_from_inputs = _receipt_input(gencase, lambda path: path.name.endswith(".metadata.json"), "F1 owner metadata")
+    owner_from_inputs = _receipt_input(gencase, lambda path: path.name.endswith(".metadata.json"), "family owner metadata")
     if owner_from_inputs != owner_metadata_path.resolve():
-        raise ConversionError("explicit F1 owner metadata differs from the GenCase receipt binding")
+        raise ConversionError("explicit family owner metadata differs from the GenCase receipt binding")
     frame_paths, raw = _raw_manifest(data_root)
     if not frame_paths:
         raise ConversionError("solver output has no Part_XXXX.bi4 frames")
@@ -317,19 +519,36 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
         for node in xml_root.findall(".//execution/parameters/parameter")
         if node.get("key")
     }
-    bindings = _condition_bindings(owner, parameters, motion)
+    copied_motion = _motion_input((solver, gencase), generated_xml)
+    motion_control = _parse_motion_control(copied_motion, generated_xml)
+    bindings = _condition_bindings(owner, parameters, motion, motion_control)
     geometry = owner.get("geometry")
     if not isinstance(geometry, Mapping):
         raise ConversionError("owner metadata has no structured geometry")
-    solver_request = solver.get("request", {})
-    gencase_request = gencase.get("request", {})
+    population = _solver_population(run_out, gencase)
+    # A completed solver receipt is not itself numerical qualification.  The
+    # population and native exclusion facts remain raw evidence for later
+    # Q-I/Q-N scope checks.
+    boundary_geometry = owner.get("geometry", {})
+    if not isinstance(boundary_geometry, Mapping):
+        boundary_geometry = {}
+    q_i = owner.get("quality_contract", {}).get("q_i", {})
+    boundary = {
+        "boundary_mode": "open" if boundary_geometry.get("open_boundary_faces") else "closed",
+        "physical_boundary_faces": _json_value(boundary_geometry.get("finite_wall_faces", [])),
+        "open_boundary_faces": _json_value(boundary_geometry.get("open_boundary_faces", [])),
+        "source_mother_boundary": owner.get("source_mother", {}).get("boundary"),
+        "lifecycle_semantics": "initial native fluid cohort; valid=false records native solver exclusion; no births are inferred",
+        "lifecycle_contract": _json_value(q_i),
+        "native_exclusion_classification": "solver-reported Excluded particles are retained as unknown_mass until event audit classifies them",
+    }
     source_inputs = _source_inputs(
         solver, gencase, owner_metadata_path.resolve(), generated_xml, definition_xml,
         solver_receipt_path.resolve(), gencase_receipt_path.resolve(),
     )
     return {
         "case_id": case_id,
-        "family_id": str(owner.get("family_id", solver_request.get("family_id", "F1"))),
+        "family_id": str(owner.get("family_id", solver_request.get("family_id", "unknown"))),
         "mechanism_id": owner.get("mechanism_id"),
         "recipe_id": owner.get("recipe_id"),
         "resolution": owner.get("resolution"),
@@ -348,6 +567,8 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
         "raw_manifest": raw,
         "dimension_evidence": dimension,
         "geometry": _json_value(geometry),
+        "source_provenance_kind": owner_schema,
+        "population": population,
         "control": {
             "control_family_id": owner.get("control_family_id"),
             "recipe_id": owner.get("recipe_id"),
@@ -357,16 +578,17 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
         "motion_control": {
             "source": str(generated_xml),
             "sha256": _sha256(generated_xml),
+            "copied_control_path": str(copied_motion) if copied_motion else None,
+            "copied_control_sha256": _sha256(copied_motion) if copied_motion else None,
             "element_present": motion is not None,
             "element_empty": motion is not None and len(motion) == 0 and not motion.attrib,
             "semantics": "empty motion element in generated case XML" if motion is not None and len(motion) == 0 and not motion.attrib else "declared by generated case XML",
+            "parsed_control": _json_value({key: value for key, value in (motion_control or {}).items()
+                                            if not str(key).startswith("_")}),
         },
+        "motion_control_spec": motion_control,
         "condition_bindings": bindings,
-        "boundary": {
-            "source_mother_boundary": owner.get("source_mother", {}).get("boundary"),
-            "open_top": owner.get("geometry", {}).get("open_top"),
-            "lifecycle_semantics": "not declared by source metadata",
-        },
+        "boundary": boundary,
         "source_input_hashes": source_inputs,
         "source_receipt_sha256": {
             "solver_receipt": _sha256(solver_receipt_path),
@@ -441,6 +663,212 @@ def _csv_manifest(paths: Iterable[Path], csv_root: Path) -> dict[str, Any]:
     }
 
 
+RIGID_BODY_DTYPE = np.dtype([
+    ("time_s", "<f8"),
+    ("body_id", "<i4"),
+    ("valid", "u1"),
+    ("actual_angle_rad", "<f8"),
+    ("prescribed_angle_rad", "<f8"),
+    ("angle_residual_rad", "<f8"),
+    ("actual_omega_rad_s", "<f8"),
+    ("prescribed_omega_rad_s", "<f8"),
+    ("omega_residual_rad_s", "<f8"),
+    ("actual_com_x_m", "<f8"),
+    ("actual_com_y_m", "<f8"),
+    ("actual_com_z_m", "<f8"),
+    ("expected_com_x_m", "<f8"),
+    ("expected_com_y_m", "<f8"),
+    ("expected_com_z_m", "<f8"),
+    ("position_rms_m", "<f8"),
+    ("position_max_m", "<f8"),
+    ("velocity_rms_m_s", "<f8"),
+    ("velocity_max_m_s", "<f8"),
+    ("moving_node_count", "<i8"),
+    ("expected_node_count", "<i8"),
+])
+
+
+def _rotate_points(points: np.ndarray, origin: np.ndarray, axis: np.ndarray, angle: float) -> np.ndarray:
+    """Rotate points about a fixed axis using Rodrigues' formula."""
+    shifted = np.asarray(points, dtype=np.float64) - origin
+    cosine, sine = float(np.cos(angle)), float(np.sin(angle))
+    cross = np.cross(axis, shifted)
+    parallel = shifted @ axis
+    return origin + cosine * shifted + sine * cross + (1.0 - cosine) * parallel[:, None] * axis
+
+
+def _fit_axis_angle(points0: np.ndarray, points: np.ndarray, origin: np.ndarray,
+                    axis: np.ndarray) -> float:
+    """Fit the signed rotation angle of actual moving nodes around the axis."""
+    q = np.asarray(points0, dtype=np.float64) - origin
+    r = np.asarray(points, dtype=np.float64) - origin
+    q_perp = q - (q @ axis)[:, None] * axis
+    r_perp = r - (r @ axis)[:, None] * axis
+    denominator = np.sum(q_perp * q_perp, axis=1)
+    usable = denominator > 1.0e-18
+    if not np.any(usable):
+        raise ConversionError("moving boundary nodes do not span the declared rotation axis")
+    denom = denominator[usable]
+    cosine = np.sum(q_perp[usable] * r_perp[usable], axis=1) / denom
+    sine = np.sum(axis * np.cross(q_perp[usable], r_perp[usable]), axis=1) / denom
+    return float(np.arctan2(np.sum(sine), np.sum(cosine)))
+
+
+def _write_rigid_body_state(path: Path, provenance: Mapping[str, Any], run_times: list[float]) -> dict[str, Any]:
+    """Persist pose/velocity reconstructed from the actual moving nodes.
+
+    DualSPHysics emits per-node moving-boundary positions and velocities (the
+    PartVTK native Type=1 code; Type=2 is reserved for floating bodies) in
+    every BI4 frame.  The fitted angle and residuals below are therefore an observation
+    of the saved moving boundary, while the prescribed values come from the
+    copied ``mvrotfile``.  No kinematic state is filled by a model or by a
+    filename convention.
+    """
+    spec = provenance.get("motion_control_spec")
+    if not isinstance(spec, Mapping) or spec.get("kind") != "rotation":
+        return {"status": "not_applicable", "reason": "no_rotational_motion_control"}
+    control_times = np.asarray(spec.get("_times"), dtype=np.float64)
+    control_angles = np.asarray(spec.get("_angles_rad"), dtype=np.float64)
+    control_omega = np.asarray(spec.get("_omega_rad_s"), dtype=np.float64)
+    if control_times.ndim != 1 or len(control_times) < 2:
+        raise ConversionError("parsed motion control has no usable time axis")
+    origin = np.asarray(spec["axis_origin_m"], dtype=np.float64)
+    axis = np.asarray(spec["axis_unit"], dtype=np.float64)
+    with h5py.File(path, "r+") as handle:
+        times = np.asarray(handle["time"][:], dtype=np.float64)
+        type_values = np.asarray(handle["type"][0, :], dtype=np.int64)
+        valid = np.asarray(handle["valid"][:], dtype=bool)
+        # PartVTK's native type code is 1 for moving boundary nodes and 2 for
+        # floating bodies.  A family with a declared CaseNmoving population
+        # must use Type=1; Type=2 remains a separate floating-body ledger.
+        population = provenance.get("population", {})
+        moving_type_code = 1 if int(population.get("case_nmoving", 0) or 0) > 0 else 2
+        initial_moving = (type_values == moving_type_code) & valid[0]
+        if not np.any(initial_moving):
+            return {"status": "missing", "reason": f"no_type{moving_type_code}_moving_nodes_in_initial_frame"}
+        initial_position = np.asarray(handle["position"][0, initial_moving, :], dtype=np.float64)
+        # First fit the saved moving-node pose without assuming that the
+        # signed axis convention in the generated XML is the same convention
+        # used by PartVTK.  DualSPHysics versions/case recipes can reverse the
+        # native mvrotfile sign while preserving the same physical motion.
+        # Choose between the two explicitly auditable candidates from the
+        # actual saved nodes; never hide the convention in a filename or
+        # family-specific constant.
+        actual_angles = np.full(len(times), np.nan, dtype=np.float64)
+        for frame, time_value in enumerate(times):
+            active = initial_moving & valid[frame]
+            current_position = np.asarray(handle["position"][frame, active, :], dtype=np.float64)
+            if len(current_position):
+                actual_angles[frame] = _fit_axis_angle(initial_position[active[initial_moving]], current_position, origin, axis)
+        finite_angles = np.isfinite(actual_angles)
+        if not finite_angles.all():
+            raise ConversionError("moving boundary is absent in one or more saved frames")
+        actual_angles = np.unwrap(actual_angles)
+        actual_omega = np.gradient(actual_angles, times, edge_order=1)
+        prescribed_angle_base = np.interp(times, control_times, control_angles)
+        prescribed_omega_base = np.interp(times, control_times, control_omega)
+        sign_residuals = {}
+        for sign in (1.0, -1.0):
+            angular_residual = np.arctan2(
+                np.sin(actual_angles - sign * prescribed_angle_base),
+                np.cos(actual_angles - sign * prescribed_angle_base),
+            )
+            sign_residuals[str(int(sign))] = {
+                "angle_rms_rad": float(np.sqrt(np.mean(angular_residual ** 2))),
+                "angle_max_rad": float(np.max(np.abs(angular_residual))),
+            }
+        control_sign = min(sign_residuals, key=lambda key: sign_residuals[key]["angle_rms_rad"])
+        control_sign_applied = float(control_sign)
+        expected_angles = control_sign_applied * prescribed_angle_base
+        expected_omega = control_sign_applied * prescribed_omega_base
+        rows = np.zeros(len(times), dtype=RIGID_BODY_DTYPE)
+        for frame, time_value in enumerate(times):
+            active = initial_moving & valid[frame]
+            current_position = np.asarray(handle["position"][frame, active, :], dtype=np.float64)
+            current_velocity = np.asarray(handle["velocity"][frame, active, :], dtype=np.float64)
+            expected_position = _rotate_points(initial_position, origin, axis, float(expected_angles[frame]))
+            expected_velocity = np.cross(
+                expected_omega[frame] * axis,
+                expected_position - origin,
+            )
+            if len(current_position):
+                expected_current_position = expected_position[active[initial_moving]]
+                expected_current_velocity = expected_velocity[active[initial_moving]]
+                position_delta = current_position - expected_current_position
+                velocity_delta = current_velocity - expected_current_velocity
+                actual_com = current_position.mean(axis=0)
+                expected_com = expected_current_position.mean(axis=0)
+                position_norm = np.linalg.norm(position_delta, axis=1)
+                velocity_norm = np.linalg.norm(velocity_delta, axis=1)
+                rows[frame]["actual_com_x_m"] = actual_com[0]
+                rows[frame]["actual_com_y_m"] = actual_com[1]
+                rows[frame]["actual_com_z_m"] = actual_com[2]
+                rows[frame]["expected_com_x_m"] = expected_com[0]
+                rows[frame]["expected_com_y_m"] = expected_com[1]
+                rows[frame]["expected_com_z_m"] = expected_com[2]
+                rows[frame]["position_rms_m"] = float(np.sqrt(np.mean(position_norm ** 2)))
+                rows[frame]["position_max_m"] = float(position_norm.max())
+                rows[frame]["velocity_rms_m_s"] = float(np.sqrt(np.mean(velocity_norm ** 2)))
+                rows[frame]["velocity_max_m_s"] = float(velocity_norm.max())
+            rows[frame]["time_s"] = float(time_value)
+            rows[frame]["body_id"] = 1
+            rows[frame]["valid"] = 1 if len(current_position) == len(initial_position) else 0
+            rows[frame]["prescribed_angle_rad"] = float(expected_angles[frame])
+            rows[frame]["prescribed_omega_rad_s"] = float(expected_omega[frame])
+            rows[frame]["moving_node_count"] = int(len(current_position))
+            rows[frame]["expected_node_count"] = int(len(initial_position))
+        rows["actual_angle_rad"] = actual_angles
+        rows["angle_residual_rad"] = np.arctan2(
+            np.sin(actual_angles - expected_angles), np.cos(actual_angles - expected_angles),
+        )
+        rows["actual_omega_rad_s"] = actual_omega
+        rows["omega_residual_rad_s"] = actual_omega - expected_omega
+        if "rigid_body_state" in handle:
+            del handle["rigid_body_state"]
+        dataset = handle.create_dataset("rigid_body_state", data=rows, compression="gzip")
+        dataset.attrs["schema"] = "ds-data-02.rigid-body-state.v1"
+        dataset.attrs["fields_json"] = json.dumps({name: str(dtype) for name, (dtype, _) in rows.dtype.fields.items()}, sort_keys=True)
+        dataset.attrs["units_json"] = json.dumps({
+            "time_s": "s", "actual_angle_rad": "rad", "prescribed_angle_rad": "rad",
+            "angle_residual_rad": "rad", "actual_omega_rad_s": "rad/s",
+            "prescribed_omega_rad_s": "rad/s", "omega_residual_rad_s": "rad/s",
+            "actual_com_*_m": "m", "expected_com_*_m": "m", "position_rms_m": "m",
+            "position_max_m": "m", "velocity_rms_m_s": "m/s", "velocity_max_m_s": "m/s",
+            "moving_node_count": "1", "expected_node_count": "1",
+        }, sort_keys=True)
+        dataset.attrs["pose_source"] = f"actual PartVTK Type={moving_type_code} moving-node positions; axis-fit Rodrigues pose"
+        dataset.attrs["velocity_source"] = f"actual PartVTK Type={moving_type_code} moving-node velocities; prescribed omega cross radius comparison"
+        dataset.attrs["control_reference"] = str(spec["control_path"])
+        dataset.attrs["control_reference_sha256"] = str(spec["control_sha256"])
+        dataset.attrs["control_sign_applied"] = control_sign_applied
+        dataset.attrs["sign_selection_method"] = "minimum actual moving-node angular residual over +/- copied mvrotfile control"
+        dataset.attrs["sign_selection_residuals_json"] = json.dumps(sign_residuals, sort_keys=True)
+        dataset.attrs["axis_origin_m"] = origin
+        dataset.attrs["axis_unit"] = axis
+        handle.attrs["rigid_body_state_source"] = "actual_saved_moving_nodes_fit_to_copied_mvrotfile"
+        handle.attrs["rigid_body_state_control_sha256"] = str(spec["control_sha256"])
+        handle.attrs["rigid_body_state_control_sign_applied"] = control_sign_applied
+        handle.attrs["rigid_body_state_axis_origin_m"] = origin
+        handle.attrs["rigid_body_state_axis_unit"] = axis
+    return {
+        "status": "pass",
+        "dataset": "rigid_body_state",
+        "frames": int(len(rows)),
+        "moving_node_count": int(len(initial_position)),
+        "moving_type_code": moving_type_code,
+        "control_sign_applied": control_sign_applied,
+        "sign_selection_method": "minimum actual moving-node angular residual over +/- copied mvrotfile control",
+        "sign_selection_residuals": sign_residuals,
+        "max_position_rms_m": float(np.nanmax(rows["position_rms_m"])),
+        "max_position_max_m": float(np.nanmax(rows["position_max_m"])),
+        "max_velocity_rms_m_s": float(np.nanmax(rows["velocity_rms_m_s"])),
+        "max_velocity_max_m_s": float(np.nanmax(rows["velocity_max_m_s"])),
+        "max_abs_angle_residual_rad": float(np.nanmax(np.abs(rows["angle_residual_rad"]))),
+        "max_abs_omega_residual_rad_s": float(np.nanmax(np.abs(rows["omega_residual_rad_s"]))),
+        "all_moving_nodes_present": bool(np.all(rows["valid"] == 1)),
+    }
+
+
 def _run_times(run_parts_csv: Path) -> list[float]:
     with run_parts_csv.open(newline="", encoding="utf-8", errors="replace") as stream:
         reader = csv.DictReader(stream, delimiter=";")
@@ -491,20 +919,38 @@ def _set_hdf5_metadata(path: Path, provenance: Mapping[str, Any], partvtk: Mappi
         "geometry_reference": provenance["definition_xml_path"],
         "geometry_reference_sha256": source_hashes["definition_xml"],
         "geometry_family_id": owner.get("geometry_family_id") or "",
+        "source_provenance_kind": provenance.get("source_provenance_kind", ""),
+        "physical_case_id": owner.get("physical_case_id") or "",
+        "lineage_group_id": owner.get("lineage_group_id") or "",
+        "paired_background_id": owner.get("paired_background_id") or "",
+        "view_id": owner.get("view_id") or "",
         "geometry_semantics_json": json.dumps(provenance["geometry"], ensure_ascii=False, sort_keys=True),
         "control_reference": provenance["owner_metadata_path"],
         "control_reference_sha256": source_hashes["owner_metadata"],
         "control_sha256": provenance["condition_bindings"]["control_sha256"],
         "control_hash_scope": "owner solver parameters, parameter values, event window, physical initial state, and generated XML motion/execution declarations",
         "control_binding_json": json.dumps(provenance["condition_bindings"]["control"], ensure_ascii=False, sort_keys=True),
+        "physical_condition_sha256": provenance["condition_bindings"]["physical_condition_sha256"],
+        "physical_condition_hash_scope": provenance["condition_bindings"]["physical_condition_hash_scope"],
+        "physical_condition_binding_json": json.dumps(
+            provenance["condition_bindings"]["physical_condition"], ensure_ascii=False, sort_keys=True),
+        "numerical_recipe_sha256": provenance["condition_bindings"]["numerical_recipe_sha256"],
+        "numerical_recipe_hash_scope": provenance["condition_bindings"]["numerical_recipe_hash_scope"],
+        "numerical_recipe_binding_json": json.dumps(
+            provenance["condition_bindings"]["numerical_recipe"], ensure_ascii=False, sort_keys=True),
         "condition_binding_missing_requirements": json.dumps(
             provenance["condition_bindings"]["missing_requirements"], ensure_ascii=False),
         "control_family_id": owner.get("control_family_id") or "",
         "control_semantics_json": json.dumps(provenance["control"], ensure_ascii=False, sort_keys=True),
         "motion_control_reference": provenance["generated_xml_path"],
         "motion_control_reference_sha256": source_hashes["generated_xml"],
+        "motion_control_copied_path": provenance["motion_control"].get("copied_control_path") or "",
+        "motion_control_copied_sha256": provenance["motion_control"].get("copied_control_sha256") or "",
         "motion_control_semantics_json": json.dumps(provenance["motion_control"], ensure_ascii=False, sort_keys=True),
         "boundary_semantics_json": json.dumps(provenance["boundary"], ensure_ascii=False, sort_keys=True),
+        "population_json": json.dumps(provenance.get("population", {}), ensure_ascii=False, sort_keys=True),
+        "lifecycle_semantics": provenance["boundary"].get("lifecycle_semantics", ""),
+        "native_exclusion_classification": provenance["boundary"].get("native_exclusion_classification", ""),
         "source_solver_receipt_sha256": source_hashes["solver_receipt"],
         "source_gencase_receipt_sha256": source_hashes["gencase_receipt"],
         "source_raw_data_tree_sha256": provenance["raw_manifest"]["tree_sha256"],
@@ -564,10 +1010,13 @@ def _verify_output(path: Path, provenance: Mapping[str, Any], run_times: list[fl
         times = np.asarray(handle["time"][:], dtype=np.float64)
         if len(run_times) != expected_frames or not np.allclose(times, run_times, rtol=0.0, atol=2e-6):
             raise ConversionError("converted times do not match solver RunPARTs.csv TimeStep values")
-        valid = np.asarray(handle["valid"][:], dtype=bool)
-        complete = bool(valid.shape == (expected_frames, expected_particles) and valid.all())
-        if not complete:
-            raise ConversionError("converted valid matrix is not complete for every BI4 frame and particle")
+        valid_raw = np.asarray(handle["valid"][:])
+        valid = np.asarray(valid_raw, dtype=bool)
+        valid_binary = bool(valid_raw.dtype.kind in "?biuf" and
+                            np.isfinite(valid_raw).all() and
+                            np.all((valid_raw == 0) | (valid_raw == 1)))
+        if not valid_binary:
+            raise ConversionError("converted valid matrix is not binary and finite")
         type_values = np.asarray(handle["type"][:])
         initial_fluid = int(np.count_nonzero(type_values[0] == 3))
         if initial_fluid != expected_fluid:
@@ -577,12 +1026,23 @@ def _verify_output(path: Path, provenance: Mapping[str, Any], run_times: list[fl
         active_mass_positive = bool(np.all(mass[valid] > 0))
         if not active_mass_finite or not active_mass_positive:
             raise ConversionError("converted active mass is not finite and positive")
+        initial_active = valid[0]
+        final_active = valid[-1]
+        missing_any = np.any(initial_active[None, :] & ~valid, axis=0)
+        introduced = np.any(~initial_active[None, :] & valid, axis=0)
         return {
             "required_datasets": sorted(required),
             "shapes": shapes,
             "frames": int(expected_frames),
             "particles": int(expected_particles),
-            "valid_complete": complete,
+            "valid_complete": bool(valid.all()),
+            "valid_binary": valid_binary,
+            "active_count_by_frame": [int(row.sum()) for row in valid],
+            "initial_active_count": int(initial_active.sum()),
+            "final_active_count": int(final_active.sum()),
+            "initial_missing_at_final_count": int(np.count_nonzero(initial_active & ~final_active)),
+            "missing_at_any_later_frame_count": int(missing_any.sum()),
+            "introduced_after_initial_count": int(introduced.sum()),
             "initial_fluid_type3": initial_fluid,
             "expected_fluid_type3": int(expected_fluid),
             "mass_dataset_complete": int(mass.size) == expected_frames * expected_particles,
@@ -655,16 +1115,17 @@ def convert_bi4(*, solver_receipt: Path, gencase_receipt: Path, owner_metadata: 
     }
     convert_streaming(record, frames, output, resume=False)
     _set_hdf5_metadata(output, provenance, partvtk_result, csv_manifest, run_times)
+    rigid_body_state = _write_rigid_body_state(output, provenance, run_times)
     verification = _verify_output(output, provenance, run_times, frame_count, expected_particles, expected_fluid)
     audit_metadata = {
         "units": DATASET_UNITS,
         "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
         "geometry": provenance["geometry"],
         "control": provenance["control"],
+        "boundary_mode": provenance["boundary"].get("boundary_mode"),
+        "boundary": provenance["boundary"],
         "solver_dimension": provenance["dimension_evidence"]["solver_dimension"],
-        # Lifecycle semantics remain intentionally absent: open top and DBC
-        # are source facts, not a closed/open particle ledger declaration.
-        "rigid_body_state": None,
+        "rigid_body_state": rigid_body_state,
     }
     audit = audit_hdf5(output, solver_log=Path(provenance["run_out_path"]), metadata=audit_metadata, particle_chunk=65536)
     raw_after = _raw_manifest(Path(provenance["data_root"]))[1]
@@ -684,6 +1145,7 @@ def convert_bi4(*, solver_receipt: Path, gencase_receipt: Path, owner_metadata: 
         "partvtk": partvtk_result,
         "partvtk_csv_manifest": csv_manifest,
         "partvtk_csv_retained": bool(keep_csv),
+        "rigid_body_state": rigid_body_state,
         "verification": verification,
         "q_i_audit": audit,
         "q_n_status": "not_assessed",
