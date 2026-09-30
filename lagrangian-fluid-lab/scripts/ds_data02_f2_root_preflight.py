@@ -75,7 +75,9 @@ def review(handoff_path, report_path):
                 distance = min((abs(p[axis]-target) for p in interior),default=math.inf)
                 plane = [p for p in interior if abs(p[axis]-target) <= distance+1e-6]
                 spans = [(max(p[a] for p in plane)-min(p[a] for p in plane)) if plane else 0 for a in tangents]
-                covered = bool(plane) and distance <= .55*dp+1e-6 and all(span >= extent[a]-2.1*dp-1e-6 for span,a in zip(spans,tangents))
+                # The .25 dp inset removes edge points. An arbitrary lattice
+                # phase adds up to one dp at each end, hence 2*(1+.25) dp.
+                covered = bool(plane) and distance <= .55*dp+1e-6 and all(span >= extent[a]-2.5*dp-1e-6 for span,a in zip(spans,tangents))
                 faces.append(dict(type=native_type,mk=native_mk,face=name.strip(),nearest_plane_distance_m=distance,
                                   interior_particles=len(plane),tangent_span_m=spans,pass_structural=covered))
         checks['interior_face_support'] = all(f['pass_structural'] for f in faces)
