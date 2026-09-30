@@ -144,7 +144,7 @@ def _mk_to_source(binding: Mapping[str, Any], metadata: Mapping[str, Any]) -> tu
     return mk_to_source, source_to_mk
 
 
-def audit_observations(*, h5_path: Path, metadata_path: Path, operators_path: Path, output: Path, labels_output: Path | None = None, preview_output: Path | None = None, timeseries_output: Path | None = None, particle_chunk: int = 65536) -> dict[str, Any]:
+def audit_observations(*, h5_path: Path, metadata_path: Path, operators_path: Path, output: Path, labels_output: Path | None = None, preview_output: Path | None = None, timeseries_output: Path | None = None, conversion_report_path: Path | None = None, particle_chunk: int = 65536) -> dict[str, Any]:
     started = time.monotonic()
     resource_before = _resource_snapshot()
     metadata = _load(metadata_path)
@@ -344,11 +344,14 @@ def audit_observations(*, h5_path: Path, metadata_path: Path, operators_path: Pa
         }
     native_mass_by_source = source_initial_native_mass
     init_error = {label: native_mass_by_source[label] - continuum_mass.get(label, math.nan) for label in source_labels}
+    conversion_provenance = None
+    if conversion_report_path is not None:
+        conversion_provenance = {"path": str(conversion_report_path), "sha256": sha256_file(conversion_report_path)}
     report = {
         "schema": SCHEMA,
         "observation_status": "completed_actual_hdf5_stream",
         "claim_boundary": "reference macro/transport evidence only; Q-I/Q-N/production not granted",
-        "input": {"h5": {"path": str(h5_path), "sha256": sha256_file(h5_path)}, "metadata": {"path": str(metadata_path), "sha256": sha256_file(metadata_path)}, "operators": {"path": str(operators_path), "sha256": sha256_file(operators_path)}},
+        "input": {"h5": {"path": str(h5_path), "sha256": sha256_file(h5_path)}, "metadata": {"path": str(metadata_path), "sha256": sha256_file(metadata_path)}, "operators": {"path": str(operators_path), "sha256": sha256_file(operators_path)}, "direct_conversion_report": conversion_provenance},
         "shape": {"frames": frames, "particles": particles, "first_time_s": float(times[0]), "last_time_s": float(times[-1]), "strictly_increasing": True},
         "physical_binding_sha256": canonical_hash(binding),
         "operators": {"fixed_physical_tolerance_m": fixed_tolerance, "resolution_dependent_threshold_m": resolution_diagnostic, "derived": derived, "macro_error_budget_fraction": operators["macro_error_budget_fraction"], "feature_time_error_budget_fraction": operators["feature_time_error_budget_fraction"]},
@@ -388,13 +391,14 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--labels", type=Path)
     parser.add_argument("--preview", type=Path)
     parser.add_argument("--timeseries", type=Path)
+    parser.add_argument("--conversion-report", type=Path)
     parser.add_argument("--particle-chunk", type=int, default=65536)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    report = audit_observations(h5_path=args.h5, metadata_path=args.metadata, operators_path=args.operators, output=args.output, labels_output=args.labels, preview_output=args.preview, timeseries_output=args.timeseries, particle_chunk=args.particle_chunk)
+    report = audit_observations(h5_path=args.h5, metadata_path=args.metadata, operators_path=args.operators, output=args.output, labels_output=args.labels, preview_output=args.preview, timeseries_output=args.timeseries, conversion_report_path=args.conversion_report, particle_chunk=args.particle_chunk)
     print(json.dumps({"output": str(args.output), "frames": report["shape"]["frames"], "particles": report["shape"]["particles"], "physical_binding_sha256": report["physical_binding_sha256"], "q_n_status": report["q_n_status"]}, sort_keys=True))
     return 0
 
