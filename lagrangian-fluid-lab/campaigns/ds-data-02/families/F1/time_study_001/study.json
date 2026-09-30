@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.time-study-registration.v1",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "independent_physical_case_increment": 0,
+  "baseline_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE/qualification-spatial-reference-001/execution-receipt.json",
+  "baseline_receipt_sha256": "e9d5ca57f84571436402bda641e98a521896b34be3fa6ad34580adde6f1dcea4",
+  "baseline_measurement": {
+    "native_minimum_dt_s": 5.258080985900867e-05,
+    "native_maximum_dt_s": 0.0001026897556138174,
+    "internal_step_count": 16818,
+    "final_time_s": 1.600023957703573,
+    "saved_frame_count": 161,
+    "minimum_interval_steps": 98,
+    "median_internal_dt_s": null,
+    "measurement_semantics": "min/max are actual per-save-interval extrema; every-step distribution unavailable",
+    "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE/qualification-spatial-reference-001/solver/RunPARTs.csv",
+    "source_sha256": "59f444d83a21abecfbc4c5e9c3ad15018ccdbdc32202c7a281ec14486941a2d1"
+  },
+  "requests": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/time_study_001/half_actual_dt-gencase.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/time_study_001/dense_save-gencase.json"
+  ],
+  "comparison_requirements": [
+    "same continuous geometry/initial state/control and full 1.6s window",
+    "fixed variant actual dt maximum <= half baseline measured minimum, with native step counts",
+    "dense-save variant retains native adaptive settings; output count is not internal step count",
+    "compare preregistered macro observables and event intervals against frozen budgets",
+    "spatial qualification remains independent and pending"
+  ]
+}
