@@ -1,0 +1,74 @@
+{
+  "schema": "ds-data-02.lifecycle-contract.v1",
+  "family_id": "F7",
+  "physical_case_id": "F7_PUMP_REFERENCE_BASE",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "geometry": {
+    "mesh_regions": {
+      "pump_fixed": {
+        "low_m": [
+          -0.3187209963798523,
+          -0.534259021282196,
+          -1.0131239891052246
+        ],
+        "size_m": [
+          0.5549950003623962,
+          0.7936530113220215,
+          0.9435469880700111
+        ],
+        "label": "Exact prescribed mesh is bound by asset SHA; these coordinates are its envelope, not a replacement shape"
+      },
+      "pump_moving": {
+        "low_m": [
+          -0.178528368473,
+          -0.430679351091,
+          -0.888982415199
+        ],
+        "size_m": [
+          0.32192897796599995,
+          0.08599698543499995,
+          0.32185894250799996
+        ],
+        "label": "Exact prescribed mesh is bound by asset SHA; these coordinates are its envelope, not a replacement shape"
+      },
+      "fill_selection_box": {
+        "low_m": [
+          -0.6,
+          -0.39,
+          -1.1
+        ],
+        "size_m": [
+          0.9,
+          0.68,
+          0.738
+        ],
+        "label": "Void fill clipped by fixed/moving mesh; continuous cavity volume unresolved"
+      }
+    },
+    "exact_mesh_bindings": [
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_fixed.vtk",
+        "sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616"
+      },
+      {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_moving.vtk",
+        "sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72"
+      }
+    ],
+    "continuous_cavity_mass_status": "unresolved; native initial mass is not a continuum denominator"
+  },
+  "control": {
+    "motion_xml": "<motion>\n            <objreal ref=\"2\">\n                <begin mov=\"1\" start=\"0\" finish=\"12\" />\n                <mvrotace id=\"1\" duration=\"0.5\" next=\"2\">\n                    <ace ang=\"288\" units_comment=\"degrees/s^2\" />\n                    <velini ang=\"0\" units_comment=\"degrees/s\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"2\" duration=\"1\" next=\"3\">\n                    <ace ang=\"0\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"3\" duration=\"0.5\" next=\"4\">\n                    <ace ang=\"-288\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <wait id=\"4\" duration=\"0.5\" next=\"5\" />\n                <mvrotace id=\"5\" duration=\"0.5\" next=\"6\">\n                    <ace ang=\"-288\" units_comment=\"degrees/s^2\" />\n                    <velini ang=\"0\" units_comment=\"degrees/s\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"6\" duration=\"1\" next=\"7\">\n                    <ace ang=\"0\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"7\" duration=\"0.5\" next=\"8\">\n                    <ace ang=\"288\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <wait id=\"8\" duration=\"0.5\" next=\"1\" />\n            </objreal>\n        </motion>\n    ",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "prescribed_motion": "actual type1 positions and velocities retained at all saved frames; aggregate rigid pose not yet materialized"
+  },
+  "boundary_mode": "closed",
+  "lifecycle_interpretation": "Actual original XML has finite initial population and no inout/periodic/adaptive replacement; native full-window accounting is independently zero exclusions; no inference of physical exit",
+  "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_REFERENCE_BASE_FINE/F7_PUMP_REFERENCE_BASE_FINE_GENCASE_05/F7_PUMP_REFERENCE_BASE_FINE.xml",
+  "generated_xml_sha256": "79fe5e68c076d7862fc02aef2f05c3a9628df8ef8321f0d36133ee8d7a0acd2b",
+  "numerical_qualification": "not_assessed"
+}
