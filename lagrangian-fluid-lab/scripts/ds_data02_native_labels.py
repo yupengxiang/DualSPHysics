@@ -31,6 +31,13 @@ def validate_config(config):
         raise ValueError('moving event frames need actual saved transforms')
     if not config.get('coordinate_frame'):
         raise ValueError('explicit coordinate_frame is required')
+    assignment = config.get('source_assignment', 'initial_regions')
+    if assignment not in ('initial_regions', 'native_initial_mk'):
+        raise ValueError('unsupported source_assignment')
+    if assignment == 'native_initial_mk':
+        mks = [row.get('native_mk') for row in config.get('source_regions', [])]
+        if not mks or any(not isinstance(mk, int) or isinstance(mk, bool) or mk < 0 for mk in mks) or len(set(mks)) != len(mks):
+            raise ValueError('native source mk must be explicit nonnegative unique integers')
     for key in ('source_regions', 'destination_regions'):
         rows = config.get(key, [])
         if not rows or len(rows) > 32000:
@@ -66,6 +73,22 @@ def locate(points, regions):
         if np.any(mask & (result != 0)):
             raise ValueError('region boxes overlap at observed particles')
         result[mask] = index
+    return result
+
+
+def initial_sources(h, config, sl, fluid, positions):
+    if config.get('source_assignment', 'initial_regions') == 'initial_regions':
+        result = locate(positions, config['source_regions'])
+    else:
+        if 'initial_mk' not in h or h['initial_mk'].shape != h['particle_id'].shape:
+            raise ValueError('native source assignment requires initial_mk on typed identity axis')
+        mks = h['initial_mk'][sl]
+        result = np.zeros(len(fluid), dtype=np.int16)
+        for code, source in enumerate(config['source_regions'], 1):
+            result[mks == source['native_mk']] = code
+        if np.any(fluid & (result == 0)):
+            raise ValueError('initial fluid has no registered native mk source')
+    result[~fluid] = 0
     return result
 
 
@@ -170,8 +193,7 @@ def materialize(source, output, config, *, particle_chunk=16384):
             initial_pos = h['position'][0, sl].astype(float)
             if not np.isfinite(initial_pos[fluid]).all():
                 raise ValueError('initial fluid position invalid')
-            sources = locate(initial_pos, config['source_regions'])
-            sources[~fluid] = 0
+            sources = initial_sources(h, config, sl, fluid, initial_pos)
             source_ds[sl], origin_mass[sl] = sources, mass
             total_initial += float(mass.sum())
             prev_pos = None

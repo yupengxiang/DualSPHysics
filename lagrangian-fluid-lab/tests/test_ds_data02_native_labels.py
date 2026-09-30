@@ -91,3 +91,33 @@ def test_no_overwrite_and_duplicate_typed_identity(tmp_path):
         h['particle_zone'][3] = 0
     with pytest.raises(ValueError, match='typed identity'):
         materialize(source, tmp_path / 'duplicates.h5', config)
+
+
+def test_native_mk_sources_keep_actual_identity_provenance_at_region_edges(tmp_path):
+    source, config = fixture(tmp_path)
+    config['source_assignment'] = 'native_initial_mk'
+    config['source_regions'] = [dict(id='lower_mk', native_mk=10, bounds=[[0, 1], [0, 1], [0, 1]]),
+                                dict(id='upper_mk', native_mk=11, bounds=[[0, 1], [1, 2], [0, 1]])]
+    # Deliberately mismatched initial point/box is a representation diagnostic;
+    # native fluid-block provenance must not be silently relabeled by position.
+    with h5py.File(source, 'r+') as h:
+        h.create_dataset('initial_mk', data=[11, 10, 10, 11])
+    output = tmp_path / 'mk-labels.h5'
+    materialize(source, output, config)
+    with h5py.File(output, 'r') as h:
+        np.testing.assert_array_equal(h['source_label'][:], [2, 1, 1, 0])
+        assert h['source_final_mass_kg'][:].sum() == 10
+    with h5py.File(source, 'r+') as h:
+        h['initial_mk'][2] = 12
+    with pytest.raises(ValueError, match='no registered'):
+        materialize(source, tmp_path / 'unknown-mk.h5', config)
+
+
+def test_native_source_assignment_rejects_duplicate_blocks(tmp_path):
+    _, config = fixture(tmp_path)
+    config['source_assignment'] = 'native_initial_mk'
+    config['source_regions'] *= 2
+    for row in config['source_regions']:
+        row['native_mk'] = 10
+    with pytest.raises(ValueError, match='unique integers'):
+        validate_config(config)
