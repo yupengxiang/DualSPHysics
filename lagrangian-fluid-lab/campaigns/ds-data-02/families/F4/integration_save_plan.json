@@ -1,0 +1,58 @@
+{
+  "event_time_relative_budget_fraction": 0.02,
+  "frozen_event_windows_s": {
+    "finite_drop_pool": 1.2,
+    "oblique_finite_columns": 1.2
+  },
+  "macro_error_budget_fraction": 0.05,
+  "matrix": {
+    "backgrounds": [
+      "finite_drop_pool",
+      "oblique_finite_columns"
+    ],
+    "half_dt": "CFL=0.1, adaptive Dt, TimeOut=0.001 s",
+    "half_save": "CFL=0.2, adaptive Dt, TimeOut=0.0005 s",
+    "native_integration": "CFL=0.2, adaptive Dt, TimeOut=0.001 s",
+    "resolutions": {
+      "coarse": 0.04,
+      "fine": 0.02,
+      "medium": 0.03
+    }
+  },
+  "primary_observations": [
+    "first_contact_time",
+    "max_spread_or_deflection",
+    "recontact_or_transport_time",
+    "source_mass_fraction",
+    "COM_and_momentum"
+  ],
+  "qualification_boundary": "This is a frozen plan. A case becomes Q-N-eligible only after actual GenCase and solver evidence for the exact recipe, geometry, controls, time window, observables and resolution.",
+  "sampling_justification": "At T≈0.128 s (drop) and T≈0.155 s (columns), half-frame at 0.001 s is below 20% of the 2% event-time budget; source 0.05 s is retained only as historical canary evidence.",
+  "scale_contract": {
+    "finite_drop_pool": {
+      "L_m": 0.16,
+      "T_s": 0.12771017136282017,
+      "event_time_budget_s": 0.0025542034272564035
+    },
+    "oblique_finite_columns": {
+      "L_m": 0.16,
+      "T_s": "L/U",
+      "U_m_per_s": "sqrt(1^2+vy^2)",
+      "event_time_budget_s": "0.02*T"
+    }
+  },
+  "schema": "ds02.f4.integration-save-plan.v1",
+  "secondary_observations": [
+    "finite_plane_first_passage",
+    "residence_time",
+    "final_category",
+    "unknown_mass"
+  ],
+  "temporal_share_each_fraction": 0.2,
+  "thresholds": {
+    "event_contact": "first frame interval in which source support regions overlap at resolved scale; linear interval locator",
+    "mass_denominator": "native frame-zero fluid mass, source-wise, never survivor-renormalized",
+    "recontact": "separation followed by resolved overlap after first contact; censored if window ends",
+    "spatial_region_min": "max(3*dp,0.02 m)"
+  }
+}
