@@ -1,0 +1,88 @@
+{
+  "complete_window_rule": "include still-water startup, release or wave ramp, at least six distinguishable response/wave periods where the mechanism permits, and a final decay/mass audit; no 0.8 s short clip is sufficient",
+  "contact_semantics": "contact_event_flag is expected to remain false for the no-contact parent; RigidAlgorithm=1 is a native SPH rigid-body path and Chrono is absent",
+  "family_id": "F6",
+  "fluid_event_labels": [
+    "source_label",
+    "destination_time_series",
+    "first_passage_interval",
+    "residence_time",
+    "final_category",
+    "failure_reason",
+    "unknown_mass"
+  ],
+  "full_event_window_s": [
+    0.0,
+    12.0
+  ],
+  "mechanisms": [
+    {
+      "control_family_id": "F6_CTRL_INITIAL_RELEASE",
+      "coordinate_frame_id": "tank_attached_inertial",
+      "description": "有限三维槽内箱浮体，初始偏离静水排水平衡后无外部驱动释放，观察 heave/roll/pitch 的衰减响应。",
+      "event_sequence": [
+        "initial_still_water",
+        "release_at_zero",
+        "first_downcrossing",
+        "successive_response_peaks",
+        "decay_tail",
+        "final_mass_and_momentum_audit"
+      ],
+      "events": {
+        "decay": "envelope over final three local periods",
+        "fluid": "source region to body-side/re-entry categories from native particle state",
+        "peak": "successive extrema of body heave and roll/pitch",
+        "release": "t=0 after initial still-water particle state"
+      },
+      "frame": {
+        "control": "no translating tank; gravity is explicit",
+        "position": "tank-attached inertial coordinates",
+        "world_transform": "identity"
+      },
+      "geometry_family_id": "F6_BOX_TANK_FREE_BODY",
+      "mechanism_id": "simple_free_response",
+      "name_zh": "简单三维自由浮体响应",
+      "source_template": "main/11_Floating/CaseFloating_Def.xml"
+    },
+    {
+      "control_family_id": "F6_CTRL_REGULAR_PISTON_WAVE",
+      "coordinate_frame_id": "world_tank_and_tank_attached_observations",
+      "description": "有限三维槽内 piston regular wave 激励自由箱浮体；浮体与侧壁、挡板和 Chrono 接触均不启用。",
+      "event_sequence": [
+        "initial_still_water",
+        "wave_ramp",
+        "first_wave_arrival",
+        "steady_wave_cycles",
+        "last_cycle_and_decay",
+        "final_mass_and_momentum_audit"
+      ],
+      "events": {
+        "arrival": "first crest at x=3.4 measuring plane",
+        "decay": "last two cycles after forcing tail",
+        "fluid": "source side to wave/body-side/re-entry categories with censored open-top events",
+        "steady_cycles": "cycles after three-period ramp"
+      },
+      "frame": {
+        "control": "piston displacement prescribed in world time; inverse tank frame only for event planes",
+        "position": "world/tank geometry with tank-attached event coordinates",
+        "world_transform": "p_world=R_tank p_tank+c_tank; R_tank=I for translating piston background"
+      },
+      "geometry_family_id": "F6_BOX_TANK_WAVE_PADDLE",
+      "mechanism_id": "wave_no_contact",
+      "name_zh": "无接触规则波浮体激励",
+      "source_template": "main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml"
+    }
+  ],
+  "rigid_state_labels": [
+    "pose",
+    "orientation_quaternion_or_matrix",
+    "linear_velocity",
+    "angular_velocity",
+    "mass",
+    "inertia_tensor",
+    "force",
+    "torque",
+    "contact_event_flag"
+  ],
+  "schema": "ds-data-02.f6.event_definitions.v1"
+}
