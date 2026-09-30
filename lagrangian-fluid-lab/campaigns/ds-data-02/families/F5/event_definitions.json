@@ -1,0 +1,87 @@
+{
+  "background_specific": {
+    "runup_return": [
+      "toe_first_arrival",
+      "runup_first_crossing",
+      "runup_peak",
+      "toe_return_crossing",
+      "terminal_residence"
+    ],
+    "weir_pair": [
+      "toe_first_arrival",
+      "crest_first_passage",
+      "notch_first_passage",
+      "overtop_or_no_overtop",
+      "return_crossing",
+      "terminal_destination"
+    ]
+  },
+  "complete_window_required": true,
+  "crossing_rules": {
+    "crest": "signed distance to finite crest top; count first passage and every later signed recrossing separately",
+    "return": "same physical line with negative direction; do not relabel a repeated crossing as new fluid",
+    "right_censoring": "unseen events at 16 s are censored, not zero and not failed transport",
+    "surface": "finite free-surface/run-up line crossing from z below to z above with linear interpolation between native saved frames"
+  },
+  "phases": [
+    {
+      "id": "initial_quiescent",
+      "interval_s": [
+        0.0,
+        0.5
+      ],
+      "semantics": "initial fluid and finite boundaries before measurable incident wave"
+    },
+    {
+      "id": "wave_generation",
+      "interval_s": [
+        0.0,
+        3.5
+      ],
+      "semantics": "prescribed piston input; no output truncation"
+    },
+    {
+      "id": "incident_propagation",
+      "interval_s": [
+        1.0,
+        5.5
+      ],
+      "semantics": "wave reaches upstream gauges and slope toe in chronological order"
+    },
+    {
+      "id": "slope_runup",
+      "interval_s": [
+        3.0,
+        10.0
+      ],
+      "semantics": "free surface climbs the continuous slope; peak run-up is recorded"
+    },
+    {
+      "id": "weir_passage",
+      "interval_s": [
+        4.0,
+        12.0
+      ],
+      "semantics": "weir crest crossing and lateral-slot passage; right-censored if not reached"
+    },
+    {
+      "id": "return_flow",
+      "interval_s": [
+        7.0,
+        15.5
+      ],
+      "semantics": "downslope retreat, reverse toe crossing and downstream residence"
+    },
+    {
+      "id": "terminal_accounting",
+      "interval_s": [
+        15.5,
+        16.0
+      ],
+      "semantics": "final category, unknown mass and boundary/closure budget"
+    }
+  ],
+  "schema": "ds-data-02.f5.event-window.v1",
+  "time_end_s": 16.0,
+  "time_start_s": 0.0
+}
