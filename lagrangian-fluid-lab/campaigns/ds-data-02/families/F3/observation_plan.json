@@ -25,42 +25,103 @@
     "training_support": "amplitude, frequency/natural-frequency ratio and fill fraction vary within each mechanism using frozen control/geometry hash families"
   },
   "integration_step_study": {
+    "baseline_definition": "native positive DtMin minimum measured in the complete QUAL02 RunPARTs.csv for the same medium parent; source is diagnostic until repaired/fallback full-window Q-I passes",
     "cases": [
       {
+        "baseline_source": {
+          "fixed_dt_s": 1.1601239979131825e-05,
+          "native_final_time_s": 10.0000182921609,
+          "native_min_dt_s": 2.320247995826365e-05,
+          "native_saved_frames": 4001,
+          "native_step_count": 257601,
+          "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_PHASE_PARENT/F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+          "run_parts_sha256": "54a18498f4cc4487af99bc9f086314900fc7f959c3d58d49ed7e32f34f45cf33",
+          "source_attempt_id": "F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02",
+          "source_case_id": "F3_DUAL_AXIS_PHASE_PARENT"
+        },
+        "fixed_dt_parameter": null,
         "integration_variant": "native_dt",
         "mechanism_id": "dual_axis_phase",
-        "output_interval_s": 0.005,
+        "output_interval_s": 0.0025,
         "resolution_id": "medium",
+        "same_geometry_control_save_contract": true,
         "time_window_s": [
           0.0,
           10.0
         ]
       },
       {
-        "integration_variant": "registered_dtmin_half",
+        "baseline_source": {
+          "fixed_dt_s": 1.1601239979131825e-05,
+          "native_final_time_s": 10.0000182921609,
+          "native_min_dt_s": 2.320247995826365e-05,
+          "native_saved_frames": 4001,
+          "native_step_count": 257601,
+          "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_PHASE_PARENT/F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+          "run_parts_sha256": "54a18498f4cc4487af99bc9f086314900fc7f959c3d58d49ed7e32f34f45cf33",
+          "source_attempt_id": "F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02",
+          "source_case_id": "F3_DUAL_AXIS_PHASE_PARENT"
+        },
+        "fixed_dt_parameter": {
+          "key": "DtFixed",
+          "rule": "exactly 0.5 * measured native positive DtMin minimum; fixed dt must be explicit in the new Definition",
+          "value_s": 1.1601239979131825e-05
+        },
+        "integration_variant": "fixed_dt_half_measured_min",
         "mechanism_id": "dual_axis_phase",
-        "output_interval_s": 0.005,
+        "output_interval_s": 0.0025,
         "resolution_id": "medium",
+        "same_geometry_control_save_contract": true,
         "time_window_s": [
           0.0,
           10.0
         ]
       },
       {
+        "baseline_source": {
+          "fixed_dt_s": 9.783024787346174e-06,
+          "native_final_time_s": 10.00003096873392,
+          "native_min_dt_s": 1.956604957469235e-05,
+          "native_saved_frames": 4001,
+          "native_step_count": 174958,
+          "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_ECCENTRIC_BAFFLE_PARENT/F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+          "run_parts_sha256": "03bf75cbded410afe13ce4d7dbde059f0b2e5df1a1549810f006a3640f4f1b8f",
+          "source_attempt_id": "F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02",
+          "source_case_id": "F3_ECCENTRIC_BAFFLE_PARENT"
+        },
+        "fixed_dt_parameter": null,
         "integration_variant": "native_dt",
         "mechanism_id": "eccentric_baffle_exchange",
-        "output_interval_s": 0.005,
+        "output_interval_s": 0.0025,
         "resolution_id": "medium",
+        "same_geometry_control_save_contract": true,
         "time_window_s": [
           0.0,
           10.0
         ]
       },
       {
-        "integration_variant": "registered_dtmin_half",
+        "baseline_source": {
+          "fixed_dt_s": 9.783024787346174e-06,
+          "native_final_time_s": 10.00003096873392,
+          "native_min_dt_s": 1.956604957469235e-05,
+          "native_saved_frames": 4001,
+          "native_step_count": 174958,
+          "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_ECCENTRIC_BAFFLE_PARENT/F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+          "run_parts_sha256": "03bf75cbded410afe13ce4d7dbde059f0b2e5df1a1549810f006a3640f4f1b8f",
+          "source_attempt_id": "F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02",
+          "source_case_id": "F3_ECCENTRIC_BAFFLE_PARENT"
+        },
+        "fixed_dt_parameter": {
+          "key": "DtFixed",
+          "rule": "exactly 0.5 * measured native positive DtMin minimum; fixed dt must be explicit in the new Definition",
+          "value_s": 9.783024787346174e-06
+        },
+        "integration_variant": "fixed_dt_half_measured_min",
         "mechanism_id": "eccentric_baffle_exchange",
-        "output_interval_s": 0.005,
+        "output_interval_s": 0.0025,
         "resolution_id": "medium",
+        "same_geometry_control_save_contract": true,
         "time_window_s": [
           0.0,
           10.0
@@ -68,10 +129,13 @@
       }
     ],
     "rules": [
-      "record actual dt_min_s, dt_max_s, median dt and total native steps from solver receipt",
-      "hold geometry/control/output cadence fixed while changing integration control",
+      "record actual positive RunPARTs DtMin/DtMax distributions, median dt, summed Steps, frame count and final timestamp for both variants",
+      "fixed_dt_half_measured_min must set parameter DtFixed explicitly; changing DtMin or registering a lower floor alone does not count as refinement",
+      "require fixed-variant actual dt <= 0.5 * the measured baseline minimum (within recorded tolerance) and summed Steps > native baseline; otherwise the study is invalid",
+      "hold geometry, control hashes, solver dimensions, TimeMax, TimeOut/save cadence and output frame count fixed while changing only integration control",
       "do not call output downsampling an integration-step study",
-      "Q-N remains pending until both full event-window state and step study are complete"
+      "the QUAL02 RunPARTs baselines are diagnostic only because their fluid exclusions fail Q-I; repaired/fallback complete-window receipts must replace them before Q-N",
+      "Q-N remains pending until both full event-window state and the verified fixed-dt step study are complete"
     ],
     "status": "planned_no_solver"
   },

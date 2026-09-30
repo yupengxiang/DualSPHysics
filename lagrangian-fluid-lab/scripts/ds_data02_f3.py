@@ -141,6 +141,37 @@ PARENT_BAFFLE_DP_M = 0.008
 PARENT_DUAL_CASE_ID = "F3_DUAL_AXIS_PHASE_PARENT"
 PARENT_BAFFLE_CASE_ID = "F3_ECCENTRIC_BAFFLE_PARENT"
 
+# These are measured from the complete QUAL02 RunPARTs logs.  The parent
+# trajectories remain diagnostic because their native fluid exclusions fail
+# the Q-I/Q-N gate; the values only seed a reproducible fixed-dt sensitivity
+# variant and are checked again on the repaired/fallback solver receipt.
+MEASURED_NATIVE_DT_BASELINES: dict[str, dict[str, Any]] = {
+    "dual_axis_phase": {
+        "source_case_id": PARENT_DUAL_CASE_ID,
+        "source_attempt_id": "F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02",
+        "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/"
+        "F3_DUAL_AXIS_PHASE_PARENT/F3_DUAL_AXIS_PHASE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+        "run_parts_sha256": "54a18498f4cc4487af99bc9f086314900fc7f959c3d58d49ed7e32f34f45cf33",
+        "native_min_dt_s": 2.320247995826365e-05,
+        "fixed_dt_s": 1.1601239979131825e-05,
+        "native_step_count": 257601,
+        "native_saved_frames": 4001,
+        "native_final_time_s": 10.0000182921609,
+    },
+    "eccentric_baffle_exchange": {
+        "source_case_id": PARENT_BAFFLE_CASE_ID,
+        "source_attempt_id": "F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02",
+        "run_parts": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/"
+        "F3_ECCENTRIC_BAFFLE_PARENT/F3_ECCENTRIC_BAFFLE_PARENT_SOLVER_QUAL_02/solver_output/RunPARTs.csv",
+        "run_parts_sha256": "03bf75cbded410afe13ce4d7dbde059f0b2e5df1a1549810f006a3640f4f1b8f",
+        "native_min_dt_s": 1.956604957469235e-05,
+        "fixed_dt_s": 9.783024787346175e-06,
+        "native_step_count": 174958,
+        "native_saved_frames": 4001,
+        "native_final_time_s": 10.00003096873392,
+    },
+}
+
 
 def _runner_receipt_path(case_id: str, attempt_id: str) -> Path:
     return RAW_OUTPUT_ROOT.parent.parent / case_id / attempt_id / "execution-receipt.json"
@@ -1454,15 +1485,35 @@ def _observation_plan() -> dict[str, Any]:
         },
         "integration_step_study": {
             "status": "planned_no_solver",
+            "baseline_definition": "native positive DtMin minimum measured in the complete QUAL02 RunPARTs.csv for the same medium parent; source is diagnostic until repaired/fallback full-window Q-I passes",
             "cases": [
-                {"mechanism_id": mechanism_id, "resolution_id": "medium", "integration_variant": variant, "output_interval_s": 0.005, "time_window_s": [0.0, 10.0]}
-                for mechanism_id in MECHANISMS for variant in ["native_dt", "registered_dtmin_half"]
+                {
+                    "mechanism_id": mechanism_id,
+                    "resolution_id": "medium",
+                    "integration_variant": variant,
+                    "output_interval_s": 0.0025,
+                    "time_window_s": [0.0, 10.0],
+                    "baseline_source": {
+                        key: value for key, value in MEASURED_NATIVE_DT_BASELINES[mechanism_id].items()
+                    },
+                    "fixed_dt_parameter": (
+                        {"key": "DtFixed", "value_s": MEASURED_NATIVE_DT_BASELINES[mechanism_id]["fixed_dt_s"],
+                         "rule": "exactly 0.5 * measured native positive DtMin minimum; fixed dt must be explicit in the new Definition"}
+                        if variant == "fixed_dt_half_measured_min" else None
+                    ),
+                    "same_geometry_control_save_contract": True,
+                }
+                for mechanism_id in MECHANISMS
+                for variant in ["native_dt", "fixed_dt_half_measured_min"]
             ],
             "rules": [
-                "record actual dt_min_s, dt_max_s, median dt and total native steps from solver receipt",
-                "hold geometry/control/output cadence fixed while changing integration control",
+                "record actual positive RunPARTs DtMin/DtMax distributions, median dt, summed Steps, frame count and final timestamp for both variants",
+                "fixed_dt_half_measured_min must set parameter DtFixed explicitly; changing DtMin or registering a lower floor alone does not count as refinement",
+                "require fixed-variant actual dt <= 0.5 * the measured baseline minimum (within recorded tolerance) and summed Steps > native baseline; otherwise the study is invalid",
+                "hold geometry, control hashes, solver dimensions, TimeMax, TimeOut/save cadence and output frame count fixed while changing only integration control",
                 "do not call output downsampling an integration-step study",
-                "Q-N remains pending until both full event-window state and step study are complete",
+                "the QUAL02 RunPARTs baselines are diagnostic only because their fluid exclusions fail Q-I; repaired/fallback complete-window receipts must replace them before Q-N",
+                "Q-N remains pending until both full event-window state and the verified fixed-dt step study are complete",
             ],
         },
         "sampling_cadence_study": {
