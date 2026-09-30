@@ -53,6 +53,13 @@ REPAIR_ROOT = FAMILY_ROOT / "parent_inputs/repairs" / REPAIR_ID
 INITIAL_MASS_REPAIR_ID = "F6_INITIAL_MASS_ALIGNMENT_REPAIR_01"
 RESOLUTION_ROOT = FAMILY_ROOT / "parameterized_resolution"
 MASS_ALIGNMENT_ROOT = RESOLUTION_ROOT / INITIAL_MASS_REPAIR_ID
+# The first initialization repair shifted only the construction fillbox.  It
+# left GenCase's lattice origin at zero, so the finite-wall x/y support loss
+# remained.  The second and final same-root-cause canary changes only the
+# numerical lattice phase to a half-dp cell-centred origin.  Its continuous
+# wall, liquid, body, paddle, density and mass inputs remain frozen.
+CELL_CENTER_REPAIR_ID = "F6_INITIAL_MASS_CELL_CENTER_REPAIR_02"
+CELL_CENTER_ROOT = RESOLUTION_ROOT / CELL_CENTER_REPAIR_ID
 RAW_F6_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6")
 # The shared runtime places F6 attempts directly under families/F6/<case>,
 # regardless of the source JSON's parameterized_resolution directory.
@@ -146,6 +153,7 @@ def parse_physical_definition(definition: Path) -> dict[str, Any]:
     pointmax = definition_node.find("pointmax")
     if pointmax is None:
         raise ValueError(f"missing pointmax: {definition}")
+    pointref = definition_node.find("pointref")
     wall = _drawbox(root, "Finite tank walls")
     wall_point = wall.find("point")
     wall_size = wall.find("size")
@@ -190,6 +198,7 @@ def parse_physical_definition(definition: Path) -> dict[str, Any]:
         "physical_wall_point_m": _vec(wall_point),
         "physical_wall_size_m": _vec(wall_size),
         "gencase_pointmax_m": _vec(pointmax),
+        "numerical_pointref_m": _vec(pointref) if pointref is not None else [0.0, 0.0, 0.0],
         "body": {
             "point_m": _vec(body_point),
             "size_m": _vec(body_size),
@@ -305,6 +314,32 @@ def _definition_for_resolution(frozen: Any, spec: Mapping[str, Any], geometry: M
     banner = (
         f"<!-- F6 fixed-geometry resolution {resolution_id}; physical wall/body/fluid/paddle values are copied "
         f"from {REPAIR_ID}; pointmax is computational wall+dp margin only. -->"
+    )
+    declaration_end = text.find("?>")
+    if declaration_end < 0:
+        return banner + "\n" + text
+    declaration_end += 2
+    return text[:declaration_end] + "\n" + banner + text[declaration_end:]
+
+
+def _definition_for_cell_center_phase(frozen: Any, spec: Mapping[str, Any], geometry: Mapping[str, Any], resolution_id: str) -> str:
+    """Build the second initialization repair with a half-dp lattice phase.
+
+    GenCase's ``pointref`` is a numerical lattice origin.  Moving it to
+    ``dp/2`` in every coordinate keeps the physical drawbox points and sizes,
+    the fillbox lower/upper planes, and the floating/paddle definitions fixed
+    while testing whether the missing boundary cells came from the zero-phase
+    center lattice.  The generated XML is audited before any solver request.
+    """
+    text = _definition_for_resolution(frozen, spec, geometry, resolution_id)
+    phase = float(spec["dp_m"]) / 2.0
+    replacement = f'<pointref x="{_fmt(phase)}" y="{_fmt(phase)}" z="{_fmt(phase)}" />'
+    text, count = re.subn(r"<pointref\b[^>]*/>", replacement, text, count=1)
+    if count != 1:
+        raise ValueError("parent definition has no pointref")
+    banner = (
+        f"<!-- F6 {CELL_CENTER_REPAIR_ID}: numerical cell-centre lattice phase="
+        f"dp/2={_fmt(phase)} m; physical wall/fluid/body/paddle definitions and liquid surface remain frozen. -->"
     )
     declaration_end = text.find("?>")
     if declaration_end < 0:
@@ -712,6 +747,275 @@ def refresh_initial_mass_alignment(output_root: Path = MASS_ALIGNMENT_ROOT) -> d
     return evidence
 
 
+def prepare_initial_mass_cell_center(output_root: Path = CELL_CENTER_ROOT) -> dict[str, Any]:
+    """Register the final same-root-cause cell-centred initialization canary.
+
+    The first repair changed the construction fillbox and was retained as
+    negative evidence.  This repair leaves that fillbox, all continuous
+    geometry and all native companions unchanged, and changes only the
+    GenCase ``pointref`` from zero to ``dp/2``.  Six requests are registered
+    so the complete three-resolution matrix is reproducible, but callers may
+    execute only the two fine representatives first through the shared CPU
+    runner.  This function never invokes GenCase itself.
+    """
+    output_root = Path(output_root)
+    if output_root.exists() and any(output_root.iterdir()):
+        raise FileExistsError(f"refusing to overwrite cell-centre repair directory: {output_root}")
+    output_root.mkdir(parents=True, exist_ok=True)
+    frozen = _load_frozen_parent_source()
+    source_manifest_path = RESOLUTION_ROOT / "resolution_manifest.json"
+    source_manifest = read_json(source_manifest_path)
+    source_rows = {(row["mechanism_id"], row["resolution_id"]): row for row in source_manifest.get("rows", [])}
+    rows: list[dict[str, Any]] = []
+    geometry_records: dict[str, Any] = {}
+    for mechanism in MECHANISMS:
+        sources = _find_repaired_inputs(mechanism)
+        if not all(path.is_file() for path in sources.values()):
+            raise FileNotFoundError("missing repaired F6 input(s): " + ", ".join(str(path) for path in sources.values() if not path.is_file()))
+        geometry = parse_physical_definition(sources["definition"])
+        geometry["continuous_geometry_hash"] = _geometry_hash(geometry)
+        geometry_records[mechanism] = geometry
+        for resolution_id, dp in RESOLUTION_DPS.items():
+            source_row = source_rows[(mechanism, resolution_id)]
+            case_id = f"F6_{mechanism.upper()}_RES_{resolution_id.upper()}_{CELL_CENTER_REPAIR_ID}"
+            case_dir = output_root / "cases" / mechanism / resolution_id
+            spec = _base_spec(mechanism, geometry, case_id, dp)
+            definition = case_dir / f"{case_id}_Def.xml"
+            definition.parent.mkdir(parents=True, exist_ok=True)
+            definition.write_text(_definition_for_cell_center_phase(frozen, spec, geometry, resolution_id), encoding="utf-8")
+            ET.parse(definition)
+            parsed_candidate = parse_physical_definition(definition)
+            if _geometry_hash(parsed_candidate) != geometry["continuous_geometry_hash"]:
+                raise ValueError(f"cell-centre repair changed continuous geometry for {mechanism}/{resolution_id}")
+            copied = {
+                "definition": {
+                    "path": str(definition.resolve()),
+                    "sha256": sha256_file(definition),
+                    "source_path": str(sources["definition"].resolve()),
+                    "source_sha256": sha256_file(sources["definition"]),
+                    "byte_identical": False,
+                },
+                "control": _copy_input(Path(source_row["paths"]["control"]["path"]), case_dir / f"{case_id}_Control.csv"),
+                "native": _copy_input(Path(source_row["paths"]["native"]["path"]), case_dir / f"{case_id}_Native.json"),
+                "normal": _copy_input(Path(source_row["paths"]["normal"]["path"]), case_dir / f"{case_id}_Normal.json"),
+            }
+            body = geometry["body"]
+            fill = geometry["fluid_fill"]
+            body_volume = math.prod(float(value) for value in body["size_m"])
+            fluid_volume = math.prod(float(value) for value in fill["size_m"])
+            phase = [dp / 2.0, dp / 2.0, dp / 2.0]
+            row = {
+                "schema": f"{SCHEMA}.initial-mass-cell-center-repair",
+                "family_id": "F6",
+                "mechanism_id": mechanism,
+                "parent_case_id": PARENT_CASES[mechanism],
+                "repair_id": CELL_CENTER_REPAIR_ID,
+                "repair_stage": 2,
+                "root_cause_id": "F6_FILLBOX_ZERO_PHASE_BOUNDARY_SUPPORT_LOSS",
+                "supersedes_case_id": source_row["case_id"],
+                "supersedes_first_repair_case_id": f"F6_{mechanism.upper()}_RES_{resolution_id.upper()}_{INITIAL_MASS_REPAIR_ID}",
+                "case_id": case_id,
+                "resolution_id": resolution_id,
+                "dp_m": dp,
+                "continuous_geometry_hash": geometry["continuous_geometry_hash"],
+                "physical_geometry_hash": geometry["continuous_geometry_hash"],
+                "same_continuous_geometry": True,
+                "physical_wall_point_m": geometry["physical_wall_point_m"],
+                "physical_wall_size_m": geometry["physical_wall_size_m"],
+                "pointmax_m": [float(value) + dp for value in geometry["physical_wall_size_m"]],
+                "numerical_lattice_phase_m": phase,
+                "numerical_lattice_phase_rule": "pointref = (dp/2, dp/2, dp/2); no continuous wall/liquid/body/paddle coordinate changes",
+                "body": {**body, "volume_m3": body_volume, "source_inertia_kg_m2": _source_inertia(body)},
+                "fluid_fill": {**fill, "volume_m3": fluid_volume, "continuous_mass_kg": fluid_volume * 1000.0},
+                "physical_fluid_region": {**fill, "volume_m3": fluid_volume, "continuous_mass_kg": fluid_volume * 1000.0, "liquid_surface_z_m": float(fill["point_m"][2]) + float(fill["size_m"][2])},
+                "paddle": geometry.get("paddle"),
+                "paths": copied,
+                "estimated_counts": _expected_counts(geometry, dp),
+                "estimated_storage_bytes": 268435456,
+                "repair_rule": "numerical pointref phase only: dp/2 in x/y/z; fixed wall planes, fluid fill lower/upper planes, liquid surface, floating body and paddle coordinates, density, native MassFluid and aggregate massbody remain unchanged",
+                "first_repair_negative_evidence": {
+                    "repair_id": INITIAL_MASS_REPAIR_ID,
+                    "path": str((MASS_ALIGNMENT_ROOT / "repair_evidence.json").resolve()),
+                    "sha256": sha256_file(MASS_ALIGNMENT_ROOT / "repair_evidence.json") if (MASS_ALIGNMENT_ROOT / "repair_evidence.json").is_file() else None,
+                },
+                "status": "gencase_pending",
+            }
+            request_file = f"execution_requests/{mechanism}_{resolution_id}_cell_center_repair_02_gencase.json"
+            request = _gencase_request(row, request_file)
+            request["purpose"] = "bounded F6 second and final same-root-cause initialization canary; GenCase only; test half-dp numerical lattice phase against strict continuous mass without changing physical geometry or mass"
+            request["repair_id"] = CELL_CENTER_REPAIR_ID
+            request["repair_stage"] = 2
+            request["numerical_lattice_phase_m"] = phase
+            request["physical_geometry_hash"] = geometry["continuous_geometry_hash"]
+            request["input_contract"] = {
+                "continuous_geometry_unchanged": True,
+                "wall_planes_unchanged": True,
+                "fluid_fill_bounds_unchanged": True,
+                "liquid_surface_unchanged": True,
+                "body_pose_size_mass_unchanged": True,
+                "paddle_unchanged": True,
+                "mass_rescaling": False,
+            }
+            request_path = output_root / request_file
+            write_json(request_path, request)
+            row["request"] = {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]}
+            write_json(case_dir / "case.json", row)
+            rows.append(row)
+    first_repair_evidence = MASS_ALIGNMENT_ROOT / "repair_evidence.json"
+    plan = {
+        "schema": f"{SCHEMA}.initial-mass-cell-center-repair",
+        "family_id": "F6",
+        "status": "registered_gencase_pending",
+        "repair_id": CELL_CENTER_REPAIR_ID,
+        "repair_stage": 2,
+        "root_cause_id": "F6_FILLBOX_ZERO_PHASE_BOUNDARY_SUPPORT_LOSS",
+        "supersedes": "F6_INITIAL_MASS_ALIGNMENT_REPAIR_01, retained as negative evidence; original six candidates remain immutable",
+        "generator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__))},
+        "frozen_parent_source": {"path": str(FROZEN_PARENT_SOURCE.resolve()), "sha256": sha256_file(FROZEN_PARENT_SOURCE)},
+        "source_manifest": {"path": str(source_manifest_path.resolve()), "sha256": sha256_file(source_manifest_path), "immutable": True},
+        "same_continuous_geometry": True,
+        "physical_geometry_hashes": {mechanism: geometry_records[mechanism]["continuous_geometry_hash"] for mechanism in MECHANISMS},
+        "physical_liquid_bounds_frozen": {mechanism: geometry_records[mechanism]["fluid_fill"] for mechanism in MECHANISMS},
+        "repair_rule": "change only GenCase numerical pointref from (0,0,0) to (dp/2,dp/2,dp/2); do not shift wall planes, fillbox bounds, liquid level, body/paddle pose, density, MassFluid or massbody",
+        "numerical_lattice_phase_rule": "phase_m = [dp/2, dp/2, dp/2] for each resolution",
+        "initial_mass_relative_tolerance": INITIAL_MASS_RELATIVE_TOLERANCE,
+        "mass_rescaling": False,
+        "representative_execution_policy": "execute fine simple_free_response and fine wave_no_contact first via shared CPU runner; execute coarse/medium only if representative evidence preserves physical boundary semantics and improves strict mass",
+        "first_repair_negative_evidence": {"path": str(first_repair_evidence.resolve()), "sha256": sha256_file(first_repair_evidence) if first_repair_evidence.is_file() else None, "immutable": True},
+        "matrix": rows,
+        "q_status": "GenCase evidence only; no solver qualification claim and no GPU request",
+    }
+    write_json(output_root / "repair_plan.json", plan)
+    write_json(output_root / "repair_manifest.json", {"schema": plan["schema"], "rows": rows, "status": "registered_gencase_pending", "source_manifest": plan["source_manifest"], "first_repair_negative_evidence": plan["first_repair_negative_evidence"]})
+    return plan
+
+
+def refresh_initial_mass_cell_center(output_root: Path = CELL_CENTER_ROOT) -> dict[str, Any]:
+    """Audit completed cell-centre GenCase receipts and publish new evidence."""
+    output_root = Path(output_root)
+    manifest_path = output_root / "repair_manifest.json"
+    plan_path = output_root / "repair_plan.json"
+    if not manifest_path.is_file() or not plan_path.is_file():
+        raise FileNotFoundError("prepare the cell-centre repair first")
+    manifest = read_json(manifest_path)
+    plan = read_json(plan_path)
+    rows: list[dict[str, Any]] = []
+    for row in manifest.get("rows", []):
+        case_dir = output_root / "cases" / row["mechanism_id"] / row["resolution_id"]
+        request = read_json(Path(row["request"]["path"]))
+        receipt_path = RAW_RESOLUTION_ROOT / row["case_id"] / request["attempt_id"] / "execution-receipt.json"
+        audit = audit_gencase(case_dir, receipt_path)
+        audit_path = case_dir / "gencase-audit.json"
+        write_json(audit_path, audit)
+        row["status"] = f"gencase_{audit.get('status')}"
+        row["gencase_receipt"] = {"path": str(receipt_path), "sha256": sha256_file(receipt_path) if receipt_path.is_file() else None, "status": audit.get("status")}
+        row["gencase_audit"] = {"path": str(audit_path.resolve()), "sha256": sha256_file(audit_path), "status": audit.get("status"), "checks": audit.get("checks", {})}
+        generated = audit.get("generated") if isinstance(audit.get("generated"), Mapping) else {}
+        row["actual_counts"] = generated.get("counts")
+        row["actual_pointref_m"] = generated.get("numerical_pointref_m")
+        budget = audit.get("initial_mass_budget") if isinstance(audit.get("initial_mass_budget"), Mapping) else {}
+        row["initial_mass_budget"] = budget
+        row["continuous_mass_relative_error"] = budget.get("continuous_after_occupancy_mass_relative_error")
+        row["effective_center_lattice_mass_relative_error"] = budget.get("lattice_target_mass_relative_error")
+        row["continuous_mass_budget_pass"] = budget.get("continuous_physical_fill_tolerance_pass") is True
+        row["effective_center_lattice_budget_pass"] = budget.get("effective_center_lattice_tolerance_pass") is True
+        row["strict_mass_contract_pass"] = budget.get("initial_mass_tolerance_pass") is True
+        row["physical_geometry_hash_recomputed"] = _geometry_hash(parse_physical_definition(Path(row["paths"]["definition"]["path"])))
+        row["physical_geometry_hash_pass"] = row["physical_geometry_hash_recomputed"] == row["physical_geometry_hash"]
+        baseline_paths = {
+            "original": RESOLUTION_ROOT / "cases" / row["mechanism_id"] / row["resolution_id"] / "gencase-audit.json",
+            "first_repair": MASS_ALIGNMENT_ROOT / "cases" / row["mechanism_id"] / row["resolution_id"] / "gencase-audit.json",
+        }
+        comparisons: dict[str, Any] = {}
+        for label, baseline_path in baseline_paths.items():
+            if not baseline_path.is_file():
+                continue
+            baseline = read_json(baseline_path)
+            base_budget = baseline.get("initial_mass_budget", {})
+            comparisons[label] = {
+                "path": str(baseline_path.resolve()),
+                "sha256": sha256_file(baseline_path),
+                "continuous_mass_relative_error": base_budget.get("continuous_after_occupancy_mass_relative_error"),
+                "effective_center_lattice_mass_relative_error": base_budget.get("lattice_target_mass_relative_error"),
+                "immutable": True,
+            }
+        row["comparison_to_prior_evidence"] = comparisons
+        rows.append(row)
+    manifest["rows"] = rows
+    statuses = [row["status"] for row in rows]
+    representative_rows = [row for row in rows if row["resolution_id"] == "fine"]
+    representative_terminal = bool(representative_rows) and all(row["status"] != "gencase_pending" for row in representative_rows)
+    representative_boundary_pass = representative_terminal and all(
+        (row.get("gencase_audit") or {}).get("checks", {}).get("finite_wall_faces_and_bottom") is True
+        and (row.get("gencase_audit") or {}).get("checks", {}).get("physical_wall_planes_match") is True
+        for row in representative_rows
+    )
+    representative_strict_contract = representative_terminal and all(row.get("strict_mass_contract_pass") is True for row in representative_rows)
+    if representative_terminal and not (representative_boundary_pass and representative_strict_contract):
+        # The two fine representatives are the pre-registered canary.  Once
+        # they show a boundary semantic failure, the remaining coarse/medium
+        # requests stay unexecuted and no third same-root-cause sweep is
+        # implied by a generic "pending" status.
+        status = "repair_gencase_representative_terminal_failed"
+    elif statuses and all(status == "gencase_pass" for status in statuses):
+        status = "repair_gencase_pass"
+    elif any(status == "gencase_pending" for status in statuses):
+        status = "repair_gencase_pending"
+    elif rows:
+        status = "repair_gencase_terminal_strict_failed"
+    else:
+        status = "repair_gencase_pending"
+    manifest["status"] = status
+    write_json(manifest_path, manifest)
+    plan["matrix"] = rows
+    plan["status"] = status
+    plan["generator"]["sha256"] = sha256_file(Path(__file__))
+    write_json(plan_path, plan)
+    strict_pass = bool(rows) and all(row.get("strict_mass_contract_pass") is True for row in rows)
+    representative_strict_pass = representative_terminal and all(row.get("strict_mass_contract_pass") is True for row in representative_rows)
+    evidence = {
+        "schema": f"{SCHEMA}.initial-mass-cell-center-repair-evidence",
+        "family_id": "F6",
+        "repair_id": CELL_CENTER_REPAIR_ID,
+        "repair_stage": 2,
+        "root_cause_id": "F6_FILLBOX_ZERO_PHASE_BOUNDARY_SUPPORT_LOSS",
+        "status": status,
+        "strict_continuous_budget_pass": strict_pass,
+        "representative_fine_strict_budget_pass": representative_strict_pass,
+        "representative_fine_boundary_semantics_pass": representative_boundary_pass,
+        "physical_geometry_unchanged": all(row.get("physical_geometry_hash_pass") is True for row in rows) if rows else False,
+        "adopted": strict_pass,
+        "decision": (
+            "adopted_pending_solver_review: half-dp lattice phase passes the strict continuous mass audit for all completed candidates and preserves physical geometry"
+            if strict_pass else
+            "not_adopted: the completed half-dp cell-centre canary shifts generated finite-wall planes off the frozen physical wall and also misses the strict continuous initial-mass contract; retain both repairs as negative evidence and do not attempt a third same-root-cause sweep"
+        ),
+        "why_no_third_same_root_cause_repair": "the fillbox construction shift and numerical half-dp lattice phase are the two bounded evidence repairs permitted for this initialization root cause",
+        "rows": [{
+            "case_id": row["case_id"],
+            "mechanism_id": row["mechanism_id"],
+            "resolution_id": row["resolution_id"],
+            "status": row["status"],
+            "actual_counts": row.get("actual_counts"),
+            "actual_pointref_m": row.get("actual_pointref_m"),
+            "expected_pointref_m": row.get("numerical_lattice_phase_m"),
+            "physical_geometry_hash_pass": row.get("physical_geometry_hash_pass"),
+            "continuous_mass_relative_error": row.get("continuous_mass_relative_error"),
+            "effective_center_lattice_mass_relative_error": row.get("effective_center_lattice_mass_relative_error"),
+            "strict_mass_contract_pass": row.get("strict_mass_contract_pass"),
+            "finite_wall_faces_and_bottom": (row.get("gencase_audit") or {}).get("checks", {}).get("finite_wall_faces_and_bottom"),
+            "physical_wall_planes_match": (row.get("gencase_audit") or {}).get("checks", {}).get("physical_wall_planes_match"),
+            "effective_transverse_layers": (row.get("gencase_audit") or {}).get("generated", {}).get("transverse_layers"),
+            "comparison_to_prior_evidence": row.get("comparison_to_prior_evidence"),
+            "audit": row.get("gencase_audit"),
+        } for row in rows],
+        "first_repair_negative_evidence": plan.get("first_repair_negative_evidence"),
+        "qualification_claim": "none; GenCase evidence only, no QI/QN or GPU solver request",
+    }
+    write_json(output_root / "repair_evidence.json", evidence)
+    return evidence
+
+
 def _generated_prefix(receipt: Mapping[str, Any]) -> Path | None:
     command = receipt.get("command")
     if isinstance(command, list) and len(command) >= 3:
@@ -1017,6 +1321,8 @@ def audit_gencase(case_path: Path, receipt_path: Path | None = None) -> dict[str
         masspart_node = floating.find("masspart")
         masspart = float(masspart_node.get("value", "nan")) if masspart_node is not None else massbound
         inertia = _inertia_from_generated(floating)
+        pointref_node = root.find(".//pointref")
+        numerical_pointref = _vec(pointref_node) if pointref_node is not None else [0.0, 0.0, 0.0]
         data2d = (constants.find("data2d").get("value", "true") if constants.find("data2d") is not None else "true").lower()
         points = _vtk_points(vtk_path)
         fluid_points = points[int(fluid.get("begin", "0")):int(fluid.get("begin", "0")) + counts["fluid"]]
@@ -1027,6 +1333,30 @@ def audit_gencase(case_path: Path, receipt_path: Path | None = None) -> dict[str
             moving_points.extend(points[begin:begin + int(moving_node.get("count", "0"))])
         layers = sorted({round(point[1], 9) for point in fluid_points})
         wall = _generated_wall_planes(points, int(fixed.get("begin", "0")), counts["fixed"])
+        physical_wall_point = [float(value) for value in case.get("physical_wall_point_m", [0.0, 0.0, 0.0])]
+        physical_wall_size = [float(value) for value in case["physical_wall_size_m"]]
+        expected_wall_planes = {
+            "x": {"low_m": physical_wall_point[0], "high_m": physical_wall_point[0] + physical_wall_size[0]},
+            "y": {"low_m": physical_wall_point[1], "high_m": physical_wall_point[1] + physical_wall_size[1]},
+            "bottom": {"low_m": physical_wall_point[2]},
+        }
+        wall_plane_deltas: dict[str, dict[str, float]] = {}
+        physical_wall_planes_match = True
+        for axis in ("x", "y"):
+            actual_axis = wall.get("planes", {}).get(axis, {})
+            deltas = {
+                "low_m": float(actual_axis.get("low_m", float("nan"))) - expected_wall_planes[axis]["low_m"],
+                "high_m": float(actual_axis.get("high_m", float("nan"))) - expected_wall_planes[axis]["high_m"],
+            }
+            wall_plane_deltas[axis] = deltas
+            physical_wall_planes_match = physical_wall_planes_match and all(math.isfinite(value) and abs(value) <= 1e-6 for value in deltas.values())
+        actual_bottom = wall.get("planes", {}).get("bottom", {})
+        bottom_delta = float(actual_bottom.get("low_m", float("nan"))) - expected_wall_planes["bottom"]["low_m"]
+        wall_plane_deltas["bottom"] = {"low_m": bottom_delta}
+        physical_wall_planes_match = physical_wall_planes_match and math.isfinite(bottom_delta) and abs(bottom_delta) <= 1e-6
+        wall["expected_physical_planes"] = expected_wall_planes
+        wall["physical_plane_deltas_m"] = wall_plane_deltas
+        wall["physical_planes_match"] = physical_wall_planes_match
         body_volume = float(case["body"]["volume_m3"])
         construction_fluid_volume = float(case["fluid_fill"]["volume_m3"])
         physical_fluid_region = case.get("physical_fluid_region", case["fluid_fill"])
@@ -1040,12 +1370,14 @@ def audit_gencase(case_path: Path, receipt_path: Path | None = None) -> dict[str
         hash_binding = _receipt_hash_binding(receipt, case)
         hash_inputs = hash_binding["inputs"]
         initial_mass = _initial_mass_budget(case, fluid_points, floating_points, moving_points, dp, density, massfluid, wall)
+        expected_pointref = case.get("numerical_lattice_phase_m")
         checks = {
             "actual_3d": receipt.get("solver_dimension_from_gencase") == 3 and data2d in {"false", "0", "no"},
             "positive_fluid_type3": counts["fluid"] > 0 and int(receipt.get("fluid_particles", 0)) == counts["fluid"],
             "positive_floating_type2": counts["floating"] > 0,
             "effective_transverse_layers": len(layers) >= 10,
             "finite_wall_faces_and_bottom": bool(wall.get("pass")),
+            "physical_wall_planes_match": physical_wall_planes_match,
             "all_requested_input_hashes_recorded": hash_binding["all_requested_inputs_recorded"],
             "definition_companion_hash_bound": hash_inputs["definition"]["after_run_matches_current"],
             "control_companion_hash_bound": hash_inputs["control"]["after_run_matches_current"],
@@ -1059,6 +1391,10 @@ def audit_gencase(case_path: Path, receipt_path: Path | None = None) -> dict[str
             "generated_inertia_defined": len(floating_inertia) == 3 and all(math.isfinite(v) for row in floating_inertia for v in row) and all(floating_inertia[i][i] > 0 for i in range(3)),
             "wave_actual_moving_particles": wave_moving,
             "normal_geometry_present": normal_path.is_file(),
+            "cell_center_lattice_phase_bound": (
+                expected_pointref is None
+                or all(abs(float(numerical_pointref[index]) - float(expected_pointref[index])) <= 1e-9 for index in range(3))
+            ),
             # Keep the strict continuous contract as the qualification-facing
             # check.  The effective center-lattice result is reported below;
             # it explains finite-wall/support exclusion but cannot turn a
@@ -1078,6 +1414,7 @@ def audit_gencase(case_path: Path, receipt_path: Path | None = None) -> dict[str
                 "xml": str(xml_path), "xml_sha256": sha256_file(xml_path), "all_vtk": str(vtk_path), "normal_vtk": str(normal_path),
                 "total_particles": int(receipt.get("total_particles", sum(counts.values()))), "counts": counts,
                 "dp_m": dp, "data2d": data2d, "transverse_layers": len(layers), "transverse_layer_coordinates_m": layers,
+                "numerical_pointref_m": numerical_pointref,
                 "body_bounds_m": body_bounds, "fluid_bounds_m": [[min(p[a] for p in fluid_points), max(p[a] for p in fluid_points)] for a in range(3)] if fluid_points else None,
                 "mass_per_particle_kg": {"fluid": massfluid, "fixed": massbound, "floating": masspart},
                 "fluid_mass_kg": fluid_mass, "floating_mass_kg": massbody, "floating_inertia_kg_m2": floating_inertia,
@@ -1820,6 +2157,10 @@ def main(argv: list[str] | None = None) -> int:
     repair_prep.add_argument("--output-root", type=Path, default=MASS_ALIGNMENT_ROOT)
     repair_refresh = sub.add_parser("refresh-initial-mass-alignment")
     repair_refresh.add_argument("--output-root", type=Path, default=MASS_ALIGNMENT_ROOT)
+    cell_prep = sub.add_parser("prepare-initial-mass-cell-center")
+    cell_prep.add_argument("--output-root", type=Path, default=CELL_CENTER_ROOT)
+    cell_refresh = sub.add_parser("refresh-initial-mass-cell-center")
+    cell_refresh.add_argument("--output-root", type=Path, default=CELL_CENTER_ROOT)
     audit = sub.add_parser("audit-gencase")
     audit.add_argument("--case", type=Path, required=True)
     audit.add_argument("--receipt", type=Path)
@@ -1841,6 +2182,10 @@ def main(argv: list[str] | None = None) -> int:
         result = prepare_initial_mass_alignment(args.output_root)
     elif args.command == "refresh-initial-mass-alignment":
         result = refresh_initial_mass_alignment(args.output_root)
+    elif args.command == "prepare-initial-mass-cell-center":
+        result = prepare_initial_mass_cell_center(args.output_root)
+    elif args.command == "refresh-initial-mass-cell-center":
+        result = refresh_initial_mass_cell_center(args.output_root)
     elif args.command == "audit-gencase":
         result = audit_gencase(args.case, args.receipt)
     else:
@@ -1853,6 +2198,8 @@ def main(argv: list[str] | None = None) -> int:
         "pending",
         "repair_gencase_pass",
         "repair_gencase_terminal_strict_failed",
+        "repair_gencase_pending",
+        "repair_gencase_representative_terminal_failed",
     } else 1
 
 
