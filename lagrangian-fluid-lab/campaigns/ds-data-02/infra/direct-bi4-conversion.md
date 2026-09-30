@@ -30,3 +30,12 @@ This adapter produces conversion evidence only.  Its report explicitly leaves
 Q-N and production eligibility unevaluated; lifecycle, geometry/control
 completeness, and scientific acceptance remain the responsibility of the
 campaign auditors.
+
+The actual F1 fine run is summarized in
+`infra/f1-direct-bi4-fine-v3-evidence.json`.  Attempt v3 completed through the
+shared CPU runner in 26.57 wall seconds (28.70 CPU seconds) and wrote its HDF5
+and report under the external DS-DATA-02 data root.  The evidence keeps the
+strict exactness result separate from the numeric tolerance result: the legacy
+CSV HDF5 has tiny position/velocity/density serialization differences, while
+identity/time/valid/type/mk are exact and every numeric field is within the
+recorded tolerance.
