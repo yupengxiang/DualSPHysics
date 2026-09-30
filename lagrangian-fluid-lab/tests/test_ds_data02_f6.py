@@ -68,7 +68,11 @@ def test_bounded_repairs_bind_wave_motion_and_select_new_gencase_attempt(tmp_pat
     assert F6._parent_specs()["simple_free_response"]["body"]["point_m"][2] == 0.36
     assert F6._parent_specs()["wave_no_contact"]["body"]["point_m"][2] == 0.36
     queue = F6.read_json(output / "execution_queue.json")
-    assert {row["attempt_id"] for row in queue["cpu_requests"]} == {
+    # The isolated tmp definitions cannot reuse receipts whose hashes point
+    # at the checkout Definition, so they advance past every stale attempt.
+    assert all(int(row["attempt_id"].rsplit("_", 1)[-1]) >= 2 for row in queue["cpu_requests"])
+    actual_queue = F6.read_json(F6.FAMILY_ROOT / "execution_queue.json")
+    assert {row["attempt_id"] for row in actual_queue["cpu_requests"]} == {
         "F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_02",
         "F6_WAVE_NO_CONTACT_PARENT_GENCASE_02",
     }
