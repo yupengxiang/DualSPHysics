@@ -400,6 +400,9 @@ def _run_times(run_parts_csv: Path) -> list[float]:
                 values.append(float(value.replace(",", "")))
     if not values:
         raise ConversionError(f"solver per-frame CSV has no time values: {run_parts_csv}")
+    values_array = np.asarray(values, dtype=np.float64)
+    if not np.isfinite(values_array).all() or len(values_array) < 2 or not np.all(np.diff(values_array) > 0):
+        raise ConversionError(f"solver RunPARTs.csv TimeStep values are not finite and strictly increasing: {run_parts_csv}")
     return values
 
 
@@ -445,6 +448,8 @@ def _set_hdf5_metadata(path: Path, provenance: Mapping[str, Any], partvtk: Mappi
         "partvtk_command_json": json.dumps(partvtk["command"], ensure_ascii=False),
         "csv_tree_sha256": csv_manifest["tree_sha256"],
         "csv_frame_count": int(csv_manifest["file_count"]),
+        "time_source": "solver RunPARTs.csv TimeStep [s] (PartVTK CSV time labels are rounded)",
+        "time_precision_preserved": True,
         "source_run_time_count": len(run_times),
         "source_run_time_start_s": float(run_times[0]),
         "source_run_time_end_s": float(run_times[-1]),
@@ -454,6 +459,12 @@ def _set_hdf5_metadata(path: Path, provenance: Mapping[str, Any], partvtk: Mappi
         "production_eligibility": "not_evaluated",
     }
     with h5py.File(path, "r+") as handle:
+        # PartVTK's CSV header rounds TimeStep to a short display value.  The
+        # solver's per-frame RunPARTs.csv is the authoritative full-precision
+        # time source, while all particle fields still come from PartVTK.
+        if handle["time"].shape != (len(run_times),):
+            raise ConversionError("converted time axis does not match solver RunPARTs.csv frame count")
+        handle["time"][:] = np.asarray(run_times, dtype=np.float64)
         for key, value in root_attrs.items():
             handle.attrs[key] = value
         for name, unit in DATASET_UNITS.items():
