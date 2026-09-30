@@ -8,7 +8,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from scripts.ds_data02_f4_observations import audit_observations
+try:
+    from scripts.ds_data02_f4_observations import audit_observations
+except ModuleNotFoundError:  # direct execution from the lab/scripts directory
+    from ds_data02_f4_observations import audit_observations
 
 
 def _parser() -> argparse.ArgumentParser:

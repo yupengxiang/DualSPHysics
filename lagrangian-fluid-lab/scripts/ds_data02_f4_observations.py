@@ -23,11 +23,14 @@ from typing import Any, Mapping
 import h5py
 import numpy as np
 
-from scripts.ds_data02_direct_convert import (
-    _validate_physical_binding,
-    canonical_hash,
-    sha256_file,
-)
+try:
+    from scripts.ds_data02_direct_convert import (
+        _validate_physical_binding,
+        canonical_hash,
+        sha256_file,
+    )
+except ModuleNotFoundError:  # direct execution from the lab/scripts directory
+    from ds_data02_direct_convert import _validate_physical_binding, canonical_hash, sha256_file
 
 
 SCHEMA = "ds02.f4.reference-observations.v1"
