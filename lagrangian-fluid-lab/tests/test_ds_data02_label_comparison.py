@@ -79,3 +79,12 @@ def test_failed_receipt_cannot_supply_actual_evidence(tmp_path):
     receipt.write_text(json.dumps(dict(status='failed', returncode=1)))
     with pytest.raises(ValueError, match='terminal and successful'):
         _label_binding(tmp_path/'missing.h5', receipt)
+
+
+def test_adaptive_save_overshoot_retains_actual_alignment_uncertainty(tmp_path):
+    a = labels(tmp_path, 'a', [0., 1.2, 2.], [.25, 1.25, .25])
+    b = labels(tmp_path, 'b', [0., .9, 2.], [.25, 1.25, .25])
+    report = compare(a, b)
+    assert report['max_actual_timestamp_alignment_difference_s'] == pytest.approx(.3)
+    assert report['events'][0]['saved_interval_worst_possible_max_difference_s'] >= 1
+    assert report['q_n_status'] == 'not_granted'

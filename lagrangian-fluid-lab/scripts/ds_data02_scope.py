@@ -397,8 +397,8 @@ def _check_scope_shape(
         for field in ("recipe_id", "schema", "state_schema", "view_id"):
             if not _nonempty_string(recipe.get(field)):
                 _fail(errors, "recipe_field_missing", f"scope.recipe.{field} must be nonempty")
-        if not isinstance(recipe.get("solver_dimension"), int) or isinstance(recipe.get("solver_dimension"), bool) or recipe["solver_dimension"] < 2:
-            _fail(errors, "recipe_dimension_invalid", "scope recipe must freeze an integer solver_dimension >= 2")
+        if recipe.get("solver_dimension") != 3 or isinstance(recipe.get("solver_dimension"), bool):
+            _fail(errors, "recipe_dimension_invalid", "DS-DATA-02 requires an actual 3D recipe")
 
     state_info = _validate_state_requirements(scope, errors=errors)
 
@@ -624,6 +624,27 @@ def _check_scope_shape(
     if missing_roles:
         _fail(errors, "scope_input_roles_missing", "scope input bindings do not include required frozen contracts", missing_roles=missing_roles)
 
+    # A reference/domain study precedes production. Planned cases need input
+    # membership evidence, not a trajectory from a solver not yet launched.
+    evidence_ids = domain.get("evidence_case_ids", list(case_by_id)) if domain is not None else []
+    if not isinstance(evidence_ids, list) or not evidence_ids or len(set(evidence_ids)) != len(evidence_ids) or any(case_id not in case_by_id for case_id in evidence_ids):
+        _fail(errors, "scope_evidence_cases_invalid", "evidence_case_ids must name unique cases in the frozen domain")
+        evidence_ids = list(case_by_id)
+    if not set(reference_case_ids.values()).issubset(evidence_ids):
+        _fail(errors, "scope_reference_evidence_missing", "every reference mother requires actual full-state Q-I evidence")
+    spatial_acceptance = scope.get("spatial_acceptance")
+    if not isinstance(spatial_acceptance, Mapping) or not spatial_acceptance:
+        _fail(errors, "spatial_acceptance_missing", "freeze spatial metric thresholds; three solver runs alone do not prove convergence")
+        spatial_acceptance = {}
+    for metric, threshold in spatial_acceptance.items():
+        if not _nonempty_string(metric) or not _finite_number(threshold) or threshold <= 0:
+            _fail(errors, "spatial_threshold_invalid", "spatial metric thresholds must be finite and positive", metric=metric)
+    budget = (observations or {}).get("error_budget", {})
+    for metric in ("macro_relative", "event_time_absolute_s"):
+        value = spatial_acceptance.get(metric)
+        if not _finite_number(value) or not _finite_number(budget.get(metric)) or value > budget[metric]:
+            _fail(errors, "spatial_budget_invalid", "spatial thresholds must cover frozen macro and event budgets without relaxation", metric=metric)
+
     return {
         "recipe": recipe or {},
         "family_id": str(scope.get("family_id", "")),
@@ -644,6 +665,8 @@ def _check_scope_shape(
         "comparison_ids": comparison_ids,
         "scope_bindings": scope_bindings,
         "required_scope_roles": required_scope_roles,
+        "evidence_case_ids": evidence_ids,
+        "spatial_acceptance": spatial_acceptance,
     }
 
 
@@ -1071,7 +1094,7 @@ def _validate_case_rows(
     bound_artifacts: dict[str, dict[str, Any]],
 ) -> dict[str, Mapping[str, Any]]:
     rows = _list(evidence.get("cases"), "evidence.cases", errors)
-    expected_by_id = scope_info["case_by_id"]
+    expected_by_id = {case_id: scope_info["case_by_id"][case_id] for case_id in scope_info["evidence_case_ids"]}
     seen: dict[str, Mapping[str, Any]] = {}
     for index, row in enumerate(rows):
         label = f"evidence.cases[{index}]"
@@ -1207,6 +1230,55 @@ def _validate_reference_views(
                     _fail(errors, "reference_time_domain_mismatch", f"{label} does not cover the frozen complete event window")
     if seen != required_keys:
         _fail(errors, "reference_matrix_incomplete", "declared background-by-three-resolution reference matrix is incomplete", missing=sorted(required_keys - seen), extra=sorted(seen - required_keys))
+
+
+def _validate_spatial_comparisons(evidence, *, scope_info, evidence_path, data_root, errors, bound_artifacts):
+    """Require actual accepted comparisons, not just three completed solves."""
+    levels = scope_info["reference_resolutions"]
+    if len(levels) != 3:
+        return
+    expected = {(bg, level, levels[-1]) for bg in scope_info["reference_backgrounds"] for level in levels[:-1]}
+    seen = set()
+    views = {(row.get("background"), row.get("resolution")): row for row in evidence.get("reference_views", []) if isinstance(row, Mapping)}
+    rows = _list(evidence.get("spatial_comparisons"), "evidence.spatial_comparisons", errors)
+    for row in rows:
+        if not isinstance(row, Mapping):
+            _fail(errors, "spatial_comparison_invalid", "spatial comparison must be an object")
+            continue
+        key = (row.get("background"), row.get("baseline_resolution"), row.get("reference_resolution"))
+        if key not in expected or key in seen:
+            _fail(errors, "spatial_pair_invalid", "duplicate or out-of-domain spatial comparison")
+            continue
+        seen.add(key)
+        mother = scope_info["case_by_id"].get(scope_info["reference_case_ids"].get(key[0]), {})
+        if row.get("physical_condition_hash") != mother.get("physical_condition_hash"):
+            _fail(errors, "spatial_physical_binding_mismatch", "spatial views must share the frozen continuous condition")
+        hashes = mother.get("numerical_recipe_hash_by_resolution", {})
+        for field, level in (("baseline_numerical_recipe_hash", key[1]), ("reference_numerical_recipe_hash", key[2])):
+            if row.get(field) != hashes.get(level):
+                _fail(errors, "spatial_recipe_binding_mismatch", "spatial comparison recipe differs from actual reference matrix")
+        report, artifact = _load_json_artifact(row.get("evidence_file"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label="spatial.comparison_report")
+        metrics = row.get("actual_error_metrics")
+        if report is None or report.get("actual_error_metrics") != metrics:
+            _fail(errors, "spatial_report_metrics_unbound", "spatial metrics must match the actual hash-bound report")
+        if not isinstance(metrics, Mapping):
+            metrics = {}
+        for metric, threshold in scope_info["spatial_acceptance"].items():
+            value = metrics.get(metric)
+            if not _finite_number(value) or value < 0:
+                _fail(errors, "spatial_metric_missing", "each frozen spatial metric needs a finite measured error", metric=metric)
+            elif _finite_number(threshold) and value > threshold:
+                _fail(errors, "spatial_budget_exceeded", "spatial error exceeds the frozen threshold", metric=metric, value=value, threshold=threshold)
+        bound = _check_bindings(row.get("source_bindings"), base_dir=evidence_path.parent, data_root=data_root, errors=errors, bound_artifacts=bound_artifacts, label="spatial.source_bindings", minimum=2)
+        supplied = {(item["path"], item["actual_sha256"]) for item in bound}
+        for level in key[1:]:
+            view = views.get((key[0], level), {})
+            sources = _binding_entries(view.get("qi", {}).get("source_bindings"))
+            native = [item for item in sources if str(item.get("path", "")).lower().endswith((".h5", ".hdf5"))]
+            if len(native) != 1 or (str(_resolve_path(native[0]["path"], evidence_path.parent, data_root)), native[0].get("sha256")) not in supplied:
+                _fail(errors, "spatial_state_binding_missing", "spatial comparison must bind the actual baseline and reference full-state H5")
+    if seen != expected:
+        _fail(errors, "spatial_comparisons_incomplete", "each declared background needs both coarser levels compared with its finest reference")
 
 
 def _has_finite_numeric(value: Any) -> bool:
@@ -1418,6 +1490,7 @@ def validate_scope_documents(
 
     _validate_case_rows(evidence, scope_info=scope_info, evidence_path=evidence_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
     _validate_reference_views(evidence, scope_info=scope_info, evidence_path=evidence_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
+    _validate_spatial_comparisons(evidence, scope_info=scope_info, evidence_path=evidence_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
     _validate_comparisons(evidence, scope_info=scope_info, evidence_path=evidence_file, data_root=root, errors=errors, bound_artifacts=bound_artifacts)
 
     # The artifact hash list is part of the verdict itself.  The root process
@@ -1446,6 +1519,7 @@ def validate_scope_documents(
             "recipe_schema_and_inputs": not any(item["code"].startswith(("scope_schema", "scope_family", "recipe", "scope_input", "artifact_", "case_input")) for item in errors),
             "physical_domain_time_observations": not any(item["code"].startswith(("scope_case", "scope_physical", "scope_split", "scope_resolution", "time_", "observation", "qi_", "reference_", "case_domain", "case_semantics", "case_numeric")) for item in errors),
             "reference_matrix": not any(item["code"].startswith("reference_") for item in errors),
+            "spatial_error_acceptance": not any(item["code"].startswith("spatial_") for item in errors),
             "independent_comparisons": not any(item["code"].startswith("comparison_") for item in errors),
             "split_and_view_leakage": not any(item["code"] in {"scope_parent_split_leak", "case_outside_scope", "reference_view_outside_scope", "comparison_outside_scope", "comparison_physical_binding_mismatch"} for item in errors),
             "current_full_state_evidence": not any(item["code"].startswith(("state_", "qi_report_", "qi_fluid_", "qi_h5_")) or item["code"] == "reuse_fluid_only_forbidden" for item in errors),

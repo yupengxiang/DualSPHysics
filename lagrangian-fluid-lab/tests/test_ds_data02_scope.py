@@ -185,6 +185,7 @@ def _scope(root: Path) -> dict[str, object]:
         "observations": _observations(),
         "physical_parameter_domains": {"receiver_x_m": {"min": 0.45, "max": 0.65, "units": "m"}},
         "physical_domain": {"cases": cases},
+        "spatial_acceptance": {"macro_relative": 0.05, "event_time_absolute_s": 0.0036682},
         "reference_requirements": {
             "backgrounds": ["center_catch", "offset_spill"],
             "resolutions": ["coarse", "medium", "fine"],
@@ -382,6 +383,18 @@ def _evidence(root: Path, scope: dict[str, object], scope_path: Path) -> dict[st
             "time_domain": {"complete": True, "start_s": 0.0, "end_s": 4.0},
         })
 
+    spatial = []
+    for case in cases:
+        for level in ['coarse', 'medium']:
+            metrics = dict(macro_relative=0.01, event_time_absolute_s=0.001)
+            spatial.append(dict(background=case['background'], baseline_resolution=level, reference_resolution='fine',
+                physical_condition_hash=case['physical_condition_hash'],
+                baseline_numerical_recipe_hash=case['numerical_recipe_hash_by_resolution'][level],
+                reference_numerical_recipe_hash=case['numerical_recipe_hash_by_resolution']['fine'],
+                evidence_file=_binding(root, f"{case['case_id']}-{level}-spatial.json", 'spatial_report', dict(actual_error_metrics=metrics)),
+                actual_error_metrics=metrics,
+                source_bindings=[copy.deepcopy(view['qi']['source_bindings'][0]) for view in references
+                    if view['background'] == case['background'] and view['resolution'] in [level, 'fine']]))
     scope_hash = hashlib.sha256(scope_path.read_bytes()).hexdigest()
     return {
         "schema": "ds-data-02.scope-evidence.v1",
@@ -395,6 +408,7 @@ def _evidence(root: Path, scope: dict[str, object], scope_path: Path) -> dict[st
         "cases": evidence_cases,
         "reference_views": references,
         "comparisons": comparisons,
+        "spatial_comparisons": spatial,
         "q_e": {"status": "optional", "external_match": None},
         "other_family_evidence": {"family_id": "F3", "status": "ignored"},
         "material_tracer": {"used": False},
@@ -563,6 +577,9 @@ def test_static_other_family_scope_does_not_require_rigid_body_state(tmp_path: P
             handle["type"][..., 1] = 0
             del handle["rigid_body_state"]
         h5_binding["sha256"] = hashlib.sha256(Path(h5_binding["path"]).read_bytes()).hexdigest()
+    for row in evidence['spatial_comparisons']:
+        for binding in row['source_bindings']:
+            binding['sha256'] = hashlib.sha256(Path(binding['path']).read_bytes()).hexdigest()
     scope_path.write_text(json.dumps(scope, indent=2), encoding="utf-8")
     evidence["scope_binding"]["sha256"] = hashlib.sha256(scope_path.read_bytes()).hexdigest()
     evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
@@ -586,6 +603,7 @@ def test_explicit_single_background_scope_is_independent_of_unqualified_backgrou
     evidence["cases"] = [item for item in evidence["cases"] if item["case_id"] == center_case_id]
     evidence["reference_views"] = [item for item in evidence["reference_views"] if item["background"] == "center_catch"]
     evidence["comparisons"] = [item for item in evidence["comparisons"] if item["background"] == "center_catch"]
+    evidence["spatial_comparisons"] = [item for item in evidence["spatial_comparisons"] if item["background"] == "center_catch"]
     scope_path.write_text(json.dumps(scope, indent=2), encoding="utf-8")
     evidence["scope_binding"]["sha256"] = hashlib.sha256(scope_path.read_bytes()).hexdigest()
     evidence_path.write_text(json.dumps(evidence, indent=2), encoding="utf-8")
@@ -637,3 +655,44 @@ def test_self_declared_qualified_and_fluid_only_reuse_are_rejected(tmp_path: Pat
     codes = _codes(verdict)
     assert "self_declared_qualification_forbidden" in codes
     assert "reuse_fluid_only_forbidden" in codes
+
+
+def test_three_completed_runs_without_spatial_comparisons_cannot_qualify(tmp_path):
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    evidence = json.loads(evidence_path.read_text())
+    del evidence['spatial_comparisons']
+    evidence_path.write_text(json.dumps(evidence))
+    verdict = validate_scope_files(scope_path, evidence_path)
+    assert not verdict['evidence_bound_eligible']
+    assert 'spatial_comparisons_incomplete' in _codes(verdict)
+
+
+def test_failing_spatial_error_is_rejected_despite_successful_solvers(tmp_path):
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    evidence = json.loads(evidence_path.read_text())
+    row = evidence['spatial_comparisons'][0]
+    row['actual_error_metrics']['macro_relative'] = .16
+    binding = row['evidence_file']
+    report = Path(binding['path'])
+    report.write_text(json.dumps(dict(actual_error_metrics=row['actual_error_metrics'], status='pass')))
+    binding['sha256'] = hashlib.sha256(report.read_bytes()).hexdigest()
+    evidence_path.write_text(json.dumps(evidence))
+    verdict = validate_scope_files(scope_path, evidence_path)
+    assert 'spatial_budget_exceeded' in _codes(verdict)
+
+
+def test_planned_production_case_needs_membership_but_not_future_trajectory(tmp_path):
+    scope_path, evidence_path = _write_fixture(tmp_path)
+    scope = json.loads(scope_path.read_text())
+    existing = scope['physical_domain']['cases']
+    scope['physical_domain']['evidence_case_ids'] = [case['case_id'] for case in existing]
+    future = _case(tmp_path, background='center_catch', mechanism='center_catch', prefix='c')
+    future.update(case_id='F2_CENTER_P02', physical_case_id='F2_CENTER_P02', parent_group_id='F2_PARENT02')
+    existing.append(future)
+    scope_path.write_text(json.dumps(scope))
+    evidence = json.loads(evidence_path.read_text())
+    evidence['scope_binding']['sha256'] = hashlib.sha256(scope_path.read_bytes()).hexdigest()
+    evidence_path.write_text(json.dumps(evidence))
+    verdict = validate_scope_files(scope_path, evidence_path)
+    assert verdict['evidence_bound_eligible'], verdict['errors']
+    assert verdict['approval_index_write'] == 'not_performed'
