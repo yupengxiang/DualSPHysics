@@ -49,6 +49,10 @@ HISTORICAL_CONTRACT = "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-D
 HISTORICAL_CLOSEOUT = "campaigns/l1-resume/continuation/F3-REF0081818-CAMPAIGN-CLOSEOUT.json"
 OFFICIAL_ACCEL_DEFINITION = "vendor/official/DualSPHysics_v5.4/examples/main/05_SloshingTank/CaseSloshingAcc_Def.xml"
 OFFICIAL_MOTION_DEFINITION = "vendor/official/DualSPHysics_v5.4/examples/main/05_SloshingTank/CaseSloshingMotion_Def.xml"
+QUALIFIED_CELL3_DEFINITION = HISTORICAL_ROOT / (
+    "campaigns/l1-resume/artifacts/f3-ref0081818-development/"
+    "F3_DEV_00_a0p903125/F3_CELL3_plain_0p0075_Def.xml"
+)
 SOLVER_BINARY = HISTORICAL_ROOT / "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64"
 
 HISTORICAL_RECIPE = "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818"
@@ -1924,6 +1928,66 @@ def _write_normal_coverage_repairs(
     return repairs
 
 
+def _write_dual_qualified_fallback(parent_root: Path, control_source: Path) -> dict[str, Any]:
+    """Materialise a dual-axis fallback on the already qualified CELL3 geometry.
+
+    This is a new F3 input identity.  It preserves the historical 3D槽
+    geometry (three boundary layers and the proven finite wall) while replacing
+    its old single-axis control file with the frozen two-axis control.  It is
+    used only if the new four-layer parent cannot obtain complete mDBC normals
+    within the bounded repair budget.
+    """
+    if not QUALIFIED_CELL3_DEFINITION.is_file():
+        raise FileNotFoundError(QUALIFIED_CELL3_DEFINITION)
+    directory = parent_root / "dual_axis_phase_qualified_fallback"
+    definition = directory / "F3_DualAxisPhase_QualifiedFallback_Def.xml"
+    directory.mkdir(parents=True, exist_ok=True)
+    root = ET.parse(QUALIFIED_CELL3_DEFINITION).getroot()
+    normal = root.find("./casedef/normals/norgeometry")
+    if normal is None:
+        raise ValueError("qualified CELL3 definition has no normal geometry")
+    distance = normal.find("distanceh")
+    if distance is None:
+        _xml_child(normal, "distanceh", {"v": "3.0"})
+    else:
+        distance.set("v", "3.0")
+    if normal.find("svshapes") is None:
+        _xml_child(normal, "svshapes", {"v": "true"})
+    motion_file = root.find("./execution/special/accinputs/accinput/acctimesfile")
+    if motion_file is None:
+        raise ValueError("qualified CELL3 definition has no acceleration control file")
+    motion_file.set("value", control_source.name)
+    parameters = {
+        node.get("key"): node
+        for node in root.findall("./execution/parameters/parameter")
+        if node.get("key")
+    }
+    parameters["TimeMax"].set("value", str(PARENT_INPUT_TIME_WINDOW_S[1]))
+    parameters["TimeOut"].set("value", "0.0025")
+    ET.indent(root, space="  ")
+    ET.ElementTree(root).write(definition, encoding="utf-8", xml_declaration=True)
+    control = directory / control_source.name
+    shutil.copyfile(control_source, control)
+    return {
+        "case_id": "F3_DUAL_AXIS_PHASE_QUALIFIED_FALLBACK",
+        "mechanism_id": "dual_axis_phase",
+        "fallback_id": "dual_axis_phase_on_qualified_cell3_geometry",
+        "definition": {"path": str(definition.resolve()), "sha256": sha256_file(definition), "bytes": definition.stat().st_size},
+        "control": {
+            "path": str(control.resolve()), "sha256": sha256_file(control), "bytes": control.stat().st_size,
+            "copied_from": str(control_source.resolve()), "source_sha256": sha256_file(control_source),
+            "coordinate_frame_id": "fixed_tank_acceleration", "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+            "sample_interval_s": PARENT_INPUT_DT_S, "rows": PARENT_INPUT_CONTROL_ROWS,
+        },
+        "source_definition": {"path": str(QUALIFIED_CELL3_DEFINITION.resolve()), "sha256": sha256_file(QUALIFIED_CELL3_DEFINITION)},
+        "geometry_contract": "historical qualified CELL3 finite 3D槽 geometry; three boundary layers; no old trajectory or split is modified",
+        "control_contract": "frozen F3 dual-axis control replaces the historical single-axis file; x/y axes remain active through 8.0 s with 0-10 s reflow tail",
+        "solver_dimension_required": 3,
+        "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "qualification_status": "fallback_cpu_gencase_pending_solver_QI_pending_QN_pending",
+    }
+
+
 def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
     parent_root = output_root / "parent_inputs"
     previous_manifest: dict[str, Any] = {}
@@ -1936,6 +2000,7 @@ def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
     dual = _write_dual_axis_definition(parent_root / "dual_axis_phase")
     baffle = _write_baffle_definition(parent_root / "eccentric_baffle_exchange")
     repairs = _write_normal_coverage_repairs(parent_root, [dual, baffle])
+    fallback = _write_dual_qualified_fallback(parent_root, parent_root / "dual_axis_phase/F3_DualAxisPhase_Control.csv")
     manifest = {
         "schema": "ds-data-02.f3.parent_inputs.v1",
         "family_id": "F3",
@@ -1951,6 +2016,7 @@ def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
         },
         "parents": [dual, baffle],
         "repairs": repairs,
+        "fallbacks": [fallback],
     }
     # `audit-parents` adds immutable receipt pointers after GenCase.  A later
     # source regeneration must retain those pointers instead of silently
