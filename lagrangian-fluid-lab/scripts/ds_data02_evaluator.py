@@ -34,10 +34,14 @@ def evaluate(reference, candidate, *, length_scale_m, velocity_scale_m_s, closed
         if not np.array_equal(ref['time'][:], cand['time'][:]):
             return dict(schema='ds-data-02.evaluation.v1', valid=False, failures=['saved_time_mismatch'],
                         numerical_qualification='not_assessed', model_invoked=False)
-        for attr in ('coordinate_frame', 'geometry_sha256', 'control_sha256'):
-            if attr not in ref.attrs or attr not in cand.attrs:
+        for attr, aliases in [('coordinate_frame',('coordinate_frame',)),
+                              ('geometry_sha256',('geometry_sha256','geometry_reference_sha256')),
+                              ('control_sha256',('control_sha256','motion_control_reference_sha256'))]:
+            ref_value = next((ref.attrs[k] for k in aliases if k in ref.attrs), None)
+            cand_value = next((cand.attrs[k] for k in aliases if k in cand.attrs), None)
+            if ref_value is None or cand_value is None:
                 failures.append(f'missing_condition_binding:{attr}')
-            elif ref.attrs[attr] != cand.attrs[attr]:
+            elif ref_value != cand_value:
                 failures.append(f'condition_mismatch:{attr}')
         ref_keys, cand_keys = identities(ref), identities(cand)
         lookup = {key:i for i,key in enumerate(cand_keys)}
@@ -53,11 +57,12 @@ def evaluate(reference, candidate, *, length_scale_m, velocity_scale_m_s, closed
         denominator = float(initial_mass.sum())
         if denominator <= 0:
             raise ValueError('reference has no initial fluid mass')
-        position_error, velocity_error, missing, unknown, mass_error = [],[],[],[],[]
+        position_error, velocity_error, missing, unknown, mass_error, reference_loss = [],[],[],[],[],[]
         wall_crossings = 0
         previous_pos, previous_good = None,None
         for ti in range(len(ref['time'])):
             rv = ref['valid'][ti].astype(bool) & initial_fluid
+            reference_loss.append(float(initial_mass[initial_fluid & ~rv].sum()/denominator))
             cp = np.full((len(ref_keys),3), np.nan)
             cv = np.full_like(cp,np.nan)
             cm = np.full(len(ref_keys),np.nan)
@@ -102,6 +107,7 @@ def evaluate(reference, candidate, *, length_scale_m, velocity_scale_m_s, closed
                     failures=sorted(set(failures)),time=ref['time'][:].tolist(),
                     initial_reference_mass_kg=denominator,extra_candidate_identities=extra,
                     missing_reference_mass_fraction=missing,unknown_reference_mass_fraction=unknown,
+                    reference_numerical_loss_mass_fraction=reference_loss,
                     mass_absolute_error_fraction=mass_error,position_error_per_initial_mass=position_error,
                     velocity_error_per_initial_mass=velocity_error,finite_wall_crossing_count=wall_crossings,
                     numerical_qualification='not_assessed',model_invoked=False,

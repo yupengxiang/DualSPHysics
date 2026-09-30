@@ -1316,23 +1316,29 @@ def _gencase_request(*, family: Path, row: Mapping[str, Any], history_path: Path
 
 def _qualification_request(*, family: Path, row: Mapping[str, Any], history_path: Path, gencase_receipt: Path, attempt_id: str) -> dict[str, Any]:
     receipt = _json(gencase_receipt)
-    if receipt.get("status") != "completed" or int(receipt.get("returncode", 1)) != 0 or int(receipt.get("total_particles", 0)) <= 0:
+    if receipt.get("status") != "completed" or int(receipt.get("returncode", 1)) != 0 or int(receipt.get("fluid_particles", 0)) <= 0 or receipt.get("solver_dimension_from_gencase") != 3:
         raise ValueError("qualification request requires a completed shared-runner GenCase receipt with nonzero particles")
     definition = Path(row["definition_path"]).resolve()
+    generated_root = Path(receipt['output_root'])
+    generated_prefix = generated_root / row['case_id']
+    native_inputs = [generated_prefix.with_suffix('.xml'), generated_prefix.with_suffix('.bi4'),
+                     generated_root / Path(row['motion_path']).name]
+    if not all(path.is_file() for path in native_inputs):
+        raise ValueError('qualification requires actual GenCase XML, BI4 and copied motion input')
     return {
         "schema": "ds-data-02.runner.request.v1",
         "family_id": FAMILY_ID,
         "case_id": row["case_id"],
         "attempt_id": attempt_id,
         "kind": "qualification",
-        "command": [str(SOLVER), f"{{attempt_root}}/{row['case_id']}", "{attempt_root}/solver_output"],
-        "cwd": str(SOLVER.parent),
+        "command": [str(SOLVER), str(generated_prefix), "{attempt_root}/solver_output"],
+        "cwd": str(generated_root),
         "max_wall_seconds": 300,
         "cpu_threads": 4,
         "estimated_storage_bytes": 5 * 1024 * 1024 * 1024,
         "estimated_peak_gpu_mib": 2048,
         "gencase_receipt": str(gencase_receipt.resolve()),
-        "input_files": [str(SCRIPT_PATH), str(history_path), str(family / "quality_contract.json"), str(family / "event_definitions.json"), str(family / "integration_save_plan.json"), str(family / "case_registry.jsonl"), str(family / "definitions/reference_matrix.json"), str(definition), str(Path(row["motion_path"]).resolve()), str(Path(row["metadata_path"]).resolve()), str(gencase_receipt.resolve())],
+        "input_files": [str(SCRIPT_PATH), str(history_path), str(family / "quality_contract.json"), str(family / "event_definitions.json"), str(family / "integration_save_plan.json"), str(family / "case_registry.jsonl"), str(family / "definitions/reference_matrix.json"), str(definition), str(Path(row["motion_path"]).resolve()), str(Path(row["metadata_path"]).resolve()), str(gencase_receipt.resolve()), *[str(path) for path in native_inputs]],
         "worktree_root": str(CURRENT_WORKTREE),
         "launch_commit": _git_commit(),
         "recipe_id": row.get("recipe_id", BACKGROUND_SPECS[row["background"]]["recipe_id"]),
