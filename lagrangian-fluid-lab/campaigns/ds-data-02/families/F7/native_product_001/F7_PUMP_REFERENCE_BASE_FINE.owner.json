@@ -1,0 +1,122 @@
+{
+  "schema": "ds02.f7.full-native-owner.v1",
+  "family_id": "F7",
+  "case_id": "F7_PUMP_REFERENCE_BASE_FINE",
+  "physical_case_id": "F7_PUMP_REFERENCE_BASE",
+  "resolution": "fine",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F7",
+    "physical_case_id": "F7_PUMP_REFERENCE_BASE",
+    "mechanism_id": "pump_recirculation",
+    "geometry_family_id": "official_pump_fixed_moving_mesh_v1",
+    "control_family_id": "pump_reciprocal_144degps_288degps2_5s",
+    "geometry": {
+      "pump_fixed": {
+        "low_m": [
+          -0.3187209963798523,
+          -0.534259021282196,
+          -1.0131239891052246
+        ],
+        "size_m": [
+          0.5549950003623962,
+          0.7936530113220215,
+          0.9435469880700111
+        ],
+        "label": "Exact prescribed mesh is bound by asset SHA; these coordinates are its envelope, not a replacement shape"
+      },
+      "pump_moving": {
+        "low_m": [
+          -0.178528368473,
+          -0.430679351091,
+          -0.888982415199
+        ],
+        "size_m": [
+          0.32192897796599995,
+          0.08599698543499995,
+          0.32185894250799996
+        ],
+        "label": "Exact prescribed mesh is bound by asset SHA; these coordinates are its envelope, not a replacement shape"
+      },
+      "fill_selection_box": {
+        "low_m": [
+          -0.6,
+          -0.39,
+          -1.1
+        ],
+        "size_m": [
+          0.9,
+          0.68,
+          0.738
+        ],
+        "label": "Void fill clipped by fixed/moving mesh; continuous cavity volume unresolved"
+      }
+    },
+    "initial_state": {
+      "source_regions": [
+        "initial pump cavity fluid cohort"
+      ],
+      "velocities_m_per_s": [
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "mass_policy": "Actual native initial mass retained; continuous cavity mass has not been independently certified"
+    },
+    "controls": {},
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "geometry_asset_sha256": {
+        "pump_fixed.vtk": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616",
+        "pump_moving.vtk": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72"
+      },
+      "motion_xml": "<motion>\n            <objreal ref=\"2\">\n                <begin mov=\"1\" start=\"0\" finish=\"12\" />\n                <mvrotace id=\"1\" duration=\"0.5\" next=\"2\">\n                    <ace ang=\"288\" units_comment=\"degrees/s^2\" />\n                    <velini ang=\"0\" units_comment=\"degrees/s\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"2\" duration=\"1\" next=\"3\">\n                    <ace ang=\"0\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"3\" duration=\"0.5\" next=\"4\">\n                    <ace ang=\"-288\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <wait id=\"4\" duration=\"0.5\" next=\"5\" />\n                <mvrotace id=\"5\" duration=\"0.5\" next=\"6\">\n                    <ace ang=\"-288\" units_comment=\"degrees/s^2\" />\n                    <velini ang=\"0\" units_comment=\"degrees/s\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"6\" duration=\"1\" next=\"7\">\n                    <ace ang=\"0\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <mvrotace id=\"7\" duration=\"0.5\" next=\"8\">\n                    <ace ang=\"288\" units_comment=\"degrees/s^2\" />\n                    <axisp1 x=\"-0.0576\" y=\"-0.29\" z=\"-0.7225\" />\n                    <axisp2 x=\"-0.0576\" y=\"-0.49\" z=\"-0.7225\" />\n                </mvrotace>\n                <wait id=\"8\" duration=\"0.5\" next=\"1\" />\n            </objreal>\n        </motion>\n    ",
+      "fillbox_seed_m": [
+        0.1,
+        -0.1,
+        -0.39
+      ],
+      "fillbox_mode": "void",
+      "fillbox_bound": "0"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 12.0,
+      "sequence": [
+        "start",
+        "forward",
+        "stop",
+        "reverse",
+        "two complete cycles",
+        "partial final cycle"
+      ],
+      "right_censor_policy": "Remaining final partial cycle explicitly censored; no stopped-tail claim"
+    }
+  },
+  "geometry_assets": [
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_fixed.vtk",
+      "sha256": "6148ea8f05a2cf497eb14dd6d7ae03693cafa1c8bd271f74ff1316ba2fbaf616"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/assets/official_pump/pump_moving.vtk",
+      "sha256": "376a6d84164ec1e154486196b4d6e7f647f857ad6cd2cf12fdd268f435753c72"
+    }
+  ],
+  "source_solver_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_REFERENCE_BASE_FINE/F7_PUMP_REFERENCE_BASE_FINE_QUALIFICATION_001/execution-receipt.json",
+    "sha256": "ea8919ec9f2bf17bfd90535d11b67b90d9017bf37fa9f41957ae0745f579d0a6"
+  },
+  "source_gencase_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_PUMP_REFERENCE_BASE_FINE/F7_PUMP_REFERENCE_BASE_FINE_GENCASE_05/execution-receipt.json",
+    "sha256": "111086e77f70b2c23cbb1a1e559016d15981db98f89e4508ac9abee6dc828a8f"
+  },
+  "product_boundary": "Reference full native states only; moving rigid pose, complete labels, continuous mass and Q-N pending"
+}
