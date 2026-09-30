@@ -1,10 +1,11 @@
 {
   "family_id": "F4",
+  "gencase_receipts": "gencase_receipts.json",
   "next_executable_tasks": [
-    "Run both requests/ gencase_*_coarse.json through shared ds_data02_runtime.py.",
-    "Verify receipt total/fluid counts, Data2D=false, finite wall bounds, native source masses and y-layer counts.",
-    "Bind each real receipt to a qualification request and let the primary dispatch GPU solver.",
-    "Only after complete 1.2 s windows, 0.001 s outputs and independent CFL/output checks evaluate Q-I/Q-N."
+    "Primary dispatch requests/qualification_finite_drop_pool_coarse.json and requests/qualification_oblique_finite_columns_coarse.json through the shared GPU runner.",
+    "Verify complete 1.20 s windows, native source mass, finite wall accounting and event sequence before any numerical qualification.",
+    "Run the independent CFL=0.1 and output=0.0005 s controls only after the coarse full-window canaries are inspected.",
+    "Keep Q-N and product status pending until exact-recipe, resolution and observable comparisons are complete."
   ],
   "no_gpu_started_by_generator": true,
   "no_product_or_qn_claim": true,
@@ -14,5 +15,5 @@
   ],
   "schema": "ds02.f4.handoff.v1",
   "source_audit": "reference_evidence.json",
-  "status": "ready_for_shared_cpu_gencase"
+  "status": "qualification_requests_ready_pending_solver"
 }
