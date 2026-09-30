@@ -1,0 +1,270 @@
+{
+  "background": "offset_spill",
+  "case_id": "F2_REF_OFFSET_NOMINAL_MEDIUM",
+  "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+  "definition_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
+  "definition_sha256": "2ec50a458648fe63dc1b0c706ded645af2a589e5d8e21613dfb5ba369f749a1a",
+  "dp_m": 0.02,
+  "event_window": {
+    "characteristic_length_m": 0.33,
+    "characteristic_time_s": 0.18340976999845687,
+    "characteristic_velocity_m_s": 1.799249843684862,
+    "complete_event_window_s": 4.0,
+    "event_window_basis": "static hold + cosine-ramped prescribed rotation + post-stop catch/spill/return hold; native evidence must observe the markers",
+    "hold_start_s": 0.5,
+    "phase_targets_s": {
+      "first_cup_mouth_departure": "observed_threshold_crossing_after_rotation_start",
+      "first_receiver_entry": "observed_finite_receiver_crossing",
+      "post_stop_return_and_residence": 4.0,
+      "rotation_start": 0.5,
+      "rotation_stop": 1.7,
+      "spill_or_tray_entry": "observed_if_any",
+      "static_hold_end": 0.5
+    },
+    "post_rotation_hold_s": 2.3,
+    "rotation_duration_s": 1.2,
+    "rotation_end_s": 1.7,
+    "save_interval_s": 0.01
+  },
+  "family_id": "F2",
+  "feature_samples": 11.0,
+  "feature_scale_m": 0.22,
+  "generation_status": "definition_only_not_gencase_run",
+  "generator_version": "ds_data02_f2.v1",
+  "geometry": {
+    "cup_low_m": [
+      0.0,
+      -0.15,
+      0.65
+    ],
+    "cup_size_m": [
+      0.425,
+      0.3,
+      0.45
+    ],
+    "cup_width_m": 0.425,
+    "domain_extent_m": [
+      3.1,
+      1.85,
+      2.25
+    ],
+    "finite_wall_faces": [
+      "cup_bottom",
+      "cup_left",
+      "cup_right",
+      "cup_front",
+      "cup_back",
+      "receiver_bottom",
+      "receiver_left",
+      "receiver_right",
+      "receiver_front",
+      "receiver_back",
+      "tray_bottom"
+    ],
+    "fluid_height_m": 0.33,
+    "fluid_low_m": [
+      0.05,
+      -0.11,
+      0.7
+    ],
+    "fluid_volume_m3": 0.023594999999999998,
+    "initial_layer_count": 3,
+    "motion_axis": "+Y from axisp1=(0,-1,0.65) to axisp2=(0,1,0.65); native mvrotfile sign retained",
+    "open_boundary_faces": [
+      "world_top"
+    ],
+    "receiver_low_m": [
+      0.45,
+      -0.07999999999999999,
+      0.0
+    ],
+    "receiver_size_m": [
+      1.1,
+      0.6,
+      0.45
+    ],
+    "receiver_x_m": 0.45,
+    "receiver_y_m": 0.22,
+    "tray_low_m": [
+      -0.6,
+      -0.6,
+      -0.2
+    ],
+    "tray_size_m": [
+      2.6,
+      1.3,
+      0.1
+    ],
+    "tray_width_m": 1.3,
+    "tray_y_m": -0.6
+  },
+  "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+  "lineage_group_id": "F2_offset_spill_v1",
+  "mechanism_id": "offset_spill",
+  "metadata_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM.metadata.json",
+  "motion_filename": "F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+  "motion_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+  "motion_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+  "observables": {
+    "background_specific": "transverse receiver offset, finite tray interception and spill/re-entry are the main mechanism",
+    "destination_labels": [
+      "cup_retained",
+      "receiver_captured",
+      "spill_tray",
+      "inflight",
+      "unknown"
+    ],
+    "finite_surfaces": [
+      "cup_mouth",
+      "receiver_entry",
+      "spill_tray_entry"
+    ],
+    "primary": [
+      "cup_remaining_mass_time_series_by_source_layer",
+      "receiver_captured_mass_time_series_and_net_flux",
+      "spill_tray_mass_time_series_and_net_flux",
+      "inflight_mass_and_unknown_mass_time_series",
+      "cup_mouth_first_departure_and_receiver_first_entry_times",
+      "fluid_center_of_mass_and_linear_angular_momentum_about_pivot",
+      "prescribed_cup_pose_and_angular_velocity_residual"
+    ],
+    "secondary": [
+      "return_or_reentry_count",
+      "velocity_and_kinetic_energy_quantiles",
+      "initial_volume_mass_and_effective_layer_depth"
+    ],
+    "source_labels": {
+      "definition": "continuous initial fluid depth bands are materialized by native initial Mk=0,1,2 layers",
+      "values": [
+        "source_layer_0_bottom",
+        "source_layer_1_middle",
+        "source_layer_2_top"
+      ]
+    }
+  },
+  "paired_background_id": "F2_REF_PAIR_NOMINAL",
+  "parameter_values": {
+    "cup_width_m": 0.425,
+    "fill_ratio": 1.0,
+    "mouth_geometry": "open_rim",
+    "receiver_x_m": 0.45,
+    "receiver_y_m": 0.22
+  },
+  "physical_case_id": "F2_REF_OFFSET_NOMINAL",
+  "production_status": "not_produced",
+  "qualification_status": "unqualified_until_native_reference_evidence",
+  "quality_contract": {
+    "background": "offset_spill",
+    "event_thresholds": {
+      "cup_mouth": {
+        "crossing_tolerance_m": 0.0125,
+        "first_departure": "first interpolated outward crossing of the moving finite opening after static hold",
+        "surface": "finite moving opening plane at local x=cup_width_m-0.05 with y/z aperture inside cup rim"
+      },
+      "receiver": {
+        "first_entry": "first interpolated world-space entry; repeated crossings are counted separately",
+        "region": "receiver interior after one boundary layer; x/y/z bounds from generated geometry"
+      },
+      "residence": {
+        "cup_retained": "body-frame cup interior at final frame",
+        "destination_time_series": "receiver/tray/cup/inflight/unknown at every native saved frame",
+        "unknown": "initial fluid ID absent or outside all declared physical regions at event-window end; unknown mass remains in denominator"
+      },
+      "spill_tray": {
+        "region": "finite tray interior after one boundary layer and below receiver lip",
+        "spill": "native particle reaches tray region after leaving cup and is not inside receiver"
+      }
+    },
+    "family_id": "F2",
+    "mass_denominator": "initial_native_fluid_mass_by_source_layer_mk_0_1_2",
+    "q_e": {
+      "blocking": false,
+      "external_experiment_or_analytic_match": "not required for Q-N",
+      "status": "optional"
+    },
+    "q_i": {
+      "boundary_particles_are_not_fluid_mass": true,
+      "required": [
+        "solver_dimension_equals_3_from_actual_output",
+        "coordinate_components_equals_3",
+        "nonzero_fluid_particles_and_positive_active_mass",
+        "finite_increasing_time_axis",
+        "all_active_position_velocity_density_mass_finite",
+        "initial_ids_retained_or_native_lifecycle_classified",
+        "finite_cup_receiver_tray_geometry_and_motion_control"
+      ],
+      "unknown_mass_is_separate_from_spill_or_tray_mass": true
+    },
+    "q_n": {
+      "event_time_absolute_budget_s": 0.0036681953999691376,
+      "event_time_fraction_of_characteristic_time": 0.02,
+      "integration_fraction_of_total_error_budget_max": 0.2,
+      "macro_relative_error_threshold": 0.05,
+      "requires": [
+        "same_recipe_geometry_control_and_event_window_across_reference_resolutions",
+        "independent_integration_step_comparison",
+        "independent_save_frequency_comparison",
+        "native_observables_cover_all_registered_event_phases"
+      ],
+      "save_fraction_of_total_error_budget_max": 0.2,
+      "status_before_native_reference": "pending",
+      "three_resolution_interpretation": "nearby resolutions are reference evidence, not automatic convergence"
+    },
+    "qualification_status": "unqualified_until_actual_native_reference_evidence",
+    "schema": "ds-data-02.f2.quality-contract.v1",
+    "scope_key": "recipe+offset_spill+4.000s+native_full_state+resolution",
+    "status": "thresholds_frozen_before_results"
+  },
+  "recipe_id": "F2_DBC_ROTATING_CUP_OFFSET_SPILL_V1",
+  "resolution": "medium",
+  "schema": "ds-data-02.f2.generator.v1",
+  "solver_parameters": {
+    "Boundary": 1,
+    "CoefDtMin": 0.05,
+    "DensityDT": 3,
+    "DensityDTvalue": 0.1,
+    "DtAllParticles": 0,
+    "DtFixed": 0,
+    "DtIni": 0,
+    "DtMin": 0,
+    "FtPause": 0,
+    "Kernel": 2,
+    "MinFluidStop": 0,
+    "PartsOutMax": 1,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 2,
+    "Shifting": 0,
+    "SlipMode": 1,
+    "StepAlgorithm": 2,
+    "TimeMax": "4",
+    "TimeOut": "0.01",
+    "Visco": 0.03,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1
+  },
+  "source_mother": {
+    "case_id": "W06_standard_offset_partial",
+    "classification": "historical_missing_classified",
+    "control": {
+      "angle_degrees": -105.0,
+      "duration_s": 0.85,
+      "receiver_x_m": 0.45,
+      "receiver_y_m": 0.22
+    },
+    "formal_reuse": false,
+    "historical_hdf5": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/data/w06/W06_standard_offset_partial.h5",
+    "historical_hdf5_declared_sha256": "1b3ce8fc05a475833be814263900b0358957fa34430058dba94991cbf014907d",
+    "historical_hdf5_exists": true,
+    "historical_status": "diagnostic_missing_mass_requires_scope_audit",
+    "identity_retention": 0.981859410430839,
+    "initial_missing_at_final": 32,
+    "reuse_reason": "W06 is a historical mechanism audit; it is never promoted to this new recipe without fresh native event evidence.",
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/w06/W06_standard_offset_partial_Def.xml",
+    "source_definition_sha256": "57cc10c3ff0c6234c9da795bbed6821cd81ddc98cf767db80155934d87a8e8c1",
+    "source_motion": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/v0.1-candidate/cases/w06/W06_standard_offset_partial_motion.dat",
+    "source_motion_sha256": "f5dbc65f0f297b110cdf812f9f46875ccfe65f7f1c469bfa0b954065329e6f89"
+  },
+  "view_id": "native_full_state"
+}

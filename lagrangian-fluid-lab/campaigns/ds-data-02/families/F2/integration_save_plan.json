@@ -1,0 +1,68 @@
+{
+  "comparison": {
+    "downsampling_is_not_integration_study": true,
+    "integrator_and_save_are_separate_factors": true,
+    "reference_matrix_save_interval_role": "raw macro-observable reference only until native event control is run",
+    "same_geometry_initial_state_and_control": true,
+    "starting_budget": {
+      "event_time_fraction_of_characteristic_time": 0.02,
+      "integration_fraction_max": 0.2,
+      "macro_relative": 0.05,
+      "save_fraction_max": 0.2
+    }
+  },
+  "controls": [
+    {
+      "control_id": "offset_native_dt_save010",
+      "purpose": "reference adaptive integration and matrix save cadence",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.01
+    },
+    {
+      "control_id": "offset_half_native_dt_save010",
+      "purpose": "independent integration-step comparison at half the observed native initial dt",
+      "solver_parameter_overrides": {
+        "DtFixed": "runner_bound_half_native_DtIni",
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.01
+    },
+    {
+      "control_id": "offset_native_dt_save005",
+      "purpose": "independent output-save comparison with identical integration control",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.005
+    },
+    {
+      "control_id": "offset_native_dt_event_save001",
+      "purpose": "complete-window event timing control before a Q-N event-time claim",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.001,
+      "timing_qualification": true,
+      "worst_case_snapshot_quantization_s": 0.0005
+    }
+  ],
+  "family_id": "F2",
+  "qualification_claim": "none",
+  "schema": "ds-data-02.f2.integration-save-study.v1",
+  "sensitivity_case": {
+    "background": "offset_spill",
+    "physical_case_id": "F2_REF_OFFSET_NOMINAL",
+    "reason": "offset destination boundary and moving cup opening are the most event-sensitive registered geometry",
+    "resolution": "medium"
+  },
+  "status": "planned_not_run"
+}

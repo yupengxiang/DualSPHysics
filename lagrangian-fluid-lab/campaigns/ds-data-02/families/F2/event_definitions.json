@@ -1,0 +1,55 @@
+{
+  "backgrounds": {
+    "center_catch": {
+      "control": "motion file at 0.005 s is input control; native saved pose/angle/omega must be compared at output times",
+      "event_window_s": 4.0,
+      "final_categories": [
+        "receiver_captured",
+        "spill_tray",
+        "cup_retained",
+        "inflight",
+        "unknown"
+      ],
+      "opening": "finite moving cup-mouth aperture; crossing is interpolated in body coordinates and retains particle ID",
+      "receiver": "finite receiver interior excluding one boundary shell; repeated entry/exit contributes signed net and separate recrossings",
+      "source": "initial Mk layer 0/1/2, continuous z bands from the same initial fluid geometry",
+      "spill_tray": "finite tray interior excluding one boundary shell; spill only after prior cup-mouth departure",
+      "unknown_mass": "initial native mass denominator minus mutually exclusive categories; never relabel as spill"
+    },
+    "offset_spill": {
+      "control": "motion file at 0.005 s is input control; native saved pose/angle/omega must be compared at output times",
+      "event_window_s": 4.0,
+      "final_categories": [
+        "receiver_captured",
+        "spill_tray",
+        "cup_retained",
+        "inflight",
+        "unknown"
+      ],
+      "opening": "finite moving cup-mouth aperture; crossing is interpolated in body coordinates and retains particle ID",
+      "receiver": "finite receiver interior excluding one boundary shell; repeated entry/exit contributes signed net and separate recrossings",
+      "source": "initial Mk layer 0/1/2, continuous z bands from the same initial fluid geometry",
+      "spill_tray": "finite tray interior excluding one boundary shell; spill only after prior cup-mouth departure",
+      "unknown_mass": "initial native mass denominator minus mutually exclusive categories; never relabel as spill"
+    }
+  },
+  "common_event_order": [
+    "static_hold",
+    "rotation_start",
+    "cup_mouth_departure",
+    "receiver_or_tray_entry",
+    "rotation_stop",
+    "post_stop_return",
+    "final_residence_or_unknown"
+  ],
+  "family_id": "F2",
+  "measurement_rules": {
+    "boundary": "fluid mass excludes fixed or moving wall nodes; physical walls are not an open sink",
+    "first_passage": "linearly interpolate bracketed finite-region crossing in native consecutive frames; if not bracketed mark right-censored",
+    "mass": "mass-weight every count; use initial fluid IDs only and keep unknown in denominator",
+    "residence": "sum native time intervals in each region, retaining repeated receiver/tray/cup occupancy"
+  },
+  "schema": "ds-data-02.f2.event-definitions.v1",
+  "thresholds_apply_before_native_results": true,
+  "thresholds_frozen_at": "2026-09-30T08:36:59+00:00"
+}
