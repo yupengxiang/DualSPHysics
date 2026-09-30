@@ -1,6 +1,6 @@
 {
   "schema": "ds-data-02.infra.audit-evidence.v1",
-  "generated_at_utc": "2026-09-30T07:57:57.693659+00:00",
+  "generated_at_utc": "2026-09-30T08:02:27.741289+00:00",
   "branch": "codex/ds-data-02-infra",
   "implementation_commit_at_full_audit": "771e361227960ef53e3504fae445010bfe52b806",
   "source_manifest": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json",
@@ -23,7 +23,7 @@
     "pytest_passed": 8,
     "py_compile_passed": true,
     "request_validation": {
-      "validated_requests": 5,
+      "validated_requests": 6,
       "hashed_input_bytes_excluding_large_hdf5": true
     }
   },
@@ -893,6 +893,261 @@
         "termination_reason": null,
         "numerical_reference_status": "not_assessed"
       }
+    },
+    {
+      "case_id": "F3_sloshing_motion_dp030",
+      "family_group": "F3",
+      "attempt_id": "ds02-infra-f3-d05-sloshing-2d-audit",
+      "source_hdf5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/normalized/B05_F3_sloshing_motion_dp030.h5",
+        "solver_log_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/solver.stdout.log",
+        "file_size_bytes": 49451,
+        "frames": 11,
+        "particles": 58,
+        "metadata_only_manifest": true,
+        "sha256": null,
+        "sha256_status": "omitted_source_not_runner_hashed"
+      },
+      "audit_output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F3_sloshing_motion_dp030/ds02-infra-f3-d05-sloshing-2d-audit/audit.json",
+      "audit_output_sha256": "0729f88d22c01846d96d551c8b331249b176fe6641c9cb449627229faec1fa65",
+      "q_i_status": "Q-I-incomplete",
+      "q_n_status": "not_assessed",
+      "scientific_acceptance": "not_assessed",
+      "production_eligibility": "not_evaluated",
+      "structural_failures": [],
+      "missing_requirements": [
+        "boundary_or_lifecycle_semantics",
+        "closed_or_open_lifecycle_declaration",
+        "control",
+        "coordinate_frame",
+        "geometry",
+        "units:density",
+        "units:mass",
+        "units:position",
+        "units:pressure",
+        "units:time",
+        "units:velocity"
+      ],
+      "solver_log": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/solver.stdout.log",
+        "bytes_read": 18169,
+        "sha256": "7a6f5d9bd4730448424e1384304e163ccc3e9410df5a590183ad056dba9a9b59",
+        "dimension": {
+          "status": "pass",
+          "solver_dimension": 2,
+          "source": "solver_log_explicit_banner",
+          "evidence_lines": [
+            "**2D-Simulation parameters:",
+            "Simulate2DPosY=0"
+          ],
+          "coordinate_components": 3,
+          "inference_from_coordinate_values": false
+        },
+        "counts": {
+          "initial_total": 152,
+          "initial_fluid_type3": 58,
+          "initial_floating_type2": 0,
+          "excluded_particles": 0
+        }
+      },
+      "dimensions": {
+        "frames": 11,
+        "particles": 58,
+        "coordinate_components": 3
+      },
+      "time": {
+        "status": "pass",
+        "finite": true,
+        "strictly_increasing": true,
+        "count": 11,
+        "start_s": 0.0,
+        "end_s": 1.00024
+      },
+      "valid": {
+        "dtype": "bool",
+        "binary": true,
+        "status": "pass"
+      },
+      "finite_active": {
+        "position": true,
+        "velocity": true,
+        "density": true,
+        "mass": true,
+        "pressure": true
+      },
+      "positive_active_mass": true,
+      "positive_active_density": true,
+      "lifecycle": {
+        "identity_axis": "(Zone,Idp)",
+        "initial_active_count": 58,
+        "final_active_count": 58,
+        "ever_seen_count": 58,
+        "introduced_after_initial_count": 0,
+        "missing_at_any_later_frame_count": 0,
+        "revived_identity_count": 0,
+        "initial_missing_at_final_count": 0,
+        "initial_to_final_retention": 1.0,
+        "type_changed_identity_count": 0,
+        "per_frame_identity_changed_rows": 0,
+        "full_timeline_checked": true
+      },
+      "frame_counts": {
+        "active": {
+          "count": 11,
+          "first": 58,
+          "last": 58,
+          "min": 58,
+          "max": 58
+        },
+        "fluid_type3": {
+          "count": 11,
+          "first": 58,
+          "last": 58,
+          "min": 58,
+          "max": 58
+        },
+        "floating_type2": {
+          "count": 11,
+          "first": 0,
+          "last": 0,
+          "min": 0,
+          "max": 0
+        }
+      },
+      "fluid_mass_ledger": {
+        "type_code": 3,
+        "status": "pass",
+        "initial_count": 58,
+        "initial_mass_kg": 52.19999861717224,
+        "final_initial_cohort_retained_count": 58,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "solver_excluded_particles": 0,
+        "separate_from_type2": true
+      },
+      "floating_mass_ledger": {
+        "type_code": 2,
+        "status": "not_present",
+        "initial_count": 0,
+        "initial_mass_kg": 0.0,
+        "final_initial_cohort_retained_count": 0,
+        "initial_cohort_missing_at_final_count": 0,
+        "initial_cohort_missing_mass_kg": 0.0,
+        "excluded_from_fluid_ledger": true
+      },
+      "solver_log_consistency": {
+        "status": "pass",
+        "comparisons": [
+          {
+            "field": "initial_fluid_type3",
+            "log": 58,
+            "hdf5": 58,
+            "match": true
+          },
+          {
+            "field": "initial_floating_type2",
+            "log": 0,
+            "hdf5": 0,
+            "match": true
+          }
+        ]
+      },
+      "cost_estimate": {
+        "frames": 11,
+        "particles": 58,
+        "particle_chunk": 65536,
+        "logical_dataset_bytes": 26188,
+        "dataset_storage_bytes": 16317,
+        "estimated_read_bytes": 26188,
+        "estimated_peak_working_set_bytes": 6206,
+        "full_trajectory_materialized": false,
+        "method": "dataset metadata plus one particle chunk per frame"
+      },
+      "audit_parameters": {
+        "particle_chunk": 65536,
+        "full_trajectory_materialized": false
+      },
+      "resource_usage": {
+        "before": {
+          "self": {
+            "user_cpu_seconds": 0.115909,
+            "system_cpu_seconds": 0.022982,
+            "max_rss_kib": 44032,
+            "minor_page_faults": 5780,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 5
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.001655,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 85,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        },
+        "after": {
+          "self": {
+            "user_cpu_seconds": 0.156948,
+            "system_cpu_seconds": 0.023992,
+            "max_rss_kib": 47104,
+            "minor_page_faults": 6151,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 3,
+            "involuntary_context_switches": 6
+          },
+          "children": {
+            "user_cpu_seconds": 0.0,
+            "system_cpu_seconds": 0.001655,
+            "max_rss_kib": 37888,
+            "minor_page_faults": 85,
+            "major_page_faults": 0,
+            "in_block": 0,
+            "out_block": 0,
+            "voluntary_context_switches": 1,
+            "involuntary_context_switches": 0
+          }
+        }
+      },
+      "runner": {
+        "status": "completed",
+        "returncode": 0,
+        "elapsed_seconds": 0.2819271399639547,
+        "cpu_core_seconds": 0.336252,
+        "bytes": 16668,
+        "request_sha256": "49acb8750d61d443336c8350919720e517ed2b54cd5186c89bc2d0f8356c613f",
+        "git_at_launch": {
+          "commit": "54bdfa402fca1c17b9ca42d35b195c837e2a5a56",
+          "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+          "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "input_hashes_at_launch": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "987028579f1f72ad7b8b38e1acd1844c6cf92ba49248e4bfe12afea7bf781bb4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/solver.stdout.log": "7a6f5d9bd4730448424e1384304e163ccc3e9410df5a590183ad056dba9a9b59"
+        },
+        "input_hashes_after_run": {
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_integrity.py": "660ae398a7a65218d76aa067d66b0ad3f2d2b5e41d6c67d494a99a83974fc30a",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/protocol/ds-data-02-schema-v1.json": "624d15d49c298a476f35dea339fdb7e40eba204990e63df19651a27dec450051",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_integrity.py": "045defd60ed13f3ada120de80fba9920a93b8a67e228f549aec5086e94354553",
+          "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/infra/source-manifest.json": "987028579f1f72ad7b8b38e1acd1844c6cf92ba49248e4bfe12afea7bf781bb4",
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d05/B05_F3_sloshing_motion_dp030/solver.stdout.log": "7a6f5d9bd4730448424e1384304e163ccc3e9410df5a590183ad056dba9a9b59"
+        },
+        "termination_reason": null,
+        "numerical_reference_status": "not_assessed"
+      }
     }
-  ]
+  ],
+  "implementation_commit_at_latest_evidence": "54bdfa402fca1c17b9ca42d35b195c837e2a5a56",
+  "source_manifest_sha256": "987028579f1f72ad7b8b38e1acd1844c6cf92ba49248e4bfe12afea7bf781bb4"
 }
