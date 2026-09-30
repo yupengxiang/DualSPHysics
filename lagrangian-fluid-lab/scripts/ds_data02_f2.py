@@ -416,16 +416,23 @@ def _definition_xml(case: Mapping[str, Any]) -> str:
 '''
 
 
-def _event_window(background: str, *, h_ratio: float = 1.0) -> dict[str, Any]:
+def _event_window(
+    background: str,
+    *,
+    h_ratio: float = 1.0,
+    rotation_duration_s: float = ROTATION_DURATION_S,
+) -> dict[str, Any]:
+    if not 0.45 <= rotation_duration_s <= 1.40:
+        raise ValueError("rotation_duration_s must stay in the resolvable 0.45..1.40 s range")
     h0 = 0.33 * h_ratio
     t_char = math.sqrt(h0 / G)
     return {
         "complete_event_window_s": EVENT_WINDOW_S,
         "save_interval_s": REFERENCE_SAVE_INTERVAL_S,
         "hold_start_s": ROTATION_HOLD_START_S,
-        "rotation_duration_s": ROTATION_DURATION_S,
-        "rotation_end_s": ROTATION_HOLD_START_S + ROTATION_DURATION_S,
-        "post_rotation_hold_s": EVENT_WINDOW_S - ROTATION_HOLD_START_S - ROTATION_DURATION_S,
+        "rotation_duration_s": rotation_duration_s,
+        "rotation_end_s": ROTATION_HOLD_START_S + rotation_duration_s,
+        "post_rotation_hold_s": EVENT_WINDOW_S - ROTATION_HOLD_START_S - rotation_duration_s,
         "characteristic_length_m": h0,
         "characteristic_velocity_m_s": math.sqrt(G * h0),
         "characteristic_time_s": t_char,
@@ -435,7 +442,7 @@ def _event_window(background: str, *, h_ratio: float = 1.0) -> dict[str, Any]:
             "first_cup_mouth_departure": "observed_threshold_crossing_after_rotation_start",
             "first_receiver_entry": "observed_finite_receiver_crossing",
             "spill_or_tray_entry": "observed_if_any",
-            "rotation_stop": ROTATION_HOLD_START_S + ROTATION_DURATION_S,
+            "rotation_stop": ROTATION_HOLD_START_S + rotation_duration_s,
             "post_stop_return_and_residence": EVENT_WINDOW_S,
         },
         "event_window_basis": "static hold + cosine-ramped prescribed rotation + post-stop catch/spill/return hold; native evidence must observe the markers",
@@ -609,7 +616,11 @@ def make_case(
     source_row = next(row for row in source["records"] if row["case_id"] == BACKGROUND_SPECS[background]["source_case"])
     cid = case_id or f"F2_{background}_{resolution}"
     pid = physical_case_id or f"{cid}_physical"
-    event = _event_window(background, h_ratio=float(values_all["fill_ratio"]))
+    event = _event_window(
+        background,
+        h_ratio=float(values_all["fill_ratio"]),
+        rotation_duration_s=float(values_all.get("rotation_duration_s", ROTATION_DURATION_S)),
+    )
     geometry = _geometry(background, values_all)
     return {
         "schema": SCHEMA,
@@ -650,7 +661,11 @@ def write_case(case: Mapping[str, Any], output_dir: str | Path) -> dict[str, Any
     motion_path = out / str(case["motion_filename"])
     meta_path = out / f"{case['case_id']}.metadata.json"
     xml_path.write_text(_definition_xml(case), encoding="utf-8")
-    write_motion(motion_path, duration_s=ROTATION_DURATION_S, event_window_s=float(case["event_window"]["complete_event_window_s"]))
+    write_motion(
+        motion_path,
+        duration_s=float(case["event_window"].get("rotation_duration_s", ROTATION_DURATION_S)),
+        event_window_s=float(case["event_window"]["complete_event_window_s"]),
+    )
     result = dict(case)
     result["definition_path"] = str(xml_path)
     result["definition_sha256"] = sha256_file(xml_path)
@@ -841,6 +856,7 @@ def reference_matrix(output_dir: str | Path, *, strict_source: bool = True) -> d
                 "physical_case_id": row["physical_case_id"],
                 "paired_background_id": row["paired_background_id"],
                 "background": row["background"],
+                "recipe_id": row["recipe_id"],
                 "resolution": row["resolution"],
                 "dp_m": row["dp_m"],
                 "feature_scale_m": row["feature_scale_m"],
@@ -1319,7 +1335,7 @@ def _qualification_request(*, family: Path, row: Mapping[str, Any], history_path
         "input_files": [str(SCRIPT_PATH), str(history_path), str(family / "quality_contract.json"), str(family / "event_definitions.json"), str(family / "integration_save_plan.json"), str(family / "case_registry.jsonl"), str(family / "definitions/reference_matrix.json"), str(definition), str(Path(row["motion_path"]).resolve()), str(Path(row["metadata_path"]).resolve()), str(gencase_receipt.resolve())],
         "worktree_root": str(CURRENT_WORKTREE),
         "launch_commit": _git_commit(),
-        "recipe_id": row["recipe_id"],
+        "recipe_id": row.get("recipe_id", BACKGROUND_SPECS[row["background"]]["recipe_id"]),
         "mechanism_id": row["background"],
         "solver_dimension_required": 3,
         "event_window_s": EVENT_WINDOW_S,
