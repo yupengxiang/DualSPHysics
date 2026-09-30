@@ -44,6 +44,12 @@ def test_reference_definitions_have_two_mechanisms_and_nonuniform_scales(tmp_pat
         assert report["status"] == "pass", report
         assert report["solver_invoked"] is False
         assert report["gencase_invoked"] is False
+    dual_report = next(
+        report
+        for report in result["preflight"]
+        if "DUAL_NOMINAL_COARSE_Def.xml" in report["definition_path"]
+    )
+    assert dual_report["checks"]["dual_fillbox_crosses_right_wall"] is True
 
 
 def test_candidate_registry_is_preregistered_and_resolution_is_not_new_physics(tmp_path: Path):
@@ -93,3 +99,10 @@ def test_design_and_shared_runner_requests_remain_unexecuted(tmp_path: Path):
     assert "{attempt_root}" in cpu["command"][2]
     assert all(Path(path).is_file() for path in cpu["input_files"])
     assert cpu["solver_launch_forbidden"] is True
+    dual_cpu = json.loads((family / "gencase_dual_request.json").read_text())
+    assert dual_cpu["case_id"] == "F1_REF_DUAL_NOMINAL_COARSE"
+    assert dual_cpu["cpu_threads"] == 4
+    assert dual_cpu["estimated_storage_bytes"] == 256 * 1024 * 1024
+    assert "{attempt_root}" in dual_cpu["command"][2]
+    assert all(Path(path).is_file() for path in dual_cpu["input_files"])
+    assert dual_cpu["solver_launch_forbidden"] is True

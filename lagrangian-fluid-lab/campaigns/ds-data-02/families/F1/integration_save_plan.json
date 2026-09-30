@@ -5,8 +5,15 @@
       "event_time_fraction_of_sqrt_H_over_g": 0.02,
       "macro_relative": 0.05
     },
+    "cost_accounting": {
+      "expected_frame_multiplier_event_control": 10.0,
+      "save_interval_ratio_event_control_to_reference": 0.1,
+      "storage_and_conversion_must_be_reserved": true
+    },
+    "event_time_gate": "Run the .001 s control over the complete event window, record native dt statistics, bracket threshold crossings, and verify snapshot quantization plus integration differences within the frozen budget before promoting event timing.",
     "integrator_and_save_are_separate_factors": true,
-    "promotion": "Record native dt statistics and compare macro observables plus event markers; do not call a downsampled trajectory an integration study.",
+    "promotion": "Compare native integration, half-native integration, and the .001 s event-output control; do not call a downsampled trajectory an integration study.",
+    "reference_matrix_role": "The .01 s complete-window matrix is a raw macro-observable reference; it carries no event-time qualification claim.",
     "same_background_recipe": true,
     "same_geometry_and_initial_state": true,
     "save_and_integration_budget_each_max_fraction": 0.2
@@ -41,6 +48,18 @@
         "DtMin": 0
       },
       "time_out_s": 0.005
+    },
+    {
+      "control_id": "dual_native_dt_event_save001",
+      "purpose": "complete-window high-frequency output required to resolve the 2% characteristic-time event budget",
+      "solver_parameter_overrides": {
+        "DtFixed": 0,
+        "DtIni": 0,
+        "DtMin": 0
+      },
+      "time_out_s": 0.001,
+      "timing_qualification": true,
+      "worst_case_snapshot_quantization_s": 0.0005
     }
   ],
   "family_id": "F1",

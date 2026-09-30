@@ -8,11 +8,24 @@
   "dp_m": 0.015,
   "error_budget": {
     "applicability": {
-      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g); it is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
       "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget."
     },
     "event_time_error_absolute_seconds_at_nominal_H0": 0.003497487083913345,
     "event_time_error_fraction_of_characteristic_time": 0.02,
+    "event_time_scale": {
+      "characteristic_time_s": 0.17487435419566724,
+      "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+      "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+      "event_control_time_out_s": 0.001,
+      "event_control_within_save_budget": true,
+      "event_control_worst_case_snapshot_quantization_s": 0.0005,
+      "nominal_H0_m": 0.3,
+      "reference_matrix_time_out_s": 0.01,
+      "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+      "save_quantization_budget_s": 0.000699497416782669,
+      "starting_absolute_budget_s": 0.003497487083913345
+    },
     "integration_fraction_of_total_error_budget_max": 0.2,
     "macro_observable_relative_error": 0.05,
     "save_fraction_of_total_error_budget_max": 0.2,

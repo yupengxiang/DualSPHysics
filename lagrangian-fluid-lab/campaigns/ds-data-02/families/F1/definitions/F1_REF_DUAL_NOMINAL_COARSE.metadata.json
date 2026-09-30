@@ -4,15 +4,28 @@
   "case_id": "F1_REF_DUAL_NOMINAL_COARSE",
   "control_family_id": "F1_CONTROL_ASYMMETRIC_DUAL_CHANNEL_V1",
   "definition_path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_DUAL_NOMINAL_COARSE_Def.xml",
-  "definition_sha256": "e0b20f9c2f313c675f932cbd53fe7019cd6db3523d58b7f67d5c9cb1cf6274be",
+  "definition_sha256": "ff817b5a108f549d9ec5971f37d7ce38021aff3ebe6de0f1c847aa8d956aae21",
   "dp_m": 0.02,
   "error_budget": {
     "applicability": {
-      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g); it is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
       "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget."
     },
     "event_time_error_absolute_seconds_at_nominal_H0": 0.004735619898238375,
     "event_time_error_fraction_of_characteristic_time": 0.02,
+    "event_time_scale": {
+      "characteristic_time_s": 0.23678099491191873,
+      "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+      "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+      "event_control_time_out_s": 0.001,
+      "event_control_within_save_budget": true,
+      "event_control_worst_case_snapshot_quantization_s": 0.0005,
+      "nominal_H0_m": 0.55,
+      "reference_matrix_time_out_s": 0.01,
+      "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+      "save_quantization_budget_s": 0.0009471239796476751,
+      "starting_absolute_budget_s": 0.004735619898238375
+    },
     "integration_fraction_of_total_error_budget_max": 0.2,
     "macro_observable_relative_error": 0.05,
     "save_fraction_of_total_error_budget_max": 0.2,
@@ -41,6 +54,7 @@
     "channel_width_lower_m": 0.34,
     "channel_width_ratio_lower_to_upper": 0.5666666666666669,
     "channel_width_upper_m": 0.5999999999999999,
+    "fillbox_overrun_m": 0.172,
     "finite_wall_faces": [
       "bottom",
       "left",
