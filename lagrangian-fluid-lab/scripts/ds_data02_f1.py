@@ -1536,7 +1536,7 @@ def write_runner_request(
         "schema": "ds-data-02.runner.request.v1",
         "family_id": FAMILY_ID,
         "case_id": "F1_REF_DUAL_NOMINAL_COARSE",
-        "attempt_id": "gencase-ref-dual-coarse-v2",
+        "attempt_id": "gencase-ref-dual-coarse-v3",
         "kind": "cpu",
         "cpu_task_kind": "gencase",
         "command": [
