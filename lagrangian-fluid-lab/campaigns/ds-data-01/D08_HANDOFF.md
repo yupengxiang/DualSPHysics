@@ -13,6 +13,7 @@ This is an internal dataset-development handoff. It contains no training, infere
 - D06 material tracer is optional and cannot gate native data.
 - D07 remains model-free and reports scientific acceptance as not assessed without external ground truth.
 - D08 includes a compact statistical preview and an observed resource report; large payloads remain local.
+- D08 includes the geometry/control index with source lineage and explicit batch parameters.
 
 ## Reproducibility
 
