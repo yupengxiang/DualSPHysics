@@ -29,6 +29,25 @@ def test_event_and_observation_contracts_are_explicit() -> None:
     assert {"source_label", "first_passage_interval", "residence_time_s", "unknown_mass_kg"} <= required_labels
 
 
+def test_parent_definitions_freeze_distinct_frames_and_full_control_windows(tmp_path: Path) -> None:
+    manifest = f3._write_parent_inputs(tmp_path)
+    assert manifest["common"]["time_window_s"] == [0.0, 10.0]
+    assert len(manifest["parents"]) == 2
+    by_mechanism = {row["mechanism_id"]: row for row in manifest["parents"]}
+    assert by_mechanism["dual_axis_phase"]["coordinate_frame_id"] == "fixed_tank_acceleration"
+    assert by_mechanism["eccentric_baffle_exchange"]["coordinate_frame_id"] == "moving_tank_world"
+    for row in manifest["parents"]:
+        control = row["control"]
+        assert control["rows"] == f3.PARENT_INPUT_CONTROL_ROWS == 2001
+        assert control["time_window_s"] == [0.0, 10.0]
+        assert Path(control["path"]).is_file()
+        assert set(row["geometry"]["closed_faces"]) == {"bottom", "left", "right", "front", "back"}
+        assert row["geometry"]["finite_wall"] is True
+    baffle_xml = Path(by_mechanism["eccentric_baffle_exchange"]["definition"]["path"]).read_text()
+    assert "F3_EccentricBaffle_Motion.txt" in baffle_xml
+    assert "setmkvoid" not in baffle_xml
+
+
 @pytest.mark.skipif(
     not f3.HISTORICAL_ROOT.is_dir(),
     reason="the read-only historical F3 source tree is not mounted",
