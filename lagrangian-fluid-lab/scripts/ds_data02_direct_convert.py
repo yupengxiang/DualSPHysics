@@ -675,13 +675,35 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
     frame_summary = []
     try:
         first = decode_frame(paths[0], decoder, scratch, 0)
-        if _as_int(first.metadata, "CaseNp") not in {None, int(first.ids.size)}:
+        case_np = _as_int(first.metadata, "CaseNp")
+        if case_np not in {None, int(first.ids.size), int(blocks["np"])}:
             raise DirectConversionError("decoder CaseNp does not match Idp count")
         dynamic_contract = _reject_dynamic_contract(generated_xml, first.metadata)
         dimension = _dimension_evidence(generated_xml, solver_log, solver_receipt)
-        base_ids = first.ids.copy()
+        # GenCase's typed ranges define the complete initial cohort.  A BI4
+        # frame may already omit a finite excluded cohort, so the identity
+        # axis must not be truncated to the IDs emitted by frame zero.
+        if blocks["np"] > np.iinfo(np.uint32).max:
+            raise DirectConversionError(f"particle axis exceeds uint32 Idp capacity: {blocks['np']}")
+        base_ids = np.arange(blocks["np"], dtype=np.uint32)
+        if np.any(first.ids >= base_ids.size):
+            raise DirectConversionError("frame zero contains Idp outside generated initial cohort")
+        first_indices = np.searchsorted(base_ids, first.ids)
+        if np.any(base_ids[first_indices] != first.ids):
+            raise DirectConversionError("frame zero identity is not in generated initial cohort")
         base_type, base_mk = _assign_types(base_ids, blocks)
         initial_mass = _mass_for_types(base_type, first.metadata)
+        initial_present = np.zeros(base_ids.size, dtype=bool)
+        initial_present[first_indices] = True
+        initial_excluded = ~initial_present
+        initial_exclusion_ledger = {
+            "count": int(initial_excluded.sum()),
+            "ids_sha256": hashlib.sha256(base_ids[initial_excluded].tobytes()).hexdigest(),
+            "type_counts": {str(int(kind)): int(np.sum(base_type[initial_excluded] == kind)) for kind in range(4)},
+            "mk_counts": {str(int(mk)): int(np.sum(base_mk[initial_excluded] == mk)) for mk in sorted(set(base_mk.tolist()))},
+            "mass_kg": float(np.sum(initial_mass[initial_excluded], dtype=np.float64)),
+            "semantics": "finite IDs absent from BI4 frame zero but retained on the generated typed initial axis",
+        }
         physical_scope = _physical_condition_scope(owner)
         numerical_scope = _numerical_scope(owner, generated_xml, first, solver_receipt_value)
         geometry_sha256 = _xml_subtree_hash(generated_xml, ".//geometry")
@@ -703,6 +725,7 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
         h5.attrs["pressure_semantics"] = "EOS pressure from native BI4 density and per-frame B/Rhop0/Gamma"
         h5.attrs["mass_semantics"] = "native header MassFluid for type=3; native header MassBound for types 0/1/2; PartVTK checked"
         h5.attrs["typed_identity_source"] = "GenCase execution/particles ranges plus decoder Idp; Zone=BI4 Piece"
+        h5.attrs["initial_exclusion_ledger_json"] = _canonical_json(initial_exclusion_ledger)
         h5.attrs["physical_condition_sha256"] = canonical_hash(physical_scope)
         h5.attrs["numerical_parameters_sha256"] = canonical_hash(numerical_scope)
         h5.attrs["geometry_reference_sha256"] = geometry_sha256
@@ -770,7 +793,7 @@ def convert_direct(*, data_root: Path, generated_xml: Path, output: Path, report
             "solver_dimension": dimension,
             "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
             "units": {"time": "s", "position": "m", "velocity": "m/s", "density": "kg/m^3", "mass": "kg", "pressure": "Pa"},
-            "typed_identity": {"key": "(Zone,Idp)", "zone_source": "BI4 Piece", "blocks": blocks["blocks"], "observed_types": sorted(set(base_type.tolist())), "observed_mks": sorted(set(base_mk.tolist())), "initial_mass_min_kg": float(initial_mass.min()), "initial_mass_max_kg": float(initial_mass.max()), "mass_semantics": "per-frame native MassFluid/MassBound, type-aware; PartVTK cross-check"},
+            "typed_identity": {"key": "(Zone,Idp)", "zone_source": "BI4 Piece", "blocks": blocks["blocks"], "observed_types": sorted(set(base_type.tolist())), "observed_mks": sorted(set(base_mk.tolist())), "initial_mass_min_kg": float(initial_mass.min()), "initial_mass_max_kg": float(initial_mass.max()), "mass_semantics": "per-frame native MassFluid/MassBound, type-aware; PartVTK cross-check", "initial_exclusion_ledger": initial_exclusion_ledger},
             "time_evidence": {"source": "BI4 decoder TimeStep", "first_s": frame_summary[0]["time"], "last_s": frame_summary[-1]["time"], "strictly_increasing": True},
             "lifecycle": {"contract": "closed fixed identity axis", "introduced_ids": "rejected", "open_birth_adaptive_multi_piece": "rejected", "frame_summary": frame_summary},
             "source_provenance": {"data_root": str(data_root), "raw_tree": source_unchanged, "decoder": {"path": str(decoder), "sha256": sha256_file(decoder)}, "generated_xml": {"path": str(generated_xml), "sha256": sha256_file(generated_xml)}, "geometry_reference_sha256": geometry_sha256, "control_reference_sha256": control_sha256, "geometry_sha256": geometry_sha256, "control_sha256": control_sha256, "solver_receipt": {"path": str(solver_receipt), "sha256": sha256_file(solver_receipt)}, "gencase_receipt": {"path": str(gencase_receipt), "sha256": sha256_file(gencase_receipt)}, "owner_metadata": {"path": str(owner_metadata), "sha256": sha256_file(owner_metadata)}, "partvtk": None if partvtk is None else {"path": str(partvtk), "sha256": sha256_file(partvtk)}},
