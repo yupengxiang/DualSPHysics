@@ -539,7 +539,10 @@ def _generated_wall_check(root: ET.Element, mechanism_id: str, boundary_count: i
         for node in mainlist.findall("drawbox")
     ]
     closed = {"bottom", "left", "right", "front", "back"}
-    outer_closed = any(set(part.strip() for part in text.split("|")) == closed for text in boxfills)
+    outer_closed = any(
+        set(part.strip() for part in text.split("|")) == closed or text.lower() == "all^top"
+        for text in boxfills
+    )
     has_full_baffle_shell = mechanism_id != "eccentric_baffle_exchange" or any(
         set(part.strip() for part in text.split("|")) == closed | {"top"} for text in boxfills
     )
