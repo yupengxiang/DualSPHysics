@@ -158,3 +158,27 @@ def test_cell_center_repair_changes_only_numerical_phase_and_registers_bounded_c
         assert request["repair_stage"] == 2
         assert request["input_contract"]["continuous_geometry_unchanged"] is True
         assert all(Path(path).is_file() for path in request["input_files"])
+
+
+def test_official_smallbody_fallback_registers_two_3d_scopes_and_actual_paddle_contract(tmp_path: Path) -> None:
+    output = tmp_path / "fallback"
+    plan = F6R.prepare_official_smallbody_fallback(output)
+    assert plan["fallback_id"] == F6R.OFFICIAL_SMALLBODY_FALLBACK_ID
+    assert plan["qualification_claim"].startswith("none")
+    assert {row["mechanism_id"] for row in plan["matrix"]} == set(F6R.MECHANISMS)
+    for row in plan["matrix"]:
+        assert row["solver_dimension_required"] == 3
+        assert row["mass_rescaling"] is False
+        assert row["body"]["mass_kg"] > 0
+        assert len(row["body"]["source_inertia_kg_m2"]) == 3
+        request = F6R.read_json(Path(row["request"]["path"]))
+        assert request["kind"] == "cpu"
+        assert request["cpu_task_kind"] == "gencase"
+        assert request["solver_launch"] == "forbidden_for_f6_owner"
+        assert any("vendor/official/DualSPHysics_v5.4/examples/main" in path for path in request["input_files"])
+        if row["mechanism_id"] == "wave_no_contact":
+            assert row["paddle"]["mkbound"] == 10
+            assert request["expected"]["moving_particles"] == 1
+        else:
+            assert row["paddle"] is None
+            assert request["expected"]["moving_particles"] == 0

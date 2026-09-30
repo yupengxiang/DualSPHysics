@@ -60,6 +60,8 @@ MASS_ALIGNMENT_ROOT = RESOLUTION_ROOT / INITIAL_MASS_REPAIR_ID
 # wall, liquid, body, paddle, density and mass inputs remain frozen.
 CELL_CENTER_REPAIR_ID = "F6_INITIAL_MASS_CELL_CENTER_REPAIR_02"
 CELL_CENTER_ROOT = RESOLUTION_ROOT / CELL_CENTER_REPAIR_ID
+OFFICIAL_SMALLBODY_FALLBACK_ID = "F6_OFFICIAL_SMALLBODY_FALLBACK_02"
+OFFICIAL_SMALLBODY_ROOT = FAMILY_ROOT / "fallbacks" / OFFICIAL_SMALLBODY_FALLBACK_ID
 RAW_F6_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6")
 # The shared runtime places F6 attempts directly under families/F6/<case>,
 # regardless of the source JSON's parameterized_resolution directory.
@@ -1013,6 +1015,250 @@ def refresh_initial_mass_cell_center(output_root: Path = CELL_CENTER_ROOT) -> di
         "qualification_claim": "none; GenCase evidence only, no QI/QN or GPU solver request",
     }
     write_json(output_root / "repair_evidence.json", evidence)
+    return evidence
+
+
+def _official_smallbody_specs() -> dict[str, dict[str, Any]]:
+    """Return new-scope 3-D small-body fallback inputs.
+
+    These are deliberately independent of the failed large parent geometry.
+    Their XML command vocabulary follows the official 11_Floating and
+    12_FloatingWaves templates, while the physical dimensions, body mass and
+    body inertia are explicit DS-DATA-02 inputs.  The wave case retains a
+    real mkbound=10 moving piston and the simple case has no moving object.
+    """
+    return {
+        "simple_free_response": {
+            "case_id": "F6_OFFICIAL_SMALLBODY_SIMPLE_FREE_RESPONSE",
+            "mechanism_id": "simple_free_response",
+            "dp_m": 0.040,
+            "tank": {"length_m": 4.0, "width_m": 2.0, "height_m": 1.4},
+            "water_level_m": 0.80,
+            "body": {
+                "kind": "box", "mkbound": 50,
+                "point_m": [1.70, 0.75, 0.56], "size_m": [0.60, 0.50, 0.32],
+                "mass_kg": 72.0,
+                "initial_pose": {"center_m": [2.00, 1.00, 0.72], "orientation_euler_deg": [0.0, 0.0, 0.0]},
+                "initial_offset_m": {"heave": 0.04, "roll": 0.0, "pitch": 0.0},
+            },
+            "fluid_fill": {"seed_m": [1.0, 1.0, 0.30], "point_m": [0.04, 0.04, 0.04], "size_m": [3.92, 1.92, 0.76]},
+            "control": {"mode": "initial_release", "release_time_s": 0.0, "wave_height_m": 0.0, "wave_period_s": None},
+            "complexity_factor": 1.0,
+        },
+        "wave_no_contact": {
+            "case_id": "F6_OFFICIAL_SMALLBODY_WAVE_NO_CONTACT",
+            "mechanism_id": "wave_no_contact",
+            "dp_m": 0.040,
+            "tank": {"length_m": 5.0, "width_m": 2.0, "height_m": 1.4},
+            "water_level_m": 0.80,
+            "body": {
+                "kind": "box", "mkbound": 50,
+                "point_m": [2.20, 0.75, 0.56], "size_m": [0.60, 0.50, 0.32],
+                "mass_kg": 72.0,
+                "initial_pose": {"center_m": [2.50, 1.00, 0.72], "orientation_euler_deg": [0.0, 0.0, 0.0]},
+                "initial_offset_m": {"heave": 0.0, "roll": 0.0, "pitch": 0.0},
+            },
+            "fluid_fill": {"seed_m": [1.0, 1.0, 0.30], "point_m": [0.12, 0.04, 0.04], "size_m": [4.80, 1.92, 0.76]},
+            "paddle": {"point_m": [0.0, 0.0, 0.0], "size_m": [0.08, 2.0, 1.20], "mkbound": 10},
+            "control": {"mode": "regular_piston_wave", "release_time_s": 0.0, "wave_height_m": 0.06, "wave_period_s": 1.50, "ramp_periods": 3},
+            "complexity_factor": 1.0,
+        },
+    }
+
+
+def prepare_official_smallbody_fallback(output_root: Path = OFFICIAL_SMALLBODY_ROOT) -> dict[str, Any]:
+    """Register a new official-template fallback and bounded CPU GenCase requests."""
+    output_root = Path(output_root)
+    if output_root.exists() and any(output_root.iterdir()):
+        raise FileExistsError(f"refusing to overwrite official fallback directory: {output_root}")
+    output_root.mkdir(parents=True, exist_ok=True)
+    frozen = _load_frozen_parent_source()
+    rows: list[dict[str, Any]] = []
+    for mechanism, base_spec in _official_smallbody_specs().items():
+        spec = copy.deepcopy(base_spec)
+        case_id = f"{spec['case_id']}_{OFFICIAL_SMALLBODY_FALLBACK_ID}"
+        spec["case_id"] = case_id
+        case_dir = output_root / "cases" / mechanism
+        case_dir.mkdir(parents=True, exist_ok=True)
+        definition = case_dir / f"{case_id}_Def.xml"
+        definition_text = frozen._definition_xml(spec)
+        wall = spec["tank"]
+        dp = float(spec["dp_m"])
+        pointmax_replacement = f'<pointmax x="{_fmt(float(wall["length_m"]) + dp)}" y="{_fmt(float(wall["width_m"]) + dp)}" z="{_fmt(float(wall["height_m"]) + dp)}" />'
+        definition_text, pointmax_count = re.subn(r"<pointmax\b[^>]*/>", pointmax_replacement, definition_text, count=1)
+        if pointmax_count != 1:
+            raise ValueError("official fallback definition has no pointmax")
+        definition_text = definition_text.replace(
+            "</case>",
+            "<!-- Official small-body fallback: pointmax=finite-wall size+dp is computational margin only. -->\n</case>",
+            1,
+        )
+        definition.write_text(definition_text, encoding="utf-8")
+        ET.parse(definition)
+        control = case_dir / f"{case_id}_Control.csv"
+        native = case_dir / f"{case_id}_Native.json"
+        normal = case_dir / f"{case_id}_Normal.json"
+        frozen._write_control(control, spec)
+        frozen._write_native(native, spec)
+        frozen._write_normal(normal, spec)
+        geometry = parse_physical_definition(definition)
+        geometry["continuous_geometry_hash"] = _geometry_hash(geometry)
+        body = geometry["body"]
+        fill = geometry["fluid_fill"]
+        body_volume = math.prod(float(value) for value in body["size_m"])
+        fluid_volume = math.prod(float(value) for value in fill["size_m"])
+        official_template = OFFICIAL_ROOT / ("examples/" + frozen.MECHANISMS[mechanism]["source_template"])
+        copied = {
+            "definition": {"path": str(definition.resolve()), "sha256": sha256_file(definition), "official_template_path": str(official_template.resolve()), "official_template_sha256": sha256_file(official_template) if official_template.is_file() else None},
+            "control": {"path": str(control.resolve()), "sha256": sha256_file(control)},
+            "native": {"path": str(native.resolve()), "sha256": sha256_file(native)},
+            "normal": {"path": str(normal.resolve()), "sha256": sha256_file(normal)},
+        }
+        row = {
+            "schema": f"{SCHEMA}.official-smallbody-fallback",
+            "family_id": "F6",
+            "mechanism_id": mechanism,
+            "case_id": case_id,
+            "fallback_id": OFFICIAL_SMALLBODY_FALLBACK_ID,
+            "physical_scope_id": f"F6_OFFICIAL_SMALLBODY_{mechanism.upper()}",
+            "resolution_id": "official_smallbody",
+            "official_template": {"path": str(official_template.resolve()), "sha256": sha256_file(official_template) if official_template.is_file() else None, "role": "official XML syntax/provenance; fallback Definition is independently generated"},
+            "dp_m": float(spec["dp_m"]),
+            "solver_dimension_required": 3,
+            "continuous_geometry_hash": geometry["continuous_geometry_hash"],
+            "physical_geometry_hash": geometry["continuous_geometry_hash"],
+            "physical_wall_point_m": geometry["physical_wall_point_m"],
+            "physical_wall_size_m": geometry["physical_wall_size_m"],
+            "pointmax_m": geometry["gencase_pointmax_m"],
+            "body": {**body, "volume_m3": body_volume, "source_inertia_kg_m2": _source_inertia(body)},
+            "fluid_fill": {**fill, "volume_m3": fluid_volume, "continuous_mass_kg": fluid_volume * 1000.0},
+            "physical_fluid_region": {**fill, "volume_m3": fluid_volume, "continuous_mass_kg": fluid_volume * 1000.0, "liquid_surface_z_m": float(fill["point_m"][2]) + float(fill["size_m"][2])},
+            "paddle": geometry.get("paddle"),
+            "control": spec["control"],
+            "paths": copied,
+            "estimated_counts": _expected_counts(geometry, float(spec["dp_m"])),
+            "estimated_storage_bytes": 268435456,
+            "fallback_reason": "second strict continuous-mass initialization repair exhausted; preserve the original two mechanism hypotheses in a fresh official-template small-body physical scope",
+            "contact_policy": {"chrono": False, "RigidAlgorithm": 1, "wall_contact": "no contact mechanism; body is placed clear of finite walls", "wave_contact": "wave paddle drives fluid; no Chrono contact"},
+            "mass_rescaling": False,
+            "status": "gencase_pending",
+        }
+        request_file = f"execution_requests/{mechanism}_official_smallbody_gencase.json"
+        request = _gencase_request(row, request_file)
+        if official_template.is_file():
+            request["input_files"].append(str(official_template.resolve()))
+        request.update({
+            "fallback_id": OFFICIAL_SMALLBODY_FALLBACK_ID,
+            "physical_scope_id": row["physical_scope_id"],
+            "official_template": row["official_template"],
+            "purpose": "bounded official-template small-body fallback GenCase only; prove actual 3-D fluid/type2/moving and finite-wall geometry before any solver review",
+            "solver_launch": "forbidden_for_f6_owner",
+        })
+        request_path = output_root / request_file
+        write_json(request_path, request)
+        row["request"] = {"path": str(request_path.resolve()), "sha256": sha256_file(request_path), "attempt_id": request["attempt_id"]}
+        write_json(case_dir / "case.json", row)
+        rows.append(row)
+    plan = {
+        "schema": f"{SCHEMA}.official-smallbody-fallback",
+        "family_id": "F6",
+        "fallback_id": OFFICIAL_SMALLBODY_FALLBACK_ID,
+        "status": "registered_gencase_pending",
+        "decision_basis": "the two bounded initialization repairs did not meet strict continuous mass while preserving physical finite-wall planes; this new physical scope is an official small-body fallback and carries the original failed parent evidence forward without reuse",
+        "official_templates": {mechanism: row["official_template"] for mechanism, row in ((r["mechanism_id"], r) for r in rows)},
+        "generator": {"path": str(Path(__file__).resolve()), "sha256": sha256_file(Path(__file__))},
+        "frozen_parent_source": {"path": str(FROZEN_PARENT_SOURCE.resolve()), "sha256": sha256_file(FROZEN_PARENT_SOURCE)},
+        "same_scope_across_mechanisms": False,
+        "two_backgrounds": ["simple_free_response", "wave_no_contact"],
+        "finite_wall_faces": ["bottom", "left", "right", "front", "back"],
+        "open_faces": ["top"],
+        "rigid_state_contract": ["pose", "orientation_euler", "linear_velocity", "angular_velocity", "mass", "inertia", "force", "torque"],
+        "wave_contract": {"moving_marker": 10, "actual_paddle_required": True, "Chrono": False},
+        "mass_rescaling": False,
+        "matrix": rows,
+        "qualification_claim": "none; fallback CPU GenCase preflight only, solver/GPU remains pending root review",
+    }
+    write_json(output_root / "fallback_plan.json", plan)
+    write_json(output_root / "fallback_manifest.json", {"schema": plan["schema"], "fallback_id": OFFICIAL_SMALLBODY_FALLBACK_ID, "status": "registered_gencase_pending", "rows": rows})
+    return plan
+
+
+def refresh_official_smallbody_fallback(output_root: Path = OFFICIAL_SMALLBODY_ROOT) -> dict[str, Any]:
+    """Audit terminal fallback GenCase outputs without launching a solver."""
+    output_root = Path(output_root)
+    manifest_path = output_root / "fallback_manifest.json"
+    plan_path = output_root / "fallback_plan.json"
+    if not manifest_path.is_file() or not plan_path.is_file():
+        raise FileNotFoundError("prepare the official small-body fallback first")
+    manifest = read_json(manifest_path)
+    plan = read_json(plan_path)
+    rows: list[dict[str, Any]] = []
+    for row in manifest.get("rows", []):
+        case_dir = output_root / "cases" / row["mechanism_id"]
+        request = read_json(Path(row["request"]["path"]))
+        receipt_path = RAW_RESOLUTION_ROOT / row["case_id"] / request["attempt_id"] / "execution-receipt.json"
+        audit = audit_gencase(case_dir, receipt_path)
+        audit_path = case_dir / "gencase-audit.json"
+        write_json(audit_path, audit)
+        checks = audit.get("checks", {}) if isinstance(audit.get("checks"), Mapping) else {}
+        generated = audit.get("generated", {}) if isinstance(audit.get("generated"), Mapping) else {}
+        budget = audit.get("initial_mass_budget", {}) if isinstance(audit.get("initial_mass_budget"), Mapping) else {}
+        mechanical_checks = {
+            "actual_3d": checks.get("actual_3d") is True,
+            "positive_fluid_type3": checks.get("positive_fluid_type3") is True,
+            "positive_floating_type2": checks.get("positive_floating_type2") is True,
+            "effective_transverse_layers": checks.get("effective_transverse_layers") is True,
+            "finite_wall_faces_and_bottom": checks.get("finite_wall_faces_and_bottom") is True,
+            "physical_wall_planes_match": checks.get("physical_wall_planes_match", True) is True,
+            "input_hashes": checks.get("all_requested_input_hashes_recorded") is True,
+            "wave_actual_moving_particles": checks.get("wave_actual_moving_particles") is True,
+            "generated_mass_inertia": checks.get("generated_mass_positive") is True and checks.get("generated_inertia_defined") is True,
+        }
+        row.update({
+            "status": f"gencase_{audit.get('status')}",
+            "gencase_receipt": {"path": str(receipt_path), "sha256": sha256_file(receipt_path) if receipt_path.is_file() else None, "status": audit.get("status")},
+            "gencase_audit": {"path": str(audit_path.resolve()), "sha256": sha256_file(audit_path), "status": audit.get("status"), "checks": checks},
+            "actual_counts": generated.get("counts"),
+            "actual_pointref_m": generated.get("numerical_pointref_m"),
+            "initial_mass_budget": budget,
+            "strict_mass_contract_pass": budget.get("initial_mass_tolerance_pass") is True,
+            "mechanical_preflight": mechanical_checks,
+            "mechanical_preflight_pass": all(mechanical_checks.values()) if mechanical_checks else False,
+        })
+        rows.append(row)
+    manifest["rows"] = rows
+    if any(row["status"] == "gencase_pending" for row in rows):
+        status = "fallback_gencase_pending"
+    elif rows and all(row.get("mechanical_preflight_pass") is True for row in rows):
+        status = "fallback_mechanical_preflight_pass_strict_mass_pending"
+    else:
+        status = "fallback_gencase_terminal_failed"
+    manifest["status"] = status
+    write_json(manifest_path, manifest)
+    plan["rows"] = rows
+    plan["status"] = status
+    plan["generator"]["sha256"] = sha256_file(Path(__file__))
+    write_json(plan_path, plan)
+    evidence = {
+        "schema": f"{SCHEMA}.official-smallbody-fallback-evidence",
+        "family_id": "F6",
+        "fallback_id": OFFICIAL_SMALLBODY_FALLBACK_ID,
+        "status": status,
+        "rows": [{
+            "case_id": row["case_id"], "mechanism_id": row["mechanism_id"], "status": row["status"],
+            "actual_counts": row.get("actual_counts"), "actual_pointref_m": row.get("actual_pointref_m"),
+            "mechanical_preflight": row.get("mechanical_preflight"),
+            "mechanical_preflight_pass": row.get("mechanical_preflight_pass"),
+            "strict_mass_contract_pass": row.get("strict_mass_contract_pass"),
+            "continuous_mass_relative_error": (row.get("initial_mass_budget") or {}).get("continuous_after_occupancy_mass_relative_error"),
+            "body_mass_kg": (row.get("body") or {}).get("mass_kg"),
+            "source_inertia_kg_m2": (row.get("body") or {}).get("source_inertia_kg_m2"),
+            "audit": row.get("gencase_audit"),
+        } for row in rows],
+        "decision": "fallback is a new official-template physical scope; even a mechanical GenCase pass does not waive the strict mass contract or authorize solver/GPU",
+        "qualification_claim": "none; CPU GenCase preflight only; full solver and rigid-state postprocessing remain root-controlled pending",
+    }
+    write_json(output_root / "fallback_evidence.json", evidence)
     return evidence
 
 
@@ -2161,6 +2407,10 @@ def main(argv: list[str] | None = None) -> int:
     cell_prep.add_argument("--output-root", type=Path, default=CELL_CENTER_ROOT)
     cell_refresh = sub.add_parser("refresh-initial-mass-cell-center")
     cell_refresh.add_argument("--output-root", type=Path, default=CELL_CENTER_ROOT)
+    fallback_prep = sub.add_parser("prepare-official-smallbody-fallback")
+    fallback_prep.add_argument("--output-root", type=Path, default=OFFICIAL_SMALLBODY_ROOT)
+    fallback_refresh = sub.add_parser("refresh-official-smallbody-fallback")
+    fallback_refresh.add_argument("--output-root", type=Path, default=OFFICIAL_SMALLBODY_ROOT)
     audit = sub.add_parser("audit-gencase")
     audit.add_argument("--case", type=Path, required=True)
     audit.add_argument("--receipt", type=Path)
@@ -2186,6 +2436,10 @@ def main(argv: list[str] | None = None) -> int:
         result = prepare_initial_mass_cell_center(args.output_root)
     elif args.command == "refresh-initial-mass-cell-center":
         result = refresh_initial_mass_cell_center(args.output_root)
+    elif args.command == "prepare-official-smallbody-fallback":
+        result = prepare_official_smallbody_fallback(args.output_root)
+    elif args.command == "refresh-official-smallbody-fallback":
+        result = refresh_official_smallbody_fallback(args.output_root)
     elif args.command == "audit-gencase":
         result = audit_gencase(args.case, args.receipt)
     else:
@@ -2200,6 +2454,8 @@ def main(argv: list[str] | None = None) -> int:
         "repair_gencase_terminal_strict_failed",
         "repair_gencase_pending",
         "repair_gencase_representative_terminal_failed",
+        "fallback_gencase_pending",
+        "fallback_mechanical_preflight_pass_strict_mass_pending",
     } else 1
 
 
