@@ -11,6 +11,7 @@ LAB_ROOT = Path(__file__).resolve().parents[1]
 FAMILY_ROOT = LAB_ROOT / "campaigns/ds-data-02/families/F2"
 SCOPE_ROOT = FAMILY_ROOT / "commensurate_cellcenter_v4"
 POSTSOLVER_PATH = FAMILY_ROOT / "f2_commensurate_postsolver.py"
+ADAPTER_PATH = FAMILY_ROOT / "f2_commensurate_conversion_adapter.py"
 PREVIEW_PATH = FAMILY_ROOT / "f2_commensurate_preview.py"
 
 
@@ -47,6 +48,38 @@ def test_postsolver_binds_all_six_actual_qualification_cases() -> None:
     assert all(row["gencase_input_prefix"].endswith(row["case_id"]) for row in rows)
     assert all(row["gencase_artifacts"][name]["sha256"] for row in rows for name in ("receipt", "xml", "bi4", "copied_motion"))
     assert planner._stage_attempt("F2_COMM4_CENTER_V1_COARSE", "conversion").startswith("conversion-f2-comm4-center")
+    assert planner._stage_attempt("F2_COMM4_CENTER_V1_COARSE", "conversion", compatibility=True).endswith("fullstate-compat-scratch-v4")
+    assert planner._stage_attempt("F2_COMM4_CENTER_V1_COARSE", "conversion", compatibility=True, conversion_engine="direct").endswith("fullstate-compat-direct-v1")
+
+
+def test_converter_compatibility_alias_binds_original_solver_and_gencase_without_rerun(tmp_path: Path) -> None:
+    adapter = _load(ADAPTER_PATH, "f2_commensurate_conversion_adapter_test")
+    planner = _load(POSTSOLVER_PATH, "f2_commensurate_postsolver_compatibility_test")
+    output_dir = tmp_path / "compatibility"
+    manifest_path = tmp_path / "compatibility-manifest.json"
+    manifest = adapter.build_aliases(
+        request_dir=SCOPE_ROOT / "requests",
+        output_dir=output_dir,
+        manifest_path=manifest_path,
+    )
+    assert manifest["status"] == "derived_provenance_aliases_ready"
+    assert manifest["source_bytes_unchanged"] is True
+    assert len(manifest["cases"]) == 6
+    compatibility = planner.load_compatibility_manifest(manifest_path)
+    assert len(compatibility) == 6
+    row = compatibility["F2_COMM4_CENTER_V1_COARSE"]
+    metadata = json.loads(Path(row["adapted_owner_metadata"]["path"]).read_text(encoding="utf-8"))
+    assert metadata["schema"].endswith("generator.v1")
+    assert metadata["compatibility_adapter"]["derived_only"] is True
+    assert Path(row["adapted_owner_metadata"]["path"]).name.endswith(".metadata.json")
+    gencase = json.loads(Path(row["adapted_gencase_receipt"]["path"]).read_text(encoding="utf-8"))
+    assert any(
+        Path(value).resolve() == Path(row["adapted_owner_metadata"]["path"]).resolve()
+        for value in gencase["request"]["input_files"]
+    )
+    solver = json.loads(Path(row["adapted_solver_receipt"]["path"]).read_text(encoding="utf-8"))
+    assert Path(solver["request"]["gencase_receipt"]).resolve() == Path(row["adapted_gencase_receipt"]["path"]).resolve()
+    assert solver["compatibility_adapter"]["no_gencase_rerun"] is True
 
 
 def test_nonterminal_solver_receipt_cannot_materialize_downstream_requests(tmp_path: Path) -> None:
