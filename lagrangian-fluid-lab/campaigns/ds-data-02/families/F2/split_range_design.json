@@ -1,0 +1,1071 @@
+{
+  "schema": "ds-data-02.f2.split-range-design.v1",
+  "family_id": "F2",
+  "authoritative_registry": "case_registry.jsonl",
+  "authoritative_split": "split_plan.json",
+  "physical_case_count": 48,
+  "paired_parent_count": 24,
+  "pairing_rule": "F2_CENTER_Pxx and F2_OFFSET_Pxx share one physical parent index and one split; center/offset remain distinct physical conditions.",
+  "resolution_rule": "coarse, medium, fine are three numerical views of each physical_case_id; they never create additional physical cases or split rows.",
+  "nested_progression": {
+    "nested8": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "physical_case_count": 8,
+      "resolution_views_per_case": 3
+    },
+    "nested24": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "physical_case_count": 24,
+      "resolution_views_per_case": 3
+    },
+    "nested48": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "physical_case_count": 48,
+      "resolution_views_per_case": 3
+    }
+  },
+  "split_counts": {
+    "train": 24,
+    "validation": 6,
+    "id_test": 6,
+    "parameter_ood": 6,
+    "geometry_control_ood": 6
+  },
+  "split_parent_groups": {
+    "train": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "validation": [
+      13,
+      14,
+      15
+    ],
+    "id_test": [
+      16,
+      17,
+      18
+    ],
+    "parameter_ood": [
+      19,
+      20,
+      21
+    ],
+    "geometry_control_ood": [
+      22,
+      23,
+      24
+    ]
+  },
+  "range_semantics": {
+    "train": {
+      "role": "support for interpolation and mechanism comparison",
+      "numeric_support": {
+        "fill_ratio": [
+          0.8,
+          1.0
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      }
+    },
+    "validation": {
+      "role": "paired held-in-domain combinations reserved for threshold tuning only",
+      "numeric_support": {
+        "fill_ratio": [
+          1.0
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          1.2
+        ]
+      }
+    },
+    "id_test": {
+      "role": "new physical identities with factors individually seen during development",
+      "numeric_support": {
+        "fill_ratio": [
+          1.0,
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      }
+    },
+    "parameter_ood": {
+      "role": "parameter-combination holdout with fill ratio outside train support",
+      "primary_ood_axis": {
+        "name": "fill_ratio",
+        "held_out_value": 1.2,
+        "train_support": [
+          0.8,
+          1.0
+        ]
+      },
+      "numeric_support": {
+        "fill_ratio": [
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      }
+    },
+    "geometry_control_ood": {
+      "role": "joint geometry/control interaction holdout; individual axes may overlap train and are not claimed as one-factor OOD",
+      "primary_ood_axis": {
+        "name": "mouth_geometry x rotation_duration_s interaction",
+        "held_out_designated_cells": [
+          {
+            "mouth_geometry": "short_spout",
+            "rotation_duration_s": 1.2,
+            "fill_ratio": 1.2
+          },
+          {
+            "mouth_geometry": "open_rim",
+            "rotation_duration_s": 1.2,
+            "fill_ratio": 1.2
+          }
+        ],
+        "interpretation": "Only the joint tuple is held out; overlapping marginal values are intentional and must not be reported as marginal OOD."
+      },
+      "numeric_support": {
+        "fill_ratio": [
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          1.2
+        ]
+      }
+    }
+  },
+  "splits": {
+    "train": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "physical_case_count": 24,
+      "paired_parent_count": 12,
+      "parameter_support": {
+        "fill_ratio": [
+          0.8,
+          1.0
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      },
+      "physical_rows": [
+        {
+          "case_id": "F2_CENTER_P01",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P01",
+          "pair_group": "F2_PAIR_01",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P01",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P01",
+          "pair_group": "F2_PAIR_01",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P02",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P02",
+          "pair_group": "F2_PAIR_02",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P02",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P02",
+          "pair_group": "F2_PAIR_02",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P03",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P03",
+          "pair_group": "F2_PAIR_03",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P03",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P03",
+          "pair_group": "F2_PAIR_03",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P04",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P04",
+          "pair_group": "F2_PAIR_04",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P04",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P04",
+          "pair_group": "F2_PAIR_04",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P05",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P05",
+          "pair_group": "F2_PAIR_05",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P05",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P05",
+          "pair_group": "F2_PAIR_05",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P06",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P06",
+          "pair_group": "F2_PAIR_06",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P06",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P06",
+          "pair_group": "F2_PAIR_06",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P07",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P07",
+          "pair_group": "F2_PAIR_07",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P07",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P07",
+          "pair_group": "F2_PAIR_07",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P08",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P08",
+          "pair_group": "F2_PAIR_08",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P08",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P08",
+          "pair_group": "F2_PAIR_08",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 0.8,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P09",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P09",
+          "pair_group": "F2_PAIR_09",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P09",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P09",
+          "pair_group": "F2_PAIR_09",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P10",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P10",
+          "pair_group": "F2_PAIR_10",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P10",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P10",
+          "pair_group": "F2_PAIR_10",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P11",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P11",
+          "pair_group": "F2_PAIR_11",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P11",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P11",
+          "pair_group": "F2_PAIR_11",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P12",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P12",
+          "pair_group": "F2_PAIR_12",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P12",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P12",
+          "pair_group": "F2_PAIR_12",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        }
+      ]
+    },
+    "validation": {
+      "parent_group_numbers": [
+        13,
+        14,
+        15
+      ],
+      "physical_case_count": 6,
+      "paired_parent_count": 3,
+      "parameter_support": {
+        "fill_ratio": [
+          1.0
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          1.2
+        ]
+      },
+      "physical_rows": [
+        {
+          "case_id": "F2_CENTER_P13",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P13",
+          "pair_group": "F2_PAIR_13",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P13",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P13",
+          "pair_group": "F2_PAIR_13",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P14",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P14",
+          "pair_group": "F2_PAIR_14",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P14",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P14",
+          "pair_group": "F2_PAIR_14",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P15",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P15",
+          "pair_group": "F2_PAIR_15",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P15",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P15",
+          "pair_group": "F2_PAIR_15",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        }
+      ]
+    },
+    "id_test": {
+      "parent_group_numbers": [
+        16,
+        17,
+        18
+      ],
+      "physical_case_count": 6,
+      "paired_parent_count": 3,
+      "parameter_support": {
+        "fill_ratio": [
+          1.0,
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      },
+      "physical_rows": [
+        {
+          "case_id": "F2_CENTER_P16",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P16",
+          "pair_group": "F2_PAIR_16",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P16",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P16",
+          "pair_group": "F2_PAIR_16",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.0,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P17",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P17",
+          "pair_group": "F2_PAIR_17",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P17",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P17",
+          "pair_group": "F2_PAIR_17",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P18",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P18",
+          "pair_group": "F2_PAIR_18",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P18",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P18",
+          "pair_group": "F2_PAIR_18",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        }
+      ]
+    },
+    "parameter_ood": {
+      "parent_group_numbers": [
+        19,
+        20,
+        21
+      ],
+      "physical_case_count": 6,
+      "paired_parent_count": 3,
+      "parameter_support": {
+        "fill_ratio": [
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          0.65,
+          1.2
+        ]
+      },
+      "physical_rows": [
+        {
+          "case_id": "F2_CENTER_P19",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P19",
+          "pair_group": "F2_PAIR_19",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P19",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P19",
+          "pair_group": "F2_PAIR_19",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P20",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P20",
+          "pair_group": "F2_PAIR_20",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_OFFSET_P20",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P20",
+          "pair_group": "F2_PAIR_20",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 0.65
+        },
+        {
+          "case_id": "F2_CENTER_P21",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P21",
+          "pair_group": "F2_PAIR_21",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P21",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P21",
+          "pair_group": "F2_PAIR_21",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        }
+      ]
+    },
+    "geometry_control_ood": {
+      "parent_group_numbers": [
+        22,
+        23,
+        24
+      ],
+      "physical_case_count": 6,
+      "paired_parent_count": 3,
+      "parameter_support": {
+        "fill_ratio": [
+          1.2
+        ],
+        "mouth_geometry": [
+          "open_rim",
+          "short_spout"
+        ],
+        "receiver_x_m": [
+          0.45,
+          0.65
+        ],
+        "receiver_y_m": [
+          0.0,
+          0.14,
+          0.22
+        ],
+        "rotation_duration_s": [
+          1.2
+        ]
+      },
+      "physical_rows": [
+        {
+          "case_id": "F2_CENTER_P22",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P22",
+          "pair_group": "F2_PAIR_22",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P22",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P22",
+          "pair_group": "F2_PAIR_22",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.45,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P23",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P23",
+          "pair_group": "F2_PAIR_23",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P23",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P23",
+          "pair_group": "F2_PAIR_23",
+          "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "open_rim",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.14,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_CENTER_P24",
+          "background": "center_catch",
+          "physical_case_id": "F2_CENTER_P24",
+          "pair_group": "F2_PAIR_24",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.0,
+          "rotation_duration_s": 1.2
+        },
+        {
+          "case_id": "F2_OFFSET_P24",
+          "background": "offset_spill",
+          "physical_case_id": "F2_OFFSET_P24",
+          "pair_group": "F2_PAIR_24",
+          "geometry_family_id": "F2_GEOM_CUP_SHORT_SPOUT_HOLDOUT_V1",
+          "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+          "fill_ratio": 1.2,
+          "mouth_geometry": "short_spout",
+          "receiver_x_m": 0.65,
+          "receiver_y_m": 0.22,
+          "rotation_duration_s": 1.2
+        }
+      ]
+    }
+  },
+  "validation_rules": [
+    "Every case_id occurs once in exactly one split.",
+    "Every pair_group has exactly one center and one offset case in the same split.",
+    "All physical parent groups 1..24 are represented once per background.",
+    "A resolution view inherits its physical case split; resolution changes cannot increase registry counts.",
+    "Any native solver or converted HDF5 artifact must reference physical_case_id and split before entering a comparison."
+  ]
+}

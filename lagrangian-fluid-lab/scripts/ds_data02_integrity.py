@@ -36,6 +36,7 @@ SCHEMA = "ds-data-02.integrity-audit.v1"
 PROTOCOL_SCHEMA = "ds-data-02.hdf5-schema.v1"
 MAX_LOG_BYTES = 16 * 1024 * 1024
 DEFAULT_PARTICLE_CHUNK = 65536
+FINITE_INITIAL_NUMERICAL_COHORT_WITH_EXCLUSIONS = "finite_initial_numerical_cohort_with_exclusions"
 
 REQUIRED_DATASETS = (
     "time",
@@ -553,6 +554,122 @@ def _safe_float(value: float | np.floating[Any] | None) -> float | None:
     return value if math.isfinite(value) else None
 
 
+def _native_exclusion_ledger_check(
+    *,
+    metadata: Mapping[str, Any],
+    ids: np.ndarray,
+    zones: np.ndarray,
+    initial_fluid: np.ndarray,
+    last_active: np.ndarray,
+    first_missing_frame: np.ndarray,
+    frames: int,
+    lifecycle: Mapping[str, Any],
+    solver_log: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Validate a finite initial cohort's native exclusion ledger.
+
+    The default closed-system audit remains strict and unchanged.  This
+    explicit mode is opt-in through metadata and accepts native exclusions
+    only when every typed identity, first missing frame, PartVTKOut
+    position/density record, and RunPARTs count is bound to the same HDF5
+    timeline.  It does not call an exclusion physical spill or grant Q-N.
+    """
+    ledger = metadata.get("native_exclusion_ledger")
+    mode = metadata.get("lifecycle_mode")
+    if mode != FINITE_INITIAL_NUMERICAL_COHORT_WITH_EXCLUSIONS:
+        return None
+    if not isinstance(ledger, Mapping):
+        return {"mode": mode, "status": "fail", "errors": ["ledger_mapping_missing"]}
+    errors: list[str] = []
+    initial_keys = {
+        (int(zones[index]), int(ids[index]))
+        for index in np.flatnonzero(initial_fluid)
+    }
+    missing_indices = np.flatnonzero(initial_fluid & ~last_active)
+    expected = {(int(zones[index]), int(ids[index])): int(first_missing_frame[index])
+                for index in missing_indices}
+    rows = ledger.get("excluded_particles")
+    if not isinstance(rows, list):
+        rows = []
+        errors.append("excluded_particles_not_list")
+    observed: dict[tuple[int, int], Mapping[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, Mapping):
+            errors.append("excluded_particle_record_not_mapping")
+            continue
+        try:
+            key = (int(row["zone"]), int(row["idp"]))
+        except (KeyError, TypeError, ValueError):
+            errors.append("excluded_particle_typed_id_missing")
+            continue
+        if key in observed:
+            errors.append(f"excluded_particle_duplicate:{key[0]}:{key[1]}")
+        observed[key] = row
+        if key not in initial_keys:
+            errors.append(f"excluded_particle_not_initial_fluid:{key[0]}:{key[1]}")
+            continue
+        expected_frame = expected.get(key)
+        try:
+            first_frame = int(row["first_missing_frame"])
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"first_missing_frame_missing:{key[0]}:{key[1]}")
+            first_frame = -1
+        if expected_frame is None or first_frame != expected_frame or first_frame < 1 or first_frame >= frames:
+            errors.append(f"first_missing_frame_mismatch:{key[0]}:{key[1]}")
+        motive = row.get("motive")
+        if not isinstance(motive, str) or not motive.strip():
+            errors.append(f"exclusion_motive_missing:{key[0]}:{key[1]}")
+        try:
+            position = np.asarray(row["partvtkout_position_m"], dtype=np.float64)
+            density = float(row["partvtkout_density_kg_m3"])
+        except (KeyError, TypeError, ValueError):
+            errors.append(f"partvtkout_state_missing:{key[0]}:{key[1]}")
+            continue
+        if position.shape != (3,) or not np.isfinite(position).all() or not math.isfinite(density):
+            errors.append(f"partvtkout_state_nonfinite:{key[0]}:{key[1]}")
+    if set(observed) != set(expected):
+        errors.append("excluded_typed_identity_set_mismatch")
+    if int(ledger.get("h5_full_timeline_frames", -1)) != frames or not ledger.get("h5_full_timeline_checked", False):
+        errors.append("h5_full_timeline_not_bound")
+    if lifecycle.get("introduced_after_initial_count") != 0:
+        errors.append("introduced_after_initial_ids")
+    if lifecycle.get("revived_identity_count") != 0:
+        errors.append("revived_excluded_identity")
+    if lifecycle.get("type_changed_identity_count") != 0:
+        errors.append("type_changed_identity")
+    count_fields = ledger.get("runparts_counts")
+    if not isinstance(count_fields, Mapping):
+        errors.append("runparts_counts_missing")
+        count_fields = {}
+    log_excluded = solver_log.get("counts", {}).get("excluded_particles")
+    expected_count = len(expected)
+    if log_excluded is None or int(log_excluded) != expected_count:
+        errors.append("solver_log_excluded_count_mismatch")
+    if int(count_fields.get("npout_sum", -1)) != expected_count:
+        errors.append("runparts_npout_count_mismatch")
+    if int(count_fields.get("npoutpos_sum", -1)) != expected_count:
+        errors.append("runparts_npoutpos_count_mismatch")
+    if int(count_fields.get("npoutrho_sum", -1)) != 0:
+        errors.append("runparts_npoutrho_count_mismatch")
+    return {
+        "mode": mode,
+        "status": "pass" if not errors else "fail",
+        "errors": sorted(set(errors)),
+        "initial_fluid_typed_count": len(initial_keys),
+        "excluded_typed_count": expected_count,
+        "excluded_typed_ids": [{"zone": key[0], "idp": key[1]} for key in sorted(expected)],
+        "first_missing_frame_by_typed_id": [
+            {"zone": key[0], "idp": key[1], "frame": expected[key]}
+            for key in sorted(expected)
+        ],
+        "h5_full_timeline_frames": frames,
+        "h5_full_timeline_checked": bool(ledger.get("h5_full_timeline_checked", False)),
+        "runparts_counts": dict(count_fields),
+        "native_exclusion_is_numerical_unknown": True,
+        "physical_spill_classification": "separate_event_ledger_required",
+    }
+
+
 def audit_hdf5(
     path: str | os.PathLike[str],
     *,
@@ -673,6 +790,7 @@ def audit_hdf5(
             previous_active = np.zeros(particles, dtype=bool)
             ever_seen = np.zeros(particles, dtype=bool)
             missing_observed = np.zeros(particles, dtype=bool)
+            first_missing_frame = np.full(particles, -1, dtype=np.int64)
             revived = np.zeros(particles, dtype=bool)
             initial_fluid = np.zeros(particles, dtype=bool)
             initial_floating = np.zeros(particles, dtype=bool)
@@ -712,6 +830,10 @@ def audit_hdf5(
                         if frame == 0:
                             initial_active[lo:hi] = active
                         missing_observed[lo:hi] |= prior_seen & ~active
+                        first_missing_slice = first_missing_frame[lo:hi]
+                        newly_missing = prior_seen & ~active & (first_missing_slice < 0)
+                        first_missing_slice[newly_missing] = frame
+                        first_missing_frame[lo:hi] = first_missing_slice
                         revived[lo:hi] |= prior_seen & ~previous_active[lo:hi] & active
                         ever_seen[lo:hi] |= active
                         previous_active[lo:hi] = active
@@ -833,6 +955,9 @@ def audit_hdf5(
                 "type_changed_identity_count": int(type_changed.sum()),
                 "per_frame_identity_changed_rows": int(frame_id_changed),
                 "full_timeline_checked": bool(static_identity_valid),
+                "first_missing_frame_by_particle": [
+                    int(value) for value in first_missing_frame.tolist()
+                ],
             }
             boundary_value = units_semantics["boundary"].get("value")
             boundary_text = str(boundary_value).lower() if boundary_value is not None else ""
@@ -845,7 +970,11 @@ def audit_hdf5(
                     structural_failures.append("closed_lifecycle_missing_or_revival")
             elif open_declared:
                 closed_check = {"status": "not_applicable", "declared": False, "open_boundary": True}
-                missing_requirements.append("open_boundary_birth_exit_and_flux_ledger")
+                # An open declaration remains incomplete unless the caller
+                # opts into the explicit finite initial numerical cohort mode
+                # and supplies a complete native exclusion ledger.
+                if metadata_map.get("lifecycle_mode") != FINITE_INITIAL_NUMERICAL_COHORT_WITH_EXCLUSIONS:
+                    missing_requirements.append("open_boundary_birth_exit_and_flux_ledger")
             else:
                 closed_check = {"status": "missing", "declared": None}
                 missing_requirements.append("closed_or_open_lifecycle_declaration")
@@ -887,6 +1016,21 @@ def audit_hdf5(
                 solver_consistency["comparisons"].append({"field": "initial_floating_type2", "log": log_counts["initial_floating_type2"], "hdf5": int(initial_floating.sum()), "match": ok})
             if solver_consistency["comparisons"]:
                 solver_consistency["status"] = "pass" if all(item["match"] for item in solver_consistency["comparisons"]) else "fail"
+            native_exclusion_ledger = _native_exclusion_ledger_check(
+                metadata=metadata_map,
+                ids=ids,
+                zones=zones,
+                initial_fluid=initial_fluid,
+                last_active=last_active,
+                first_missing_frame=first_missing_frame,
+                frames=frames,
+                lifecycle=lifecycle,
+                solver_log=log_evidence,
+            )
+            if native_exclusion_ledger is not None:
+                report["native_exclusion_ledger"] = native_exclusion_ledger
+                if native_exclusion_ledger["status"] != "pass":
+                    structural_failures.append("native_exclusion_ledger_incomplete")
             report.update({
                 "shape_checks": shape_checks,
                 "units_and_semantics": units_semantics,
