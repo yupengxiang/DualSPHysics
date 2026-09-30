@@ -1,7 +1,31 @@
 {
   "complete_window_rule": "include still-water startup, release or wave ramp, at least six distinguishable response/wave periods where the mechanism permits, and a final decay/mass audit; no 0.8 s short clip is sufficient",
   "contact_semantics": "contact_event_flag is expected to remain false for the no-contact parent; RigidAlgorithm=1 is a native SPH rigid-body path and Chrono is absent",
+  "coordinate_frames": [
+    {
+      "control_semantics": "gravity is explicit; no prescribed tank translation",
+      "frame_id": "tank_attached_inertial",
+      "kind": "fixed tank",
+      "position_semantics": "native particle and rigid-body positions in the finite tank frame",
+      "world_transform": "identity"
+    },
+    {
+      "control_semantics": "piston displacement is prescribed in world time",
+      "frame_id": "world_tank_and_tank_attached_observations",
+      "kind": "world plus tank-attached event frame",
+      "position_semantics": "native world state; event planes are evaluated in the tank frame",
+      "world_transform": "p_world=R_tank(t)p_tank+c_tank; R_tank=I for this parent"
+    }
+  ],
   "family_id": "F6",
+  "finite_surfaces": [
+    "bottom",
+    "left",
+    "right",
+    "front",
+    "back",
+    "open_top"
+  ],
   "fluid_event_labels": [
     "source_label",
     "destination_time_series",
@@ -73,6 +97,15 @@
       "source_template": "main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml"
     }
   ],
+  "required_labels": [
+    "source_label",
+    "destination_time_series",
+    "first_passage_interval",
+    "residence_time",
+    "final_category",
+    "failure_reason",
+    "unknown_mass"
+  ],
   "rigid_state_labels": [
     "pose",
     "orientation_quaternion_or_matrix",
@@ -84,5 +117,17 @@
     "torque",
     "contact_event_flag"
   ],
-  "schema": "ds-data-02.f6.event_definitions.v1"
+  "schema": "ds-data-02.f6.event_definitions.v1",
+  "source_regions": [
+    {
+      "mass_denominator": "sum(initial fluid mass)",
+      "region": "initial type-3 fluid set",
+      "source_label": "initial_fluid"
+    },
+    {
+      "mass_denominator": "initial fluid mass in upstream mask",
+      "region": "wave parent upstream half",
+      "source_label": "paddle_side"
+    }
+  ]
 }

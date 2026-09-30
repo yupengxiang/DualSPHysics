@@ -14,14 +14,29 @@
     "train": 24,
     "validation": 6
   },
+  "coverage": {
+    "actual_new_case_count": 0,
+    "mechanism_balance": {
+      "simple_free_response": 24,
+      "wave_no_contact": 24
+    },
+    "new_geometry_or_control_holdout": 6,
+    "reused_count": 0,
+    "target_total_unique_physical_cases": 48
+  },
   "family_id": "F6",
   "leakage_rules": [
     "physical_case_id is unique",
     "resolution/restart/window/view share parent split",
     "geometry OOD uses geometry_family_id",
     "control OOD uses control_family_id",
+    "template/source provenance does not define physical identity",
     "hidden test generation is not claimed"
   ],
+  "legacy_policy": {
+    "old_ds_data_01_f6_identity": "preserved as excluded performance reference; no split rewrite",
+    "reused_count": 0
+  },
   "nested_subsets": {
     "final_48": [
       "F6_000_simple_free_response",
@@ -109,6 +124,13 @@
       "F6_006_simple_free_response",
       "F6_007_wave_no_contact"
     ]
+  },
+  "new_slot_counts": {
+    "geometry_control_ood": 6,
+    "id_test": 6,
+    "parameter_ood": 6,
+    "train": 24,
+    "validation": 6
   },
   "rows": 48,
   "schema": "ds-data-02.f6.split_plan.v1",

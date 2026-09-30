@@ -84,10 +84,277 @@
   ],
   "family_id": "F6",
   "next_task": "submit both execution_requests through shared runtime, then run audit-parents; submit generated qualification requests only after parent structural pass",
+  "parent_gencase_audit": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/gencase_audit.json",
+    "sha256": "eaf7069a8fcc888b02764a51583dcbe4d92a5019149c9dd3288c19f3578dec87",
+    "status": "pass"
+  },
   "production_status": "strictly_pending",
-  "qualification_request_files": [],
-  "qualification_requests": [],
-  "qualification_status": "pending_parent_gencase_audit",
+  "qualification_request_files": [
+    "qualification_requests/simple_free_response.json",
+    "qualification_requests/wave_no_contact.json"
+  ],
+  "qualification_requests": [
+    {
+      "attempt_id": "F6_SIMPLE_FREE_RESPONSE_PARENT_SOLVER_QUAL_01",
+      "case_id": "F6_SIMPLE_FREE_RESPONSE_PARENT",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT",
+        "{attempt_root}/solver_output",
+        "-tmax:12",
+        "-tout:0.05"
+      ],
+      "complete_event_window_s": [
+        0.0,
+        12.0
+      ],
+      "coordinate_frame_id": "tank_attached_inertial",
+      "cost_estimate": {
+        "actual_fluid_particles": 16780,
+        "actual_total_particles": 22698,
+        "anchor_fluid_particles": 12957384,
+        "anchor_solver_elapsed_seconds": 1632.445,
+        "anchor_time_window_s": 0.800037,
+        "anchor_total_particles": 15027060,
+        "basis": "measured old DS-DATA-01 run used only as conservative performance anchor, scaled by actual GenCase particle count and requested window",
+        "estimated_gpu_seconds": 60,
+        "estimated_native_bytes": 536870912,
+        "estimated_storage_bytes": 2147483648,
+        "mechanism_complexity_factor": 1.05,
+        "particle_ratio": 0.0015104751029143425,
+        "window_ratio": 14.999306282084454
+      },
+      "cpu_threads": 4,
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux",
+      "definition_commit_binding": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+      "estimated_peak_gpu_mib": 8192,
+      "estimated_storage_bytes": 2147483648,
+      "event_timing_qualified": false,
+      "family_id": "F6",
+      "gencase_actual_particles": {
+        "floating": 1232,
+        "fluid": 16780,
+        "total": 22698
+      },
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/execution-receipt.json",
+      "gencase_receipt_sha256": "809182d0edbd368a1110901c3c9f277eece9ec16f410dd31703a7d54847709fb",
+      "gencase_runner_sha256": "1b010e941f2dbef9c2a299cb72f2fbcd2b9a19bf1cf20015756d40fbe1fdf48d",
+      "input_files": [
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6.py",
+        "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime.py",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/event_definitions.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/observation_plan.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/split_plan.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/parent_input_manifest.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/gencase_audit.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Def.xml",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Control.csv",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Native.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/simple_free_response/F6_SIMPLE_FREE_RESPONSE_PARENT_Normal.json",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/11_Floating/CaseFloating_Def.xml",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/execution-receipt.json",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT.xml",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT.bi4",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT_All.vtk",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT__Actual.vtk",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_SIMPLE_FREE_RESPONSE_PARENT/F6_SIMPLE_FREE_RESPONSE_PARENT_GENCASE_01/F6_SIMPLE_FREE_RESPONSE_PARENT_Fluid.vtk"
+      ],
+      "kind": "qualification",
+      "launch_commit": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+      "max_wall_seconds": 600,
+      "mechanism_id": "simple_free_response",
+      "observables": [
+        "equilibrium_draft",
+        "heave_and_orientation",
+        "natural_period",
+        "wave_response_amplitude",
+        "decay_ratio",
+        "fluid_mass_and_momentum",
+        "rigid_force_and_torque"
+      ],
+      "output_interval_s": 0.05,
+      "parent_gencase_git_at_launch": {
+        "commit": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor"
+      },
+      "postprocessing_plan": {
+        "compute_forces": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+          "-dirdata",
+          "{attempt_root}/solver_output/data",
+          "-onlymk:60",
+          "-savecsv",
+          "{attempt_root}/solver_output/forces/FloatingForce"
+        ],
+        "floating_info": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+          "-dirdata",
+          "{attempt_root}/solver_output/data",
+          "-onlymk:60",
+          "-savedata",
+          "{attempt_root}/solver_output/floatinginfo/FloatingMotion"
+        ],
+        "postprocessors_are_pending_shared_cpu_execution": true
+      },
+      "qualification_launch_authority": "shared_ds_data_02_runtime_only; root dispatches GPU",
+      "qualification_scope": "parent complete-window Q-I/Q-N evidence candidate only; no production authorization and no claim that old F6 output is reused",
+      "raw_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/case/attempt",
+      "recipe_id": "F6_simple_free_response_medium_parent_v1",
+      "request_file": "qualification_requests/simple_free_response.json",
+      "request_note": "Submit this exact JSON through the shared runtime after verifying parent_gencase_audit. Runtime binds leased UUID, actual command, input hashes and git_at_launch. All definition/control/native/normal/generated native/normal files are hash-bound.",
+      "required_rigid_state": [
+        "pose",
+        "orientation",
+        "linear_velocity",
+        "angular_velocity",
+        "mass",
+        "inertia",
+        "force",
+        "torque",
+        "contact_event_flag"
+      ],
+      "resolution": "medium_parent",
+      "schema": "ds-data-02.runner.request.v1",
+      "solver_dimension_required": 3,
+      "solver_launch_forbidden_for_f6_owner": true,
+      "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab"
+    },
+    {
+      "attempt_id": "F6_WAVE_NO_CONTACT_PARENT_SOLVER_QUAL_01",
+      "case_id": "F6_WAVE_NO_CONTACT_PARENT",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT",
+        "{attempt_root}/solver_output",
+        "-tmax:12",
+        "-tout:0.05"
+      ],
+      "complete_event_window_s": [
+        0.0,
+        12.0
+      ],
+      "coordinate_frame_id": "world_tank_and_tank_attached_observations",
+      "cost_estimate": {
+        "actual_fluid_particles": 15795,
+        "actual_total_particles": 23215,
+        "anchor_fluid_particles": 12957384,
+        "anchor_solver_elapsed_seconds": 1632.445,
+        "anchor_time_window_s": 0.800037,
+        "anchor_total_particles": 15027060,
+        "basis": "measured old DS-DATA-01 run used only as conservative performance anchor, scaled by actual GenCase particle count and requested window",
+        "estimated_gpu_seconds": 60,
+        "estimated_native_bytes": 536870912,
+        "estimated_storage_bytes": 2147483648,
+        "mechanism_complexity_factor": 1.2,
+        "particle_ratio": 0.0015448797036812258,
+        "window_ratio": 14.999306282084454
+      },
+      "cpu_threads": 4,
+      "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux",
+      "definition_commit_binding": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+      "estimated_peak_gpu_mib": 8192,
+      "estimated_storage_bytes": 2147483648,
+      "event_timing_qualified": false,
+      "family_id": "F6",
+      "gencase_actual_particles": {
+        "floating": 1320,
+        "fluid": 15795,
+        "total": 23215
+      },
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/execution-receipt.json",
+      "gencase_receipt_sha256": "38cb299c00020ab6d59ad447eaa8e8c516dea0c7c5b1a072d389a04c610f51e0",
+      "gencase_runner_sha256": "1b010e941f2dbef9c2a299cb72f2fbcd2b9a19bf1cf20015756d40fbe1fdf48d",
+      "input_files": [
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6.py",
+        "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime.py",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/event_definitions.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/observation_plan.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/split_plan.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/parent_input_manifest.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/gencase_audit.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Def.xml",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Control.csv",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Native.json",
+        "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/parent_inputs/wave_no_contact/F6_WAVE_NO_CONTACT_PARENT_Normal.json",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/12_FloatingWaves/CaseFloatingWavesVal2_Def.xml",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/execution-receipt.json",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT.xml",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT.bi4",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT_All.vtk",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT__Actual.vtk",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_WAVE_NO_CONTACT_PARENT/F6_WAVE_NO_CONTACT_PARENT_GENCASE_01/F6_WAVE_NO_CONTACT_PARENT_Fluid.vtk"
+      ],
+      "kind": "qualification",
+      "launch_commit": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+      "max_wall_seconds": 600,
+      "mechanism_id": "wave_no_contact",
+      "observables": [
+        "equilibrium_draft",
+        "heave_and_orientation",
+        "natural_period",
+        "wave_response_amplitude",
+        "decay_ratio",
+        "fluid_mass_and_momentum",
+        "rigid_force_and_torque"
+      ],
+      "output_interval_s": 0.05,
+      "parent_gencase_git_at_launch": {
+        "commit": "07927654c6086bab502ae1ee4c2b9534f9538c7e",
+        "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor"
+      },
+      "postprocessing_plan": {
+        "compute_forces": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+          "-dirdata",
+          "{attempt_root}/solver_output/data",
+          "-onlymk:60",
+          "-savecsv",
+          "{attempt_root}/solver_output/forces/FloatingForce"
+        ],
+        "floating_info": [
+          "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+          "-dirdata",
+          "{attempt_root}/solver_output/data",
+          "-onlymk:60",
+          "-savedata",
+          "{attempt_root}/solver_output/floatinginfo/FloatingMotion"
+        ],
+        "postprocessors_are_pending_shared_cpu_execution": true
+      },
+      "qualification_launch_authority": "shared_ds_data_02_runtime_only; root dispatches GPU",
+      "qualification_scope": "parent complete-window Q-I/Q-N evidence candidate only; no production authorization and no claim that old F6 output is reused",
+      "raw_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/case/attempt",
+      "recipe_id": "F6_wave_no_contact_medium_parent_v1",
+      "request_file": "qualification_requests/wave_no_contact.json",
+      "request_note": "Submit this exact JSON through the shared runtime after verifying parent_gencase_audit. Runtime binds leased UUID, actual command, input hashes and git_at_launch. All definition/control/native/normal/generated native/normal files are hash-bound.",
+      "required_rigid_state": [
+        "pose",
+        "orientation",
+        "linear_velocity",
+        "angular_velocity",
+        "mass",
+        "inertia",
+        "force",
+        "torque",
+        "contact_event_flag"
+      ],
+      "resolution": "medium_parent",
+      "schema": "ds-data-02.runner.request.v1",
+      "solver_dimension_required": 3,
+      "solver_launch_forbidden_for_f6_owner": true,
+      "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab"
+    }
+  ],
+  "qualification_status": "ready_for_shared_gpu_dispatch",
   "raw_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/case/attempt",
   "runtime": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime.py",
   "schema": "ds-data-02.f6.execution_queue.v1"
