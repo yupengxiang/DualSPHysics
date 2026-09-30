@@ -88,6 +88,13 @@ def _json_value(value: Any) -> Any:
     return value
 
 
+def _canonical_sha256(value: Any) -> str:
+    """Hash JSON semantics with stable ordering, independent of whitespace."""
+    encoded = json.dumps(_json_value(value), ensure_ascii=False, sort_keys=True,
+                         separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _sha256(path: Path) -> str:
     if not path.is_file():
         raise ConversionError(f"source file is missing: {path}")
@@ -163,6 +170,54 @@ def _read_dimension(run_out: Path, generated_xml: Path, owner: Mapping[str, Any]
         "owner_metadata_dimension": owner_dimension,
         "gencase_receipt_dimension": gencase_dimension,
         "inference_from_coordinate_values": False,
+    }
+
+
+def _condition_bindings(owner: Mapping[str, Any], parameters: Mapping[str, Any], motion: ET.Element | None) -> dict[str, Any]:
+    """Build resolution-independent physical condition bindings.
+
+    The generated definition XML contains resolution-dependent ``dp``, ``h``,
+    and particle mass values.  Those values belong to discretization, so the
+    geometry binding is taken from the owner metadata's physical geometry.  A
+    control binding retains the declared controls, event window, physical
+    initial-state facts, and the generated XML motion/solver parameter
+    declaration.
+    """
+    geometry_binding = {
+        "geometry_family_id": owner.get("geometry_family_id"),
+        "geometry": _json_value(owner.get("geometry")),
+    }
+    actual = owner.get("source_mother", {}).get("actual_successful_run", {})
+    initial_keys = (
+        "boundary", "coordinate_components", "finite_wall_faces", "initial_flow_direction",
+        "initial_fluid_extent_m", "nominal_initial_fluid_fill_box_extent_m", "open_top",
+        "tank_extent_m", "solver_dimension",
+    )
+    initial_state = {key: _json_value(actual.get(key)) for key in initial_keys if key in actual}
+    control_binding = {
+        "control_family_id": owner.get("control_family_id"),
+        "recipe_id": owner.get("recipe_id"),
+        "solver_parameters": _json_value(owner.get("solver_parameters", {})),
+        "parameter_values": _json_value(owner.get("parameter_values", {})),
+        "event_window": _json_value(owner.get("event_window", {})),
+        "initial_state": initial_state,
+        "motion_control": {
+            "element_present": motion is not None,
+            "element_empty": motion is not None and len(motion) == 0 and not motion.attrib,
+            "execution_parameters": _json_value(parameters),
+        },
+    }
+    missing = []
+    if geometry_binding["geometry"] is None:
+        missing.append("geometry_semantic_content")
+    if not control_binding["solver_parameters"]:
+        missing.append("control_semantic_content")
+    return {
+        "geometry": geometry_binding,
+        "geometry_sha256": _canonical_sha256(geometry_binding),
+        "control": control_binding,
+        "control_sha256": _canonical_sha256(control_binding),
+        "missing_requirements": missing,
     }
 
 
@@ -262,6 +317,7 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
         for node in xml_root.findall(".//execution/parameters/parameter")
         if node.get("key")
     }
+    bindings = _condition_bindings(owner, parameters, motion)
     geometry = owner.get("geometry")
     if not isinstance(geometry, Mapping):
         raise ConversionError("owner metadata has no structured geometry")
@@ -305,6 +361,7 @@ def load_provenance(solver_receipt_path: Path, gencase_receipt_path: Path,
             "element_empty": motion is not None and len(motion) == 0 and not motion.attrib,
             "semantics": "empty motion element in generated case XML" if motion is not None and len(motion) == 0 and not motion.attrib else "declared by generated case XML",
         },
+        "condition_bindings": bindings,
         "boundary": {
             "source_mother_boundary": owner.get("source_mother", {}).get("boundary"),
             "open_top": owner.get("geometry", {}).get("open_top"),
@@ -428,12 +485,20 @@ def _set_hdf5_metadata(path: Path, provenance: Mapping[str, Any], partvtk: Mappi
         "coordinate_frame_source": "PartVTK Pos.x/Pos.y/Pos.z columns and generated GenCase XML x/y/z axes",
         "coordinate_frame_inference_from_coordinate_values": False,
         "units_json": json.dumps(DATASET_UNITS, ensure_ascii=False, sort_keys=True),
+        "geometry_sha256": provenance["condition_bindings"]["geometry_sha256"],
+        "geometry_hash_scope": "owner metadata physical geometry and geometry_family_id; excludes resolution dp and particle mesh",
+        "geometry_binding_json": json.dumps(provenance["condition_bindings"]["geometry"], ensure_ascii=False, sort_keys=True),
         "geometry_reference": provenance["definition_xml_path"],
         "geometry_reference_sha256": source_hashes["definition_xml"],
         "geometry_family_id": owner.get("geometry_family_id") or "",
         "geometry_semantics_json": json.dumps(provenance["geometry"], ensure_ascii=False, sort_keys=True),
         "control_reference": provenance["owner_metadata_path"],
         "control_reference_sha256": source_hashes["owner_metadata"],
+        "control_sha256": provenance["condition_bindings"]["control_sha256"],
+        "control_hash_scope": "owner solver parameters, parameter values, event window, physical initial state, and generated XML motion/execution declarations",
+        "control_binding_json": json.dumps(provenance["condition_bindings"]["control"], ensure_ascii=False, sort_keys=True),
+        "condition_binding_missing_requirements": json.dumps(
+            provenance["condition_bindings"]["missing_requirements"], ensure_ascii=False),
         "control_family_id": owner.get("control_family_id") or "",
         "control_semantics_json": json.dumps(provenance["control"], ensure_ascii=False, sort_keys=True),
         "motion_control_reference": provenance["generated_xml_path"],
