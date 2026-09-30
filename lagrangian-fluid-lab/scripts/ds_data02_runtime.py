@@ -305,6 +305,10 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             registered = True
         output.mkdir(parents=True, exist_ok=False)
         command = request['command'][:]
+        if request.get('cpu_task_kind') == 'gencase' and Path(command[0]).resolve() == (BIN_ROOT / 'GenCase_linux64').resolve():
+            # GenCase defaults to 16 threads even when OMP_NUM_THREADS is set.
+            command = [arg for arg in command if not arg.startswith('-threads:')]
+            command.append(f"-threads:{request['cpu_threads']}")
         if device:
             command = [arg for arg in command if not arg.startswith('-gpu')]
             command.insert(1, f"-gpu:{device['index']}")
