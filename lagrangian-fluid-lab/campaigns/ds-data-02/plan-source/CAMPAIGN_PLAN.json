@@ -1,0 +1,181 @@
+{
+  "schema": "ds_data_02.parallel_plan.v1",
+  "campaign_id": "DS-DATA-02",
+  "baseline_repository": "yupengxiang/DualSPHysics",
+  "baseline_branch": "codex/lagrangian-dataset-handoff",
+  "baseline_commit": "0081645116664386f76f2bfa2ef428bcd74e846e",
+  "scope": "dataset_only",
+  "adoption_status": "proposed_pending_actual_owner_adoption",
+  "lifetime_days_from_actual_adoption": 14,
+  "prohibited_tasks": [
+    "model_training",
+    "model_inference",
+    "checkpoint_loading",
+    "hyperparameter_search",
+    "model_ranking",
+    "model_qualification"
+  ],
+  "limits": {
+    "gpu_hours": 96,
+    "cpu_core_hours": 384,
+    "new_storage_gib": 1024,
+    "qualification_attempts": 160,
+    "production_attempts": 420,
+    "material_full_configurations": 12,
+    "material_cpu_fraction_cap": 0.05,
+    "training_attempts": 0,
+    "inference_attempts": 0
+  },
+  "concurrency": {
+    "family_owners": 7,
+    "suggested_active_subagents_max": 14,
+    "gpu_heavy_initial": 4,
+    "gpu_heavy_max_after_preflight": 7,
+    "solver_per_gpu_max": 1,
+    "io_heavy_initial": 2,
+    "io_heavy_max": 4,
+    "allowed_gpu_indices_subject_to_live_approval": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "preferred_gpu_indices": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "global_uuid_lease": true,
+    "foreign_processes_protected": true
+  },
+  "publication": {
+    "local_internal_bundles": true,
+    "split_materialization_after_scope_gates": true,
+    "public_upload": false,
+    "hidden_test_generation": false
+  },
+  "family_plans": [
+    {
+      "family_id": "F1",
+      "card": "families/F1.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F2",
+      "card": "families/F2.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F3",
+      "card": "families/F3.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F4",
+      "card": "families/F4.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F5",
+      "card": "families/F5.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F6",
+      "card": "families/F6.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    },
+    {
+      "family_id": "F7",
+      "card": "families/F7.md",
+      "target_independent_cases": 48,
+      "pilot_sizes": [
+        8,
+        24,
+        48
+      ],
+      "qualification_soft_cap": 20,
+      "production_soft_cap": 60,
+      "backgrounds": 2,
+      "reference_resolutions": 3,
+      "training_dependencies": []
+    }
+  ],
+  "qualification_shared_reserve": 20,
+  "planned_independent_cases_max": 336,
+  "state_axes": [
+    "execution_status",
+    "integrity_status",
+    "numerical_reference_status",
+    "external_observation_status",
+    "production_scope_status"
+  ],
+  "positive_termination": "all seven family products meet declared target and deliver complete data artifacts",
+  "negative_termination": "all applicable bounded branches have evidence terminal; no ready authorized tasks; otherwise checkpoint only",
+  "resource_termination": "owner stop, actual cap/deadline, external safety dependency; partial product not scientific failure"
+}

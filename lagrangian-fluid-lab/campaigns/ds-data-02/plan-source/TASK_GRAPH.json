@@ -1,0 +1,728 @@
+{
+  "schema": "ds02.task_graph.v1",
+  "tasks": [
+    {
+      "id": "COMMON_V1",
+      "role": "infra",
+      "kind": "data_contract",
+      "requires": []
+    },
+    {
+      "id": "MANIFEST_AUDIT",
+      "role": "integrator",
+      "kind": "data_audit",
+      "requires": []
+    },
+    {
+      "id": "F1_SOURCE",
+      "role": "F1",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_GENERATOR",
+      "role": "F1",
+      "kind": "case_generation",
+      "requires": [
+        "F1_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_REFERENCE",
+      "role": "F1",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F1_GENERATOR"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_DOMAIN",
+      "role": "F1",
+      "kind": "parameter_design",
+      "requires": [
+        "F1_REFERENCE"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_BATCH8",
+      "role": "F1",
+      "kind": "production",
+      "requires": [
+        "F1_DOMAIN"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_BATCH24",
+      "role": "F1",
+      "kind": "production",
+      "requires": [
+        "F1_BATCH8"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_BATCH48",
+      "role": "F1",
+      "kind": "production",
+      "requires": [
+        "F1_BATCH24"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_PACKAGE",
+      "role": "F1",
+      "kind": "data_packaging",
+      "requires": [
+        "F1_BATCH48",
+        "F1_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F1",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F1_NATIVE_LABELS",
+      "role": "F1",
+      "kind": "native_labels",
+      "requires": [
+        "F1_BATCH8"
+      ],
+      "scope": "F1"
+    },
+    {
+      "id": "F2_SOURCE",
+      "role": "F2",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_GENERATOR",
+      "role": "F2",
+      "kind": "case_generation",
+      "requires": [
+        "F2_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_REFERENCE",
+      "role": "F2",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F2_GENERATOR"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_DOMAIN",
+      "role": "F2",
+      "kind": "parameter_design",
+      "requires": [
+        "F2_REFERENCE"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_BATCH8",
+      "role": "F2",
+      "kind": "production",
+      "requires": [
+        "F2_DOMAIN"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_BATCH24",
+      "role": "F2",
+      "kind": "production",
+      "requires": [
+        "F2_BATCH8"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_BATCH48",
+      "role": "F2",
+      "kind": "production",
+      "requires": [
+        "F2_BATCH24"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_PACKAGE",
+      "role": "F2",
+      "kind": "data_packaging",
+      "requires": [
+        "F2_BATCH48",
+        "F2_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F2",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F2_NATIVE_LABELS",
+      "role": "F2",
+      "kind": "native_labels",
+      "requires": [
+        "F2_BATCH8"
+      ],
+      "scope": "F2"
+    },
+    {
+      "id": "F3_SOURCE",
+      "role": "F3",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_GENERATOR",
+      "role": "F3",
+      "kind": "case_generation",
+      "requires": [
+        "F3_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_REFERENCE",
+      "role": "F3",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F3_GENERATOR"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_DOMAIN",
+      "role": "F3",
+      "kind": "parameter_design",
+      "requires": [
+        "F3_REFERENCE"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_BATCH8",
+      "role": "F3",
+      "kind": "production",
+      "requires": [
+        "F3_DOMAIN"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_BATCH24",
+      "role": "F3",
+      "kind": "production",
+      "requires": [
+        "F3_BATCH8"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_BATCH48",
+      "role": "F3",
+      "kind": "production",
+      "requires": [
+        "F3_BATCH24"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_PACKAGE",
+      "role": "F3",
+      "kind": "data_packaging",
+      "requires": [
+        "F3_BATCH48",
+        "F3_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F3",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F3_NATIVE_LABELS",
+      "role": "F3",
+      "kind": "native_labels",
+      "requires": [
+        "F3_BATCH8"
+      ],
+      "scope": "F3"
+    },
+    {
+      "id": "F4_SOURCE",
+      "role": "F4",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_GENERATOR",
+      "role": "F4",
+      "kind": "case_generation",
+      "requires": [
+        "F4_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_REFERENCE",
+      "role": "F4",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F4_GENERATOR"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_DOMAIN",
+      "role": "F4",
+      "kind": "parameter_design",
+      "requires": [
+        "F4_REFERENCE"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_BATCH8",
+      "role": "F4",
+      "kind": "production",
+      "requires": [
+        "F4_DOMAIN"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_BATCH24",
+      "role": "F4",
+      "kind": "production",
+      "requires": [
+        "F4_BATCH8"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_BATCH48",
+      "role": "F4",
+      "kind": "production",
+      "requires": [
+        "F4_BATCH24"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_PACKAGE",
+      "role": "F4",
+      "kind": "data_packaging",
+      "requires": [
+        "F4_BATCH48",
+        "F4_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F4",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F4_NATIVE_LABELS",
+      "role": "F4",
+      "kind": "native_labels",
+      "requires": [
+        "F4_BATCH8"
+      ],
+      "scope": "F4"
+    },
+    {
+      "id": "F5_SOURCE",
+      "role": "F5",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_GENERATOR",
+      "role": "F5",
+      "kind": "case_generation",
+      "requires": [
+        "F5_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_REFERENCE",
+      "role": "F5",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F5_GENERATOR"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_DOMAIN",
+      "role": "F5",
+      "kind": "parameter_design",
+      "requires": [
+        "F5_REFERENCE"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_BATCH8",
+      "role": "F5",
+      "kind": "production",
+      "requires": [
+        "F5_DOMAIN"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_BATCH24",
+      "role": "F5",
+      "kind": "production",
+      "requires": [
+        "F5_BATCH8"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_BATCH48",
+      "role": "F5",
+      "kind": "production",
+      "requires": [
+        "F5_BATCH24"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_PACKAGE",
+      "role": "F5",
+      "kind": "data_packaging",
+      "requires": [
+        "F5_BATCH48",
+        "F5_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F5",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F5_NATIVE_LABELS",
+      "role": "F5",
+      "kind": "native_labels",
+      "requires": [
+        "F5_BATCH8"
+      ],
+      "scope": "F5"
+    },
+    {
+      "id": "F6_SOURCE",
+      "role": "F6",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_GENERATOR",
+      "role": "F6",
+      "kind": "case_generation",
+      "requires": [
+        "F6_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_REFERENCE",
+      "role": "F6",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F6_GENERATOR"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_DOMAIN",
+      "role": "F6",
+      "kind": "parameter_design",
+      "requires": [
+        "F6_REFERENCE"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_BATCH8",
+      "role": "F6",
+      "kind": "production",
+      "requires": [
+        "F6_DOMAIN"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_BATCH24",
+      "role": "F6",
+      "kind": "production",
+      "requires": [
+        "F6_BATCH8"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_BATCH48",
+      "role": "F6",
+      "kind": "production",
+      "requires": [
+        "F6_BATCH24"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_PACKAGE",
+      "role": "F6",
+      "kind": "data_packaging",
+      "requires": [
+        "F6_BATCH48",
+        "F6_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F6",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F6_NATIVE_LABELS",
+      "role": "F6",
+      "kind": "native_labels",
+      "requires": [
+        "F6_BATCH8"
+      ],
+      "scope": "F6"
+    },
+    {
+      "id": "F7_SOURCE",
+      "role": "F7",
+      "kind": "asset_inventory",
+      "requires": [],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_GENERATOR",
+      "role": "F7",
+      "kind": "case_generation",
+      "requires": [
+        "F7_SOURCE",
+        "COMMON_V1"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_REFERENCE",
+      "role": "F7",
+      "kind": "numerical_qualification",
+      "requires": [
+        "F7_GENERATOR"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_DOMAIN",
+      "role": "F7",
+      "kind": "parameter_design",
+      "requires": [
+        "F7_REFERENCE"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_BATCH8",
+      "role": "F7",
+      "kind": "production",
+      "requires": [
+        "F7_DOMAIN"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_BATCH24",
+      "role": "F7",
+      "kind": "production",
+      "requires": [
+        "F7_BATCH8"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_BATCH48",
+      "role": "F7",
+      "kind": "production",
+      "requires": [
+        "F7_BATCH24"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_PACKAGE",
+      "role": "F7",
+      "kind": "data_packaging",
+      "requires": [
+        "F7_BATCH48",
+        "F7_NATIVE_LABELS",
+        "EVALUATOR_V1"
+      ],
+      "scope": "F7",
+      "on_failure": "classify -> permitted repair/alternative -> continue other ready scopes",
+      "success_receipt_required": true
+    },
+    {
+      "id": "F7_NATIVE_LABELS",
+      "role": "F7",
+      "kind": "native_labels",
+      "requires": [
+        "F7_BATCH8"
+      ],
+      "scope": "F7"
+    },
+    {
+      "id": "INTEGRATED_PRODUCT",
+      "role": "integrator",
+      "kind": "data_packaging",
+      "requires": [
+        "F1_PACKAGE",
+        "F2_PACKAGE",
+        "F3_PACKAGE",
+        "F4_PACKAGE",
+        "F5_PACKAGE",
+        "F6_PACKAGE",
+        "F7_PACKAGE"
+      ],
+      "partial_delivery_allowed": true
+    },
+    {
+      "id": "EVALUATOR_V1",
+      "role": "data_interface",
+      "kind": "model_free_evaluator",
+      "requires": [
+        "COMMON_V1"
+      ],
+      "scope": "shared"
+    }
+  ],
+  "fallback_policy": "shared defects only block dependent recipes; no global all_canaries_pass gate"
+}
