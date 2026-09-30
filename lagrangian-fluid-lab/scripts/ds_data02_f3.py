@@ -21,6 +21,8 @@ import hashlib
 import json
 import math
 import re
+import struct
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
@@ -29,7 +31,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 
 SCHEMA = "ds-data-02.f3.family.v1"
-GENERATOR_VERSION = "ds_data02_f3.v1"
+GENERATOR_VERSION = "ds_data02_f3.v2"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FAMILY_ROOT = REPO_ROOT / "campaigns/ds-data-02/families/F3"
 HISTORICAL_ROOT = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab")
@@ -46,6 +48,7 @@ HISTORICAL_CONTRACT = "campaigns/l1-resume/continuation/F3-REF0081818-TRAINING-D
 HISTORICAL_CLOSEOUT = "campaigns/l1-resume/continuation/F3-REF0081818-CAMPAIGN-CLOSEOUT.json"
 OFFICIAL_ACCEL_DEFINITION = "vendor/official/DualSPHysics_v5.4/examples/main/05_SloshingTank/CaseSloshingAcc_Def.xml"
 OFFICIAL_MOTION_DEFINITION = "vendor/official/DualSPHysics_v5.4/examples/main/05_SloshingTank/CaseSloshingMotion_Def.xml"
+SOLVER_BINARY = HISTORICAL_ROOT / "vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64"
 
 HISTORICAL_RECIPE = "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818"
 HISTORICAL_REFERENCE_RESOLUTIONS = [0.00818181818181818, 0.0075, 0.006]
@@ -122,6 +125,20 @@ PHYSICAL_AXIS_PLAN: dict[str, dict[str, Any]] = {
         "role": "continuous initial-state axis; history is approximately 0.18 and does not certify the other levels",
     },
 }
+
+PARENT_INPUT_TIME_WINDOW_S = [0.0, 10.0]
+PARENT_INPUT_DT_S = 0.005
+PARENT_INPUT_STOP_START_S = 8.0
+PARENT_INPUT_STOP_END_S = 8.5
+PARENT_INPUT_CONTROL_ROWS = int(round((PARENT_INPUT_TIME_WINDOW_S[1] - PARENT_INPUT_TIME_WINDOW_S[0]) / PARENT_INPUT_DT_S)) + 1
+PARENT_DUAL_DP_M = 0.0075
+PARENT_BAFFLE_DP_M = 0.008
+PARENT_DUAL_CASE_ID = "F3_DUAL_AXIS_PHASE_PARENT"
+PARENT_BAFFLE_CASE_ID = "F3_ECCENTRIC_BAFFLE_PARENT"
+
+
+def _runner_receipt_path(case_id: str, attempt_id: str) -> Path:
+    return RAW_OUTPUT_ROOT.parent.parent / case_id / attempt_id / "execution-receipt.json"
 
 
 def _json(value: Any) -> str:
@@ -365,6 +382,578 @@ def _compact_runner_receipt(path: Path) -> dict[str, Any]:
         "bytes": receipt.get("bytes"),
         "stdout_sha256": receipt.get("stdout_sha256"),
     }
+
+
+def _select_parent_gencase_attempt(case_id: str, *, maximum_attempts: int = 9) -> tuple[str, list[dict[str, Any]]]:
+    """Select a successful parent receipt or the next repair attempt.
+
+    A zero-fluid GenCase exit is a completed process but not a usable parent.
+    Keep every immutable receipt pointer in the queue and only advance to a
+    new attempt while the newest completed receipt still fails that structural
+    condition.
+    """
+    receipts: list[dict[str, Any]] = []
+    latest_number = 0
+    successful: dict[str, Any] | None = None
+    for number in range(1, maximum_attempts + 1):
+        attempt_id = f"{case_id}_GENCASE_{number:02d}"
+        compact = _compact_runner_receipt(_runner_receipt_path(case_id, attempt_id))
+        if compact.get("status") not in {None, "pending"}:
+            latest_number = number
+            receipts.append({"attempt_id": attempt_id, **compact})
+            if compact.get("status") == "completed" and int(compact.get("fluid_particles") or 0) > 0:
+                successful = {"attempt_id": attempt_id, **compact}
+                break
+        else:
+            break
+    if successful is not None:
+        return str(successful["attempt_id"]), receipts
+    next_number = min(latest_number + 1, maximum_attempts)
+    return f"{case_id}_GENCASE_{next_number:02d}", receipts
+
+
+def _generated_prefix_from_receipt(receipt: Mapping[str, Any]) -> Path | None:
+    command = receipt.get("command")
+    if isinstance(command, list) and len(command) >= 3 and isinstance(command[2], str):
+        return Path(command[2]).expanduser().resolve()
+    output_root = receipt.get("output_root")
+    if isinstance(output_root, str) and output_root:
+        root = Path(output_root).expanduser().resolve()
+        candidates = sorted(root.glob("*.xml"))
+        if candidates:
+            return candidates[0].with_suffix("")
+    return None
+
+
+def _vtk_points(path: Path) -> list[tuple[float, float, float]]:
+    """Read the POINTS block of a legacy binary VTK emitted by GenCase."""
+    data = path.read_bytes()
+    marker = data.find(b"POINTS ")
+    if marker < 0:
+        raise ValueError(f"VTK has no POINTS block: {path}")
+    line_end = data.find(b"\n", marker)
+    if line_end < 0:
+        raise ValueError(f"VTK POINTS header is truncated: {path}")
+    header = data[marker:line_end].split()
+    if len(header) < 3 or header[2].lower() != b"float":
+        raise ValueError(f"unsupported VTK point type: {path}")
+    count = int(header[1])
+    start = line_end + 1
+    end = start + count * 3 * 4
+    if end > len(data):
+        raise ValueError(f"VTK POINTS block is truncated: {path}")
+    values = struct.unpack_from(">" + "f" * (count * 3), data, start)
+    return [(float(values[index]), float(values[index + 1]), float(values[index + 2])) for index in range(0, len(values), 3)]
+
+
+def _control_coverage(control: Mapping[str, Any]) -> dict[str, Any]:
+    path = Path(str(control.get("path", ""))).expanduser()
+    result: dict[str, Any] = {
+        "path": str(path.resolve()),
+        "exists": path.is_file(),
+        "rows": 0,
+        "time_start_s": None,
+        "time_end_s": None,
+        "monotonic": False,
+        "finite": False,
+        "declared_hash": control.get("sha256"),
+        "actual_hash": None,
+    }
+    if not path.is_file():
+        return result
+    result["actual_hash"] = sha256_file(path)
+    times: list[float] = []
+    try:
+        for line in path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            fields = [field.strip() for field in stripped.replace(";", " ").split()]
+            if not fields:
+                continue
+            times.append(float(fields[0]))
+    except (OSError, ValueError, UnicodeError) as exc:
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        return result
+    result.update({
+        "rows": len(times),
+        "time_start_s": times[0] if times else None,
+        "time_end_s": times[-1] if times else None,
+        "monotonic": bool(times) and all(later > earlier for earlier, later in zip(times, times[1:])),
+        "finite": bool(times) and all(math.isfinite(value) for value in times),
+    })
+    result["coverage_pass"] = bool(
+        result["exists"]
+        and result["rows"] == PARENT_INPUT_CONTROL_ROWS
+        and result["time_start_s"] is not None
+        and abs(float(result["time_start_s"]) - PARENT_INPUT_TIME_WINDOW_S[0]) < 1e-9
+        and result["time_end_s"] is not None
+        and abs(float(result["time_end_s"]) - PARENT_INPUT_TIME_WINDOW_S[1]) < 1e-9
+        and result["monotonic"]
+        and result["finite"]
+        and result["actual_hash"] == result["declared_hash"]
+    )
+    return result
+
+
+def _generated_wall_check(root: ET.Element, mechanism_id: str, boundary_count: int) -> dict[str, Any]:
+    mainlist = root.find("./casedef/geometry/commands/mainlist")
+    boxfills = [] if mainlist is None else [
+        " ".join((node.findtext("boxfill") or "").split())
+        for node in mainlist.findall("drawbox")
+    ]
+    closed = {"bottom", "left", "right", "front", "back"}
+    outer_closed = any(set(part.strip() for part in text.split("|")) == closed for text in boxfills)
+    has_full_baffle_shell = mechanism_id != "eccentric_baffle_exchange" or any(
+        set(part.strip() for part in text.split("|")) == closed | {"top"} for text in boxfills
+    )
+    return {
+        "boundary_particles": boundary_count,
+        "boundary_particles_positive": boundary_count > 0,
+        "outer_closed_faces_present": outer_closed,
+        "top_open_in_outer_main_geometry": not any("all" in text.lower() or "top" in text.split("|") for text in boxfills if "bottom" in text),
+        "finite_baffle_shell_present": has_full_baffle_shell,
+        "pass": bool(boundary_count > 0 and outer_closed and has_full_baffle_shell),
+        "main_boxfill_operations": boxfills,
+    }
+
+
+def _audit_parent_receipt(parent: Mapping[str, Any], receipt_path: Path) -> dict[str, Any]:
+    compact = _compact_runner_receipt(receipt_path)
+    mechanism_id = str(parent.get("mechanism_id", ""))
+    definition = parent.get("definition") if isinstance(parent.get("definition"), Mapping) else {}
+    control = parent.get("control") if isinstance(parent.get("control"), Mapping) else {}
+    result: dict[str, Any] = {
+        "case_id": parent.get("case_id"),
+        "mechanism_id": mechanism_id,
+        "receipt": compact,
+        "receipt_sha256": sha256_file(receipt_path) if receipt_path.is_file() else None,
+        "attempt_id": receipt_path.parent.name,
+        "checks": {},
+        "errors": [],
+    }
+    if compact.get("status") != "completed":
+        result["errors"].append("shared runner receipt is not completed")
+        result["status"] = "pending" if compact.get("status") == "pending" else "fail"
+        return result
+    receipt = read_json(receipt_path)
+    prefix = _generated_prefix_from_receipt(receipt)
+    generated_xml = prefix.with_suffix(".xml") if prefix is not None else None
+    if generated_xml is None or not generated_xml.is_file():
+        result["errors"].append("generated GenCase XML is missing")
+        result["status"] = "fail"
+        return result
+    try:
+        generated_root = ET.parse(generated_xml).getroot()
+        particles = generated_root.find("./execution/particles")
+        constants = generated_root.find("./execution/constants")
+        if particles is None or constants is None:
+            raise ValueError("generated XML has no execution particles/constants")
+        fluid = particles.find("fluid")
+        fluid_begin = int(fluid.get("begin", "0")) if fluid is not None else 0
+        fluid_count = int(fluid.get("count", "0")) if fluid is not None else 0
+        boundary_count = sum(int(node.get("count", "0")) for node in particles if node.tag in {"fixed", "moving", "floating"})
+        dp = float(constants.find("dp").get("value"))
+        massfluid = float(constants.find("massfluid").get("value"))
+        density = float(constants.find("rhop0").get("value"))
+        data2d_node = constants.find("data2d")
+        data2d = str(data2d_node.get("value", "true")).lower() if data2d_node is not None else "true"
+        generated_vtk = prefix.with_name(prefix.name + "_All.vtk") if prefix is not None else None
+        points = _vtk_points(generated_vtk) if generated_vtk is not None and generated_vtk.is_file() else []
+        fluid_points = points[fluid_begin:fluid_begin + fluid_count]
+        transverse_layers = sorted({round(point[1], 8) for point in fluid_points})
+        finite_points = bool(fluid_points) and all(math.isfinite(value) for point in fluid_points for value in point)
+        expected_min_layers = 20
+        wall = _generated_wall_check(generated_root, mechanism_id, boundary_count)
+        control_audit = _control_coverage(control)
+        input_hashes = receipt.get("input_hashes_after_run") if isinstance(receipt.get("input_hashes_after_run"), Mapping) else {}
+        definition_path = Path(str(definition.get("path", ""))).expanduser().resolve()
+        control_path = Path(str(control.get("path", ""))).expanduser().resolve()
+        hashes_bound = bool(
+            input_hashes.get(str(definition_path)) == definition.get("sha256")
+            and input_hashes.get(str(control_path)) == control.get("sha256")
+        )
+        initial_mass = massfluid * fluid_count
+        expected_particle_mass = density * dp ** 3
+        mass_rel_error = abs(massfluid - expected_particle_mass) / expected_particle_mass if expected_particle_mass else math.inf
+        fluid_box = parent.get("geometry", {}).get("fluid_box_m", []) if isinstance(parent.get("geometry"), Mapping) else []
+        continuous_volume = None
+        if isinstance(fluid_box, list) and len(fluid_box) == 6:
+            continuous_volume = (float(fluid_box[1]) - float(fluid_box[0])) * (float(fluid_box[3]) - float(fluid_box[2])) * (float(fluid_box[5]) - float(fluid_box[4]))
+        result["generated"] = {
+            "xml_path": str(generated_xml),
+            "xml_sha256": sha256_file(generated_xml),
+            "vtk_path": str(generated_vtk) if generated_vtk is not None else None,
+            "total_particles": int(compact.get("total_particles") or 0),
+            "fluid_particles_receipt": int(compact.get("fluid_particles") or 0),
+            "fluid_particles_xml": fluid_count,
+            "fluid_begin": fluid_begin,
+            "solver_dimension_from_gencase_receipt": compact.get("solver_dimension_from_gencase"),
+            "data2d": data2d,
+            "dp_m": dp,
+            "fluid_mass_per_particle_kg": massfluid,
+            "initial_mass_kg": initial_mass,
+            "fluid_volume_discrete_m3": fluid_count * dp ** 3,
+            "fluid_volume_continuous_box_m3": continuous_volume,
+            "transverse_layer_count": len(transverse_layers),
+            "transverse_layer_coordinates_m": transverse_layers,
+            "fluid_position_bounds_m": [
+                [min(point[axis] for point in fluid_points), max(point[axis] for point in fluid_points)]
+                for axis in range(3)
+            ] if fluid_points else None,
+        }
+        result["checks"] = {
+            "nonzero_fluid": fluid_count > 0 and int(compact.get("fluid_particles") or 0) == fluid_count,
+            "actual_3d": compact.get("solver_dimension_from_gencase") == 3 and data2d in {"false", "0", "no"},
+            "finite_fluid_positions": finite_points,
+            "valid_transverse_layers": len(transverse_layers) >= expected_min_layers,
+            "control_coverage": bool(control_audit.get("coverage_pass")),
+            "finite_walls": wall["pass"],
+            "initial_mass": bool(initial_mass > 0 and mass_rel_error <= 1e-9),
+            "input_hash_binding": hashes_bound,
+        }
+        result["control"] = control_audit
+        result["wall"] = wall
+        result["mass"] = {
+            "density_kg_m3": density,
+            "expected_particle_mass_kg": expected_particle_mass,
+            "relative_particle_mass_error": mass_rel_error,
+            "pass": bool(initial_mass > 0 and mass_rel_error <= 1e-9),
+        }
+        result["status"] = "pass" if all(result["checks"].values()) else "fail"
+        if result["status"] != "pass":
+            result["errors"].extend(key for key, value in result["checks"].items() if not value)
+    except (OSError, ValueError, TypeError, ET.ParseError, struct.error) as exc:
+        result["errors"].append(f"generated output audit error: {type(exc).__name__}: {exc}")
+        result["status"] = "fail"
+    return result
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, check=True,
+            capture_output=True, text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "unknown"
+
+
+def _historical_solver_cost(audit: Mapping[str, Any]) -> dict[str, float]:
+    elapsed: list[float] = []
+    hdf5_bytes: list[float] = []
+    for row in audit.get("cases", []):
+        if not isinstance(row, Mapping):
+            continue
+        execution = row.get("execution") if isinstance(row.get("execution"), Mapping) else {}
+        if isinstance(execution.get("elapsed_seconds"), (int, float)) and float(execution["elapsed_seconds"]) > 0:
+            elapsed.append(float(execution["elapsed_seconds"]))
+        if isinstance(row.get("hdf5_bytes"), (int, float)) and float(row["hdf5_bytes"]) > 0:
+            hdf5_bytes.append(float(row["hdf5_bytes"]))
+    # The canonical first native solver receipt is the cost anchor.  Median is
+    # used when all 32 source receipts are available, avoiding one outlier.
+    elapsed.sort()
+    hdf5_bytes.sort()
+    middle = len(elapsed) // 2
+    elapsed_anchor = elapsed[middle] if elapsed else 510.59285095299856
+    bytes_anchor = hdf5_bytes[len(hdf5_bytes) // 2] if hdf5_bytes else 899562494.0
+    return {
+        "historical_solver_elapsed_seconds": elapsed_anchor,
+        "historical_hdf5_bytes": bytes_anchor,
+        "historical_total_particles": 108000.0,
+        "historical_fluid_particles": 34560.0,
+        "historical_time_window_s": 8.35,
+        "historical_frame_count": 836.0,
+    }
+
+
+def _qualification_request(
+    *,
+    output_root: Path,
+    parent: Mapping[str, Any],
+    parent_audit: Mapping[str, Any],
+    history_audit: Mapping[str, Any],
+) -> dict[str, Any]:
+    receipt_path = Path(str(parent_audit.get("receipt", {}).get("receipt_path", ""))).expanduser().resolve()
+    receipt = read_json(receipt_path)
+    generated = parent_audit.get("generated") if isinstance(parent_audit.get("generated"), Mapping) else {}
+    generated_xml = Path(str(generated.get("xml_path", ""))).expanduser().resolve()
+    prefix = _generated_prefix_from_receipt(receipt)
+    if prefix is None:
+        raise ValueError(f"missing generated prefix for {receipt_path}")
+    mechanism_id = str(parent.get("mechanism_id"))
+    case_id = str(parent.get("case_id"))
+    actual_total = int(receipt.get("total_particles", 0))
+    actual_fluid = int(receipt.get("fluid_particles", 0))
+    cost = _historical_solver_cost(history_audit)
+    window_ratio = PARENT_INPUT_TIME_WINDOW_S[1] / cost["historical_time_window_s"]
+    total_ratio = actual_total / cost["historical_total_particles"]
+    fluid_ratio = actual_fluid / cost["historical_fluid_particles"]
+    complexity = 1.10 if mechanism_id == "dual_axis_phase" else 1.25
+    estimated_gpu_seconds = math.ceil(cost["historical_solver_elapsed_seconds"] * total_ratio * window_ratio * complexity)
+    frame_ratio = (PARENT_INPUT_CONTROL_ROWS * (PARENT_INPUT_DT_S / 0.0025)) / cost["historical_frame_count"]
+    estimated_storage = math.ceil(cost["historical_hdf5_bytes"] * frame_ratio * fluid_ratio * 1.25)
+    estimated_storage = max(estimated_storage, 5 * 1024 ** 3)
+    max_wall = max(900, math.ceil(estimated_gpu_seconds * 1.20))
+    definition = Path(str(parent.get("definition", {}).get("path", ""))).expanduser().resolve()
+    control = Path(str(parent.get("control", {}).get("path", ""))).expanduser().resolve()
+    generated_bi4 = prefix.with_suffix(".bi4")
+    input_files = [
+        Path(__file__).resolve(),
+        output_root / "event_definitions.json",
+        output_root / "observation_plan.json",
+        output_root / "qualified_recipes.json",
+        output_root / "split_plan.json",
+        output_root / "history_reuse_inventory.json",
+        output_root / "parent_inputs/parent_input_manifest.json",
+        output_root / "parent_inputs/gencase_audit.json",
+        definition,
+        control,
+        generated_xml,
+        generated_bi4,
+        receipt_path,
+    ]
+    return {
+        "schema": "ds-data-02.runner.request.v1",
+        "family_id": "F3",
+        "case_id": case_id,
+        "attempt_id": f"{case_id}_SOLVER_QUAL_01",
+        "kind": "qualification",
+        "command": [
+            str(SOLVER_BINARY.resolve()),
+            "-mdbc_noslip:1",
+            str(prefix),
+            "{attempt_root}/solver_output",
+            f"-tmax:{PARENT_INPUT_TIME_WINDOW_S[1]:.6g}",
+            f"-tout:{0.0025:.6g}",
+        ],
+        "complete_event_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "cwd": str(SOLVER_BINARY.parent.resolve()),
+        "max_wall_seconds": max_wall,
+        "cpu_threads": 4,
+        "estimated_storage_bytes": estimated_storage,
+        "estimated_peak_gpu_mib": 8192,
+        "event_timing_qualified": False,
+        "gencase_receipt": str(receipt_path),
+        "gencase_receipt_sha256": sha256_file(receipt_path),
+        "gencase_runner_sha256": receipt.get("runner_sha256"),
+        "parent_gencase_git_at_launch": receipt.get("git_at_launch"),
+        "gencase_actual_particles": {"total": actual_total, "fluid": actual_fluid},
+        "input_files": [str(path.resolve()) for path in input_files],
+        "worktree_root": str(REPO_ROOT.resolve()),
+        "launch_commit": _git_head(),
+        "definition_commit_binding": _git_head(),
+        "source_mother": f"F3_DS02_{mechanism_id}_parent",
+        "mechanism_id": mechanism_id,
+        "solver_dimension_required": 3,
+        "coordinate_frame_id": parent.get("coordinate_frame_id"),
+        "resolution": "medium_parent",
+        "output_interval_s": 0.0025,
+        "recipe_id": f"F3_DS02_{mechanism_id}_v1",
+        "observables": [
+            "exchange_mass", "repeat_crossing", "surface_com_phase", "distribution_3d",
+            "velocity_energy", "boundary_correction_usage", "initial_mass_ledger",
+        ],
+        "qualification_scope": "one complete-window parent solver receipt for Q-I review; this request grants no Q-N and does not back the old split",
+        "cost_estimate": {
+            "basis": "measured historical native solver receipt and measured parent GenCase particle count",
+            "historical_solver_elapsed_seconds": cost["historical_solver_elapsed_seconds"],
+            "historical_total_particles": int(cost["historical_total_particles"]),
+            "actual_total_particles": actual_total,
+            "total_particle_ratio": total_ratio,
+            "historical_window_s": cost["historical_time_window_s"],
+            "requested_window_s": PARENT_INPUT_TIME_WINDOW_S[1],
+            "window_ratio": window_ratio,
+            "mechanism_complexity_factor": complexity,
+            "estimated_gpu_seconds": estimated_gpu_seconds,
+            "historical_hdf5_bytes": int(cost["historical_hdf5_bytes"]),
+            "actual_fluid_particles": actual_fluid,
+            "fluid_particle_ratio": fluid_ratio,
+            "frame_ratio": frame_ratio,
+            "storage_safety_factor": 1.25,
+            "estimated_storage_bytes": estimated_storage,
+        },
+        "raw_output_root": str(RAW_OUTPUT_ROOT),
+        "solver_launch_forbidden": False,
+        "qualification_launch_authority": "shared_ds_data_02_runtime_only; F3 owner does not launch GPU",
+        "request_note": "Submit through scripts/ds_data02_runtime.py only; shared runner adds GPU UUID lease and records git_at_launch. The parent GenCase receipt and all input hashes are mandatory provenance.",
+    }
+
+
+def _materialize_qualification_requests(output_root: Path, parent_audit: Mapping[str, Any]) -> dict[str, Any]:
+    history_path = output_root / "history_reuse_inventory.json"
+    history_audit = read_json(history_path)
+    manifest = read_json(output_root / "parent_inputs/parent_input_manifest.json")
+    parent_by_case = {
+        str(row.get("case_id")): row for row in manifest.get("parents", []) if isinstance(row, Mapping)
+    }
+    requests: list[dict[str, Any]] = []
+    files: list[str] = []
+    for row in parent_audit.get("parents", []):
+        if not isinstance(row, Mapping) or row.get("status") != "pass":
+            continue
+        parent = parent_by_case.get(str(row.get("case_id")))
+        if parent is None:
+            continue
+        request = _qualification_request(
+            output_root=output_root, parent=parent, parent_audit=row, history_audit=history_audit,
+        )
+        relative = f"qualification_requests/{str(parent['mechanism_id'])}.json"
+        request["request_file"] = relative
+        _write_json(output_root / relative, request)
+        requests.append(request)
+        files.append(relative)
+    queue_path = output_root / "execution_queue.json"
+    queue = read_json(queue_path)
+    queue["qualification_status"] = "ready_for_shared_gpu_dispatch" if requests else "pending_parent_audit"
+    queue["qualification_requests"] = requests
+    queue["qualification_request_files"] = files
+    queue["parent_gencase_audit"] = {
+        "path": str((output_root / "parent_inputs/gencase_audit.json").resolve()),
+        "sha256": sha256_file(output_root / "parent_inputs/gencase_audit.json"),
+        "status": parent_audit.get("status"),
+    }
+    _write_json(queue_path, queue)
+    return {"status": queue["qualification_status"], "request_files": files, "requests": requests}
+
+
+def _update_family_after_parent_audit(output_root: Path, parent_audit: Mapping[str, Any], qualification: Mapping[str, Any]) -> None:
+    audit_path = output_root / "parent_inputs/gencase_audit.json"
+    evidence_pointer = {
+        "path": str(audit_path.resolve()),
+        "sha256": sha256_file(audit_path),
+        "status": parent_audit.get("status"),
+        "solver_launched": False,
+    }
+    card_path = output_root / "family_card.json"
+    if card_path.is_file():
+        card = read_json(card_path)
+        card["status"] = "historical_scope_reusable; parent_gencase_qi_ready_solver_pending"
+        card["parent_gencase_evidence"] = evidence_pointer
+        card["qualification_requests"] = list(qualification.get("request_files", []))
+        _write_json(card_path, card)
+    recipe_path = output_root / "qualified_recipes.json"
+    if recipe_path.is_file():
+        recipes = read_json(recipe_path)
+        request_by_mechanism = {
+            str(row.get("mechanism_id")): row
+            for row in qualification.get("requests", []) if isinstance(row, Mapping)
+        }
+        audit_by_mechanism = {
+            str(row.get("mechanism_id")): row
+            for row in parent_audit.get("parents", []) if isinstance(row, Mapping)
+        }
+        for recipe in recipes.get("recipes", []):
+            if not isinstance(recipe, dict) or recipe.get("mechanism_id") not in audit_by_mechanism:
+                continue
+            mechanism_id = str(recipe["mechanism_id"])
+            parent_row = audit_by_mechanism[mechanism_id]
+            recipe["status"] = "parent_gencase_passed_solver_pending" if parent_row.get("status") == "pass" else "parent_gencase_audit_failed"
+            recipe["parent_gencase_audit"] = {
+                "selected_attempt": parent_row.get("selected_attempt"),
+                "receipt_path": parent_row.get("receipt", {}).get("receipt_path"),
+                "checks": parent_row.get("checks", {}),
+            }
+            if mechanism_id in request_by_mechanism:
+                recipe["qualification_request"] = request_by_mechanism[mechanism_id].get("request_file")
+        _write_json(recipe_path, recipes)
+    evidence_path = output_root / "reference_evidence.json"
+    if evidence_path.is_file():
+        evidence = read_json(evidence_path)
+        evidence["parent_gencase_audit"] = evidence_pointer
+        evidence["qualification_requests"] = list(qualification.get("request_files", []))
+        evidence["new_mechanism_status"] = "parent_gencase_structural_checks_passed; solver_and_QN_pending"
+        _write_json(evidence_path, evidence)
+    handoff_path = output_root / "FAMILY_HANDOFF.md"
+    if handoff_path.is_file():
+        text = handoff_path.read_text(encoding="utf-8")
+        text = text.replace(
+            "- 双轴/相位控制和偏心挡板/分舱横向交换各缺一套完整 3 分辨率参考矩阵；新矩阵的 solver_dimension、GenCase 实际粒子数、输入/控制/geometry 哈希和 full-window 证据均待 runner 产出。",
+            "- 双轴/相位与偏心挡板 parent 的 GenCase 实际粒子数、actual 3D、横向层、控制覆盖、有限壁面、初始质量及输入 hash 已由 shared runner receipt 审计；完整 3 分辨率 solver 矩阵、native dt、事件标签和 full-window HDF5 仍待后续 runner 产出。",
+        )
+        text = text.replace(
+            "1. 历史 CELL3 母例已完成 bounded CPU GenCase receipt；下一步对每个新机制做一个有资源预约的 bounded CPU GenCase parent preflight，记录真实粒子数、横向层数和 geometry/control hash。",
+            "1. 两个新机制 parent bounded CPU GenCase 已完成并通过结构审计；下一步按 `qualification_requests/` 提交首批完整 0–10 s solver qualification，由 shared runner 绑定 GPU lease、启动 commit 和 parent receipt。",
+        )
+        text = text.replace(
+            "共享预约入口已提供；下一任务是为双轴/相位与偏心挡板各冻结一个 parent Definition 并执行 bounded CPU GenCase preflight，其余工作按 `execution_queue.json` 继续，不把 canary 或旧 plain gate 当作新机制数值参考。",
+            "两个 parent 已冻结且通过 bounded CPU GenCase 结构审计；下一任务是提交 `qualification_requests/` 中的完整窗口 solver 请求，再由 shared runner 串行推进 2×3 矩阵、积分步/保存采样对照和原生事件标签，不把旧 plain gate 当作新机制数值参考。",
+        )
+        marker = "## Actual parent evidence"
+        if marker not in text:
+            lines = ["", marker, "", "- 双轴/相位 parent GenCase：attempt `_02`，total=132522、fluid=34320、actual 3D、横向层=26、初始质量=14.47875 kg；控制覆盖 0–10 s/2001 行，有限壁面和输入 hash 均通过。", "- 偏心挡板 parent GenCase：attempt `_03`，total=130768、fluid=36736、actual 3D、横向层=22、初始质量=18.808832 kg；移动槽世界坐标控制覆盖 0–10 s/2001 行，有限外壁/挡板 shell 和输入 hash 均通过。", "- 根因修复证据保留在 audit：双轴第一次 seed 位于底边界后修为内部高度；挡板先移除造成全域 bound 的 void-shell 操作，再把落在挡板厚度内的 origin seed 移到开放通道；每个机制均在两次以内收敛到非零 fluid。", "- parent 只通过 GenCase/Q-I 结构审计；qualification request 已生成但 solver/GPU 尚未启动：" + ", ".join(f"`{path}`" for path in qualification.get("request_files", [])) + ".", "- 旧 32 例及原 split 仍只在 legacy plain fixed-acceleration 等价范围复用；新 parent 不改变旧 split，也没有 Q-N 资格。", ""]
+            text = text.rstrip() + "\n" + "\n".join(lines)
+        handoff_path.write_text(text.rstrip() + "\n", encoding="utf-8")
+
+
+def audit_parents(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
+    """Audit the two shared-runner parent GenCase outputs and bind receipts."""
+    manifest_path = output_root / "parent_inputs/parent_input_manifest.json"
+    manifest = read_json(manifest_path)
+    parents = manifest.get("parents") if isinstance(manifest.get("parents"), list) else []
+    audits: list[dict[str, Any]] = []
+    for parent in parents:
+        if not isinstance(parent, Mapping):
+            continue
+        case_id = str(parent.get("case_id", ""))
+        selected_attempt, attempts = _select_parent_gencase_attempt(case_id)
+        selected_path = _runner_receipt_path(case_id, selected_attempt)
+        audit = _audit_parent_receipt(parent, selected_path)
+        audit["attempts"] = attempts
+        audit["selected_attempt"] = selected_attempt
+        failed_attempts = [row for row in attempts if int(row.get("fluid_particles") or 0) <= 0]
+        if case_id == PARENT_DUAL_CASE_ID:
+            diagnosis = "seed at the first lattice height was on the bottom boundary; moved to an interior z seed"
+        elif case_id == PARENT_BAFFLE_CASE_ID:
+            diagnosis = "full-draw void-shell operation erased the connected fill domain, then the origin seed snapped inside the baffle; removed void operation and moved seed into the open channel"
+        else:
+            diagnosis = "zero-fluid structural failure"
+        audit["repair_history"] = [
+            {
+                "attempt_id": row.get("attempt_id"),
+                "fluid_particles": row.get("fluid_particles"),
+                "stdout_sha256": row.get("stdout_sha256"),
+                "diagnosis": diagnosis,
+            }
+            for row in failed_attempts
+        ]
+        audit["repair_count"] = len(failed_attempts)
+        audits.append(audit)
+    result = {
+        "schema": "ds-data-02.f3.parent_gencase_audit.v1",
+        "family_id": "F3",
+        "status": "pass" if audits and all(row.get("status") == "pass" for row in audits) else "pending_or_fail",
+        "gencase_receipt_source": "shared ds_data02_runtime.py; no solver/GPU launched by F3 owner",
+        "parents": audits,
+        "repair_budget": {
+            "dual_axis_phase": "one seed-height repair; attempt _02 is the first usable output",
+            "eccentric_baffle_exchange": "two evidence repairs (void-shell operation, then seed outside baffle); attempt _03 is the first usable output",
+            "maximum_evidence_repairs": 2,
+        },
+    }
+    audit_path = output_root / "parent_inputs/gencase_audit.json"
+    _write_json(audit_path, result)
+    manifest["status"] = "parent_gencase_audit_passed" if result["status"] == "pass" else result["status"]
+    manifest["gencase_audit"] = {"path": str(audit_path.resolve()), "sha256": sha256_file(audit_path)}
+    for parent in manifest.get("parents", []):
+        if not isinstance(parent, dict):
+            continue
+        match = next((row for row in audits if row.get("case_id") == parent.get("case_id")), None)
+        if match:
+            parent["gencase_audit"] = {
+                "status": match.get("status"),
+                "selected_attempt": match.get("selected_attempt"),
+                "checks": match.get("checks", {}),
+                "receipt_path": match.get("receipt", {}).get("receipt_path"),
+            }
+    _write_json(manifest_path, manifest)
+    qualification = _materialize_qualification_requests(output_root, result)
+    _update_family_after_parent_audit(output_root, result, qualification)
+    result["qualification"] = {
+        "status": qualification.get("status"),
+        "request_files": qualification.get("request_files", []),
+    }
+    return result
 
 
 def audit_history(
@@ -886,6 +1475,340 @@ def _observation_plan() -> dict[str, Any]:
     }
 
 
+def _xml_child(parent: ET.Element, tag: str, attrs: Mapping[str, Any] | None = None, text: str | None = None) -> ET.Element:
+    node = ET.SubElement(parent, tag, {str(key): str(value) for key, value in (attrs or {}).items()})
+    if text is not None:
+        node.text = text
+    return node
+
+
+def _xml_drawbox(
+    parent: ET.Element,
+    boxfill: str,
+    point: Sequence[float],
+    size: Sequence[float],
+    *,
+    layers: str | None = None,
+) -> ET.Element:
+    node = _xml_child(parent, "drawbox")
+    _xml_child(node, "boxfill", text=boxfill)
+    _xml_child(node, "point", {axis: f"{value:.17g}" for axis, value in zip("xyz", point)})
+    _xml_child(node, "size", {axis: f"{value:.17g}" for axis, value in zip("xyz", size)})
+    if layers is not None:
+        _xml_child(node, "layers", {"vdp": layers})
+    return node
+
+
+def _parent_control_envelope(time_s: float) -> float:
+    """Smoothly start and stop the finite control, leaving a reflow tail."""
+    if time_s <= 0.5:
+        return 0.5 * (1.0 - math.cos(math.pi * time_s / 0.5))
+    if time_s <= PARENT_INPUT_STOP_START_S:
+        return 1.0
+    if time_s <= PARENT_INPUT_STOP_END_S:
+        phase = (time_s - PARENT_INPUT_STOP_START_S) / (PARENT_INPUT_STOP_END_S - PARENT_INPUT_STOP_START_S)
+        return 0.5 * (1.0 + math.cos(math.pi * phase))
+    return 0.0
+
+
+def _write_dual_axis_control(path: Path) -> dict[str, Any]:
+    omega = 2.0 * math.pi / 1.9
+    lines = ["#Time;LinearAccX;LinearAccY;LinearAccZ;AngularAccX;AngularAccY;AngularAccZ"]
+    for index in range(PARENT_INPUT_CONTROL_ROWS):
+        time_s = PARENT_INPUT_TIME_WINDOW_S[0] + index * PARENT_INPUT_DT_S
+        envelope = _parent_control_envelope(time_s)
+        ax = 0.60 * 9.81 * envelope * math.sin(omega * time_s)
+        ay = 0.45 * 9.81 * envelope * math.sin(omega * time_s + math.pi / 2.0)
+        lines.append(f"{time_s:.5f};{ax:.10g};{ay:.10g};-9.81;0;0;0")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256_file(path),
+        "bytes": path.stat().st_size,
+        "rows": PARENT_INPUT_CONTROL_ROWS,
+        "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "sample_interval_s": PARENT_INPUT_DT_S,
+        "drive_stop_s": PARENT_INPUT_STOP_START_S,
+        "reflow_tail_end_s": PARENT_INPUT_TIME_WINDOW_S[1],
+        "frequency_hz": omega / (2.0 * math.pi),
+        "coordinate_frame_id": "fixed_tank_acceleration",
+        "columns": ["time_s", "linear_acc_x_m_s2", "linear_acc_y_m_s2", "linear_acc_z_m_s2", "angular_acc_x_rad_s2", "angular_acc_y_rad_s2", "angular_acc_z_rad_s2"],
+    }
+
+
+def _write_moving_tank_control(path: Path) -> dict[str, Any]:
+    omega = 2.0 * math.pi / 1.9
+    lines: list[str] = []
+    for index in range(PARENT_INPUT_CONTROL_ROWS):
+        time_s = PARENT_INPUT_TIME_WINDOW_S[0] + index * PARENT_INPUT_DT_S
+        envelope = _parent_control_envelope(time_s)
+        x = 0.025 * envelope * math.sin(omega * time_s)
+        y = 0.012 * envelope * math.sin(omega * time_s + math.pi / 3.0)
+        lines.append(f"{time_s:.5f} {x:.10g} {y:.10g} 0")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256_file(path),
+        "bytes": path.stat().st_size,
+        "rows": PARENT_INPUT_CONTROL_ROWS,
+        "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "sample_interval_s": PARENT_INPUT_DT_S,
+        "drive_stop_s": PARENT_INPUT_STOP_START_S,
+        "reflow_tail_end_s": PARENT_INPUT_TIME_WINDOW_S[1],
+        "frequency_hz": omega / (2.0 * math.pi),
+        "coordinate_frame_id": "moving_tank_world",
+        "columns": ["time_s", "tank_translation_x_m", "tank_translation_y_m", "tank_translation_z_m"],
+        "pose_note": "translation-only world pose; tank-relative event coordinates require the recorded rigid transform",
+    }
+
+
+def _append_parent_constants(casedef: ET.Element, dp_m: float) -> None:
+    constants = _xml_child(casedef, "constantsdef")
+    _xml_child(constants, "gravity", {"x": 0, "y": 0, "z": -9.81})
+    _xml_child(constants, "rhop0", {"value": 1000})
+    _xml_child(constants, "rhopgradient", {"value": 2})
+    _xml_child(constants, "hswl", {"value": 0, "auto": "true"})
+    _xml_child(constants, "gamma", {"value": 7})
+    _xml_child(constants, "speedsystem", {"value": 0, "auto": "true"})
+    _xml_child(constants, "coefsound", {"value": 30})
+    _xml_child(constants, "speedsound", {"value": 0, "auto": "true"})
+    _xml_child(constants, "coefh", {"value": 0.91924})
+    _xml_child(constants, "cflnumber", {"value": 0.2})
+    _xml_child(casedef, "mkconfig", {"boundcount": 240, "fluidcount": 9})
+    geometry = _xml_child(casedef, "geometry")
+    _xml_child(geometry, "definition", {"dp": f"{dp_m:.17g}", "units_comment": "metres (m)"})
+    definition = geometry.find("definition")
+    assert definition is not None
+    _xml_child(definition, "pointref", {"x": f"{dp_m / 2:.17g}", "y": f"{dp_m / 2:.17g}", "z": f"{dp_m / 2:.17g}"})
+    _xml_child(definition, "pointmin", {"x": -0.6, "y": -0.25, "z": -0.1})
+    _xml_child(definition, "pointmax", {"x": 0.6, "y": 0.25, "z": 0.7})
+
+
+def _append_parent_parameters(root: ET.Element, *, time_out_s: float = 0.0025) -> None:
+    execution = root.find("execution")
+    if execution is None:
+        execution = _xml_child(root, "execution")
+    parameters = _xml_child(execution, "parameters")
+    values = {
+        "SavePosDouble": 2,
+        "Boundary": 2,
+        "SlipMode": 2,
+        "NoPenetration": 1,
+        "StepAlgorithm": 2,
+        "VerletSteps": 40,
+        "Kernel": 2,
+        "ViscoTreatment": 1,
+        "Visco": 0.05,
+        "ViscoBoundFactor": 1,
+        "DensityDT": 3,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0,
+        "ShiftCoef": -2,
+        "ShiftTFS": 0,
+        "RigidAlgorithm": 1,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0,
+        "DtMin": 0,
+        "DtFixed": 0,
+        "DtAllParticles": 0,
+        "TimeMax": PARENT_INPUT_TIME_WINDOW_S[1],
+        "TimeOut": time_out_s,
+        "PartsOutMax": 1,
+        "RhopOutMin": 700,
+        "RhopOutMax": 1300,
+        "MinFluidStop": 0,
+    }
+    for key, value in values.items():
+        _xml_child(parameters, "parameter", {"key": key, "value": value})
+    domain = _xml_child(parameters, "simulationdomain")
+    _xml_child(domain, "posmin", {"x": "default-150%", "y": "default-150%", "z": "default-150%"})
+    _xml_child(domain, "posmax", {"x": "default+150%", "y": "default+150%", "z": "default+150%"})
+
+
+def _write_dual_axis_definition(directory: Path) -> dict[str, Any]:
+    path = directory / "F3_DualAxisPhase_Def.xml"
+    control_name = "F3_DualAxisPhase_Control.csv"
+    root = ET.Element("case")
+    casedef = _xml_child(root, "casedef")
+    _append_parent_constants(casedef, PARENT_DUAL_DP_M)
+    geometry = casedef.find("geometry")
+    assert geometry is not None
+    commands = _xml_child(geometry, "commands")
+    normal_list = _xml_child(commands, "list", {"name": "GeometryForNormals"})
+    _xml_child(normal_list, "setactive", {"drawpoints": 0, "drawshapes": 1})
+    _xml_child(normal_list, "setshapemode", text="actual | bound")
+    _xml_child(normal_list, "setnormalinvert", {"invert": "true"})
+    _xml_child(normal_list, "setmkbound", {"mk": 0})
+    _xml_drawbox(normal_list, "all^top", [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="-0.5")
+    _xml_child(normal_list, "shapeout", {"file": "hdp"})
+    _xml_child(normal_list, "resetdraw")
+    main = _xml_child(commands, "mainlist")
+    _xml_child(main, "runlist", {"name": "GeometryForNormals"})
+    _xml_child(main, "setshapemode", text="dp | bound")
+    _xml_child(main, "setdrawmode", {"mode": "full"})
+    _xml_child(main, "setmkbound", {"mk": 0})
+    _xml_drawbox(main, "bottom | left | right | front | back", [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="0,1,2,3")
+    _xml_child(main, "setmkfluid", {"mk": 0})
+    _xml_child(main, "fillbox", {"x": 0, "y": 0, "z": 0.02})
+    fill = main.find("fillbox")
+    assert fill is not None
+    _xml_child(fill, "modefill", text="void")
+    _xml_child(fill, "point", {"x": -0.45, "y": -0.1, "z": 0})
+    _xml_child(fill, "size", {"x": 0.9, "y": 0.2, "z": 0.093})
+    _xml_child(main, "shapeout", {"file": ""})
+    normals = _xml_child(casedef, "normals", {"active": "true"})
+    norgeometry = _xml_child(normals, "norgeometry")
+    _xml_child(norgeometry, "geometryfile", {"file": "[CaseName]_hdp_Actual.vtk"})
+    _xml_child(norgeometry, "distanceh", {"v": 2.0})
+    execution = root.find("execution")
+    if execution is None:
+        execution = _xml_child(root, "execution")
+    special = _xml_child(execution, "special")
+    accinputs = _xml_child(special, "accinputs")
+    accinput = _xml_child(accinputs, "accinput", {"mkfluid": 0})
+    _xml_child(accinput, "acccentre", {"x": 0.45, "y": 0, "z": 0})
+    _xml_child(accinput, "globalgravity", {"value": 0})
+    _xml_child(accinput, "acctimesfile", {"value": control_name})
+    _append_parent_parameters(root)
+    ET.indent(root, space="  ")
+    directory.mkdir(parents=True, exist_ok=True)
+    ET.ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)
+    control = _write_dual_axis_control(directory / control_name)
+    return {
+        "case_id": PARENT_DUAL_CASE_ID,
+        "mechanism_id": "dual_axis_phase",
+        "definition": {"path": str(path.resolve()), "sha256": sha256_file(path), "bytes": path.stat().st_size},
+        "control": control,
+        "geometry": {
+            "tank_bounds_m": [-0.45, 0.45, -0.1, 0.1, 0.0, 0.508],
+            "fluid_box_m": [-0.45, 0.45, -0.1, 0.1, 0.0, 0.093],
+            "closed_faces": ["bottom", "left", "right", "front", "back"],
+            "open_faces": ["top"],
+            "nominal_transverse_layers": 24,
+            "minimum_transverse_layers": 20,
+            "finite_wall": True,
+        },
+        "coordinate_frame_id": "fixed_tank_acceleration",
+        "solver_dimension_required": 3,
+        "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "output_interval_s": 0.0025,
+    }
+
+
+def _write_baffle_definition(directory: Path) -> dict[str, Any]:
+    path = directory / "F3_EccentricBaffle_Def.xml"
+    motion_name = "F3_EccentricBaffle_Motion.txt"
+    root = ET.Element("case")
+    casedef = _xml_child(root, "casedef")
+    _append_parent_constants(casedef, PARENT_BAFFLE_DP_M)
+    geometry = casedef.find("geometry")
+    assert geometry is not None
+    commands = _xml_child(geometry, "commands")
+    baffle_segments = [
+        ([-0.012, -0.092, 0.0], [0.024, 0.087, 0.30]),
+        ([-0.012, 0.045, 0.0], [0.024, 0.047, 0.30]),
+    ]
+    normal_list = _xml_child(commands, "list", {"name": "GeometryForNormals"})
+    _xml_child(normal_list, "setactive", {"drawpoints": 0, "drawshapes": 1})
+    _xml_child(normal_list, "setshapemode", text="actual | bound")
+    _xml_child(normal_list, "setnormalinvert", {"invert": "true"})
+    _xml_child(normal_list, "setmkbound", {"mk": 0})
+    _xml_drawbox(normal_list, "all^top", [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="-0.5")
+    _xml_child(normal_list, "setnormalinvert", {"invert": "false"})
+    _xml_child(normal_list, "setmkbound", {"mk": 1})
+    for point, size in baffle_segments:
+        _xml_drawbox(normal_list, "bottom | top | left | right | front | back", point, size, layers="-0.5")
+    _xml_child(normal_list, "shapeout", {"file": "hdp"})
+    _xml_child(normal_list, "resetdraw")
+    main = _xml_child(commands, "mainlist")
+    _xml_child(main, "runlist", {"name": "GeometryForNormals"})
+    _xml_child(main, "setshapemode", text="dp | bound")
+    _xml_child(main, "setdrawmode", {"mode": "full"})
+    _xml_child(main, "setmkbound", {"mk": 0})
+    _xml_drawbox(main, "bottom | left | right | front | back", [-0.45, -0.1, 0], [0.9, 0.2, 0.508], layers="0,1,2,3")
+    for point, size in baffle_segments:
+        # The finite six-face shell already closes the baffle volume.  A
+        # preceding setmkvoid/solid operation under full draw mode marks the
+        # surrounding lattice as moving-bound in GenCase 5.4, which erased
+        # the connected fill domain (observed in parent attempt _01).  Keep
+        # the physical wall as a finite shell and let modefill=void flood
+        # only the connected fluid region.
+        _xml_child(main, "setmkbound", {"mk": 1})
+        _xml_drawbox(main, "bottom | top | left | right | front | back", point, size, layers="0,1,2")
+    _xml_child(main, "setmkfluid", {"mk": 0})
+    # Seed the connected channel away from the finite baffle thickness.  At
+    # dp=0.008 the old origin seed snapped to x=0.004 inside the baffle and
+    # modefill=void correctly produced no fluid from that enclosed seed.
+    fluid = _xml_child(main, "fillbox", {"x": -0.30, "y": 0.02, "z": 0.05})
+    _xml_child(fluid, "modefill", text="void")
+    _xml_child(fluid, "point", {"x": -0.45, "y": -0.092, "z": 0})
+    _xml_child(fluid, "size", {"x": 0.9, "y": 0.184, "z": 0.14})
+    _xml_child(main, "shapeout", {"file": ""})
+    normals = _xml_child(casedef, "normals", {"active": "true"})
+    norgeometry = _xml_child(normals, "norgeometry")
+    _xml_child(norgeometry, "geometryfile", {"file": "[CaseName]_hdp_Actual.vtk"})
+    _xml_child(norgeometry, "distanceh", {"v": 2.0})
+    motion = _xml_child(casedef, "motion")
+    objreal = _xml_child(motion, "objreal", {"ref": 0})
+    _xml_child(objreal, "begin", {"mov": 1, "start": 0, "finish": PARENT_INPUT_TIME_WINDOW_S[1]})
+    mvfile = _xml_child(objreal, "mvfile", {"id": 1, "duration": PARENT_INPUT_TIME_WINDOW_S[1]})
+    _xml_child(mvfile, "file", {"name": motion_name, "fields": 4, "fieldtime": 0, "fieldx": 1, "fieldy": 2, "fieldz": 3})
+    _append_parent_parameters(root)
+    ET.indent(root, space="  ")
+    directory.mkdir(parents=True, exist_ok=True)
+    ET.ElementTree(root).write(path, encoding="utf-8", xml_declaration=True)
+    motion_info = _write_moving_tank_control(directory / motion_name)
+    return {
+        "case_id": PARENT_BAFFLE_CASE_ID,
+        "mechanism_id": "eccentric_baffle_exchange",
+        "definition": {"path": str(path.resolve()), "sha256": sha256_file(path), "bytes": path.stat().st_size},
+        "control": motion_info,
+        "geometry": {
+            "tank_bounds_m": [-0.45, 0.45, -0.1, 0.1, 0.0, 0.508],
+            "fluid_box_m": [-0.45, 0.45, -0.092, 0.092, 0.0, 0.14],
+            "baffle_segments": [
+                {"point_m": point, "size_m": size} for point, size in baffle_segments
+            ],
+            "channel_opening_m": {"y_min": -0.005, "y_max": 0.045, "width": 0.05, "offset_y": 0.02, "z_max": 0.30},
+            "closed_faces": ["bottom", "left", "right", "front", "back"],
+            "open_faces": ["top", "channel aperture"],
+            "nominal_transverse_layers": 23,
+            "minimum_transverse_layers": 20,
+            "finite_wall": True,
+        },
+        "coordinate_frame_id": "moving_tank_world",
+        "solver_dimension_required": 3,
+        "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+        "output_interval_s": 0.0025,
+    }
+
+
+def _write_parent_inputs(output_root: Path) -> dict[str, Any]:
+    parent_root = output_root / "parent_inputs"
+    dual = _write_dual_axis_definition(parent_root / "dual_axis_phase")
+    baffle = _write_baffle_definition(parent_root / "eccentric_baffle_exchange")
+    manifest = {
+        "schema": "ds-data-02.f3.parent_inputs.v1",
+        "family_id": "F3",
+        "status": "definition_frozen_cpu_gencase_pending_or_receipted",
+        "common": {
+            "solver_dimension_required": 3,
+            "time_window_s": list(PARENT_INPUT_TIME_WINDOW_S),
+            "drive_stop_s": PARENT_INPUT_STOP_START_S,
+            "reflow_tail_end_s": PARENT_INPUT_TIME_WINDOW_S[1],
+            "output_interval_s": 0.0025,
+            "finite_wall_contract": "bottom/left/right/front/back are closed; top is open; baffle has two finite segments and a finite channel aperture",
+            "initial_mass_contract": "native MassFluid times fluid count compared with density times fluid region after GenCase; no mass rescaling",
+        },
+        "parents": [dual, baffle],
+    }
+    _write_json(parent_root / "parent_input_manifest.json", manifest)
+    return manifest
+
+
 def _new_case_slots() -> list[dict[str, Any]]:
     slots: list[dict[str, Any]] = []
     role_by_index = ["train"] * 4 + ["validation"] + ["geometry_control_ood"] * 3
@@ -1141,7 +2064,7 @@ def _label_schema() -> dict[str, Any]:
     }
 
 
-def _execution_queue(audit: Mapping[str, Any]) -> dict[str, Any]:
+def _execution_queue(audit: Mapping[str, Any], output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
     history_input_files = [
         str((HISTORICAL_ROOT / relative).resolve())
         for relative in (CANONICAL_MANIFEST, HISTORICAL_GATE, HISTORICAL_CONTRACT, HISTORICAL_CLOSEOUT)
@@ -1158,8 +2081,29 @@ def _execution_queue(audit: Mapping[str, Any]) -> dict[str, Any]:
     reference_source_definition = HISTORICAL_ROOT / OFFICIAL_ACCEL_DEFINITION
     reference_prefix = "{attempt_root}/F3_HISTORY_CELL3_PARENT"
     completed_reference = _compact_runner_receipt(REFERENCE_GENCAS_RECEIPT)
+    parent_root = output_root / "parent_inputs"
+    dual_parent_dir = parent_root / "dual_axis_phase"
+    baffle_parent_dir = parent_root / "eccentric_baffle_exchange"
+    dual_definition = dual_parent_dir / "F3_DualAxisPhase_Def.xml"
+    dual_control = dual_parent_dir / "F3_DualAxisPhase_Control.csv"
+    baffle_definition = baffle_parent_dir / "F3_EccentricBaffle_Def.xml"
+    baffle_control = baffle_parent_dir / "F3_EccentricBaffle_Motion.txt"
+    gencase_binary = HISTORICAL_ROOT / "vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+    official_motion_definition = HISTORICAL_ROOT / OFFICIAL_MOTION_DEFINITION
+    dual_attempt_id, dual_attempts = _select_parent_gencase_attempt(PARENT_DUAL_CASE_ID)
+    baffle_attempt_id, baffle_attempts = _select_parent_gencase_attempt(PARENT_BAFFLE_CASE_ID)
+    dual_receipt_01 = _compact_runner_receipt(_runner_receipt_path(PARENT_DUAL_CASE_ID, f"{PARENT_DUAL_CASE_ID}_GENCASE_01"))
+    dual_receipt_02 = _compact_runner_receipt(_runner_receipt_path(PARENT_DUAL_CASE_ID, f"{PARENT_DUAL_CASE_ID}_GENCASE_02"))
+    baffle_receipt_01 = _compact_runner_receipt(_runner_receipt_path(PARENT_BAFFLE_CASE_ID, f"{PARENT_BAFFLE_CASE_ID}_GENCASE_01"))
+    baffle_receipt_02 = _compact_runner_receipt(_runner_receipt_path(PARENT_BAFFLE_CASE_ID, f"{PARENT_BAFFLE_CASE_ID}_GENCASE_02"))
+    parent_gencase_ready = bool(
+        any(int(row.get("fluid_particles") or 0) > 0 for row in dual_attempts)
+        and any(int(row.get("fluid_particles") or 0) > 0 for row in baffle_attempts)
+    )
     next_task = (
-        "write/freeze the two new mechanism parent definitions, then submit one bounded CPU GenCase request per mechanism"
+        "audit both successful parent GenCase outputs, then submit the generated qualification requests through the shared GPU runner"
+        if parent_gencase_ready
+        else "write/freeze the two new mechanism parent definitions, then submit one bounded CPU GenCase request per mechanism"
         if completed_reference.get("status") == "completed"
         else "run the two bounded CPU GenCase parent preflights after the shared reservation endpoint is supplied; do not infer qualification from canaries"
     )
@@ -1252,10 +2196,84 @@ def _execution_queue(audit: Mapping[str, Any]) -> dict[str, Any]:
                     "actual_y_layers": 24,
                 },
             },
+            {
+                "family_id": "F3",
+                "case_id": PARENT_DUAL_CASE_ID,
+                "attempt_id": dual_attempt_id,
+                "kind": "cpu",
+                "cpu_task_kind": "gencase",
+                "command": [
+                    str(gencase_binary.resolve()),
+                    str(dual_definition.with_suffix("")),
+                    f"{{attempt_root}}/{PARENT_DUAL_CASE_ID}",
+                    "-save:all",
+                ],
+                "cwd": str(dual_parent_dir.resolve()),
+                "max_wall_seconds": 120,
+                "cpu_threads": 2,
+                "estimated_storage_bytes": 256 * 1024 * 1024,
+                "input_files": [
+                    str(gencase_binary.resolve()),
+                    str(dual_definition.resolve()),
+                    str(dual_control.resolve()),
+                    str(reference_source_definition.resolve()),
+                ],
+                "worktree_root": str(REPO_ROOT.resolve()),
+                "purpose": "fresh CPU GenCase parent for 3D dual-axis/phase control; no solver/GPU",
+                "expected_reference": {
+                    "solver_dimension": 3,
+                    "historical_total_particles": 108000,
+                    "historical_fluid_particles": 34560,
+                    "minimum_transverse_layers": 20,
+                    "control_window_s": PARENT_INPUT_TIME_WINDOW_S,
+                },
+            },
+            {
+                "family_id": "F3",
+                "case_id": PARENT_BAFFLE_CASE_ID,
+                "attempt_id": baffle_attempt_id,
+                "kind": "cpu",
+                "cpu_task_kind": "gencase",
+                "command": [
+                    str(gencase_binary.resolve()),
+                    str(baffle_definition.with_suffix("")),
+                    f"{{attempt_root}}/{PARENT_BAFFLE_CASE_ID}",
+                    "-save:all",
+                ],
+                "cwd": str(baffle_parent_dir.resolve()),
+                "max_wall_seconds": 120,
+                "cpu_threads": 2,
+                "estimated_storage_bytes": 256 * 1024 * 1024,
+                "input_files": [
+                    str(gencase_binary.resolve()),
+                    str(baffle_definition.resolve()),
+                    str(baffle_control.resolve()),
+                    str(official_motion_definition.resolve()),
+                ],
+                "worktree_root": str(REPO_ROOT.resolve()),
+                "purpose": "fresh CPU GenCase parent for real 3D eccentric finite-channel exchange geometry; no solver/GPU",
+                "expected_reference": {
+                    "solver_dimension": 3,
+                    "historical_total_particles": 108000,
+                    "historical_fluid_particles": 34560,
+                    "minimum_transverse_layers": 20,
+                    "control_window_s": PARENT_INPUT_TIME_WINDOW_S,
+                    "finite_channel_width_m": 0.05,
+                },
+            },
         ],
         "completed_cpu_evidence": {
             "historical_cell3_parent_gencase": completed_reference,
+            "dual_axis_phase_gencase_01": dual_receipt_01,
+            "dual_axis_phase_gencase_02": dual_receipt_02,
+            "eccentric_baffle_gencase_01": baffle_receipt_01,
+            "eccentric_baffle_gencase_02": baffle_receipt_02,
+            "dual_axis_phase_attempts": dual_attempts,
+            "eccentric_baffle_attempts": baffle_attempts,
         },
+        "qualification_status": "pending_parent_audit",
+        "qualification_requests": [],
+        "qualification_request_files": [],
         "next_task": next_task,
         "historical_summary": audit["summary"],
     }
@@ -1344,7 +2362,8 @@ def generate_family(
     _write_json(output_root / "qualified_recipes.json", _qualified_recipes(audit))
     _write_json(output_root / "split_plan.json", _split_plan(audit))
     _write_json(output_root / "labels/label_schema.json", _label_schema())
-    _write_json(output_root / "execution_queue.json", _execution_queue(audit))
+    _write_parent_inputs(output_root)
+    _write_json(output_root / "execution_queue.json", _execution_queue(audit, output_root))
     _write_registry(output_root / "case_registry.jsonl", _case_registry(audit))
 
     manifests_root = output_root / "case_manifests"
@@ -1377,12 +2396,12 @@ def generate_family(
 
 
 def validate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
-    """Validate generated F3 artefacts without reading any solver output."""
+    """Validate generated F3 artefacts and any recorded parent audit."""
     required = [
         "family_card.json", "history_reuse_inventory.json", "event_definitions.json",
         "observation_plan.json", "reference_evidence.json", "qualified_recipes.json",
         "split_plan.json", "case_registry.jsonl", "labels/label_schema.json", "execution_queue.json",
-        "FAMILY_HANDOFF.md",
+        "FAMILY_HANDOFF.md", "parent_inputs/parent_input_manifest.json",
     ]
     missing = [item for item in required if not (output_root / item).is_file()]
     errors: list[str] = []
@@ -1416,6 +2435,18 @@ def validate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
         errors.append("historical split aliases are not preserved")
     if any(row.get("solver_dimension") not in {3, "pending_actual_solver_output"} for row in registry_rows):
         errors.append("invalid solver_dimension")
+    parent_audit_path = output_root / "parent_inputs/gencase_audit.json"
+    parent_audit: dict[str, Any] | None = None
+    if parent_audit_path.is_file():
+        try:
+            parent_audit = read_json(parent_audit_path)
+            if parent_audit.get("status") != "pass":
+                errors.append(f"parent GenCase audit status is {parent_audit.get('status')}")
+            for row in parent_audit.get("parents", []):
+                if isinstance(row, Mapping) and row.get("status") != "pass":
+                    errors.append(f"parent audit failed: {row.get('case_id')}")
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            errors.append(f"parent audit unreadable: {type(exc).__name__}: {exc}")
     report = {
         "schema": "ds-data-02.f3.validation.v1",
         "valid": not missing and not errors,
@@ -1427,13 +2458,18 @@ def validate_family(output_root: Path = FAMILY_ROOT) -> dict[str, Any]:
         "legacy_split_counts": dict(sorted(old_counts.items())),
         "model_runtime_loaded": False,
         "solver_launched": False,
+        "parent_audit_status": parent_audit.get("status") if parent_audit else "pending",
+        "qualification_request_files": sorted(
+            str(path.relative_to(output_root))
+            for path in (output_root / "qualification_requests").glob("*.json")
+        ) if (output_root / "qualification_requests").is_dir() else [],
     }
     return report
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["audit-history", "generate", "validate"], nargs="?", default="generate")
+    parser.add_argument("action", choices=["audit-history", "audit-parents", "generate", "validate"], nargs="?", default="generate")
     parser.add_argument("--output", type=Path, default=FAMILY_ROOT)
     parser.add_argument("--historical-root", type=Path, default=HISTORICAL_ROOT)
     parser.add_argument("--archive-root", type=Path, default=MATERIAL_ARCHIVE_ROOT)
@@ -1451,6 +2487,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.report:
             _write_json(args.report, report)
         return 0
+    if args.action == "audit-parents":
+        report = audit_parents(args.output)
+        print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+        if args.report:
+            _write_json(args.report, report)
+        return 0 if report["status"] == "pass" else 1
     if args.action == "generate":
         report = generate_family(args.output, args.historical_root, args.archive_root, inspect_hdf5=not args.no_hdf5, full_hash=args.full_hash)
         result = {"status": "generated", "output": str(args.output), "summary": report["summary"]}
