@@ -639,7 +639,8 @@ def _ensure_source_unchanged(data_root: Path, before: Mapping[str, Any]) -> dict
 def audit_conversion_contract(*, data_root: Path, generated_xml: Path, decoder: Path, solver_log: Path | None, solver_receipt: Path | None) -> dict[str, Any]:
     """Cheap preflight used by tests and callers that need no HDF5 output."""
     paths = frame_paths(data_root)
-    first = decode_frame(paths[0], decoder, Path(tempfile.mkdtemp(prefix="ds02-direct-preflight-")), 0)
+    with tempfile.TemporaryDirectory(prefix="ds02-direct-preflight-") as scratch:
+        first = decode_frame(paths[0], decoder, Path(scratch), 0)
     blocks = parse_particle_blocks(generated_xml)
     dynamic = _reject_dynamic_contract(generated_xml, first.metadata)
     dimension = _dimension_evidence(generated_xml, solver_log, solver_receipt)
