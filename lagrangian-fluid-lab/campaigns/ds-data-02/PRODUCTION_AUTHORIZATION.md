@@ -38,6 +38,10 @@ labels, evaluation, preview, split and provenance acceptance. A zero return
 code or an approved numerical scope is not final product acceptance.
 
 The launch receipt records request-owner and runner-owner Git states separately,
-as well as runtime/code/input hashes. All referenced input and approval files
-must remain immutable while a launch is running. Version approval manifests
-rather than patching completed evidence.
+as well as runtime/code/input hashes. Referenced inputs and the selected scope's
+approval dependencies remain immutable while a launch runs. The selected
+registry entry and the index hash at launch are copied into the receipt.
+Adding another family's approval does not invalidate this case. The runner
+rechecks the selected entry while running and at completion; changing,
+duplicating or revoking that entry affects only its dependent cases. Version
+approval manifests rather than patching completed evidence.

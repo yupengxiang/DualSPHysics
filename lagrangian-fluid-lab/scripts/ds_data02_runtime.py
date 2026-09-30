@@ -195,7 +195,7 @@ def git_launch_state(root):
                 diff_sha256=hashlib.sha256(query(['diff', 'HEAD']).encode()).hexdigest())
 
 
-def validate_request(request):
+def validate_request(request, *, approval_context=None):
     for key in ('family_id', 'case_id', 'attempt_id', 'kind', 'command', 'cwd', 'max_wall_seconds',
                 'cpu_threads', 'estimated_storage_bytes', 'input_files', 'worktree_root'):
         if key not in request:
@@ -245,8 +245,10 @@ def validate_request(request):
     if not hashes:
         raise ValueError('input provenance is mandatory')
     if request['kind'] == 'production':
-        from ds_data02_production import authorize
-        hashes.update(authorize(request))
+        from ds_data02_production import INDEX, authorize
+        if str(INDEX.resolve()) in hashes:
+            raise ValueError('mutable approval registry must not be an immutable input; selected approval is recorded separately')
+        hashes.update(authorize(request, approval_context=approval_context))
     return hashes
 
 
@@ -272,7 +274,8 @@ def run_request(request_path, *, data_root=DATA_ROOT):
     data_root = Path(data_root)
     request = json.loads(Path(request_path).read_text())
     before_cpu = cpu_usage()
-    hashes = validate_request(request)
+    approval_context = {}
+    hashes = validate_request(request, approval_context=approval_context)
     attempt = f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
     output = data_root / 'families' / attempt
     if output.exists():
@@ -294,6 +297,8 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                    git_at_launch=git_launch_state(request['worktree_root']), started_at_utc=None,
                    output_root=str(output), numerical_reference_status='approved_scope_at_launch' if request['kind'] == 'production' else 'not_assessed',
                    production_product_acceptance='not_assessed')
+    if approval_context:
+        receipt['scientific_approval_at_launch'] = approval_context
     try:
         with ledger_locked(data_root) as ledger:
             check_reservation(ledger, reservation, tree_bytes(data_root))
@@ -349,6 +354,13 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                     reason = 'campaign_deadline_reached'
                 if elapsed - last_check >= 5:
                     last_check = elapsed
+                    if approval_context:
+                        from ds_data02_production import revalidate_approval
+                        try:
+                            receipt['scientific_approval_revalidation'] = revalidate_approval(approval_context)
+                        except (OSError, ValueError) as error:
+                            receipt['scientific_approval_revalidation'] = dict(status='failed', error=str(error))
+                            reason = 'selected_scientific_approval_changed'
                     if lease_path:
                         atomic_json(lease_path, dict(uuid=device['uuid'], device_index=device['index'],
                                                    attempt_id=attempt, launcher_pid=os.getpid(), pid=proc.pid,
@@ -384,6 +396,13 @@ def run_request(request_path, *, data_root=DATA_ROOT):
         if receipt['input_hashes_after_run'] != hashes:
             receipt['status'] = 'failed'
             receipt['provenance_error'] = 'input_mutated_during_run'
+        if approval_context:
+            from ds_data02_production import revalidate_approval
+            try:
+                receipt['scientific_approval_revalidation'] = revalidate_approval(approval_context)
+            except (OSError, ValueError) as error:
+                receipt.update(status='failed', provenance_error='selected_scientific_approval_changed',
+                               scientific_approval_revalidation=dict(status='failed', error=str(error)))
         atomic_json(output / 'execution-receipt.json', receipt)
         if registered:
             with ledger_locked(data_root) as ledger:

@@ -25,7 +25,7 @@ def digest(path):
     return h.hexdigest()
 
 
-def _json(path):
+def _parse_json(content):
     def unique(pairs):
         result = {}
         for key, value in pairs:
@@ -33,7 +33,31 @@ def _json(path):
                 raise ValueError('duplicate JSON field')
             result[key] = value
         return result
-    return json.loads(Path(path).read_text(), object_pairs_hook=unique)
+    return json.loads(content, object_pairs_hook=unique)
+
+
+def _json(path):
+    return _parse_json(Path(path).read_text())
+
+
+def _entry_digest(entry):
+    return hashlib.sha256(json.dumps(entry, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def revalidate_approval(context):
+    """Only a change to the selected approval affects this running family."""
+    raw = Path(context['index_path']).read_bytes()
+    index = _parse_json(raw)
+    if index.get('schema') != 'ds02.root-approved-scopes.v1' or index.get('campaign_id') != 'DS-DATA-02':
+        raise ValueError('root approval index became invalid')
+    selected = context['selected_entry_at_launch']
+    matching = [entry for entry in index.get('scopes', [])
+                if (entry.get('family_id'), entry.get('scope_id')) ==
+                (selected['family_id'], selected['scope_id'])]
+    if len(matching) != 1 or _entry_digest(matching[0]) != context['selected_entry_sha256']:
+        raise ValueError('selected scientific approval changed or was revoked')
+    return dict(status='selected_approval_unchanged', index_sha256=hashlib.sha256(raw).hexdigest(),
+                selected_entry_sha256=context['selected_entry_sha256'])
 
 
 def _binding(binding, hashes):
@@ -58,10 +82,11 @@ def _scope_verdict(scope, evidence):
     return json.loads(result.stdout)
 
 
-def authorize(request, *, index_path=INDEX):
+def authorize(request, *, index_path=INDEX, approval_context=None):
     """Return all immutable launch bindings; reject before any GPU lease."""
     index_path = Path(index_path).resolve()
-    index = _json(index_path)
+    raw_index = index_path.read_bytes()
+    index = _parse_json(raw_index)
     if index.get('schema') != 'ds02.root-approved-scopes.v1' or index.get('campaign_id') != 'DS-DATA-02':
         raise ValueError('invalid root approval index')
     entries = index.get('scopes', [])
@@ -69,7 +94,14 @@ def authorize(request, *, index_path=INDEX):
     if len(matching) != 1:
         raise ValueError('production_scope_not_approved')
     entry = matching[0]
-    hashes = {str(index_path): digest(index_path), str(Path(__file__).resolve()): digest(__file__)}
+    # The registry can acquire other families while this approved scope runs.
+    # Freeze its selected entry in the receipt and hash every dependency of
+    # that entry, rather than making all families depend on the whole index.
+    context = dict(index_path=str(index_path), index_sha256_at_launch=hashlib.sha256(raw_index).hexdigest(),
+                   selected_entry_at_launch=entry, selected_entry_sha256=_entry_digest(entry))
+    if approval_context is not None:
+        approval_context.update(context)
+    hashes = {str(Path(__file__).resolve()): digest(__file__)}
     paths = {key: _binding(entry[key], hashes) for key in ('scope_spec', 'scope_evidence', 'root_decision', 'production_manifest')}
     scope, decision, manifest = (_json(paths[key]) for key in ('scope_spec', 'root_decision', 'production_manifest'))
     identity = (request['family_id'], request['scope_id'])

@@ -7,7 +7,7 @@ import sys
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from ds_data02_production import authorize
+from ds_data02_production import authorize, revalidate_approval
 from test_ds_data02_scope import _write_fixture
 
 
@@ -67,9 +67,39 @@ def fixture(tmp_path):
 
 def test_actual_scope_verifier_and_membership_bind_successful_launch_without_case_trajectory(tmp_path):
     request, index = fixture(tmp_path)
-    hashes = authorize(request, index_path=index)
-    assert str(index) in hashes
+    context = {}
+    hashes = authorize(request, index_path=index, approval_context=context)
+    assert str(index) not in hashes
+    assert context['index_sha256_at_launch'] == hashlib.sha256(index.read_bytes()).hexdigest()
+    assert revalidate_approval(context)['status'] == 'selected_approval_unchanged'
     assert request['gencase_receipt'] in hashes
+
+
+def test_another_family_approval_does_not_invalidate_selected_launch(tmp_path):
+    request, index = fixture(tmp_path)
+    context = {}
+    hashes = authorize(request, index_path=index, approval_context=context)
+    document = json.loads(index.read_text())
+    document['scopes'].append(dict(family_id='F7', scope_id='other-family-scope'))
+    save(index, document)
+    result = revalidate_approval(context)
+    assert result['status'] == 'selected_approval_unchanged'
+    assert result['index_sha256'] != context['index_sha256_at_launch']
+    assert all(hashlib.sha256(Path(p).read_bytes()).hexdigest() == h for p,h in hashes.items())
+
+
+@pytest.mark.parametrize('change', ['remove', 'duplicate', 'change'])
+def test_selected_approval_revocation_or_change_is_detected(tmp_path, change):
+    request, index = fixture(tmp_path)
+    context = {}
+    authorize(request, index_path=index, approval_context=context)
+    document = json.loads(index.read_text())
+    if change == 'remove': document['scopes'] = []
+    elif change == 'duplicate': document['scopes'].append(copy.deepcopy(document['scopes'][0]))
+    else: document['scopes'][0]['root_decision']['sha256'] = 'f'*64
+    save(index, document)
+    with pytest.raises(ValueError, match='changed or was revoked'):
+        revalidate_approval(context)
 
 
 def test_self_declared_qualification_cannot_rescue_missing_root_approval(tmp_path):
