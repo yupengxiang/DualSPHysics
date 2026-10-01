@@ -422,6 +422,13 @@ def _obstacle_xml(spec: CaseSpec) -> tuple[str, dict[str, Any]]:
     # small disconnected lattice component, producing 6--12 kg across dp.
     fluid_seed_x = fill_x0 + 0.10
     fluid_seed_x_right = fill_x0 + fill_x - 0.10
+    domain_margin = 4.0 * spec.dp_m
+    domain_min_x = x0 - domain_margin
+    domain_min_y = y0 - domain_margin
+    domain_min_z = -domain_margin
+    domain_max_x = -x0 + domain_margin
+    domain_max_y = -y0 + domain_margin
+    domain_max_z = tank_z + domain_margin
     motion = f"""
       <motion>
         <objreal ref="2">
@@ -464,8 +471,8 @@ def _obstacle_xml(spec: CaseSpec) -> tuple[str, dict[str, Any]]:
     <geometry>
       <definition dp="{fmt(spec.dp_m)}" units_comment="metres (m)">
         <pointref x="{fmt(spec.dp_m / 2)}" y="{fmt(spec.dp_m / 2)}" z="{fmt(spec.dp_m / 2)}" />
-        <pointmin x="{fmt(x0)}" y="{fmt(y0)}" z="0" />
-        <pointmax x="{fmt(-x0)}" y="{fmt(-y0)}" z="{fmt(tank_z)}" />
+        <pointmin x="{fmt(domain_min_x)}" y="{fmt(domain_min_y)}" z="{fmt(domain_min_z)}" />
+        <pointmax x="{fmt(domain_max_x)}" y="{fmt(domain_max_y)}" z="{fmt(domain_max_z)}" />
       </definition>
       <commands>
         <mainlist>
@@ -505,9 +512,7 @@ def _obstacle_xml(spec: CaseSpec) -> tuple[str, dict[str, Any]]:
   <execution>
     <parameters>
       <parameter key="SavePosDouble" value="2" />
-      <parameter key="Boundary" value="2" />
-      <parameter key="SlipMode" value="2" />
-      <parameter key="NoPenetration" value="1" />
+      <parameter key="Boundary" value="1" />
       <parameter key="StepAlgorithm" value="2" />
       <parameter key="Kernel" value="2" />
       <parameter key="ViscoTreatment" value="1" />

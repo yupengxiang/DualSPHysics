@@ -371,6 +371,10 @@ def audit_pump_transport(
     identity = np.column_stack((particle_zone, particle_id))
     if len(np.unique(identity, axis=0)) != particle_count:
         return _blocked("blocked_duplicate_identity", f"{IDENTITY} is not unique")
+    if particle_id_by_frame.ndim == 1:
+        particle_id_by_frame = np.broadcast_to(particle_id_by_frame[None, :], (frame_count, particle_count))
+    if particle_zone_by_frame.ndim == 1:
+        particle_zone_by_frame = np.broadcast_to(particle_zone_by_frame[None, :], (frame_count, particle_count))
     if (particle_id_by_frame.shape != (frame_count, particle_count)
             or particle_zone_by_frame.shape != (frame_count, particle_count)):
         return _blocked("blocked_invalid_identity_history", "cross-frame identity datasets must have shape [T,N]")

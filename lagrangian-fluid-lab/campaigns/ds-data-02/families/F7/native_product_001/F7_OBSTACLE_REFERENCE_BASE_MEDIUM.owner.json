@@ -1,0 +1,81 @@
+{
+  "schema": "ds02.f7.full-native-owner.v1",
+  "family_id": "F7",
+  "case_id": "F7_OBSTACLE_REFERENCE_BASE_MEDIUM",
+  "physical_case_id": "F7_OBSTACLE_REFERENCE_BASE",
+  "resolution": "medium",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F7",
+    "physical_case_id": "F7_OBSTACLE_REFERENCE_BASE",
+    "mechanism_id": "moving_obstacle_exchange",
+    "geometry_family_id": "obstacle_exchange_tank_blade_v1",
+    "control_family_id": "obstacle_sinusoidal_rotation_45deg_0p4hz",
+    "geometry": {
+      "tank": {
+        "low_m": [-0.6, -0.4, 0.0],
+        "size_m": [1.2, 0.8, 0.6],
+        "label": "Closed rectangular tank container"
+      },
+      "blade": {
+        "low_m": [-0.07, -0.24, 0.05],
+        "size_m": [0.06, 0.48, 0.48],
+        "label": "Rotating obstacle blade"
+      },
+      "fluid_left": {
+        "low_m": [-0.55, -0.35, 0.05],
+        "size_m": [0.51, 0.70, 0.432],
+        "mkfluid": 1,
+        "label": "Left fluid chamber"
+      },
+      "fluid_right": {
+        "low_m": [-0.01, -0.35, 0.05],
+        "size_m": [0.55, 0.70, 0.432],
+        "mkfluid": 1,
+        "label": "Right fluid chamber"
+      }
+    },
+    "initial_state": {
+      "source_regions": [
+        "initial left chamber fluid",
+        "initial right chamber fluid"
+      ],
+      "velocities_m_per_s": [
+        [0.0, 0.0, 0.0]
+      ],
+      "mass_policy": "Actual native initial mass retained; continuous fluid mass 320.1984 kg"
+    },
+    "controls": {},
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "motion_csv": "F7_OBSTACLE_REFERENCE_BASE_MEDIUM_motion.csv",
+      "amplitude_deg": 45.0,
+      "frequency_hz": 0.4,
+      "axis_p1_m": [-0.04, 0.0, 0.05],
+      "axis_p2_m": [-0.04, 0.0, 1.05]
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 12.0,
+      "sequence": [
+        "start",
+        "forward rotation",
+        "neutral wait",
+        "reverse rotation",
+        "two complete exchange cycles",
+        "partial final cycle"
+      ],
+      "right_censor_policy": "12.0 s event boundary; no stopped tail claim"
+    }
+  },
+  "source_solver_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_REFERENCE_BASE_MEDIUM/F7_OBSTACLE_REFERENCE_BASE_MEDIUM_QUALIFICATION_003/execution-receipt.json",
+    "sha256": "8832c2293ebcf869988229181ac9ea42eef823de26e507a0b5f270aa8e2b7580"
+  },
+  "source_gencase_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_REFERENCE_BASE_MEDIUM/F7_OBSTACLE_REFERENCE_BASE_MEDIUM_GENCASE_07/execution-receipt.json",
+    "sha256": "548572b5b2441c1e92b736e6b2a4d33776adf88586a9d1bdfbb6d6188585a9f8"
+  },
+  "product_boundary": "Reference full native states only; moving rigid pose, complete labels, continuous mass and Q-N pending"
+}

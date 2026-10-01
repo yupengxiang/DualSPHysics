@@ -43,13 +43,20 @@ def render(source, metadata, output):
                 ax.set_aspect('equal',adjustable='box')
                 ax.set_xlabel('x [m]');ax.set_ylabel('y [m]' if axis==1 else 'z [m]')
                 ax.set_title(f't = {times[ti]:.4f} s' if row==0 else 'native side view',fontsize=10)
-                if metadata['mechanism_id']=='eccentric_obstacle':
-                    y=geom['obstacle_y_m'] if axis==1 else 0
-                    height=geom['obstacle_width_m'] if axis==1 else geom['obstacle_height_m']
-                    ax.add_patch(Rectangle((geom['obstacle_x_m'],y),geom['obstacle_length_m'],height,
-                                           fill=False,edgecolor='#42484e',linewidth=1))
-        fig.suptitle(f"F1 eccentric obstacle: actual saved numerical states\n"
-                     f"orange/blue = initial transverse halves; initial fluid mass {initial_mass:.3f} kg; Q-N pending",fontsize=12)
+                if metadata.get('mechanism_id') == 'eccentric_obstacle':
+                    y = geom['obstacle_y_m'] if axis == 1 else 0
+                    height = geom['obstacle_width_m'] if axis == 1 else geom['obstacle_height_m']
+                    ax.add_patch(Rectangle((geom['obstacle_x_m'], y), geom['obstacle_length_m'], height,
+                                           fill=False, edgecolor='#42484e', linewidth=1))
+                elif metadata.get('mechanism_id') in ('asymmetric_dual_channel', 'dual_channel'):
+                    y = geom.get('separator_y_m', 0.34) if axis == 1 else 0
+                    height = geom.get('separator_thickness_m', 0.06) if axis == 1 else geom.get('separator_height_m', 0.7)
+                    ax.add_patch(Rectangle((geom.get('separator_start_x_m', 1.25), y),
+                                           geom.get('separator_length_m', 0.8), height,
+                                           fill=False, edgecolor='#42484e', linewidth=1))
+        mech_label = metadata.get('mechanism_id', 'case').replace('_', ' ')
+        fig.suptitle(f"F1 {mech_label}: actual saved numerical states\n"
+                     f"orange/blue = initial transverse halves; initial fluid mass {initial_mass:.3f} kg; Q-N pending", fontsize=12)
         output.parent.mkdir(parents=True,exist_ok=True)
         fig.savefig(output,dpi=180)
         plt.close(fig)

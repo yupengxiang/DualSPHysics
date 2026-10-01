@@ -37,11 +37,13 @@ def read_frame(path: Path, identity_only=False):
     # PartVTK emits leading spaces in the particle header.  Applying a
     # usecols predicate before pandas has normalized those names can silently
     # drop Idp/Zone and makes otherwise valid solver output unauditable.
-    frame = pd.read_csv(path, skiprows=3)
-    frame.columns = [str(column).strip() for column in frame.columns]
-    frame = frame.loc[:, ~frame.columns.str.startswith("Unnamed")]
     if identity_only:
-        frame = frame[["Idp", "Zone"]]
+        frame = pd.read_csv(path, skiprows=3, usecols=lambda c: str(c).strip() in {"Idp", "Zone"})
+        frame.columns = [str(column).strip() for column in frame.columns]
+    else:
+        frame = pd.read_csv(path, skiprows=3)
+        frame.columns = [str(column).strip() for column in frame.columns]
+        frame = frame.loc[:, ~frame.columns.str.startswith("Unnamed")]
     if "Zone" not in frame:
         frame["Zone"] = 0
     return frame
@@ -56,15 +58,24 @@ def source_fingerprint(csv_paths):
 def scan_identity_axis(csv_paths):
     if not csv_paths:
         raise ValueError("no particle CSV frames were supplied")
-    identity_keys = set()
-    times = []
-    for path in csv_paths:
-        times.append(frame_time(path))
-        frame = read_frame(path, identity_only=True)
-        identity_keys.update(zip(frame["Zone"].astype(int), frame["Idp"].astype(int)))
+    times = [frame_time(path) for path in csv_paths]
     times = np.asarray(times, dtype=np.float64)
     if len(times) < 2 or not np.all(np.diff(times) > 0):
         raise ValueError("CSV frame times must be strictly increasing and contain at least two frames")
+    f0 = read_frame(csv_paths[0], identity_only=True)
+    identity_keys = set(zip(f0["Zone"].astype(int), f0["Idp"].astype(int)))
+    min_id = min(k[1] for k in identity_keys)
+    max_id = max(k[1] for k in identity_keys)
+    expected_n = len(identity_keys)
+    for path in csv_paths[1:]:
+        frame = read_frame(path, identity_only=True)
+        pids = frame["Idp"].to_numpy(np.int64)
+        zones = frame["Zone"].to_numpy(np.int64)
+        if len(frame) > expected_n or (len(pids) > 0 and (pids.max() > max_id or pids.min() < min_id)):
+            identity_keys.update(zip(zones.tolist(), pids.tolist()))
+            expected_n = len(identity_keys)
+            min_id = min(k[1] for k in identity_keys)
+            max_id = max(k[1] for k in identity_keys)
     keys = np.asarray(sorted(identity_keys), dtype=np.int64)
     return times, keys
 
@@ -102,16 +113,32 @@ def create_partial(path, record, times, keys, fingerprint):
 
 
 def write_frames(partial_path, csv_paths, keys, start_frame=0, fail_after_frames=None):
-    key_to_index = {(int(zone), int(pid)): index for index, (zone, pid) in enumerate(keys)}
+    max_zone = int(keys[:, 0].max())
+    max_id = int(keys[:, 1].max())
+    if max_id < 20_000_000 and max_zone < 1000:
+        table = np.full((max_zone + 1, max_id + 1), -1, dtype=np.int64)
+        table[keys[:, 0], keys[:, 1]] = np.arange(len(keys))
+        vectorized_lookup = True
+    else:
+        key_to_index = {(int(zone), int(pid)): index for index, (zone, pid) in enumerate(keys)}
+        vectorized_lookup = False
+
     with h5py.File(partial_path, "r+") as h5:
         for frame_index in range(start_frame, len(csv_paths)):
             frame = read_frame(csv_paths[frame_index])
-            frame_keys = np.column_stack((frame["Zone"].to_numpy(np.int64),
-                                          frame["Idp"].to_numpy(np.int64)))
-            if len(np.unique(frame_keys, axis=0)) != len(frame_keys):
-                raise ValueError(f"duplicate (zone,idp) key in frame {frame_index}")
-            indices = np.asarray([key_to_index[(int(zone), int(pid))]
-                                  for zone, pid in frame_keys])
+            zones = frame["Zone"].to_numpy(np.int64)
+            pids = frame["Idp"].to_numpy(np.int64)
+            if vectorized_lookup:
+                indices = table[zones, pids]
+                if np.any(indices < 0):
+                    raise ValueError(f"unrecognized particle key in frame {frame_index}")
+                if len(np.unique(indices)) != len(indices):
+                    raise ValueError(f"duplicate (zone,idp) key in frame {frame_index}")
+            else:
+                frame_keys = np.column_stack((zones, pids))
+                if len(np.unique(frame_keys, axis=0)) != len(frame_keys):
+                    raise ValueError(f"duplicate (zone,idp) key in frame {frame_index}")
+                indices = np.asarray([key_to_index[(int(z), int(p))] for z, p in zip(zones, pids)])
             order = np.argsort(indices)
             indices = indices[order]
             h5["valid"][frame_index, indices] = True
@@ -120,8 +147,10 @@ def write_frames(partial_path, csv_paths, keys, start_frame=0, fail_after_frames
             for name, (column, dtype, _) in SCALAR_COLUMNS.items():
                 h5[name][frame_index, indices] = frame[column].to_numpy(dtype)[order]
             h5.attrs.modify("conversion_complete_frames", frame_index + 1)
-            h5.flush()
+            if (frame_index + 1) % 50 == 0 or frame_index + 1 == len(csv_paths):
+                h5.flush()
             if fail_after_frames is not None and frame_index + 1 >= fail_after_frames:
+                h5.flush()
                 raise RuntimeError("injected conversion interruption")
         h5.attrs.modify("conversion_complete", True)
         h5.flush()

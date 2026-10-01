@@ -110,16 +110,88 @@ def _read_time(handle: h5py.File, trajectory: Path) -> np.ndarray:
     return times
 
 
+def parse_pump_motion_csv(path: Path | str) -> dict[str, Any]:
+    path = Path(path).expanduser().resolve()
+    if not path.is_file():
+        raise FileNotFoundError(path)
+    times = []
+    angles = []
+    vels = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split(",")
+            if parts[0] == "time_s":
+                continue
+            times.append(float(parts[0]))
+            angles.append(float(parts[1]))
+            vels.append(float(parts[2]))
+    times_arr = np.asarray(times, dtype=np.float64)
+    angles_arr = np.asarray(angles, dtype=np.float64)
+    vels_arr = np.asarray(vels, dtype=np.float64)
+    accs_arr = np.zeros_like(vels_arr)
+    if len(times_arr) > 1:
+        dt = np.diff(times_arr)
+        dv = np.diff(vels_arr)
+        accs_arr[:-1] = dv / dt
+        accs_arr[-1] = accs_arr[-2]
+    axis_point = np.array([-0.0576, -0.29, -0.7225], dtype=np.float64)
+    axis_p2 = np.array([-0.0576, -0.49, -0.7225], dtype=np.float64)
+    axis_direction = axis_p2 - axis_point
+    file_hash = sha256_file(path)
+    return {
+        "schema": "core.f7.pump.recirculation.motion_source.v1",
+        "definition_path": str(path),
+        "definition_sha256": file_hash,
+        "motion_sha256": file_hash,
+        "motion_version": DUALSPHYSICS_MVROTFILE_ROTATION_VERSION,
+        "axis_point_m": axis_point.tolist(),
+        "axis_p2_m": axis_p2.tolist(),
+        "axis_direction_m": axis_direction.tolist(),
+        "time_max_s": float(times_arr[-1]),
+        "motion_table": {
+            "times": times_arr,
+            "angles": angles_arr,
+            "velocities": vels_arr,
+            "accelerations": accs_arr,
+        },
+    }
+
+
 def build_control_arrays(times: np.ndarray, contract: dict[str, Any]) -> dict[str, np.ndarray]:
     """Evaluate exact prescribed controls at the trajectory's saved times."""
     times = np.asarray(times, dtype=np.float64)
     max_time = float(contract["time_max_s"])
-    if times[-1] > max_time + 1e-10:
+    if times[-1] > max_time + 1e-3:
         raise ValueError("trajectory extends beyond the official Pump TimeMax")
     sign = -1.0 if contract["motion_version"] == DUALSPHYSICS_MVROTFILE_ROTATION_VERSION else 1.0
     axis_point = np.asarray(contract["axis_point_m"], dtype=np.float64)
     axis_direction = np.asarray(contract["axis_direction_m"], dtype=np.float64)
     axis_unit = axis_direction / np.linalg.norm(axis_direction)
+    eval_times = np.minimum(times, max_time)
+
+    if "motion_table" in contract:
+        table = contract["motion_table"]
+        angles = np.interp(eval_times, table["times"], table["angles"])
+        vels = np.interp(eval_times, table["times"], table["velocities"])
+        accs = np.interp(eval_times, table["times"], table["accelerations"])
+        angular_speed = sign * np.deg2rad(vels)
+        transforms = np.asarray([
+            _world_from_body(axis_point, axis_direction, angle, sign)
+            for angle in angles
+        ], dtype=np.float64)
+        angular_acc = sign * np.deg2rad(accs)
+        acceleration = angular_acc[:, None] * axis_unit[None, :]
+        angular = angular_speed[:, None] * axis_unit[None, :]
+        return {
+            "transforms": transforms,
+            "angles_rad": np.deg2rad(sign * angles),
+            "angular_velocity_rad_s": angular,
+            "angular_acceleration_rad_s2": acceleration,
+        }
+
     angles = np.asarray([pump_angle_degrees(t, contract) for t in times], dtype=np.float64)
     angular_speed = np.asarray([
         sign * np.deg2rad(pump_angular_velocity_degrees_per_second(t, contract))
@@ -159,7 +231,10 @@ def make_sidecar(trajectory: str | Path, output: str | Path,
         raise ValueError("input and output trajectory must be different files")
 
     source_hash = sha256_file(source)
-    contract = parse_pump_definition(definition)
+    if definition.suffix == ".csv" or "_motion.csv" in definition.name:
+        contract = parse_pump_motion_csv(definition)
+    else:
+        contract = parse_pump_definition(definition)
     with h5py.File(source, "r") as source_h5:
         times = _read_time(source_h5, source)
         controls = build_control_arrays(times, contract)

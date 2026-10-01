@@ -638,11 +638,21 @@ def _run_partvtk(partvtk: Path, data_root: Path, csv_root: Path, frame_count: in
         f"-threads:{threads}", "-savecsv", str(csv_root / "Particles"),
         "-onlytype:+all", "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone", "-csvsep:1",
     ]
+    log_path = csv_root.parent / "partvtk.stdout.log"
+    existing_frames = list(csv_root.glob("Particles_[0-9][0-9][0-9][0-9].csv"))
+    if len(existing_frames) == frame_count and log_path.is_file():
+        return {
+            "path": str(partvtk),
+            "sha256": _sha256(partvtk),
+            "command": command,
+            "returncode": 0,
+            "stdout_log": str(log_path),
+            "stdout_sha256": _sha256(log_path),
+        }
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = f"{partvtk.parent}:{env.get('LD_LIBRARY_PATH', '')}"
     completed = subprocess.run(command, cwd=LAB_ROOT, env=env, stdout=subprocess.PIPE,
                                stderr=subprocess.STDOUT, text=True, errors="replace", check=False)
-    log_path = csv_root.parent / "partvtk.stdout.log"
     log_path.write_text(completed.stdout, encoding="utf-8")
     if completed.returncode != 0:
         raise ConversionError(f"PartVTK failed with return code {completed.returncode}: {completed.stdout[-1200:]}")

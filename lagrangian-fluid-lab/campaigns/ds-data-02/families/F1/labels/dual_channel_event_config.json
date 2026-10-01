@@ -1,0 +1,167 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "geometry_source": "F1_REF_DUAL_NOMINAL_COARSE_Def.xml",
+  "geometry_sha256": "e1202dd0f0ddf4ec8e75722ef2b7ebd779bf3e3147b97f372194f9820d70e889",
+  "physical_case_id": "F1_REF_DUAL_NOMINAL",
+  "source_regions": [
+    {
+      "id": "initial_lower_half",
+      "bounds": [
+        [
+          2.0,
+          3.25
+        ],
+        [
+          -0.05,
+          0.5
+        ],
+        [
+          -0.05,
+          0.6
+        ]
+      ]
+    },
+    {
+      "id": "initial_upper_half",
+      "bounds": [
+        [
+          2.0,
+          3.25
+        ],
+        [
+          0.5,
+          1.05
+        ],
+        [
+          -0.05,
+          0.6
+        ]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "upstream_reservoir",
+      "bounds": [
+        [
+          2.05,
+          3.25
+        ],
+        [
+          -0.05,
+          1.05
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    },
+    {
+      "id": "lower_channel",
+      "bounds": [
+        [
+          1.25,
+          2.05
+        ],
+        [
+          -0.05,
+          0.34
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    },
+    {
+      "id": "upper_channel",
+      "bounds": [
+        [
+          1.25,
+          2.05
+        ],
+        [
+          0.4,
+          1.05
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    },
+    {
+      "id": "downstream_basin",
+      "bounds": [
+        [
+          -0.05,
+          1.25
+        ],
+        [
+          -0.05,
+          1.05
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "lower_channel_entry",
+      "axis": 0,
+      "value": 2.05,
+      "aperture_bounds": [
+        [
+          -0.05,
+          0.34
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    },
+    {
+      "id": "upper_channel_entry",
+      "axis": 0,
+      "value": 2.05,
+      "aperture_bounds": [
+        [
+          0.4,
+          1.05
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    },
+    {
+      "id": "downstream_arrival",
+      "axis": 0,
+      "value": 1.25,
+      "aperture_bounds": [
+        [
+          -0.05,
+          1.05
+        ],
+        [
+          -0.05,
+          1.05
+        ]
+      ]
+    }
+  ],
+  "interpretation": "static finite dual-channel geometry from official definition; disjoint upstream reservoir, lower channel, upper channel, and downstream basin partitions",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "solver exclusions are tracked as numerical loss until spatial audit",
+    "no learned fluid model or heuristic label remapping"
+  ]
+}

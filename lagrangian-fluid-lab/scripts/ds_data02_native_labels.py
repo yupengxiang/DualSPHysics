@@ -120,7 +120,7 @@ def chord_box_fraction(p0, p1, bounds):
     return np.maximum(0, upper-lower)
 
 
-def materialize(source, output, config, *, particle_chunk=16384):
+def materialize(source, output, config, *, particle_chunk=65536):
     validate_config(config)
     source, output = Path(source), Path(output)
     if output.exists() or output.resolve() == source.resolve():
@@ -185,12 +185,18 @@ def materialize(source, output, config, *, particle_chunk=16384):
         for begin in range(0, nparticles, particle_chunk):
             end = min(nparticles, begin+particle_chunk)
             sl = slice(begin, end)
-            initial_valid = h['valid'][0, sl].astype(bool)
-            fluid = initial_valid & (h['type'][0, sl] == 3)
-            mass = np.where(fluid, h['mass'][0, sl], 0).astype(float)
+            chunk_valid = h['valid'][:, sl].astype(bool)
+            chunk_type = h['type'][:, sl]
+            chunk_pos = h['position'][:, sl].astype(float)
+            chunk_mass = h['mass'][:, sl].astype(float)
+            chunk_dest = np.zeros((nt, end-begin), dtype=np.int16)
+
+            initial_valid = chunk_valid[0]
+            fluid = initial_valid & (chunk_type[0] == 3)
+            mass = np.where(fluid, chunk_mass[0], 0).astype(float)
             if not np.isfinite(mass).all() or np.any(mass[fluid] <= 0):
                 raise ValueError('initial fluid mass must be finite and positive')
-            initial_pos = h['position'][0, sl].astype(float)
+            initial_pos = chunk_pos[0]
             if not np.isfinite(initial_pos[fluid]).all():
                 raise ValueError('initial fluid position invalid')
             sources = initial_sources(h, config, sl, fluid, initial_pos)
@@ -205,8 +211,8 @@ def materialize(source, output, config, *, particle_chunk=16384):
             first_estimate = np.full((end-begin, ne), np.nan)
             censor_local = np.ones((end-begin, ne), dtype=np.int8)
             for ti, timestamp in enumerate(time):
-                valid = h['valid'][ti, sl].astype(bool)
-                current_type = h['type'][ti, sl]
+                valid = chunk_valid[ti]
+                current_type = chunk_type[ti]
                 if np.any(~fluid & valid & (current_type == 3)):
                     raise ValueError('births require lifecycle label support')
                 if np.any(fluid & valid & (current_type != 3)):
@@ -214,8 +220,8 @@ def materialize(source, output, config, *, particle_chunk=16384):
                 if np.any(disappeared & fluid & valid):
                     raise ValueError('lost fluid identity reappeared without lineage')
                 disappeared |= fluid & ~valid
-                pos = h['position'][ti, sl].astype(float)
-                current_mass = h['mass'][ti, sl]
+                pos = chunk_pos[ti]
+                current_mass = chunk_mass[ti]
                 good = fluid & valid & np.isfinite(pos).all(axis=1) & np.isfinite(current_mass) & (current_mass > 0)
                 if np.any(good & ~np.isclose(current_mass, mass, rtol=1e-5, atol=0)):
                     raise ValueError('variable mass requires adaptive lifecycle support')
@@ -223,7 +229,7 @@ def materialize(source, output, config, *, particle_chunk=16384):
                 destination[~fluid] = -3
                 destination[fluid & ~valid] = -1
                 destination[fluid & valid & ~good] = -2
-                dest_ds[ti, sl] = destination
+                chunk_dest[ti] = destination
                 unknown[ti] += mass[good & (destination == 0)].sum()
                 lost[ti] += mass[fluid & ~valid].sum()
                 invalid[ti] += mass[fluid & valid & ~good].sum()
@@ -246,6 +252,7 @@ def materialize(source, output, config, *, particle_chunk=16384):
                         first_estimate[selected, ei] = time[ti-1]+tau[selected]*dt
                         censor_local[selected, ei] = 0
                 prev_pos, prev_good = pos, good
+            dest_ds[:, sl] = chunk_dest
             first[sl], estimate[sl], censor[sl] = bracket, first_estimate, censor_local
             residence[sl], unresolved[sl], final_ds[sl] = residence_local, unresolved_local, destination
             failure_ds[sl] = np.where(~fluid, 4, np.where(destination == -1, 1,
@@ -281,7 +288,7 @@ def main():
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--config', type=Path, required=True)
-    parser.add_argument('--particle-chunk', type=int, default=16384)
+    parser.add_argument('--particle-chunk', type=int, default=65536)
     args = parser.parse_args()
     print(json.dumps(materialize(args.source, args.output, json.loads(args.config.read_text()),
                                  particle_chunk=args.particle_chunk), indent=2))
