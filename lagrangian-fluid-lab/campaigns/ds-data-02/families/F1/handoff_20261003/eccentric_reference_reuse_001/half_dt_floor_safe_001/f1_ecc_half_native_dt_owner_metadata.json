@@ -1,0 +1,99 @@
+{
+  "schema": "ds02.f1.eccentric-half-native-dt-owner.v1",
+  "family_id": "F1",
+  "case_id": "F1_REF_ECC_NOMINAL_FINE_HALF_NATIVE_DT_FLOORSAFE",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "physical_parent_id": "F1_REF_ECC_NOMINAL",
+  "mechanism_id": "eccentric_obstacle",
+  "resolution": "fine",
+  "resolution_role": "numeric_time_sensitivity_view",
+  "geometry_reference_sha256": "088405b7cc1813fbeccf8949cfbae6101b85f14c4d66ecef4f8a660b56c756dd",
+  "control_reference_sha256": "fe91d76871626a751854de00d496e45192ac9fdce18eed2d22759c7848f599ec",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "units": {
+    "time": "s",
+    "position": "m",
+    "velocity": "m/s",
+    "density": "kg/m^3",
+    "mass": "kg",
+    "pressure": "Pa"
+  },
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "lineage_group_id": "F1_eccentric_obstacle_v1",
+    "paired_background_id": "F1_REF_PAIR_NOMINAL",
+    "family_id": "F1",
+    "physical_case_id": "F1_REF_ECC_NOMINAL",
+    "mechanism_id": "eccentric_obstacle",
+    "geometry_family_id": "F1_GEOM_ECCENTRIC_OBSTACLE_V1",
+    "control_family_id": "F1_CONTROL_ECCENTRIC_OBSTACLE_V1",
+    "geometry": {
+      "tank": {"low_m": [0.0, 0.0, 0.0], "size_m": [1.6, 0.67, 0.4], "label": "continuous tank with finite bottom/side walls and open top"},
+      "initial_fluid_region": {"low_m": [0.0, 0.0, 0.0], "size_m": [0.4, 0.67, 0.3], "label": "continuous initial fill region"},
+      "eccentric_obstacle": {"low_m": [0.9, 0.24, 0.0], "size_m": [0.12, 0.12, 0.45], "label": "continuous solid obstacle"}
+    },
+    "initial_state": {
+      "source_regions": [{"label": "fluid", "low_m": [0.0, 0.0, 0.0], "size_m": [0.4, 0.67, 0.3]}],
+      "velocities_m_per_s": {"fluid": [0.0, 0.0, 0.0]},
+      "source_labels": ["fluid"],
+      "initial_mass_by_source_kg": {"fluid": 79.20000376179814},
+      "continuum_mass_by_source_kg": {"fluid": 80.4},
+      "initial_mass_total_kg": 79.20000376179814,
+      "mass_policy": "native natural quadrature retained; no mass normalization"
+    },
+    "controls": {
+      "step_algorithm": "Verlet",
+      "kernel": "CubicSpline",
+      "viscosity": "Artificial Monaghan, Visco=0.1, ViscoBoundFactor=1",
+      "density_dt": "Fourtakas et al. 2019 inner density diffusion",
+      "density_dt_value": 0.1,
+      "boundary": "DBC"
+    },
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "gamma": 7.0,
+      "initial_fluid_depth_m": 0.3,
+      "obstacle_offset_y_m": -0.035,
+      "obstacle_width_m": 0.12,
+      "reservoir_length_m": 0.4,
+      "open_top": true,
+      "finite_wall_faces": ["bottom", "left", "right", "front", "back"]
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 1.6,
+      "sequence": ["release", "obstacle interaction", "bypass/split", "downstream arrival", "remerge/return flow"],
+      "expected_first_contact_range_s": [0.0, 1.6],
+      "right_censor_policy": "open free surface is physical geometry; no inlet/birth inference; unknown particle state remains censored"
+    },
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "mass_policy": "report natural native mass and continuous reference separately"
+  },
+  "numeric_scope": {
+    "dp_m": 0.01,
+    "DtIni_s": 2.629040492950434e-05,
+    "DtMin_s": 2.629040492950434e-05,
+    "DtFixed_s": 2.629040492950434e-05,
+    "TimeMax_s": 1.6,
+    "TimeOut_s": 0.001,
+    "CFL": 0.2,
+    "VerletSteps": 40,
+    "numeric_overlay_only": true,
+    "excluded_from_physical_binding": ["dp_m", "DtIni_s", "DtMin_s", "DtFixed_s", "TimeMax_s", "TimeOut_s", "CFL", "VerletSteps", "save_frequency"]
+  },
+  "source_provenance": {
+    "prepared_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE_HALF_NATIVE_DT_FLOORSAFE/gencase-floor-safe-001/F1_REF_ECC_NOMINAL_FINE_HALF_NATIVE_DT_FLOORSAFE.xml",
+    "prepared_xml_sha256": "eef96972c971d9abcec6a3e040d06810aa9de450cea102bfd61b75f18bd719bc",
+    "source_gencase_attempt": "gencase-time-study-001",
+    "source_particle_cloud_sha256": "289c356df028c2ee9e06fc9c325e2deee8a41b42fbf2d120731061d07717d334",
+    "source_solver_attempt": "qualification-f1-ecc-half-native-dt-root-reviewed-20261003-002",
+    "source_geometry_binding": "half-dt-floor-safe-physical-binding.json",
+    "open_birth_adaptive_multi_piece": "unsupported/rejected by direct converter contract"
+  },
+  "qualification_claim": "none; complete typed conversion evidence only",
+  "q_i_status": "pending direct conversion",
+  "q_n_status": "not_assessed",
+  "production_eligibility": "not_evaluated"
+}
