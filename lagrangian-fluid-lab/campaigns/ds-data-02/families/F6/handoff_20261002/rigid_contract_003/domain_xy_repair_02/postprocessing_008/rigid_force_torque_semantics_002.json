@@ -1,0 +1,63 @@
+{
+  "compute_forces": {
+    "input_reference_m": [
+      2.4,
+      1.2,
+      1.08
+    ],
+    "raw_field": "FloatingForce.csv moment columns",
+    "reframe_required_for_current_COM": "only if a matching current COM and matching-time force are available; never subtract a lever arm from native FloatingInfo fluidforceang",
+    "semantic_status": "fixed_reference_point_supplied_to_ComputeForces"
+  },
+  "family_id": "F6",
+  "h5_contract": {
+    "compute_forces_csv": "separate fixed-reference audit",
+    "current_COM_reframed_torque": "not materialized by this audit",
+    "fluid_force_and_fluid_torque": "native FloatingInfo current-COM-at-accumulation-step semantics"
+  },
+  "native_floating_info": {
+    "evidence": [
+      {
+        "claim": "KerFtPartsSumAce reads ftocenter[cf] as rcenter and accumulates cross(position-rcenter, acceleration)",
+        "file": "/home/jade/Projects/DualSPHysics/src/source/JSphGpu_ker.cu",
+        "lines": "1959-1985"
+      },
+      {
+        "claim": "fforceang is the accumulated fluid angular force multiplied by particle mass and stored in FtObjs[cf].fluforceang",
+        "file": "/home/jade/Projects/DualSPHysics/src/source/JSph.cpp",
+        "lines": "2589-2616"
+      },
+      {
+        "claim": "SetFtData serializes v.fluforceang into FloatingInfo",
+        "file": "/home/jade/Projects/DualSPHysics/src/source/JDsPartFloatSave.cpp",
+        "lines": "160-171"
+      }
+    ],
+    "field": "fluidforceang",
+    "origin": "current solver floating center at the force accumulation step",
+    "reframe_required": false,
+    "semantic_status": "current_COM_at_force_accumulation_step",
+    "time_alignment": "FloatingInfo row is saved after the solver step; it is a saved-state record and may differ from the exact force accumulation instant by the step integration interval"
+  },
+  "q_n_status": "pending scientific comparison; torque provenance corrected, no qualification claim",
+  "schema": "ds-data-02.f6.rigid003.postprocessing_008.force_torque_semantics_002.v1",
+  "source_files": {
+    "floating_force_accumulation": {
+      "path": "/home/jade/Projects/DualSPHysics/src/source/JSph.cpp",
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7"
+    },
+    "floating_info_serialization": {
+      "path": "/home/jade/Projects/DualSPHysics/src/source/JDsPartFloatSave.cpp",
+      "sha256": "d54b7ebda6a8a0d5094757d1ab1ba045d01765d72876f53e43d2474694949af8"
+    },
+    "gpu_particle_moment_kernel": {
+      "path": "/home/jade/Projects/DualSPHysics/src/source/JSphGpu_ker.cu",
+      "sha256": "37a28cf2b19e55bc3c6784a0824319af09be9f7933a15ee7ec601b0b2d6aeb0e"
+    }
+  },
+  "supersedes_additively": {
+    "old_bytes_preserved": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_006/rigid_force_torque_semantics_001.json",
+    "sha256": "d65934fe65321809a3e7e49f427bf3fa99c617bdff8107f8ce3bc45468214f8b"
+  }
+}
