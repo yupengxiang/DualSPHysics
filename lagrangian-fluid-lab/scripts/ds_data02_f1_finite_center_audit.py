@@ -121,7 +121,9 @@ def audit(gencase_root: Path, metadata_path: Path, output_path: Path) -> dict:
         "fluid_identity_positions_unique": bool(unique),
         "center_grid_envelope": expected_center_bounds,
         "continuous_reservoir_contains_centers": reservoir_inside,
-        "lattice_residual": bool(float(grid_residual.max()) <= 2e-6),
+        # GenCase's VTK is float32; a 1e-5 lattice residual is the expected
+        # serialization roundoff for 1 cm coordinates.
+        "lattice_residual": bool(float(grid_residual.max()) <= 2e-5),
         "closed_wall_clearance": wall_clearance,
         "separator_clearance": separator_clearance,
         "outer_boundary_generated": len(bound) > 0,
