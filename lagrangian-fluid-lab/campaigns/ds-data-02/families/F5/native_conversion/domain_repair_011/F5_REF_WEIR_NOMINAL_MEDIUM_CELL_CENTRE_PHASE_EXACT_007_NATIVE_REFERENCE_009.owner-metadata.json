@@ -1,0 +1,414 @@
+{
+  "background": "weir_pair",
+  "case_id": "F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009",
+  "control_family_id": "F5_CTRL_OFFICIAL_PISTON_V1",
+  "family_id": "F5",
+  "geometry_family_id": "F5_GEOM_NOTCHED_WEIR_SIDE_SLOT_V1",
+  "lineage_group_id": "lineage_physical_F5_4c73cd98b7230035",
+  "mechanism_id": "weir_pair",
+  "paired_background_id": "F5_REFERENCE_PAIR_NOMINAL",
+  "physical_binding": {
+    "control_family_id": "F5_CTRL_OFFICIAL_PISTON_V1",
+    "controls": {
+      "boundary": "finite DBC floor, finite sidewalls, finite prescribed piston, no periodic y",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.01
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        16.0
+      ],
+      "right_censor_policy": "unseen events at 16 s remain censored and retain the 2352 kg denominator",
+      "sequence": [
+        "toe_first_arrival",
+        "runup_or_crest_first_passage",
+        "return_crossing",
+        "terminal_destination"
+      ],
+      "time_end_s": 16.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F5",
+    "geometry": {
+      "continuous_bed": {
+        "label": "continuous finite bed STL envelope",
+        "low_m": [
+          -1.1,
+          -0.72,
+          -0.25
+        ],
+        "mkfluid": null,
+        "size_m": [
+          11.95,
+          1.44,
+          1.09
+        ]
+      },
+      "finite_tank": {
+        "label": "finite solver tank envelope",
+        "low_m": [
+          -1.1,
+          -0.8,
+          -0.25
+        ],
+        "mkfluid": null,
+        "size_m": [
+          11.9,
+          1.6,
+          1.45
+        ]
+      },
+      "initial_fluid": {
+        "label": "frozen continuous initial fluid box",
+        "low_m": [
+          -0.9,
+          -0.7,
+          0.02
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          4.2,
+          1.4,
+          0.4
+        ]
+      },
+      "return_region": {
+        "label": "finite downstream return destination",
+        "low_m": [
+          7.15,
+          -0.72,
+          0.08
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          3.7,
+          1.44,
+          0.4
+        ]
+      }
+    },
+    "geometry_family_id": "F5_GEOM_NOTCHED_WEIR_SIDE_SLOT_V1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": [
+        2352.0
+      ],
+      "initial_mass_total_kg": 2352.0,
+      "mass_policy": "native BI4 MassFluid times initial fluid cohort; no rescaling",
+      "source_labels": [
+        "upstream_reservoir"
+      ],
+      "source_regions": [
+        "initial_fluid"
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "lineage_group_id": "lineage_physical_F5_4c73cd98b7230035",
+    "mass_policy": "native per-particle mass from BI4 header; type-aware ledger",
+    "mechanism_id": "weir_pair",
+    "open_inlet": false,
+    "paired_background_id": "F5_REFERENCE_PAIR_NOMINAL",
+    "parameters": {
+      "coordinate_components": 3,
+      "finite_destination": "downstream return region and lateral notch for weir_pair",
+      "finite_source": "upstream_reservoir",
+      "initial_depth_m": 0.4,
+      "slope_ratio": 0.28
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "physical_F5_4c73cd98b7230035",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "physical_F5_4c73cd98b7230035",
+  "production_eligibility": "not_evaluated",
+  "q_i_status": "pending immutable conversion and root review",
+  "q_n_status": "not_assessed",
+  "qualification_claim": "none; complete native macro reference only",
+  "raw_solver_tree": {
+    "bytes": 16244746983,
+    "exclusion_accounting": {
+      "case_id": "F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009",
+      "mechanism_id": "weir_pair",
+      "motive_accounting_required": true,
+      "native_partout_artifacts": [
+        {
+          "bytes": 584,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/data/PartOut_000.obi4",
+          "role": "native PartOut artifact retained for later PartVTKOut/typed exclusion audit",
+          "sha256": "7b79f947c913529a749ded2db511a5d834c266ade1902badd8cc0f6512780fe0"
+        }
+      ],
+      "partvtkout_accounting_required": true,
+      "q_i_status": "pending_typed_conversion_partvtkout_and_motive_audit",
+      "q_n_status": "not_assessed",
+      "run_csv": {
+        "case_particles": 633705,
+        "dp_m": 0.025,
+        "fixed_particles": 467230,
+        "header_fields": 49,
+        "part_files": 801,
+        "parts_out": 0,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/Run.csv",
+        "physical_time_s": 16.000052,
+        "sha256": "c6df2fdd1666bb202c5ec53984b44b53e4d21ee8b0cd230a3eee07d75d754b3f"
+      },
+      "saved_frame_contract": {
+        "expected_frames": 801,
+        "first_part": 0,
+        "full_window_s": [
+          0.0,
+          16.00005163297406
+        ],
+        "last_part": 800,
+        "run_csv_part_files": 801,
+        "runparts_rows": 801
+      },
+      "schema": "ds-data-02.f5.native-exclusion-accounting.v1",
+      "solver_counters": {
+        "all_exclusion_counters_zero": true,
+        "exclusion_counters": {
+          "NpOut": {
+            "max": 0,
+            "nonzero_rows": 0,
+            "sum": 0
+          },
+          "NpOutMov": {
+            "max": 0,
+            "nonzero_rows": 0,
+            "sum": 0
+          },
+          "NpOutPos": {
+            "max": 0,
+            "nonzero_rows": 0,
+            "sum": 0
+          },
+          "NpOutRho": {
+            "max": 0,
+            "nonzero_rows": 0,
+            "sum": 0
+          }
+        },
+        "first_part": 0,
+        "first_time_s": 0.0,
+        "last_part": 800,
+        "last_time_s": 16.00005163297406,
+        "np_bound_first": 483177,
+        "np_bound_last": 483177,
+        "np_fluid_first": 150528,
+        "np_fluid_last": 150528,
+        "np_sim_first": 633705,
+        "np_sim_last": 633705,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/RunPARTs.csv",
+        "row_count": 801,
+        "sha256": "bf295fb06e081d93cadd2bb05ba65e9c18e26cfa4bd9d33985fbadbfe2728455"
+      },
+      "unknown_exclusion_policy": "RunPARTs counters and Run.csv PartsOut are retained as solver accounting only; every PartOut artifact is hash-bound and its particle identity/provenance remains unknown until official PartVTKOut plus typed HDF5 conversion audit."
+    },
+    "frame_count": 801,
+    "run_csv_accounting": {
+      "case_particles": 633705,
+      "dp_m": 0.025,
+      "fixed_particles": 467230,
+      "header_fields": 49,
+      "part_files": 801,
+      "parts_out": 0,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/Run.csv",
+      "physical_time_s": 16.000052,
+      "sha256": "c6df2fdd1666bb202c5ec53984b44b53e4d21ee8b0cd230a3eee07d75d754b3f"
+    },
+    "runparts_accounting": {
+      "all_exclusion_counters_zero": true,
+      "exclusion_counters": {
+        "NpOut": {
+          "max": 0,
+          "nonzero_rows": 0,
+          "sum": 0
+        },
+        "NpOutMov": {
+          "max": 0,
+          "nonzero_rows": 0,
+          "sum": 0
+        },
+        "NpOutPos": {
+          "max": 0,
+          "nonzero_rows": 0,
+          "sum": 0
+        },
+        "NpOutRho": {
+          "max": 0,
+          "nonzero_rows": 0,
+          "sum": 0
+        }
+      },
+      "first_part": 0,
+      "first_time_s": 0.0,
+      "last_part": 800,
+      "last_time_s": 16.00005163297406,
+      "np_bound_first": 483177,
+      "np_bound_last": 483177,
+      "np_fluid_first": 150528,
+      "np_fluid_last": 150528,
+      "np_sim_first": 633705,
+      "np_sim_last": 633705,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/RunPARTs.csv",
+      "row_count": 801,
+      "sha256": "bf295fb06e081d93cadd2bb05ba65e9c18e26cfa4bd9d33985fbadbfe2728455"
+    },
+    "save_interval_s": 0.02,
+    "time_window_s": [
+      0.0,
+      16.0
+    ],
+    "tree_sha256": "d691126dc7f162d70693a467bbb9b6a3106c54bb18dd65fbaaecc957f168a45e",
+    "typed_native": {
+      "fluid_mass_kg": 2352.0,
+      "fluid_particles": 150528,
+      "mk_counts": {
+        "1": 150528,
+        "10": 25683,
+        "20": 15947,
+        "40": 354606,
+        "50": 78541,
+        "60": 8400
+      },
+      "solver_dimension": 3,
+      "total_particles": 633705,
+      "typed_counts": {
+        "0": 467230,
+        "1": 15947,
+        "3": 150528
+      }
+    }
+  },
+  "recipe_id": "F5_DBC_NOTCHED_WEIR_OVERTOP_RETURN_V1",
+  "resolution": "medium",
+  "schema": "ds-data-02.f5.native-owner-metadata.v2",
+  "source_bindings": {
+    "event_definitions": {
+      "bytes": 2318,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/event_definitions.json",
+      "role": "frozen F5 event definitions",
+      "sha256": "71521c38459580acbc2014d842a3d48bc264326c104b7835380a3458151b6d1c"
+    },
+    "gencase_receipt": {
+      "bytes": 46573,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007/gencase-f5-weir_pair-cellcentre-phase-exact-dp025-007/execution-receipt.json",
+      "role": "completed original GenCase receipt",
+      "sha256": "4fab0aec39cf8d77158c770925ade1624235e7846fb4463d3d558f4272e26849"
+    },
+    "generated_bi4": {
+      "bytes": 27884476,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/native_inputs_domain_repair_011/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007.bi4",
+      "role": "fresh co-located domain-repair BI4",
+      "sha256": "bab21ca1cf5ff58ab8f16da7940081653b6f5478346700f77cdfe9472811ff11"
+    },
+    "generated_xml": {
+      "bytes": 10120,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/native_inputs_domain_repair_011/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007.xml",
+      "role": "fresh co-located domain-repair XML",
+      "sha256": "7c3f49a4103374027be0d4dd0c5b50065ad8a3a7d925765799172bbd48bf595c"
+    },
+    "native_exclusion_accounting": {
+      "bytes": 3020,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/native_conversion/domain_repair_011/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009.native-exclusion-accounting.json",
+      "role": "RunPARTs/Run.csv/PartOut source accounting; no Q-I claim",
+      "sha256": "e71caa0728fd9dae05c5f61e68bd462ad20cf277f80f8053be3758561229de81"
+    },
+    "native_partout_artifacts": [
+      {
+        "bytes": 584,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/data/PartOut_000.obi4",
+        "role": "native PartOut artifact retained for PartVTKOut audit",
+        "sha256": "7b79f947c913529a749ded2db511a5d834c266ade1902badd8cc0f6512780fe0"
+      }
+    ],
+    "quality_contract": {
+      "bytes": 1691,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/quality_contract.json",
+      "role": "frozen F5 quality contract",
+      "sha256": "5135e9aeaa06c7bea71eb290309944b429e1b49e021f48b6e8c6f4d08396ac9d"
+    },
+    "root_domain_proof": {
+      "bytes": 1539,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/initialization_repairs/F5_CONTINUOUS_CELL_CENTRE_PHASE_EXACT_DP025_007/native_reference_009/root_native_domain_repair_011/weir_pair_domain_proof_011.json",
+      "role": "root domain repair and finite union evidence",
+      "sha256": "bd24d2135e7bf900b4165a6c759fa51632604fe4d6ec39e4b7fb4f2129389fc7"
+    },
+    "root_grid_audit": {
+      "bytes": 3930,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007/root-double-native-grid-audit-001/native-grid-audit.json",
+      "role": "independent native grid audit",
+      "sha256": "288a3ef4f1d91374e28c931c3504aadf93b7f1900592483f5cc0a4963c4d5922"
+    },
+    "root_solid_audit": {
+      "bytes": 14133,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/root-native-union-solid-coverage-003/native-solid-coverage.json",
+      "role": "independent union finite-solid audit",
+      "sha256": "609c12e4c98ceffb39d7a007723d3e27c1558c3277919e317f81436c3b843bf7"
+    },
+    "solver_receipt": {
+      "bytes": 97614,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/execution-receipt.json",
+      "role": "completed full-window solver receipt",
+      "sha256": "fb37dcfc539cf4430874055ab5fc728e2c97aeb229a89fbbe55a503379b55da1"
+    },
+    "source_bed": {
+      "bytes": 8778,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/assets/f5_continuous_bed_profile_slope_0p280.stl",
+      "role": "immutable finite bed STL",
+      "sha256": "93cf180ae6d5439d3ed3e2787b390d3b1268d76f0069dbdeaa10b18bf3314621"
+    },
+    "source_definition": {
+      "bytes": 6645,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/F5_REF_WEIR_NOMINAL_MEDIUM.xml",
+      "role": "immutable F5 physical source XML",
+      "sha256": "118bac36d3601259592bd1a1adad340b25ae06ee29985fc951aafa4cd909544d"
+    },
+    "source_metadata": {
+      "bytes": 6937,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/F5_REF_WEIR_NOMINAL_MEDIUM.metadata.json",
+      "role": "immutable F5 physical source metadata",
+      "sha256": "b9c38dea82e7090025b063de605851be2d337030111b588492a72e0dd7b233cb"
+    },
+    "source_motion": {
+      "bytes": 12627,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/piston_4c73cd98b7230035_regular_piston.dat",
+      "role": "immutable source motion",
+      "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+    },
+    "staged_motion": {
+      "bytes": 12627,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/native_inputs_domain_repair_011/piston_4c73cd98b7230035_regular_piston.dat",
+      "role": "co-located motion referenced by XML",
+      "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+    }
+  },
+  "source_contract": {
+    "domain_repair_semantics": "numerical simulation-domain envelope extension only; fluid lattice, finite bed/walls, piston control, and 2352 kg denominator remain frozen",
+    "finite_destinations": [
+      "upstream",
+      "slope_crest",
+      "downstream_return",
+      "weir_notch"
+    ],
+    "finite_source": "initial upstream fluid box x=-0.90..3.30, y=-0.70..0.70, z=0.02..0.42",
+    "no_posthoc_destination_assignment": true,
+    "solver_dimension_required": 3
+  },
+  "written_at_utc": "2026-10-02T15:46:44+00:00"
+}
