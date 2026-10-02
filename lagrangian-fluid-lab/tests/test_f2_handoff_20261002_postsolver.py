@@ -21,6 +21,8 @@ def _load(name: str, path: Path):
 POST = _load("f2_postsolver_20261002", F2 / "f2_handoff_20261002_postsolver.py")
 LEDGER = _load("f2_native_ledger_20261002", F2 / "f2_handoff_20261002_native_ledger.py")
 NUMERIC = _load("f2_numeric_studies_20261002", F2 / "f2_handoff_20261002_numeric_studies.py")
+NUMERIC_V3 = _load("f2_numeric_studies_20261002_v3", F2 / "f2_handoff_20261002_numeric_studies_v3.py")
+DOMAIN = _load("f2_exclusion_domain_diagnostic_20261002", F2 / "f2_handoff_20261002_exclusion_domain_diagnostic.py")
 
 
 def test_postsolver_uses_frame_partvtk_and_keeps_ledger_as_a_separate_stage():
@@ -90,3 +92,65 @@ def test_numeric_studies_are_four_second_prepared_comparisons_with_real_dt_contr
 def test_numeric_xml_parameter_replacement_requires_exactly_one_parameter(tmp_path):
     source = '<parameter key="DtFixed" value="0" />\n'
     assert 'value="1.25e-4"' in NUMERIC.replace_parameter(source, "DtFixed", "1.25e-4")
+
+
+def test_numeric_studies_v3_binds_each_background_receipt_and_freezes_physical_inputs():
+    plan_path = F2 / "handoff_20261002/numerical_studies_v3/numeric-study-plan-v3.json"
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    assert plan["study_version"] == "v3_correct_background_receipts_and_physical_equality"
+    assert plan["event_window_s"] == 4.0
+    assert len(plan["studies"]) == 4
+    for row in plan["studies"]:
+        request = json.loads(Path(row["request"]).read_text(encoding="utf-8"))
+        case_id = row["case_id"]
+        receipt_path = Path(row["solver_receipt"]["path"])
+        assert case_id in receipt_path.parts
+        assert request["gencase_artifacts"]["solver_receipt"]["path"] == str(receipt_path)
+        equality = request["physical_input_equality"]
+        assert equality["xml_allowed_control_changes"] == ["DtFixed", "TimeOut"]
+        assert equality["xml_normalized_equal"] is True
+        assert equality["bi4_hash_equal"] is True
+        assert equality["motion_hash_equal"] is True
+        assert request["numerical_study"]["xml_dtini"] == "0"
+        assert request["numerical_study"]["xml_dtmin"] == "0"
+        assert all(Path(path).is_file() for path in request["input_files"])
+
+
+def test_exclusion_domain_diagnostic_keeps_domain_evidence_separate_from_spill(tmp_path):
+    xml = tmp_path / "case.xml"
+    xml.write_text(
+        '<case><simulationdomain><posmin x="0" y="0" z="0" />'
+        '<posmax x="1" y="1" z="1" /></simulationdomain></case>\n',
+        encoding="utf-8",
+    )
+    run_out = tmp_path / "Run.out"
+    run_out.write_text("MapRealPos(final)=(0,0,0)-(1,1,1)\n", encoding="utf-8")
+    runparts = tmp_path / "RunPARTs.csv"
+    runparts.write_text(
+        "Part;NpOut;NpOutPos;NpOutRho;NpOutMov\n"
+        "0;1;1;0;0\n"
+        "# Part: legend\n",
+        encoding="utf-8",
+    )
+    ledger = tmp_path / "ledger.json"
+    ledger.write_text(
+        json.dumps({
+            "native_exclusion_ledger": {
+                "excluded_particles_reported_by_run_out": 1,
+                "excluded_particles": [{
+                    "idp": 7, "motive": "native_solver_excluded_numerical_unknown",
+                    "position_m": [0.00001, 0.2, 0.3],
+                    "first_missing_frame": 1, "first_missing_time_s": 0.1,
+                }],
+            },
+        }),
+        encoding="utf-8",
+    )
+    result = DOMAIN.classify_case(
+        case_id="TEST", ledger_path=ledger, xml_path=xml,
+        runparts_path=runparts, run_out_path=run_out, tolerance_m=5e-4,
+    )
+    assert result["simulation_domain"]["xml_and_run_out_match"] is True
+    assert result["nearest_domain_face_counts"] == {"xmin": 1}
+    assert result["interpretation"]["physical_spill"] == "not_classified_by_this_diagnostic"
+    assert result["runparts_counts"]["NpOut"]["sum"] == 1.0
