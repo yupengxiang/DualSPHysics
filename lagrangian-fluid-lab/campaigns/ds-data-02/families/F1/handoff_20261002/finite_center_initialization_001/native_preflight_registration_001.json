@@ -1,0 +1,79 @@
+{
+  "schema": "ds02.f1.finite-center.native-preflight-registration.v1",
+  "family_id": "F1",
+  "case_id": "F1_DUAL_FINITE_CENTER_DP001_003",
+  "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE",
+  "status": "native_initial_contract_pass_no_solver",
+  "claim_boundary": "The new mother passes the registered GenCase initial occupancy and wall/separator preflight. This is not a solver result, Q-N qualification, or production approval.",
+  "definition": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/F1_DUAL_FINITE_CENTER_DP001_003_Def.xml",
+    "sha256": "d56691dd4b6d0f165d933514892fe63a75b4a44eccdf4e63c159f2baf2728a4e",
+    "commit": "74ff331b"
+  },
+  "native_gencase": {
+    "request": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/gencase-request.json",
+    "attempt_id": "gencase-finite-center-001",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/gencase-finite-center-001/execution-receipt.json",
+    "receipt_sha256": "65c11ff1f97ae438de334f2039409f255b1728bee5cd2dcbc8e304fb449072f6",
+    "status": "completed",
+    "returncode": 0,
+    "elapsed_seconds": 5.464408594882116,
+    "cpu_core_seconds": 3.688021,
+    "gpu_seconds": 0.0,
+    "dimension": 3,
+    "total_particles": 1011911,
+    "fluid_particles": 616000,
+    "native_bi4_sha256": "e1fa4331609bba30f9a4b19b302f8733fe307d3fa4cbd85b04d9b53053be5a13",
+    "gencase_out_sha256": "12e45c668d557643b583aa3c8cadf7124a270c3a940e0e6d167f2ee6d7ede3b0"
+  },
+  "native_audit": {
+    "request": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/finite-center-native-audit-request-003.json",
+    "request_sha256": "6b5f1bc02857f84f91235882d61fb350f42ed628edb3bac8bfba55ee84b1e430",
+    "attempt_id": "finite-center-native-audit-003",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/finite-center-native-audit-003/finite-center-native-audit.json",
+    "report_sha256": "7a8da2882759f9914162449ecd081bf385894d5a2e1515dfdada9bdedd0fddc4",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/finite-center-native-audit-003/execution-receipt.json",
+    "receipt_sha256": "1a42910585b6100113238caa5eef2898d86203444d4b165b009113a34ae98e60",
+    "status": "completed",
+    "returncode": 0,
+    "checks_all_true": true,
+    "checks": [
+      "actual 3D",
+      "native fluid count 616000",
+      "native fluid mass 616.0 kg",
+      "finite fluid rows and unique positions",
+      "center envelope [2.105,0.005,0.005] to [3.215,0.995,0.545] m",
+      "112 x 100 x 55 cell-center quadrature",
+      "continuous reservoir [2.1,0,0] to [3.22,1,0.55] m contains all centers",
+      "closed-wall clearances >= 0.005 m",
+      "separator x clearance 0.055000019 m",
+      "outer boundary generated"
+    ],
+    "observed_fluid_bounds_m": [[2.1050000190734863, 0.004999999888241291, 0.004999999888241291], [3.2149999141693115, 0.9950000047683716, 0.5450000166893005]],
+    "observed_initial_mass_kg": 616.0,
+    "maximum_float32_lattice_residual": 1.1444091811085855e-05,
+    "bound_vtk_sha256": "7f512c8df35ba5f6ba839daad14011dd5064f6cd45d76f28f4d28a266fcb8082",
+    "generated_xml_sha256": "97c0896e0c73d51210242073803a6b103fc214f596e2ee3420a9cce2fd02ef75"
+  },
+  "preserved_failed_audits": [
+    {
+      "attempt_id": "finite-center-native-audit-001",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/finite-center-native-audit-001/execution-receipt.json",
+      "reason": "implementation key lookup failed before native output read"
+    },
+    {
+      "attempt_id": "finite-center-native-audit-002",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/finite-center-native-audit-002/execution-receipt.json",
+      "reason": "initial lattice tolerance 2e-6 was below expected float32 VTK roundoff; native contract values otherwise passed"
+    }
+  ],
+  "solver_and_science": {
+    "solver_launched": false,
+    "gpu_launched": false,
+    "q_n_status": "not_assessed",
+    "production_status": "not_evaluated",
+    "open_top_semantics": "physical free surface only; no birth, adaptive replacement, periodic clone, or exit ledger inferred"
+  },
+  "source_immutability": true,
+  "implementation_commit": "0e3f18b2"
+}
