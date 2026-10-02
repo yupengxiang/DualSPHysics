@@ -348,6 +348,8 @@ def prepare(family_dir: Path = FAMILY_ROOT) -> dict[str, Any]:
             "schema": "ds-data-02.f5.initialization-repair-metadata.v2",
             "family_id": "F5",
             "repair_scope": SCOPE,
+            "producer_script": bind(SCRIPT, "committed exact cell-centre producer"),
+            "producer_git_commit": git_commit(),
             "case_id": spec["case_id"],
             "mechanism_id": mechanism,
             "source_mother": spec["source_mother"],
@@ -402,6 +404,8 @@ def prepare(family_dir: Path = FAMILY_ROOT) -> dict[str, Any]:
             "repair_scope": SCOPE,
             "case_id": spec["case_id"],
             "mechanism_id": mechanism,
+            "producer_script": bind(SCRIPT, "committed exact cell-centre producer"),
+            "producer_git_commit": git_commit(),
             "status": "static_pass_pending_actual_gencase_and_partvtk",
             "static_checks": {
                 "source_is_medium_dp_025": f'dp="0.025"' in source["definition"].read_text(encoding="utf-8"),
