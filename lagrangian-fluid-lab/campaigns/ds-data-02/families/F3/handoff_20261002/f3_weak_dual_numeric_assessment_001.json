@@ -1,0 +1,165 @@
+{
+  "schema": "ds02.f3.weak-dual.numeric-assessment.v1",
+  "created_at_utc": "2026-10-02T14:00:00+00:00",
+  "family_id": "F3",
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "assessment_status": "actual_reference_evidence_partial_qn_not_assessed",
+  "claim_boundary": "This file records read-only native state, lifecycle, time-study, fixed-window and transport evidence. It does not grant Q-N, production eligibility, or a family-wide qualification claim.",
+  "physical_binding": {
+    "sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+    "geometry": "continuous tank [−0.45,−0.09,0] + [0.9,0.18,0.51] m; initial fluid depth 0.09 m; top physically open",
+    "control_family": "weak dual axis 0.06g/0.04g",
+    "control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+    "density_kg_m3": 1000.0,
+    "initial_fluid_mass_kg": 14.58,
+    "initial_fluid_particles": 34560,
+    "total_particles": 108000,
+    "window_s": [0.0, 10.0],
+    "save_interval_baseline_s": 0.0025,
+    "reference_scales": {
+      "length_x_m": 0.9,
+      "length_y_m": 0.18,
+      "length_z_m": 0.09,
+      "velocity_sqrt_gH_m_s": 0.9396275858019495,
+      "time_sqrt_H_over_g_s": 0.09578262852211514,
+      "energy_MgH_J": 12.872682
+    }
+  },
+  "native_time_evidence": {
+    "baseline": {
+      "frames": 4001,
+      "particles": 108000,
+      "initial_fluid_type3": 34560,
+      "final_fluid_type3": 34560,
+      "time_s": [0.0, 10.00001205137414],
+      "steps": 452006,
+      "native_dt_min_s": 2.212269686706988e-05,
+      "partsout_sum": 0,
+      "source_run_out_sha256": "6c50c8a17ff8f5a8cd2ac9cfd8397268551be1e5543bb3297cc11e0afc7c375f",
+      "source_runparts_sha256": "4b072d862a0cd21466145d24f904ec6123b305d2da427b58a553d56d968ed173"
+    },
+    "half_save": {
+      "frames": 8001,
+      "particles": 108000,
+      "time_s": [0.0, 10.00001205137414],
+      "steps": 452006,
+      "save_interval_s": 0.00125,
+      "partsout_sum": 0
+    },
+    "half_dt": {
+      "frames": 4001,
+      "particles": 108000,
+      "time_s": [0.0, 10.00000098990184],
+      "steps": 904049,
+      "runparts_sum": 904050,
+      "native_dt_min_s": 1.106134843353494e-05,
+      "save_interval_requested_s": 0.0025,
+      "partsout_sum": 0,
+      "direct_h5_sha256": "27a2206c6a3fe03f9202955e895811e735d21cbdd59273ee52ecb8c5227bbe69"
+    }
+  },
+  "full_time_validity_audit": {
+    "scope": "every initial type=3 and valid=true macro input row in baseline, coarse, fine and HALF_DT HDF5",
+    "request": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/requests/f3-macro-input-audit-request-001.json",
+    "request_sha256": "3589b0fb6c893dbfdf78ba9c48f3b24a8538179ec9b4009fc54edd59353004a0",
+    "attempt_id": "f3-macro-input-audit-20261002-001",
+    "output": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_MACRO_INPUT_AUDIT/f3-macro-input-audit-20261002-001/macro-input-audit.json",
+    "status_at_registration": "running_read_only_audit",
+    "policy": "any valid=true nonfinite or nonpositive fluid row is an explicit audit failure; no row is silently dropped",
+    "source_hdf5_policy": "HDF5 source hashes are pinned in the request from completed direct conversion reports; no source bytes are modified"
+  },
+  "spatial_fixed_window": {
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY/weak-dual-spatial-fixed-window-comparison-20261002-002/fixed-window-comparison.json",
+    "report_sha256": "ca3a7c710b1607de8fcb9558c4c13491319538a7fb4136a1724391c29f40ec02",
+    "comparison_semantics": "coarse and fine retain collision-safe unique source keys; all values are absolute physical differences against the medium reference",
+    "coarse_vs_medium": {
+      "frames": 4001,
+      "end_s": 10.0000006956,
+      "max_abs_mass_kg": 6.9849193e-07,
+      "max_abs_com_m": [0.001795854078, 0.000033313708, 0.000245555525],
+      "max_abs_ke_j": 0.0494135167,
+      "max_relative_ke_to_reference_curve": 0.4191131407,
+      "physical_scale_fractions": {
+        "com_x_over_0p9": 0.00199539342,
+        "com_y_over_0p18": 0.00018507616,
+        "com_z_over_0p09": 0.00272839472,
+        "ke_over_MgH": 0.00383863415
+      }
+    },
+    "fine_vs_medium": {
+      "frames": 4001,
+      "end_s": 10.0000170011,
+      "max_abs_mass_kg": 3.5361154e-07,
+      "max_abs_com_m": [0.00440900709, 0.000039308921, 0.000694599305],
+      "max_abs_ke_j": 0.1281425354,
+      "max_relative_ke_to_reference_curve": 0.5886317825,
+      "physical_scale_fractions": {
+        "com_x_over_0p9": 0.00489889677,
+        "com_y_over_0p18": 0.00021838289,
+        "com_z_over_0p09": 0.00771777006,
+        "ke_over_MgH": 0.0099546105
+      }
+    },
+    "interpretation": "The absolute COM and energy differences are the usable physical-scale diagnostics. Near-zero COM denominators make large pointwise relative COM ratios uninformative; the KE curve-relative differences remain large and are not a qualification pass."
+  },
+  "half_dt_fixed_window": {
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/half_dt-fixed-window-comparison-20261002-001/fixed-window-comparison.json",
+    "report_sha256": "6160a9ae362aadc4fda3b45ed61888057e9dfe6d92a7d3bd37620b15b09211ad",
+    "frames": 4001,
+    "end_s": 10.00000098990184,
+    "save_interval_s": {
+      "min": 0.0024998647458,
+      "max": 0.0025109260944
+    },
+    "max_abs_com_m": [0.0001940531719000181, 0.000031974966478265855, 0.00010838112500825836],
+    "max_abs_ke_j": 0.002110088154960388,
+    "max_relative_ke_to_baseline_curve": 0.024284826356295267,
+    "physical_scale_fractions": {
+      "com_x_over_0p9": 0.00021561464,
+      "com_y_over_0p18": 0.00017763870,
+      "com_z_over_0p09": 0.00120423472,
+      "ke_over_MgH": 0.00016391985
+    },
+    "interpretation": "The half-dt fixed-window result is a numerical sensitivity diagnostic. Its absolute KE difference is small on MgH scale, but the registered curve-relative maximum is 2.43%; no Q-N decision is made."
+  },
+  "half_dt_transport": {
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_TRANSPORT_STUDY/half_dt-transport-comparison-20261002-002/transport-comparison.json",
+    "report_sha256": "4900062a0d1bda787f0fbe446d2080615deda7bedf1ad32e37147af0054be7f8",
+    "left_right": {
+      "baseline_chord_residence_s": 2.5595970656,
+      "half_dt_chord_residence_s": 2.5319831221,
+      "delta_s": -0.0276139435,
+      "relative_delta": -0.0107884,
+      "observed_mass_delta_kg": -0.0307969,
+      "censored_mass_delta_kg": 0.0307969
+    },
+    "front_back": {
+      "baseline_chord_residence_s": 4.3177483998,
+      "half_dt_chord_residence_s": 4.2544227992,
+      "delta_s": -0.0633256006,
+      "relative_delta": -0.0146663,
+      "observed_mass_delta_kg": 0.0185625,
+      "censored_mass_delta_kg": -0.0185625
+    },
+    "top_open_exit": {
+      "observed_mass_kg": 0.0,
+      "censored_mass_kg": 14.580000378,
+      "interpretation": "all particles remain right-censored for this top aperture; no physical exit is inferred"
+    },
+    "claim_boundary": "fixed physical finite-aperture transport diagnostic only; no Q-N"
+  },
+  "qi_and_qn": {
+    "baseline_direct_conversion": "actual 4001-frame typed HDF5, lifecycle, 3D log, static finite-aperture evidence and first/middle/final PartVTK checks complete in f3-weak-dual-direct-v2-evidence.json",
+    "half_save": "root source-contract closure reports full structural Q-I for 8001x108000; this numeric file only binds the comparison values",
+    "half_dt": "post-audit rebind has structural checks and full labels, but the open-boundary birth/exit/flux ledger remains a declared missing semantic requirement until a source-contract closure is separately bound",
+    "q_n_status": "not_assessed",
+    "production_status": "not_evaluated"
+  },
+  "source_immutability": true,
+  "operator_refs": {
+    "operators": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json",
+    "operators_sha256": "21a54faaab3a1f1a56138e2d73f62c90505e506e47e0bf6889fcb843f6e9a7b2",
+    "owner_metadata": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/weak_dual_scope_001/f3_weak_owner_metadata.json",
+    "owner_metadata_sha256": "8caeac6e630716093bfaaad9018040bdf0ce59a7d4fcdf0f9d6467752ece35bf"
+  }
+}
