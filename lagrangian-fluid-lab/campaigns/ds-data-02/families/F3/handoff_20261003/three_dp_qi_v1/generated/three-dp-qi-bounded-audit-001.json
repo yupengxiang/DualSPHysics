@@ -1,0 +1,530 @@
+{
+  "common_physical_contract": {
+    "continuum_mass_kg": 14.58,
+    "control_file_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+    "density_kg_m3": 1000.0,
+    "geometry": {
+      "fluid_size_m": [
+        0.9,
+        0.18,
+        0.09
+      ],
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ],
+      "top_open": true
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "nominal_save_interval_s": 0.0025,
+    "window_s": [
+      0.0,
+      10.0
+    ]
+  },
+  "created_at_utc": "2026-10-02T16:53:43+00:00",
+  "family_id": "F3",
+  "frozen_budget_contract": {
+    "derived_save_or_integration_fraction_of_event_time": 0.004,
+    "event_time_relative_starting_budget": 0.02,
+    "macro_relative_starting_budget": 0.05,
+    "observed_medium_temporal_diagnostic": {
+      "front_back_chord_relative_delta": -0.014666348001670111,
+      "left_right_chord_relative_delta": -0.010788394747056574,
+      "scope": "medium baseline versus HALF_DT only; does not qualify coarse/fine",
+      "share_cap_status": "exceeded_on_two_observed_events"
+    },
+    "residence_time_budget_registered": false,
+    "save_or_integration_share_cap": 0.2,
+    "source_assessment": {
+      "bytes": 11493,
+      "hash_scope": "actual_file_sha256",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/f3_weak_dual_temporal_budget_assessment_001.json",
+      "rehash_performed": true,
+      "role": "frozen temporal budget assessment",
+      "sha256": "def19897256a3f85052c43949ded25082e3cc0c4a33f8eef0e0834ee545dc9f4"
+    },
+    "status": "temporal_share_cap_exceeded_on_two_observed_events; residence_budget_not_registered"
+  },
+  "macro_input_audit": {
+    "bytes": 7430,
+    "hash_scope": "actual_file_sha256",
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_MACRO_INPUT_AUDIT/root-nvme-macro-input-audit-001/macro-input-audit.json",
+    "rehash_performed": true,
+    "role": "completed four-input finite-positive macro audit",
+    "sha256": "a7309e7b7ec3abe3253759af3e9f4982bfe92803ed4ba4edf5eb5aafc31492ef"
+  },
+  "macro_source_bindings": {
+    "bytes": 1109,
+    "hash_scope": "actual_file_sha256",
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/root_nvme_macro_input_audit_001/source_bindings.json",
+    "rehash_performed": true,
+    "role": "macro audit source-binding config",
+    "sha256": "780fc21bcc7bbde5a901e337b47854bc5b60874200cabdfb40bf79e48d9a229a"
+  },
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "production_eligibility": "not_evaluated",
+  "q_n_status": "not_assessed",
+  "qualification_claim": "none",
+  "requests_are_registration_only": true,
+  "resolutions": {
+    "coarse": {
+      "bounded_audit_request": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/requests/coarse.bounded-audit-request.v1.json",
+      "case_id": "F3_WEAK_DUAL_REFERENCE_COARSE",
+      "findings": {
+        "hdf5_raw_hash": {
+          "reason": "Avoid repeated multi-GB H5 read; existing registered SHA and direct report output SHA agree.",
+          "source": "macro_input_audit",
+          "status": "bound_without_rehash"
+        },
+        "native_accounting_binding": {
+          "expected_case_id": "F3_WEAK_DUAL_REFERENCE_COARSE",
+          "expected_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/qualification-weak-dual-coarse-reference-001/execution-receipt.json",
+          "reason": "Native accounting case and solver receipt match this resolution.",
+          "report_case_id": "F3_WEAK_DUAL_REFERENCE_COARSE",
+          "report_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/qualification-weak-dual-coarse-reference-001/execution-receipt.json",
+          "status": "pass"
+        },
+        "surface_vs_typed_label_flux": {
+          "meaning": "Surface replay and typed-label JSON are distinct products; retain both until an operator-specific binding is produced.",
+          "status": "reconciliation_required",
+          "surface_x_y_crossings_present": true,
+          "typed_label_aggregate_x_y_crossings": {
+            "negative": 0,
+            "positive": 0
+          }
+        }
+      },
+      "finite_surface_replay": {
+        "front_back_exchange": {
+          "accepted_crossings": 5671,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 5671,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 1.5533012431114912,
+          "negative_crossings": 2836,
+          "net_crossing_mass_kg": -0.0005477084778249264,
+          "particle_count_with_crossing": 1381,
+          "positive_crossing_mass_kg": 1.5527535346336663,
+          "positive_crossings": 2835,
+          "repeat_crossings": 4290
+        },
+        "left_right_exchange": {
+          "accepted_crossings": 63528,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 63528,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 17.568844843190163,
+          "negative_crossings": 32077,
+          "net_crossing_mass_kg": -0.3428655071184039,
+          "particle_count_with_crossing": 9052,
+          "positive_crossing_mass_kg": 17.22597933607176,
+          "positive_crossings": 31451,
+          "repeat_crossings": 54476
+        },
+        "top_open_exit": {
+          "accepted_crossings": 0,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 0,
+          "classification": "legal_open_exit_diagnostic",
+          "negative_crossing_mass_kg": 0.0,
+          "negative_crossings": 0,
+          "net_crossing_mass_kg": 0.0,
+          "particle_count_with_crossing": 0,
+          "positive_crossing_mass_kg": 0.0,
+          "positive_crossings": 0,
+          "repeat_crossings": 0
+        }
+      },
+      "first_passage": {
+        "front_back_exchange": {
+          "crossing_count_max": 14,
+          "crossing_count_sum": 5671,
+          "first_passage_max_s": 9.99363952107776,
+          "first_passage_min_s": 1.578746727844177,
+          "first_passage_present": true,
+          "identities_with_first_passage": 1381,
+          "identity_rows": 26620,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "left_right_exchange": {
+          "crossing_count_max": 11,
+          "crossing_count_sum": 63528,
+          "first_passage_max_s": 9.623460506737745,
+          "first_passage_min_s": 0.3569982887464418,
+          "first_passage_present": true,
+          "identities_with_first_passage": 9052,
+          "identity_rows": 26620,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "top_open_exit": {
+          "crossing_count_max": 0,
+          "crossing_count_sum": 0,
+          "first_passage_max_s": null,
+          "first_passage_min_s": null,
+          "first_passage_present": false,
+          "identities_with_first_passage": 0,
+          "identity_rows": 26620,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        }
+      },
+      "missing_or_deferred": [
+        "Q-N numerical reference comparison is not assessed.",
+        "A complete x/y exchange transport label artifact with source/destination/residence semantics is not bound to the finite-surface replay.",
+        "Top-open exit has no observed crossing; all identities are right-censored for this event and must not be called zero physical spill.",
+        "Save/integration temporal budget is not proven per resolution; only the existing medium baseline versus HALF_DT diagnostic exists and its share-cap status is exceeded.",
+        "Residence-time budget is not registered; reported residence is accounting only."
+      ],
+      "q_i_evidence_status": "registered_reference_evidence_pending_root_qi_review",
+      "runparts": {
+        "NpSim_max": 88528,
+        "NpSim_min": 88528,
+        "NpbSim_max": 61908,
+        "NpbSim_min": 61908,
+        "NpfSim_max": 26620,
+        "NpfSim_min": 26620,
+        "dt_max_post_initial_max_s": 2.423420098795313e-05,
+        "dt_max_post_initial_min_s": 2.423420098795313e-05,
+        "dt_min_first_s": 0.0,
+        "dt_min_post_initial_max_s": 2.423420098795313e-05,
+        "dt_min_post_initial_min_s": 2.423420098795313e-05,
+        "excluded_all_zero": true,
+        "excluded_interval_max": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "excluded_interval_sums": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "expected_population_match": true,
+        "first_time_s": 0.0,
+        "full_window_completed": true,
+        "last_time_s": 10.00000069562804,
+        "numeric_rows": 4001,
+        "runparts_sha256": "d8038291d5eef9a72686c1fda6c016707eb5ec64c8eaf97f1afbbdc31965fbbd",
+        "strict_time_increase_after_frame_zero": true
+      },
+      "source_contract": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/source_contracts/coarse.source-contract.v1.json"
+    },
+    "fine": {
+      "bounded_audit_request": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/requests/fine.bounded-audit-request.v1.json",
+      "case_id": "F3_WEAK_DUAL_REFERENCE_FINE",
+      "findings": {
+        "hdf5_raw_hash": {
+          "reason": "Avoid repeated multi-GB H5 read; existing registered SHA and direct report output SHA agree.",
+          "source": "macro_input_audit",
+          "status": "bound_without_rehash"
+        },
+        "native_accounting_binding": {
+          "expected_case_id": "F3_WEAK_DUAL_REFERENCE_FINE",
+          "expected_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/qualification-weak-dual-fine-reference-001/execution-receipt.json",
+          "reason": "Existing audit native_accounting must be rebound to this resolution; original report is immutable.",
+          "report_case_id": "F3_WEAK_DUAL_REFERENCE_COARSE",
+          "report_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/qualification-weak-dual-fine-reference-001/execution-receipt.json",
+          "status": "gap"
+        },
+        "surface_vs_typed_label_flux": {
+          "meaning": "Surface replay and typed-label JSON are distinct products; retain both until an operator-specific binding is produced.",
+          "status": "reconciliation_required",
+          "surface_x_y_crossings_present": true,
+          "typed_label_aggregate_x_y_crossings": {
+            "negative": 0,
+            "positive": 0
+          }
+        }
+      },
+      "finite_surface_replay": {
+        "front_back_exchange": {
+          "accepted_crossings": 16945,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 16945,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 1.8288720030832337,
+          "negative_crossings": 8467,
+          "net_crossing_mass_kg": 0.0023760000040056184,
+          "particle_count_with_crossing": 3470,
+          "positive_crossing_mass_kg": 1.8312480030872393,
+          "positive_crossings": 8478,
+          "repeat_crossings": 13475
+        },
+        "left_right_exchange": {
+          "accepted_crossings": 175712,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 175712,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 19.125072032242315,
+          "negative_crossings": 88542,
+          "net_crossing_mass_kg": -0.29635200049960986,
+          "particle_count_with_crossing": 25280,
+          "positive_crossing_mass_kg": 18.828720031742705,
+          "positive_crossings": 87170,
+          "repeat_crossings": 150432
+        },
+        "top_open_exit": {
+          "accepted_crossings": 0,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 0,
+          "classification": "legal_open_exit_diagnostic",
+          "negative_crossing_mass_kg": 0.0,
+          "negative_crossings": 0,
+          "net_crossing_mass_kg": 0.0,
+          "particle_count_with_crossing": 0,
+          "positive_crossing_mass_kg": 0.0,
+          "positive_crossings": 0,
+          "repeat_crossings": 0
+        }
+      },
+      "first_passage": {
+        "front_back_exchange": {
+          "crossing_count_max": 20,
+          "crossing_count_sum": 16945,
+          "first_passage_max_s": 9.96814079478319,
+          "first_passage_min_s": 0.6878268909567007,
+          "first_passage_present": true,
+          "identities_with_first_passage": 3470,
+          "identity_rows": 67500,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "left_right_exchange": {
+          "crossing_count_max": 12,
+          "crossing_count_sum": 175712,
+          "first_passage_max_s": 9.639309857703262,
+          "first_passage_min_s": 0.3328340805769341,
+          "first_passage_present": true,
+          "identities_with_first_passage": 25280,
+          "identity_rows": 67500,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "top_open_exit": {
+          "crossing_count_max": 0,
+          "crossing_count_sum": 0,
+          "first_passage_max_s": null,
+          "first_passage_min_s": null,
+          "first_passage_present": false,
+          "identities_with_first_passage": 0,
+          "identity_rows": 67500,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        }
+      },
+      "missing_or_deferred": [
+        "Q-N numerical reference comparison is not assessed.",
+        "A complete x/y exchange transport label artifact with source/destination/residence semantics is not bound to the finite-surface replay.",
+        "Top-open exit has no observed crossing; all identities are right-censored for this event and must not be called zero physical spill.",
+        "Save/integration temporal budget is not proven per resolution; only the existing medium baseline versus HALF_DT diagnostic exists and its share-cap status is exceeded.",
+        "Residence-time budget is not registered; reported residence is accounting only.",
+        "Fine historical native_accounting report is cross-bound to coarse; a fresh fine-specific accounting sidecar is required."
+      ],
+      "q_i_evidence_status": "registered_reference_evidence_pending_root_qi_review",
+      "runparts": {
+        "NpSim_max": 179208,
+        "NpSim_min": 179208,
+        "NpbSim_max": 111708,
+        "NpbSim_min": 111708,
+        "NpfSim_max": 67500,
+        "NpfSim_min": 67500,
+        "dt_max_post_initial_max_s": 1.753942769126442e-05,
+        "dt_max_post_initial_min_s": 1.753942769126442e-05,
+        "dt_min_first_s": 0.0,
+        "dt_min_post_initial_max_s": 1.753942769126442e-05,
+        "dt_min_post_initial_min_s": 1.753942769126442e-05,
+        "excluded_all_zero": true,
+        "excluded_interval_max": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "excluded_interval_sums": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "expected_population_match": true,
+        "first_time_s": 0.0,
+        "full_window_completed": true,
+        "last_time_s": 10.00001700111805,
+        "numeric_rows": 4001,
+        "runparts_sha256": "e00e793ce823b877473cf0894528ec462a84282d26284ab347ca9a4206b41366",
+        "strict_time_increase_after_frame_zero": true
+      },
+      "source_contract": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/source_contracts/fine.source-contract.v1.json"
+    },
+    "medium": {
+      "bounded_audit_request": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/requests/medium.bounded-audit-request.v1.json",
+      "case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+      "findings": {
+        "hdf5_raw_hash": {
+          "reason": "Avoid repeated multi-GB H5 read; existing registered SHA and direct report output SHA agree.",
+          "source": "macro_input_audit",
+          "status": "bound_without_rehash"
+        },
+        "native_accounting_binding": {
+          "expected_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+          "expected_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/qualification-weak-dual-scope-001/execution-receipt.json",
+          "reason": "Native accounting case and solver receipt match this resolution.",
+          "report_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+          "report_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/qualification-weak-dual-scope-001/execution-receipt.json",
+          "status": "pass"
+        },
+        "surface_vs_typed_label_flux": {
+          "meaning": "Surface replay and typed-label JSON are distinct products; retain both until an operator-specific binding is produced.",
+          "status": "reconciliation_required",
+          "surface_x_y_crossings_present": true,
+          "typed_label_aggregate_x_y_crossings": {
+            "negative": 0,
+            "positive": 0
+          }
+        }
+      },
+      "finite_surface_replay": {
+        "front_back_exchange": {
+          "accepted_crossings": 7859,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 7859,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 1.657125042984262,
+          "negative_crossings": 3928,
+          "net_crossing_mass_kg": 0.0012656250328291208,
+          "particle_count_with_crossing": 1766,
+          "positive_crossing_mass_kg": 1.6583906680170912,
+          "positive_crossings": 3931,
+          "repeat_crossings": 6093
+        },
+        "left_right_exchange": {
+          "accepted_crossings": 84593,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 84593,
+          "classification": "in_domain_transport_interface",
+          "negative_crossing_mass_kg": 18.009000467136502,
+          "negative_crossings": 42688,
+          "net_crossing_mass_kg": -0.3303281335684005,
+          "particle_count_with_crossing": 12112,
+          "positive_crossing_mass_kg": 17.6786723335681,
+          "positive_crossings": 41905,
+          "repeat_crossings": 72481
+        },
+        "top_open_exit": {
+          "accepted_crossings": 0,
+          "aperture_rejected_crossings": 0,
+          "candidate_crossings": 0,
+          "classification": "legal_open_exit_diagnostic",
+          "negative_crossing_mass_kg": 0.0,
+          "negative_crossings": 0,
+          "net_crossing_mass_kg": 0.0,
+          "particle_count_with_crossing": 0,
+          "positive_crossing_mass_kg": 0.0,
+          "positive_crossings": 0,
+          "repeat_crossings": 0
+        }
+      },
+      "first_passage": {
+        "front_back_exchange": {
+          "crossing_count_max": 15,
+          "crossing_count_sum": 7859,
+          "first_passage_max_s": 9.967754651055637,
+          "first_passage_min_s": 0.9929387497846813,
+          "first_passage_present": true,
+          "identities_with_first_passage": 1766,
+          "identity_rows": 34560,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "left_right_exchange": {
+          "crossing_count_max": 11,
+          "crossing_count_sum": 84593,
+          "first_passage_max_s": 9.582034216687006,
+          "first_passage_min_s": 0.3499874364847009,
+          "first_passage_present": true,
+          "identities_with_first_passage": 12112,
+          "identity_rows": 34560,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        },
+        "top_open_exit": {
+          "crossing_count_max": 0,
+          "crossing_count_sum": 0,
+          "first_passage_max_s": null,
+          "first_passage_min_s": null,
+          "first_passage_present": false,
+          "identities_with_first_passage": 0,
+          "identity_rows": 34560,
+          "source": "finite-surface-audit per_particle; linear chord crossing time"
+        }
+      },
+      "missing_or_deferred": [
+        "Q-N numerical reference comparison is not assessed.",
+        "A complete x/y exchange transport label artifact with source/destination/residence semantics is not bound to the finite-surface replay.",
+        "Top-open exit has no observed crossing; all identities are right-censored for this event and must not be called zero physical spill.",
+        "Save/integration temporal budget is not proven per resolution; only the existing medium baseline versus HALF_DT diagnostic exists and its share-cap status is exceeded.",
+        "Residence-time budget is not registered; reported residence is accounting only."
+      ],
+      "q_i_evidence_status": "registered_reference_evidence_pending_root_qi_review",
+      "runparts": {
+        "NpSim_max": 108000,
+        "NpSim_min": 108000,
+        "NpbSim_max": 73440,
+        "NpbSim_min": 73440,
+        "NpfSim_max": 34560,
+        "NpfSim_min": 34560,
+        "dt_max_post_initial_max_s": 2.212269686706988e-05,
+        "dt_max_post_initial_min_s": 2.212269686706988e-05,
+        "dt_min_first_s": 0.0,
+        "dt_min_post_initial_max_s": 2.212269686706988e-05,
+        "dt_min_post_initial_min_s": 2.212269686706988e-05,
+        "excluded_all_zero": true,
+        "excluded_interval_max": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "excluded_interval_sums": {
+          "NpOut": 0,
+          "NpOutMov": 0,
+          "NpOutPos": 0,
+          "NpOutRho": 0
+        },
+        "expected_population_match": true,
+        "first_time_s": 0.0,
+        "full_window_completed": true,
+        "last_time_s": 10.00001205137414,
+        "numeric_rows": 4001,
+        "runparts_sha256": "4b072d862a0cd21466145d24f904ec6123b305d2da427b58a553d56d968ed173",
+        "strict_time_increase_after_frame_zero": true
+      },
+      "source_contract": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/three_dp_qi_v1/generated/source_contracts/medium.source-contract.v1.json"
+    }
+  },
+  "schema": "ds02.f3.three-dp-qi-bounded-audit.v1",
+  "source_hash_semantics": {
+    "control_file": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+    "hdf5_control_reference": "0d3202227346dcc1357299f6838741b5d2e91e4da506a75284fb9586a781a635",
+    "numerical_recipe": "dp/internal dt/save/integrator; resolution-specific",
+    "physical_binding": "geometry/initial state/control/window only; same across DP",
+    "trajectory_h5": "macro audit registered SHA plus direct conversion output SHA, no new H5 read"
+  },
+  "status": "reference_qi_evidence_registered_qn_pending",
+  "temporal_quarter_followup": {
+    "bind_label_hash_before_dispatch": true,
+    "label_sha256": null,
+    "no_label_binding_performed": true,
+    "quarter_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_QUARTER_DT/qualification-weak-dual-quarter_dt-root-reviewed-20261002-002/execution-receipt.json",
+    "root_owned": true,
+    "status": "deferred_until_terminal_quarter_conversion_and_labels"
+  }
+}
