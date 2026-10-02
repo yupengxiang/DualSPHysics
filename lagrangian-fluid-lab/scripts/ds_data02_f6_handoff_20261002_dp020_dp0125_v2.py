@@ -46,6 +46,10 @@ MODULE.FAMILY_ROOT = SCOPE_ROOT
 MODULE.SCRIPT = SCRIPT
 MODULE.VERSION = "ds_data02_f6_handoff_20261002.rigid_contract_003.dp020_dp0125.v2"
 MODULE.DP_LADDER = (("dp020", 0.020), ("dp0125", 0.0125))
+MODULE.MECHANISMS = {
+    key: {**value, "case_prefix": value["case_prefix"] + "_EPSFREE002"}
+    for key, value in MODULE.MECHANISMS.items()
+}
 
 
 def _request_input_files_with_repair(*paths: Path) -> list[str]:
