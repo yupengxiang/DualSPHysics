@@ -1,0 +1,37 @@
+{
+  "schema": "ds-data-02.f6.geometry-sampling-addendum.v1",
+  "family_id": "F6",
+  "mother_id": "F6_HANDOFF_20261002_COMMENSURATE_CELL_CENTRE",
+  "source_manifest": "manifest.json",
+  "source_manifest_bytes_preserved": true,
+  "physical_geometry_unchanged": {
+    "tank_low_m": [0.0, 0.0, 0.0],
+    "tank_size_m": [4.8, 2.4, 2.4],
+    "fluid_low_m": [0.4, 0.4, 0.04],
+    "fluid_size_m": [4.0, 1.6, 0.8],
+    "fluid_volume_m3": 5.12,
+    "strict_mass_kg": 5120.0,
+    "wall_endpoints_fixed": true
+  },
+  "measured_gencase_population_rule": {
+    "point_m": "continuous_fluid_low + [dp/2, dp/2, dp/2]",
+    "z_draw_size_m": "fluid_size_z - dp",
+    "xy_draw_size_m": {
+      "coarse_dp_0.08": "fluid_size_xy - 2*dp + 1e-6",
+      "medium_dp_0.05": "fluid_size_xy - dp + 1e-6",
+      "fine_dp_0.04": "fluid_size_xy - dp + 1e-6"
+    },
+    "reason": "official GenCase inclusive lattice rasterisation was measured from repair-002b VTK; this changes numerical population span only and does not move a physical wall, liquid face, body, paddle, density, or mass denominator",
+    "expected_fluid_particles": {
+      "coarse_dp_0.08": 10000,
+      "medium_dp_0.05": 40960,
+      "fine_dp_0.04": 80000
+    },
+    "no_mass_rescaling": true
+  },
+  "negative_evidence": {
+    "repair_002b_medium_fluid_particles": 39184,
+    "repair_002b_fine_fluid_particles": 77220,
+    "repair_002b_is_not_reused": true
+  }
+}
