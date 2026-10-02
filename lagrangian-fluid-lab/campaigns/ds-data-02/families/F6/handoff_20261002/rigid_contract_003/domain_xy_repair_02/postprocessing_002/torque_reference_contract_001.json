@@ -1,0 +1,141 @@
+{
+  "created_at": "2026-10-02T10:40:56.170303+00:00",
+  "current_com_reframe": {
+    "allowed": true,
+    "current_com_label_allowed_only_after_reframe": true,
+    "raw_output_preserved": true,
+    "reference_origin_rule": "use the origin actually reported by the selected official moment output; do not substitute the initial center if the selected moving axis has translated",
+    "requires": [
+      "completed FloatingInfo output for the same 241 native saved frames",
+      "the actual current COM position from FloatingInfo at each frame",
+      "the force component matching the torque component and frame",
+      "explicit conversion between world and body axes when using momentin_xyz"
+    ],
+    "same_component_rule": "ForceFluid pairs with fluid torque; ForceTotal pairs with total torque; never mix components",
+    "world_frame_formula": "tau_COM(t) = tau_reference(t) - cross(r_COM(t) - r_reference(t), F_matching(t))"
+  },
+  "family_id": "F6",
+  "gpu_launch": false,
+  "join_contract": {
+    "frame_count": 241,
+    "join_key": "native saved frame index and time",
+    "mechanisms": [
+      "simple_free_response",
+      "wave_no_contact"
+    ],
+    "required_columns": [
+      "frame",
+      "time_s",
+      "com_world_m",
+      "linear_velocity_world_m_s",
+      "angular_velocity_world_rad_s",
+      "force_matching_N",
+      "raw_torque",
+      "torque_reference_frame",
+      "torque_reference_origin_m",
+      "torque_com_reframed"
+    ],
+    "time_window_s": [
+      0.0,
+      12.0
+    ]
+  },
+  "q_n_status": "pending actual FloatingInfo and ComputeForces CPU outputs plus independent torque-frame review",
+  "qualification_claim": "none",
+  "raw_compute_forces": {
+    "floating_mk": 60,
+    "raw_force_components": [
+      "ForceFluid",
+      "Weight",
+      "ForceTotal"
+    ],
+    "raw_output_frames": {
+      "momentex_xyz": "official extrinsic moment output: the selected axis follows the floating body origin but remains world aligned",
+      "momentin_xyz": "official intrinsic moment output: the selected axis follows the floating body and rotates with it"
+    },
+    "raw_torque_claim": "raw official tool output only; it is not labelled instantaneous-COM torque",
+    "reference_coordinate_source": "generated native aggregate rigid center at t=0; serialized center is hash-bound in each v16 request",
+    "reference_coordinates_m": [
+      2.4,
+      1.2,
+      1.08
+    ],
+    "tool": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/ComputeForces_linux64",
+    "v16_underlying_options": [
+      "-momentin_xyz:2.4:1.2:1.08",
+      "-momentex_xyz:2.4:1.2:1.08",
+      "-viscoauto",
+      "-gravity:0:0:-9.81"
+    ]
+  },
+  "schema": "ds-data-02.f6.rigid003.domain_xy_repair_02.torque_reference_contract_001.v1",
+  "source_request_manifest": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/request_manifest.json",
+  "source_request_manifest_sha256": "f2ec3925427ba54eb69289d45fa996cbc8c1082322aaf52753444f0f70451635",
+  "source_requests": [
+    {
+      "attempt_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_FLOATINGINFO_001",
+      "case_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "audit",
+      "mechanism_id": "simple_free_response",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_floatinginfo.json",
+      "sha256": "740b4dbbf0145735af5bd59b2829c9fff650fa191bdaed6276796584fce0b8e1"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_COMPUTEFORCES_001",
+      "case_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "audit",
+      "mechanism_id": "simple_free_response",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_computeforces.json",
+      "sha256": "1c52e996ab02c0ad6ea11864c5c0534c16449ce5c14fef457de05b884b859751"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_NATIVE_H5_001",
+      "case_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "conversion",
+      "mechanism_id": "simple_free_response",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_native_h5.json",
+      "sha256": "e19ff9219e2baa945848370c22db2a02f2591c7473d347ba337134eb47e2fffd"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_LABELS_001",
+      "case_id": "F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "labels",
+      "mechanism_id": "simple_free_response",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_SIMPLE_FREE_RESPONSE_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_labels.json",
+      "sha256": "aef6b0442d43283355cbd66033a44d7e8bbc75944615d8edd06ea8daade634e8"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_FLOATINGINFO_001",
+      "case_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "audit",
+      "mechanism_id": "wave_no_contact",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_floatinginfo.json",
+      "sha256": "8d40788ba70eff7d784eb7606df249da57b8397def13faddf09e37a42dcf491c"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_COMPUTEFORCES_001",
+      "case_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "audit",
+      "mechanism_id": "wave_no_contact",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_computeforces.json",
+      "sha256": "17a4758adb7f952ac8dd15f508113659998b3384f551c406f30932265a08ffc9"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_NATIVE_H5_001",
+      "case_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "conversion",
+      "mechanism_id": "wave_no_contact",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_native_h5.json",
+      "sha256": "90c4a52ff60b51af08413bdc2e03cd707855bf85649ad050c15e2bb1483d6a1e"
+    },
+    {
+      "attempt_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_LABELS_001",
+      "case_id": "F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM",
+      "cpu_task_kind": "labels",
+      "mechanism_id": "wave_no_contact",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/rigid_contract_003/domain_xy_repair_02/postprocessing_001/execution_requests/F6_HANDOFF_20261002_WAVE_NO_CONTACT_RIGID003_DOMAIN_X_REPAIR_01_MEDIUM_labels.json",
+      "sha256": "d161abaac4051aa968a11ef54abe386415c32919fe7c09554d8377870fd1964b"
+    }
+  ],
+  "source_scope": "completed DOMAIN_X_REPAIR_01 medium raw solver trees and frozen v16 post-processing requests"
+}
