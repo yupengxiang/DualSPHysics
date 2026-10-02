@@ -403,9 +403,15 @@ def main() -> None:
         },
         "transport_label_binding": {
             "all_three_cases_bound": all(row["binding_status"] == "bound" for row in label_results),
+            "bound_case_count": sum(row["binding_status"] == "bound" for row in label_results),
             "cases": label_results,
-            "qualification_status": "incomplete",
-            "reason": "existing coarse labels use a stale geometry hash, medium has no label artifact, and fine is the only currently bound label artifact",
+            "qualification_status": "complete_artifact_binding" if all(row["binding_status"] == "bound" for row in label_results) else "incomplete",
+            "reason": (
+                "all three registered label artifacts match the physical geometry/source bindings; "
+                "this remains label evidence only and does not grant Q-N"
+                if all(row["binding_status"] == "bound" for row in label_results)
+                else "label artifact bindings remain incomplete or mismatched; inspect per-case checks"
+            ),
         },
         "q_n_status": "not_granted",
         "production_approval": "none",
