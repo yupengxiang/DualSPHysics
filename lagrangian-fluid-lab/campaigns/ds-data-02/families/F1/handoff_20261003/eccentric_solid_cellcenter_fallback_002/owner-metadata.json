@@ -1,0 +1,163 @@
+{
+  "schema": "ds02.f1.eccentric-solid-cellcenter-owner.v2",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "recipe_id": "solid-drawbox-cellcenter-fallback-002",
+  "physical_case_id": "F1_ECCENTRIC_CELL_CENTER_HALFDP",
+  "qualification_claim": "none",
+  "q_n_status": "not_assessed",
+  "production_claim": "none",
+  "source_contract": {
+    "manifest": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/eccentric-cellcenter-manifest.json",
+    "manifest_sha256": "4ad33fbc31c005e50d360663b880bc700dbffcfccf0500c2ce4314fb6a13c8f0",
+    "source_template": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/source/F1_REF_ECC_NOMINAL_BASE_Def.xml",
+    "source_template_sha256": "f499a5f1a0a6a604320fd3c1a7f4e691a8f81ee01152a4d8308bd710f32b5ad7",
+    "physical_hash": "94e1af2a7daeeb5e183eb7ba4d6a7f2d607135a661d530af86d5f66a88adc5bd",
+    "continuous_geometry": {
+      "tank_low_m": [
+        0,
+        0,
+        0
+      ],
+      "tank_size_m": [
+        1.6,
+        0.67,
+        0.4
+      ],
+      "fluid_low_m": [
+        0,
+        0,
+        0
+      ],
+      "fluid_size_m": [
+        0.4,
+        0.67,
+        0.3
+      ],
+      "obstacle_low_m": [
+        0.9,
+        0.24,
+        0
+      ],
+      "obstacle_size_m": [
+        0.12,
+        0.12,
+        0.45
+      ]
+    },
+    "continuous_fluid_mass_kg": 80.4,
+    "density_kg_m3": 1000.0,
+    "boundary_method": "DBC",
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+    "controls_from_source": true,
+    "raw_source_mutation": "forbidden",
+    "repair_evidence": {
+      "prior_attempt": "solid-drawbox-cellcenter-fallback-001",
+      "prior_attempt_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_SOLID/gencase-partvtk-solid-drawbox-dp010-20261003-001/eccentric-solid-cellcenter-dp010-preflight.json",
+      "prior_attempt_observation": "GenCase/PartVTK produced 80400 fluid at 80.4 kg but final solid fluid draw overwrote low x/y/z boundary support; all_outer_five_covered=false while obstacle five passed.",
+      "repair": "retain continuous source geometry, solid fluid population, and physical hash; append one post-fluid outer-face drawbox using vdp=0 so the physical faces are reasserted after the observed overwrite.",
+      "mass_normalization": "forbidden",
+      "qualification_effect": "initialization evidence only; no solver or Q-N claim"
+    }
+  },
+  "numeric_recipe": {
+    "primitive": "setmkfluid mk=0 then drawbox boxfill=solid",
+    "point": "continuous fluid low + dp/2",
+    "size": "continuous fluid extent - dp",
+    "pointmin": "[-dp/2,-dp/2,-dp/2]",
+    "boundary_support_layers": "vdp=0,1,2",
+    "resolutions": [
+      {
+        "case_id": "F1_ECC_CELL_CENTER_SOLID_DP010",
+        "resolution": "dp010",
+        "dp_m": 0.01,
+        "counts_xyz": [
+          40,
+          67,
+          30
+        ],
+        "definition": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP010/F1_ECC_CELL_CENTER_SOLID_DP010_Def.xml",
+        "metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP010/F1_ECC_CELL_CENTER_SOLID_DP010.metadata.json",
+        "definition_sha256": "4494b8d3fe03724d53e634081a9872b38b6ee23f305a6f82bbf839905bf5d25c",
+        "metadata_sha256": "53eea0438d4cd14199452c67769f508989dde5d9d05c0c9f7ac37e2035523595",
+        "expected_fluid_particles": 80400,
+        "expected_fluid_mass_kg": 80.4
+      },
+      {
+        "case_id": "F1_ECC_CELL_CENTER_SOLID_DP005",
+        "resolution": "dp005",
+        "dp_m": 0.005,
+        "counts_xyz": [
+          80,
+          134,
+          60
+        ],
+        "definition": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP005/F1_ECC_CELL_CENTER_SOLID_DP005_Def.xml",
+        "metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP005/F1_ECC_CELL_CENTER_SOLID_DP005.metadata.json",
+        "definition_sha256": "f505caa6fe8d06f4dc38f54578c654d4ee901405adced5c4701babef1c25cfc6",
+        "metadata_sha256": "11ca406414380e08765970d72405cdeabb18650ba519de0180bc20e72366d3aa",
+        "expected_fluid_particles": 643200,
+        "expected_fluid_mass_kg": 80.4
+      },
+      {
+        "case_id": "F1_ECC_CELL_CENTER_SOLID_DP003333",
+        "resolution": "dp003333",
+        "dp_m": 0.0033333333333333335,
+        "counts_xyz": [
+          120,
+          201,
+          90
+        ],
+        "definition": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP003333/F1_ECC_CELL_CENTER_SOLID_DP003333_Def.xml",
+        "metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_002/definitions/F1_ECC_CELL_CENTER_SOLID_DP003333/F1_ECC_CELL_CENTER_SOLID_DP003333.metadata.json",
+        "definition_sha256": "d0df66ec24d772c5ef7a89e5b927cc102735dc7608ce3c1b54f39e5f69003bdb",
+        "metadata_sha256": "970e49f9825cb1381e1a9a35739fa8eb1ffb1d79cf65caf1bc2ce05923e44b6c",
+        "expected_fluid_particles": 2170800,
+        "expected_fluid_mass_kg": 80.4
+      }
+    ],
+    "time_max_s": 1.6,
+    "time_out_s": 0.001,
+    "macro_budget_fraction": 0.05,
+    "event_budget_fraction_of_characteristic_time": 0.02,
+    "repair_id": "solid-drawbox-cellcenter-fallback-002",
+    "post_fluid_outer_face_redraw": "boxfill=bottom | left | right | front | back; layers vdp=0; same continuous tank point/size"
+  },
+  "prior_failed_attempts": [
+    {
+      "attempt_id": "gencase-partvtk-preflight-20261003-001",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_HALFDP/gencase-partvtk-preflight-20261003-001/execution-receipt.json",
+      "sha256": "333faf462bec2b17eed7b68f1dbc71cb6f97b4408958b27c38b6d490a25c9599"
+    },
+    {
+      "attempt_id": "gencase-partvtk-preflight-20261003-002",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_HALFDP/gencase-partvtk-preflight-20261003-002/execution-receipt.json",
+      "sha256": "24e40e45bc3ccf4a62afed65fe7e5062a9c879a7a427dcf0d22323bc63999c8c"
+    }
+  ],
+  "successful_primitive_reference": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE_Def.xml",
+    "sha256": "d8ec2e1667784a71d6124a3e4415df3d61be5eded10134d647b9ce7d0e731641",
+    "role": "local syntax/operation reference only; no physical borrowing"
+  },
+  "execution_policy": {
+    "cpu_only": true,
+    "gpu_by_subagent": false,
+    "solver": false,
+    "raw_inputs_immutable": true,
+    "maximum_repair_attempts": 2,
+    "repair_attempt_number": 2
+  },
+  "prior_solid_fallback_attempt": {
+    "attempt_id": "gencase-partvtk-solid-drawbox-dp010-20261003-001",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_SOLID/gencase-partvtk-solid-drawbox-dp010-20261003-001/eccentric-solid-cellcenter-dp010-preflight.json",
+    "report_sha256": "df3bfa82491f75e1afd1f4ea790e231f2b2f0c360bc5c62f66b9e2cade35abc8",
+    "execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_SOLID/gencase-partvtk-solid-drawbox-dp010-20261003-001/execution-receipt.json",
+    "execution_receipt_sha256": "9639f4a73eaa759c58e9abd2fc4fe0d50478b94075382a86f23d27bb5525c9b7"
+  }
+}
