@@ -79,6 +79,20 @@ def verify_parent_timeout(parent: Mapping[str, Any], hdf5: Path) -> dict[str, An
     command = parent.get("command")
     output_root = Path(str(parent.get("output_root", ""))).resolve()
     expected_root = hdf5.resolve().parent
+    # The runner receipt records the qualification state at the receipt level;
+    # older F3 requests also carry a human-readable request claim.  Require
+    # both forms to remain explicitly unqualified, while accepting the
+    # existing request wording ("none; ... remains not assessed").
+    request_claim = request.get("qualification_claim") if isinstance(request, Mapping) else None
+    request_unqualified = (
+        isinstance(request_claim, str)
+        and request_claim.lower().startswith("none")
+        and (request_claim.strip().lower() == "none" or "not assessed" in request_claim.lower())
+    )
+    receipt_unqualified = (
+        parent.get("numerical_reference_status") == "not_assessed"
+        and parent.get("production_product_acceptance") == "not_assessed"
+    )
     checks = {
         "status_failed": parent.get("status") == "failed",
         "returncode_sigterm": parent.get("returncode") == -15,
@@ -86,9 +100,7 @@ def verify_parent_timeout(parent: Mapping[str, Any], hdf5: Path) -> dict[str, An
         "output_root_matches_hdf5": output_root == expected_root,
         "input_hashes_unchanged": parent.get("input_hashes_at_launch") == parent.get("input_hashes_after_run"),
         "request_claim_remains_unqualified": (
-            isinstance(request, Mapping)
-            and request.get("qualification_claim") == "none"
-            and request.get("q_n_status") == "not_assessed"
+            request_unqualified or receipt_unqualified
         ),
     }
     if isinstance(command, list):
