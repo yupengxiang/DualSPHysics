@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from scripts.ds_data02_f3_gencase import generate_definition
-from scripts.ds_data02_f3_weak import _canonical_hash, _finite_aperture_labels
+from scripts.ds_data02_f3_weak import F3AuditError, _canonical_hash, _finite_aperture_labels, _validate_raw_manifest
 
 
 def _write_small_trajectory(path: Path) -> None:
@@ -89,6 +89,31 @@ def test_f3_physical_binding_hash_excludes_numeric_view_metadata() -> None:
     changed_physics = json.loads(json.dumps(binding))
     changed_physics["controls"]["viscosity"]["value"] = 0.06
     assert _canonical_hash(changed_physics) != first
+
+
+def test_direct_adapter_rechecks_metadata_only_all_frame_binding(tmp_path: Path) -> None:
+    data_root = tmp_path / "data"
+    data_root.mkdir()
+    (data_root / "PartInfo.ibi4").write_bytes(b"info")
+    (data_root / "Part_0000.bi4").write_bytes(b"zero")
+    (data_root / "Part_0001.bi4").write_bytes(b"one")
+    manifest = tmp_path / "raw-frame-manifest.json"
+    manifest.write_text(json.dumps({
+        "schema": "ds02.f3.raw-frame-manifest.v1",
+        "raw_source": {
+            "root": str(data_root), "frame_count": 2,
+            "files": [
+                {"path": "PartInfo.ibi4", "bytes": 4},
+                {"path": "Part_0000.bi4", "bytes": 4},
+                {"path": "Part_0001.bi4", "bytes": 3},
+            ],
+        },
+    }))
+    evidence = _validate_raw_manifest(manifest, data_root)
+    assert evidence["raw_source"]["frame_count"] == 2
+    (data_root / "Part_0001.bi4").write_bytes(b"changed")
+    with pytest.raises(F3AuditError, match="byte size changed"):
+        _validate_raw_manifest(manifest, data_root)
 
 
 def test_gencase_matrix_changes_only_resolution_lattice_insets(tmp_path: Path) -> None:
