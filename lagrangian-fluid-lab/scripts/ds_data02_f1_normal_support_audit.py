@@ -164,6 +164,24 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
             total_values = int(fields[2])
             _ignored_cells, offset = _payload(raw, offset, total_values, "int", path)
             continue
+        if keyword == "FIELD":
+            if len(fields) != 3:
+                raise ValueError(f"{path}: malformed FIELD section")
+            field_count = int(fields[2])
+            for _ in range(field_count):
+                field_header, offset = _line(raw, offset, path)
+                field_fields = field_header.split()
+                if len(field_fields) != 4:
+                    raise ValueError(f"{path}: malformed FIELD array header {field_header!r}")
+                _field_name, field_components, field_values, field_kind = field_fields
+                _field_payload, offset = _payload(
+                    raw,
+                    offset,
+                    int(field_components) * int(field_values),
+                    field_kind,
+                    path,
+                )
+            continue
         if keyword == "SCALARS":
             if data_count is None or len(fields) < 3:
                 raise ValueError(f"{path}: malformed SCALARS section")
