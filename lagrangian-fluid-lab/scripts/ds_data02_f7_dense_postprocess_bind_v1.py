@@ -21,7 +21,10 @@ def register(conversion_request, destination, prefix):
     report = json.loads(report_path.read_text())
     if receipt.get('status') != 'completed' or receipt.get('returncode') != 0:
         raise ValueError('Actual completed converter receipt required')
-    if receipt.get('input_sha256') and any(receipt['input_sha256'].get(p) != sha for p, sha in request['input_sha256'].items()):
+    if receipt.get('request_sha256') != digest(conversion_request):
+        raise ValueError('Converter receipt request digest differs')
+    actual_inputs = receipt.get('input_hashes_at_launch', {})
+    if any(actual_inputs.get(p) != sha for p, sha in request['input_sha256'].items()):
         raise ValueError('Converter receipt input binding differs')
     source = source_dir / 'trajectory.h5'
     if not source.is_file() or report['output_hdf5'] != str(source):
