@@ -1,0 +1,42 @@
+{
+  "schema": "ds02.runner.request.v2",
+  "family_id": "F1",
+  "case_id": "F1_REF_ECC_NOMINAL_MATRIX",
+  "attempt_id": "eccentric-finite-face-audit-20261003-002",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "model_profile": "gpt-5.6-luna/max",
+  "cpu_threads": 1,
+  "max_wall_seconds": 300,
+  "estimated_storage_bytes": 16777216,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f1_eccentric_finite_face_audit_v2.py",
+    "--manifest",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_reference_reuse_001/input_manifest.json",
+    "--finite-faces-helper",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_finite_faces_v1.py",
+    "--output",
+    "{attempt_root}/eccentric-finite-face-audit.json"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f1_eccentric_finite_face_audit_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_f1_eccentric_finite_face_audit_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_reference_reuse_001/input_manifest.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_finite_faces_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_COARSE/gencase-ref-ecc-coarse-v1/F1_REF_ECC_NOMINAL_COARSE_Bound.vtk",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_MEDIUM/gencase-reference-002/F1_REF_ECC_NOMINAL_MEDIUM_Bound.vtk",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE/gencase-reference-002/F1_REF_ECC_NOMINAL_FINE_Bound.vtk",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE_DENSE_SAVE/gencase-time-study-001/F1_REF_ECC_NOMINAL_FINE_DENSE_SAVE_Bound.vtk"
+  ],
+  "input_hash_policy": "runner hashes only scripts, manifest, helper and Bound.vtk inputs; no HDF5 trajectory is opened or hashed",
+  "scope": "Additive v2 after preserved 001 negative: finite interior/edge/corner sampling for five outer faces and five eccentric-obstacle faces, with the tank-floor obstacle intersection decomposed into four exposed patches. No solver, GenCase, conversion, HDF5 read, GPU or Q-N claim.",
+  "supersedes": "eccentric-finite-face-audit-20261003-001 only for the corrected floor-intersection geometry; 001 output remains immutable negative evidence",
+  "solver_launch": false,
+  "gencase_launch": false,
+  "gpu_launch": false,
+  "q_n_status": "not_assessed"
+}
