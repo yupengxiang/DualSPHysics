@@ -236,7 +236,8 @@ def build_metadata(owner: Mapping[str, Any], direct: Mapping[str, Any]) -> dict[
 
 def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Path,
                accounting_path: Path, labels_path: Path, solver_log: Path,
-               owner_path: Path, raw_manifest_path: Path, particle_chunk: int) -> dict[str, Any]:
+               owner_path: Path, raw_manifest_path: Path, particle_chunk: int,
+               expected_hdf5_sha256: str | None = None) -> dict[str, Any]:
     started = time.perf_counter()
     before = resource_snapshot()
     direct = first_record(load_json(direct_report_path))
@@ -244,6 +245,8 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
     accounting = first_record(load_json(accounting_path))
     owner = first_record(load_json(owner_path))
     source_sha = sha256_file(hdf5)
+    if expected_hdf5_sha256 is not None and source_sha != expected_hdf5_sha256:
+        raise ValueError(f"HDF5 SHA-256 mismatch: expected {expected_hdf5_sha256}, observed {source_sha}")
     parent_check = verify_parent_timeout(parent, hdf5)
     direct_check = verify_direct_report(direct, hdf5, source_sha)
     accounting_check = verify_native_accounting(accounting, hdf5)
@@ -261,7 +264,10 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
     return {
         "schema": SCHEMA,
         "audit_claim": "independent post-audit/rebind of a completed native conversion artifact; Q-N and production remain unassessed",
-        "source_hdf5": {"path": str(hdf5), "sha256": source_sha, "bytes": hdf5.stat().st_size},
+        "source_hdf5": {
+            "path": str(hdf5), "sha256": source_sha, "expected_sha256": expected_hdf5_sha256,
+            "bytes": hdf5.stat().st_size,
+        },
         "parent_conversion_timeout": parent_check,
         "direct_conversion_evidence": direct_check,
         "native_accounting_evidence": accounting_check,
@@ -288,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--solver-log", type=Path, required=True)
     parser.add_argument("--owner-metadata", type=Path, required=True)
     parser.add_argument("--raw-manifest", type=Path, required=True)
+    parser.add_argument("--expected-hdf5-sha256", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--particle-chunk", type=int, default=65536)
     args = parser.parse_args(argv)
@@ -295,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
         hdf5=args.hdf5, direct_report_path=args.direct_report, parent_receipt_path=args.parent_receipt,
         accounting_path=args.native_accounting, labels_path=args.labels, solver_log=args.solver_log,
         owner_path=args.owner_metadata, raw_manifest_path=args.raw_manifest, particle_chunk=args.particle_chunk,
+        expected_hdf5_sha256=args.expected_hdf5_sha256,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
