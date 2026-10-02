@@ -1,0 +1,73 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F3",
+  "case_id": "F3_DUAL_AXIS_WEAK_006G_004G_MACRO_INPUT_AUDIT",
+  "attempt_id": "f3-macro-input-audit-20261002-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 4,
+  "max_wall_seconds": 3600,
+  "estimated_storage_bytes": 268435456,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_macro_input_audit.py",
+    "--input",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+    "--input",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+    "--input",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+    "--input",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/trajectory.h5",
+    "--particle-chunk",
+    "65536",
+    "--output",
+    "{attempt_root}/macro-input-audit.json"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_macro_input_audit.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_f3_macro_input_audit.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/direct-conversion-report.json"
+  ],
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "source_hdf5_policy": "source HDF5 is read-only and omitted from input_files to avoid redundant multi-GB hashing; each source trajectory SHA is pinned from its completed direct report",
+  "source_hdf5_bindings": {
+    "medium": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+      "sha256": "c2cb2f701ef81a1a490764aa9057874c0d61f0d2447416cb4e1f7693daa76fd2"
+    },
+    "coarse": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+      "sha256": "61d14a1a67ab040dfb6728a6b11a1721eb71f83da99468e31cbd8d987aeda2db"
+    },
+    "fine": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+      "sha256": "8cf11a279aa4849939982c1b11a1a4260dff0224051795a38880d55dfc74e8be"
+    },
+    "half_dt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/trajectory.h5",
+      "sha256": "27a2206c6a3fe03f9202955e895811e735d21cbdd59273ee52ecb8c5227bbe69"
+    }
+  },
+  "scope": "independent actual finite/positive input audit for every initial type=3 and valid=true macro row across spatial reference H5 and HALF_DT; failures are explicit and cannot be silently filtered; no solver/GPU/Q-N",
+  "claim_boundary": "input finite/positive row integrity only; Q-N and production remain unassessed",
+  "q_n_status": "not_assessed",
+  "implementation": {
+    "script": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_macro_input_audit.py",
+    "script_sha256": "a00f94a151ecbd74a53f4e0d3cb841fba364a76ad556ac34ce537ce45eb52e81",
+    "commit": "01d918a9",
+    "policy": "status failed if any valid=true initial-fluid row has nonfinite position/velocity/mass or nonpositive mass"
+  },
+  "comparison_v2_evidence": {
+    "request": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/requests/weak-dual-spatial-fixed-window-comparison-request-002.json",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY/weak-dual-spatial-fixed-window-comparison-20261002-002/fixed-window-comparison.json",
+    "report_sha256": "ca3a7c710b1607de8fcb9558c4c13491319538a7fb4136a1724391c29f40ec02"
+  }
+}
