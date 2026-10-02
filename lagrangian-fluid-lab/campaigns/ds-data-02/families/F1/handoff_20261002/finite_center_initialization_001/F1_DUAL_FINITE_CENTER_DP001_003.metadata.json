@@ -1,0 +1,84 @@
+{
+  "schema": "ds02.f1.new-mother-finite-center-quadrature.v1",
+  "family_id": "F1",
+  "case_id": "F1_DUAL_FINITE_CENTER_DP001_003",
+  "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE",
+  "mechanism": "asymmetric_dual_channel",
+  "status": "new_mother_definition_only_pending_native_gencase",
+  "qualification_claim": "none",
+  "production_claim": "none",
+  "new_mother_route": {
+    "reason": "The two bounded repairs of the padded-fill mother produced the same 633472 fluid cells and wall-overlap failure. This is a new explicitly declared cell-center quadrature mother, not a third patch of that mother.",
+    "prior_failed_attempts": [
+      {
+        "attempt": "F1_DUAL_FINITE_INIT_DP001_001",
+        "audit": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_initialization_001/native_preflight_audit_001.json",
+        "audit_sha256": "138009f879b54d4938c78ecb69772f013bd87acd8bf5361728a7a4da36b216b5",
+        "failure": "633472 fluid particles (633.472 kg) and fluid on bottom/y/right physical faces"
+      },
+      {
+        "attempt": "F1_DUAL_FINITE_INIT_DP001_002",
+        "audit": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_initialization_002/native_preflight_audit_001.json",
+        "audit_sha256": "eefebedf226d8269a77b1956ff7632f22e823232fe0ba42425b07ed6d8fdba57",
+        "failure": "Same native occupancy after pointmin/endpoint tie nudge; declared 616 kg did not match"
+      }
+    ]
+  },
+  "continuous_contract": {
+    "density_kg_m3": 1000.0,
+    "reservoir_low_m": [2.1, 0.0, 0.0],
+    "reservoir_high_m": [3.22, 1.0, 0.55],
+    "reservoir_size_m": [1.12, 1.0, 0.55],
+    "reservoir_volume_m3": 0.616,
+    "reservoir_mass_kg": 616.0,
+    "quadrature_rule": "one representative fluid particle per dp^3 cell; mass is native GenCase mass and is never rescaled",
+    "initial_center_envelope_low_m": [2.105, 0.005, 0.005],
+    "initial_center_envelope_high_m": [3.215, 0.995, 0.545],
+    "expected_center_counts_xyz": [112, 100, 55],
+    "expected_fluid_count": 616000,
+    "expected_native_mass_kg": 616.0,
+    "initial_velocity_m_per_s": [0.0, 0.0, 0.0]
+  },
+  "declared_geometry": {
+    "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+    "tank_low_m": [0.0, -0.005, -0.005],
+    "tank_high_m": [3.23, 1.005, 1.0],
+    "tank_size_m": [3.23, 1.01, 1.005],
+    "tank_wall_faces": ["bottom", "left", "right", "front", "back"],
+    "top": "open physical free surface; no inlet, birth, adaptive replacement, or periodic clone",
+    "separator_low_m": [1.25, 0.34, 0.0],
+    "separator_high_m": [2.05, 0.4, 0.7],
+    "separator_contract": "same finite separator placement and two-path mechanism as the official asymmetric dual-channel source",
+    "wall_clearance_from_fluid_centers_m": 0.005,
+    "numerical_grid_origin_m": [0.005, 0.005, 0.005],
+    "dp_m": 0.01,
+    "geometry_change": "new mother explicitly declares a half-cell outer-wall envelope so the finite reservoir's center cells do not overwrite wall markers"
+  },
+  "source_lineage": {
+    "mechanism_source_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_DUAL_NOMINAL_COARSE_Def.xml",
+    "mechanism_source_definition_sha256": "e1202dd0f0ddf4ec8e75722ef2b7ebd779bf3e3147b97f372194f9820d70e889",
+    "official_mother": "mdbc/04_Dambreak/CaseDamBreak3D",
+    "boundary_method": "mDBC",
+    "source_geometry_role": "mechanism and finite separator reference only; this case has its own declared continuous tank envelope and fluid quadrature"
+  },
+  "solver_preflight": {
+    "dimension_expected": 3,
+    "time_max_s": 6.0,
+    "time_out_s": 0.001,
+    "gpu_launch": false,
+    "solver_launch": false,
+    "native_gencase_status": "pending",
+    "required_checks": [
+      "actual 3D GenCase evidence",
+      "native fluid count 616000 and mass 616 kg",
+      "all center coordinates inside the continuous reservoir with 0.005 m clearance from declared tank/separator walls",
+      "finite wall and separator marker coverage",
+      "input bytes and hashes before/after equal"
+    ]
+  },
+  "source_artifacts": {
+    "definition": "F1_DUAL_FINITE_CENTER_DP001_003_Def.xml",
+    "metadata": "F1_DUAL_FINITE_CENTER_DP001_003.metadata.json",
+    "diagnosis_source": "initial_geometry_diagnosis_001.source.json"
+  }
+}
