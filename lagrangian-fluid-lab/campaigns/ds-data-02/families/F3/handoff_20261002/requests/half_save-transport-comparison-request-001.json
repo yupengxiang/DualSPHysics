@@ -1,0 +1,97 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F3",
+  "case_id": "F3_DUAL_AXIS_WEAK_006G_004G_TRANSPORT_STUDY",
+  "attempt_id": "half_save-transport-comparison-20261002-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 2,
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_transport_compare.py",
+    "--baseline",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-labels-half_save-20261002-003/typed-transport-labels.h5",
+    "--particle-chunk",
+    "65536",
+    "--output",
+    "{attempt_root}/transport-comparison.json"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "max_wall_seconds": 1200,
+  "estimated_storage_bytes": 536870912,
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_transport_compare.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_full_transport_config.v1.json",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/half_save-post-audit-rebind-20261002-002/post-audit-rebind.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-labels-half_save-20261002-003/typed-transport-labels.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-labels-half_save-20261002-003/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-accounting-half_save-20261002-003/native-accounting.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/raw-manifest-half_save-20261002-002/raw-frame-manifest.json"
+  ],
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "fixed_window_s": [
+    0.0,
+    10.0
+  ],
+  "scope": "F3 fixed physical 0-10 s comparison on immutable native artifacts; diagnostics only, Q-N and production remain unassessed",
+  "qualification_claim": "none; comparison request only, Q-N remains not assessed",
+  "q_n_status": "not_assessed",
+  "budget_contract": {
+    "macro_relative": 0.05,
+    "event_time_relative": 0.02,
+    "save_or_integration_share": 0.2,
+    "status": "not_assessed"
+  },
+  "hdf5_binding_policy": "HDF5 source SHA/bytes are explicitly pinned from completed direct-conversion reports; runner does not redundantly rehash multi-GB trajectory HDF5 inputs",
+  "expected_native": {
+    "baseline_frames": 4001,
+    "half_save_frames": 8001,
+    "fluid_particles": 34560,
+    "total_particles": 108000,
+    "events": [
+      "left_right_exchange",
+      "front_back_exchange",
+      "top_open_exit"
+    ]
+  },
+  "label_hdf5_bindings": {
+    "baseline": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+      "sha256": "1b4f9acdfaa386688db815c0de8e064c0b54aa216b072ef90b9efaa9de5dc1f3",
+      "bytes": 5722540,
+      "source_hdf5_sha256": "c2cb2f701ef81a1a490764aa9057874c0d61f0d2447416cb4e1f7693daa76fd2"
+    },
+    "half_save": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-labels-half_save-20261002-003/typed-transport-labels.h5",
+      "sha256": "47ed78602426949113eba961f1dd222568007b6fe6d277c55201045df943dcb6",
+      "bytes": 9603140,
+      "source_hdf5_sha256": "b7bab5bee7ef99d6eeabd02f7c1ac5c5ea38913636da5923c60efa4cb734d7df"
+    }
+  },
+  "variant_provenance": {
+    "post_audit_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/half_save-post-audit-rebind-20261002-002/post-audit-rebind.json",
+      "sha256": "cb8ed525b32a01de692cfc0222112bf873c55d614da77b972953c9f94382be08",
+      "bytes": 1122671
+    },
+    "parent_conversion_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/execution-receipt.json",
+      "sha256": "703218fa2b90b73aa57afee25e42898a0a8addf7ee76d734e645b10b18fac4a5",
+      "bytes": 44072
+    },
+    "reuse_semantics": "read-only comparison of immutable native labels; parent conversion timeout remains recorded"
+  },
+  "retry_of": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/requests/transport-comparison-request-002.json",
+  "retry_reason": "new additive single-variant transport comparison binds successful HALF_SAVE native labels 003 and source H5 SHA; old two-variant request is untouched"
+}
