@@ -1,0 +1,95 @@
+{
+  "schema": "ds02.f3.half-save-fixed-window-acceptance-audit.v1",
+  "created_utc": "2026-10-02",
+  "family": "F3",
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "variant": "HALF_SAVE",
+  "claim_boundary": "diagnostic numerical and transport comparison only; Q-N and production acceptance remain unassessed",
+  "window_s": [
+    0.0,
+    10.0
+  ],
+  "source_contract": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/root-full-integrity-source-contract-001/full-integrity-report.json",
+    "sha256": "0bea94236d11f93512f6e42c9673f90b664f3b45e4834a5bdfc89ac64884894d",
+    "observed_status": "Q-I-structure-pass",
+    "observed_shape": "8001 frames x 108000 particles x 3 coordinates",
+    "observed_lifecycle": "closed cohort passed; no structural failures or missing requirements",
+    "q_n_status": "not_assessed"
+  },
+  "conversion_and_labels": {
+    "trajectory_hdf5_sha256": "b7bab5bee7ef99d6eeabd02f7c1ac5c5ea38913636da5923c60efa4cb734d7df",
+    "trajectory_hdf5_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/trajectory.h5",
+    "frames": 8001,
+    "particle_count": 108000,
+    "fluid_particle_count": 34560,
+    "time_end_s": 10.00001205137414,
+    "initial_fluid_mass_kg": 14.580000378191471,
+    "parts_out_excluded": 0,
+    "labels_hdf5_sha256": "47ed78602426949113eba961f1dd222568007b6fe6d277c55201045df943dcb6",
+    "labels_hdf5_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/native-labels-half_save-20261002-003/typed-transport-labels.h5"
+  },
+  "fixed_window_macro": {
+    "report_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_TIME_STUDY/half_save-fixed-window-comparison-20261002-001/fixed-window-comparison.json",
+    "report_sha256": "f47bf54e35c01273a03bfc2ab6fb0f2701f9fc8c85351e3857d096cd74c31d03",
+    "receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_TIME_STUDY/half_save-fixed-window-comparison-20261002-001/execution-receipt.json",
+    "receipt_sha256": "5ab46deb2242c6ca625169d90fcf7b86de543d9a7679061d940d690f66f9493c",
+    "baseline_frames": 4001,
+    "variant_frames": 8001,
+    "variant_save_interval_s": {
+      "min": 0.001238871024543009,
+      "max": 0.0012609937214413947
+    },
+    "max_relative_error": {
+      "active_mass_kg": 0.0,
+      "com_x_m": 0.005395559469324315,
+      "com_y_m": 0.004184855885705081,
+      "com_z_m": 1.358341727798977e-07,
+      "kinetic_energy_j": 0.004487184022770363
+    },
+    "starting_budget": {
+      "macro_relative": 0.05,
+      "event_time_relative": 0.02,
+      "save_or_integration_share": 0.2
+    },
+    "budget_observation": "reported macro errors are below the preregistered 5% starting macro budget; this comparison does not grant Q-N or production status"
+  },
+  "transport_comparison": {
+    "report_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_TRANSPORT_STUDY/half_save-transport-comparison-20261002-001/transport-comparison.json",
+    "report_sha256": "aa8e6af53d28c2961d48b3d416db6e1072c906a127a6be004d971f21cb76c1b7",
+    "receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_TRANSPORT_STUDY/half_save-transport-comparison-20261002-001/execution-receipt.json",
+    "receipt_sha256": "737bbafee18641c81b25b5c957fad740c97e06b6b555ae5f0333f54156585211",
+    "initial_fluid_mass_kg": 14.580000378191471,
+    "final_unknown_mass_kg": 0.0,
+    "final_numerical_loss_mass_kg": 0.0,
+    "final_invalid_state_mass_kg": 0.0,
+    "net_flux_kg": {
+      "baseline": [-0.3303281335684005, 0.0012656250328291208, 0.0],
+      "half_save": [-0.3303281335684005, 0.0012656250328291208, 0.0]
+    },
+    "event_bracket_absolute_differences_s": {
+      "left_right_exchange": {
+        "lower": 0.0006227140988763757,
+        "upper": -0.0006271506932198356,
+        "chord": -1.1034848501623173e-06
+      },
+      "front_back_exchange": {
+        "lower": 0.000628880876626603,
+        "upper": -0.0006215400496927259,
+        "chord": -2.494937168862066e-06
+      }
+    },
+    "top_open_exit": "0 observed mass and the full 14.580000378191471 kg remained censored; no physical exit was inferred",
+    "residence_mean_absolute_differences_s": {
+      "region_1": 9.541900602982878e-08,
+      "region_2": -9.541900514165036e-08
+    },
+    "budget_observation": "event bracket changes are small relative to their event times and are retained as diagnostics; transport qualification remains not_assessed because the report explicitly preserves the Q-N boundary and censored mass"
+  },
+  "acceptance_status": {
+    "q_i": "source-contract structural pass is recorded separately above; post-audit/rebind provenance remains additive",
+    "q_n": "not_assessed",
+    "production": "not_accepted",
+    "next_dependency": "HALF_DT direct conversion and its independent labels, fixed-window macro comparison, and transport comparison"
+  }
+}
