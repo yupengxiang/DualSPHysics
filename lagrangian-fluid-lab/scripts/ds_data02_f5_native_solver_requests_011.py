@@ -616,6 +616,8 @@ def _request(key: str, spec: Mapping[str, Any], paths: Mapping[str, Path], stage
         "attempt_id": f"qualification-f5-{spec['mechanism_id']}-{spec['resolution_id']}-native-reference-011",
         "command": [str(SOLVER), str(input_prefix), "{attempt_root}/solver_output", "-tmax:16", "-tout:0.02"],
         "input_prefix": str(input_prefix),
+        "gencase_receipt": str(paths["gencase_receipt"]),
+        "gencase_receipt_sha256": sha256(paths["gencase_receipt"]),
         "cwd": str(stage["stage_dir"]),
         "max_wall_seconds": int(spec["max_wall_seconds"]),
         "cpu_threads": int(spec["cpu_threads"]),
