@@ -413,7 +413,7 @@ def prepare(family_dir: Path = FAMILY_ROOT) -> dict[str, Any]:
                 "repair_xml_well_formed": ET.parse(definition).getroot().tag == "case",
                 "source_equivalence_outside_fluid_primitive": True,
                 "exact_commensurate_count": lattice()["particle_count"] == 150528,
-                "exact_continuum_mass_kg": lattice()["native_lattice_mass_kg"] == 2352.0,
+                "exact_continuum_mass_kg": abs(lattice()["native_lattice_mass_kg"] - 2352.0) < 1e-9,
                 "mass_budget_pass": lattice()["mass_budget_pass"],
                 "finite_bed_present": bed.is_file(),
                 "motion_present": motion.is_file(),
