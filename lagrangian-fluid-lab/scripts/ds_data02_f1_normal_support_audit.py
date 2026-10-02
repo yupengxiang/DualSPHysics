@@ -137,6 +137,7 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
     point_values, offset = _payload(raw, offset, point_count * 3, point_kind, path)
     points = point_values.reshape(point_count, 3).astype(np.float64)
     point_data: dict[str, np.ndarray] = {}
+    field_data: dict[str, np.ndarray] = {}
     data_count: int | None = None
     while True:
         offset = _skip_newline(raw, offset)
@@ -173,14 +174,25 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
                 field_fields = field_header.split()
                 if len(field_fields) != 4:
                     raise ValueError(f"{path}: malformed FIELD array header {field_header!r}")
-                _field_name, field_components, field_values, field_kind = field_fields
-                _field_payload, offset = _payload(
+                field_name, field_components, field_values, field_kind = field_fields
+                field_components_i = int(field_components)
+                field_values_i = int(field_values)
+                field_payload, offset = _payload(
                     raw,
                     offset,
-                    int(field_components) * int(field_values),
+                    field_components_i * field_values_i,
                     field_kind,
                     path,
                 )
+                # GenCase writes its typed boundary arrays in a VTK
+                # ``FIELD FieldData`` block immediately after POINT_DATA.
+                # Although the block is named FieldData, these arrays are
+                # point-aligned when their count equals POINT_DATA.  Preserve
+                # that native association instead of discarding it or
+                # manufacturing values; unrelated arrays remain field data.
+                shaped = field_payload.reshape(field_values_i, field_components_i)
+                target = point_data if data_count is not None and field_values_i == data_count else field_data
+                target[field_name] = shaped[:, 0] if field_components_i == 1 else shaped
             continue
         if keyword == "SCALARS":
             if data_count is None or len(fields) < 3:
@@ -220,7 +232,7 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
         # Bound.vtk has no cells or additional sections.  Refuse an unknown
         # section rather than guessing its payload offset.
         raise ValueError(f"{path}: unsupported VTK section {header!r}")
-    return {"points": points, "point_data": point_data, "sha256": sha256(path), "file_size_bytes": len(raw)}
+    return {"points": points, "point_data": point_data, "field_data": field_data, "sha256": sha256(path), "file_size_bytes": len(raw)}
 
 
 def _point_count(path: Path) -> int:
