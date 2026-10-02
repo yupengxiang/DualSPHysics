@@ -243,6 +243,34 @@ def _point_count(path: Path) -> int:
     return int(match.group(1))
 
 
+def _read_vtk_points(path: Path) -> np.ndarray:
+    """Read the legacy binary VTK POINTS block for shape-plane evidence."""
+
+    raw = path.read_bytes()
+    match = re.search(rb"POINTS\s+(\d+)\s+float\r?\n", raw)
+    if match is None:
+        raise ValueError(f"{path}: POINTS float header not found")
+    count = int(match.group(1))
+    start = match.end()
+    stop = start + count * 3 * 4
+    if stop > len(raw):
+        raise ValueError(f"{path}: truncated POINTS payload")
+    values = np.frombuffer(raw, dtype=">f4", count=count * 3, offset=start)
+    return values.astype(np.float64, copy=False).reshape(count, 3)
+
+
+def _shape_summary(points: np.ndarray) -> dict[str, Any]:
+    return {
+        "point_count": int(len(points)),
+        "finite": bool(np.isfinite(points).all()),
+        "bounds_m": [points.min(axis=0).astype(float).tolist(), points.max(axis=0).astype(float).tolist()],
+        "unique_axis_values_m": {
+            axis: [float(value) for value in np.unique(np.round(points[:, index], 8))]
+            for index, axis in enumerate(("x", "y", "z"))
+        },
+    }
+
+
 def _fixed_population_xml(generated_xml: Path) -> dict[int, int]:
     root = ET.parse(generated_xml).getroot()
     particles = root.find(".//particles")
@@ -386,6 +414,7 @@ def audit(
     source_before = {str(path): sha256(path) for path in source_paths}
     xml = _xml_summary(generated_xml)
     bound = read_binary_vtk(bound_vtk)
+    hdp_points = _read_vtk_points(hdp_vtk)
     point_data = bound["point_data"]
     required = {"Mk", "Type", "Normal", "NormalSize"}
     missing = required - set(point_data)
@@ -464,7 +493,7 @@ def audit(
         "source_hashes_after": source_after,
         "input_bytes_unchanged": source_before == source_after,
         "generated_xml": xml,
-        "vtk_headers": {"bound_point_count": int(len(points)), "fluid_point_count": _point_count(fluid_vtk), "all_point_count": _point_count(all_vtk), "hdp_point_count": _point_count(hdp_vtk)},
+        "vtk_headers": {"bound_point_count": int(len(points)), "fluid_point_count": _point_count(fluid_vtk), "all_point_count": _point_count(all_vtk), "hdp_point_count": _point_count(hdp_vtk), "hdp_shape": _shape_summary(hdp_points)},
         "typed_native_counts": {
             "fixed_rows": all_fixed,
             "mk_counts": {str(key): value for key, value in sorted(vtk_counts.items())},
