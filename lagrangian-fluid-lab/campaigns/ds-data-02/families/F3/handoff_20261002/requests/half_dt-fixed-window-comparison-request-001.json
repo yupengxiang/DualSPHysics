@@ -1,0 +1,90 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F3",
+  "case_id": "F3_DUAL_AXIS_WEAK_006G_004G_TIME_STUDY",
+  "attempt_id": "half_dt-fixed-window-comparison-20261002-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 4,
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "compare",
+    "--baseline",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/trajectory.h5",
+    "--grid-step",
+    "0.0025",
+    "--output",
+    "{attempt_root}/fixed-window-comparison.json"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "max_wall_seconds": 2400,
+  "estimated_storage_bytes": 1073741824,
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_transport_compare.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_full_transport_config.v1.json",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/half_dt-post-audit-rebind-20261002-001/post-audit-rebind.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/native-accounting-half_dt-20261002-003/native-accounting.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/raw-manifest-half_dt-20261002-002/raw-frame-manifest.json"
+  ],
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "fixed_window_s": [
+    0.0,
+    10.0
+  ],
+  "scope": "F3 fixed physical 0-10 s comparison of the HALF_DT integration-step variant on immutable native artifacts; diagnostics only, Q-N and production remain unassessed",
+  "qualification_claim": "none; comparison request only, Q-N remains not assessed",
+  "q_n_status": "not_assessed",
+  "budget_contract": {
+    "macro_relative": 0.05,
+    "event_time_relative": 0.02,
+    "save_or_integration_share": 0.2,
+    "status": "not_assessed"
+  },
+  "hdf5_binding_policy": "HDF5 source SHA/bytes are explicitly pinned from completed direct-conversion reports; runner does not redundantly rehash multi-GB trajectory HDF5 inputs",
+  "expected_native": {
+    "baseline_frames": 4001,
+    "fluid_particles": 34560,
+    "total_particles": 108000,
+    "half_dt_frames": 4001
+  },
+  "source_hdf5_bindings": {
+    "baseline": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+      "sha256": "4c6f3553673c45f428c3fdd7777f9fc8fb575ae29df87f06d7daea7a825b8cd4",
+      "bytes": 2156155,
+      "trajectory_sha256": "c2cb2f701ef81a1a490764aa9057874c0d61f0d2447416cb4e1f7693daa76fd2"
+    },
+    "half_dt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/direct-conversion-report.json",
+      "sha256": "ad4a18d5a2c2d6b26c7b61acf0bbed753cc9c851e4d5987fcb09af1718efdac4",
+      "bytes": 2156414,
+      "trajectory_sha256": "27a2206c6a3fe03f9202955e895811e735d21cbdd59273ee52ecb8c5227bbe69"
+    }
+  },
+  "variant_provenance": {
+    "post_audit_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/half_dt-post-audit-rebind-20261002-001/post-audit-rebind.json",
+      "sha256": "599c926bc49da9ad1fbed1689ac02e9e40c50a875876daf58b2eb9858b2f900a",
+      "bytes": 574711
+    },
+    "parent_conversion_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/direct-half_dt-20261002-004/execution-receipt.json",
+      "sha256": "4c19ac0ae7bd43ada4a48f3db3a81a9a8d0cacf6ca2fde14fbbdf8195aae3584",
+      "bytes": 42587
+    },
+    "reuse_semantics": "read-only comparison of immutable HALF_DT H5 after completed-parent post-audit/rebind; parent conversion status completed"
+  },
+  "retry_of": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/requests/half_save-fixed-window-comparison-request-001.json",
+  "retry_reason": "new additive single-variant comparison binds completed HALF_DT direct-004 H5 and completed-parent post-audit-001; HALF_SAVE request is untouched"
+}
