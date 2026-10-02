@@ -65,6 +65,11 @@ production claim is made.  FloatingInfo and ComputeForces remain required
 shared CPU postprocessing for pose, orientation, linear/angular velocity,
 mass, inertia, force, and torque.
 
-The v2 runtime source is bound by SHA-256
-`5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60` and
-runtime launch commit `788bc7aa44b9b0f57cab4390d27dc9c5e5004358`.
+The v2 runtime source is bound in every receipt by SHA-256
+`5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60`.
+The receipts are authoritative for the changing shared-runner worktree: the
+GenCase launches record runner commit
+`d905b8e3cf824d95ff93933df2ba2aebfa7e57a6`, and the PartVTK launches record
+`196004797c4f51834cf14b42e0642e9f42b68a24` or
+`ba2628b11f799f865d62e70c979c7acbdeb40189`, with no input-hash changes after
+each run.
