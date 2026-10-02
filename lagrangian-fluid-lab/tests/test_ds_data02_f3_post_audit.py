@@ -70,3 +70,22 @@ def test_direct_report_rebind_rejects_wrong_hdf5_digest(tmp_path: Path) -> None:
     result = MODULE.verify_direct_report(report, hdf5, MODULE.sha256_file(hdf5))
     assert result["all_checks_pass"] is False
     assert result["checks"]["output_sha256_matches"] is False
+
+
+def test_direct_report_rebind_supports_half_dt_frame_count(tmp_path: Path) -> None:
+    hdf5 = tmp_path / "trajectory.h5"
+    hdf5.write_bytes(b"native")
+    report = {
+        "conversion_status": "completed",
+        "output_hdf5": str(hdf5),
+        "output_sha256": MODULE.sha256_file(hdf5),
+        "frames": 4001,
+        "particles": 108000,
+        "partvtk_validation": {"all_passed": True, "frames": [{}, {}, {}]},
+        "source_provenance": {"raw_tree": {"unchanged": True, "before_tree_sha256": "x", "after_tree_sha256": "x"}},
+        "lifecycle": {"transient_missing_frame_count": 0},
+        "typed_identity": {},
+        "q_n_status": "not_assessed",
+    }
+    result = MODULE.verify_direct_report(report, hdf5, MODULE.sha256_file(hdf5), expected_frames=4001)
+    assert result["all_checks_pass"] is True
