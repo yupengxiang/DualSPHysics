@@ -154,6 +154,16 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
             if data_count != point_count:
                 raise ValueError(f"{path}: POINT_DATA count differs from POINTS")
             continue
+        if keyword in {"VERTICES", "POLYGONS", "LINES", "TRIANGLE_STRIPS"}:
+            if len(fields) != 3:
+                raise ValueError(f"{path}: malformed {keyword} section")
+            # GenCase Bound.vtk emits one vertex cell per boundary point before
+            # POINT_DATA.  The audit needs no cell topology, but it must consume
+            # the binary payload exactly so subsequent typed arrays remain aligned.
+            _cell_count = int(fields[1])
+            total_values = int(fields[2])
+            _ignored_cells, offset = _payload(raw, offset, total_values, "int", path)
+            continue
         if keyword == "SCALARS":
             if data_count is None or len(fields) < 3:
                 raise ValueError(f"{path}: malformed SCALARS section")
