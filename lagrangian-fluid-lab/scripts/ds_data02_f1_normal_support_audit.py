@@ -194,6 +194,22 @@ def read_binary_vtk(path: Path) -> dict[str, Any]:
             shaped = values.reshape(data_count, components)
             point_data[name] = shaped[:, 0] if components == 1 else shaped
             continue
+        # GenCase writes several point arrays in its compact four-token form
+        # without the VTK SCALARS keyword (for example ``Normal 3 N float``).
+        # Consume that native form explicitly instead of searching binary data
+        # for textual headers or manufacturing missing arrays.
+        if len(fields) == 4 and fields[1].isdigit() and fields[2].isdigit() and fields[3] in VTK_TYPES:
+            if data_count is None:
+                raise ValueError(f"{path}: compact array appears before POINT_DATA")
+            name = fields[0]
+            components = int(fields[1])
+            count = int(fields[2])
+            if count != data_count:
+                raise ValueError(f"{path}: compact array {name} count differs from POINT_DATA")
+            values, offset = _payload(raw, offset, count * components, fields[3], path)
+            shaped = values.reshape(count, components)
+            point_data[name] = shaped[:, 0] if components == 1 else shaped
+            continue
         if keyword == "VECTORS":
             if data_count is None or len(fields) != 3:
                 raise ValueError(f"{path}: malformed VECTORS section")
