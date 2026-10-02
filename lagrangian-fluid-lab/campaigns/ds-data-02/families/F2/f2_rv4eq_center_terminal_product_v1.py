@@ -604,15 +604,16 @@ def load_module(path: Path, name: str):
 
 
 def run_labels(args: argparse.Namespace) -> dict[str, Any]:
-    import shutil
-
     source = require(args.source_h5, "source H5")
     augmented = args.augmented_h5.resolve()
     if augmented.exists() or augmented == source:
         raise ValueError("refusing to overwrite or alias source H5")
     augmented.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source, augmented)
     labels_impl = load_module(LABEL_IMPL, "f2_terminal_labels_impl")
+    # ``augment_pose`` performs the single streaming copy itself while it
+    # creates the derived H5 and appends the fitted rigid-body state.  Do not
+    # copy the 6 GB source here as well: that would either double the I/O or
+    # make the helper reject its already-existing destination.
     pose = labels_impl.augment_pose(
         source=source,
         augmented=augmented,
