@@ -40,6 +40,7 @@ FAMILY_ID = "F1"
 MECHANISM_ID = "eccentric_obstacle"
 PHYSICAL_CASE_ID = "F1_ECCENTRIC_CELL_CENTER_HALFDP"
 SCHEMA = "ds02.f1.eccentric-cellcenter.v1"
+NUMERIC_REPAIR_ID = "fillbox-canonical-attribute-repair-002"
 RHO0 = 1000.0
 FLUID_LOW = (0.0, 0.0, 0.0)
 FLUID_SIZE = (0.4, 0.67, 0.3)
@@ -233,7 +234,7 @@ def _mainlist(dp: float) -> str:
             <layers vdp="0,1,2" />
           </drawbox>
           <setmkfluid mk="0" />
-          <fillbox x="{_q(dp)}" y="{_q(dp)}" z="{_q(dp)}" cmt="Numeric-only cell-centre seeding: low+dp/2 through high-dp/2">
+          <fillbox x="{_q(dp)}" y="{_q(dp)}" z="{_q(dp)}">
             <modefill>fluid</modefill>
             <point x="{_q(FLUID_LOW[0] + half)}" y="{_q(FLUID_LOW[1] + half)}" z="{_q(FLUID_LOW[2] + half)}" />
             <size x="{_q(fluid_size[0])}" y="{_q(fluid_size[1])}" z="{_q(fluid_size[2])}" />
@@ -275,6 +276,8 @@ def materialize_case(template: Path, output_root: Path, spec: dict[str, Any], so
         "q_n_status": "not_assessed",
         "repair_lineage": {
             "kind": "new_numeric_only_cellcenter_mother",
+            "repair_id": NUMERIC_REPAIR_ID,
+            "repair_reason": "The first GenCase preflight emitted zero fluid particles; this version uses the canonical fillbox attribute set from the official F2 cell-centre source.",
             "parent_failed_reference_cases": [
                 "F1_REF_ECC_NOMINAL_COARSE",
                 "F1_REF_ECC_NOMINAL_MEDIUM",

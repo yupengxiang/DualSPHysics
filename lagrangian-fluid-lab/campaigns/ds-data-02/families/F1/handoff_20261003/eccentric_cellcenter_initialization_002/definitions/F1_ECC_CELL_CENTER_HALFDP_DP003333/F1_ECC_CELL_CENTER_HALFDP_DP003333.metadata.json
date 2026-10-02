@@ -1,0 +1,221 @@
+{
+  "schema": "ds02.f1.eccentric-cellcenter.v1",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "case_id": "F1_ECC_CELL_CENTER_HALFDP_DP003333",
+  "physical_case_id": "F1_ECCENTRIC_CELL_CENTER_HALFDP",
+  "status": "definition_only_pending_shared_cpu_gencase",
+  "qualification_claim": "none",
+  "production_claim": "none",
+  "q_n_status": "not_assessed",
+  "repair_lineage": {
+    "kind": "new_numeric_only_cellcenter_mother",
+    "repair_id": "fillbox-canonical-attribute-repair-002",
+    "repair_reason": "The first GenCase preflight emitted zero fluid particles; this version uses the canonical fillbox attribute set from the official F2 cell-centre source.",
+    "parent_failed_reference_cases": [
+      "F1_REF_ECC_NOMINAL_COARSE",
+      "F1_REF_ECC_NOMINAL_MEDIUM",
+      "F1_REF_ECC_NOMINAL_FINE"
+    ],
+    "failure_addressed": "lattice phase and wall/fluid coincident rows removed one fluid y-layer in the old definitions",
+    "old_inputs_immutable": true
+  },
+  "source_binding": {
+    "template_path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_cellcenter_initialization_002/source/F1_REF_ECC_NOMINAL_BASE_Def.xml",
+    "template_sha256": "f499a5f1a0a6a604320fd3c1a7f4e691a8f81ee01152a4d8308bd710f32b5ad7",
+    "physical_fields_reused_byte_semantically": true,
+    "controls_reused_byte_semantically": true
+  },
+  "physical_binding": {
+    "physical_case_id": "F1_ECCENTRIC_CELL_CENTER_HALFDP",
+    "physical_hash": "94e1af2a7daeeb5e183eb7ba4d6a7f2d607135a661d530af86d5f66a88adc5bd",
+    "payload": {
+      "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+      "continuous_geometry": {
+        "tank_low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tank_size_m": [
+          1.6,
+          0.67,
+          0.4
+        ],
+        "tank_high_m": [
+          1.6,
+          0.67,
+          0.4
+        ],
+        "closed_outer_faces": [
+          "x=0",
+          "x=1.6",
+          "y=0",
+          "y=0.67",
+          "z=0"
+        ],
+        "open_top": true,
+        "fluid_low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "fluid_size_m": [
+          0.4,
+          0.67,
+          0.3
+        ],
+        "fluid_volume_m3": 0.0804,
+        "fluid_continuous_mass_kg": 80.4,
+        "obstacle_low_m": [
+          0.9,
+          0.24,
+          0.0
+        ],
+        "obstacle_size_m": [
+          0.12,
+          0.12,
+          0.45
+        ],
+        "obstacle_high_m": [
+          1.02,
+          0.36,
+          0.45
+        ]
+      },
+      "physical_controls": {
+        "boundary_method": "DBC",
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ],
+        "density_kg_m3": 1000.0,
+        "constantsdef": {
+          "gravity": {
+            "x": 0,
+            "y": 0,
+            "z": -9.81
+          },
+          "rhop0": {
+            "value": 1000
+          },
+          "rhopgradient": {
+            "value": 2
+          },
+          "hswl": {
+            "value": 0,
+            "auto": "true"
+          },
+          "gamma": {
+            "value": 7
+          },
+          "speedsystem": {
+            "value": 0,
+            "auto": "true"
+          },
+          "coefsound": {
+            "value": 20
+          },
+          "speedsound": {
+            "value": 0,
+            "auto": "true"
+          },
+          "coefh": {
+            "value": 1
+          },
+          "cflnumber": {
+            "value": 0.2
+          }
+        },
+        "parameters": {
+          "ViscoTreatment": "1",
+          "Visco": "0.1",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "2",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0",
+          "MinFluidStop": "0"
+        },
+        "motion": "empty static motion element",
+        "no_normals_section": true
+      },
+      "source_contract": {
+        "mechanism_id": "eccentric_obstacle",
+        "source_template_sha256": "f499a5f1a0a6a604320fd3c1a7f4e691a8f81ee01152a4d8308bd710f32b5ad7",
+        "physical_fields_verified_from_source": true
+      }
+    },
+    "continuous_fluid_volume_m3": 0.0804,
+    "continuous_fluid_mass_kg": 80.4,
+    "mass_normalization": "forbidden",
+    "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+    "boundary_method": "DBC",
+    "normals": "not declared; DBC source has no normals section"
+  },
+  "numeric_binding": {
+    "dp_m": 0.0033333333333333335,
+    "pointmin_m": [
+      -0.0016666666666666668,
+      -0.0016666666666666668,
+      -0.0016666666666666668
+    ],
+    "fluid_population": "fillbox modefill=fluid; point=continuous_low+dp/2; size=continuous_extent-dp",
+    "fixed_support_layers_vdp": [
+      0,
+      1,
+      2
+    ],
+    "wall_layer_role": "numeric half-cell support around the unchanged physical faces",
+    "physical_hash_excludes": [
+      "dp_m",
+      "pointmin_m",
+      "fillbox point/size",
+      "vdp support layers"
+    ],
+    "time_max_s": 1.6,
+    "time_out_s": 0.001
+  },
+  "expected_initial": {
+    "counts_xyz": [
+      120,
+      201,
+      90
+    ],
+    "fluid_particles_type3": 2170800,
+    "fluid_mass_kg": 80.4,
+    "fluid_center_low_m": [
+      0.0016666666666666668,
+      0.0016666666666666668,
+      0.0016666666666666668
+    ],
+    "fluid_center_high_m": [
+      0.3983333333333334,
+      0.6683333333333333,
+      0.29833333333333334
+    ],
+    "no_initial_void_overlap": true,
+    "no_initial_particle_deletion": true
+  },
+  "finite_faces": {
+    "outer": [
+      "x=0",
+      "x=1.6",
+      "y=0",
+      "y=0.67",
+      "z=0"
+    ],
+    "obstacle": [
+      "x=0.9",
+      "x=1.02",
+      "y=0.24",
+      "y=0.36",
+      "z=0.45"
+    ],
+    "coverage_method": "finite interior sampling at spacing <= dp against native Bound.vtk points"
+  },
+  "definition_path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_cellcenter_initialization_002/definitions/F1_ECC_CELL_CENTER_HALFDP_DP003333/F1_ECC_CELL_CENTER_HALFDP_DP003333_Def.xml",
+  "definition_sha256": "dea202f82fb9bd59d76ba201298a660c5d98974bf29d93d0e5e7966b55c82619"
+}
