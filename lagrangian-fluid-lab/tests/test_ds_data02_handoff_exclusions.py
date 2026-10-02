@@ -2,7 +2,7 @@ import pytest
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from ds_data02_handoff_exclusions import bind_exclusions
+from ds_data02_handoff_exclusions import bind_exclusions, read_runparts
 
 
 def data():
@@ -27,3 +27,12 @@ def test_reject_unbound_or_inconsistent_native_exclusion(change):
     if change=='wrong_motive_count':d['totals']['NpOutRho']=1
     if change=='missing':d['records']=[]
     with pytest.raises(ValueError):bind_exclusions(**d)
+
+
+def test_official_native_footer_is_documentation(tmp_path):
+    path=tmp_path/'RunPARTs.csv'
+    path.write_text('Part;TimeStep [s];NpOut;NpOutPos;NpOutRho;NpOutMov\n'
+                    '0;0;0;0;0;0\n1;0.1;1;1;0;0\n\n# NpOut: documentation.\n')
+    assert read_runparts(path)['totals']['NpOut']==1
+    path.write_text(path.read_text()+'malformed;data\n')
+    with pytest.raises((ValueError,TypeError)):read_runparts(path)

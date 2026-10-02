@@ -5,13 +5,55 @@ Numerical exclusions remain unknown physical fate. This prepares new full
 integrity audits, without changing trajectories, labels or numerical scope.
 """
 import argparse
+import csv
 import json
+import math
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
 from ds_data02_handoff_inventory import binding, load, sha256
 from ds_data02_handoff_contracts import UNITS
-from ds_data02_f4_science import _read_runparts, _parse_partvtk_csv
+
+
+def read_runparts(path):
+    # Official RunPARTs appends '# field: description' documentation.
+    # Ignore only documented comments and empty lines, never malformed data.
+    lines = [s for s in Path(path).read_text().splitlines()
+             if s.strip() and not s.lstrip().startswith('#')]
+    reader = csv.DictReader(lines, delimiter=';')
+    fields = ('NpOut', 'NpOutPos', 'NpOutRho', 'NpOutMov')
+    if reader.fieldnames is None or not set(('Part', 'TimeStep [s]', *fields)) <= set(reader.fieldnames):
+        raise ValueError('native RunPARTs header missing')
+    totals = dict.fromkeys(fields, 0)
+    rows = []
+    for raw in reader:
+        part = int(raw['Part'].replace(',', ''))
+        time = float(raw['TimeStep [s]'])
+        if part != len(rows) or not math.isfinite(time) or (rows and time <= rows[-1]['time_s']):
+            raise ValueError('native PART sequence/time is incomplete or invalid')
+        counts = {f: int(raw[f].replace(',', '')) for f in fields}
+        if any(v < 0 for v in counts.values()) or counts['NpOut'] != sum(counts[f] for f in fields[1:]):
+            raise ValueError('invalid native exclusion counters')
+        rows.append({'part': part, 'time_s': time, **counts})
+        for f in fields:totals[f] += counts[f]
+    if not rows:raise ValueError('native PART records missing')
+    return {'rows': rows, 'totals': totals}
+
+
+def read_partout(path):
+    rows = []
+    with Path(path).open() as stream:
+        for raw in csv.DictReader(stream):
+            row = {k.strip():v.strip() for k,v in raw.items() if k and v is not None}
+            position = [float(row[f'Pos.{axis} [m]']) for axis in 'xyz']
+            density = float(row['Rhop [kg/m^3]'])
+            code = int(row['Motive'])
+            if code not in (1,2,3) or not all(math.isfinite(v) for v in (*position,density)):
+                raise ValueError('invalid native exclusion state/motive')
+            rows.append({'idp':int(row['Idp']), 'part_out':int(row['PartOut']),
+                         'motive_code':code, 'motive':{1:'position',2:'density',3:'movement'}[code],
+                         'position_m':position, 'density_kg_m3':density})
+    return rows
 
 
 def bind_exclusions(ids, zones, types, first_missing, frames, records, totals):
@@ -95,15 +137,15 @@ def prepare_case(row, lab, output):
     for path, expected in receipt['input_hashes_at_launch'].items():
         if sha256(path) != expected:
             raise ValueError('native decoder input changed')
-    runparts = _read_runparts(runparts_path)
-    native = _parse_partvtk_csv(decoded/'PartOut.csv', runparts)
-    if runparts['status'] != 'available' or native['status'] != 'available' or native['duplicate_idp']:
-        raise ValueError('native accounting parse failed')
+    runparts = read_runparts(runparts_path)
+    native = read_partout(decoded/'PartOut.csv')
     with h5py.File(trajectory, 'r') as handle:
         frames = len(handle['time'])
+        if len(runparts['rows']) != frames:
+            raise ValueError('native PART timeline length differs from H5')
         ledger = bind_exclusions(handle['particle_id'][:], handle['particle_zone'][:],
                                  handle['initial_type'][:], life['first_missing_frame_by_particle'],
-                                 frames, native['rows'], runparts['totals'])
+                                 frames, native, runparts['totals'])
     if len(ledger['excluded_particles']) != life['initial_missing_at_final_count']:
         raise ValueError('native excluded count differs from old full timeline')
     inputs = []
