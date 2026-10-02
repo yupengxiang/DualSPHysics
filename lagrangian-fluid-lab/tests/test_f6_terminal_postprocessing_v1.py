@@ -12,6 +12,7 @@ AUDIT = FAMILY / "dp0125_finite_face_reference_001/finite_face_audit_001.json"
 DP0125_MANIFEST = FAMILY / "dp0125_finite_face_reference_001/solver_requests_001/request_manifest.json"
 DP020_MANIFEST = FAMILY / "dp020_repair_002_postprocessing_001/execution_requests/request_manifest.json"
 PARTVTKOUT_MANIFEST = FAMILY / "dp020_repair_002_partvtkout_001/requests/request_manifest.json"
+CPU_AUDIT = FAMILY / "dp020_repair_002_postprocessing_002/actual_cpu_audit_001.json"
 
 
 def _read(path: Path) -> dict:
@@ -84,3 +85,22 @@ def test_repair002_partvtkout_is_bounded_cpu_only_and_preserves_unknown_bucket()
         assert "unknown_position_policy" in request["native_exclusion_contract"]
         assert Path(request["command"][0]).name == "PartVTKOut_linux64"
         assert len(request["input_hashes_at_request"]) >= 10
+
+
+def test_repair002_actual_cpu_audit_keeps_h5_pending_and_records_typed_state():
+    payload = _read(CPU_AUDIT)
+    assert payload["gpu_launch"] is False
+    assert payload["solver_launch"] is False
+    assert payload["h5_conversion"] == "not run; remains queued"
+    assert payload["labels"] == "not run"
+    for case in payload["cases"].values():
+        assert case["generated_xml"]["contract"]["data2d"] is False
+        assert case["generated_xml"]["contract"]["aggregate_massbody_kg"] == 128.0
+        assert case["floatinginfo"]["receipt"]["status"] == "completed"
+        assert case["floatinginfo"]["receipt"]["returncode"] == 0
+        assert case["floatinginfo"]["frame_contract"]["expected_rows"] == 241
+        assert case["computeforces"]["frame_contract"]["expected_rows"] == 241
+        assert case["partvtkout"]["outputs"]["csv"]["rows"] == 1
+        assert "unknown native exclusion" in case["partvtkout"]["unknown_position_policy"]
+    assert payload["cases"]["simple_free_response"]["computeforces"]["receipt"]["returncode"] == 0
+    assert payload["cases"]["wave_no_contact"]["computeforces"]["receipt"]["returncode"] == -15
