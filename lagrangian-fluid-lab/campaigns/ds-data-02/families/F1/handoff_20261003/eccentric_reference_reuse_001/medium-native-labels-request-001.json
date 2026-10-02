@@ -1,0 +1,57 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "kind": "cpu",
+  "cpu_task_kind": "labels",
+  "family_id": "F1",
+  "case_id": "F1_REF_ECC_NOMINAL_MEDIUM",
+  "attempt_id": "native-labels-f1-ecc-medium-20261003-001",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "physical_parent_id": "F1_REF_ECC_NOMINAL",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_native_labels.py",
+    "--source",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_MEDIUM/ds02-infra-f1-bi4-conversion-medium-v1/trajectory.h5",
+    "--output",
+    "{attempt_root}/native-labels.h5",
+    "--config",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/validation_extension_001/fine-label-config.json",
+    "--particle-chunk",
+    "65536"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "max_wall_seconds": 900,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 67108864,
+  "scope": "Materialize medium F1 ECC finite-aperture transport labels from the existing complete medium native trajectory. Read-only source HDF5; fixed solver frame, native initial identity/type/mk checks, per-identity destination series, first-passage brackets, residence, forward/backward mass, and censored/unknown ledgers. No solver/GenCase/conversion, no source mutation, no Q-N claim.",
+  "launch_authority": "bounded CPU labels via shared runtime v2",
+  "source_hdf5": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_MEDIUM/ds02-infra-f1-bi4-conversion-medium-v1/trajectory.h5",
+  "source_hdf5_sha256": "88ea8f4acaa1c507e4d0857f3d20f28ac66c24c6042d0ac07164364eaf8040f7",
+  "source_conversion_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_MEDIUM/ds02-infra-f1-bi4-conversion-medium-v1/conversion-report.json",
+  "config": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/validation_extension_001/fine-label-config.json",
+  "physical_binding": {
+    "geometry_sha256": "088405b7cc1813fbeccf8949cfbae6101b85f14c4d66ecef4f8a660b56c756dd",
+    "control_sha256": "fe91d76871626a751854de00d496e45192ac9fdce18eed2d22759c7848f599ec",
+    "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+    "natural_initial_mass_kg": 80.19000208005309,
+    "continuous_initial_mass_kg": 80.4,
+    "mass_normalization": "none"
+  },
+  "expected_native": {
+    "frames": 161,
+    "identities": 37896,
+    "fluid_particles_type3": 23760,
+    "fixed_particles_type0": 14136,
+    "solver_exclusions": 0,
+    "q_n_status": "not_assessed"
+  },
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_native_labels.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/validation_extension_001/fine-label-config.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_MEDIUM/ds02-infra-f1-bi4-conversion-medium-v1/trajectory.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_MEDIUM/ds02-infra-f1-bi4-conversion-medium-v1/conversion-report.json"
+  ],
+  "qualification_claim": "none; label artifact evidence only",
+  "q_n_status": "not_assessed"
+}
