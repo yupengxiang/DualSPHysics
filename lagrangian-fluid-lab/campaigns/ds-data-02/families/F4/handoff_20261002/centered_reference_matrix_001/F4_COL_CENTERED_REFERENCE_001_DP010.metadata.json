@@ -1,0 +1,227 @@
+{
+  "schema": "ds02.f4.centered-reference-preregistration.v1",
+  "case_id": "F4_COL_CENTERED_REFERENCE_001_DP010",
+  "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+  "dp_m": 0.01,
+  "physical_binding": {
+    "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+    "controls": {
+      "boundary": "DBC",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": "Wendland",
+      "step_algorithm": "Verlet",
+      "viscosity": 0.08
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.15,
+        0.4
+      ],
+      "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring",
+      "sequence": [
+        "separated_initial_state",
+        "first_column_contact",
+        "maximum_deflection",
+        "recontact_or_merge",
+        "transport_tail"
+      ],
+      "time_end_s": 1.2,
+      "time_start_s": 0.0
+    },
+    "family_id": "F4",
+    "geometry": {
+      "left_column": {
+        "label": "left_column",
+        "low_m": [
+          0.12,
+          0.04,
+          0.24
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.22,
+          0.16,
+          0.18
+        ]
+      },
+      "right_column": {
+        "label": "right_column",
+        "low_m": [
+          0.86,
+          0.2,
+          0.24
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.22,
+          0.16,
+          0.18
+        ]
+      },
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "wall_box": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      }
+    },
+    "geometry_family_id": "F4_oblique_finite_columns_finite_geometry_v1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "left_column": 6.336,
+        "right_column": 6.336
+      },
+      "initial_mass_by_source_kg": {
+        "left_column": 6.336,
+        "right_column": 6.336
+      },
+      "initial_mass_total_kg": 12.672,
+      "mass_policy": "native_rho_dp_cubed_no_rescaling",
+      "source_labels": {
+        "mkfluid:0": "left_column",
+        "mkfluid:1": "right_column"
+      },
+      "source_regions": {
+        "left_column": {
+          "label": "left_column",
+          "low_m": [
+            0.12,
+            0.04,
+            0.24
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.22,
+            0.16,
+            0.18
+          ]
+        },
+        "right_column": {
+          "label": "right_column",
+          "low_m": [
+            0.86,
+            0.2,
+            0.24
+          ],
+          "mkfluid": 1,
+          "size_m": [
+            0.22,
+            0.16,
+            0.18
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "mkfluid:0": [
+          1.0,
+          0.25,
+          0.0
+        ],
+        "mkfluid:1": [
+          -1.0,
+          -0.25,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "oblique_finite_columns_frozen_geometry_control_domain",
+    "mass_policy": "native_rho_dp_cubed_no_rescaling",
+    "mechanism_id": "oblique_finite_columns",
+    "open_inlet": false,
+    "paired_background_id": "oblique_finite_columns",
+    "parameters": {
+      "column_length_x_m": 0.22,
+      "edge_gap_m": 0.52,
+      "right_y_offset_m": 0.0,
+      "transverse_speed_m_per_s": 0.25
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "dbc97c0081fa8622c1f5da4348e2b78a56eca55bdcdcc39f1e601976dbdcca85",
+  "source_regions": {
+    "left_column": {
+      "label": "left_column",
+      "low_m": [
+        0.12,
+        0.04,
+        0.24
+      ],
+      "mkfluid": 0,
+      "size_m": [
+        0.22,
+        0.16,
+        0.18
+      ]
+    },
+    "right_column": {
+      "label": "right_column",
+      "low_m": [
+        0.86,
+        0.2,
+        0.24
+      ],
+      "mkfluid": 1,
+      "size_m": [
+        0.22,
+        0.16,
+        0.18
+      ]
+    }
+  },
+  "expected_counts_by_source": {
+    "left_column": 6336,
+    "right_column": 6336
+  },
+  "continuous_mass_by_source_kg": {
+    "left_column": 6.336,
+    "right_column": 6.336
+  },
+  "definition_sha256": "f5b4d1807d75baf24b347f3d40e17e4d2afc9bb26b7df3d4dad5dfe5610e2d24",
+  "original_source_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/metadata/f4_col_gap0p52000_vy0p25000_yoff0p00000_lx0p22000-fine-native.metadata.json": "aaad9a03ccf28976335cf4a22cc254ccab59c0744e41b614f4cb5efcd9162da5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/gencase-oblique_columns-fine-nominal-v1/F4_oblique_columns_fine.xml": "1370d43b7e53ccf10d277ab00c5a8fccbf50467a7633578895e42b37258ec525",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/oblique_finite_columns_fine_Def.xml": "5bb55db56cc8f47fe60868018ee2431670fca69f21061451bb05d86ec17b0ca7",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000/direct-bi4-fine-native-v1/execution-receipt.json": "f80e97b99ac079ce9771378e11424144e635b7c16b124aa5da840c4abf08b679",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/evidence/f4-actual-evidence-v1.json": "e4029a4d0e5a3d9b4781f4036b0dfd0bd07862b772c9dc3c7affe8cd8dfa10cf"
+  },
+  "original_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/oblique_finite_columns_fine_Def.xml",
+  "original_owner_metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/metadata/f4_col_gap0p52000_vy0p25000_yoff0p00000_lx0p22000-fine-native.metadata.json",
+  "numeric_changes": "dp and shared half-dp lattice phase; centered finite population in original declared source regions. Walls/initial velocities/constants/execution unchanged.",
+  "repair_class": "first explicit centered initialization recipe; three-resolution reference matrix preregistered before solver results",
+  "comparison_budget": {
+    "macro_relative": 0.05,
+    "event_relative": 0.02,
+    "temporal_share": 0.2
+  },
+  "old_extreme_spread_retained": true,
+  "independent_case_count_increment": 0,
+  "q_n_status": "not_assessed",
+  "production_approval": "none"
+}
