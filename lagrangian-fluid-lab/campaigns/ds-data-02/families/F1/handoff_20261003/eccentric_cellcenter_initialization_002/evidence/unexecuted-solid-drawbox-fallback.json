@@ -1,0 +1,75 @@
+{
+  "schema": "ds02.f1.eccentric-cellcenter-unexecuted-fallback.v1",
+  "status": "proposal_only_unexecuted",
+  "qualification_claim": "none",
+  "q_n_status": "not_assessed",
+  "production_claim": "none",
+  "proposal_id": "f1-eccentric-cellcenter-solid-drawbox-fallback-001",
+  "basis": [
+    "Both bounded GenCase attempts using fillbox/modefill=fluid generated zero fluid particles.",
+    "The local official F2 successful commensurate cell-centre definitions use setmkfluid followed by drawbox with boxfill=solid and no fluid fillbox."
+  ],
+  "numeric_recipe": {
+    "preserve_physical_hash": "94e1af2a7daeeb5e183eb7ba4d6a7f2d607135a661d530af86d5f66a88adc5bd",
+    "preserve_continuous_fluid_mass_kg": 80.4,
+    "per_resolution": [
+      {
+        "resolution": "dp010",
+        "dp_m": 0.01,
+        "fluid_draw_point_m": [
+          0.005,
+          0.005,
+          0.005
+        ],
+        "fluid_draw_size_m": [
+          0.39,
+          0.66,
+          0.29
+        ],
+        "expected_count": 80400
+      },
+      {
+        "resolution": "dp005",
+        "dp_m": 0.005,
+        "fluid_draw_point_m": [
+          0.0025,
+          0.0025,
+          0.0025
+        ],
+        "fluid_draw_size_m": [
+          0.395,
+          0.665,
+          0.295
+        ],
+        "expected_count": 643200
+      },
+      {
+        "resolution": "dp003333",
+        "dp_m": 0.0033333333333333335,
+        "fluid_draw_point_m": [
+          0.0016666666666666668,
+          0.0016666666666666668,
+          0.0016666666666666668
+        ],
+        "fluid_draw_size_m": [
+          0.39666666666666667,
+          0.6666666666666666,
+          0.2966666666666667
+        ],
+        "expected_count": 2170800
+      }
+    ],
+    "xml_operation": "setmkfluid mk=0; drawbox; boxfill=solid; point=continuous_low+dp/2; size=continuous_extent-dp",
+    "boundary_layers": "retain explicit outer and obstacle layers vdp=0,1,2"
+  },
+  "constraints": [
+    "This proposal was not materialized or run after the two failed fillbox attempts.",
+    "Any future execution requires a fresh root-authorized lineage and must preserve both failed receipts; it is not evidence of success.",
+    "No solver or GPU request is authorized by this file."
+  ],
+  "source_references": {
+    "failed_001": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_HALFDP/gencase-partvtk-preflight-20261003-001/execution-receipt.json",
+    "failed_002": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_CELL_CENTER_HALFDP/gencase-partvtk-preflight-20261003-002/execution-receipt.json",
+    "successful_primitive_reference": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE_Def.xml"
+  }
+}
