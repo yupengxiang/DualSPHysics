@@ -1,0 +1,64 @@
+{
+  "schema": "ds02.f3-root-closed-cohort-source-contract.v1",
+  "created_at_utc": "2026-10-02T11:19:58.703085+00:00",
+  "family_id": "F3",
+  "case_id": "F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE",
+  "boundary_mode": "closed",
+  "lifecycle_interpretation": "Finite numerical identity cohort, all8001 native frames accounted, no injection/outflow XML, no native exclusions or identity births/revivals. Physical open top is a free surface; continuous fluid fate and QN remain separate.",
+  "units": {
+    "density": "kg/m^3",
+    "mass": "kg",
+    "position": "m",
+    "pressure": "Pa",
+    "time": "s",
+    "velocity": "m/s"
+  },
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "solver_dimension": 3,
+  "geometry": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/prepare-solver-input-half_save-20261002-002/prepared/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE.xml",
+      "sha256": "4833cf28c7c8f803815a336b82250dc748d032b931839f382789dbeb8c31cbd9"
+    },
+    "geometry_xml": "<geometry>\n            <definition dp=\"0.0075\" units_comment=\"metres (m)\">\n                <pointref x=\"0.00375\" y=\"0.00375\" z=\"0.00375\" />\n                <pointmin x=\"-1\" y=\"-.2\" z=\"-1\" />\n                <pointmax x=\"1\" y=\".2\" z=\"1\" />\n            </definition>\n            <commands>\n                <list name=\"GeometryForNormals\">\n                    <setactive drawpoints=\"0\" drawshapes=\"1\" />\n                    <setshapemode>actual | bound</setshapemode>\n                    <setnormalinvert invert=\"true\" />\n                    <setmkbound mk=\"0\" />\n                    <drawbox>\n                        <boxfill>all^top</boxfill>\n                        <point x=\"-0.45\" y=\"-0.09\" z=\"0\" />\n                        <size x=\"0.9\" y=\"0.18\" z=\"0.51\" />\n                        <layers vdp=\"0\" />\n                    </drawbox>\n                    <shapeout file=\"hdp\" />\n                    <resetdraw />\n                </list>\n                <mainlist>\n                    <runlist name=\"GeometryForNormals\" />\n                    <setdrawmode mode=\"full\" />\n                    <setmkfluid mk=\"0\" />\n                    <drawbox>\n                        <boxfill>solid</boxfill>\n                        <point x=\"-0.44625000000000004\" y=\"-0.08625\" z=\"0.00375\" />\n                        <size x=\"0.8925000000000001\" y=\"0.1725\" z=\"0.08249999999999999\" />\n                    </drawbox>\n                    <setmkbound mk=\"0\" />\n                    <drawbox>\n                        <boxfill>all^top</boxfill>\n                        <point x=\"-0.45375\" y=\"-0.09375\" z=\"-0.00375\" />\n                        <size x=\"0.9075\" y=\"0.1875\" z=\"0.51375\" />\n                        <layers vdp=\"0,1,2\" />\n                    </drawbox>\n                </mainlist>\n            </commands>\n        </geometry>\n        "
+  },
+  "control": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/prepare-solver-input-half_save-20261002-002/prepared/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE.xml",
+      "sha256": "4833cf28c7c8f803815a336b82250dc748d032b931839f382789dbeb8c31cbd9"
+    },
+    "actual_launch_bound_forcing_files": [
+      {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/prepare-solver-input-half_save-20261002-002/prepared/F3_DualAxisPhase_WeakControl.csv",
+        "sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b"
+      }
+    ],
+    "native_control_xml": [
+      "<motion />\n        ",
+      "<special>\n            <accinputs>\n                <accinput mkfluid=\"0\">\n                    <acccentre x=\"0.45\" y=\"0\" z=\"0\" comment=\"Center of acceleration\" units_comment=\"metres (m)\" />\n                    <globalgravity value=\"0\" comment=\"Global gravity enabled (1) or disabled (0)\" />\n                    <acctimesfile value=\"F3_DualAxisPhase_WeakControl.csv\" comment=\"File with linear and angular acceleration data\" />\n                </accinput>\n            </accinputs>\n        </special>\n        ",
+      "<constantsdef>\n            <gravity x=\"0\" y=\"0\" z=\"-9.81\" comment=\"Gravitational acceleration\" units_comment=\"m/s^2\" />\n            <rhop0 value=\"1000\" comment=\"Reference density of the fluid\" units_comment=\"kg/m^3\" />\n            <rhopgradient value=\"2\" comment=\"Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)\" />\n            <hswl value=\"0\" auto=\"true\" comment=\"Maximum still water level to calculate speedofsound using coefsound\" units_comment=\"metres (m)\" />\n            <gamma value=\"7\" comment=\"Polytropic constant for water used in the state equation\" />\n            <speedsystem value=\"0\" auto=\"true\" comment=\"Maximum system speed (by default the dam-break propagation is used)\" />\n            <coefsound value=\"30\" comment=\"Coefficient to multiply speedsystem\" />\n            <speedsound value=\"0\" auto=\"true\" comment=\"Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)\" />\n            <coefh value=\"0.91924\" comment=\"Coefficient to calculate the smoothing length (h=coefh*sqrt(3*dp^2) in 3D)\" />\n            <cflnumber value=\"0.05\" comment=\"Coefficient to multiply dt\" />\n        </constantsdef>\n        ",
+      "<parameters>\n            <parameter key=\"SavePosDouble\" value=\"2\" comment=\"Saves particle position using double precision (default=0)\" />\n            <parameter key=\"StepAlgorithm\" value=\"2\" comment=\"Step Algorithm 1:Verlet, 2:Symplectic (default=1)\" />\n            <parameter key=\"VerletSteps\" value=\"40\" comment=\"Verlet only: Number of steps to apply Euler timestepping (default=40)\" />\n            <parameter key=\"Kernel\" value=\"2\" comment=\"Interaction Kernel 1:Cubic Spline, 2:Wendland (default=2)\" />\n            <parameter key=\"ViscoTreatment\" value=\"1\" comment=\"Viscosity formulation 1:Artificial, 2:Laminar+SPS, 3:Laminar (default=1)\" />\n            <parameter key=\"Visco\" value=\"0.05\" comment=\"Viscosity value. Typically 0.01 for Artificial and 1e-6 m^2/s (water kinematic viscosity) for Laminar\" />\n            <parameter key=\"ViscoBoundFactor\" value=\"1\" comment=\"Multiply viscosity value with boundary (default=1)\" />\n            <parameter key=\"DensityDT\" value=\"3\" comment=\"Density Diffusion Term 0:None, 1:Molteni, 2:Fourtakas, 3:Fourtakas(full) (default=0)\" />\n            <parameter key=\"DensityDTvalue\" value=\"0.1\" comment=\"DDT value (default=0.1)\" />\n            <parameter key=\"Shifting\" value=\"0\" comment=\"Shifting mode 0:None, 1:Ignore bound, 2:Ignore fixed, 3:Full (default=0)\" />\n            <parameter key=\"ShiftCoef\" value=\"-2\" comment=\"Coefficient for shifting computation (default=-2)\" />\n            <parameter key=\"ShiftTFS\" value=\"0\" comment=\"Threshold to detect free surface. Typically 1.5 for 2D and 2.75 for 3D (default=0)\" />\n            <parameter key=\"RigidAlgorithm\" value=\"1\" comment=\"Rigid Algorithm 0:collision-free, 1:SPH, 2:DEM, 3:Chrono (default=1)\" />\n            <parameter key=\"FtPause\" value=\"0.0\" comment=\"Time to freeze the floatings at simulation start (warmup) (default=0)\" units_comment=\"seconds\" />\n            <parameter key=\"CoefDtMin\" value=\"0.05\" comment=\"Coefficient to calculate minimum time step dtmin=coefdtmin*h/speedsound (default=0.05)\" />\n            <parameter key=\"DtIni\" value=\"0\" comment=\"Initial time step. Use 0 to default use (default=h/speedsound)\" units_comment=\"seconds\" />\n            <parameter key=\"DtMin\" value=\"0\" comment=\"Minimum time step. Use 0 to default use (default=coefdtmin*h/speedsound)\" units_comment=\"seconds\" />\n            <parameter key=\"DtFixed\" value=\"0\" comment=\"Fixed Dt value. Use 0 to disable (default=disabled)\" units_comment=\"seconds\" />\n            <parameter key=\"DtFixedFile\" value=\"NONE\" comment=\"Dt values are loaded from file. Use NONE to disable (default=disabled)\" units_comment=\"milliseconds (ms)\" />\n            <parameter key=\"DtAllParticles\" value=\"0\" comment=\"Velocity of particles used to calculate DT. 1:All, 0:Only fluid/floating (default=0)\" />\n            <parameter key=\"TimeMax\" value=\"10.0\" comment=\"Time of simulation\" units_comment=\"seconds\" />\n            <parameter key=\"TimeOut\" value=\"0.00125\" comment=\"Time out data\" units_comment=\"seconds\" />\n            <parameter key=\"PartsOutMax\" value=\"1\" comment=\"**DEPRECATED** %/100 of fluid particles allowed to be excluded from domain (default=1)\" units_comment=\"decimal\" />\n            <parameter key=\"RhopOutMin\" value=\"700\" comment=\"Minimum rhop valid (default=700)\" units_comment=\"kg/m^3\" />\n            <parameter key=\"RhopOutMax\" value=\"1300\" comment=\"Maximum rhop valid (default=1300)\" units_comment=\"kg/m^3\" />\n            <parameter key=\"NoPenetration\" value=\"1\" />\n            <parameter key=\"Boundary\" value=\"2\" />\n            <parameter key=\"SlipMode\" value=\"2\" />\n            <simulationdomain comment=\"Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)\">\n                <posmin x=\"default\" y=\"default\" z=\"default\" comment=\"e.g.: x=0.5, y=default-1, z=default-10%\" />\n                <posmax x=\"default\" y=\"default\" z=\"default\" />\n            </simulationdomain>\n        </parameters>\n        "
+    ]
+  },
+  "prior_complete_timeline_evidence": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/half_save-post-audit-rebind-20261002-002/post-audit-rebind.json",
+    "sha256": "cb8ed525b32a01de692cfc0222112bf873c55d614da77b972953c9f94382be08"
+  },
+  "solver_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/qualification-weak-dual-half_save-20261002-002/execution-receipt.json",
+    "sha256": "4b6b216a0fe17b123fc0a190941afe7af1c12014f536640e48878431cccfc2ac"
+  },
+  "gencase_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/gencase-weak-dual-half_save-20261002-001/execution-receipt.json",
+    "sha256": "251bfd7a282b7d911ad2c4ad81ba6662fdd8c99f4cbb0b8665299fa025679906"
+  },
+  "direct_conversion_report": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/direct-conversion-report.json",
+    "sha256": "0106f2524a4b844eb01d89dbfbabacd2540554c35021363d2e75db9d1d641356"
+  },
+  "source_hdf5": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_SAVE/direct-half_save-20261002-003/trajectory.h5",
+  "hdf5_sha256_bound_to_completed_conversion": "b7bab5bee7ef99d6eeabd02f7c1ac5c5ea38913636da5923c60efa4cb734d7df",
+  "parent_conversion_receipt_remains_failed": true,
+  "q_n_status": "not_assessed",
+  "production_eligibility": "not_evaluated"
+}
