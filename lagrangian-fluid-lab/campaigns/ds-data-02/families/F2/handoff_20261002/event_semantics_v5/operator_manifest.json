@@ -1,0 +1,45 @@
+{
+  "schema": "ds-data-02.f2.event-semantics.v5-manifest",
+  "operator_version": "f2-moving-cup-local-z-top-v5",
+  "operator_sha256": "728c3224fa58164ff6cb2cd6dcacf3e2505a998fe35343104d112429c205c100",
+  "source_script": "../../f2_handoff_20261002_event_semantics_v5.py",
+  "quality_contract": "../../quality_contract.json",
+  "physical_hash_scope": {
+    "included": [
+      "canonical continuous geometry",
+      "initial fluid state and source bands",
+      "prescribed motion/control binding",
+      "SI units and event-window definition"
+    ],
+    "excluded": [
+      "observation operator version/hash",
+      "dp and grid phase",
+      "DtFixed, DtIni, DtMin, integrator parameters",
+      "save cadence"
+    ]
+  },
+  "opening_definition": {
+    "surface": "moving finite cup local-z=body-frame cup_high_z face",
+    "pose_source": "rigid_body_state.actual_angle_rad",
+    "aperture": "body-frame x/y cup footprint expanded by crossing_tolerance_m",
+    "departure": "outward crossing after hold start; previous signed top margin <=0 and current >0",
+    "return": "inward crossing after a prior departure; previous signed top margin >0 and current <=0"
+  },
+  "destination_definition": {
+    "precedence": ["unknown_invalid", "cup", "receiver", "tray_after_departure", "inflight"],
+    "tray": "finite tray interior only after the same initial identity has a v5 top departure",
+    "unknown": "native invalid identities remain unknown; PartVTKOut Motive and position are side evidence",
+    "wall": "closed cup/receiver/tray bottom and side crossings are separately counted; top faces are open"
+  },
+  "frozen_budget": {
+    "event_time_absolute_budget_s": 0.0036681953999691376,
+    "save_fraction_max": 0.2,
+    "save_half_width_budget_s": 0.0007336390799938275,
+    "strict_native_vs_continuous_mass_relative_budget": 1e-12
+  },
+  "output": {
+    "old_six_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_EVENT_SEMANTICS_V5/old-six",
+    "old_six_comparison": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_EVENT_SEMANTICS_V5/f2-v5-sixview-comparison.json",
+    "status": "evidence producer only; Q-N and production eligibility are not granted"
+  }
+}
