@@ -402,12 +402,12 @@ def _completed_receipt(path: Path) -> dict[str, Any]:
     return value
 
 
-def _generated_variant_paths(receipt_path: Path, case_id: str) -> dict[str, Path]:
+def _generated_variant_paths(receipt_path: Path, case_id: str, *, control: Path) -> dict[str, Path]:
     receipt = _completed_receipt(receipt_path)
     root = Path(receipt["output_root"])
     prefix = root / case_id
     paths = {"root": root, "prefix": prefix, "xml": prefix.with_suffix(".xml"), "bi4": prefix.with_suffix(".bi4"),
-             "out": prefix.with_suffix(".out"), "control": root / "F3_DualAxisPhase_WeakControl.csv", "receipt": receipt_path}
+             "out": prefix.with_suffix(".out"), "control": Path(control).resolve(), "receipt": receipt_path}
     for key in ("xml", "bi4", "out", "control"):
         if not paths[key].is_file():
             raise F3TimeStudyError(f"GenCase output missing {key}: {paths[key]}")
@@ -640,7 +640,13 @@ def bind_requests(args: argparse.Namespace) -> dict[str, Any]:
         variant = manifest["variant"]
         case_id = manifest["case_id"]
         gencase_receipt = Path(args.receipts[variant]).resolve()
-        generated = _generated_variant_paths(gencase_receipt, case_id)
+        # GenCase emits the generated XML/BI4/Run.out prefix but does not
+        # copy the acceleration CSV.  Bind the immutable variant control
+        # copy explicitly instead of inventing an output file.
+        generated = _generated_variant_paths(
+            gencase_receipt, case_id,
+            control=Path(manifest["variant_control_copy"]["path"]),
+        )
         variant_save = float(manifest["numeric_variant"]["variant_save_interval_s"])
         solver_attempt = f"qualification-weak-dual-{variant}-20261002-001"
         solver_case_root = DATA_ROOT / "families" / "F3" / case_id / solver_attempt
