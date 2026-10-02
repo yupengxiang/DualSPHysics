@@ -1,0 +1,114 @@
+{
+  "schema": "ds02.f3.historical-cell3-reference-request-review.v1",
+  "status": "reviewed_root_rebind_required",
+  "claim_boundary": {
+    "requests_are_templates_only": true,
+    "conversion_started_by_child": false,
+    "q_i": "request provenance review only",
+    "q_n": "not_assessed",
+    "production": "not_evaluated"
+  },
+  "immutable_001_policy": "Keep all *_001 request bytes unchanged. Root may clone into root_reference_review_002 and add hashes/strict guard.",
+  "cases": [
+    {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_rev075_r075-output-direct-nvme-001.json",
+      "sha256": "824c6db999dd1e73988fdf7d63cec1c7a776d47ba790dccd5629b6da9a439a95",
+      "case_id": "F3_REV075_R075-OUTPUT",
+      "attempt_id": "f3_rev075_r075-output-direct-nvme-001",
+      "checks": {
+        "kind_cpu": true,
+        "integration_venv_python": true,
+        "nvme_wrapper_command": true,
+        "nvme_staging_root": true,
+        "staging_limit_4gib": false,
+        "separator_before_direct_converter": true,
+        "worktree_root": true,
+        "input_files_all_regular_files": true,
+        "input_sha256_present": false,
+        "strict_digest_binding": false,
+        "source_binding_present": true,
+        "launch_root_only": true
+      },
+      "missing_or_failed": [
+        "staging_limit_4gib",
+        "input_sha256_present",
+        "strict_digest_binding"
+      ],
+      "input_file_count": 22,
+      "input_sha256_count": null,
+      "wrapper": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_nvme_convert_v1.py"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_rev075_r075-time-direct-nvme-001.json",
+      "sha256": "6a90a4762114eda970c3f5ae47b1727be1140435f7e5c29e590b6a80bbca7f97",
+      "case_id": "F3_REV075_R075-TIME",
+      "attempt_id": "f3_rev075_r075-time-direct-nvme-001",
+      "checks": {
+        "kind_cpu": true,
+        "integration_venv_python": true,
+        "nvme_wrapper_command": true,
+        "nvme_staging_root": true,
+        "staging_limit_4gib": true,
+        "separator_before_direct_converter": true,
+        "worktree_root": true,
+        "input_files_all_regular_files": true,
+        "input_sha256_present": false,
+        "strict_digest_binding": false,
+        "source_binding_present": true,
+        "launch_root_only": true
+      },
+      "missing_or_failed": [
+        "input_sha256_present",
+        "strict_digest_binding"
+      ],
+      "input_file_count": 22,
+      "input_sha256_count": null,
+      "wrapper": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_nvme_convert_v1.py"
+    },
+    {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_rev075_r075-zero-direct-nvme-001.json",
+      "sha256": "3327fa5194ca34963d0df7cf78fabc49d6f58474f029817016f7409bf8b71693",
+      "case_id": "F3_REV075_R075-ZERO",
+      "attempt_id": "f3_rev075_r075-zero-direct-nvme-001",
+      "checks": {
+        "kind_cpu": true,
+        "integration_venv_python": true,
+        "nvme_wrapper_command": true,
+        "nvme_staging_root": true,
+        "staging_limit_4gib": true,
+        "separator_before_direct_converter": true,
+        "worktree_root": true,
+        "input_files_all_regular_files": true,
+        "input_sha256_present": false,
+        "strict_digest_binding": false,
+        "source_binding_present": true,
+        "launch_root_only": true
+      },
+      "missing_or_failed": [
+        "input_sha256_present",
+        "strict_digest_binding"
+      ],
+      "input_file_count": 22,
+      "input_sha256_count": null,
+      "wrapper": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_nvme_convert_v1.py"
+    }
+  ],
+  "findings": {
+    "shared_runtime_v2": "not a command input in current *_001 direct requests; runner executes them externally, but corrected root copies should hash-bind the exact runtime_v2 path.",
+    "strict_digest_guard": "Current *_001 requests omit input_sha256, so exact input digest guard is absent.",
+    "runtime_v2_input_contract": "Each *_001 input_files list contains regular files in this workspace, but v2 still requires input_sha256 for the root strict review policy.",
+    "nvme_wrapper": "All three commands use the integration venv and ds_data02_nvme_convert_v1.py with --staging-root /tmp/ds02-nvme-conversion, 4 GiB staging limit, and -- separator.",
+    "source_binding": "Each request has a nonempty source_binding, but this does not replace a complete per-input SHA map."
+  },
+  "root_rebind_requirements": [
+    "Clone each *_001 request to a new root-owned *_002 path; do not rewrite consumed *_001 bytes.",
+    "Add input_sha256 for every input_files file, including exact runtime_v2, wrapper, direct converter, decoder, PartVTK, owner, XML/control/Def, receipts, Run.out/RunPARTs, and BI4 anchors.",
+    "Retain command[0] as integration .venv/bin/python and the NVMe wrapper/staging arguments.",
+    "Recheck expected native frame count 836, source raw-tree immutability, old split, and nominal/TIME/OUTPUT physical control semantics before any root conversion."
+  ],
+  "nominal_template": {
+    "direct_request": "requests/reference/f3_cell3_long_dp0075_nominal-direct-nvme-001.json",
+    "labels_request": "requests/reference/f3_cell3_long_dp0075_nominal-labels-001.json",
+    "meaning": "The actual gate production_source_case_id nominal source is separately bound; R075-ZERO remains a static zero-drive sanity reference, not the temporal baseline."
+  }
+}
