@@ -63,13 +63,19 @@ def audit(gencase_root: Path, metadata_path: Path, output_path: Path) -> dict:
     fluid = read_binary_vtk_points(fluid_vtk)
     bound = read_binary_vtk_points(bound_vtk)
 
-    dp = float(contract["expected_center_envelope_high_m"][0]) - float(
-        contract["expected_center_envelope_low_m"][0]
+    center_low = np.asarray(
+        contract.get("expected_center_envelope_low_m", contract["initial_center_envelope_low_m"]),
+        dtype=float,
     )
+    center_high = np.asarray(
+        contract.get("expected_center_envelope_high_m", contract["initial_center_envelope_high_m"]),
+        dtype=float,
+    )
+    dp = float(center_high[0] - center_low[0])
     nx, ny, nz = (int(x) for x in contract["expected_center_counts_xyz"])
     dp /= nx - 1
-    low = np.asarray(contract["initial_center_envelope_low_m"], dtype=float)
-    high = np.asarray(contract["initial_center_envelope_high_m"], dtype=float)
+    low = center_low
+    high = center_high
     reservoir_low = np.asarray(contract["reservoir_low_m"], dtype=float)
     reservoir_high = np.asarray(contract["reservoir_high_m"], dtype=float)
     tank_low = np.asarray(geometry["tank_low_m"], dtype=float)
