@@ -26,6 +26,8 @@ numerical population rule: coarse keeps the passing `L-2dp+epsilon` span, and
 medium/fine use `L-dp+epsilon` in x/y.  The physical faces, density, body
 mass/inertia, liquid level, and finite walls are unchanged.  Shared v2 CPU
 receipts show all six cases completed in 3D with these fluid counts:
+The exact additive rule and preserved-manifest boundary are in
+`geometry_sampling_addendum_001.json`.
 
 | mechanism | coarse `.08` | medium `.05` | fine `.04` |
 | --- | ---: | ---: | ---: |
