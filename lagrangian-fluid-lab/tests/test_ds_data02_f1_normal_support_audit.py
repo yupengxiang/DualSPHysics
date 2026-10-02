@@ -70,3 +70,17 @@ def test_bound_vtk_field_arrays_are_retained_as_point_aligned_data(tmp_path: Pat
     assert np.array_equal(parsed["point_data"]["Type"], np.asarray([0, 1], dtype=np.uint8))
     np.testing.assert_allclose(parsed["point_data"]["Normal"], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
     np.testing.assert_allclose(parsed["point_data"]["NormalSize"], [0.01, 0.02])
+
+
+def test_vtk_point_shape_summary_records_actual_planes(tmp_path: Path) -> None:
+    path = tmp_path / "hdp.vtk"
+    raw = bytearray(
+        b"# vtk DataFile Version 3.0\nshape test\nBINARY\nDATASET POLYDATA\nPOINTS 2 float\n"
+    )
+    raw.extend(np.asarray([[0.005, 0.0, 0.0], [3.225, 1.0, 0.705]], dtype=">f4").tobytes())
+    path.write_bytes(raw)
+    points = MODULE._read_vtk_points(path)
+    summary = MODULE._shape_summary(points)
+    assert summary["point_count"] == 2
+    assert summary["finite"] is True
+    np.testing.assert_allclose(summary["unique_axis_values_m"]["x"], [0.005, 3.225], rtol=0, atol=2e-7)
