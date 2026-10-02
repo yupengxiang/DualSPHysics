@@ -419,6 +419,81 @@ def _generated_numeric_values(xml_path: Path) -> dict[str, str]:
     return {key: _parameter(root, key).get("value", "") for key in ("DtIni", "DtMin", "DtFixed", "DtFixedFile", "TimeMax", "TimeOut")}
 
 
+def prepare_solver_input(args: argparse.Namespace) -> dict[str, Any]:
+    """Create an additive solver input directory with XML-relative controls resolved.
+
+    GenCase's generated XML retains the acceleration-file basename in
+    ``<acctimesfile>``.  The first qualification requests intentionally kept
+    the generated prefix in the GenCase attempt while the control CSV lived in
+    the handoff source directory, so the GPU solver could not resolve that
+    relative path.  This preparation step copies the immutable generated XML
+    and BI4 plus the byte-identical control CSV into a fresh directory, and
+    records every copy hash.  It never edits or rewrites the source bytes.
+    """
+    generated_xml = Path(args.generated_xml).resolve()
+    generated_bi4 = Path(args.generated_bi4).resolve()
+    control = Path(args.control).resolve()
+    gencase_receipt = Path(args.gencase_receipt).resolve()
+    output_dir = Path(args.output_dir).resolve()
+    output_report = Path(args.output_report).resolve()
+    for path in (generated_xml, generated_bi4, control, gencase_receipt):
+        if not path.is_file():
+            raise F3TimeStudyError(f"missing immutable solver-input source: {path}")
+    receipt = _completed_receipt(gencase_receipt)
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise F3TimeStudyError(f"solver input destination is nonempty; refusing overwrite: {output_dir}")
+    root = ET.parse(generated_xml).getroot()
+    control_node = root.find(".//acctimesfile")
+    if control_node is None or not control_node.get("value"):
+        raise F3TimeStudyError("generated XML has no explicit acceleration control reference")
+    control_name = Path(control_node.get("value")).name
+    if control_name != control_node.get("value"):
+        raise F3TimeStudyError(f"control reference is not a basename: {control_node.get('value')!r}")
+    if digest(control) != CONTROL_SHA:
+        raise F3TimeStudyError("solver preparation control SHA differs from the frozen owner hash")
+    output_dir.mkdir(parents=True, exist_ok=False)
+    case_id = str(args.case_id)
+    copied_xml = output_dir / f"{case_id}.xml"
+    copied_bi4 = output_dir / f"{case_id}.bi4"
+    copied_control = output_dir / control_name
+    shutil.copyfile(generated_xml, copied_xml)
+    shutil.copyfile(generated_bi4, copied_bi4)
+    shutil.copyfile(control, copied_control)
+    copies = {"xml": copied_xml, "bi4": copied_bi4, "control": copied_control}
+    if digest(copied_xml) != digest(generated_xml) or digest(copied_bi4) != digest(generated_bi4):
+        raise F3TimeStudyError("prepared XML/BI4 copy differs from the immutable GenCase output")
+    if digest(copied_control) != CONTROL_SHA:
+        raise F3TimeStudyError("prepared control copy differs from the frozen control SHA")
+    resolved_control = copied_xml.parent / control_name
+    if not resolved_control.is_file() or digest(resolved_control) != CONTROL_SHA:
+        raise F3TimeStudyError("prepared XML relative control reference is not resolvable with the expected SHA")
+    report = {
+        "schema": "ds02.f3.solver-input-preparation.v1",
+        "status": "completed_actual_read_only_copy",
+        "claim_boundary": "additive solver-input copy only; no solver/GPU/Q-N/production claim",
+        "case_id": case_id,
+        "source": {
+            "generated_xml": ref(generated_xml), "generated_bi4": ref(generated_bi4),
+            "control": ref(control), "gencase_receipt": ref(gencase_receipt),
+        },
+        "prepared": {key: ref(path) for key, path in copies.items()},
+        "control_reference": {
+            "xml_attribute": control_node.get("value"),
+            "resolved_path": str(resolved_control),
+            "resolved_sha256": digest(resolved_control),
+            "expected_sha256": CONTROL_SHA,
+            "matches": True,
+        },
+        "gencase_actual": {key: receipt.get(key) for key in ("solver_dimension_from_gencase", "total_particles", "fluid_particles")},
+        "numeric_parameters": _generated_numeric_values(generated_xml),
+        "source_immutable": True,
+    }
+    if output_report.exists():
+        raise F3TimeStudyError(f"refusing to overwrite preparation report: {output_report}")
+    output_report.write_text(json.dumps(report, indent=2, sort_keys=True, default=_json_default) + "\n")
+    return report
+
+
 def make_native_accounting(args: argparse.Namespace) -> dict[str, Any]:
     receipt_path = Path(args.solver_receipt).resolve()
     runparts = Path(args.runparts).resolve()
@@ -797,6 +872,15 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--run-out", type=Path, required=True)
     p.add_argument("--output", type=Path, required=True)
     p.set_defaults(func=make_native_accounting)
+    p = sub.add_parser("prepare-solver-input")
+    p.add_argument("--case-id", required=True)
+    p.add_argument("--generated-xml", type=Path, required=True)
+    p.add_argument("--generated-bi4", type=Path, required=True)
+    p.add_argument("--control", type=Path, required=True)
+    p.add_argument("--gencase-receipt", type=Path, required=True)
+    p.add_argument("--output-dir", type=Path, required=True)
+    p.add_argument("--output-report", type=Path, required=True)
+    p.set_defaults(func=prepare_solver_input)
     p = sub.add_parser("initial-partvtk")
     p.add_argument("--bi4", type=Path, required=True)
     p.add_argument("--xml", type=Path, required=True)

@@ -88,3 +88,43 @@ def test_variant_patch_preserves_physical_hash_and_changes_only_numeric_fields(t
     root = study.ET.parse(result["variant_definition"]["path"]).getroot()
     assert study._parameter(root, "DtFixed").get("value") == "1.106134843353494e-05"
     assert study._parameter(root, "TimeOut").get("value") == "0.0025"
+
+
+def test_prepare_solver_input_resolves_xml_relative_control_without_rewriting_sources(tmp_path):
+    xml = tmp_path / "generated.xml"
+    bi4 = tmp_path / "generated.bi4"
+    control = tmp_path / "F3_DualAxisPhase_WeakControl.csv"
+    receipt = tmp_path / "gencase-receipt.json"
+    output = tmp_path / "prepared"
+    report = output / "prepared-source-manifest.json"
+    xml.write_text(
+        '<case><execution><commands><motion><acctimesfile value="F3_DualAxisPhase_WeakControl.csv" /></motion></commands>'
+        '<data2d value="false" /><normals active="true" /><particles np="108000" /></execution>'
+        '<parameter key="DtIni" value="0" /><parameter key="DtMin" value="0" />'
+        '<parameter key="DtFixed" value="0" /><parameter key="DtFixedFile" value="NONE" />'
+        '<parameter key="TimeMax" value="10" /><parameter key="TimeOut" value="0.0025" /></case>'
+    )
+    bi4.write_bytes(b"native-bi4-placeholder")
+    # The production helper checks the frozen control hash.  Use a real
+    # source copy so this test exercises the actual copy/relative-path logic.
+    source_control = DATA / "gencase-weak-dual-scope-001/F3_DualAxisPhase_WeakControl.csv"
+    control.write_bytes(source_control.read_bytes())
+    receipt.write_text(json.dumps({"status": "completed", "returncode": 0, "solver_dimension_from_gencase": 3,
+                                   "fluid_particles": 34560, "total_particles": 108000,
+                                   "output_root": str(tmp_path)}))
+    source_xml_bytes = xml.read_bytes()
+    source_bi4_bytes = bi4.read_bytes()
+    source_control_bytes = control.read_bytes()
+    args = type("Args", (), {
+        "case_id": "F3_TEST_PREPARED",
+        "generated_xml": xml, "generated_bi4": bi4, "control": control,
+        "gencase_receipt": receipt, "output_dir": output, "output_report": report,
+    })()
+    result = study.prepare_solver_input(args)
+    assert result["control_reference"]["matches"] is True
+    assert (output / "F3_TEST_PREPARED.xml").read_bytes() == source_xml_bytes
+    assert (output / "F3_TEST_PREPARED.bi4").read_bytes() == source_bi4_bytes
+    assert (output / "F3_DualAxisPhase_WeakControl.csv").read_bytes() == source_control_bytes
+    assert xml.read_bytes() == source_xml_bytes
+    assert bi4.read_bytes() == source_bi4_bytes
+    assert control.read_bytes() == source_control_bytes
