@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -22,8 +23,13 @@ def test_v35_requests_are_source_bound_and_gpu_free():
         assert value["q_n_status"].startswith("pending")
         if value["cpu_task_kind"] == "conversion":
             assert value["attempt_id"].endswith("_NATIVE_H5_005")
-            assert str(SCRIPT) in value["command"]
-            assert str(CONVERTER) in value["input_hashes_at_request"]
+            # Historical requests retain their actual launch worktree. Verify
+            # the integrated copies match those bound bytes without rebasing
+            # consumed request paths to this checkout.
+            bound_script = next(arg for arg in value["command"] if Path(arg).name == SCRIPT.name)
+            assert value["input_hashes_at_request"][bound_script] == hashlib.sha256(SCRIPT.read_bytes()).hexdigest()
+            bound_converter = next(arg for arg in value["input_hashes_at_request"] if Path(arg).name == CONVERTER.name)
+            assert value["input_hashes_at_request"][bound_converter] == hashlib.sha256(CONVERTER.read_bytes()).hexdigest()
         if value["cpu_task_kind"] == "labels":
             assert value["attempt_id"].endswith("_LABELS_005")
             assert value["source_trajectory_sha256"] == "deferred_until_native_h5_receipt"
