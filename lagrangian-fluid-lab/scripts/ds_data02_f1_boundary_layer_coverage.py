@@ -14,9 +14,14 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
+
+LAB = Path(__file__).resolve().parents[1]
+if str(LAB) not in sys.path:
+    sys.path.insert(0, str(LAB))
 
 from scripts.ds_data02_f1_boundary_coverage import (
     _decode_bi4,
