@@ -1,0 +1,46 @@
+{
+  "schema": "ds-data-02.f2.event-semantics.v6-manifest",
+  "operator_version": "f2-moving-cup-local-z-top-v6",
+  "operator_sha256": "c1e2921683fa0dbd4097aa1554fa0e7cb6fd3fc61848071d5f3b0660f078637e",
+  "source_script": "../../f2_handoff_20261002_event_semantics_v6.py",
+  "quality_contract": "../../quality_contract.json",
+  "physical_hash_scope": {
+    "included": [
+      "canonical continuous geometry",
+      "initial fluid state and source bands",
+      "prescribed motion/control binding",
+      "SI units and event-window definition"
+    ],
+    "excluded": [
+      "observation operator version/hash",
+      "dp and grid phase",
+      "DtFixed, DtIni, DtMin, integrator parameters",
+      "save cadence"
+    ]
+  },
+  "opening_definition": {
+    "surface": "moving finite cup local-z=body-frame cup_high_z face",
+    "pose_source": "rigid_body_state.actual_angle_rad",
+    "aperture": "body-frame x/y inside cup footprint expanded by crossing_tolerance_m at interpolated crossing pose",
+    "crossing_pose": "linear interpolation of world particle position and saved body angle at the signed-margin crossing",
+    "departure": "outward crossing after hold start; previous signed top margin <=0 and current >0",
+    "return": "inward crossing after a prior departure; previous signed top margin >0 and current <=0"
+  },
+  "destination_definition": {
+    "precedence": ["unknown_invalid", "cup", "receiver", "tray_after_departure", "inflight"],
+    "tray": "finite tray interior only after the same initial identity has a v6 top departure",
+    "unknown": "native invalid identities remain unknown; PartVTKOut Motive and position are side evidence",
+    "wall": "closed cup/receiver/tray bottom and side crossings are separately counted; top faces are open"
+  },
+  "frozen_budget": {
+    "event_time_absolute_budget_s": 0.0036681953999691376,
+    "save_fraction_max": 0.2,
+    "save_half_width_budget_s": 0.0007336390799938275,
+    "strict_native_vs_continuous_mass_relative_budget": 1e-12
+  },
+  "output": {
+    "old_six_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_EVENT_SEMANTICS_V6/old-six",
+    "old_six_comparison": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_EVENT_SEMANTICS_V6/f2-v6-sixview-comparison.json",
+    "status": "additive observation producer; v5 outputs and consumed source bytes are preserved; Q-N and production eligibility are not granted"
+  }
+}
