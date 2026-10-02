@@ -235,6 +235,18 @@ def _obstacle_points_inside(points: np.ndarray, tolerance: float = 2e-7) -> bool
 
 def audit_native(case: dict[str, Any], case_root: Path, bi4_dump: Path) -> dict[str, Any]:
     report = base.audit_native(case, case_root, bi4_dump)
+    # Keep the v1 external-obstacle interpretation as explicit negative
+    # evidence.  v2 changes the expected side only after preserving the
+    # original result; it must never look as though an external-face failure
+    # was silently rewritten into a pass.
+    v1_coverage = report["coverage_from_actual_double_bi4_fixed_positions"]["obstacle"]
+    v1_check = report["checks"]["obstacle_five_face_coverage_from_typed_fixed"]
+    report["v1_external_obstacle_check"] = {
+        "coverage": v1_coverage,
+        "check": v1_check,
+        "status": "retained_negative_evidence",
+        "meaning": "v1 expected obstacle supports outside the continuous body; that side is intentionally rejected by v2.",
+    }
     typed = report["typed_identity"]
     # Recover typed fixed positions from the already validated BI4 exactly as
     # v1 does, without changing its source files or its output artifacts.
@@ -264,6 +276,12 @@ def audit_native(case: dict[str, Any], case_root: Path, bi4_dump: Path) -> dict[
         receipt["variant_id"] = VARIANT_ID
         receipt["obstacle_support_side"] = "inside_obstacle"
         child.write_text(json.dumps(receipt, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        # The child receipt is amended with the v2 semantic binding before
+        # the parent report is returned.  Bind the hash of those final bytes,
+        # never the pre-amendment v1 receipt.
+        child_sha = base.sha256(child)
+        report["child_gencase_receipt_sha256"] = child_sha
+        report["source_hashes"]["child_gencase_receipt"] = child_sha
     return report
 
 
@@ -320,7 +338,7 @@ def run_gencase(manifest_path: Path, attempt_root: Path, output_path: Path, genc
         "official_gencase": str(gencase.resolve()),
         "official_partvtk": str(partvtk.resolve()),
         "variant_id": VARIANT_ID,
-        "parent_v1_audit_replaced": True,
+        "parent_v1_external_obstacle_check_retained_as_negative": True,
         "claim_boundary": "Initial GenCase/PartVTK/BI4 only; no solver/GPU/Q-N/production claim.",
     })
     output_path.parent.mkdir(parents=True, exist_ok=True)
