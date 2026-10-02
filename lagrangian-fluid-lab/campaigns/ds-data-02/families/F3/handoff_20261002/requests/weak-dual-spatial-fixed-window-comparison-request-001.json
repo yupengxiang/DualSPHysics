@@ -1,0 +1,112 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F3",
+  "case_id": "F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY",
+  "attempt_id": "weak-dual-spatial-fixed-window-comparison-20261002-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 4,
+  "max_wall_seconds": 2400,
+  "estimated_storage_bytes": 1073741824,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "compare",
+    "--baseline",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+    "--grid-step",
+    "0.0025",
+    "--output",
+    "{attempt_root}/fixed-window-comparison.json"
+  ],
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "fixed_window_s": [0.0, 10.0],
+  "scope": "read-only fixed physical-window macro comparison across the actual coarse, medium, and fine weak-dual references; diagnostic only",
+  "qualification_claim": "none; Q-N and production remain unassessed",
+  "q_n_status": "not_assessed",
+  "budget_contract": {
+    "macro_relative": 0.05,
+    "event_time_relative": 0.02,
+    "save_or_integration_share": 0.2,
+    "status": "preregistered diagnostic thresholds only"
+  },
+  "hdf5_binding_policy": "trajectory HDF5 is read-only; output SHA values are pinned from completed direct-conversion reports and the runner request does not rehash multi-GB sources",
+  "expected_native": {
+    "frames_each": 4001,
+    "time_window_s": [0.0, 10.0],
+    "initial_fluid_mass_kg": 14.58,
+    "fluid_particles": {
+      "coarse_dp_0p008181818": 26620,
+      "medium_dp_0p0075": 34560,
+      "fine_dp_0p006": 67500
+    },
+    "all_particles": {
+      "coarse_dp_0p008181818": 88528,
+      "medium_dp_0p0075": 108000,
+      "fine_dp_0p006": 179208
+    },
+    "solver_dimension": 3,
+    "parts_out": 0,
+    "control_family": "weak_dual_axis_0p06g_0p04g",
+    "control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b"
+  },
+  "source_hdf5_bindings": {
+    "medium_baseline": {
+      "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+      "trajectory_sha256": "c2cb2f701ef81a1a490764aa9057874c0d61f0d2447416cb4e1f7693daa76fd2",
+      "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+      "direct_report_sha256": "4c6f3553673c45f428c3fdd7777f9fc8fb575ae29df87f06d7daea7a825b8cd4",
+      "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+      "transport_labels_sha256": "1b4f9acdfaa386688db815c0de8e064c0b54aa216b072ef90b9efaa9de5dc1f3"
+    },
+    "coarse": {
+      "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+      "trajectory_sha256": "61d14a1a67ab040dfb6728a6b11a1721eb71f83da99468e31cbd8d987aeda2db",
+      "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json",
+      "direct_report_sha256": "bbf52efe7f59cf740380edf2039a35a0cffb33b29eed1f31bcfd2c18ce0306cf",
+      "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5",
+      "transport_labels_sha256": "56460108fd9b6a26f43fa54f76717958e741ba93bbc22d411ea80459119cb4f8"
+    },
+    "fine": {
+      "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+      "trajectory_sha256": "8cf11a279aa4849939982c1b11a1a4260dff0224051795a38880d55dfc74e8be",
+      "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json",
+      "direct_report_sha256": "de4a6ada6e67e8b17c17f5c8c36bfeb9bd984bc7e7049402a907c009d7b9a739",
+      "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5",
+      "transport_labels_sha256": "6bc29292b7cc705d3946d96ec3497a32572716dd769056dac60227d7f2a6b199"
+    }
+  },
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5"
+  ],
+  "source_solver_evidence": {
+    "coarse_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/qualification-weak-dual-coarse-reference-001/execution-receipt.json",
+    "coarse_solver_receipt_sha256": "aa27ca899e1aa5371b596a7466eabd9f569e614577dcf162ef15b6fea7603258",
+    "medium_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/qualification-weak-dual-scope-001/execution-receipt.json",
+    "fine_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/qualification-weak-dual-fine-reference-001/execution-receipt.json",
+    "fine_solver_receipt_sha256": "3d63815b1f3d3d875095d48b16be95ebb09685516f3d1e2e09ba379a61740581",
+    "semantic_requirement": "actual Run.csv/RunPARTs/Run.out and native exclusion ledgers remain the authority for full time and save-frequency claims; this request only compares converted trajectories"
+  },
+  "comparison_semantics": {
+    "baseline": "medium dp=0.0075",
+    "variants": ["coarse dp=0.008181818", "fine dp=0.006"],
+    "operators": ["active_mass_kg", "com_x_m", "com_y_m", "com_z_m", "kinetic_energy_j"],
+    "time_matching": "linear interpolation at fixed physical times 0,2.5,5,7.5,10 s; report source frame/time brackets",
+    "claim_boundary": "spatial diagnostic across three actual 3-D full-window references; no Q-N from this comparison"
+  }
+}
