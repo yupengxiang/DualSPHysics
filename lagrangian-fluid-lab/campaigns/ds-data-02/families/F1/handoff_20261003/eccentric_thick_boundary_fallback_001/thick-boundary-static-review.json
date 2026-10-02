@@ -1,0 +1,174 @@
+{
+  "schema": "ds02.f1.eccentric-thick-boundary.static-review.v1",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "case_id": "F1_ECC_THICK_BOUNDARY_DBC_DP010",
+  "status": "static_recipe_pending_root_review",
+  "claim_boundary": "No GenCase, solver, GPU, Q-N, or production claim in this review.",
+  "candidate": {
+    "definition": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_001/definitions/F1_ECC_THICK_BOUNDARY_DBC_DP010/F1_ECC_THICK_BOUNDARY_DBC_DP010_Def.xml",
+      "role": "new additive coarse candidate",
+      "bytes": 4769,
+      "sha256": "649f50b75654157f92999a7b14c42d7428970111c7cd42111d60d3506b8fdc1a"
+    },
+    "metadata": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_001/definitions/F1_ECC_THICK_BOUNDARY_DBC_DP010/F1_ECC_THICK_BOUNDARY_DBC_DP010.metadata.json",
+      "role": "new physical/numeric binding",
+      "bytes": 11924,
+      "sha256": "281c6ccc8620b9cc957ce32f61a164c73411c282a9e40e655f01720c94a6fe63"
+    },
+    "producer": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f1_eccentric_thick_boundary.py",
+      "role": "candidate producer and native audit code",
+      "bytes": 44624,
+      "sha256": "23a88eb21aeae3f73ecc85c00fb0d7b78ed1de1b70b31be88bf812b41a53f388"
+    },
+    "tests": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_f1_eccentric_thick_boundary.py",
+      "role": "static and synthetic geometry tests",
+      "bytes": 3516,
+      "sha256": "a755abdea30144d646374c295508f67a2bcce82f274c1691e1f7c10e0dd8650d"
+    },
+    "manifest": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_001/eccentric-thick-boundary-manifest.json",
+      "role": "candidate registry",
+      "bytes": 2078,
+      "sha256": "6e26293b37b41804a03fbc92234111d3b8f11499803e97646e1f0fa1bfdf76d5"
+    }
+  },
+  "continuous_contract_preserved": {
+    "tank_low_m": [
+      0,
+      0,
+      0
+    ],
+    "tank_high_m": [
+      1.6,
+      0.67,
+      0.4
+    ],
+    "fluid_low_m": [
+      0,
+      0,
+      0
+    ],
+    "fluid_high_m": [
+      0.4,
+      0.67,
+      0.3
+    ],
+    "obstacle_low_m": [
+      0.9,
+      0.24,
+      0
+    ],
+    "obstacle_high_m": [
+      1.02,
+      0.36,
+      0.45
+    ],
+    "fluid_volume_m3": 0.0804,
+    "fluid_mass_kg": 80.4,
+    "density_kg_m3": 1000,
+    "gravity_m_per_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "open_top": true,
+    "boundary_method": "DBC",
+    "normal_geometry": false
+  },
+  "numeric_recipe": {
+    "dp_m": 0.01,
+    "pointref_m": [
+      0.005,
+      0.005,
+      0.005
+    ],
+    "pointmin_m": [
+      -0.025,
+      -0.025,
+      -0.025
+    ],
+    "fluid_count_xyz": [
+      40,
+      67,
+      30
+    ],
+    "fluid_count": 80400,
+    "fluid_primitive": "boxfill=solid; point=low+0.5dp; size=extent-dp",
+    "outer_support": "five independent boxfill=solid slabs, each three lattice rows wholly outside its face; no layers/vdp",
+    "obstacle_support": "four side plus top independent external solid slabs around the unchanged void body; no layers/vdp",
+    "nearest_fixed_offset_m": 0.005,
+    "fixed_fluid_overlap_allowed": false,
+    "double_bi4_required": true,
+    "typed_id_source": "generated XML ranges cross-checked against decoded Idp.bin",
+    "explicit_boundary_parameter": {
+      "source": "omitted, official DBC default",
+      "candidate": "Boundary=1",
+      "semantic_change": "explicitizes same DBC mode"
+    },
+    "save_pos_double": {
+      "source": "0",
+      "candidate": "1",
+      "reason": "audit representation only; require Posd.bin; no solver physics change"
+    }
+  },
+  "precedent_differences": {
+    "f1_dual_finite_center": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/F1_DUAL_FINITE_CENTER_DP001_003_Def.xml",
+      "native_audit": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003/finite-center-native-audit-003/finite-center-native-audit.json",
+      "reused": [
+        "pointref=(0.005,0.005,0.005)",
+        "actual GenCase Data2D=0",
+        "double BI4 precedent",
+        "explicit DBC execution variant"
+      ],
+      "not_reused": [
+        "DUAL dimensions/reservoir/separator",
+        "mDBC normals list",
+        "DUAL fluid mass/geometry"
+      ],
+      "observed_reference": {
+        "dimension": 3,
+        "total_particles": 1011911,
+        "fluid_particles": 616000,
+        "fluid_mass_kg": 616.0
+      }
+    },
+    "f5_solid_cell_center": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/initialization_repairs/F5_CONTINUOUS_CELL_CENTRE_PHASE_EXACT_DP025_007/runup_return/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007.xml",
+      "actual_audit": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/initialization_repairs/F5_CONTINUOUS_CELL_CENTRE_COMMENSURATE_DP005_DP00125_010/gencase-audit-010.json",
+      "reused": [
+        "boxfill=solid fluid cell-centre primitive",
+        "explicit pointref phase",
+        "solid wall support idiom",
+        "no mass rescaling"
+      ],
+      "not_reused": [
+        "F5 tank/bed/piston geometry",
+        "F5 moving control",
+        "F5 mass denominator"
+      ],
+      "observed_reference": {
+        "dimension": 3,
+        "dp005_fluid_particles": 18816,
+        "dp00125_fluid_particles": 1204224,
+        "mass_contract": "exact in static/GenCase audit"
+      }
+    }
+  },
+  "prior_negative_evidence": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_003/evidence/solid-fallback-coarse-stop-summary.json",
+    "role": "immutable F1 ECC solid/vdp stop evidence",
+    "bytes": 14116,
+    "sha256": "4f017c3bd3f4d6a39e34683d46f091e07ea52ce02619f0dd2e80b0c71bebe5a6"
+  },
+  "required_root_review": [
+    "Review external slab semantics against official GenCase before any CPU launch.",
+    "If approved, run only the bounded coarse request; do not start medium/fine until coarse typed BI4 and all-face gates pass.",
+    "Use child gencase-child-receipt.json for total/fluid/dim3; parent runner stdout regex is not scientific evidence."
+  ]
+}
