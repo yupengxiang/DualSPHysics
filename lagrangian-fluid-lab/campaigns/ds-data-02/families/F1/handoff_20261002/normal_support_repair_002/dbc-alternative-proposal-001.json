@@ -1,0 +1,80 @@
+{
+  "schema": "ds02.f1.finite-center.boundary-model-alternative-proposal.v1",
+  "model_profile": "gpt-5.6-luna/max",
+  "proposal_id": "F1_DBC_ALTERNATIVE_REVIEW_001",
+  "family_id": "F1",
+  "parent_physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE",
+  "status": "root_review_only",
+  "claim_boundary": "A proposal for a separately validated numerical boundary-model case. It is not a solver request, Q-N result, or production approval.",
+  "motivation": {
+    "failed_candidates": [
+      "normal_support_repair_001: distanceh=3, svshapes=true; 15751/395911 fixed rows lacked usable native normals.",
+      "normal_support_repair_002: only GeometryForNormals vdp values changed to zero; 112031/395911 fixed rows lacked usable native normals."
+    ],
+    "interpretation": "The second bounded representation change did not close the mDBC native normal gate. A boundary-model alternative is therefore preferable to another blind virtual-normal retry."
+  },
+  "official_source_evidence": {
+    "source_tree": "/home/jade/Projects/DualSPHysics",
+    "files": [
+      {
+        "path": "/home/jade/Projects/DualSPHysics/src/source/JSph.cpp",
+        "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7",
+        "evidence": [
+          {"lines": "701-704", "finding": "XML Boundary value 1 selects BC_DBC and value 2 selects BC_MDBC."},
+          {"lines": "706-707", "finding": "UseNormals is enabled inside the BC_MDBC branch."},
+          {"lines": "878-898", "finding": "Command-line boundary selection accepts DBC/mDBC and sets UseNormals from TBoundary==BC_MDBC."}
+        ]
+      },
+      {
+        "path": "/home/jade/Projects/DualSPHysics/src/source/JSphCfgRun.h",
+        "sha256": "8fb6effae985a32fa7a2f1b97c2ee8be7ad5987e7abd6b484dbbfac33810b9e8",
+        "evidence": [
+          {"lines": "50-52", "finding": "TBoundary documents 1 as DBC and 2 as mDBC; SlipMode and NoPenetration are mDBC settings."}
+        ]
+      },
+      {
+        "path": "/home/jade/Projects/DualSPHysics/src/source/JSphCfgRun.cpp",
+        "sha256": "51b8dc214181edc0518e4c7de42a71b9248dee891064de3efb74aa8b095a2c96",
+        "evidence": [
+          {"lines": "158-161", "finding": "The official CLI exposes -dbc and -mdbc variants."},
+          {"lines": "362-378", "finding": "CLI parsing maps -dbc to BC_DBC and mDBC options to BC_MDBC."}
+        ]
+      }
+    ]
+  },
+  "candidate_change": {
+    "new_case_required": true,
+    "physical_geometry_and_initial_state": "Preserve the finite 3D geometry, 616000 fluid particles, 616.0 kg mass, typed fixed populations, initial state, controls, gravity, and all source hashes from the parent case.",
+    "numerical_boundary_change_only": {
+      "xml_parameter": "Boundary",
+      "parent_value": "2",
+      "proposed_value": "1",
+      "meaning": "Use official Dynamic Boundary Condition (DBC) instead of modified Dynamic Boundary Condition (mDBC)."
+    },
+    "slip_mode": {
+      "parent_value": "1",
+      "proposal": "Keep the source XML byte value only if the parser accepts it, but treat it as non-operative under DBC; independently verify the parsed runtime configuration before any solver launch.",
+      "reason": "Official source applies SlipMode only in the mDBC branch."
+    },
+    "alternative_cli": "If root's solver request uses command-line overrides, use the official -dbc option and record the full command/hash; do not combine an unverified XML and CLI override."
+  },
+  "required_root_review_gates": [
+    "Create a new immutable XML/request prefix; do not alter either failed mDBC candidate or their artifacts.",
+    "Verify the generated XML and actual solver command resolve to DBC (TBoundary=1) before launch.",
+    "Run bounded CPU/native typed-state and wall-coverage checks with no mass rescaling and no normal-based mDBC claim.",
+    "Revalidate penetration/no-slip/pressure behavior and all F1 fixed physical observables independently; DBC is a numerical model change, not an equivalence repair.",
+    "Keep Q-N and production status unassessed until the separate numerical and scientific gates pass."
+  ],
+  "authorization": {
+    "solver_launch": false,
+    "gpu_launch": false,
+    "child_agent_launch": false,
+    "root_must_authorize_new_case": true
+  },
+  "provenance": {
+    "failed_vdp0_registration": "normal-plane-audit-result-001.json",
+    "failed_vdp0_report_sha256": "72e016a60ddecba3b1915a6aacdc82492ad0d69728f111221bb4df53153ee63e",
+    "parent_mdbc_definition_sha256": "f5d87425c2eaa76514a5b2d0cff75adf165d13da627088ffc0ccc4f63fe99b14",
+    "source_immutability": true
+  }
+}
