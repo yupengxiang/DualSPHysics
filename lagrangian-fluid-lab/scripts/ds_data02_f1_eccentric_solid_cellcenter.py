@@ -567,13 +567,29 @@ def _usage() -> dict[str, Any]:
     return {"self": pack(self_usage), "children": pack(child_usage)}
 
 
-def run_gencase(manifest_path: Path, attempt_root: Path, output_path: Path, gencase: Path, partvtk: Path) -> dict[str, Any]:
+def run_gencase(
+    manifest_path: Path,
+    attempt_root: Path,
+    output_path: Path,
+    gencase: Path,
+    partvtk: Path,
+    requested_resolutions: list[str] | None = None,
+) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     attempt_root.mkdir(parents=True, exist_ok=True)
     started = time.time()
     usage_before = _usage()
+    registered_cases = list(manifest["resolutions"])
+    registered_ids = {case["case_id"] for case in registered_cases}
+    selected_ids = set(requested_resolutions or registered_ids)
+    unknown_ids = selected_ids - registered_ids
+    if unknown_ids:
+        raise ValueError(f"unknown resolution case_id(s): {sorted(unknown_ids)}")
+    selected_cases = [case for case in registered_cases if case["case_id"] in selected_ids]
+    if not selected_cases:
+        raise ValueError("at least one registered resolution case_id is required")
     cases: list[dict[str, Any]] = []
-    for case in manifest["resolutions"]:
+    for case in selected_cases:
         case_root = attempt_root / case["case_id"]
         case_root.mkdir(parents=True, exist_ok=True)
         prefix = case_root / case["case_id"]
@@ -596,6 +612,9 @@ def run_gencase(manifest_path: Path, attempt_root: Path, output_path: Path, genc
         "family_id": FAMILY_ID, "mechanism_id": MECHANISM_ID, "physical_case_id": PHYSICAL_CASE_ID,
         "manifest": str(manifest_path.resolve()), "manifest_sha256": sha256(manifest_path),
         "attempt_root": str(attempt_root.resolve()), "gencase": str(gencase.resolve()), "partvtk": str(partvtk.resolve()),
+        "registered_resolution_case_ids": [case["case_id"] for case in registered_cases],
+        "requested_resolution_case_ids": [case["case_id"] for case in selected_cases],
+        "partial_resolution_run": len(selected_cases) != len(registered_cases),
         "cases": cases,
         "physical_hashes": sorted({case["physical_hash"] for case in cases}),
         "all_physical_hashes_equal": len({case["physical_hash"] for case in cases}) == 1,
@@ -626,11 +645,24 @@ def main(argv: list[str] | None = None) -> int:
     p_run.add_argument("--output", type=Path, required=True)
     p_run.add_argument("--gencase", type=Path, required=True)
     p_run.add_argument("--partvtk", type=Path, required=True)
+    p_run.add_argument(
+        "--resolution",
+        dest="requested_resolutions",
+        action="append",
+        help="registered case_id to run; repeat for a bounded subset (default: all)",
+    )
     args = parser.parse_args(argv)
     if args.command == "design":
         result = design(args.output_root, args.template)
     else:
-        result = run_gencase(args.manifest, args.attempt_root, args.output, args.gencase, args.partvtk)
+        result = run_gencase(
+            args.manifest,
+            args.attempt_root,
+            args.output,
+            args.gencase,
+            args.partvtk,
+            args.requested_resolutions,
+        )
     print(json.dumps(result, indent=2, ensure_ascii=False, default=_json_default))
     return 0
 
