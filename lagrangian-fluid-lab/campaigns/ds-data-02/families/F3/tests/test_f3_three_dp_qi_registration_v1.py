@@ -81,7 +81,11 @@ def test_bounded_audit_requests_are_root_review_only_and_hash_bound():
         assert request["input_hashes"]
         contract = load_resolution(role, "contract")
         contract_path = (GENERATED / "source_contracts" / f"{role}.source-contract.v1.json").resolve()
-        assert request["source_contract"]["path"] == str(contract_path)
+        registered_path = Path(request["source_contract"]["path"])
+        assert registered_path.is_absolute()
+        # Integration preserves the originating worktree's immutable binding.
+        # Verify the referenced artifact itself, rather than rebasing its path.
+        assert registered_path.read_bytes() == contract_path.read_bytes()
         expected_contract_sha = hashlib.sha256(
             json.dumps(contract, sort_keys=True, separators=(",", ":")).encode()
         ).hexdigest()
