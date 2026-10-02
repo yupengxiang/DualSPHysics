@@ -1,0 +1,125 @@
+{
+  "schema": "ds02.f4.frozen-centered-reference-observables.v1",
+  "frozen_at_utc": "2026-10-02T13:15:27.753938+00:00",
+  "frozen_before_new_solver_results": true,
+  "budgets": {
+    "COL": {
+      "original_scale_contract": {
+        "L_m": 0.16,
+        "U_m_per_s": 1.0307764064044151,
+        "T_s": 0.15522280002325312,
+        "event_time_error_budget_s": 0.0031044560004650622,
+        "macro_error_budget_fraction": 0.05,
+        "temporal_allocation_each_fraction": 0.2,
+        "threshold_policy": "all spatial regions and plane bands are max(3*dp,0.02 m); no single-particle topology"
+      },
+      "current_operator_protocol": {
+        "schema": "ds02.f4.science-operators.v2",
+        "operator_version": "f4-fixed-source-support-v2",
+        "scope": "actual F4 typed HDF5 reference evidence; every curve is bound to physical and control hashes",
+        "physical_support": {
+          "support_radius_m": 0.02,
+          "support_radius_semantics": "fixed physical distance, independent of dp; max(3*dp,0.02 m) is retained only as a labelled resolution diagnostic",
+          "minimum_cross_support_pairs": 3,
+          "minimum_support_mass_fraction_of_smaller_source": 0.01,
+          "contact_definition": "at least the registered cross-source pair and mass thresholds are true in the converted typed active particle positions; initial source boxes are never used as contact evidence",
+          "recontact_definition": "a false interval after first sourced contact followed by a later sourced contact; right-censored when absent",
+          "spread_definition": "axis-aligned extent of each typed source group over active finite-mass particles",
+          "calibration": "translation, rotation, and deterministic subsampling fixtures are run through the same support detector and recorded with the audit"
+        },
+        "transport": {
+          "plane": "finite physical y/z aperture derived from the registered source geometry, not an infinite x plane",
+          "crossing": "typed identity-resolved signed crossings with native mass in kg; repeated crossings and first-passage brackets are retained",
+          "residence_mass_time_unit": "kg*s",
+          "residence_particle_time_unit": "s",
+          "missing_identity_policy": "unknown state; missing particles are excluded from active aperture sums and never counted as physical exit"
+        },
+        "comparison": {
+          "spatial_reference": "fine/native per physical case",
+          "temporal_reference": "fine/native per physical case",
+          "time_alignment": "linear interpolation at actual time values over the overlap window; frame index equality is not assumed",
+          "macro_error_budget_fraction": 0.05,
+          "event_time_error_budget_fraction": 0.02,
+          "temporal_item_allocation_fraction": 0.2,
+          "macro_scales": "native mass, registered L, M*U momentum, and M*U^2 energy; no trajectory mass normalization",
+          "status_policy": "observed pass/fail/fail-over-budget is evidence only and grants neither Q-N nor production eligibility"
+        },
+        "preview": {
+          "projection": "actual solver Cartesian x/z with y as color",
+          "downsample": "deterministic display-only sample; full HDF5 remains the audit input",
+          "required": "first/middle/final keyframes and at least one frame-sequence GIF"
+        },
+        "claim_boundary": "Q-I lifecycle and scientific reference evidence are reported separately; Q-N and production are not assessed"
+      },
+      "window_s": [
+        0,
+        1.2
+      ],
+      "save_s": 0.001,
+      "macro_definition": "full original per-source extrema, native mass, L, M*U momentum and M*U^2 energy; no percentile substitution",
+      "mass_policy": "registered continuum denominator retained; no mass rescaling"
+    },
+    "DROP": {
+      "original_scale_contract": {
+        "L_m": 0.16,
+        "U_m_per_s": 1.252836781069266,
+        "T_s": 0.12771017136282017,
+        "event_time_error_budget_s": 0.0025542034272564035,
+        "macro_error_budget_fraction": 0.05,
+        "temporal_allocation_each_fraction": 0.2,
+        "threshold_policy": "all spatial regions and plane bands are max(3*dp,0.02 m); no single-particle topology"
+      },
+      "current_operator_protocol": {
+        "schema": "ds02.f4.science-operators.v2",
+        "operator_version": "f4-fixed-source-support-v2",
+        "scope": "actual F4 typed HDF5 reference evidence; every curve is bound to physical and control hashes",
+        "physical_support": {
+          "support_radius_m": 0.02,
+          "support_radius_semantics": "fixed physical distance, independent of dp; max(3*dp,0.02 m) is retained only as a labelled resolution diagnostic",
+          "minimum_cross_support_pairs": 3,
+          "minimum_support_mass_fraction_of_smaller_source": 0.01,
+          "contact_definition": "at least the registered cross-source pair and mass thresholds are true in the converted typed active particle positions; initial source boxes are never used as contact evidence",
+          "recontact_definition": "a false interval after first sourced contact followed by a later sourced contact; right-censored when absent",
+          "spread_definition": "axis-aligned extent of each typed source group over active finite-mass particles",
+          "calibration": "translation, rotation, and deterministic subsampling fixtures are run through the same support detector and recorded with the audit"
+        },
+        "transport": {
+          "plane": "finite physical y/z aperture derived from the registered source geometry, not an infinite x plane",
+          "crossing": "typed identity-resolved signed crossings with native mass in kg; repeated crossings and first-passage brackets are retained",
+          "residence_mass_time_unit": "kg*s",
+          "residence_particle_time_unit": "s",
+          "missing_identity_policy": "unknown state; missing particles are excluded from active aperture sums and never counted as physical exit"
+        },
+        "comparison": {
+          "spatial_reference": "fine/native per physical case",
+          "temporal_reference": "fine/native per physical case",
+          "time_alignment": "linear interpolation at actual time values over the overlap window; frame index equality is not assumed",
+          "macro_error_budget_fraction": 0.05,
+          "event_time_error_budget_fraction": 0.02,
+          "temporal_item_allocation_fraction": 0.2,
+          "macro_scales": "native mass, registered L, M*U momentum, and M*U^2 energy; no trajectory mass normalization",
+          "status_policy": "observed pass/fail/fail-over-budget is evidence only and grants neither Q-N nor production eligibility"
+        },
+        "preview": {
+          "projection": "actual solver Cartesian x/z with y as color",
+          "downsample": "deterministic display-only sample; full HDF5 remains the audit input",
+          "required": "first/middle/final keyframes and at least one frame-sequence GIF"
+        },
+        "claim_boundary": "Q-I lifecycle and scientific reference evidence are reported separately; Q-N and production are not assessed"
+      },
+      "window_s": [
+        0,
+        1.2
+      ],
+      "save_s": 0.001,
+      "macro_definition": "full original per-source extrema, native mass, L, M*U momentum and M*U^2 energy; no percentile substitution",
+      "mass_policy": "registered continuum denominator retained; no mass rescaling"
+    }
+  },
+  "source_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/f4_science_operators.v2.json": "fec2fe34e43c03a1e5e2b093e668813a432539140e995aa4dfdaef19e9d39bc5",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/reference_matrix_001/oblique_finite_columns_fine.metadata.json": "1fc726125332266a5146f963d341af04aee823de7898e106fbf857b69c4d34cd",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/reference_matrix_001/finite_drop_pool_fine.metadata.json": "a90606cbdd296b0a3c37713135a7a2629f57cad88d6bb2de570bd2c275f7a9e4"
+  },
+  "old_threshold_policy_superseded_by_v2_protocol": "physical support fixed .02m, independent ofdp; original numeric error budgets unchanged"
+}
