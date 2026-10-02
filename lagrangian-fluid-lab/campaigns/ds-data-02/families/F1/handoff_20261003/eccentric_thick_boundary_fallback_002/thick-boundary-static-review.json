@@ -1,0 +1,254 @@
+{
+  "schema": "ds02.f1.eccentric-thick-boundary.static-review.v2",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "case_id": "F1_ECC_THICK_BOUNDARY_DBC_DP010",
+  "variant_id": "002-obstacle-internal-solid-support",
+  "status": "static_recipe_pending_root_review_and_bounded_cpu_gencase",
+  "claim_boundary": "No GenCase, PartVTK, solver, GPU, Q-N, or production claim in this review.",
+  "execution": {
+    "no_execution_performed": true,
+    "solver_started": false,
+    "gpu_started": false,
+    "shared_runner_submitted": false
+  },
+  "candidate": {
+    "definition": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_002/definitions/F1_ECC_THICK_BOUNDARY_DBC_DP010/F1_ECC_THICK_BOUNDARY_DBC_DP010_Def.xml",
+      "role": "new additive coarse numeric definition",
+      "bytes": 4769,
+      "sha256": "3ca4d2c3950f0ae84b7fcef05456f516bd5acf5f79e5ae713d08335e89eafa1e"
+    },
+    "metadata": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_002/definitions/F1_ECC_THICK_BOUNDARY_DBC_DP010/F1_ECC_THICK_BOUNDARY_DBC_DP010.metadata.json",
+      "role": "physical and numeric binding",
+      "bytes": 12501,
+      "sha256": "6899c9afcb0530de5014ee8ae9d8a55596466ec2765ec47fbde33c50f85b6e97"
+    },
+    "producer": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f1_eccentric_thick_boundary_v2.py",
+      "role": "candidate producer and native audit code",
+      "bytes": 19373,
+      "sha256": "7b08ed099e175d2a2a790d0d4d37a98b793c85371b8627608f49851793a32f23"
+    },
+    "tests": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_f1_eccentric_thick_boundary_v2.py",
+      "role": "static geometry and semantic tests",
+      "bytes": 3896,
+      "sha256": "703cc293444a35a48290950564a2c2ea02d26ac1b9035faa25d5c8f656b32052"
+    },
+    "manifest": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_002/eccentric-thick-boundary-manifest.json",
+      "role": "candidate registry",
+      "bytes": 3462,
+      "sha256": "e81c42df24669c5f66f7b266fa4b9a426b3c512b9ce2883f5334289704116cc1"
+    }
+  },
+  "continuous_contract_preserved": {
+    "tank_low_m": [
+      0,
+      0,
+      0
+    ],
+    "tank_high_m": [
+      1.6,
+      0.67,
+      0.4
+    ],
+    "fluid_low_m": [
+      0,
+      0,
+      0
+    ],
+    "fluid_high_m": [
+      0.4,
+      0.67,
+      0.3
+    ],
+    "obstacle_low_m": [
+      0.9,
+      0.24,
+      0
+    ],
+    "obstacle_high_m": [
+      1.02,
+      0.36,
+      0.45
+    ],
+    "fluid_volume_m3": 0.0804,
+    "fluid_mass_kg": 80.4,
+    "density_kg_m3": 1000,
+    "gravity_m_per_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "open_top": true,
+    "boundary_method": "DBC",
+    "normal_geometry": false,
+    "physical_hash": "bb449a2c1d34c75ea6f94d6f5e9124c4eedf0f5b1667ec5225700e6bf11495b5",
+    "mass_normalization": "forbidden"
+  },
+  "support_side_semantics": {
+    "outer_tank": {
+      "side": "outside_continuous_tank_faces",
+      "faces": [
+        "x_low",
+        "x_high",
+        "y_low",
+        "y_high",
+        "z_low"
+      ],
+      "layers": 3,
+      "nearest_row_offset_m": 0.005,
+      "description": "Each outer tank slab is outside its corresponding closed physical face; it is not part of the fluid-accessible volume."
+    },
+    "obstacle": {
+      "side": "inside_continuous_obstacle_solid",
+      "faces": [
+        "x_low",
+        "x_high",
+        "y_low",
+        "y_high",
+        "z_high"
+      ],
+      "layers": 3,
+      "nearest_row_offset_m": 0.005,
+      "continuous_low_m": [
+        0.9,
+        0.24,
+        0
+      ],
+      "continuous_high_m": [
+        1.02,
+        0.36,
+        0.45
+      ],
+      "all_support_coordinates_inside_closed_interval": true,
+      "description": "The obstacle support rows are physically inside the declared solid body. Their tangent spans also stop half a dp from each obstacle face; no support slab is placed in the surrounding fluid-accessible region."
+    }
+  },
+  "obstacle_support_slabs_m": {
+    "x_low": {
+      "point": [
+        0.905,
+        0.245,
+        0.005
+      ],
+      "size": [
+        0.02,
+        0.11,
+        0.44
+      ]
+    },
+    "x_high": {
+      "point": [
+        0.995,
+        0.245,
+        0.005
+      ],
+      "size": [
+        0.02,
+        0.11,
+        0.44
+      ]
+    },
+    "y_low": {
+      "point": [
+        0.905,
+        0.245,
+        0.005
+      ],
+      "size": [
+        0.11,
+        0.02,
+        0.44
+      ]
+    },
+    "y_high": {
+      "point": [
+        0.905,
+        0.335,
+        0.005
+      ],
+      "size": [
+        0.11,
+        0.02,
+        0.44
+      ]
+    },
+    "z_high": {
+      "point": [
+        0.905,
+        0.245,
+        0.425
+      ],
+      "size": [
+        0.11,
+        0.11,
+        0.02
+      ]
+    },
+    "grid_interpretation": "With dp=.01 and pointref=.005, each size=.02 span contains three grid rows including both endpoints; nearest row is .005 m inward from its physical face."
+  },
+  "numeric_recipe": {
+    "dp_m": 0.01,
+    "pointref_m": [
+      0.005,
+      0.005,
+      0.005
+    ],
+    "pointmin_m": [
+      -0.025,
+      -0.025,
+      -0.025
+    ],
+    "fluid_count_xyz": [
+      40,
+      67,
+      30
+    ],
+    "fluid_count": 80400,
+    "fluid_mass_kg": 80.4,
+    "fluid_primitive": "boxfill=solid; point=low+0.5dp; size=extent-dp",
+    "fixed_fluid_overlap_allowed": false,
+    "double_bi4_required": true,
+    "boundary_parameter": 1,
+    "save_pos_double": 1,
+    "uses_vdp": false,
+    "obstacle_geometry_draw_order": [
+      "setmkvoid",
+      "draw unchanged continuous obstacle solid",
+      "setmkbound mk=1",
+      "draw internal supports"
+    ]
+  },
+  "preserved_candidate_001_negative_review": {
+    "manifest": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_001/eccentric-thick-boundary-manifest.json",
+    "manifest_sha256": "6e26293b37b41804a03fbc92234111d3b8f11499803e97646e1f0fa1bfdf76d5",
+    "review": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_001/thick-boundary-static-review.json",
+    "review_sha256": "9a1d0cd773e953ae43d44a39ebea0d8f8ef320949f07479d356c239385243cbc",
+    "status": "retained_immutable_negative_evidence",
+    "finding": "001 kept obstacle supports external to all four sides and top; those fixed rows can occupy the surrounding fluid-accessible region and therefore do not meet the solid-side semantic required here.",
+    "action": "002 is additive and does not modify or relabel 001; 001 is not reused as an approved recipe."
+  },
+  "prior_negative_evidence": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_solid_cellcenter_fallback_003/evidence/solid-fallback-coarse-stop-summary.json",
+    "sha256": "4f017c3bd3f4d6a39e34683d46f091e07ea52ce02619f0dd2e80b0c71bebe5a6",
+    "role": "immutable earlier solid/vdp stop evidence"
+  },
+  "hard_gates_before_any_later_solver_request": [
+    "bounded official GenCase receipt returncode=0, Data2D=0, total/fluid counts parsed from child files",
+    "double BI4 has Posd.bin and unique contiguous Idp.bin",
+    "generated fixed/fluid ranges partition Idp exactly",
+    "native fluid count/mass are 80400/80.4 kg without rescaling",
+    "typed fixed positions cover all five tank faces from outside and all five obstacle faces from inside",
+    "every actual obstacle support point lies in the declared obstacle body",
+    "source/input hashes are unchanged"
+  ],
+  "required_root_review": [
+    "Review the inside-solid support semantics against official GenCase output before any CPU launch.",
+    "If approved, run only the bounded coarse request below; no medium/fine or solver follows from this static artifact.",
+    "Use child gencase receipt and decoded BI4 evidence, never parent stdout regex, for counts/dimension."
+  ]
+}
