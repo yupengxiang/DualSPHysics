@@ -1,0 +1,61 @@
+{
+  "claim_boundary": "Planning registration only; no quarter-dt XML/prefix, solver, conversion, labels, Q-N, or production claim.",
+  "control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
+  "family_id": "F3",
+  "frozen_inputs": {
+    "prepared_control_anchor": {
+      "bytes": 85683,
+      "exists": true,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/prepare-solver-input-half_dt-20261002-002/prepared/F3_DualAxisPhase_WeakControl.csv",
+      "sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b"
+    },
+    "prepared_half_dt_bi4_anchor": {
+      "bytes": 5634759,
+      "exists": true,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/prepare-solver-input-half_dt-20261002-002/prepared/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT.bi4",
+      "sha256": "c21220e91c6711f2d7b559e522124bce3264ebf36487005e842b574cc7aaf8ab"
+    },
+    "prepared_half_dt_xml_anchor": {
+      "bytes": 9533,
+      "exists": true,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT/prepare-solver-input-half_dt-20261002-002/prepared/F3_DUAL_AXIS_WEAK_006G_004G_HALF_DT.xml",
+      "sha256": "731683e882eff1903d8e23990c47f52b5bdb4f20fe91d7d9aad6c4ba2fe6bfc7"
+    },
+    "source_manifest": {
+      "bytes": 5465,
+      "exists": true,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/source/half_dt-source-manifest.json",
+      "sha256": "f74f2968fef41237f3ed9514ce5fd9e659e5f273600309574c354fa951396391"
+    }
+  },
+  "numeric_parameters": {
+    "baseline_native_minimum_dt_s": 2.212269686706988e-05,
+    "dt_semantics": "DtFixed/DtIni/DtMin are seconds; set all three to the candidate and DtFixedFile=NONE.",
+    "expected_saved_frames": 4001,
+    "expected_steps_approx": 1808098,
+    "half_dt_native_minimum_dt_s": 1.106134843353494e-05,
+    "quarter_dt_fixed_dt_ini_dt_min_s": 5.53067421676747e-06,
+    "same_physical_geometry_and_control": true,
+    "save_interval_s": 0.0025,
+    "time_window_s": [
+      0.0,
+      10.0
+    ]
+  },
+  "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+  "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+  "prelaunch_requirements": [
+    "Create a fresh additive quarter-dt XML/prefix; do not modify the half_dt or baseline XML/BI4/control.",
+    "Copy the exact control beside the new XML and verify its SHA before launch because the XML uses a relative acctimesfile.",
+    "Run root-owned input/GenCase provenance checks and bind the new XML/BI4/control/receipt hashes in a fresh solver request.",
+    "Use root-only GPU launch through runtime_v2; this agent must not launch the solver.",
+    "Expected storage and wall budget must be estimated from the actual half_dt run and parent ledger before submission."
+  ],
+  "production_status": "not_accepted",
+  "q_n_status": "not_assessed",
+  "reason": "Both observed transport chord deltas exceeded the derived 20%-of-2% save/integration share allocation in the frozen temporal assessment; quarter dt is the smallest targeted integration sensitivity reference.",
+  "schema": "ds02.f3.quarter-dt.root-launch-plan.v1",
+  "source_immutability": true,
+  "status": "root_only_candidate_not_started",
+  "variant_id": "quarter_dt_same_save"
+}
