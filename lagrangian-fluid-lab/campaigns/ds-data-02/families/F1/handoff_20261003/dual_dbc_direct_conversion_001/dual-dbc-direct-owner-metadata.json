@@ -1,0 +1,248 @@
+{
+  "schema": "ds02.f1.direct-conversion-owner-metadata.v1",
+  "family_id": "F1",
+  "case_id": "F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1",
+  "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE_DBC",
+  "mechanism": "asymmetric_dual_channel",
+  "resolution": "coarse_dp010",
+  "claim_boundary": "Root-only streaming conversion evidence registration; no conversion launched here, no Q-N or production claim, and no mDBC qualification migration.",
+  "qualification_claim": "none",
+  "q_n_status": "not_assessed",
+  "production_claim": "none",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F1",
+    "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE_DBC",
+    "mechanism_id": "asymmetric_dual_channel",
+    "geometry_family_id": "F1_GEOM_ASYMMETRIC_DUAL_CHANNEL_V1",
+    "control_family_id": "F1_CONTROL_ASYMMETRIC_DUAL_CHANNEL_DBC_V1",
+    "lineage_group_id": "F1_asymmetric_dual_channel_v1_dbc",
+    "paired_background_id": "F1_REF_PAIR_NOMINAL",
+    "geometry": {
+      "fluid_reservoir": {
+        "low_m": [
+          2.1,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.12,
+          1.0,
+          0.55
+        ],
+        "mkfluid": 1,
+        "label": "finite initial fluid reservoir"
+      },
+      "tank": {
+        "low_m": [
+          0.0,
+          -0.005,
+          -0.005
+        ],
+        "size_m": [
+          3.23,
+          1.01,
+          1.005
+        ],
+        "mkfluid": 0,
+        "label": "continuous five-face tank envelope"
+      },
+      "separator": {
+        "low_m": [
+          1.25,
+          0.34,
+          0.0
+        ],
+        "size_m": [
+          0.8,
+          0.06,
+          0.7
+        ],
+        "mkfluid": 0,
+        "label": "finite separator solid"
+      }
+    },
+    "initial_state": {
+      "source_regions": [
+        "fluid_reservoir"
+      ],
+      "velocities_m_per_s": {
+        "fluid_reservoir": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source_labels": {
+        "fluid_reservoir": "type=3/mk=1"
+      },
+      "initial_mass_by_source_kg": {
+        "fluid_reservoir": 616.0
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid_reservoir": 616.0
+      },
+      "initial_mass_total_kg": 616.0,
+      "mass_policy": "native GenCase mass; no normalization or rescaling"
+    },
+    "controls": {
+      "step_algorithm": 2,
+      "kernel": 2,
+      "viscosity": 0.01,
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "boundary": 1
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "reservoir_low_m": [
+        2.1,
+        0.0,
+        0.0
+      ],
+      "reservoir_size_m": [
+        1.12,
+        1.0,
+        0.55
+      ],
+      "tank_low_m": [
+        0.0,
+        -0.005,
+        -0.005
+      ],
+      "tank_size_m": [
+        3.23,
+        1.01,
+        1.005
+      ],
+      "separator_low_m": [
+        1.25,
+        0.34,
+        0.0
+      ],
+      "separator_size_m": [
+        0.8,
+        0.06,
+        0.7
+      ],
+      "open_top_free_surface": true,
+      "fluid_volume_m3": 0.616,
+      "fluid_mass_kg": 616.0,
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 6.0,
+      "sequence": [
+        "release",
+        "first_separator_interaction",
+        "bypass_split",
+        "downstream_arrival",
+        "remerge",
+        "return_flow_observable"
+      ],
+      "expected_first_contact_range_s": [
+        0.65,
+        1.6
+      ],
+      "right_censor_policy": "finite closed initial cohort; open top is a free surface, not an inlet/birth zone; unobserved return is censored"
+    },
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "mass_policy": "native mass only; no rescaling"
+  },
+  "solver_parameters": {
+    "Boundary": 1,
+    "BoundaryName": "DBC",
+    "SavePosDouble": 1,
+    "StepAlgorithm": 2,
+    "VerletSteps": 40,
+    "Kernel": 2,
+    "ViscoTreatment": 1,
+    "Visco": 0.01,
+    "ViscoBoundFactor": 1,
+    "DensityDT": 3,
+    "DensityDTvalue": 0.1,
+    "Shifting": 0,
+    "RigidAlgorithm": 1,
+    "DtIni": 0.0,
+    "DtMin": 0.0,
+    "DtFixed": 0.0,
+    "TimeMax": 6.0,
+    "TimeOut": 0.001,
+    "NoPenetration": 0,
+    "SlipMode": 1,
+    "CoefDtMin": 0.05,
+    "RhopOutMin": 700,
+    "RhopOutMax": 1300
+  },
+  "numeric_binding": {
+    "dp_m": 0.01,
+    "h_m": 0.02,
+    "boundary": 1,
+    "boundary_name": "DBC",
+    "save_pos_double": 1,
+    "time_max_s": 6.0,
+    "time_out_s": 0.001,
+    "expected_frames": 6001,
+    "expected_particles": 1011911,
+    "expected_fluid_particles": 616000,
+    "expected_fixed_particles": 395911,
+    "expected_fluid_mass_kg": 616.0,
+    "dt_source": "actual solver Run.out; adaptive native DtIni/DtMin, no time-step qualification inferred"
+  },
+  "source_provenance": {
+    "definition_source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/dbc-input-001/F1_DUAL_FINITE_CENTER_DP001_003.xml",
+    "definition_sha256": "bf4d6cbbc4f7a4d87abc8f93e620be1490495d1b340074653ea9bc9a87e8cd0a",
+    "initial_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/dbc-input-001/F1_DUAL_FINITE_CENTER_DP001_003.bi4",
+    "initial_bi4_sha256": "e1fa4331609bba30f9a4b19b302f8733fe307d3fa4cbd85b04d9b53053be5a13",
+    "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/dbc-input-001/parent-gencase-execution-receipt.json",
+    "gencase_receipt_sha256": "65c11ff1f97ae438de334f2039409f255b1728bee5cd2dcbc8e304fb449072f6",
+    "solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/qualification-f1-dbc-root-wall-cost-20261003-003/execution-receipt.json",
+    "solver_receipt_sha256": "1680546f9e24e7d2d697fd1cff575f35c0ace570adf6ed24285055581ac6f405",
+    "solver_log": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/qualification-f1-dbc-root-wall-cost-20261003-003/solver_output/Run.out",
+    "solver_log_sha256": "53e016b11c6732f8f13e8122588b7c34bb68b1412892f4eebad7f9bbf2176801",
+    "legacy_metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/F1_DUAL_FINITE_CENTER_DP001_003.metadata.json",
+    "legacy_metadata_sha256": "ab258402c9256c329b6cf9d481320b5a76ffd3ac74a76867c68de3bb3cefc889",
+    "physical_binding_source": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/F1_DUAL_FINITE_CENTER_DP001_003.physical-binding.json",
+    "physical_binding_source_sha256": "70d22a07a0c9c49d1f717e29c87380a2584a6acc864388d32ab3ea979d5641d8",
+    "source_semantics": "DBC=1 actual Run.out; generated input has data2d=false, no motion, no in/out/periodic/birth/adaptive tags"
+  },
+  "typed_contract": {
+    "identity_key": "(Zone,Idp)",
+    "zone_source": "native BI4 Piece",
+    "types_preserved": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "initial_typed_ranges": {
+      "fixed_mk10": {
+        "begin": 0,
+        "count": 361104
+      },
+      "fixed_mk11": {
+        "begin": 361104,
+        "count": 34807
+      },
+      "fluid_mk1": {
+        "begin": 395911,
+        "count": 616000
+      }
+    },
+    "initial_particle_axis": "all generated np=1011911 IDs retained; missing/revival/open birth rejected by converter"
+  },
+  "source_immutability": true,
+  "converter_scope": "Use direct upstream BI4 decoder one frame at a time; official PartVTK first/middle/final; HDF5 on NVMe attempt root; raw source tree hashed before/after by converter, not prehashed in full here."
+}

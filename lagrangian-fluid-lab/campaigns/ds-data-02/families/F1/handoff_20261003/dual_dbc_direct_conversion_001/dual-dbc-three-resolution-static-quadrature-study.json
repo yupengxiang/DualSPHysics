@@ -1,0 +1,196 @@
+{
+  "schema": "ds02.f1.dual-dbc-three-resolution-static-quadrature-study.v1",
+  "family_id": "F1",
+  "case_id": "F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1",
+  "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE_DBC",
+  "status": "static_registration_only",
+  "claim_boundary": "No GenCase, solver, GPU, conversion, Q-N, or production claim. Candidate support counts are planning estimates; each candidate needs a bounded native GenCase/PartVTK audit before launch.",
+  "physical_binding": {
+    "owner_metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/dual_dbc_direct_conversion_001/dual-dbc-direct-owner-metadata.json",
+    "owner_metadata_sha256": "d8ac05bad3b9c865031ba948ff150557ea067d2da6e36f3d8afd308d933550b4",
+    "physical_binding_sidecar": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_center_initialization_001/F1_DUAL_FINITE_CENTER_DP001_003.physical-binding.json",
+    "physical_binding_sidecar_sha256": "70d22a07a0c9c49d1f717e29c87380a2584a6acc864388d32ab3ea979d5641d8",
+    "candidate_xml_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_DUAL_FINITE_CENTER_DP001_003_DBC_V1/dbc-input-001/F1_DUAL_FINITE_CENTER_DP001_003.xml",
+    "candidate_xml_sha256": "bf4d6cbbc4f7a4d87abc8f93e620be1490495d1b340074653ea9bc9a87e8cd0a",
+    "continuous_fluid_reservoir_low_m": [
+      2.1,
+      0.0,
+      0.0
+    ],
+    "continuous_fluid_reservoir_size_m": [
+      1.12,
+      1.0,
+      0.55
+    ],
+    "continuous_mass_kg": 616.0,
+    "density_kg_m3": 1000.0,
+    "mass_normalization": "forbidden",
+    "boundary": "DBC (Boundary=1); no mDBC evidence migration",
+    "support_semantics": "0.5 dp cell-center fluid envelope; outer five-face supports outside tank and separator supports inside solid; continuous physical geometry unchanged"
+  },
+  "quadrature_rule": {
+    "counts_xyz": "floor(continuous_extent/dp) per axis so every representative cell remains inside [2.1,3.22]x[0,1]x[0,.55]",
+    "mass": "rho*dp^3 per native fluid particle",
+    "budget": "absolute natural quadrature mass error <=1% of frozen 616 kg; no normalization",
+    "center_formula": "low + (i+0.5)*dp",
+    "upper_gap_formula": "extent - count*dp; report explicitly, do not hide"
+  },
+  "candidates": [
+    {
+      "token": "DP0125",
+      "dp_m": 0.0125,
+      "counts_xyz": [
+        89,
+        80,
+        44
+      ],
+      "fluid_particles": 313280,
+      "native_mass_kg": 611.8750000000001,
+      "mass_error_percent": -0.6696428571428381,
+      "mass_budget_1pct_pass": true,
+      "center_low_m": [
+        2.10625,
+        0.00625,
+        0.00625
+      ],
+      "center_high_m": [
+        3.20625,
+        0.99375,
+        0.5437500000000001
+      ],
+      "unfilled_upper_gap_m": [
+        0.007500000000000062,
+        0.0,
+        0.0
+      ],
+      "support_policy": "0.5 dp cell-center fluid envelope; keep continuous reservoir/tank/separator geometry and three numerical support layers; no mass rescaling",
+      "fixed_particles_planning_estimate_from_dp01_surface_scaling": 253383,
+      "total_particles_planning_estimate": 566663,
+      "total_under_5m_planning": true,
+      "hdf5_uncompressed_frame_datasets_bytes_40B_guard": 136021786520,
+      "hdf5_uncompressed_frame_datasets_gib_40B_guard": 126.68016042560339,
+      "status": "static_candidate_only"
+    },
+    {
+      "token": "DP010",
+      "dp_m": 0.01,
+      "counts_xyz": [
+        112,
+        100,
+        55
+      ],
+      "fluid_particles": 616000,
+      "native_mass_kg": 616.0000000000001,
+      "mass_error_percent": 2.220446049250313e-14,
+      "mass_budget_1pct_pass": true,
+      "center_low_m": [
+        2.105,
+        0.005,
+        0.005
+      ],
+      "center_high_m": [
+        3.215,
+        0.995,
+        0.545
+      ],
+      "unfilled_upper_gap_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "support_policy": "0.5 dp cell-center fluid envelope; keep continuous reservoir/tank/separator geometry and three numerical support layers; no mass rescaling",
+      "fixed_particles_planning_estimate_from_dp01_surface_scaling": 395911,
+      "total_particles_planning_estimate": 1011911,
+      "total_under_5m_planning": true,
+      "hdf5_uncompressed_frame_datasets_bytes_40B_guard": 242899116440,
+      "hdf5_uncompressed_frame_datasets_gib_40B_guard": 226.2174304947257,
+      "status": "static_candidate_only"
+    },
+    {
+      "token": "DP008333333333333333",
+      "dp_m": 0.008333333333333333,
+      "counts_xyz": [
+        134,
+        120,
+        66
+      ],
+      "fluid_particles": 1061280,
+      "native_mass_kg": 614.1666666666666,
+      "mass_error_percent": -0.29761904761905766,
+      "mass_budget_1pct_pass": true,
+      "center_low_m": [
+        2.104166666666667,
+        0.004166666666666667,
+        0.004166666666666667
+      ],
+      "center_high_m": [
+        3.2125000000000004,
+        0.9958333333333333,
+        0.5458333333333333
+      ],
+      "unfilled_upper_gap_m": [
+        0.0033333333333334103,
+        0.0,
+        0.0
+      ],
+      "support_policy": "0.5 dp cell-center fluid envelope; keep continuous reservoir/tank/separator geometry and three numerical support layers; no mass rescaling",
+      "fixed_particles_planning_estimate_from_dp01_surface_scaling": 570112,
+      "total_particles_planning_estimate": 1631392,
+      "total_under_5m_planning": true,
+      "hdf5_uncompressed_frame_datasets_bytes_40B_guard": 391599335680,
+      "hdf5_uncompressed_frame_datasets_gib_40B_guard": 364.7053015232086,
+      "status": "static_candidate_only"
+    }
+  ],
+  "excluded_spacings": [
+    {
+      "token": "DP005",
+      "dp_m": 0.005,
+      "counts_xyz": [
+        224,
+        200,
+        110
+      ],
+      "fluid_particles": 4928000,
+      "native_mass_kg": 616.0000000000001,
+      "estimated_total_particles_with_surface_scaling": 6511644,
+      "reason": "exceeds 5,000,000 planning particle cap before any full typed trajectory; do not launch this spacing in the current DBC range"
+    },
+    {
+      "token": "DP003333333333333333",
+      "dp_m": 0.003333333333333333,
+      "counts_xyz": [
+        336,
+        300,
+        165
+      ],
+      "fluid_particles": 16632000,
+      "native_mass_kg": 615.9999999999999,
+      "estimated_total_particles_with_surface_scaling": 20195199,
+      "reason": "exceeds 5,000,000 planning particle cap before any full typed trajectory; do not launch this spacing in the current DBC range"
+    }
+  ],
+  "necessary_range_conclusion": {
+    "recommended_static_matrix": [
+      "DP0125",
+      "DP010",
+      "DP008333333333333333"
+    ],
+    "anchor": "DP010 is exact 616 kg natural quadrature and should anchor the physical window",
+    "fine_candidate": "DP008333333333333333 remains below 5m planning particles but has 0.2976% natural mass deficit and 3.333 mm x upper gap",
+    "coarse_candidate": "DP0125 remains within 1% mass budget but has 0.6696% deficit and 7.5 mm x upper gap",
+    "not_registered_for_launch": [
+      "DP005",
+      "DP003333333333333333"
+    ],
+    "next_gate": "root may register separate bounded GenCase/PartVTK initial audits for the three candidates; do not treat static estimates as native occupancy evidence"
+  },
+  "planning_basis": {
+    "measured_dp010_fixed_particles": 395911,
+    "surface_scaling_formula": "round(395911*(0.01/dp)^2), planning only; exact fixed count must come from GenCase",
+    "trajectory_frames_reference": 6001,
+    "frame_dataset_guard_bytes_per_particle_frame": 40,
+    "five_million_limit": 5000000,
+    "reason_for_excluding_finer": "DP005 fluid alone is 4,928,000 and support pushes estimated total above 5m; DP003333 fluid alone is 16,632,000"
+  }
+}
