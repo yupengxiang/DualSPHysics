@@ -1,0 +1,95 @@
+{
+  "schema": "ds02.f1.finite-center.initial-normal-representation-repair-plan.v2",
+  "plan_id": "F1_NATIVE_NORMAL_SUPPORT_V2",
+  "family_id": "F1",
+  "parent_case_id": "F1_DUAL_FINITE_CENTER_DP001_003",
+  "candidate_id": "F1_DUAL_FINITE_CENTER_DP001_003_NORMAL_SUPPORT_V1",
+  "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE",
+  "model_profile": "gpt-5.6-luna/max",
+  "status": "root_review_only_candidate_materialization",
+  "qualification_claim": "none",
+  "q_n_status": "not_assessed",
+  "production_status": "not_accepted",
+  "authorization_boundary": {
+    "definition_writer_authorized": true,
+    "gencase_authorized": true,
+    "solver_authorized": false,
+    "gpu_authorized": false,
+    "root_only_full_window_request_after_native_gate": true,
+    "ledger_mutation": 0
+  },
+  "observed_basis": {
+    "old_definition": "The parent definition explicitly contains distanceh=2.0 and svshapes=true; the prior plan's statement that both were omitted is superseded and must not be used.",
+    "old_definition_sha256": "d56691dd4b6d0f165d933514892fe63a75b4a44eccdf4e63c159f2baf2728a4e",
+    "old_native_normal_report_sha256": "7e8e26b61de9729141a405bb6e418aadd3c26f63e6b645c106cad3198ad23c27",
+    "old_failure": "Native solver initialization reported 10000 exact-zero outer Mk=10 normals and 5751 thresholded near-zero separator Mk=11 normals; root stopped that solver attempt and preserved its raw bytes.",
+    "repair_hypothesis": "Increasing only the explicit normal-support distanceh from 2.0 to 3.0 may provide usable native normals at the affected finite faces; this is falsifiable and is not a solver or Q-N claim."
+  },
+  "candidate_definition": {
+    "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/normal_support_repair_001/F1_DUAL_FINITE_CENTER_DP001_003_NORMAL_SUPPORT_V1_Def.xml",
+    "sha256": "01edf73a45081768b23dba2ea5419917e6d1ff2101fc14e11b8429a844901384",
+    "byte_delta": {
+      "replace_once": [
+        "<distanceh v=\"2.0\" />",
+        "<distanceh v=\"3.0\" />"
+      ],
+      "svshapes": "unchanged explicit <svshapes v=\"true\" />"
+    },
+    "source_unchanged": true,
+    "new_output_prefix_required": true
+  },
+  "preserved_physical_binding": {
+    "canonical_physical_payload_sha256": "064145c87b20d7df13f6a4176da504838dab0370d0589435d374e17a63d03add",
+    "dimension": 3,
+    "fluid_count": 616000,
+    "fluid_mass_kg": 616.0,
+    "density_kg_m3": 1000.0,
+    "reservoir_low_m": [2.1, 0.0, 0.0],
+    "reservoir_high_m": [3.22, 1.0, 0.55],
+    "center_envelope_low_m": [2.105, 0.005, 0.005],
+    "center_envelope_high_m": [3.215, 0.995, 0.545],
+    "expected_center_counts_xyz": [112, 100, 55],
+    "tank_wall_faces": ["bottom", "left", "right", "front", "back"],
+    "separator_low_m": [1.25, 0.34, 0.0],
+    "separator_high_m": [2.05, 0.4, 0.7],
+    "top": "open physical free surface; no inlet, outlet, birth, adaptive replacement, or periodic clone",
+    "gravity_m_per_s2": [0.0, 0.0, -9.81],
+    "initial_velocity_m_per_s": [0.0, 0.0, 0.0],
+    "mass_rescaling": "forbidden"
+  },
+  "native_hard_gate": {
+    "actual_dimension_3": true,
+    "expected_total_particles": 1011911,
+    "expected_fluid_particles": 616000,
+    "expected_fixed_particles": 395911,
+    "expected_typed_fixed_counts": {"mk10_outer": 361104, "mk11_separator": 34807},
+    "expected_native_fluid_mass_kg": 616.0,
+    "required_arrays_finite": ["positions", "type", "mk", "Normal", "NormalSize"],
+    "normal_size_threshold_m": 1.0e-8,
+    "usable_normal_norm_threshold_m": 1.0e-8,
+    "fixed_normal_size_zero_max": 0,
+    "fixed_usable_normal_zero_max": 0,
+    "fixed_normal_nonfinite_max": 0,
+    "all_faces": [
+      "outer_x_low", "outer_x_high", "outer_y_low", "outer_y_high", "outer_z_low",
+      "separator_x_low", "separator_x_high", "separator_y_low", "separator_y_high", "separator_z_high"
+    ],
+    "each_face_requires": [
+      "typed native rows",
+      "positive NormalSize",
+      "usable nonzero normal vectors",
+      "finite tangential coverage",
+      "orientation consistent with the inward fluid direction"
+    ],
+    "runtime_without_normal_warning_max": 0,
+    "inferred_normals": false,
+    "survivor_renormalization": false,
+    "q_n_credit": false
+  },
+  "source_immutability": {
+    "old_definition_bi4_hdp_and_solver_attempt_untouched": true,
+    "old_abort_evidence_untouched": true,
+    "candidate_uses_new_prefix": true
+  },
+  "next_step": "Run only bounded CPU GenCase for this fresh candidate, then run the native normal hard gate through the shared CPU runner. Prepare a root-only full-window solver request only if every native gate passes; do not launch it here."
+}
