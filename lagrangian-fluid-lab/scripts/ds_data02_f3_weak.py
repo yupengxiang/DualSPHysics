@@ -78,6 +78,29 @@ def _load_json(path: Path) -> Any:
         raise F3AuditError(f"cannot read JSON provenance: {path}") from exc
 
 
+def _validate_raw_manifest(path: Path, data_root: Path) -> dict[str, Any]:
+    """Check the metadata-only all-frame binding before decoding any frame."""
+    manifest = _load_json(path)
+    if manifest.get("schema") != "ds02.f3.raw-frame-manifest.v1":
+        raise F3AuditError(f"unsupported raw frame manifest schema: {path}")
+    source = manifest.get("raw_source", {})
+    if Path(str(source.get("root", ""))).resolve() != data_root.resolve():
+        raise F3AuditError("raw frame manifest root differs from conversion data root")
+    files = source.get("files", [])
+    frames = [row for row in files if str(row.get("path", "")).startswith("Part_") and str(row.get("path", "")).endswith(".bi4")]
+    expected = sorted(data_root.glob("Part_*.bi4"), key=lambda item: item.name)
+    expected_names = [item.name for item in expected]
+    manifest_names = [str(row.get("path")) for row in frames]
+    if manifest_names != expected_names:
+        raise F3AuditError("raw frame manifest does not enumerate the current contiguous BI4 frame set")
+    for row, current in zip(frames, expected):
+        if int(row.get("bytes", -1)) != current.stat().st_size:
+            raise F3AuditError(f"raw frame byte size changed after manifest creation: {current}")
+    if int(source.get("frame_count", -1)) != len(expected):
+        raise F3AuditError("raw frame manifest frame_count disagrees with data root")
+    return manifest
+
+
 def _usage_snapshot() -> dict[str, float]:
     result: dict[str, float] = {}
     for who, label in ((resource.RUSAGE_SELF, "self"), (resource.RUSAGE_CHILDREN, "children")):
@@ -457,7 +480,7 @@ def _previews(h5_path: Path, preview_dir: Path) -> dict[str, Any]:
 def _audit_h5(
     *, h5_path: Path, conversion_report_path: Path, generated_xml: Path, solver_log: Path,
     solver_receipt: Path, gencase_receipt: Path, owner_metadata: Path, native_accounting: Path,
-    operators: Path, labels_path: Path, timeseries_path: Path, preview_dir: Path,
+    operators: Path, labels_path: Path, timeseries_path: Path, preview_dir: Path, raw_manifest: Path,
 ) -> dict[str, Any]:
     started = time.monotonic()
     before_usage = _usage_snapshot()
@@ -567,6 +590,7 @@ def _audit_h5(
         "audit_claim": "F3 weak dual-axis typed Q-I/reference evidence only; Q-N and production are not assessed",
         "case_id": owner["physical_case_id"], "family_id": "F3", "mechanism_id": owner["mechanism_id"],
         "hdf5": _ref(h5_path), "conversion_report": _ref(conversion_report_path),
+        "raw_frame_manifest": _ref(raw_manifest),
         "conversion": {
             "schema": conversion.get("schema"), "frames": conversion.get("frames"), "particles": conversion.get("particles"),
             "solver_dimension": conversion.get("solver_dimension"), "partvtk_validation": conversion.get("partvtk_validation"),
@@ -621,6 +645,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--gencase-receipt", type=Path, required=True)
     parser.add_argument("--owner-metadata", type=Path, required=True)
     parser.add_argument("--native-accounting", type=Path, required=True)
+    parser.add_argument("--raw-manifest", type=Path, required=True)
     parser.add_argument("--operators", type=Path, required=True)
     parser.add_argument("--labels", type=Path, required=True)
     parser.add_argument("--timeseries", type=Path, required=True)
@@ -632,6 +657,7 @@ def _parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
+        raw_manifest = _validate_raw_manifest(args.raw_manifest, args.data_root)
         conversion = convert_direct(
             data_root=args.data_root, generated_xml=args.generated_xml, output=args.output,
             report_path=args.conversion_report, decoder=args.decoder, partvtk=args.partvtk,
@@ -646,7 +672,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             solver_receipt=args.solver_receipt, gencase_receipt=args.gencase_receipt,
             owner_metadata=args.owner_metadata, native_accounting=args.native_accounting,
             operators=args.operators, labels_path=args.labels, timeseries_path=args.timeseries,
-            preview_dir=args.preview_dir,
+            preview_dir=args.preview_dir, raw_manifest=args.raw_manifest,
         )
         report["conversion_report_sha256"] = sha256_file(args.conversion_report)
         args.audit_report.parent.mkdir(parents=True, exist_ok=True)
