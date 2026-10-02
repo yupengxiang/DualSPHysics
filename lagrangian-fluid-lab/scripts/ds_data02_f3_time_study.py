@@ -514,13 +514,13 @@ def make_native_accounting(args: argparse.Namespace) -> dict[str, Any]:
         raise F3TimeStudyError("Run.out lacks actual 3-D banner")
     def run_out_number(pattern: str) -> float | None:
         match = re.search(pattern, run_text, re.MULTILINE)
-        return None if match is None else float(match.group(1))
+        return None if match is None else float(match.group(1).replace(",", ""))
 
     run_out_parameters = {
         "dt_min_s": run_out_number(r"^DtMin=([0-9.eE+-]+)"),
         "time_out_s": run_out_number(r"^(?:TimePart|TimeOut)=([0-9.eE+-]+)"),
         "time_max_s": run_out_number(r"^TimeMax=([0-9.eE+-]+)"),
-        "steps_of_simulation": run_out_number(r"^Steps of simulation\.*:\s*([0-9.eE+-]+)"),
+        "steps_of_simulation": run_out_number(r"^Steps of simulation\.*:\s*([0-9,.eE+-]+)"),
         "source_label": "Run.out actual solver summary",
     }
     if run_out_parameters["dt_min_s"] is not None and not math.isclose(
@@ -543,6 +543,12 @@ def make_native_accounting(args: argparse.Namespace) -> dict[str, Any]:
         "actual_internal_dt_max_s": measurement["native_maximum_dt_s"],
         "native_dt_semantics": measurement["measurement_semantics"],
         "run_out_parameters": run_out_parameters,
+        "run_csv_summary": {
+            "steps": summary["steps"], "physical_time_s": summary["physical_time_s"],
+            "part_files": summary["part_files"], "np": summary["np"], "dp_m": summary["dp_m"],
+        },
+        "run_out_vs_run_csv_steps_delta": None if run_out_parameters["steps_of_simulation"] is None else
+            run_out_parameters["steps_of_simulation"] - summary["steps"],
         "native_exclusion_semantics": "sum all per-save interval NpOut fields; final-row zero is not a full-window proof",
         "initial_fluid_particles": measurement["initial_fluid_particles"],
         "final_fluid_particles": measurement["final_fluid_particles"],
