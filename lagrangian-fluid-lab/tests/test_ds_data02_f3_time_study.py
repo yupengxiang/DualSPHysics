@@ -50,6 +50,37 @@ def test_real_baseline_dt_and_population_are_registered():
     assert result["run_out_parameters"]["time_out_source_label"] == "TimePart"
 
 
+def test_native_accounting_parser_exposes_run_out_steps_and_dt(tmp_path):
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(json.dumps({"status": "completed", "returncode": 0, "gpu_seconds": 0.0, "command": []}))
+    runparts = tmp_path / "RunPARTs.csv"
+    runparts.write_text(
+        "Part;TimeStep [s];NpOut;Steps;DtMin [s];DtMax [s];NpSim;NpfSim\n"
+        "0;1;0;10;0.1;0.2;10;4\n"
+        "1;2;0;20;0.1;0.2;10;4\n"
+    )
+    run_csv = tmp_path / "Run.csv"
+    run_csv.write_text("Steps;PhysicalTime;PartFiles;Np;Dp;Configuration\n30;2;2;10;0.1;test\n")
+    run_out = tmp_path / "Run.out"
+    run_out.write_text(
+        "**3D-Simulation parameters\nDtMin=0.1\nTimePart=1\nTimeMax=2\n"
+        "Steps of simulation.................: 30\n"
+    )
+    output = tmp_path / "native.json"
+    result = study.make_native_accounting(type("Args", (), {
+        "case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+        "attempt_id": "test",
+        "solver_receipt": receipt,
+        "runparts": runparts,
+        "run_csv": run_csv,
+        "run_out": run_out,
+        "output": output,
+    })())
+    facts = result["facts"]
+    assert facts["run_out_parameters"]["dt_min_s"] == 0.1
+    assert facts["run_out_parameters"]["steps_of_simulation"] == 30
+
+
 def test_fixed_window_comparison_records_brackets_and_error(tmp_path):
     baseline = tmp_path / "baseline.h5"
     candidate = tmp_path / "candidate.h5"
