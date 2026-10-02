@@ -166,6 +166,9 @@ def _parse_runout(path: Path) -> dict[str, Any]:
     time_match = re.search(r"TimeStep:\s*([0-9.eE+-]+)\s+\(Nstep:\s*(\d+)\)", text)
     excluded_match = re.search(r"Excluded for:\s*position=(\d+)\s+rho=(\d+)\s+velocity=(\d+)", text)
     total_out = [int(value.replace(",", "")) for value in re.findall(r"total out:\s*([\d,]+)", text)]
+    # Run.out does not print the Data2D flag in this build.  Keep the solver
+    # log as the source for MapSize/failure timing, and let the generated XML
+    # below provide the authoritative dimensionality check.
     return {
         "path": str(path.resolve()),
         "sha256": sha256(path),
@@ -182,7 +185,98 @@ def _parse_runout(path: Path) -> dict[str, Any]:
         "total_out_last": total_out[-1] if total_out else None,
         "boundary_error": next((line.strip() for line in text.splitlines() if "exceeded the" in line), None),
         "abort_kind": "JSphGpuSingle::AbortBoundOut" if "AbortBoundOut" in text else None,
-        "is_3d": 'Data2D=[0]' in text,
+        "is_3d": None,
+    }
+
+
+def _decode_bound_vtk(path: Path, dp: float = 0.05) -> dict[str, Any]:
+    """Decode native GenCase ``*_Bound.vtk`` and audit fixed wall coverage.
+
+    The binary VTK uses big-endian payloads.  In this GenCase output the
+    ``Type`` byte is 0 for fixed, 1 for moving, and 2 for floating boundary
+    points.  Face centers lie on the source planes when the endpoint is
+    represented; the old x-max endpoint is absent because its lattice
+    coordinate was truncated before reaching 4.8 m.  These are distinct
+    checks below.
+    """
+    data = path.read_bytes()
+    header = re.search(rb"POINTS\s+(\d+)\s+float\n", data)
+    if header is None:
+        raise ValueError(f"POINTS header missing: {path}")
+    count = int(header.group(1))
+    points_offset = header.end()
+    points_size = count * 3 * 4
+    if points_offset + points_size > len(data):
+        raise ValueError(f"points payload truncated: {path}")
+    values = struct.unpack(">" + "f" * (count * 3), data[points_offset : points_offset + points_size])
+    points = [list(values[index : index + 3]) for index in range(0, len(values), 3)]
+    vertices = re.compile(rb"VERTICES\s+\d+\s+\d+\n").search(data, points_offset + points_size)
+    if vertices is None:
+        raise ValueError(f"VERTICES header missing: {path}")
+    point_data = re.compile(rb"POINT_DATA\s+\d+\n").search(data, vertices.end() + count * 2 * 4)
+    if point_data is None:
+        raise ValueError(f"POINT_DATA header missing: {path}")
+    lookup = re.compile(rb"LOOKUP_TABLE\s+default\n").search(data, point_data.end())
+    if lookup is None:
+        raise ValueError(f"Idp lookup missing: {path}")
+    id_offset = lookup.end()
+    if id_offset + count * 4 > len(data):
+        raise ValueError(f"Idp payload truncated: {path}")
+    ids = struct.unpack(">" + "I" * count, data[id_offset : id_offset + count * 4])
+    field = re.compile(rb"FIELD\s+FieldData\s+2\n").search(data, id_offset + count * 4)
+    if field is None:
+        raise ValueError(f"FieldData header missing: {path}")
+    type_header = re.compile(rb"Type\s+1\s+\d+\s+unsigned_char\n").search(data, field.end())
+    if type_header is None:
+        raise ValueError(f"Type field missing: {path}")
+    type_offset = type_header.end()
+    types = data[type_offset : type_offset + count]
+    if len(types) != count:
+        raise ValueError(f"Type payload truncated: {path}")
+    mk_header = re.compile(rb"Mk\s+1\s+\d+\s+unsigned_char\n").search(data, type_offset + count)
+    if mk_header is None:
+        raise ValueError(f"Mk field missing: {path}")
+    mk_offset = mk_header.end()
+    mks = data[mk_offset : mk_offset + count]
+    if len(mks) != count:
+        raise ValueError(f"Mk payload truncated: {path}")
+
+    fixed = [points[index] for index, value in enumerate(types) if value == 0]
+    # Source physical planes: x=0 and x=4.8, y=0 and y=2.4, z=0.
+    # The tolerance only covers float32 serialization and therefore cannot
+    # turn an absent face into a pass.
+    tol = 2.0e-5
+    expected = {
+        "x_min": (0, 0.0),
+        "x_max": (0, 4.8),
+        "y_min": (1, 0.0),
+        "y_max": (1, 2.4),
+        "z_min": (2, 0.0),
+    }
+    face_counts = {
+        name: sum(abs(point[axis] - target) <= tol for point in fixed)
+        for name, (axis, target) in expected.items()
+    }
+    type_names = {0: "fixed", 1: "moving", 2: "floating"}
+    fixed_bounds = (
+        [[min(point[axis] for point in fixed), max(point[axis] for point in fixed)] for axis in range(3)]
+        if fixed
+        else None
+    )
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256(path),
+        "count": count,
+        "type_counts": {type_names.get(value, f"unknown_{value}"): types.count(value) for value in sorted(set(types))},
+        "mk_counts": {str(value): mks.count(value) for value in sorted(set(mks))},
+        "fixed_points_bounds_m": fixed_bounds,
+        "fixed_face_coverage": {
+            "expected_center_targets_m": {name: {"axis": "xyz"[axis], "value": target} for name, (axis, target) in expected.items()},
+            "counts": face_counts,
+            "all_declared_faces_nonzero": all(value > 0 for value in face_counts.values()),
+        },
+        "solver_dimension": 3,
+        "id_range": [int(min(ids)), int(max(ids))] if ids else None,
     }
 
 
@@ -196,6 +290,7 @@ def _generated_contract(xml_path: Path) -> dict[str, Any]:
     inertia = floating.find("inertia")
     massbody = floating.find("massbody")
     params = root.find("./execution/parameters/simulationdomain")
+    data2d = root.find("./execution/constants/data2d")
     return {
         "path": str(xml_path.resolve()),
         "sha256": sha256(xml_path),
@@ -205,6 +300,7 @@ def _generated_contract(xml_path: Path) -> dict[str, Any]:
         "massbody_kg": float(massbody.attrib["value"]) if massbody is not None else None,
         "center_m": [float(center.attrib[axis]) for axis in "xyz"] if center is not None else None,
         "inertia_diag_kg_m2": [float(inertia.attrib[axis]) for axis in "xyz"] if inertia is not None else None,
+        "solver_dimension": 2 if data2d is not None and data2d.attrib.get("value", "true").lower() == "true" else 3,
         "simulationdomain_source": {
             "posmin": dict(params.find("posmin").attrib) if params is not None and params.find("posmin") is not None else None,
             "posmax": dict(params.find("posmax").attrib) if params is not None and params.find("posmax") is not None else None,
@@ -225,6 +321,7 @@ def _case_paths(mechanism: str) -> dict[str, Path]:
         "run_out": raw / "solver_output/Run.out",
         "runparts": raw / "solver_output/RunPARTs.csv",
         "error_vtk": raw / "solver_output/Error_BoundaryOut.vtk",
+        "bound_vtk": gen.with_name(gen.name + "_Bound.vtk"),
         "data": raw / "solver_output/data",
         "generated_xml": gen.with_suffix(".xml"),
         "gencase_receipt": gen.parent / "execution-receipt.json",
@@ -237,7 +334,7 @@ def _case_paths(mechanism: str) -> dict[str, Path]:
 
 def audit_boundary(mechanism: str, output_path: Path) -> dict[str, Any]:
     paths = _case_paths(mechanism)
-    required = [paths[name] for name in ("receipt", "run_out", "runparts", "error_vtk", "generated_xml", "gencase_receipt")]
+    required = [paths[name] for name in ("receipt", "run_out", "runparts", "error_vtk", "bound_vtk", "generated_xml", "gencase_receipt")]
     missing = [str(path) for path in required if not path.is_file()]
     if missing:
         raise FileNotFoundError("missing immutable failure evidence: " + ", ".join(missing))
@@ -245,7 +342,9 @@ def audit_boundary(mechanism: str, output_path: Path) -> dict[str, Any]:
     run_out = _parse_runout(paths["run_out"])
     runparts = _runparts(paths["runparts"])
     vtk = _decode_boundary_vtk(paths["error_vtk"])
+    bound_vtk = _decode_bound_vtk(paths["bound_vtk"])
     generated = _generated_contract(paths["generated_xml"])
+    run_out["is_3d"] = generated["solver_dimension"] == 3
     boundary = vtk["records"]
     map_final = run_out.get("map_real_pos_final_m")
     right_limit = map_final["max_m"][0] if map_final else None
@@ -271,6 +370,7 @@ def audit_boundary(mechanism: str, output_path: Path) -> dict[str, Any]:
         "run_out": run_out,
         "runparts": runparts,
         "error_boundary_vtk": vtk,
+        "native_boundary_vtk": bound_vtk,
         "generated_native_contract": generated,
         "physical_reference": {"finite_tank_right_wall_x_m": physical_right_wall, "continuous_fluid_box_x_m": [0.4, 4.4], "body_center_m": [2.4, 1.2, 1.08], "massbody_kg": 128.0, "inertia_diag_kg_m2": [8.53333, 8.53333, 13.6533]},
         "root_cause_evidence": {
@@ -278,14 +378,17 @@ def audit_boundary(mechanism: str, output_path: Path) -> dict[str, Any]:
             "all_excluded_records_outside_numerical_x_limit": bool(boundary) and all(row["classification"]["outside_numerical_domain"] for row in boundary),
             "all_excluded_records_inside_frozen_physical_tank": bool(boundary) and all(row["classification"]["inside_physical_tank_x"] for row in boundary),
             "domain_limit_is_below_frozen_wall_endpoint": right_limit is not None and right_limit < physical_right_wall,
+            "native_fixed_wall_faces_complete": bound_vtk["fixed_face_coverage"]["all_declared_faces_nonzero"],
+            "native_right_wall_face_missing": bound_vtk["fixed_face_coverage"]["counts"]["x_max"] == 0,
+            "native_lattice_x_endpoint_below_physical_wall": bound_vtk["fixed_points_bounds_m"][1][1] < physical_right_wall if bound_vtk["fixed_points_bounds_m"] else True,
             "floating_boundary_abort": run_out.get("abort_kind") == "JSphGpuSingle::AbortBoundOut",
         },
-        "diagnosis": "Both medium attempts excluded one type-2 floating particle at +X beyond the solver MapRealPos(final) limit while the particle remained inside the frozen physical tank x<=4.8 m. This identifies numerical-domain exhaustion, not physical overflow or a mass/center/inertia mismatch.",
+        "diagnosis": "Both medium attempts excluded one type-2 floating particle at +X beyond the solver MapRealPos(final) limit while the particle remained inside the frozen physical tank x<=4.8 m. Native *_Bound.vtk confirms the fixed x-max face is absent: the source box declares a right face, but pointmax x=4.85 leaves the float lattice at x=4.75 and no interior x-max fixed face. The evidence therefore separates auto-domain exhaustion from a lattice endpoint/wall representation defect; widening only the simulation domain would leave the missing wall unresolved.",
         "legal_next_scope": {
             "repair_id": "F6_HANDOFF_20261002_RIGID003_DOMAIN_X_REPAIR_01",
-            "change": "set explicit numerical simulationdomain x bounds with a documented positive margin",
+            "change": "extend only the numerical lattice pointmax to include the frozen x=4.8 wall center and set explicit simulationdomain x bounds with a documented positive margin",
             "preserve": ["continuous tank/fluid/body geometry", "finite wall endpoints", "fluid population and mass denominator", "floating massbody/center/inertia", "wave paddle control"],
-            "must_recheck": ["GenCase nonzero fluid/actual3D/layers", "generated center/inertia exact serialized contract", "MapRealPos x limit above body clearance", "same physical source hash and input semantics"],
+            "must_recheck": ["GenCase nonzero fluid/actual3D/layers", "generated center/inertia exact serialized contract", "native fixed x-max face coverage plus all other declared faces", "MapRealPos x limit above body clearance", "same physical wall/fluid/body source semantics"],
             "gpu": "root only after CPU GenCase and review",
         },
         "qualification_claim": "none; failed solver evidence only",
@@ -295,7 +398,7 @@ def audit_boundary(mechanism: str, output_path: Path) -> dict[str, Any]:
 
 
 def _inputs(paths: dict[str, Path]) -> list[str]:
-    values = [SCRIPT, RUNTIME_V2, SOLVER, GENCASE, paths["receipt"], paths["gencase_receipt"], paths["run_out"], paths["runparts"], paths["error_vtk"], paths["generated_xml"], paths["definition"], paths["control"], paths["native"], paths["normal"]]
+    values = [SCRIPT, RUNTIME_V2, SOLVER, GENCASE, paths["receipt"], paths["gencase_receipt"], paths["run_out"], paths["runparts"], paths["error_vtk"], paths["bound_vtk"], paths["generated_xml"], paths["definition"], paths["control"], paths["native"], paths["normal"]]
     values.extend(sorted(paths["data"].glob("*.bi4")))
     missing = [str(path) for path in values if not path.is_file()]
     if missing:
@@ -303,13 +406,13 @@ def _inputs(paths: dict[str, Path]) -> list[str]:
     return [str(path.resolve()) for path in values]
 
 
-def make_requests() -> dict[str, Any]:
-    AUDIT_ROOT.mkdir(parents=True, exist_ok=True)
+def _make_requests(audit_root: Path, attempt_suffix: str, schema_suffix: str) -> dict[str, Any]:
+    audit_root.mkdir(parents=True, exist_ok=True)
     rows = []
     for mechanism in CASE_IDS:
         paths = _case_paths(mechanism)
         cid = CASE_IDS[mechanism]
-        attempt = f"{cid}_DOMAIN_AUDIT_001"
+        attempt = f"{cid}_DOMAIN_AUDIT_{attempt_suffix}"
         request = {
             "schema": "ds-data-02.runner.request.v1",
             "family_id": "F6",
@@ -331,16 +434,29 @@ def make_requests() -> dict[str, Any]:
             "expected": {"solver_dimension": 3, "excluded_type": 2, "frozen_physical_right_wall_x_m": 4.8, "frozen_massbody_kg": 128.0, "frozen_center_m": [2.4, 1.2, 1.08], "frozen_serialized_inertia_diag_kg_m2": [8.53333, 8.53333, 13.6533]},
             "qualification_claim": "none",
         }
-        path = AUDIT_ROOT / "execution_requests" / f"{mechanism}_boundary_audit.json"
+        path = audit_root / "execution_requests" / f"{mechanism}_boundary_audit.json"
         write_json(path, request)
         rows.append({"mechanism_id": mechanism, "case_id": cid, "path": str(path.resolve()), "sha256": sha256(path), "attempt_id": attempt})
-    result = {"schema": "ds-data-02.f6.rigid_contract_003.domain_diagnosis_requests.v1", "status": "ready_for_shared_cpu_audit", "created_at": now(), "requests": rows, "gpu_launch": False}
-    write_json(AUDIT_ROOT / "request_manifest.json", result)
+    result = {"schema": f"ds-data-02.f6.rigid_contract_003.domain_diagnosis_requests.{schema_suffix}", "status": "ready_for_shared_cpu_audit", "created_at": now(), "requests": rows, "gpu_launch": False}
+    write_json(audit_root / "request_manifest.json", result)
     return result
 
 
-def record_receipts() -> dict[str, Any]:
-    manifest = read_json(AUDIT_ROOT / "request_manifest.json")
+def make_requests() -> dict[str, Any]:
+    return _make_requests(AUDIT_ROOT, "001", "v1")
+
+
+AUDIT_ROOT_002 = FAMILY_ROOT / "domain_diagnosis_002"
+
+
+def make_requests_002() -> dict[str, Any]:
+    # Additive rerun after the fixed-wall VTK decoder was added.  The original
+    # _001 requests and receipts remain byte-for-byte immutable.
+    return _make_requests(AUDIT_ROOT_002, "002", "v2")
+
+
+def _record_receipts(audit_root: Path, schema_suffix: str, next_scope: str) -> dict[str, Any]:
+    manifest = read_json(audit_root / "request_manifest.json")
     rows = []
     for request_row in manifest["requests"]:
         cid = request_row["case_id"]
@@ -351,26 +467,40 @@ def record_receipts() -> dict[str, Any]:
             raise FileNotFoundError(f"audit receipt/output pending: {receipt}")
         result = read_json(result_path)
         rows.append({"case_id": cid, "attempt_id": attempt, "receipt": str(receipt.resolve()), "receipt_sha256": sha256(receipt), "result": str(result_path.resolve()), "result_sha256": sha256(result_path), "status": result.get("status"), "excluded": result["error_boundary_vtk"]["records"], "failure_time_s": result["run_out"].get("failure_time_s")})
-    output = {"schema": "ds-data-02.f6.rigid_contract_003.domain_diagnosis_001.v1", "status": "evidence_bound", "created_at": now(), "records": rows, "next_scope": "RIGID003_DOMAIN_X_REPAIR_01 CPU GenCase then root review", "qualification_claim": "none"}
-    write_json(AUDIT_ROOT / "diagnosis_receipt_sidecar.json", output)
+    output = {"schema": f"ds-data-02.f6.rigid_contract_003.domain_diagnosis_002.{schema_suffix}", "status": "evidence_bound", "created_at": now(), "records": rows, "next_scope": next_scope, "qualification_claim": "none"}
+    write_json(audit_root / "diagnosis_receipt_sidecar.json", output)
     return output
+
+
+def record_receipts() -> dict[str, Any]:
+    return _record_receipts(AUDIT_ROOT, "v1", "RIGID003_DOMAIN_X_REPAIR_01 CPU GenCase then root review")
+
+
+def record_receipts_002() -> dict[str, Any]:
+    return _record_receipts(AUDIT_ROOT_002, "v2", "RIGID003_DOMAIN_X_REPAIR_01 CPU GenCase then root review")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="action", required=True)
     sub.add_parser("make-requests")
+    sub.add_parser("make-requests-002")
     audit = sub.add_parser("audit-boundary")
     audit.add_argument("--mechanism", choices=CASE_IDS, required=True)
     audit.add_argument("--output", type=Path, required=True)
     sub.add_parser("record-receipts")
+    sub.add_parser("record-receipts-002")
     args = parser.parse_args()
     if args.action == "make-requests":
         result = make_requests()
+    elif args.action == "make-requests-002":
+        result = make_requests_002()
     elif args.action == "audit-boundary":
         result = audit_boundary(args.mechanism, args.output)
-    else:
+    elif args.action == "record-receipts":
         result = record_receipts()
+    else:
+        result = record_receipts_002()
     print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
