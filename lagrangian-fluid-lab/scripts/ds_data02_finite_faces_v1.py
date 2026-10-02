@@ -39,7 +39,7 @@ def face_coverage(points, *, normal_axis, plane_m, tangential_low_m, tangential_
     radius = np.sqrt(3)*dp_m/2+tolerance_m
     samples = [np.linspace(low[i], high[i], int(np.ceil((high[i]-low[i])/dp_m))+1) for i in range(2)]
     first, second = np.meshgrid(*samples, indexing='ij')
-    query = np.full((first.size, 3), plane_m)
+    query = np.full((first.size, 3), plane_m, dtype=float)
     query[:, axes[0]], query[:, axes[1]] = first.ravel(), second.ravel()
     distances = cKDTree(near).query(query, workers=1)[0] if len(near) else np.full(len(query), np.inf)
     missing = distances > radius
