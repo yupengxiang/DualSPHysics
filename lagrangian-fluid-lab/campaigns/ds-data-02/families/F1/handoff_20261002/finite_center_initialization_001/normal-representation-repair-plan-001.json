@@ -10,13 +10,13 @@
   },
   "case_id": "F1_DUAL_FINITE_CENTER_DP001_003",
   "falsifiable_candidate": {
-    "basis": "The immutable hdp_Actual contains the ten finite polygons, but the official normal block omits explicit distanceh/svshapes. The official template documents the default distanceh=2 and svshapes=false; the existing canonical rectangular normal package uses distanceh=3 and svshapes=true. This candidate tests normal support reach/debug serialization while holding the physical mother fixed.",
+    "basis": "The immutable hdp_Actual contains the ten finite polygons. The parent definition explicitly contains distanceh=2.0 and svshapes=true; the candidate tests only a longer normal-support reach while holding the physical mother fixed. This corrected wording supersedes the earlier mistaken omission description.",
     "candidate_id": "F1_DUAL_FINITE_CENTER_DP001_003_NORMAL_SUPPORT_V1",
     "change_class": "normal-representation-only; fresh generated prefix required",
     "prediction": "A fresh GenCase plus root-only initialization must reduce NormalSize-zero rows to zero for all fixed Mk=10/Mk=11 rows. This is a hypothesis, not an expected pass.",
     "xml_delta_only": {
-      "add_norgeometry_distanceh_v": "3.0",
-      "add_norgeometry_svshapes": "true",
+      "replace_norgeometry_distanceh_v": ["2.0", "3.0"],
+      "preserve_norgeometry_svshapes": "true",
       "do_not_change": [
         "GeometryForNormals face coordinates or boxfill",
         "GeometryForNormals layer offsets",
@@ -73,7 +73,7 @@
       "separator_geometry_for_normals": "vdp=0.5",
       "separator_mainlist": "vdp=0,-1,-2"
     },
-    "xml_normal_block": "<norgeometry> contains geometryfile only; distanceh and svshapes are omitted (defaults are distanceh=2 and svshapes=false in the official template)."
+    "xml_normal_block": "The parent <norgeometry> contains geometryfile, explicit distanceh=2.0, and explicit svshapes=true. The candidate changes only distanceh to 3.0; svshapes remains true."
   },
   "physical_case_id": "F1_DUAL_FINITE_CENTER_QUADRATURE",
   "plan_id": "F1_NATIVE_NORMAL_SUPPORT_V1",
