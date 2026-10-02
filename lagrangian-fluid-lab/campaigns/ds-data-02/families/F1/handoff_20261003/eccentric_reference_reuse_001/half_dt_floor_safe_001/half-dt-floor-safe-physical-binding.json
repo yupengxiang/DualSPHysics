@@ -1,0 +1,45 @@
+{
+  "schema": "ds02.f1.eccentric-physical-binding.v1",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "physical_case_id": "F1_REF_ECC_NOMINAL",
+  "physical_parent_id": "F1_REF_ECC_NOMINAL",
+  "geometry_sha256": "088405b7cc1813fbeccf8949cfbae6101b85f14c4d66ecef4f8a660b56c756dd",
+  "control_sha256": "fe91d76871626a751854de00d496e45192ac9fdce18eed2d22759c7848f599ec",
+  "boundary_model": "DBC",
+  "gravity_m_s2": [0.0, 0.0, -9.81],
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "continuous_geometry": {
+    "tank_m": [1.6, 0.67, 0.4],
+    "initial_fill_m": [0.4, 0.67, 0.3],
+    "obstacle_min_m": [0.9, 0.24, 0.0],
+    "obstacle_size_m": [0.12, 0.12, 0.45],
+    "closed_outer_faces": ["x=0", "x=1.6", "y=0", "y=0.67", "z=0"],
+    "open_top": true
+  },
+  "initial_state": {
+    "continuous_initial_mass_kg": 80.4,
+    "natural_native_initial_fluid_mass_kg": 79.20000376179814,
+    "mass_normalization": "none",
+    "fluid_particle_count": 79200,
+    "total_particle_count": 110468
+  },
+  "motion": "empty motion element; gravity-only static initial condition",
+  "numeric_overlay": {
+    "dp_m": 0.01,
+    "DtIni_s": 2.629040492950434e-05,
+    "DtMin_s": 2.629040492950434e-05,
+    "DtFixed_s": 2.629040492950434e-05,
+    "TimeMax_s": 1.6,
+    "TimeOut_s": 0.001,
+    "numeric_only": true,
+    "excluded_from_continuous_binding": ["dp_m", "DtIni_s", "DtMin_s", "DtFixed_s", "TimeMax_s", "TimeOut_s"]
+  },
+  "source_evidence": {
+    "continuous_binding_source": "eccentric-reference-audit.json",
+    "source_gencase_attempt_id": "gencase-time-study-001",
+    "prepared_status": "copy_only_numeric_xml_overlay_not_gencase_run"
+  },
+  "q_n_status": "not_assessed",
+  "production_approval": "none"
+}
