@@ -44,3 +44,8 @@ The actual old-six products and comparison are written below the data root
 listed in `operator_manifest.json`.  They are observation evidence only; the
 comparison deliberately leaves Q-N and production eligibility pending until
 the independent save and integration studies use this same operator.
+
+The old-six source trajectories are legacy `.01 s` saves (401 frames over
+approximately 4 s); their first observed event brackets are therefore about
+`.005 s`.  The separate RV4 requests use `.001 s` saves.  These cadences and
+their evidence must not be conflated.
