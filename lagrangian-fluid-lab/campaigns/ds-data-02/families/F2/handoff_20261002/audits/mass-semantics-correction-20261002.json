@@ -1,0 +1,97 @@
+{
+  "schema": "ds-data-02.f2.gem-handoff-20261002-mass-semantics-correction.v1",
+  "family_id": "F2",
+  "scope_id": "F2_SCOPE_GEM_COMMENSURATE_CELLCENTER_20261002_V2",
+  "status": "EVIDENCE_BOUND_CORRECTION_NO_QUALIFICATION",
+  "purpose": "Separate exact continuous/lattice geometry from native float32 and PartVTK CSV serialization. This sidecar does not relax the frozen 1e-12 budget and does not grant QI, QN, or production eligibility.",
+  "source_report": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_INITIAL_AUDIT/f2h10v2-initial-audit-20261002-001/report/gem-handoff-initial-structure-audit.json",
+    "sha256": "1ac7fd6f5dd98996d2fb358f6d1370a1d0721e6ce8fb5be7f1e22e72acab03c5"
+  },
+  "source_manifest": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261002/gridphase_v2/manifest.json",
+    "sha256": "d0a455498158ff6d74251a2eeb7da7a570934cc5d6ee8aff42314b86577b8ad2"
+  },
+  "frozen_geometry": {
+    "fluid_size_m": [
+      0.32,
+      0.24,
+      0.32
+    ],
+    "continuous_volume_m3": 0.024575999999999997,
+    "continuous_mass_kg": 24.575999999999997,
+    "expected_lattice_mass_kg": 24.576000000000004,
+    "exact_lattice_relative_error_vs_continuum": 2.220446049250313e-16,
+    "frozen_mass_budget_fraction": 1e-12,
+    "geometry_budget_result": "PASS_FOR_EXACT_CELL_LATTICE_ONLY"
+  },
+  "observed_cases": [
+    {
+      "case_id": "F2H10V2_CENTER_V1_COARSE",
+      "background": "center_catch",
+      "resolution": "coarse",
+      "fluid_particles": 384,
+      "measured_partvtk_csv_mass_kg": 24.576001152000092,
+      "report_mass_relative_error_vs_exact_lattice": 4.6875003656410286e-08,
+      "report_native_storage_relative_error": 3.774758283725532e-15,
+      "native_or_csv_strict_budget_result": "FAILS_1E-12_WHEN_REFERENCED_TO_CONTINUUM_OR_EXACT_LATTICE"
+    },
+    {
+      "case_id": "F2H10V2_CENTER_V1_MEDIUM",
+      "background": "center_catch",
+      "resolution": "medium",
+      "fluid_particles": 3072,
+      "measured_partvtk_csv_mass_kg": 24.57600122879828,
+      "report_mass_relative_error_vs_exact_lattice": 4.99999297520759e-08,
+      "report_native_storage_relative_error": -7.016609515630989e-14,
+      "native_or_csv_strict_budget_result": "FAILS_1E-12_WHEN_REFERENCED_TO_CONTINUUM_OR_EXACT_LATTICE"
+    },
+    {
+      "case_id": "F2H10V2_CENTER_V1_FINE",
+      "background": "center_catch",
+      "resolution": "fine",
+      "fluid_particles": 24576,
+      "measured_partvtk_csv_mass_kg": 24.576000000007053,
+      "report_mass_relative_error_vs_exact_lattice": 2.8688162956314045e-13,
+      "report_native_storage_relative_error": 2.8688162956314045e-13,
+      "native_or_csv_strict_budget_result": "WITHIN_1E-12_SERIALIZATION_ERROR_ONLY"
+    },
+    {
+      "case_id": "F2H10V2_OFFSET_V1_COARSE",
+      "background": "offset_spill",
+      "resolution": "coarse",
+      "fluid_particles": 384,
+      "measured_partvtk_csv_mass_kg": 24.576001152000092,
+      "report_mass_relative_error_vs_exact_lattice": 4.6875003656410286e-08,
+      "report_native_storage_relative_error": 3.774758283725532e-15,
+      "native_or_csv_strict_budget_result": "FAILS_1E-12_WHEN_REFERENCED_TO_CONTINUUM_OR_EXACT_LATTICE"
+    },
+    {
+      "case_id": "F2H10V2_OFFSET_V1_MEDIUM",
+      "background": "offset_spill",
+      "resolution": "medium",
+      "fluid_particles": 3072,
+      "measured_partvtk_csv_mass_kg": 24.57600122879828,
+      "report_mass_relative_error_vs_exact_lattice": 4.99999297520759e-08,
+      "report_native_storage_relative_error": -7.016609515630989e-14,
+      "native_or_csv_strict_budget_result": "FAILS_1E-12_WHEN_REFERENCED_TO_CONTINUUM_OR_EXACT_LATTICE"
+    },
+    {
+      "case_id": "F2H10V2_OFFSET_V1_FINE",
+      "background": "offset_spill",
+      "resolution": "fine",
+      "fluid_particles": 24576,
+      "measured_partvtk_csv_mass_kg": 24.576000000007053,
+      "report_mass_relative_error_vs_exact_lattice": 2.8688162956314045e-13,
+      "report_native_storage_relative_error": 2.8688162956314045e-13,
+      "native_or_csv_strict_budget_result": "WITHIN_1E-12_SERIALIZATION_ERROR_ONLY"
+    }
+  ],
+  "interpretation": {
+    "audit_mass_check_semantics": "The v2 structural audit's checks.mass_within_budget compares the measured CSV sum with expected PartVTK's rounded serialized particle mass. It is a serialization consistency check, not a strict continuous-mass approval.",
+    "no_normalization": true,
+    "no_support_layer_reassignment": true,
+    "qualification_decision": "PENDING_SEPARATE_QI_AND_NUMERICAL_MASS_REVIEW",
+    "production_decision": "CLOSED"
+  }
+}
