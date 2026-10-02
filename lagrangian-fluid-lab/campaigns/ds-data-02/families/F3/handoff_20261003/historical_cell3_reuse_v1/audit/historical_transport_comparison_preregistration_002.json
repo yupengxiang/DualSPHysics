@@ -1,0 +1,414 @@
+{
+  "actual_time_reference": {
+    "closure": "closure-001 and closure-002 are retained failed/review-required evidence; closure-003 is the corrected terminal source/label closure and is the only current closure reference.",
+    "closure_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-label-closure-root-reviewed-003/execution-receipt.json",
+      "returncode": 0,
+      "sha256": "89e7c619b6dc61fd316944bb27f15a3b861badaa74743075e94c3021ab96ea20",
+      "status": "completed"
+    },
+    "closure_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-label-closure-root-reviewed-003/labels-closure.json",
+      "q_i_status": "completed_pass",
+      "q_n_status": "not_assessed",
+      "sha256": "37e2729b2da78de330ee972a27cb7c3ebe2e89eb3044f8150372153b8be37269",
+      "status": "completed_pass"
+    },
+    "closure_script": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/audit/f3_time_labels_closure_v1.py",
+      "sha256": "a2b3e91fa2be8bffdffda64f453580e8d4361c7af7e32e7d7992cb91a1c6b9b4"
+    },
+    "direct_h5": {
+      "bytes": 1360727474,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-direct-nvme-root-reviewed-002/trajectory.h5",
+      "role": "completed root-reviewed direct typed H5",
+      "sha256": "540e2f08df0ed1c1705badca2603efbed5f12cab30df895bfe18bd9613eff590"
+    },
+    "direct_receipt": {
+      "bytes": 53940,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-direct-nvme-root-reviewed-002/execution-receipt.json",
+      "role": "completed direct receipt",
+      "sha256": "fe8e2d9ff15d9b4e817e817539d1335cb74719d6568b3955f3b07b518378c179"
+    },
+    "direct_report": {
+      "bytes": 463550,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-direct-nvme-root-reviewed-002/direct-conversion-report.json",
+      "role": "completed direct report",
+      "sha256": "54011e801d89cf310beba32f204c9a5a6483179089a61e03590522386bcf86fb"
+    },
+    "frames": 836,
+    "initial_fluid_mass_kg": 14.580000378191471,
+    "labels_h5": {
+      "bytes": 2002553,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-labels-root-reviewed-003/typed-transport-labels.h5",
+      "role": "completed saved-frame labels",
+      "sha256": "f0f6ca2cfc9685cd8f73eee2b0857067e1c916967493d40fbf37c2f8218d9821"
+    },
+    "labels_receipt": {
+      "bytes": 52323,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-TIME/f3_rev075_r075-time-labels-root-reviewed-003/execution-receipt.json",
+      "role": "completed labels receipt",
+      "sha256": "e2bc9f88bcb2aef83ee0b4dc25e134f437e2ff308887bd18f9fdfe5bef1cb65f"
+    },
+    "last_time_s": 8.35000176687708,
+    "prior_closures": [
+      {
+        "attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-001",
+        "reason": "argument binding TypeError; immutable inputs preserved",
+        "status": "failed"
+      },
+      {
+        "attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-002",
+        "reason": "native HDF5 schema corrected separately from report schema; cumulative net flux is signed and was not a nonnegative mass ledger",
+        "status": "completed_review_required"
+      }
+    ],
+    "q_n_status": "not_assessed"
+  },
+  "claim_boundary": {
+    "coordinate_semantics": "fixed tank computational coordinates with prescribed acceleration; no moving-world trajectory interpretation",
+    "new_dual_axis_or_baffle_transfer": false,
+    "production": "not_evaluated",
+    "q_i": "pending independent nominal/TIME/OUTPUT source closure and comparison",
+    "q_n": "not_assessed",
+    "scope": "historical fixed-tank single-axis CELL3 transport comparison only",
+    "training": "not_authorized"
+  },
+  "comparisons": [
+    {
+      "acceptance_accounting": {
+        "event_time_budget_s": "0.02 * frozen_nominal_feature_time_s = 0.05119194131256742",
+        "interpretation": "share-cap exceedance remains a registered sensitivity finding requiring finer reference; it is not silently converted to a Q-N pass",
+        "macro_relative_budget": 0.05,
+        "save_or_integration_share_budget_s": "0.004 * frozen_nominal_feature_time_s = 0.010238388262513484",
+        "transport_relative_budget": 0.01
+      },
+      "changed_fields": [
+        "CFL and CoefDtMin: 0.05 to 0.025; actual native internal dt and summed steps must be read from each RunPARTs.csv"
+      ],
+      "comparison_id": "nominal_vs_TIME_internal_step",
+      "completion_gate": "No T2/Q-N conclusion until nominal direct H5 and labels are terminal, both closure reports pass, and actual RunPARTs distributions/steps and all censored ledgers are compared.",
+      "expected_reference_contract": {
+        "nominal_cfl": 0.05,
+        "nominal_expected_saved_frames": 836,
+        "nominal_save_interval_s": 0.01,
+        "time_actual_min_dt_s": 1.106134843353494e-05,
+        "time_actual_saved_frames": 836,
+        "time_actual_steps": 754843,
+        "time_cfl": 0.025,
+        "time_save_interval_s": 0.01
+      },
+      "physical_equal_fields": [
+        "geometry",
+        "Def/XML physical particle layout",
+        "density",
+        "initial fluid",
+        "raw numeric control array",
+        "solver dimension",
+        "boundary/no-slip recipe",
+        "time window",
+        "event config",
+        "save interval 0.01 s"
+      ],
+      "question": "Does measured internal CFL/CoefDtMin refinement alter transport labels under the same numeric control, geometry, tank frame, save cadence and physical mass?",
+      "required_observables": [
+        "forward/backward signed exchange mass by initial source label",
+        "repeat crossing count and mass",
+        "first passage bracket and chord estimate for observed identities",
+        "residence_time_s by left/right region",
+        "unknown/numerical_loss/invalid mass per frame",
+        "right-censored mass and final categories",
+        "initial mass and valid typed identity closure"
+      ],
+      "variant_a": "NOMINAL",
+      "variant_b": "TIME"
+    },
+    {
+      "acceptance_accounting": {
+        "event_time_budget_s": "0.05119194131256742 for observed left/right feature",
+        "interpretation": "this is a save-only sensitivity comparison; it cannot be called an internal integration refinement",
+        "macro_relative_budget": 0.05,
+        "save_or_integration_share_budget_s": "0.010238388262513484 as frozen diagnostic share cap",
+        "transport_relative_budget": 0.01
+      },
+      "changed_fields": [
+        "TimeOut/output cadence: 0.01 s to 0.002 s; internal integration remains nominal and must be verified from both RunPARTs.csv"
+      ],
+      "comparison_id": "nominal_vs_OUTPUT_save_only",
+      "completion_gate": "No T2/Q-N conclusion until OUTPUT direct H5/labels are terminal and actual outputs prove same internal solver contract; preserve all censored/unknown observations.",
+      "expected_reference_contract": {
+        "nominal_cfl": 0.05,
+        "nominal_expected_saved_frames": 836,
+        "nominal_save_interval_s": 0.01,
+        "output_cfl": 0.05,
+        "output_expected_saved_frames": 4176,
+        "output_save_interval_s": 0.002
+      },
+      "physical_equal_fields": [
+        "geometry",
+        "Def/XML physical particle layout",
+        "density",
+        "initial fluid",
+        "raw numeric control array",
+        "solver dimension",
+        "boundary/no-slip recipe",
+        "time window",
+        "event config",
+        "CFL/CoefDtMin 0.05",
+        "native internal-step contract"
+      ],
+      "question": "Does changing saved output cadence alone alter finite-event labels and macro transport accounting?",
+      "required_observables": [
+        "same transport fields as nominal_vs_TIME",
+        "saved-frame event bracket width and chord estimate",
+        "residence and exchange mass before any downsampling",
+        "actual internal dt distributions and total steps"
+      ],
+      "variant_a": "NOMINAL",
+      "variant_b": "OUTPUT"
+    }
+  ],
+  "control_equivalence": {
+    "columns": 7,
+    "delimiter": ";",
+    "nominal": {
+      "bytes": 7737549,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+      "role": "frozen original nominal control",
+      "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3"
+    },
+    "numeric_load": "skiprows=1",
+    "output": {
+      "bytes": 13407139,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/CaseSloshingAccData.csv",
+      "role": "OUTPUT control",
+      "sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6"
+    },
+    "raw_byte_policy": "Preserve raw source SHA and paths even where numeric arrays are exactly equal.",
+    "rows": 167001,
+    "time": {
+      "bytes": 13407139,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/CaseSloshingAccData.csv",
+      "role": "TIME control",
+      "sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6"
+    },
+    "verified_numeric_result": {
+      "nominal_vs_output_max_abs": 0.0,
+      "nominal_vs_time_max_abs": 0.0,
+      "numeric_arrays_exact_equal": true,
+      "time_vs_output_max_abs": 0.0
+    }
+  },
+  "created_from": "frozen CELL3 protocol, observation plan, original temporal budget, and immutable root-reviewed TIME labels; closure-003 additive evidence",
+  "frozen_budgets": {
+    "derived_save_or_integration_fraction_of_event_time": 0.004,
+    "event_time_relative_starting_budget": 0.02,
+    "initial_mass_relative_tolerance": 0.01,
+    "left_right_exchange": {
+      "baseline_bracket_s": [
+        2.5583505280807444,
+        2.560850502417362
+      ],
+      "frozen_full_event_time_budget_s": 0.05119194131256742,
+      "frozen_nominal_feature_time_s": 2.559597065628371,
+      "frozen_save_or_integration_share_budget_s": 0.010238388262513484,
+      "right_censor_policy": "retain final category and unknown state; do not infer physical exit from censored identities"
+    },
+    "macro_relative_budget": 0.05,
+    "original_temporal_budget_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/f3_weak_dual_temporal_budget_assessment_001.json",
+    "original_temporal_budget_sha256": "def19897256a3f85052c43949ded25082e3cc0c4a33f8eef0e0834ee545dc9f4",
+    "protocol_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+    "protocol_sha256": "6e533c03bcbc78ea026aac233b15e5c066dd18f5736e98ce22b0a43588a40c15",
+    "residence_time": "no residence-specific frozen pass/fail budget; report accounting values and censoring as descriptive only",
+    "save_or_integration_share_cap": 0.2,
+    "top_open_exit": {
+      "event_time_budget_s": null,
+      "feature_time_s": null,
+      "policy": "all-censored or unobserved remains censored; no physical exit inference"
+    },
+    "transport_relative_budget": 0.01
+  },
+  "frozen_physical_contract": {
+    "canonical_initial_fluid_mass_kg": 14.58,
+    "control_family_id": "F3_CTRL_LEGACY_SINGLE_AXIS",
+    "coordinate_frame": "DualSPHysics fixed tank Cartesian coordinates (x,y,z)",
+    "density_kg_m3": 1000.0,
+    "dp_m": 0.0075,
+    "event_operator": "finite x=0 internal exchange plane with y/z aperture; top z=0.51 is a separate legal open-exit diagnostic",
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "initial_fluid_size_m": [
+        0.9,
+        0.18,
+        0.09
+      ],
+      "open_face": "top",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ]
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "mass_policy": "native mass only; no normalization/rescaling; retain raw kg and unknown/censored/loss ledgers",
+    "mechanism_id": "legacy_plain_sloshing",
+    "native_expected_fluid_particles": 34560,
+    "operators_are_identical_across_variants": true,
+    "time_window_s": [
+      0.0,
+      8.35
+    ]
+  },
+  "label_semantics": {
+    "censoring": "identities without observed crossing remain right-censored; unknown/loss are separate ledgers",
+    "event_time": "saved-frame bracket plus linear chord estimate",
+    "hidden_recrossings": "unresolved between saved frames",
+    "mass": "native HDF5 kg, no normalization",
+    "residence": "piecewise-linear chord occupancy; interpolation error unassessed",
+    "top_open_exit": "separate legal open-exit diagnostic; no physical exit inferred from censoring"
+  },
+  "next_action": "TIME source/label closure-003 is Q-I complete. Root must still finish nominal and OUTPUT direct H5 plus labels/closures, then compare measured RunPARTs dt/step distributions and all censored ledgers before any T2/Q-N or production decision.",
+  "pending_sources": {
+    "nominal": {
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "direct_h5": null,
+      "labels_h5": null,
+      "native_h5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen.h5",
+        "sha256": "fb304e0bc8e5d7f51eaab0af0d8dba8c928b8146e0bf5776002f83012e4480c4"
+      },
+      "status": "queued_root_direct_conversion_pending",
+      "terminal_sha256s": null
+    },
+    "output": {
+      "case_id": "F3_REV075_R075-OUTPUT",
+      "direct_h5": null,
+      "labels_h5": null,
+      "live_receipt": {
+        "bytes": 48606,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-OUTPUT/f3_rev075_r075-output-direct-nvme-root-reviewed-002/execution-receipt.json",
+        "sha256": "be274735bbe64c9945e360cf14b81122c0e4e88437b0a853b4b8a774cf1e55e0"
+      },
+      "status": "root_conversion_live_at_preregistration",
+      "terminal_sha256s": null
+    }
+  },
+  "required_terminal_artifacts": [
+    "nominal direct report and receipt with actual output H5 SHA",
+    "OUTPUT direct report and receipt with actual output H5 SHA",
+    "nominal/TIME/OUTPUT labels and strict input-hash receipts",
+    "closure audit for each labels H5",
+    "actual RunPARTs dt distribution and frame/time coverage",
+    "comparison report preserving raw and normalized mass plus censored/unknown ledgers",
+    "TIME closure-003 report and receipt with source-schema and signed-net-flux checks"
+  ],
+  "schema": "ds02.f3.historical-cell3-transport-comparison-preregistration.v1",
+  "source_bindings": {
+    "canonical_config": {
+      "bytes": 1911,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/legacy_plain_8/f3_legacy_plain_full_transport_config.v1.json",
+      "role": "canonical full transport config",
+      "sha256": "69c3a4789d9f92e0f360067f3ee115cc65fc1adb42a5869a7944d64f2b3338d8"
+    },
+    "canonical_operators": {
+      "bytes": 1531,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/legacy_plain_8/f3_legacy_plain_operators.v1.json",
+      "role": "canonical transport operators",
+      "sha256": "db28ebebd76ba2528481fe330a6e973186ba21b8c0cc7f7941d26fb53775cf21"
+    },
+    "legacy_plan": {
+      "bytes": 22179,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/legacy_plain_8/legacy_plain_8_plan.json",
+      "role": "legacy plan",
+      "sha256": "374ffb8381c2620ff876f39fbbbeb4cdaf1e9aab0d8641fd20ad9b4e36c3934e"
+    },
+    "nominal_direct_template": {
+      "bytes": 18270,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_cell3_long_dp0075_nominal-direct-nvme-001.json",
+      "role": "old immutable direct-H5 template; no terminal direct output yet",
+      "sha256": "2c88925ed22132676a53381f3acc2a22bd41714b5269e4619ed5186f79cd1b77"
+    },
+    "nominal_owner": {
+      "bytes": 9519,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/source/reference_owners/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen_owner.v1.json",
+      "role": "immutable nominal source owner",
+      "sha256": "d819135d8400c81bed45f740657e2ad5ef43773d0a9520d78013158e1586d019"
+    },
+    "observation_plan": {
+      "bytes": 12195,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/observation_plan.json",
+      "role": "observation and budget plan",
+      "sha256": "091bebd3f85ca958847438886f32a3f91092f0186b3bb8e145d0e00ae9edc0f8"
+    },
+    "original_budget": {
+      "bytes": 11493,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/f3_weak_dual_temporal_budget_assessment_001.json",
+      "role": "original frozen nominal feature-time budget",
+      "sha256": "def19897256a3f85052c43949ded25082e3cc0c4a33f8eef0e0834ee545dc9f4"
+    },
+    "output_direct_template": {
+      "bytes": 9839,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_rev075_r075-output-direct-nvme-001.json",
+      "role": "old immutable direct-H5 template; root clone is independent",
+      "sha256": "824c6db999dd1e73988fdf7d63cec1c7a776d47ba790dccd5629b6da9a439a95"
+    },
+    "output_owner": {
+      "bytes": 8951,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/source/reference_owners/F3_REV075_R075-OUTPUT_owner.v1.json",
+      "role": "immutable OUTPUT source owner",
+      "sha256": "9a8e23c488e9335b1c5ec7d4de3d16bc86972301385cd35100ce305d3f5281c6"
+    },
+    "output_root_live_receipt": {
+      "bytes": 48606,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_REV075_R075-OUTPUT/f3_rev075_r075-output-direct-nvme-root-reviewed-002/execution-receipt.json",
+      "role": "root-owned live receipt; status was running at preregistration",
+      "sha256": "be274735bbe64c9945e360cf14b81122c0e4e88437b0a853b4b8a774cf1e55e0"
+    },
+    "output_root_review_request": {
+      "bytes": 16588,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/root_reference_review_002/output-request.json",
+      "role": "root-owned live conversion request",
+      "sha256": "2e4323361948cdd7813e5d80923bbbb7f56ba2f6cc42924d2376e7ba23f8a66c"
+    },
+    "selected_macro_reference_gate": {
+      "bytes": 1846,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+      "role": "passed 13-panel historical macro/reference gate",
+      "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+    },
+    "selected_macro_reference_scores": {
+      "bytes": 8741476,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-SCORES-633a9f1c021fcbbaa2fa5a8a85f204753b6a801f7109003538f0c92a39425fa3.json",
+      "role": "13-panel scoring JSON",
+      "sha256": "633a9f1c021fcbbaa2fa5a8a85f204753b6a801f7109003538f0c92a39425fa3"
+    },
+    "semantics": {
+      "bytes": 11580,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/historical_cell3_reuse_semantics_v1.json",
+      "role": "historical reuse semantics",
+      "sha256": "c3e5c48bb891ad8c1ce303a261064d258125cbdf04c2c58ffd77061a1a5d36d3"
+    },
+    "time_owner": {
+      "bytes": 8928,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/source/reference_owners/F3_REV075_R075-TIME_owner.v1.json",
+      "role": "immutable TIME source owner",
+      "sha256": "a097e1f81cd5d98bcc4e91e8ca5f9ec6e78ecf35d290fd7dec3cd045e8be4846"
+    }
+  },
+  "status": "preregistered_pending_nominal_and_output_terminal_direct_h5",
+  "supersedes": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/audit/historical_transport_comparison_preregistration_001.json",
+    "reason": "Additive update after TIME closure-003; v1 bytes preserved.",
+    "sha256": "fa9bc07a6e910b4c5821423ada7810b878e2bb67733fcedc6771a8b3ac4bc070"
+  }
+}
