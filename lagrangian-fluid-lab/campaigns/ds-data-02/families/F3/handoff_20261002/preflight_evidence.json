@@ -53,6 +53,55 @@
   "claim_boundary": "actual GenCase and full PartVTK initial-state preflight only; no solver was launched by this handoff and no Q-N/production claim",
   "control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b",
   "created_by_commit": "e9d2e6dd5a97c4b025ccee2e426f8ddad06000a7",
+  "dt_semantics": {
+    "baseline_runtime_evidence": {
+      "Run.out": {
+        "bytes": 399946,
+        "exists": true,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/qualification-weak-dual-scope-001/solver_output/Run.out",
+        "sha256": "6c50c8a17ff8f5a8cd2ac9cfd8397268551be1e5543bb3297cc11e0afc7c375f"
+      },
+      "logged_DtMin_s": 2.212269686706988e-05,
+      "logged_TimePart_s": 0.0025
+    },
+    "input_parameter_units": "seconds",
+    "observed_semantics": "JSph reads XML TimeOut into runtime TimePart; a positive DtFixed with DtFixedFile=NONE constructs fixed-dt state; nonzero DtIni and DtMin prevent default fallback, and equal DtMin prevents a lower computed step from changing the fixed value.",
+    "source_lines": {
+      "DtFixed_and_DtFixedFile": [
+        797,
+        804
+      ],
+      "DtMin_clamp": {
+        "file": "/home/jade/Projects/DualSPHysics/src/source/JSphGpu.cpp",
+        "lines": [
+          1131,
+          1134
+        ]
+      },
+      "TimeOut_to_TimePart": [
+        787,
+        788
+      ],
+      "fixed_dt_application": [
+        2209,
+        2209
+      ],
+      "zero_DtIni_DtMin_fallback": [
+        1537,
+        1538
+      ]
+    },
+    "source_reference": {
+      "bytes": 177192,
+      "exists": true,
+      "path": "/home/jade/Projects/DualSPHysics/src/source/JSph.cpp",
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7"
+    },
+    "variant_binding": {
+      "half_dt": "DtIni=DtMin=DtFixed=1.106134843353494e-05; DtFixedFile=NONE; TimeOut=0.0025",
+      "half_save": "DtIni=DtMin=DtFixed=0; DtFixedFile=NONE; TimeOut=0.00125"
+    }
+  },
   "failed_attempts_preserved": [
     {
       "attempt_id": "initial-partvtk-half_dt-20261002-001",
