@@ -1,0 +1,121 @@
+{
+  "case_id": "F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010",
+  "case_key": "runup_dp00125",
+  "expected_lattice": {
+    "continuous_high_m": [
+      3.3000000000000003,
+      0.7,
+      0.42000000000000004
+    ],
+    "continuous_low_m": [
+      -0.9,
+      -0.7,
+      0.02
+    ],
+    "continuous_mass_kg": 2352.0,
+    "continuous_size_m": [
+      4.2,
+      1.4,
+      0.4
+    ],
+    "continuous_volume_m3": 2.352,
+    "counts_xyz": [
+      336,
+      112,
+      32
+    ],
+    "dp_m": 0.0125,
+    "draw_size_m": [
+      4.1875,
+      1.3875000000000002,
+      0.3875
+    ],
+    "first_center_m": [
+      -0.89375,
+      -0.69375,
+      0.026250000000000002
+    ],
+    "last_center_m": [
+      3.29375,
+      0.6937500000000002,
+      0.41375
+    ],
+    "lattice_volume_m3": 2.3520000000000008,
+    "mass_budget_fraction": 0.01,
+    "mass_budget_pass": true,
+    "mass_rescaling": false,
+    "native_lattice_mass_kg": 2352.000000000001,
+    "particle_count": 1204224,
+    "particle_mass_kg": 0.0019531250000000004,
+    "phase_formula": "low + 0.5*dp + index*dp",
+    "pointref_formula": "positive residue of first_center modulo dp",
+    "pointref_m": [
+      0.006249999999999978,
+      0.006250000000000089,
+      0.0012500000000000011
+    ],
+    "relative_mass_error": 4.440892098500626e-16,
+    "rule": "explicit solid cell-centre lattice; first=low+dp/2; integer index=(center-pointref)/dp"
+  },
+  "family_id": "F5",
+  "finite_qa_required": [
+    "actual GenCase receipt total/fluid counts and solver dimension",
+    "generated XML massfluid and physical marker preservation",
+    "official PartVTK type=3 grid/mass/bounds and fixed/moving finite-face ledger",
+    "bed STL and weir union coverage where boundary markers overlap"
+  ],
+  "mechanism_id": "runup_return",
+  "producer_script": {
+    "bytes": 41876,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f5_commensurate_dp_reference_010.py",
+    "role": "committed additive DP producer",
+    "sha256": "09d5e34ba4420b59c1c3da596f12c65845afdaaf83eae3d95d6f4ac81fc664e6"
+  },
+  "production_claim": "none",
+  "qualification_claim": "none",
+  "resolution_id": "dp00125",
+  "schema": "ds-data-02.f5.commensurate-dp-static-preflight.v1",
+  "scope": "F5_CONTINUOUS_CELL_CENTRE_COMMENSURATE_DP005_DP00125_010",
+  "source_hashes": {
+    "bed": {
+      "bytes": 8778,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/assets/f5_continuous_bed_profile_slope_0p280.stl",
+      "role": "immutable finite bed STL",
+      "sha256": "93cf180ae6d5439d3ed3e2787b390d3b1268d76f0069dbdeaa10b18bf3314621"
+    },
+    "definition": {
+      "bytes": 6133,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/F5_REF_RUNUP_NOMINAL_MEDIUM.xml",
+      "role": "immutable physical mother XML",
+      "sha256": "3b3575194578b3648ef8a0cb194606704cacdbdbf0937fdfc614b2cc7742a216"
+    },
+    "metadata": {
+      "bytes": 6876,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/F5_REF_RUNUP_NOMINAL_MEDIUM.metadata.json",
+      "role": "immutable physical mother metadata",
+      "sha256": "6ff7dda7d082a65585ddfb43c6c1a7523404d06235c7256065d70054b9bcceb7"
+    },
+    "motion": {
+      "bytes": 12627,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/piston_f91973457a049db5_regular_piston.dat",
+      "role": "immutable control",
+      "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+    }
+  },
+  "static_checks": {
+    "exact_commensurate_counts": true,
+    "exact_continuum_mass_without_rescaling": true,
+    "expected_3d": true,
+    "finite_source_markers_present": true,
+    "fluid_centres_strictly_inside_continuum": true,
+    "motion_and_bed_staged_byte_identical": true,
+    "no_solver_or_gpu": true,
+    "one_percent_mass_budget": true,
+    "only_registered_dp_fluid_pointref_changes": true,
+    "repair_xml_well_formed": true,
+    "same_event_window": true,
+    "source_canonical_equivalence": true,
+    "weir_source_preserved_for_weir": true
+  },
+  "status": "static_pass_pending_actual_gencase"
+}
