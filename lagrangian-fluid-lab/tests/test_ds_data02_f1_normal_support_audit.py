@@ -38,3 +38,35 @@ def test_face_specs_cover_five_outer_and_five_separator_faces() -> None:
         "outer_x_low", "outer_x_high", "outer_y_low", "outer_y_high", "outer_z_low",
         "separator_x_low", "separator_x_high", "separator_y_low", "separator_y_high", "separator_z_high",
     }
+
+
+def test_bound_vtk_field_arrays_are_retained_as_point_aligned_data(tmp_path: Path) -> None:
+    """GenCase stores Mk/Type/Normal/NormalSize in FIELD after POINT_DATA."""
+
+    n = 2
+    raw = bytearray(
+        f"# vtk DataFile Version 3.0\nnormal support test\nBINARY\n"
+        f"DATASET POLYDATA\nPOINTS {n} float\n".encode()
+    )
+    raw.extend(np.asarray([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=">f4").tobytes())
+    raw.extend(f"\nVERTICES {n} {2 * n}\n".encode())
+    raw.extend(np.asarray([1, 0, 1, 1], dtype=">i4").tobytes())
+    raw.extend(f"\nPOINT_DATA {n}\nFIELD FieldData 4\n".encode())
+    raw.extend(f"Mk 1 {n} unsigned_short\n".encode())
+    raw.extend(np.asarray([10, 11], dtype=">u2").tobytes())
+    raw.extend(f"\nType 1 {n} unsigned_char\n".encode())
+    raw.extend(np.asarray([0, 1], dtype=">u1").tobytes())
+    raw.extend(f"\nNormal 3 {n} float\n".encode())
+    raw.extend(np.asarray([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=">f4").tobytes())
+    raw.extend(f"\nNormalSize 1 {n} float\n".encode())
+    raw.extend(np.asarray([0.01, 0.02], dtype=">f4").tobytes())
+    path = tmp_path / "Bound.vtk"
+    path.write_bytes(raw)
+
+    parsed = MODULE.read_binary_vtk(path)
+
+    assert set(("Mk", "Type", "Normal", "NormalSize")) <= set(parsed["point_data"])
+    assert np.array_equal(parsed["point_data"]["Mk"], np.asarray([10, 11], dtype=np.uint16))
+    assert np.array_equal(parsed["point_data"]["Type"], np.asarray([0, 1], dtype=np.uint8))
+    np.testing.assert_allclose(parsed["point_data"]["Normal"], [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]])
+    np.testing.assert_allclose(parsed["point_data"]["NormalSize"], [0.01, 0.02])
