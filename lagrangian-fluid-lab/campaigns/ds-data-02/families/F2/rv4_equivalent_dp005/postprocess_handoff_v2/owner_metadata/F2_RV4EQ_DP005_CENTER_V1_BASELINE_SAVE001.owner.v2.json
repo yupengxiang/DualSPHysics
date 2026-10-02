@@ -1,0 +1,263 @@
+{
+  "background": "CENTER",
+  "case_id": "F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001",
+  "definition": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001.xml",
+    "sha256": "78e77d38d251ac0fb4c9b7b10641262c1b4d602b9bc88c7402d6b81137be7548"
+  },
+  "family_id": "F2",
+  "mass_reference": {
+    "adapter_float32_error_is_separate": true,
+    "continuous_mass_kg": 24.575999999999997,
+    "native_header_is_authority": true,
+    "strict_relative_budget_fraction": 1e-12
+  },
+  "mechanism_id": "center_catch",
+  "motion": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001_motion.dat",
+    "sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70"
+  },
+  "numerical_recipe_hash_declared": "845a1395c5610a030f7dec2f0fb672d0600e8e11d58403d1397ff6ab856759d1",
+  "numerical_view": {
+    "physical_condition_hash": "45c579bd9fa7a4878fcd25d0e0aa6dedf6da8c4cd77cd85e0d05b928ab8b6a43",
+    "scope": "same RV4 physical mother; dp=.005 solver; .01 macro save; numerical recipe is separate",
+    "source_conversion_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_CENTER_V1_MEDIUM_RV4D1_BASELINE_SAVE001/conversion-f2h10v2_center_v1_medium_rv4d1_baseline_save001-fullstate-v5-002/conversion-report.json",
+      "sha256": "d0de2ee3511384bc62e527e25877e1767f4deac059b690c5779eda20c18d41e7"
+    },
+    "source_metadata": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/rv4_equivalent_dp005/definitions/F2_RV4EQ_DP005_CENTER_V1/F2_RV4EQ_DP005_CENTER_V1.metadata.json",
+      "sha256": "31f67213f80a97c9878946662f4924254406ab88496b4e7b55266bf8e0f80630"
+    },
+    "variant": "RV4EQ_DP005_BASELINE_SAVE001",
+    "variant_case_id": "F2_RV4EQ_DP005_CENTER_V1_BASELINE_SAVE001"
+  },
+  "physical_binding": {
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_GEM_V2",
+    "controls": {
+      "boundary": "finite DBC rotating cup, fixed receiver, and finite catch tray; world top open",
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.03
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        4.0
+      ],
+      "right_censor_policy": "saved 4 s window retains initial typed fluid denominator and keeps numerical unknown separate",
+      "sequence": [
+        "static_hold",
+        "prescribed_rotation",
+        "receiver_or_tray_transport",
+        "post_stop_residence"
+      ],
+      "time_end_s": 4.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F2",
+    "geometry": {
+      "cup": {
+        "label": "cup",
+        "low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size_m": [
+          0.425,
+          0.3,
+          0.45
+        ]
+      },
+      "fluid": {
+        "label": "continuous three-band liquid domain",
+        "low_m": [
+          0.0525,
+          -0.12,
+          0.7
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.32,
+          0.24,
+          0.32
+        ]
+      },
+      "receiver": {
+        "label": "receiver",
+        "low_m": [
+          0.45,
+          -0.3,
+          0.0
+        ],
+        "size_m": [
+          1.1,
+          0.6,
+          0.45
+        ]
+      },
+      "tray": {
+        "label": "tray",
+        "low_m": [
+          -1.2,
+          -1.0,
+          -0.2
+        ],
+        "size_m": [
+          4.0,
+          2.0,
+          0.15
+        ]
+      }
+    },
+    "geometry_family_id": "F2_GEOM_GEM_CUP_RECEIVER_CENTER_CATCH_V2",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": [
+        8.191999999999998,
+        8.191999999999998,
+        8.191999999999998
+      ],
+      "initial_mass_by_source_kg": [
+        8.191999999999998,
+        8.191999999999998,
+        8.191999999999998
+      ],
+      "initial_mass_total_kg": 24.575999999999997,
+      "mass_policy": "native BI4 header MassFluid is authoritative; continuous mass is an independent frozen reference",
+      "source_labels": [
+        "source_layer_0",
+        "source_layer_1",
+        "source_layer_2"
+      ],
+      "source_regions": [
+        {
+          "label": "source_layer_0",
+          "low_m": [
+            0.0525,
+            -0.12,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        },
+        {
+          "label": "source_layer_1",
+          "low_m": [
+            0.0525,
+            -0.039999999999999994,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        },
+        {
+          "label": "source_layer_2",
+          "low_m": [
+            0.0525,
+            0.04000000000000001,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        }
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "lineage_group_id": "F2_GEM_CENTER_CATCH_V2",
+    "mechanism_id": "center_catch",
+    "paired_background_id": "F2H10V2_OFFSET_V1",
+    "parameters": {
+      "cup_width_m": 0.425,
+      "drive_mechanism": "center_catch",
+      "motion_axis_origin_m": [
+        0.0,
+        -1.0,
+        0.65
+      ],
+      "motion_axis_unit": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "open_top": true,
+      "receiver_x_m": 0.45,
+      "receiver_y_m": 0.0,
+      "rotation_amplitude_deg": -105.0,
+      "rotation_duration_s": 0.65,
+      "rotation_end_s": 1.15,
+      "rotation_start_s": 0.5
+    },
+    "physical_case_id": "F2H10V2_CENTER_V1",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "45c579bd9fa7a4878fcd25d0e0aa6dedf6da8c4cd77cd85e0d05b928ab8b6a43",
+  "physical_case_id": "F2H10V2_CENTER_V1",
+  "physical_condition_hash_declared": "45c579bd9fa7a4878fcd25d0e0aa6dedf6da8c4cd77cd85e0d05b928ab8b6a43",
+  "production_claim": "none",
+  "qualification_claim": "none; conversion evidence only",
+  "resolution": "dp005",
+  "schema": "ds-data-02.f2.rv4eq-dp005-owner.v2",
+  "scope_id": "F2_SCOPE_RV4_EQUIVALENT_DP005_PRECHECK_20261002",
+  "solver_parameters": {
+    "Boundary": "1",
+    "CoefDtMin": "0.05",
+    "DensityDT": "3",
+    "DensityDTvalue": "0.1",
+    "DtAllParticles": "0",
+    "DtFixed": "0",
+    "DtIni": "0",
+    "DtMin": "0",
+    "FtPause": "0",
+    "Kernel": "2",
+    "MinFluidStop": "0",
+    "PartsOutMax": "1",
+    "RhopOutMax": "1300",
+    "RhopOutMin": "700",
+    "RigidAlgorithm": "1",
+    "SavePosDouble": "2",
+    "Shifting": "0",
+    "SlipMode": "1",
+    "StepAlgorithm": "2",
+    "TimeMax": "4",
+    "TimeOut": "0.01",
+    "Visco": "0.03",
+    "ViscoBoundFactor": "1",
+    "ViscoTreatment": "1"
+  },
+  "source_case_id": "F2_RV4EQ_DP005_CENTER_V1",
+  "source_provenance": {
+    "dp005_metadata": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/rv4_equivalent_dp005/definitions/F2_RV4EQ_DP005_CENTER_V1/F2_RV4EQ_DP005_CENTER_V1.metadata.json",
+      "sha256": "31f67213f80a97c9878946662f4924254406ab88496b4e7b55266bf8e0f80630"
+    },
+    "physical_binding_origin": "RV4 conversion report hash_scopes.physical_condition; stale label-owner declaration is not used",
+    "rv4_physical_conversion_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2H10V2_CENTER_V1_MEDIUM_RV4D1_BASELINE_SAVE001/conversion-f2h10v2_center_v1_medium_rv4d1_baseline_save001-fullstate-v5-002/conversion-report.json",
+      "sha256": "d0de2ee3511384bc62e527e25877e1767f4deac059b690c5779eda20c18d41e7"
+    }
+  }
+}
