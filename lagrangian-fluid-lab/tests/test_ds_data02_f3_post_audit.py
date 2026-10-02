@@ -52,6 +52,28 @@ def test_parent_timeout_accepts_runner_level_unqualified_receipt(tmp_path: Path)
     assert result["all_checks_pass"] is True
 
 
+def test_parent_completed_rebind_has_distinct_provenance_mode(tmp_path: Path) -> None:
+    hdf5 = tmp_path / "trajectory.h5"
+    hdf5.write_bytes(b"immutable")
+    parent = {
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": None,
+        "output_root": str(tmp_path),
+        "command": [str(hdf5)],
+        "request": {"qualification_claim": "none; direct conversion only, Q-N remains not assessed"},
+        "numerical_reference_status": "not_assessed",
+        "production_product_acceptance": "not_assessed",
+        "input_hashes_at_launch": {"source": "abc"},
+        "input_hashes_after_run": {"source": "abc"},
+    }
+    result = MODULE.verify_parent_completed(parent, hdf5)
+    assert result["all_checks_pass"] is True
+    assert result["checks"]["status_completed"] is True
+    parent["input_hashes_after_run"] = {"source": "changed"}
+    assert MODULE.verify_parent_completed(parent, hdf5)["all_checks_pass"] is False
+
+
 def test_direct_report_rebind_rejects_wrong_hdf5_digest(tmp_path: Path) -> None:
     hdf5 = tmp_path / "trajectory.h5"
     hdf5.write_bytes(b"native")

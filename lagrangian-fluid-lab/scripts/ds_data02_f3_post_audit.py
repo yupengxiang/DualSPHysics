@@ -4,8 +4,10 @@
 This is deliberately separate from ``ds_data02_f3_weak.py``.  The latter can
 time out after the streaming conversion has completed while it is rendering
 the full audit.  This module consumes that immutable output, verifies the
-parent timeout and the inner conversion evidence, and then performs a bounded
-Q-I audit.  It never invokes a solver, decoder, PartVTK, model, or GPU.
+parent conversion provenance (either a timeout with a completed inner
+artifact or a completed direct conversion) and the inner conversion evidence,
+and then performs a bounded Q-I audit.  It never invokes a solver, decoder,
+PartVTK, model, or GPU.
 """
 
 from __future__ import annotations
@@ -116,6 +118,46 @@ def verify_parent_timeout(parent: Mapping[str, Any], hdf5: Path) -> dict[str, An
         "checks": checks,
         "all_checks_pass": all(checks.values()),
         "reuse_semantics": "immutable H5/direct report retained from a parent conversion attempt that timed out during downstream audit; no failed receipt or artifact was patched",
+    }
+
+
+def verify_parent_completed(parent: Mapping[str, Any], hdf5: Path) -> dict[str, Any]:
+    """Verify a completed direct-conversion parent without relabelling it as a timeout."""
+    request = parent.get("request")
+    command = parent.get("command")
+    output_root = Path(str(parent.get("output_root", ""))).resolve()
+    expected_root = hdf5.resolve().parent
+    request_claim = request.get("qualification_claim") if isinstance(request, Mapping) else None
+    request_unqualified = (
+        isinstance(request_claim, str)
+        and request_claim.lower().startswith("none")
+        and (request_claim.strip().lower() == "none" or "not assessed" in request_claim.lower())
+    )
+    receipt_unqualified = (
+        parent.get("numerical_reference_status") == "not_assessed"
+        and parent.get("production_product_acceptance") == "not_assessed"
+    )
+    checks = {
+        "status_completed": parent.get("status") == "completed",
+        "returncode_zero": parent.get("returncode") == 0,
+        "no_termination_reason": parent.get("termination_reason") is None,
+        "output_root_matches_hdf5": output_root == expected_root,
+        "input_hashes_unchanged": parent.get("input_hashes_at_launch") == parent.get("input_hashes_after_run"),
+        "request_claim_remains_unqualified": request_unqualified or receipt_unqualified,
+    }
+    if isinstance(command, list):
+        rendered = [str(value) for value in command]
+        checks["parent_command_targets_hdf5"] = any(str(expected_root / "trajectory.h5") == value for value in rendered)
+    else:
+        checks["parent_command_targets_hdf5"] = False
+    return {
+        "receipt_status": parent.get("status"),
+        "termination_reason": parent.get("termination_reason"),
+        "elapsed_seconds": parent.get("elapsed_seconds"),
+        "receipt_path_output_root": str(output_root),
+        "checks": checks,
+        "all_checks_pass": all(checks.values()),
+        "reuse_semantics": "immutable H5/direct report retained from a completed direct-conversion attempt; no source, receipt, or artifact was patched",
     }
 
 
@@ -260,7 +302,8 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
                owner_path: Path, raw_manifest_path: Path, particle_chunk: int,
                expected_hdf5_sha256: str | None = None,
                expected_frames: int = EXPECTED_FRAMES,
-               expected_particles: int = EXPECTED_PARTICLES) -> dict[str, Any]:
+               expected_particles: int = EXPECTED_PARTICLES,
+               parent_mode: str = "timeout") -> dict[str, Any]:
     started = time.perf_counter()
     before = resource_snapshot()
     direct = first_record(load_json(direct_report_path))
@@ -270,14 +313,19 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
     source_sha = sha256_file(hdf5)
     if expected_hdf5_sha256 is not None and source_sha != expected_hdf5_sha256:
         raise ValueError(f"HDF5 SHA-256 mismatch: expected {expected_hdf5_sha256}, observed {source_sha}")
-    parent_check = verify_parent_timeout(parent, hdf5)
+    if parent_mode == "timeout":
+        parent_check = verify_parent_timeout(parent, hdf5)
+    elif parent_mode == "completed":
+        parent_check = verify_parent_completed(parent, hdf5)
+    else:
+        raise ValueError(f"unsupported parent mode: {parent_mode!r}")
     direct_check = verify_direct_report(direct, hdf5, source_sha, expected_frames=expected_frames, expected_particles=expected_particles)
     accounting_check = verify_native_accounting(accounting, hdf5, expected_frames=expected_frames, expected_particles=expected_particles)
     label_check = verify_label_hdf5(labels_path, hdf5, source_sha, expected_frames=expected_frames, expected_particles=expected_particles)
     metadata = build_metadata(owner, direct)
     integrity = audit_hdf5(hdf5, solver_log=solver_log, metadata=metadata, particle_chunk=particle_chunk)
     checks = {
-        "parent_timeout_rebound": parent_check["all_checks_pass"],
+        "parent_conversion_rebound": parent_check["all_checks_pass"],
         "direct_report_rebound": direct_check["all_checks_pass"],
         "native_accounting_rebound": accounting_check["all_checks_pass"],
         "full_label_hdf5_rebound": label_check["all_checks_pass"],
@@ -291,7 +339,10 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
             "path": str(hdf5), "sha256": source_sha, "expected_sha256": expected_hdf5_sha256,
             "bytes": hdf5.stat().st_size,
         },
-        "parent_conversion_timeout": parent_check,
+        "parent_conversion_mode": parent_mode,
+        "parent_conversion_provenance": parent_check,
+        # Retain the old field for consumers of the HALF_SAVE timeout report.
+        "parent_conversion_timeout": parent_check if parent_mode == "timeout" else None,
         "direct_conversion_evidence": direct_check,
         "native_accounting_evidence": accounting_check,
         "full_label_hdf5_evidence": label_check,
@@ -320,6 +371,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--expected-hdf5-sha256", required=True)
     parser.add_argument("--expected-frames", type=int, default=EXPECTED_FRAMES)
     parser.add_argument("--expected-particles", type=int, default=EXPECTED_PARTICLES)
+    parser.add_argument("--parent-mode", choices=("timeout", "completed"), default="timeout")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--particle-chunk", type=int, default=65536)
     args = parser.parse_args(argv)
@@ -329,6 +381,7 @@ def main(argv: list[str] | None = None) -> int:
         owner_path=args.owner_metadata, raw_manifest_path=args.raw_manifest, particle_chunk=args.particle_chunk,
         expected_hdf5_sha256=args.expected_hdf5_sha256,
         expected_frames=args.expected_frames, expected_particles=args.expected_particles,
+        parent_mode=args.parent_mode,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
