@@ -41,6 +41,8 @@ def _request_input_files_with_v5(*paths: Path) -> list[str]:
 
 MODULE._request_input_files = _request_input_files_with_v5
 
+_BASE_PARTVTK_REQUESTS = MODULE.make_partvtk_requests
+
 
 def make_partvtk_requests() -> dict[str, object]:
     # Use a fresh additive root so the original _001 request remains
@@ -49,7 +51,7 @@ def make_partvtk_requests() -> dict[str, object]:
     source_manifest = MODULE.read_json(ORIGINAL_ROOT / "manifest.json")
     MODULE.FAMILY_ROOT.mkdir(parents=True, exist_ok=True)
     MODULE.write_json(MODULE.FAMILY_ROOT / "manifest.json", source_manifest)
-    result = MODULE_V5.make_partvtk_requests()
+    result = _BASE_PARTVTK_REQUESTS()
     rows: list[dict[str, object]] = []
     for row in result["requests"]:
         old_path = Path(row["request"]["path"])
