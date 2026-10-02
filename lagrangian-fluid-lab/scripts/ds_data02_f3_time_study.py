@@ -497,10 +497,16 @@ def run_initial_partvtk(args: argparse.Namespace) -> dict[str, Any]:
     lines = [line for line in text.splitlines() if line.strip()]
     # Official PartVTK emits a time line, a summary line, a blank separator,
     # then the particle header.  Keep this parser tied to that actual format.
-    header_idx = next((i for i, line in enumerate(lines) if line.lstrip().startswith("Pos.x") or line.lstrip().startswith("TimeStep")), None)
+    # The first ``TimeStep`` row is the summary header.  The particle table
+    # follows the blank separator and starts with Pos.x; selecting TimeStep
+    # first would silently parse the summary table and lose all typed fields.
+    header_idx = next((i for i, line in enumerate(lines) if line.lstrip().startswith("Pos.x")), None)
     if header_idx is None:
         raise F3TimeStudyError("PartVTK CSV lacks the particle header")
-    header = [item.strip() for item in lines[header_idx].split(",")]
+    raw_header = [item.strip() for item in lines[header_idx].split(",")]
+    # PartVTK writes units into the CSV header (for example ``Mass [kg]``),
+    # while the semantic field names used by this audit are unit-independent.
+    header = [item.split(" [", 1)[0].strip() for item in raw_header]
     rows = list(csv.DictReader(lines[header_idx + 1:], fieldnames=header))
     required = {"Idp", "Type", "Mk", "Mass", "Pos.x", "Pos.y", "Pos.z", "Zone"}
     missing = sorted(required - set(header))
