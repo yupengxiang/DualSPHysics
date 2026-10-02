@@ -14,11 +14,14 @@ import argparse
 import csv
 from datetime import datetime, timezone
 import hashlib
+import importlib.util
 import json
 import math
+import os
 from pathlib import Path
 import struct
 import subprocess
+import sys
 from typing import Any, Iterable, Mapping
 import xml.etree.ElementTree as ET
 
@@ -26,6 +29,8 @@ import xml.etree.ElementTree as ET
 FAMILY_ID = "F2"
 DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
 PARTVTK = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64")
+NATIVE_MASS_AUDIT = Path(__file__).with_name("f2_handoff_20261002_native_mass_audit.py")
+SAFE_BI4_DECODER = Path("/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/f8_r008_safe_bi4_decoder_v1.py")
 TOL = 2.5e-6
 
 
@@ -53,6 +58,83 @@ def integer(row: Mapping[str, str], key: str) -> int:
 def float32(value: float) -> float:
     """Return the exact IEEE-754 single-precision value used by PartVTK."""
     return struct.unpack("f", struct.pack("f", float(value)))[0]
+
+
+def load_native_mass_helpers() -> Any:
+    """Load the pinned read-only XML/BI4 header helpers without package imports."""
+    spec = importlib.util.spec_from_file_location("ds02_f2_native_mass_audit", NATIVE_MASS_AUDIT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load native mass helper: {NATIVE_MASS_AUDIT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def native_mass_evidence(data_dir: Path, case_id: str, expected: Mapping[str, Any], metadata: Mapping[str, Any]) -> dict[str, Any]:
+    """Read generated XML and the BI4 root header as the mass authority.
+
+    The PartVTK CSV remains a separate display/serialization diagnostic.  It
+    is intentionally excluded from the frozen initial-mass gate because its
+    decimal particle mass is rounded before summation.
+    """
+    helper = load_native_mass_helpers()
+    generated_xml = data_dir / f"{case_id}.xml"
+    bi4_path = data_dir / f"{case_id}.bi4"
+    scanner = helper._load_safe_decoder(SAFE_BI4_DECODER)
+    xml = helper.parse_generated_xml(generated_xml)
+    native = helper.scan_native_header(bi4_path, scanner)
+    root_values = native["root_values"]
+    fluid_count = int(root_values["CaseNfluid"])
+    case_np = int(root_values["CaseNp"])
+    massfluid = float(root_values["MassFluid"])
+    from decimal import Decimal
+
+    continuous_mass = Decimal("24.576")
+    native_mass = Decimal.from_float(massfluid) * fluid_count
+    xml_mass = xml["xml_massfluid_kg"] * xml["particles_nfluid"]
+    native_relative_error = float((native_mass - continuous_mass) / continuous_mass)
+    xml_relative_error = float((xml_mass - continuous_mass) / continuous_mass)
+    budget = float(metadata["mass_error_budget_fraction"])
+    checks = {
+        "generated_xml_present": generated_xml.is_file(),
+        "bi4_present": bi4_path.is_file(),
+        "xml_bi4_case_nfluid_match": xml["particles_nfluid"] == fluid_count,
+        "xml_bi4_case_np_match": xml["particles_np"] == case_np,
+        "xml_bi4_dp_match": abs(float(xml["definition_dp_m"]) - float(root_values["Dp"])) <= 1e-15,
+        "xml_bi4_massfluid_match": abs(float(xml["xml_massfluid_kg"]) - massfluid) <= 1e-14,
+        "native_mass_within_budget": abs(native_relative_error) <= budget,
+        "xml_mass_within_budget": abs(xml_relative_error) <= budget,
+    }
+    return {
+        "authority": "BI4 root MassFluid IEEE-754 value multiplied by BI4 CaseNfluid; generated XML is an independent decimal cross-check",
+        "continuous_mass_kg": float(continuous_mass),
+        "mass_error_budget_fraction": budget,
+        "generated_xml": {
+            "path": str(generated_xml),
+            "sha256": sha256(generated_xml),
+            "bytes": generated_xml.stat().st_size,
+            "massfluid_kg": float(xml["xml_massfluid_kg"]),
+            "particles_nfluid": xml["particles_nfluid"],
+            "particles_np": xml["particles_np"],
+            "mass_total_kg": float(xml_mass),
+            "relative_error": xml_relative_error,
+        },
+        "bi4": {
+            "path": str(bi4_path),
+            "sha256": native["sha256"],
+            "bytes": native["bytes"],
+            "root_massfluid_kg": massfluid,
+            "root_case_nfluid": fluid_count,
+            "root_case_np": case_np,
+            "root_dp_m": root_values["Dp"],
+            "mass_total_kg": float(native_mass),
+            "relative_error": native_relative_error,
+            "data2d": root_values.get("Data2d"),
+        },
+        "checks": checks,
+        "pass": all(checks.values()),
+    }
 
 
 def parse_partvtk_csv(path: Path) -> list[dict[str, str]]:
@@ -192,7 +274,12 @@ def run_partvtk(data_dir: Path, output_dir: Path, case_id: str) -> tuple[Path, d
 def audit_case(entry: Mapping[str, Any], report_root: Path) -> dict[str, Any]:
     case_id = str(entry["case_id"])
     request = json.loads(Path(entry["request"]["path"]).read_text(encoding="utf-8"))
-    receipt_path = DATA_ROOT / "families" / FAMILY_ID / case_id / request["attempt_id"] / "execution-receipt.json"
+    # New additive repair manifests may place each attempt under a distinct
+    # raw-output root.  Keep the historical case/attempt convention as the
+    # fallback, but honor an evidence-bound receipt path when supplied so an
+    # audit cannot accidentally read a different attempt with the same case
+    # and attempt naming.
+    receipt_path = Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / case_id / request["attempt_id"] / "execution-receipt.json"))
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     if receipt.get("status") != "completed" or receipt.get("returncode") != 0:
         raise RuntimeError(f"GenCase receipt is not completed: {receipt_path}")
@@ -241,6 +328,7 @@ def audit_case(entry: Mapping[str, Any], report_root: Path) -> dict[str, Any]:
     mass_relative_error = mass / expected_mass - 1.0 if expected_mass else float("inf")
     native_storage_relative_error = mass / expected_native_mass - 1.0 if expected_native_mass else float("inf")
     physical_lattice_relative_error = float(expected["relative_mass_error"])
+    native_mass = native_mass_evidence(data_dir, case_id, expected, metadata)
     boundary_groups: dict[tuple[int, int], list[tuple[float, float, float]]] = {}
     for row, point in zip(rows, positions):
         key = (integer(row, "Type"), integer(row, "Mk"))
@@ -270,7 +358,10 @@ def audit_case(entry: Mapping[str, Any], report_root: Path) -> dict[str, Any]:
         "typed_id_unique": typed_id_duplicates == 0,
         "fluid_position_unique": coordinate_duplicates == 0,
         "fluid_boundary_nonoverlap": overlap == 0,
-        "mass_within_budget": abs(native_storage_relative_error) <= float(metadata["mass_error_budget_fraction"]),
+        # The CSV sum is retained as a serialization diagnostic.  The frozen
+        # initial-mass gate uses the generated XML and BI4 header values read
+        # above, because PartVTK rounds each decimal mass before printing.
+        "mass_within_budget": native_mass["pass"],
         "finite_wall_faces": all(item.get("finite_faces_pass", False) for item in walls.values()),
     }
     return {
@@ -295,8 +386,10 @@ def audit_case(entry: Mapping[str, Any], report_root: Path) -> dict[str, Any]:
         "expected_partvtk_csv_particle_mass_kg": serialized_particle_mass,
         "expected_native_float32_mass_kg": expected_native_mass,
         "mass_relative_error_vs_exact_lattice": mass_relative_error,
+        "partvtk_csv_relative_error_vs_serialized_mass": native_storage_relative_error,
         "native_storage_relative_error": native_storage_relative_error,
         "physical_lattice_relative_error": physical_lattice_relative_error,
+        "native_mass_authority": native_mass,
         "wall_evidence": walls,
         "checks": checks,
         "status": "PASS_INITIAL_STRUCTURE" if all(checks.values()) else "FAIL_INITIAL_STRUCTURE",
@@ -313,7 +406,7 @@ def audit(manifest_path: Path, report_root: Path) -> dict[str, Any]:
         "manifest": {"path": str(manifest_path), "sha256": sha256(manifest_path)},
         "qualification_claim": "none",
         "production_claim": "none",
-        "native_identity_semantics": "PartVTK CSV Zone+Idp; Type=3 and native Mk identify fluid; no coordinate/mass rewriting",
+        "native_identity_semantics": "PartVTK CSV Zone+Idp; Type=3 and native Mk identify fluid; generated XML and BI4 header provide the mass authority; no coordinate/mass rewriting",
         "cases": cases,
         "status": "PASS_INITIAL_STRUCTURE" if all(case["status"] == "PASS_INITIAL_STRUCTURE" for case in cases) else "FAIL_INITIAL_STRUCTURE",
         "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
@@ -327,16 +420,21 @@ def make_request(manifest_path: Path, request_path: Path, *, case_id: str = "F2_
     request_path = request_path.resolve()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     audit_script = Path(__file__).resolve()
-    input_files = [audit_script, manifest_path, PARTVTK]
+    input_files = [audit_script, manifest_path, PARTVTK, NATIVE_MASS_AUDIT, SAFE_BI4_DECODER]
     for entry in manifest["cases"]:
         request = json.loads(Path(entry["request"]["path"]).read_text(encoding="utf-8"))
+        metadata = json.loads(Path(entry["metadata"]["path"]).read_text(encoding="utf-8"))
         input_files.extend([
             Path(entry["definition"]["path"]),
             Path(entry["metadata"]["path"]),
-            Path(request["motion_sha256"] and json.loads(Path(entry["metadata"]["path"]).read_text())["motion"]["path"]),
-            DATA_ROOT / "families" / FAMILY_ID / entry["case_id"] / request["attempt_id"] / "execution-receipt.json",
+            Path(metadata["motion"]["path"]),
+            Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / entry["case_id"] / request["attempt_id"] / "execution-receipt.json")),
             Path(entry["request"]["path"]),
         ])
+        receipt_path = Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / entry["case_id"] / request["attempt_id"] / "execution-receipt.json"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        data_dir = Path(receipt["output_root"])
+        input_files.extend([data_dir / f"{entry['case_id']}.xml", data_dir / f"{entry['case_id']}.bi4"])
     unique_files = []
     seen: set[str] = set()
     for path in input_files:
