@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='utf-8'?>
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="02-10-2026 20:51:52">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" units_comment="m" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="30" />
+            <speedsound value="0" auto="true" />
+            <coefh value="0.91924" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="240" fluidcount="9" />
+        <geometry>
+            <definition dp="0.01" units_comment="metres (m)">
+                <pointref x="0.005" y="0.005" z="0.005" />
+                <pointmin x="-0.664" y="-0.464" z="-0.064" />
+                <pointmax x="0.664" y="0.464" z="0.664" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>real | bound | dp</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="-0.6" y="-0.4" z="0" />
+                        <size x="1.2" y="0.8" z="0.6" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkbound mk="2" />
+                    <drawbox>
+                        <boxfill>all</boxfill>
+                        <point x="-0.07" y="-0.24" z="0.05" />
+                        <size x="0.06" y="0.48" z="0.48" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkfluid mk="1" />
+                    <drawbox cmt="Finer reference finite wet-cell slab; original continuum unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.545" y="-0.345" z="0.055" />
+                        <size x="0.470000001" y="0.690000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Finer reference finite wet-cell slab; original continuum unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.005" y="-0.345" z="0.055" />
+                        <size x="0.550000001" y="0.690000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Finer reference finite wet-cell slab; original continuum unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.065" y="-0.345" z="0.055" />
+                        <size x="0.050000001" y="0.100000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Finer reference finite wet-cell slab; original continuum unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.065" y="0.245" z="0.055" />
+                        <size x="0.050000001" y="0.100000001" z="0.420000001" />
+                    </drawbox>
+                    <shapeout file="" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <motion>
+            <objreal ref="2">
+                <begin mov="1" start="0" finish="12" />
+                <mvrotsinu id="1" duration="2" next="2" anglesunits="degrees">
+                    <freq v="0.4" units_comment="1/s" />
+                    <ampl v="45" units_comment="degrees" />
+                    <phase v="0" units_comment="degrees" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotsinu>
+                <wait id="2" duration="0.25" next="3" />
+                <mvrotsinu id="3" duration="2" next="4" anglesunits="degrees">
+                    <freq v="0.4" units_comment="1/s" />
+                    <ampl v="45" units_comment="degrees" />
+                    <phase v="180" units_comment="degrees" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotsinu>
+                <wait id="4" duration="0.25" next="1" />
+            </objreal>
+        </motion>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="2" />
+            <parameter key="Boundary" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.05" />
+            <parameter key="DensityDT" value="3" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="12" units_comment="seconds" />
+            <parameter key="TimeOut" value="0.002" units_comment="seconds" />
+            <parameter key="PartsOutMax" value="1" comment="**DEPRECATED** " />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <parameter key="MinFluidStop" value="0" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default - 150%" y="default - 150%" z="default - 150%" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default + 150%" y="default + 150%" z="default + 150%" />
+            </simulationdomain>
+        </parameters>
+        <particles np="424277" nb="105561" nbf="100662" mkboundfirst="10" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="-0.615" y="-0.425" z="-0.015" />
+                    <posmax x="0.625" y="0.425" z="0.605" />
+                </positions>
+                <fixed count="100662" id="0-100661" mkcount="1" mkvalues="10" />
+                <moving count="4899" id="100662-105560" mkcount="1" mkvalues="12" />
+                <fluid count="318716" id="105561-424276" mkcount="1" mkvalues="2" />
+            </_summary>
+            <fixed mkbound="0" mk="10" begin="0" count="100662" />
+            <moving mkbound="2" mk="12" begin="100662" count="4899" refmotion="0" />
+            <fluid mkfluid="1" mk="2" begin="105561" count="318716" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.01" units_comment="metres (m)" />
+            <h value="0.015921703843" units_comment="metres (m)" />
+            <b value="542352.85714" units_comment="Pascal (Pa)" />
+            <massbound value="0.001" units_comment="kg" />
+            <massfluid value="0.001" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion>
+            <objreal ref="0">
+                <begin mov="1" start="0" finish="12" />
+                <mvrotsinu id="1" duration="2" next="2" anglesunits="degrees">
+                    <freq v="0.4" units_comment="1/s" />
+                    <ampl v="45" units_comment="degrees" />
+                    <phase v="0" units_comment="degrees" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotsinu>
+                <wait id="2" duration="0.25" next="3" />
+                <mvrotsinu id="3" duration="2" next="4" anglesunits="degrees">
+                    <freq v="0.4" units_comment="1/s" />
+                    <ampl v="45" units_comment="degrees" />
+                    <phase v="180" units_comment="degrees" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotsinu>
+                <wait id="4" duration="0.25" next="1" />
+            </objreal>
+        </motion>
+        <vtkout mkboundfirst="10" mkfluidfirst="1">
+            <vtkfile name="F7_OBSTACLE_EXPLICIT_WET_CELLS_DP001_REFERENCE_001__Dp.vtk" mk="10,12" mkbound="0,2" />
+            <vtkfile name="F7_OBSTACLE_EXPLICIT_WET_CELLS_DP001_REFERENCE_001__Actual.vtk" mk="10,12" mkbound="0,2" />
+        </vtkout>
+    </execution>
+</case>
