@@ -1,0 +1,490 @@
+#!/usr/bin/env python3
+"""Audit the new F2 commensurate cell-centre GenCase artefacts.
+
+The audit is deliberately a read-only CPU task.  It invokes the official
+PartVTK binary only from the shared runtime request, then checks the native
+CSV identity/type fields, source-band populations, cell-centre lattice,
+fluid-wall overlap, mass, and finite wall faces.  It never edits a BI4 or
+normalizes particle positions/masses.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+from datetime import datetime, timezone
+import hashlib
+import importlib.util
+import json
+import math
+import os
+from pathlib import Path
+import struct
+import subprocess
+import sys
+from typing import Any, Iterable, Mapping
+import xml.etree.ElementTree as ET
+
+
+FAMILY_ID = "F2"
+DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
+PARTVTK = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64")
+NATIVE_MASS_AUDIT = Path(__file__).with_name("f2_handoff_20261002_native_mass_audit.py")
+SAFE_BI4_DECODER = Path("/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/f8_r008_safe_bi4_decoder_v1.py")
+TOL = 2.5e-6
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def number(row: Mapping[str, str], key: str) -> float:
+    return float(row[key].strip())
+
+
+def integer(row: Mapping[str, str], key: str) -> int:
+    return int(float(row[key].strip()))
+
+
+def float32(value: float) -> float:
+    """Return the exact IEEE-754 single-precision value used by PartVTK."""
+    return struct.unpack("f", struct.pack("f", float(value)))[0]
+
+
+def load_native_mass_helpers() -> Any:
+    """Load the pinned read-only XML/BI4 header helpers without package imports."""
+    spec = importlib.util.spec_from_file_location("ds02_f2_native_mass_audit", NATIVE_MASS_AUDIT)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"cannot load native mass helper: {NATIVE_MASS_AUDIT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def native_mass_evidence(data_dir: Path, case_id: str, expected: Mapping[str, Any], metadata: Mapping[str, Any]) -> dict[str, Any]:
+    """Read generated XML and the BI4 root header as the mass authority.
+
+    The PartVTK CSV remains a separate display/serialization diagnostic.  It
+    is intentionally excluded from the frozen initial-mass gate because its
+    decimal particle mass is rounded before summation.
+    """
+    helper = load_native_mass_helpers()
+    generated_xml = data_dir / f"{case_id}.xml"
+    bi4_path = data_dir / f"{case_id}.bi4"
+    scanner = helper._load_safe_decoder(SAFE_BI4_DECODER)
+    xml = helper.parse_generated_xml(generated_xml)
+    native = helper.scan_native_header(bi4_path, scanner)
+    root_values = native["root_values"]
+    fluid_count = int(root_values["CaseNfluid"])
+    case_np = int(root_values["CaseNp"])
+    massfluid = float(root_values["MassFluid"])
+    from decimal import Decimal
+
+    continuous_mass = Decimal("24.576")
+    native_mass = Decimal.from_float(massfluid) * fluid_count
+    xml_mass = xml["xml_massfluid_kg"] * xml["particles_nfluid"]
+    native_relative_error = float((native_mass - continuous_mass) / continuous_mass)
+    xml_relative_error = float((xml_mass - continuous_mass) / continuous_mass)
+    budget = float(metadata["mass_error_budget_fraction"])
+    checks = {
+        "generated_xml_present": generated_xml.is_file(),
+        "bi4_present": bi4_path.is_file(),
+        "xml_bi4_case_nfluid_match": xml["particles_nfluid"] == fluid_count,
+        "xml_bi4_case_np_match": xml["particles_np"] == case_np,
+        "xml_bi4_dp_match": abs(float(xml["definition_dp_m"]) - float(root_values["Dp"])) <= 1e-15,
+        "xml_bi4_massfluid_match": abs(float(xml["xml_massfluid_kg"]) - massfluid) <= 1e-14,
+        "native_mass_within_budget": abs(native_relative_error) <= budget,
+        "xml_mass_within_budget": abs(xml_relative_error) <= budget,
+    }
+    return {
+        "authority": "BI4 root MassFluid IEEE-754 value multiplied by BI4 CaseNfluid; generated XML is an independent decimal cross-check",
+        "continuous_mass_kg": float(continuous_mass),
+        "mass_error_budget_fraction": budget,
+        "generated_xml": {
+            "path": str(generated_xml),
+            "sha256": sha256(generated_xml),
+            "bytes": generated_xml.stat().st_size,
+            "massfluid_kg": float(xml["xml_massfluid_kg"]),
+            "particles_nfluid": xml["particles_nfluid"],
+            "particles_np": xml["particles_np"],
+            "mass_total_kg": float(xml_mass),
+            "relative_error": xml_relative_error,
+        },
+        "bi4": {
+            "path": str(bi4_path),
+            "sha256": native["sha256"],
+            "bytes": native["bytes"],
+            "root_massfluid_kg": massfluid,
+            "root_case_nfluid": fluid_count,
+            "root_case_np": case_np,
+            "root_dp_m": root_values["Dp"],
+            "mass_total_kg": float(native_mass),
+            "relative_error": native_relative_error,
+            "data2d": root_values.get("Data2d"),
+        },
+        "checks": checks,
+        "pass": all(checks.values()),
+    }
+
+
+def parse_partvtk_csv(path: Path) -> list[dict[str, str]]:
+    lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    header_index = next((i for i, line in enumerate(lines) if line.startswith("Pos.x [m]")), None)
+    if header_index is None:
+        raise RuntimeError(f"PartVTK CSV has no particle header: {path}")
+    header = [item.strip() for item in lines[header_index].split(",") if item.strip()]
+    required = {"Pos.x [m]", "Pos.y [m]", "Pos.z [m]", "Zone", "Idp", "Mass [kg]", "Type", "Mk"}
+    missing = required.difference(header)
+    if missing:
+        raise RuntimeError(f"PartVTK CSV missing fields {sorted(missing)}: {path}")
+    rows: list[dict[str, str]] = []
+    for line in lines[header_index + 1 :]:
+        if not line.strip():
+            continue
+        values = [item.strip() for item in line.split(",")]
+        if len(values) < len(header):
+            continue
+        rows.append(dict(zip(header, values)))
+    if not rows:
+        raise RuntimeError(f"PartVTK CSV contains no particle rows: {path}")
+    return rows
+
+
+def parse_declared_boxes(xml_path: Path) -> dict[int, dict[str, Any]]:
+    root = ET.parse(xml_path).getroot()
+    mainlist = root.find(".//geometry/commands/mainlist")
+    if mainlist is None:
+        raise RuntimeError(f"definition has no geometry mainlist: {xml_path}")
+    bound_mk: int | None = None
+    boxes: dict[int, dict[str, Any]] = {}
+    for node in mainlist:
+        if node.tag == "setmkbound":
+            bound_mk = int(node.attrib["mk"])
+            continue
+        if node.tag == "setmkfluid":
+            bound_mk = None
+            continue
+        if node.tag != "drawbox" or bound_mk is None:
+            continue
+        point = node.find("./point")
+        size = node.find("./size")
+        if point is None or size is None:
+            continue
+        low = [float(point.attrib[key]) for key in ("x", "y", "z")]
+        extent = [float(size.attrib[key]) for key in ("x", "y", "z")]
+        boxes[bound_mk] = {
+            "mk": bound_mk,
+            "low_m": low,
+            "high_m": [a + b for a, b in zip(low, extent)],
+            "size_m": extent,
+            "boxfill": node.findtext("./boxfill", default="").strip(),
+        }
+    if len(boxes) != 3:
+        raise RuntimeError(f"expected 3 declared bound boxes, found {len(boxes)}: {xml_path}")
+    return boxes
+
+
+def face_names(boxfill: str) -> tuple[str, ...]:
+    mapping = {"bottom": "z-", "top": "z+", "left": "x-", "right": "x+", "front": "y-", "back": "y+"}
+    return tuple(mapping[token.strip()] for token in boxfill.split("|") if token.strip() in mapping)
+
+
+def face_coverage(points: list[tuple[float, float, float]], box: Mapping[str, Any], dp: float) -> dict[str, Any]:
+    low = box["low_m"]
+    high = box["high_m"]
+    size = box["size_m"]
+    axes = {"x": 0, "y": 1, "z": 2}
+    tolerance = max(2.25 * dp, 1e-6)
+    output: dict[str, Any] = {}
+    for face in face_names(str(box["boxfill"])):
+        axis = axes[face[0]]
+        target = low[axis] if face[1] == "-" else high[axis]
+        selected = [point for point in points if abs(point[axis] - target) <= tolerance]
+        tangential = [index for index in range(3) if index != axis]
+        spans = []
+        for index in tangential:
+            span = max((point[index] for point in selected), default=0.0) - min((point[index] for point in selected), default=0.0)
+            spans.append(max(0.0, min(1.0, span / max(size[index], 1e-12))))
+        output[face] = {
+            "count": len(selected),
+            "span_fraction": min(spans) if spans else 0.0,
+            "normal": [(-1.0 if face[1] == "-" else 1.0) if index == axis else 0.0 for index in range(3)],
+            "coordinate_target_m": target,
+            "tolerance_m": tolerance,
+        }
+    return output
+
+
+def nearest_box_group(groups: Mapping[tuple[int, int], list[tuple[float, float, float]]], box: Mapping[str, Any], *, type_id: int) -> tuple[int, int] | None:
+    center = [(a + b) / 2.0 for a, b in zip(box["low_m"], box["high_m"])]
+    candidates = {key: points for key, points in groups.items() if key[0] == type_id}
+    if not candidates:
+        return None
+    return min(candidates, key=lambda key: sum((sum(point[i] for point in candidates[key]) / len(candidates[key]) - center[i]) ** 2 for i in range(3)))
+
+
+def run_partvtk(data_dir: Path, output_dir: Path, case_id: str) -> tuple[Path, dict[str, Any]]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    prefix = output_dir / "Particles"
+    bi4 = data_dir / f"{case_id}.bi4"
+    xml = data_dir / f"{case_id}.xml"
+    command = [
+        str(PARTVTK),
+        "-filedata",
+        str(bi4),
+        "-filexml",
+        str(xml),
+        "-first:0",
+        "-last:0",
+        "-threads:4",
+        "-savecsv",
+        str(prefix),
+        "-onlytype:+all",
+        "-vars:-all,+idp,+vel,+rhop,+press,+type,+mk,+mass,+zone",
+        "-csvsep:1",
+    ]
+    completed = subprocess.run(command, cwd=output_dir, capture_output=True, text=True, check=False, timeout=600)
+    log_path = output_dir / "partvtk.stdout.log"
+    log_path.write_text(completed.stdout + completed.stderr, encoding="utf-8")
+    frames = sorted(output_dir.glob("Particles_*.csv"))
+    frames = [path for path in frames if not path.name.endswith("_stats.csv")]
+    if not frames and (output_dir / "Particles.csv").is_file():
+        frames = [output_dir / "Particles.csv"]
+    if completed.returncode != 0 or not frames:
+        raise RuntimeError(f"PartVTK failed for {case_id}: {log_path}")
+    return frames[0], {
+        "command": command,
+        "returncode": completed.returncode,
+        "csv": {"path": str(frames[0]), "sha256": sha256(frames[0]), "bytes": frames[0].stat().st_size},
+        "log": {"path": str(log_path), "sha256": sha256(log_path), "bytes": log_path.stat().st_size},
+        "binary": {"path": str(PARTVTK), "sha256": sha256(PARTVTK)},
+    }
+
+
+def audit_case(entry: Mapping[str, Any], report_root: Path) -> dict[str, Any]:
+    case_id = str(entry["case_id"])
+    request = json.loads(Path(entry["request"]["path"]).read_text(encoding="utf-8"))
+    # New additive repair manifests may place each attempt under a distinct
+    # raw-output root.  Keep the historical case/attempt convention as the
+    # fallback, but honor an evidence-bound receipt path when supplied so an
+    # audit cannot accidentally read a different attempt with the same case
+    # and attempt naming.
+    receipt_path = Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / case_id / request["attempt_id"] / "execution-receipt.json"))
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("status") != "completed" or receipt.get("returncode") != 0:
+        raise RuntimeError(f"GenCase receipt is not completed: {receipt_path}")
+    expected = entry["expected_population"]
+    if receipt.get("solver_dimension_from_gencase") != 3 or receipt.get("fluid_particles") != expected["total_particle_count"]:
+        raise RuntimeError(f"GenCase population/dimension mismatch for {case_id}: {receipt_path}")
+    data_dir = Path(receipt["output_root"])
+    case_report = report_root / case_id
+    csv_path, partvtk = run_partvtk(data_dir, case_report / "partvtk", case_id)
+    rows = parse_partvtk_csv(csv_path)
+    positions = [(number(row, "Pos.x [m]"), number(row, "Pos.y [m]"), number(row, "Pos.z [m]")) for row in rows]
+    typed_ids = [(integer(row, "Zone"), integer(row, "Idp")) for row in rows]
+    typed_id_duplicates = len(typed_ids) - len(set(typed_ids))
+    fluid_rows = [row for row in rows if integer(row, "Type") == 3]
+    fluid_positions = [(number(row, "Pos.x [m]"), number(row, "Pos.y [m]"), number(row, "Pos.z [m]")) for row in fluid_rows]
+    fluid_mks = sorted({integer(row, "Mk") for row in fluid_rows})
+    per_mk = {str(mk): sum(integer(row, "Mk") == mk for row in fluid_rows) for mk in fluid_mks}
+    coordinate_keys = [(round(point[0], 7), round(point[1], 7), round(point[2], 7)) for point in fluid_positions]
+    coordinate_duplicates = len(coordinate_keys) - len(set(coordinate_keys))
+    metadata = json.loads(Path(entry["metadata"]["path"]).read_text(encoding="utf-8"))
+    dp = float(metadata["dp_m"])
+    low = metadata["geometry"]["continuous_fluid_low_m"]
+    size = metadata["geometry"]["continuous_fluid_size_m"]
+    counts = expected["cells_xyz"]
+    expected_axes = [[low[i] + dp / 2.0 + index * dp for index in range(counts[i])] for i in range(3)]
+    actual_axes = [sorted({point[i] for point in fluid_positions}) for i in range(3)]
+    axis_checks = []
+    for actual, expected_axis in zip(actual_axes, expected_axes):
+        error = max((min(abs(value - target) for target in expected_axis) for value in actual), default=float("inf"))
+        axis_checks.append({"actual_count": len(actual), "expected_count": len(expected_axis), "max_nearest_error_m": error, "first_m": actual[0] if actual else None, "last_m": actual[-1] if actual else None, "pass": len(actual) == len(expected_axis) and error <= TOL})
+    band_checks = []
+    bounds_y = metadata["geometry"]["source_band_bounds_y_m"]
+    for index, (band_low, band_high) in enumerate(bounds_y):
+        band = [row for row in fluid_rows if band_low - TOL <= number(row, "Pos.y [m]") <= band_high - TOL]
+        ys = sorted({number(row, "Pos.y [m]") for row in band})
+        band_checks.append({"source_index": index, "native_mk": fluid_mks[index] if index < len(fluid_mks) else None, "count": len(band), "expected_count": expected["source_band_particle_count"], "y_count": len(ys), "y_values_m": ys, "pass": len(band) == expected["source_band_particle_count"] and len(ys) == expected["source_band_cells_xyz"][1]})
+    gaps = [actual_axes[1][i + 1] - actual_axes[1][i] for i in range(len(actual_axes[1]) - 1)] if actual_axes[1] else []
+    mass = sum(number(row, "Mass [kg]") for row in fluid_rows)
+    expected_mass = float(expected["expected_lattice_mass_kg"])
+    native_particle_mass = float32(dp ** 3 * 1000.0)
+    # PartVTK's CSV uses eight significant digits for Mass. Compare the
+    # measured sum to that immutable serialization contract as well as to the
+    # exact lattice mass; never alter the measured values.
+    serialized_particle_mass = float(f"{native_particle_mass:.7E}")
+    expected_native_mass = serialized_particle_mass * expected["total_particle_count"]
+    mass_relative_error = mass / expected_mass - 1.0 if expected_mass else float("inf")
+    native_storage_relative_error = mass / expected_native_mass - 1.0 if expected_native_mass else float("inf")
+    physical_lattice_relative_error = float(expected["relative_mass_error"])
+    native_mass = native_mass_evidence(data_dir, case_id, expected, metadata)
+    boundary_groups: dict[tuple[int, int], list[tuple[float, float, float]]] = {}
+    for row, point in zip(rows, positions):
+        key = (integer(row, "Type"), integer(row, "Mk"))
+        boundary_groups.setdefault(key, []).append(point)
+    boxes = parse_declared_boxes(Path(entry["definition"]["path"]))
+    walls: dict[str, Any] = {}
+    labels = [(0, "cup", 1), (1, "receiver", 0), (2, "tray", 0)]
+    for declared_mk, label, type_id in labels:
+        box = boxes[declared_mk]
+        native = nearest_box_group(boundary_groups, box, type_id=type_id)
+        walls[label] = {"declared_mk": declared_mk, "native_type_mk": list(native) if native else None}
+        if native:
+            coverage = face_coverage(boundary_groups[native], box, dp)
+            walls[label].update({"point_count": len(boundary_groups[native]), "bounds_low_m": [min(p[i] for p in boundary_groups[native]) for i in range(3)], "bounds_high_m": [max(p[i] for p in boundary_groups[native]) for i in range(3)], "face_coverage": coverage, "finite_faces_pass": all(item["count"] > 0 and item["span_fraction"] >= 0.5 for item in coverage.values())})
+        else:
+            walls[label]["finite_faces_pass"] = False
+    fluid_keys = set(coordinate_keys)
+    boundary_keys = {(round(point[0], 7), round(point[1], 7), round(point[2], 7)) for row, point in zip(rows, positions) if integer(row, "Type") != 3}
+    overlap = len(fluid_keys & boundary_keys)
+    checks = {
+        "three_d": receipt.get("solver_dimension_from_gencase") == 3,
+        "fluid_count": len(fluid_rows) == expected["total_particle_count"],
+        "source_mk_count": len(fluid_mks) == expected["source_band_count"],
+        "source_band_counts": all(item["pass"] for item in band_checks),
+        "axis_lattice": all(item["pass"] for item in axis_checks),
+        "interface_spacing": bool(gaps) and all(abs(gap - dp) <= TOL for gap in gaps),
+        "typed_id_unique": typed_id_duplicates == 0,
+        "fluid_position_unique": coordinate_duplicates == 0,
+        "fluid_boundary_nonoverlap": overlap == 0,
+        # The CSV sum is retained as a serialization diagnostic.  The frozen
+        # initial-mass gate uses the generated XML and BI4 header values read
+        # above, because PartVTK rounds each decimal mass before printing.
+        "mass_within_budget": native_mass["pass"],
+        "finite_wall_faces": all(item.get("finite_faces_pass", False) for item in walls.values()),
+    }
+    return {
+        "case_id": case_id,
+        "background": entry["background"],
+        "resolution": entry["resolution"],
+        "receipt": {"path": str(receipt_path), "sha256": sha256(receipt_path), "output_root": str(data_dir), "total_particles": receipt["total_particles"], "fluid_particles": receipt["fluid_particles"], "dimension": receipt["solver_dimension_from_gencase"]},
+        "partvtk": partvtk,
+        "row_count": len(rows),
+        "typed_id_duplicates": typed_id_duplicates,
+        "fluid_type": 3,
+        "fluid_mks": fluid_mks,
+        "fluid_per_native_mk": per_mk,
+        "fluid_position_duplicates": coordinate_duplicates,
+        "fluid_boundary_overlap_count": overlap,
+        "axis_checks": axis_checks,
+        "source_band_checks": band_checks,
+        "interface_dy_m": gaps,
+        "fluid_mass_kg": mass,
+        "expected_mass_kg": expected_mass,
+        "expected_native_float32_particle_mass_kg": native_particle_mass,
+        "expected_partvtk_csv_particle_mass_kg": serialized_particle_mass,
+        "expected_native_float32_mass_kg": expected_native_mass,
+        "mass_relative_error_vs_exact_lattice": mass_relative_error,
+        "partvtk_csv_relative_error_vs_serialized_mass": native_storage_relative_error,
+        "native_storage_relative_error": native_storage_relative_error,
+        "physical_lattice_relative_error": physical_lattice_relative_error,
+        "native_mass_authority": native_mass,
+        "wall_evidence": walls,
+        "checks": checks,
+        "status": "PASS_INITIAL_STRUCTURE" if all(checks.values()) else "FAIL_INITIAL_STRUCTURE",
+    }
+
+
+def audit(manifest_path: Path, report_root: Path) -> dict[str, Any]:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    cases = [audit_case(entry, report_root) for entry in manifest["cases"]]
+    result = {
+        "schema": "ds-data-02.f2.commensurate-cellcenter-audit.v1",
+        "family_id": FAMILY_ID,
+        "scope_id": manifest["scope_id"],
+        "manifest": {"path": str(manifest_path), "sha256": sha256(manifest_path)},
+        "qualification_claim": "none",
+        "production_claim": "none",
+        "native_identity_semantics": "PartVTK CSV Zone+Idp; Type=3 and native Mk identify fluid; generated XML and BI4 header provide the mass authority; no coordinate/mass rewriting",
+        "cases": cases,
+        "status": "PASS_INITIAL_STRUCTURE" if all(case["status"] == "PASS_INITIAL_STRUCTURE" for case in cases) else "FAIL_INITIAL_STRUCTURE",
+        "created_at_utc": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+    }
+    write_json(report_root / "commensurate-cellcenter-audit.json", result)
+    return result
+
+
+def make_request(manifest_path: Path, request_path: Path, *, case_id: str = "F2_COMM4_CELL_AUDIT_V4B", attempt_id: str = "commensurate-cellcenter-audit-v4b") -> dict[str, Any]:
+    manifest_path = manifest_path.resolve()
+    request_path = request_path.resolve()
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    audit_script = Path(__file__).resolve()
+    input_files = [audit_script, manifest_path, PARTVTK, NATIVE_MASS_AUDIT, SAFE_BI4_DECODER]
+    for entry in manifest["cases"]:
+        request = json.loads(Path(entry["request"]["path"]).read_text(encoding="utf-8"))
+        metadata = json.loads(Path(entry["metadata"]["path"]).read_text(encoding="utf-8"))
+        input_files.extend([
+            Path(entry["definition"]["path"]),
+            Path(entry["metadata"]["path"]),
+            Path(metadata["motion"]["path"]),
+            Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / entry["case_id"] / request["attempt_id"] / "execution-receipt.json")),
+            Path(entry["request"]["path"]),
+        ])
+        receipt_path = Path(entry.get("receipt_path", DATA_ROOT / "families" / FAMILY_ID / entry["case_id"] / request["attempt_id"] / "execution-receipt.json"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        data_dir = Path(receipt["output_root"])
+        input_files.extend([data_dir / f"{entry['case_id']}.xml", data_dir / f"{entry['case_id']}.bi4"])
+    unique_files = []
+    seen: set[str] = set()
+    for path in input_files:
+        path = Path(path).resolve()
+        if str(path) not in seen:
+            seen.add(str(path))
+            unique_files.append(str(path))
+    request = {
+        "schema": "ds-data-02.runner.request.v1",
+        "family_id": FAMILY_ID,
+        "case_id": case_id,
+        "attempt_id": attempt_id,
+        "kind": "cpu",
+        "cpu_task_kind": "audit",
+        "cpu_threads": 4,
+        "max_wall_seconds": 600,
+        "estimated_storage_bytes": 8 * 1024 * 1024 * 1024,
+        "command": ["/usr/bin/python3", str(audit_script), "audit", "--manifest", str(manifest_path), "--report-root", "{attempt_root}/report"],
+        "cwd": str(audit_script.parent),
+        "raw_output_root": str(DATA_ROOT / "families/F2/F2_COMM4_CELL_AUDIT_V4"),
+        "worktree_root": str(audit_script.parents[5]),
+        "solver_launch_forbidden": True,
+        "scope_id": manifest["scope_id"],
+        "input_files": unique_files,
+        "request_note": "Shared CPU PartVTK initial-frame audit only; no solver/GPU/QN/production claim.",
+    }
+    write_json(request_path, request)
+    return request
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command", required=True)
+    p_audit = sub.add_parser("audit")
+    p_audit.add_argument("--manifest", type=Path, required=True)
+    p_audit.add_argument("--report-root", type=Path, required=True)
+    p_request = sub.add_parser("make-request")
+    p_request.add_argument("--manifest", type=Path, required=True)
+    p_request.add_argument("--request", type=Path, required=True)
+    p_request.add_argument("--case-id", default="F2_COMM4_CELL_AUDIT_V4B")
+    p_request.add_argument("--attempt-id", default="commensurate-cellcenter-audit-v4b")
+    args = parser.parse_args()
+    if args.command == "audit":
+        result = audit(args.manifest, args.report_root)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0 if result["status"] == "PASS_INITIAL_STRUCTURE" else 2
+    request = make_request(args.manifest, args.request, case_id=args.case_id, attempt_id=args.attempt_id)
+    print(json.dumps({"status": "written", "request": str(args.request), "input_count": len(request["input_files"])}, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
