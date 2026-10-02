@@ -44,3 +44,16 @@ def test_v35_converter_preserves_native_exclusions_and_xml_inertia():
     assert '"x", "Ixx"' in text
     assert '"y", "Iyy"' in text
     assert '"z", "Izz"' in text
+
+
+def test_v35_actual_evidence_keeps_qn_pending_and_negative_evidence():
+    evidence = json.loads((SCOPE / "actual_h5_labels_spatial_evidence_001.json").read_text())
+    assert evidence["qualification_claim"] == "none"
+    assert evidence["production_claim"] == "none"
+    assert evidence["negative_evidence_preserved"]
+    assert evidence["cases"]["simple_free_response"]["h5"]["receipt"]["status"] == "completed"
+    assert evidence["cases"]["wave_no_contact"]["labels"]["receipt"]["status"] == "completed"
+    for row in evidence["cases"].values():
+        assert row["h5"]["aggregate_massbody_kg"] == 128.0
+        assert row["h5"]["inertia_tensor_kg_m2"][0][0] > 0.0
+        assert row["h5"]["initial_fluid_mass_kg"] == 5120.0
