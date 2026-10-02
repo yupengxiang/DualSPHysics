@@ -27,6 +27,12 @@ EXTERNAL_REPORT = Path(
     "F2H10V2_INITIAL_AUDIT/f2h10v2-initial-audit-20261002-001/report/"
     "gem-handoff-initial-structure-audit.json"
 )
+NATIVE_MASS_REPORT = Path(
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/"
+    "F2H10V2_NATIVE_MASS_AUDIT/f2h10v2-native-mass-audit-20261002-002/report/"
+    "native-mass-audit.json"
+)
+QUALIFICATION_REQUEST_MANIFEST = HANDOFF_ROOT / "qualification_requests/qualification_request_manifest.json"
 
 
 def load_generator_module():
@@ -157,6 +163,41 @@ class F2Handoff20261002Tests(unittest.TestCase):
         self.assertTrue(all(case["checks"]["not_a_denominator_typo"] for case in report["cases"]))
         self.assertTrue(all(case["checks"]["inclusive_lattice_mismatch_is_reproduced"] for case in report["cases"]))
         self.assertTrue(all(case["receipt_consistency_label_ignored"] for case in report["cases"]))
+
+    @unittest.skipUnless(NATIVE_MASS_REPORT.is_file(), "shared-runner native mass evidence is not present")
+    def test_native_mass_report_uses_frozen_metadata_budget_and_native_authority(self) -> None:
+        report = json.loads(NATIVE_MASS_REPORT.read_text(encoding="utf-8"))
+        self.assertEqual(report["status"], "PASS_NATIVE_INITIAL_MASS")
+        self.assertEqual(report["continuous_authority"]["mass_budget_fraction"], "0.000000000001")
+        self.assertFalse(report["continuous_authority"]["partvtk_csv_used_as_authority"])
+        self.assertEqual(len(report["cases"]), 6)
+        for case in report["cases"]:
+            self.assertTrue(case["checks"]["metadata_sha256_matches_manifest"])
+            self.assertTrue(case["checks"]["metadata_frozen_budget_is_1e-12"])
+            self.assertTrue(case["checks"]["native_mass_within_frozen_budget"])
+            self.assertTrue(case["checks"]["xml_mass_within_frozen_budget"])
+            self.assertLess(float(case["mass_authority"]["native_relative_error"]), 1e-12)
+
+    def test_gpu_request_manifest_binds_medium_first_without_launching(self) -> None:
+        manifest = json.loads(QUALIFICATION_REQUEST_MANIFEST.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["status"], "ready_for_primary_gpu_scheduling_no_solver_claim")
+        self.assertFalse(manifest["gpu_launch"])
+        self.assertEqual(len(manifest["requests"]), 6)
+        self.assertEqual(manifest["priority_order"][:2], [
+            "F2H10V2_CENTER_V1_MEDIUM",
+            "F2H10V2_OFFSET_V1_MEDIUM",
+        ])
+        for entry in manifest["requests"]:
+            request_path = Path(entry["path"])
+            request = json.loads(request_path.read_text(encoding="utf-8"))
+            self.assertEqual(request["kind"], "qualification")
+            self.assertEqual(request["status"], "ready_for_primary_gpu_scheduling")
+            self.assertEqual(request["gpu_launch"]["family_owner_launch"], False)
+            self.assertTrue(Path(request["gencase_input_prefix"] + ".xml").is_file())
+            self.assertTrue(Path(request["gencase_input_prefix"] + ".bi4").is_file())
+            self.assertEqual(Path(request["cwd"]), Path(request["gencase_input_prefix"]).parent)
+            for path, digest in request["input_sha256"].items():
+                self.assertEqual(sha256(Path(path)), digest, path)
 
 
 if __name__ == "__main__":
