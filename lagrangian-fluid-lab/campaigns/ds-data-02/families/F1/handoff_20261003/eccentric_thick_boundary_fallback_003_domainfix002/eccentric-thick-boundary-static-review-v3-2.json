@@ -1,0 +1,78 @@
+{
+  "schema": "ds02.f1.eccentric-thick-boundary.static-review.v3.2",
+  "family_id": "F1",
+  "mechanism_id": "eccentric_obstacle",
+  "variant_id": "003-domain-bound-and-summary-rounding-fix",
+  "status": "additive_fine_reaudit_ready_for_root_approved_bounded_cpu",
+  "claim_boundary": "Only a bounded CPU re-run of official GenCase+PartVTK and direct BI4/typed finite-face initial checks; no solver, GPU, temporal qualification, Q-N, or production claim.",
+  "execution": {
+    "solver_started": false,
+    "gpu_started": false,
+    "conversion_started": false,
+    "prior_v31_output_preserved": true
+  },
+  "physical_binding": {
+    "physical_hash": "bb449a2c1d34c75ea6f94d6f5e9124c4eedf0f5b1667ec5225700e6bf11495b5",
+    "continuous_geometry": "same immutable ECC 80.4 kg source used by v3.1 and coarse 002",
+    "boundary_method": "DBC",
+    "normal_geometry": false,
+    "mass_normalization": "forbidden",
+    "support_side_semantics": "outer tank supports outside; obstacle four sides plus top inside continuous solid; three lattice rows; no vdp",
+    "fine_dp_m": 0.003333333333333333,
+    "expected_fluid_particles": 2170800,
+    "expected_fluid_mass_kg": 80.4
+  },
+  "audit_fix": {
+    "rule": "Decoded BI4 and PartVTK remain authoritative; only execution/_summary/positions comparisons allow known five-decimal XML formatting.",
+    "summary_rounding_tolerance_m": 5.02e-06,
+    "why_grounded": "Prior v3.1 fine GenCase/PartVTK output had all direct geometry, identity, mass, typed face, and PartVTK checks true. It printed summary high z=0.44833 while decoded high z=0.4483333333333333, so 2e-8 comparison was a display-precision false negative.",
+    "no_physical_relaxation": "Fluid count/mass, finite values, exact BI4-VTK matching, identity, disjointness, face coverage, continuous-obstacle containment, and DBC/no-normals checks remain unchanged."
+  },
+  "prior_v31_fine_attempt": {
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-1-dp003333333333333333-preflight-002/native-audit.json",
+    "report_sha256": "fc3db425c9ce53eeb32501ed7e5f6bc43a6f4647ac55cc7c52dabb6173620318",
+    "execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-1-dp003333333333333333-preflight-002/execution-receipt.json",
+    "execution_receipt_sha256": "0fec38ae873341b55c0a803853b08999b5c5153066b725a4f1939c9a0a8e8d6c",
+    "child_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-1-dp003333333333333333-preflight-002/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/gencase-child-receipt.json",
+    "child_receipt_sha256": "9b09364f2d0ba6678d4022adf40e490a706c423f643df4a7303f76417a9e0551",
+    "status": "failed_initial_native_contract",
+    "failed_checks": [
+      "native_summary_domain_contains_actual_bounds",
+      "native_summary_domain_matches_expected_padding"
+    ],
+    "all_direct_decoded_checks_except_summary_rounding": true,
+    "actual": {
+      "total_particles": 3035772,
+      "fluid_particles": 2170800,
+      "fixed_particles": 864972,
+      "initial_fluid_mass_kg": 80.3999999999196,
+      "dimension": 3,
+      "decoded_high_m": [
+        1.6083333333333332,
+        0.6783333333333332,
+        0.4483333333333333
+      ],
+      "xml_summary_high_m": [
+        1.60833,
+        0.678333,
+        0.448333
+      ]
+    },
+    "raw_output_immutable": true
+  },
+  "reuse_inputs": {
+    "manifest": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_003_domainfix001/eccentric-thick-boundary-v3-1-DP003333333333333333.manifest.json",
+    "definition": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_003_domainfix001/definitions/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333_Def.xml",
+    "metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_003_domainfix001/definitions/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333.metadata.json",
+    "physical_bytes_unchanged": true
+  },
+  "hard_gates": [
+    "official child returncode=0 and Data2D=0",
+    "decoded BI4 Posd/Idp typed identity and all expected counts/mass",
+    "PartVTK initial total and fluid VTK exact match",
+    "component-wise support bounds including internal obstacle top",
+    "all five outer and all five inside-obstacle faces",
+    "input hashes unchanged before/after"
+  ],
+  "next_scope": "Only after v3.2 fine initial audit passes may root prepare a separate root-only solver request; this audit does not authorize GPU or Q-N."
+}
