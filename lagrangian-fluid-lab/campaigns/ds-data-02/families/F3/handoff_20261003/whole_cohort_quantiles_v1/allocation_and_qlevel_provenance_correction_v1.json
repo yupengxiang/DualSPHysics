@@ -1,0 +1,162 @@
+{
+  "schema": "ds02.f3.whole-cohort.provenance-correction.v1",
+  "status": "additive_correction_only",
+  "claim_boundary": {
+    "qualification_claim": "none",
+    "q_n_status": "not_assessed",
+    "model_invoked": false,
+    "purpose": "Disambiguate the original frozen temporal allocation provenance from the later whole-cohort diagnostic allocation, and record the diagnostic q-level support limitation.",
+    "do_not_modify": [
+      "consumed HALF/QUARTER labels",
+      "consumed comparison report",
+      "original frozen budget JSON"
+    ]
+  },
+  "canonical_sources": {
+    "original_frozen_budget": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/f3_weak_dual_temporal_budget_assessment_001.json",
+      "sha256": "def19897256a3f85052c43949ded25082e3cc0c4a33f8eef0e0834ee545dc9f4",
+      "schema": "ds02.f3.weak-dual.temporal-budget-assessment.v1",
+      "authoritative_fields": {
+        "registration.allocation_rule": "For an observed event with baseline duration T, the registered 2% starting event-time budget is 0.02*T; the registered save/integration share cap allocates at most 0.20*(0.02*T)=0.004*T to save/integration sensitivity.",
+        "registration.event_time_relative_starting_budget": 0.02,
+        "registration.save_or_integration_share_cap": 0.2,
+        "registration.derived_save_or_integration_fraction_of_event_time": 0.004,
+        "registration.allocation_status": "The absolute per-event allocations below are derived from the registered generic contract and are diagnostic accounting, not an automatic Q-N threshold.",
+        "event_allocations.left_right_exchange.derived_save_or_integration_allocation_s": 0.010238388262513484,
+        "event_allocations.left_right_exchange.baseline.chord_time_s": 2.559597065628371,
+        "event_allocations.front_back_exchange.derived_save_or_integration_allocation_s": 0.017270993599294474,
+        "event_allocations.front_back_exchange.baseline.chord_time_s": 4.317748399823618,
+        "event_allocations.top_open_exit.derived_save_or_integration_allocation_s": null
+      },
+      "q_level_fields_present": false
+    },
+    "new_whole_cohort_contract": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/whole_cohort_quantiles_v1/contract.json",
+      "sha256": "068075110a94f8d58fb1d02d5f78e41a07a9930954a5818b4b7651b02c7a2009",
+      "schema": "ds02.f3.quarter-half-whole-cohort-contract.v1",
+      "diagnostic_only_fields": {
+        "budget_contract.integration_allocation_rule": "0.20 * 0.02 * baseline observed chord feature time",
+        "budget_contract.event_time_relative": 0.02,
+        "budget_contract.save_or_integration_share": 0.2,
+        "budget_contract.macro_relative_starting_budget": 0.05,
+        "quantile_fractions": [
+          0.1,
+          0.5,
+          0.9
+        ],
+        "q_level_status": "new diagnostic registration for this whole-cohort comparison; not part of the original frozen gate"
+      }
+    },
+    "whole_cohort_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_WHOLE_COHORT_BOUNDS/f3-quarter-half-whole-cohort-bounds-20261003-001/whole-cohort-bounds.json",
+      "sha256": "9b5b6eb8c91af7c669fd163cd9065283488d395cf4aec625ec75988172063372",
+      "execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G_WHOLE_COHORT_BOUNDS/f3-quarter-half-whole-cohort-bounds-20261003-001/execution-receipt.json",
+      "report_semantics": "The report is a CPU diagnostic over consumed HALF/QUARTER labels. It does not alter the original budget or grant Q-N."
+    }
+  },
+  "allocation_provenance": {
+    "frozen_authority": "Use the original_frozen_budget event_allocations values for any frozen-gate accounting. Never recompute these values from a native observed velocity, a later temporal variant, or a changed comparison cohort.",
+    "new_values_are_descriptive_only": "The values in the report's observed_event_integration_allocation are an additive diagnostic normalization using the actual HALF observed chord feature time. They are not replacements for the frozen allocations.",
+    "events": [
+      {
+        "event_id": "left_right_exchange",
+        "axis": "x",
+        "frozen_baseline_feature_time_s": 2.559597065628371,
+        "frozen_integration_allocation_s": 0.010238388262513484,
+        "new_diagnostic_baseline_feature_time_s": 2.5319831220909643,
+        "new_diagnostic_integration_allocation_s": 0.010127932488363857,
+        "new_diagnostic_source_field": "whole_cohort_report.observed_event_integration_allocation[0]",
+        "observed_max_bracket_or_chord_delta_s": 0.022483624266267377,
+        "ratio_to_frozen_allocation": 2.1960120762940996,
+        "ratio_to_new_diagnostic_allocation": 2.219961901612118,
+        "verdict_under_frozen_allocation": "exceeds_allocation",
+        "verdict_under_new_diagnostic_allocation": "exceeds_allocation"
+      },
+      {
+        "event_id": "front_back_exchange",
+        "axis": "y",
+        "frozen_baseline_feature_time_s": 4.317748399823618,
+        "frozen_integration_allocation_s": 0.017270993599294474,
+        "new_diagnostic_baseline_feature_time_s": 4.25442279920815,
+        "new_diagnostic_integration_allocation_s": 0.017017691196832604,
+        "new_diagnostic_source_field": "whole_cohort_report.observed_event_integration_allocation[1]",
+        "observed_max_bracket_or_chord_delta_s": 0.06929010178625372,
+        "ratio_to_frozen_allocation": 4.011934888858059,
+        "ratio_to_new_diagnostic_allocation": 4.071651141439813,
+        "verdict_under_frozen_allocation": "exceeds_allocation",
+        "verdict_under_new_diagnostic_allocation": "exceeds_allocation"
+      },
+      {
+        "event_id": "top_open_exit",
+        "axis": "top",
+        "frozen_baseline_feature_time_s": null,
+        "frozen_integration_allocation_s": null,
+        "new_diagnostic_baseline_feature_time_s": null,
+        "new_diagnostic_integration_allocation_s": null,
+        "verdict": "no_observed_feature_time; retain right-censoring and do not infer physical exit"
+      }
+    ],
+    "interpretation": "Both allocation conventions give the same negative temporal result. This sidecar records the provenance correction; it does not relax the budget or convert the result into Q-N."
+  },
+  "q_level_provenance_and_support": {
+    "q_levels": [
+      0.1,
+      0.5,
+      0.9
+    ],
+    "registration_status": "new diagnostic q-level convention introduced by whole_cohort_quantiles_v1; not originally pre-registered as the initial gate",
+    "cohort_semantics": "Mass-weighted whole initial fluid cohort. Observed first passage is conditional; identities without observed passage remain right-censored at the 10 s window; unresolved native support is [0,+inf].",
+    "canonical_initial_mass_kg": 14.58,
+    "observed_support": [
+      {
+        "event_id": "left_right_exchange",
+        "variant": "HALF",
+        "observed_mass_kg": 5.078953256743262,
+        "observed_mass_fraction_of_canonical_initial_mass": 0.3483507034803334,
+        "censored_mass_kg": 9.50104712144821,
+        "censored_mass_fraction_of_canonical_initial_mass": 0.651649322458725,
+        "q_0_1": {
+          "lower_s": 1.490007879386446,
+          "upper_s": 1.492507744132401,
+          "status": "bounded"
+        },
+        "q_0_5_and_q_0_9": "upper support remains unbounded because censoring exceeds the observed cohort support"
+      },
+      {
+        "event_id": "front_back_exchange",
+        "variant": "HALF",
+        "observed_mass_kg": 0.7635937698069029,
+        "observed_mass_fraction_of_canonical_initial_mass": 0.05237268654368332,
+        "censored_mass_kg": 13.816406608384568,
+        "censored_mass_fraction_of_canonical_initial_mass": 0.947627339395375,
+        "support_statement": "Only about 5.2% of the canonical initial mass has an observed y-axis crossing in HALF; q=.1, .5, and .9 whole-cohort bounds are unresolved by right-censoring.",
+        "interpretation": "The q-levels cannot identify a physical-vs-censoring explanation from this support. Do not label the unidentified result as a waveform-model error."
+      },
+      {
+        "event_id": "front_back_exchange",
+        "variant": "QUARTER",
+        "observed_mass_kg": 0.8197031462623272,
+        "observed_mass_fraction_of_canonical_initial_mass": 0.0562210662731363,
+        "censored_mass_kg": 13.760297231929144,
+        "censored_mass_fraction_of_canonical_initial_mass": 0.9437789340603508,
+        "support_statement": "The quarter result observes about 5.6%; this does not repair the whole-cohort identification gap."
+      },
+      {
+        "event_id": "top_open_exit",
+        "variant": "HALF_AND_QUARTER",
+        "observed_mass_kg": 0.0,
+        "censored_mass_kg": 14.580000378191471,
+        "support_statement": "All identities remain censored; no physical exit is inferred."
+      }
+    ],
+    "operator_gap": "The consumed HALF/QUARTER operator comparison reports conditional observed means/brackets, whereas these q-levels are whole-cohort censor-safe bounds. They are different estimands.",
+    "negative_interpretation_rule": "unidentified_due_to_censoring is a support limitation, not evidence of a waveform-model error or a physical spill event"
+  },
+  "reproducibility": {
+    "calculation_policy": "Preserve the original frozen allocations verbatim and compare the same observed delta to both provenance values only as an audit. Do not derive a new frozen scale from observed speed, native step, or a new variant.",
+    "input_report_sha256": "9b5b6eb8c91af7c669fd163cd9065283488d395cf4aec625ec75988172063372",
+    "source_budget_sha256": "def19897256a3f85052c43949ded25082e3cc0c4a33f8eef0e0834ee545dc9f4",
+    "source_contract_sha256": "068075110a94f8d58fb1d02d5f78e41a07a9930954a5818b4b7651b02c7a2009"
+  }
+}
