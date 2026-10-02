@@ -33,6 +33,25 @@ def test_parent_timeout_rebind_requires_unchanged_input_hashes(tmp_path: Path) -
     assert result["checks"]["input_hashes_unchanged"] is False
 
 
+def test_parent_timeout_accepts_runner_level_unqualified_receipt(tmp_path: Path) -> None:
+    hdf5 = tmp_path / "trajectory.h5"
+    hdf5.write_bytes(b"immutable")
+    parent = {
+        "status": "failed",
+        "returncode": -15,
+        "termination_reason": "reserved_wall_time_exceeded",
+        "output_root": str(tmp_path),
+        "command": [str(hdf5)],
+        "request": {"qualification_claim": "none; request only, Q-N remains not assessed"},
+        "numerical_reference_status": "not_assessed",
+        "production_product_acceptance": "not_assessed",
+        "input_hashes_at_launch": {"source": "abc"},
+        "input_hashes_after_run": {"source": "abc"},
+    }
+    result = MODULE.verify_parent_timeout(parent, hdf5)
+    assert result["all_checks_pass"] is True
+
+
 def test_direct_report_rebind_rejects_wrong_hdf5_digest(tmp_path: Path) -> None:
     hdf5 = tmp_path / "trajectory.h5"
     hdf5.write_bytes(b"native")
