@@ -119,7 +119,10 @@ def verify_parent_timeout(parent: Mapping[str, Any], hdf5: Path) -> dict[str, An
     }
 
 
-def verify_direct_report(report: Mapping[str, Any], hdf5: Path, actual_sha: str) -> dict[str, Any]:
+def verify_direct_report(
+    report: Mapping[str, Any], hdf5: Path, actual_sha: str,
+    *, expected_frames: int = EXPECTED_FRAMES, expected_particles: int = EXPECTED_PARTICLES,
+) -> dict[str, Any]:
     provenance = report.get("source_provenance", {})
     raw_tree = provenance.get("raw_tree", {}) if isinstance(provenance, Mapping) else {}
     partvtk = report.get("partvtk_validation", {})
@@ -129,8 +132,8 @@ def verify_direct_report(report: Mapping[str, Any], hdf5: Path, actual_sha: str)
         "conversion_completed": report.get("conversion_status") == "completed",
         "output_path_matches": Path(str(report.get("output_hdf5", ""))).resolve() == hdf5.resolve(),
         "output_sha256_matches": report.get("output_sha256") == actual_sha,
-        "expected_frames": report.get("frames") == EXPECTED_FRAMES,
-        "expected_particles": report.get("particles") == EXPECTED_PARTICLES,
+        "expected_frames": report.get("frames") == expected_frames,
+        "expected_particles": report.get("particles") == expected_particles,
         "partvtk_first_middle_final": bool(partvtk.get("all_passed")) and len(partvtk.get("frames", [])) == 3,
         "raw_tree_unchanged": raw_tree.get("unchanged") is True and raw_tree.get("before_tree_sha256") == raw_tree.get("after_tree_sha256"),
         "no_transient_missing": lifecycle.get("transient_missing_frame_count") == 0,
@@ -160,7 +163,10 @@ def verify_direct_report(report: Mapping[str, Any], hdf5: Path, actual_sha: str)
     }
 
 
-def verify_native_accounting(accounting: Mapping[str, Any], hdf5: Path) -> dict[str, Any]:
+def verify_native_accounting(
+    accounting: Mapping[str, Any], hdf5: Path,
+    *, expected_frames: int = EXPECTED_FRAMES, expected_particles: int = EXPECTED_PARTICLES,
+) -> dict[str, Any]:
     facts = accounting.get("facts", {})
     with h5py.File(hdf5, "r") as handle:
         frames = int(handle["time"].shape[0])
@@ -169,8 +175,8 @@ def verify_native_accounting(accounting: Mapping[str, Any], hdf5: Path) -> dict[
         last_time = float(handle["time"][-1])
     csv_summary = facts.get("run_csv_summary", {})
     checks = {
-        "frames_match_hdf5": facts.get("saved_frames") == frames == EXPECTED_FRAMES,
-        "particles_match_hdf5": facts.get("final_total_particles") == particles == EXPECTED_PARTICLES,
+        "frames_match_hdf5": facts.get("saved_frames") == frames == expected_frames,
+        "particles_match_hdf5": facts.get("final_total_particles") == particles == expected_particles,
         "first_time_zero": first_time == 0.0,
         "final_time_matches_accounting": abs(last_time - float(facts.get("final_time_s"))) <= 1e-9,
         "run_csv_frames_match": csv_summary.get("part_files") == frames,
@@ -193,19 +199,22 @@ def verify_native_accounting(accounting: Mapping[str, Any], hdf5: Path) -> dict[
     }
 
 
-def verify_label_hdf5(labels: Path, source: Path, source_sha: str) -> dict[str, Any]:
+def verify_label_hdf5(
+    labels: Path, source: Path, source_sha: str,
+    *, expected_frames: int = EXPECTED_FRAMES, expected_particles: int = EXPECTED_PARTICLES,
+) -> dict[str, Any]:
     label_sha = sha256_file(labels)
     with h5py.File(labels, "r") as handle:
         attrs = {str(key): (value.item() if hasattr(value, "item") else value) for key, value in handle.attrs.items()}
         shapes = {name: list(obj.shape) for name, obj in handle.items() if isinstance(obj, h5py.Dataset)}
         required = {
-            "time": (EXPECTED_FRAMES,),
-            "particle_id": (EXPECTED_PARTICLES,),
-            "particle_zone": (EXPECTED_PARTICLES,),
-            "destination_time_series": (EXPECTED_FRAMES, EXPECTED_PARTICLES),
-            "final_category": (EXPECTED_PARTICLES,),
-            "first_passage_interval": (EXPECTED_PARTICLES, 3, 2),
-            "residence_time_s": (EXPECTED_PARTICLES, 2),
+            "time": (expected_frames,),
+            "particle_id": (expected_particles,),
+            "particle_zone": (expected_particles,),
+            "destination_time_series": (expected_frames, expected_particles),
+            "final_category": (expected_particles,),
+            "first_passage_interval": (expected_particles, 3, 2),
+            "residence_time_s": (expected_particles, 2),
         }
         checks = {
             "complete": attrs.get("complete") is True,
@@ -249,7 +258,9 @@ def build_metadata(owner: Mapping[str, Any], direct: Mapping[str, Any]) -> dict[
 def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Path,
                accounting_path: Path, labels_path: Path, solver_log: Path,
                owner_path: Path, raw_manifest_path: Path, particle_chunk: int,
-               expected_hdf5_sha256: str | None = None) -> dict[str, Any]:
+               expected_hdf5_sha256: str | None = None,
+               expected_frames: int = EXPECTED_FRAMES,
+               expected_particles: int = EXPECTED_PARTICLES) -> dict[str, Any]:
     started = time.perf_counter()
     before = resource_snapshot()
     direct = first_record(load_json(direct_report_path))
@@ -260,9 +271,9 @@ def post_audit(*, hdf5: Path, direct_report_path: Path, parent_receipt_path: Pat
     if expected_hdf5_sha256 is not None and source_sha != expected_hdf5_sha256:
         raise ValueError(f"HDF5 SHA-256 mismatch: expected {expected_hdf5_sha256}, observed {source_sha}")
     parent_check = verify_parent_timeout(parent, hdf5)
-    direct_check = verify_direct_report(direct, hdf5, source_sha)
-    accounting_check = verify_native_accounting(accounting, hdf5)
-    label_check = verify_label_hdf5(labels_path, hdf5, source_sha)
+    direct_check = verify_direct_report(direct, hdf5, source_sha, expected_frames=expected_frames, expected_particles=expected_particles)
+    accounting_check = verify_native_accounting(accounting, hdf5, expected_frames=expected_frames, expected_particles=expected_particles)
+    label_check = verify_label_hdf5(labels_path, hdf5, source_sha, expected_frames=expected_frames, expected_particles=expected_particles)
     metadata = build_metadata(owner, direct)
     integrity = audit_hdf5(hdf5, solver_log=solver_log, metadata=metadata, particle_chunk=particle_chunk)
     checks = {
@@ -307,6 +318,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--owner-metadata", type=Path, required=True)
     parser.add_argument("--raw-manifest", type=Path, required=True)
     parser.add_argument("--expected-hdf5-sha256", required=True)
+    parser.add_argument("--expected-frames", type=int, default=EXPECTED_FRAMES)
+    parser.add_argument("--expected-particles", type=int, default=EXPECTED_PARTICLES)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--particle-chunk", type=int, default=65536)
     args = parser.parse_args(argv)
@@ -315,6 +328,7 @@ def main(argv: list[str] | None = None) -> int:
         accounting_path=args.native_accounting, labels_path=args.labels, solver_log=args.solver_log,
         owner_path=args.owner_metadata, raw_manifest_path=args.raw_manifest, particle_chunk=args.particle_chunk,
         expected_hdf5_sha256=args.expected_hdf5_sha256,
+        expected_frames=args.expected_frames, expected_particles=args.expected_particles,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
