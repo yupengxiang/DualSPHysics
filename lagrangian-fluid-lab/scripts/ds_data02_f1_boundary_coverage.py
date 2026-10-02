@@ -253,7 +253,13 @@ def audit(*, gencase_root: Path, decoder: Path, output: Path) -> dict[str, Any]:
     total_xml = int(particles.get("np", "-1"))
     boundary_xml = int(particles.get("nb", "-1"))
     fluid_xml = sum(int(node.get("count", "0")) for node in particles.findall("fluid"))
-    data2d = int(_number(r"<data2d value=\"([01])\"", generated_xml.read_text(errors="replace"), "data2d", int))
+    data2d_node = generated_root.find(".//constants/data2d")
+    if data2d_node is None or data2d_node.get("value") is None:
+        raise ValueError("generated XML has no data2d value")
+    data2d_value = data2d_node.get("value", "").strip().lower()
+    if data2d_value not in {"true", "false", "0", "1"}:
+        raise ValueError(f"unrecognised data2d value: {data2d_value}")
+    data2d = 1 if data2d_value in {"true", "1"} else 0
     h = float(generated_root.find(".//constants/dp").get("value")) * 2.0
     with tempfile.TemporaryDirectory(prefix="f1-boundary-decode-") as temp:
         decoded_prefix = Path(temp) / "native"
