@@ -1,0 +1,92 @@
+{
+  "schema": "ds02.f6.floating-descriptive-analysis-summary.v1",
+  "family_id": "F6",
+  "attempt_id": "f6-existing-floating-descriptive-analysis-002",
+  "execution_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_BODY_CELLCENTER_DESCRIPTIVE_ANALYSIS/f6-existing-floating-descriptive-analysis-002/execution-receipt.json",
+    "sha256": "cff5e4591f501acdbc3a0f723f60244dcfef47c846c12a2c239af85d69a5a332",
+    "status": "completed",
+    "returncode": 0,
+    "elapsed_seconds": 0.340142,
+    "cpu_core_seconds": 4.782371
+  },
+  "authoritative_analysis_json": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_BODY_CELLCENTER_DESCRIPTIVE_ANALYSIS/f6-existing-floating-descriptive-analysis-002/existing-floating-descriptive-analysis.json",
+    "sha256": "edf8b09239731f7c3fb5b9f29620303217ac18567c02ffa7927c903a2719b454"
+  },
+  "key_findings": {
+    "initial_conditions_across_3dp": {
+      "initial_angles_rad": [0.0, 0.0, 0.0],
+      "initial_angular_velocity_rad_s": [0.0, 0.0, 0.0],
+      "initial_heave_m": 0.0
+    },
+    "actual_peak_angular_amplitudes_rad": {
+      "coarse_dp025": {
+        "roll": 0.09051735,
+        "pitch": 0.03102740,
+        "yaw": 0.07389807
+      },
+      "medium_dp020": {
+        "roll": 0.02250953,
+        "pitch": 0.07099408,
+        "yaw": 0.03538126
+      },
+      "fine_dp0125": {
+        "roll": 0.01043274,
+        "pitch": 0.07450400,
+        "yaw": 0.09473341
+      }
+    },
+    "actual_peak_heave_amplitudes_m": {
+      "coarse_dp025": 0.69019144,
+      "medium_dp020": 0.70399456,
+      "fine_dp0125": 0.74785565
+    },
+    "separate_absolute_and_relative_rmse": {
+      "medium_vs_coarse": {
+        "orientation_absolute_rmse_rad": [0.01976729, 0.02828778, 0.03568499],
+        "orientation_relative_rmse": [0.21838121, 0.91170328, 0.48289484],
+        "heave_absolute_rmse_m": 0.01777990,
+        "heave_relative_rmse": 0.02576082
+      },
+      "fine_vs_coarse": {
+        "orientation_absolute_rmse_rad": [0.02126621, 0.03442607, 0.06269848],
+        "orientation_relative_rmse": [0.23494071, 1.10953778, 0.84844551],
+        "heave_absolute_rmse_m": 0.06104888,
+        "heave_relative_rmse": 0.08845210
+      },
+      "medium_vs_fine": {
+        "orientation_absolute_rmse_rad": [0.00965594, 0.05869089, 0.03063379],
+        "orientation_relative_rmse": [0.92554214, 0.78775488, 0.32336839],
+        "heave_absolute_rmse_m": 0.04876850,
+        "heave_relative_rmse": 0.06521111
+      }
+    },
+    "dt_clamping_diagnosis": {
+      "coarse_dp025": {
+        "total_steps": 76222,
+        "dt_clamped_to_min": false,
+        "dts_min_hits": 0,
+        "dt_range_s": [5.568445e-05, 0.000188092]
+      },
+      "medium_dp020": {
+        "total_steps": 96249,
+        "dt_clamped_to_min": false,
+        "dts_min_hits": 0,
+        "dt_range_s": [4.733660e-05, 0.000149992]
+      },
+      "fine_dp0125": {
+        "total_steps": 163659,
+        "dt_clamped_to_min": true,
+        "dts_min_hits": 118,
+        "dt_range_s": [2.336857e-05, 9.336346e-05]
+      }
+    },
+    "conditioning_analysis": {
+      "summary": "Near-zero angular response in pure heave yields extreme relative RMSE sensitivity due to near-zero denominator (reference peak < 0.09 rad), despite small absolute angular differences (< 0.063 rad).",
+      "no_new_gates": true,
+      "frozen_operator_preserved": true,
+      "prospective_angular_release_need": "Finite 3D angular release excitation [0.08, 0.12, 0.06] rad/s provides macroscopic angular dynamics across all rotational axes for well-conditioned macro evaluation without artificial constraints or dropped DOFs."
+    }
+  }
+}
