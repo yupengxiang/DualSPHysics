@@ -1,0 +1,144 @@
+{
+  "schema": "ds02.f3.fluid-only-transport-reference-adapter-proposal.v1",
+  "family_id": "F3",
+  "status": "proposed_for_root_review",
+  "proposal_metadata": {
+    "created_at_utc": "2026-10-03T03:31:00+00:00",
+    "owner": "family_f3",
+    "review_authority": "primary_codex_root",
+    "purpose": "Define an explicit, zero-copy, in-memory transport reference adapter for historical fluid-only references to allow unchanged canonical label operators to run without schema modification, file patching, or fabricated fixed particles."
+  },
+  "historical_spatial_references_cohort": [
+    {
+      "case_id": "R0081818-NOMINAL",
+      "resolution": "dp_0p008181818_native",
+      "gencase_geometry": {
+        "total_particles": 88528,
+        "fixed_particles": 61908,
+        "fixed_id_range": [0, 61907],
+        "fluid_particles": 26620,
+        "fluid_id_range": [61908, 88527],
+        "fluid_is_contiguous_suffix": true,
+        "mass_fluid_kg": 0.0005477085041322314,
+        "total_initial_fluid_mass_kg": 14.580000379999999
+      },
+      "native_h5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/R0081818-NOMINAL.h5",
+        "sha256": "3d178d8c5e6ee4057a10a384c9289df5723bcabbfe58850803cf54996c4a9575",
+        "bytes": 692839604,
+        "frames": 836,
+        "native_particles": 26620,
+        "stored_type": 3,
+        "stored_mk": 1
+      },
+      "official_partvtk_anchor_audit": {
+        "attempt_id": "r0081818-nominal-partvtk-anchor-audit-001",
+        "status": "completed_pass",
+        "returncode": 0,
+        "anchor_frames": [0, 418, 835],
+        "anchor_particles_per_frame": 88528,
+        "anchor_fluid_particles_per_frame": 26620,
+        "anchor_fixed_particles_per_frame": 61908,
+        "max_fluid_position_residual_m": 4.656612873077393e-09,
+        "fluid_mass_closed_kg": 14.580000000000002
+      },
+      "qi_qualification_barrier": "Source H5 contains fluid particles only; lacks native fixed particles and full-typed axis attributes (initial_type, initial_mass); cannot pass full-typed Q-I without an adapter."
+    },
+    {
+      "case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "resolution": "dp_0p006_native",
+      "gencase_geometry": {
+        "total_particles": 179208,
+        "fixed_particles": 111708,
+        "fixed_id_range": [0, 111707],
+        "fluid_particles": 67500,
+        "fluid_id_range": [111708, 179207],
+        "fluid_is_contiguous_suffix": true,
+        "mass_fluid_kg": 0.000216,
+        "total_initial_fluid_mass_kg": 14.58
+      },
+      "native_h5": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/data/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen.h5",
+        "sha256": "a937a72688b5066db287e0be309df50a417088bda9f471e4cb80072b2ff54388",
+        "bytes": 1756475306,
+        "frames": 836,
+        "native_particles": 67500,
+        "stored_type": 3,
+        "stored_mk": 1
+      },
+      "official_partvtk_anchor_audit": {
+        "attempt_id": "ref006-nominal-partvtk-anchor-audit-001",
+        "status": "completed_pass",
+        "returncode": 0,
+        "anchor_frames": [0, 418, 835],
+        "anchor_particles_per_frame": 179208,
+        "anchor_fluid_particles_per_frame": 67500,
+        "anchor_fixed_particles_per_frame": 111708,
+        "max_fluid_position_residual_m": 4.656612873077393e-09,
+        "fluid_mass_closed_kg": 14.58
+      },
+      "qi_qualification_barrier": "Source H5 contains fluid particles only; lacks native fixed particles and full-typed axis attributes (initial_type, initial_mass); cannot pass full-typed Q-I without an adapter."
+    }
+  ],
+  "strict_non_claim_boundaries": {
+    "no_invented_fixed_particles": "The adapter MUST NOT fabricate dummy fixed particles, static boundary rows, or fictitious wall trajectories. Fixed particles were never recorded in the fluid-only continuation files and shall not be simulated or claimed.",
+    "no_assumed_unknown_fate": "Unobserved particles MUST remain right-censored under registered observation semantics. No particle shall be classified as exited, lost, or relocated without direct native geometric evidence.",
+    "no_consumed_h5_patching": "The consumed immutable HDF5 continuation files on disk MUST NOT be modified, rewritten, overwritten, or in-place patched.",
+    "no_schema_enrichment_without_root_review": "No new dataset schema versions, ad-hoc attributes, or modified HDF5 contracts shall be persisted without explicit Codex root review and approval.",
+    "scientific_boundary": "This adapter provides transport-reference-only memory virtualization. It does NOT confer full-typed Q-I status, Q-N qualification, or production eligibility to the fluid-only historical references."
+  },
+  "memory_adapter_specification": {
+    "architecture": "Zero-copy in-memory wrapper / duck-typing layer around native h5py.File",
+    "target_consumer": "ds_data02_native_labels.py (unchanged canonical scientific label operator)",
+    "virtualized_datasets": {
+      "position": {
+        "source": "native h5['position'][:, :, :3]",
+        "shape": "(n_frames, n_fluid, 3)",
+        "dtype": "float64",
+        "semantics": "direct pass-through of native Cartesian coordinates"
+      },
+      "valid": {
+        "source": "native h5['valid'][:, :]",
+        "shape": "(n_frames, n_fluid)",
+        "dtype": "bool",
+        "semantics": "direct pass-through of native solver validity flag"
+      },
+      "type": {
+        "source": "virtual uniform array (all Type 3)",
+        "shape": "(n_frames, n_fluid)",
+        "dtype": "int16",
+        "semantics": "indicates fluid identity (Type 3) across all frames; avoids synthesizing Type 0 fixed rows"
+      },
+      "mass": {
+        "source": "virtual uniform array (MassFluid = 14.58 / n_fluid)",
+        "shape": "(n_frames, n_fluid)",
+        "dtype": "float64",
+        "semantics": "exact GenCase physical MassFluid in kg; no normalization or rescaling"
+      },
+      "time": {
+        "source": "native h5['time']",
+        "shape": "(n_frames,)",
+        "dtype": "float64",
+        "semantics": "direct pass-through of physical simulation timestamps"
+      },
+      "particle_id": {
+        "source": "contiguous integer array [fluid_id_start, fluid_id_end]",
+        "shape": "(n_fluid,)",
+        "dtype": "uint32",
+        "semantics": "binds the exact GenCase fluid particle IDs (61908..88527 for R0081818, 111708..179207 for REF-006)"
+      },
+      "zone": {
+        "source": "virtual zero array",
+        "shape": "(n_fluid,)",
+        "dtype": "int16",
+        "semantics": "Zone 0 standard binding"
+      }
+    },
+    "operator_compatibility": {
+      "f3_legacy_plain_full_transport_config": "100% compatible; source regions partition initial fluid positions at frame 0 into Left (x < 0) and Right (x >= 0)",
+      "f3_legacy_plain_operators": "100% compatible; finite interface x=0 exchange and z=0.51 open-exit diagnostic computed identically",
+      "output_labels_h5": "Emits typed-transport-labels.h5 with n_particles=n_fluid, initial_fluid_mass_kg=14.58 kg, and complete transport/censoring ledgers"
+    }
+  },
+  "root_review_recommendation": "Adopt this memory adapter in a dedicated scoped module (e.g. audit/f3_fluid_only_transport_adapter_v1.py) when root authorizes spatial convergence comparisons (dp=0.0075 vs dp=0.0081818 vs dp=0.006). Keep source HDF5 files strictly read-only."
+}
