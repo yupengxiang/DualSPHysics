@@ -48,6 +48,7 @@ def _create_synthetic_bi4_header(
     rhop0: float = 1000.0,
     gamma: float = 7.0,
     b: float = 840857.0,
+    extra_constants: list[tuple[str, int, bytes]] | None = None,
 ) -> Path:
     """Create a minimal synthetic BI4 header containing only metadata constants."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -60,19 +61,22 @@ def _create_synthetic_bi4_header(
         values_buf = bytearray()
         values_buf.extend(_pack_bi4_string(audit_mod.CODE_VALUES.decode("utf-8")))
         constants = [
-            ("Dp", dp),
-            ("H", dp * 1.5),
-            ("B", b),
-            ("Rhop0", rhop0),
-            ("Gamma", gamma),
-            ("MassBound", mass_bound),
-            ("MassFluid", mass_fluid),
+            ("Dp", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(dp))),
+            ("H", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(dp * 1.5))),
+            ("B", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(b))),
+            ("Rhop0", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(rhop0))),
+            ("Gamma", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(gamma))),
+            ("MassBound", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(mass_bound))),
+            ("MassFluid", audit_mod.TYPE_DOUBLE, struct.pack("<d", float(mass_fluid))),
         ]
+        if extra_constants:
+            constants.extend(extra_constants)
+
         values_buf.extend(struct.pack("<I", len(constants)))
-        for name, val in constants:
+        for name, type_code, payload in constants:
             values_buf.extend(_pack_bi4_string(name))
-            values_buf.extend(struct.pack("<i", audit_mod.TYPE_DOUBLE))
-            values_buf.extend(struct.pack("<d", float(val)))
+            values_buf.extend(struct.pack("<i", type_code))
+            values_buf.extend(payload)
 
         # Build item record
         item_buf = bytearray()
@@ -95,7 +99,7 @@ def _create_synthetic_bi4_header(
 
 
 def test_mass_precision_report_and_sidecar_exist():
-    """Verify presence of report and sidecar in handoff_20261003."""
+    """Verify presence of report, sidecar, config, and request in handoff_20261003."""
     assert REPORT_MD_PATH.is_file(), f"Missing report: {REPORT_MD_PATH}"
     assert SIDECAR_PATH.is_file(), f"Missing sidecar: {SIDECAR_PATH}"
     assert CONFIG_PATH.is_file(), f"Missing config: {CONFIG_PATH}"
@@ -125,6 +129,16 @@ def test_mass_precision_sidecar_schema_and_policy():
         "bi4_dump",
     }
     assert set(inv.keys()) == expected_sources
+
+    # Check actual BI4 audit targets in sidecar
+    targets = data["actual_bi4_audit_targets"]
+    assert len(targets) == 6
+    assert "coarse_gencase_initial" in targets
+    assert "coarse_solver_frame0" in targets
+    assert "medium_gencase_initial" in targets
+    assert "medium_solver_frame0" in targets
+    assert "fine_gencase_initial" in targets
+    assert "fine_solver_frame0" in targets
 
     # Check policy assertions
     policies = data["policy_and_scientific_assertions"]
@@ -164,41 +178,81 @@ def test_ieee754_representation_math():
     assert struct.pack("<f", fn_f32).hex() == fn["native_float32_hex"]
 
 
-def test_synthetic_bi4_header_parsing(tmp_path: Path):
-    """Test reading constants from a synthetic BI4 header with 100% campaign write isolation."""
+def test_synthetic_bi4_header_parsing_with_known_types(tmp_path: Path):
+    """Test reading constants including known enum types (Char=1B, Short=2B, Int3=12B, Double3=24B)."""
     synthetic_bi4 = tmp_path / "synthetic_test.bi4"
+    extras = [
+        ("TestChar", 3, struct.pack("<b", 42)),             # 1 byte
+        ("TestShort", 5, struct.pack("<h", 1234)),           # 2 bytes
+        ("TestInt3", 20, struct.pack("<iii", 1, 2, 3)),      # 12 bytes
+        ("TestFloat3", 22, struct.pack("<fff", 0.1, 0.2, 0.3)), # 12 bytes
+        ("TestDouble3", 23, struct.pack("<ddd", 1.0, 2.0, 3.0)), # 24 bytes
+    ]
     _create_synthetic_bi4_header(
         output_path=synthetic_bi4,
         dp=0.010,
         mass_fluid=0.001,
         mass_bound=0.001,
+        extra_constants=extras,
     )
 
-    parsed = audit_mod.parse_bi4_header_constants(synthetic_bi4)
+    parsed = parse_bi4_header_constants = audit_mod.parse_bi4_header_constants(synthetic_bi4)
     assert parsed["root_item_name"] == "PART_DATA"
-    assert parsed["fmt_double"] == "%.15E"
     constants = parsed["constants"]
     assert "MassFluid" in constants
     assert constants["MassFluid"]["type_name"] == "DatDouble"
     assert math.isclose(constants["MassFluid"]["double_value"], 0.001, rel_tol=1e-12)
+    assert constants["TestChar"]["int_value"] == 42
+    assert constants["TestShort"]["int_value"] == 1234
+    assert constants["TestInt3"]["int3_value"] == [1, 2, 3]
+
+
+def test_synthetic_bi4_header_rejects_unknown_type(tmp_path: Path):
+    """Test that encountering an unknown JBinaryData type immediately raises ValueError to prevent desync."""
+    bad_bi4 = tmp_path / "bad_type.bi4"
+    unknown_type_code = 99  # Undefined in JBinaryDataDef
+    extras = [
+        ("BadValue", unknown_type_code, b"\x00" * 4),
+    ]
+    _create_synthetic_bi4_header(
+        output_path=bad_bi4,
+        dp=0.010,
+        mass_fluid=0.001,
+        mass_bound=0.001,
+        extra_constants=extras,
+    )
+
+    with pytest.raises(ValueError, match="Unknown JBinaryData type code 99"):
+        audit_mod.parse_bi4_header_constants(bad_bi4)
 
 
 def test_synthetic_bi4_header_precision_audit_run(tmp_path: Path):
     """Test full audit workflow using a synthetic config and fixtures in tmp_path."""
-    mock_coarse_bi4 = tmp_path / "mock_coarse.bi4"
-    _create_synthetic_bi4_header(mock_coarse_bi4, dp=0.010, mass_fluid=0.001, mass_bound=0.001)
+    mock_coarse_gencase = tmp_path / "mock_coarse_gencase.bi4"
+    mock_coarse_solver = tmp_path / "mock_coarse_solver.bi4"
+    _create_synthetic_bi4_header(mock_coarse_gencase, dp=0.010, mass_fluid=0.001, mass_bound=0.001)
+    _create_synthetic_bi4_header(mock_coarse_solver, dp=0.010, mass_fluid=0.0010000000474974513, mass_bound=0.001)
 
     mock_config_path = tmp_path / "mock_audit_config.json"
     mock_config = {
         "schema": "ds-data-02.f2.bi4-header-precision-audit-config.v1",
-        "cases": {
-            "coarse": {
-                "case_id": "MOCK_CASE_COARSE",
+        "targets": {
+            "coarse_gencase_initial": {
+                "target_id": "MOCK_COARSE_GENCASE",
+                "target_role": "gencase_initial",
                 "resolution": "COARSE",
                 "dp_m": 0.010,
                 "xml_decimal_mass_kg": 0.001,
-                "bi4_path": str(mock_coarse_bi4),
-            }
+                "bi4_path": str(mock_coarse_gencase),
+            },
+            "coarse_solver_frame0": {
+                "target_id": "MOCK_COARSE_SOLVER",
+                "target_role": "solver_frame0",
+                "resolution": "COARSE",
+                "dp_m": 0.010,
+                "xml_decimal_mass_kg": 0.001,
+                "bi4_path": str(mock_coarse_solver),
+            },
         },
     }
     with open(mock_config_path, "w", encoding="utf-8") as f:
@@ -208,10 +262,13 @@ def test_synthetic_bi4_header_precision_audit_run(tmp_path: Path):
     report = audit_mod.run_audit(mock_config_path, output_dir)
 
     assert report["schema"] == "ds-data-02.f2.bi4-header-precision-audit.v1"
-    assert "coarse" in report["results"]
-    c_res = report["results"]["coarse"]
-    assert c_res["case_id"] == "MOCK_CASE_COARSE"
-    assert math.isclose(c_res["header_mass_fluid_double"], 0.001, rel_tol=1e-12)
+    assert "coarse_gencase_initial" in report["results"]
+    assert "coarse_solver_frame0" in report["results"]
+    gc_res = report["results"]["coarse_gencase_initial"]
+    sv_res = report["results"]["coarse_solver_frame0"]
+    assert gc_res["target_role"] == "gencase_initial"
+    assert sv_res["target_role"] == "solver_frame0"
+    assert math.isclose(gc_res["header_mass_fluid_double"], 0.001, rel_tol=1e-12)
 
     report_file = output_dir / "f2_native_bi4_header_precision_audit_report.json"
     assert report_file.is_file()
@@ -229,3 +286,4 @@ def test_runner_request_validation():
     assert req["kind"] == "cpu"
     assert req["cpu_threads"] == 2
     assert req["max_wall_seconds"] <= 1800
+    assert len(req["input_files"]) == len(req["input_sha256"])

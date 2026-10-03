@@ -25,9 +25,29 @@ HEADER_PREFIX = b"#FileJBD JPartDataBi4"
 CODE_ITEM = b"\nITEM\n"
 CODE_VALUES = b"\nVALUES"
 
-# JBinaryDataDef::TpData enum code for DatDouble
-TYPE_DOUBLE = 12
+# JBinaryDataDef::TpData enum code mapping and sizes from DualSPHysics v5.4 source
+# (vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.cpp lines 83-110)
+TYPE_SIZE_MAP: dict[int, int] = {
+    2: 4,   # DatBool
+    3: 1,   # DatChar
+    4: 1,   # DatUchar
+    5: 2,   # DatShort
+    6: 2,   # DatUshort
+    7: 4,   # DatInt
+    8: 4,   # DatUint
+    9: 8,   # DatLlong
+    10: 8,  # DatUllong
+    11: 4,  # DatFloat
+    12: 8,  # DatDouble
+    20: 12, # DatInt3
+    21: 12, # DatUint3
+    22: 12, # DatFloat3
+    23: 24, # DatDouble3
+}
+
+TYPE_TEXT = 1
 TYPE_FLOAT = 11
+TYPE_DOUBLE = 12
 
 
 def read_string(stream: BinaryIO) -> str:
@@ -47,6 +67,7 @@ def parse_bi4_header_constants(bi4_path: Path) -> dict[str, Any]:
     
     This function reads only the initial header bytes necessary to inspect
     metadata values, strictly avoiding particle array materialization.
+    Unknown JBinary types are rejected immediately to prevent stream desynchronization.
     """
     if not bi4_path.is_file():
         raise FileNotFoundError(f"BI4 file not found: {bi4_path}")
@@ -87,53 +108,69 @@ def parse_bi4_header_constants(bi4_path: Path) -> dict[str, Any]:
 
             for _ in range(num_vals):
                 val_name = read_string(f)
-                val_type = struct.unpack("<i", f.read(4))[0]
+                raw_type = f.read(4)
+                if len(raw_type) < 4:
+                    raise ValueError(f"Premature EOF reading type for value '{val_name}'")
+                val_type = struct.unpack("<i", raw_type)[0]
 
-                if val_type == TYPE_DOUBLE:
-                    payload = f.read(8)
-                    if len(payload) < 8:
-                        raise ValueError(f"Premature EOF reading double {val_name}")
-                    d_val = struct.unpack("<d", payload)[0]
-                    f32_val = struct.unpack("<f", struct.pack("<f", float(d_val)))[0]
-                    f32_hex = struct.pack("<f", f32_val).hex()
-                    values[val_name] = {
-                        "type_code": val_type,
-                        "type_name": "DatDouble",
-                        "byte_length": 8,
-                        "double_value": d_val,
-                        "float32_value": f32_val,
-                        "float32_hex": f32_hex,
-                        "payload_hex": payload.hex(),
-                    }
-                elif val_type == TYPE_FLOAT:
-                    payload = f.read(4)
-                    f_val = struct.unpack("<f", payload)[0]
-                    values[val_name] = {
-                        "type_code": val_type,
-                        "type_name": "DatFloat",
-                        "byte_length": 4,
-                        "float32_value": f_val,
-                        "payload_hex": payload.hex(),
-                    }
-                elif val_type == 1:  # Text
+                if val_type == TYPE_TEXT:
                     t_val = read_string(f)
                     values[val_name] = {"type_code": val_type, "type_name": "DatText", "text_value": t_val}
-                elif val_type in (2, 7, 8):  # Bool, Int, Uint
-                    payload = f.read(4)
-                    i_val = struct.unpack("<i" if val_type in (2, 7) else "<I", payload)[0]
-                    values[val_name] = {"type_code": val_type, "type_name": "DatInt", "int_value": i_val}
-                elif val_type in (9, 10):  # Llong, Ullong
-                    payload = f.read(8)
-                    ll_val = struct.unpack("<q" if val_type == 9 else "<Q", payload)[0]
-                    values[val_name] = {"type_code": val_type, "type_name": "DatUllong", "int_value": ll_val}
-                elif val_type == 23:  # Double3
-                    payload = f.read(24)
-                    d3_val = struct.unpack("<ddd", payload)
-                    values[val_name] = {"type_code": val_type, "type_name": "DatDouble3", "double3_value": list(d3_val)}
+                elif val_type in TYPE_SIZE_MAP:
+                    expected_len = TYPE_SIZE_MAP[val_type]
+                    payload = f.read(expected_len)
+                    if len(payload) < expected_len:
+                        raise ValueError(f"Premature EOF reading payload for '{val_name}' (expected {expected_len} bytes)")
+
+                    if val_type == TYPE_DOUBLE:
+                        d_val = struct.unpack("<d", payload)[0]
+                        f32_val = struct.unpack("<f", struct.pack("<f", float(d_val)))[0]
+                        f32_hex = struct.pack("<f", f32_val).hex()
+                        values[val_name] = {
+                            "type_code": val_type,
+                            "type_name": "DatDouble",
+                            "byte_length": 8,
+                            "double_value": d_val,
+                            "float32_value": f32_val,
+                            "float32_hex": f32_hex,
+                            "payload_hex": payload.hex(),
+                        }
+                    elif val_type == TYPE_FLOAT:
+                        f_val = struct.unpack("<f", payload)[0]
+                        values[val_name] = {
+                            "type_code": val_type,
+                            "type_name": "DatFloat",
+                            "byte_length": 4,
+                            "float32_value": f_val,
+                            "payload_hex": payload.hex(),
+                        }
+                    elif val_type in (3, 4):  # Char (3), Uchar (4)
+                        i_val = struct.unpack("<b" if val_type == 3 else "<B", payload)[0]
+                        values[val_name] = {"type_code": val_type, "type_name": "DatChar", "int_value": i_val}
+                    elif val_type in (5, 6):  # Short (5), Ushort (6)
+                        i_val = struct.unpack("<h" if val_type == 5 else "<H", payload)[0]
+                        values[val_name] = {"type_code": val_type, "type_name": "DatShort", "int_value": i_val}
+                    elif val_type in (2, 7, 8):  # Bool (2), Int (7), Uint (8)
+                        i_val = struct.unpack("<i" if val_type in (2, 7) else "<I", payload)[0]
+                        values[val_name] = {"type_code": val_type, "type_name": "DatInt", "int_value": i_val}
+                    elif val_type in (9, 10):  # Llong (9), Ullong (10)
+                        ll_val = struct.unpack("<q" if val_type == 9 else "<Q", payload)[0]
+                        values[val_name] = {"type_code": val_type, "type_name": "DatUllong", "int_value": ll_val}
+                    elif val_type in (20, 21):  # Int3 (20), Uint3 (21)
+                        i3_val = struct.unpack("<iii" if val_type == 20 else "<III", payload)
+                        values[val_name] = {"type_code": val_type, "type_name": "DatInt3", "int3_value": list(i3_val)}
+                    elif val_type == 22:  # Float3 (22)
+                        f3_val = struct.unpack("<fff", payload)
+                        values[val_name] = {"type_code": val_type, "type_name": "DatFloat3", "float3_value": list(f3_val)}
+                    elif val_type == 23:  # Double3 (23)
+                        d3_val = struct.unpack("<ddd", payload)
+                        values[val_name] = {"type_code": val_type, "type_name": "DatDouble3", "double3_value": list(d3_val)}
                 else:
-                    # Skip other types according to their sizes if known
-                    # For header constants, the critical variables are all DatDouble (type 12)
-                    pass
+                    # Reject unknown JBinaryData type immediately to prevent stream desynchronization
+                    raise ValueError(
+                        f"Unknown JBinaryData type code {val_type} encountered while reading value '{val_name}'; "
+                        f"rejecting to prevent parser desynchronization"
+                    )
 
     return {
         "file_size_bytes": file_size,
@@ -145,7 +182,8 @@ def parse_bi4_header_constants(bi4_path: Path) -> dict[str, Any]:
 
 
 def audit_bi4_case_precision(
-    case_id: str,
+    target_id: str,
+    target_role: str,  # 'gencase_initial' or 'solver_frame0'
     resolution: str,
     dp_m: float,
     xml_decimal_mass_kg: float,
@@ -167,7 +205,8 @@ def audit_bi4_case_precision(
     rel_delta_to_xml = delta_to_xml / xml_decimal_mass_kg if xml_decimal_mass_kg > 0 else 0.0
 
     return {
-        "case_id": case_id,
+        "target_id": target_id,
+        "target_role": target_role,
         "resolution": resolution,
         "dp_m": dp_m,
         "bi4_path": str(bi4_path),
@@ -195,17 +234,18 @@ def run_audit(config_path: Path, output_dir: Path) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     results: dict[str, Any] = {}
 
-    cases = config.get("cases", {})
-    for case_key, case_info in cases.items():
-        bi4_file = Path(case_info["bi4_path"])
+    targets = config.get("targets", {})
+    for target_key, target_info in targets.items():
+        bi4_file = Path(target_info["bi4_path"])
         res_audit = audit_bi4_case_precision(
-            case_id=case_info["case_id"],
-            resolution=case_info["resolution"],
-            dp_m=case_info["dp_m"],
-            xml_decimal_mass_kg=case_info["xml_decimal_mass_kg"],
+            target_id=target_info["target_id"],
+            target_role=target_info["target_role"],
+            resolution=target_info["resolution"],
+            dp_m=target_info["dp_m"],
+            xml_decimal_mass_kg=target_info["xml_decimal_mass_kg"],
             bi4_path=bi4_file,
         )
-        results[case_key] = res_audit
+        results[target_key] = res_audit
 
     report = {
         "schema": SCHEMA,

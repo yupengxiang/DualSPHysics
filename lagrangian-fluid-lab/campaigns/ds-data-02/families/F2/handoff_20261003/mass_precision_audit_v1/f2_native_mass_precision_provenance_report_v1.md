@@ -234,6 +234,33 @@ Based on official source code (`JBinaryData.cpp`, `JPartDataBi4.cpp`) and the sa
 
 Each simulation constant is typed as `DatDouble` (code `12`), encoded as an 8-byte little-endian IEEE-754 binary64 scalar.
 
+### 5.1. Exact Binary Stream Cursor Management & Type Widths
+To prevent stream desynchronization (`desync`), the binary parser must account for every type width in the `JBinaryDataDef::TpData` enum ([`JBinaryData.cpp#L83-L110`](file:///home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.cpp#L83-L110)):
+- **1 Byte**: `DatChar` (type code 3), `DatUchar` (4)
+- **2 Bytes**: `DatShort` (5), `DatUshort` (6)
+- **4 Bytes**: `DatBool` (2), `DatInt` (7), `DatUint` (8), `DatFloat` (11)
+- **8 Bytes**: `DatLlong` (9), `DatUllong` (10), `DatDouble` (12)
+- **12 Bytes**: `DatInt3` (20), `DatUint3` (21), `DatFloat3` (22)
+- **24 Bytes**: `DatDouble3` (23)
+- **Variable Length**: `DatText` (1) = uint32 string length + UTF-8 bytes
+- **Unknown Type Codes**: Must raise an immediate exception and reject rather than skipping bytes arbitrarily, guaranteeing cursor synchronization across the entire VALUES payload.
+
+### 5.2. Actual Audit Targets: Initial GenCase DOUBLE vs Solver Output Float32 Widening
+The revised metered audit targets the 6 canonical files on campaign storage:
+
+| Target Identifier | Role | File Path | SHA-256 Digest |
+| :--- | :--- | :--- | :--- |
+| `coarse_gencase_initial` | GenCase Initial DOUBLE | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010/gencase-f2_rv4eq_matched_offset_v1_coarse_dp010-20261003-001/F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010.bi4` | `1022ee3f14b1d0680e8d8ca9ad89b6641ddb88fac0b71216a3a7941b80805a86` |
+| `coarse_solver_frame0` | Solver Frame 0 Widened Float32 | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010/qualification-f2_rv4eq_matched_offset_v1_coarse_dp010-spatial-reference-save010-root-review-001/solver_output/data/Part_0000.bi4` | `911b215215663d8c5ae6161cf18e3c987b744b98bc84252b3db5c99673be3c8d` |
+| `medium_gencase_initial` | GenCase Initial DOUBLE | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008/gencase-f2_rv4eq_matched_offset_v1_medium_dp008-20261003-001/F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008.bi4` | `55935d3a60a732cb8384ed040fde2328337407c8a29a66e176139225a2e95eeb` |
+| `medium_solver_frame0` | Solver Frame 0 Widened Float32 | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008_SPATIAL_REFERENCE_SAVE010/qualification-f2_rv4eq_matched_offset_v1_medium_dp008-spatial-reference-save010-root-review-001/solver_output/data/Part_0000.bi4` | `a4125ba899a16389e7f807cdd289d4f4264cd9969cb8382e9fdb82136ee6f2b3` |
+| `fine_gencase_initial` | GenCase Initial DOUBLE | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1/gencase-f2_rv4eq_dp005_offset_v1-20261002-001/F2_RV4EQ_DP005_OFFSET_V1.bi4` | `efa7d2a296ed3de308c93b598e47225b36865006977caaa6a9a8898099b922a6` |
+| `fine_solver_frame0` | Solver Frame 0 Widened Float32 | `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/qualification-f2_rv4eq_dp005_offset_v1-baseline-save001-native-fullstate-v1/solver_output/data/Part_0000.bi4` | `424dc6cf114f96072f95bb3b5096976a8228fb243f0cbda7f915d040b1aa80fa` |
+
+This exact pairing enables Root's metered audit to directly measure:
+1. Initial GenCase DOUBLE precision constants created from XML continuous decimal reference.
+2. Output solver BI4 DOUBLE precision constants widened from solver float32 interaction constants.
+
 ---
 
 ## 6. Review of Commit `a6f1aafb` Prospective Spatial Scope
@@ -256,5 +283,5 @@ In commit `a6f1aafb`, the 3DP spatial transport comparison pipeline (`f2_rv4eq_m
 ## 7. Conclusion & Next Steps
 
 1. This report and accompanying sidecar establish the definitive 4-tier mass precision provenance.
-2. A metered runner request (`requests/f2_native_bi4_header_precision_audit_request_v1.json`) is prepared to allow Root to execute an independent, bounded verification of raw BI4 header constants directly on campaign storage.
-3. Synthetic unit tests verify all mathematical relationships and schema invariants with 100% campaign write isolation.
+2. A revised metered runner request (`requests/f2_native_bi4_header_precision_audit_request_v1.json`) is prepared to allow Root to execute an independent, bounded verification of raw BI4 header constants directly on campaign storage across all 6 targets.
+3. Synthetic unit tests verify all mathematical relationships, exact type widths, and schema invariants with 100% campaign write isolation.
