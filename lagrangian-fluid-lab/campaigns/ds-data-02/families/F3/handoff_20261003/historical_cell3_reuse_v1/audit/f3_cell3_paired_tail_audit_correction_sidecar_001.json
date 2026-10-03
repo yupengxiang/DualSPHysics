@@ -1,0 +1,102 @@
+{
+  "schema": "ds02.f3.paired-tail-audit-correction-sidecar.v1",
+  "family_id": "F3",
+  "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+  "status": "correction_registered",
+  "created_at_utc": "2026-10-03T04:45:00+00:00",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "production_granted": false,
+    "q_i": "completed_pass for reference direct conversions and label closures",
+    "q_n": "not_assessed",
+    "q_n_granted": false,
+    "t1_macro_qualification": "passed (historical gate F3-075-REF0081818-GATE passed 13/13 panels)",
+    "t2_transport_qualification": "not_yet_qualified (error tail and bracket non-overlap preclude Q-N)",
+    "training": "not_authorized",
+    "scope": "Historical fixed-tank single-axis CELL3 transport comparison with root independent paired-tail audit reconciliation"
+  },
+  "root_audit_binding": {
+    "attempt_id": "root-cell3-paired-tail-audit-005",
+    "report_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/root-cell3-paired-tail-audit-005/paired-transport-audit.json",
+    "report_sha256": "c7006d474cdba25ce95bb085166ff40f9c7cbcbe44da6ab28e2ee82f0247ba3e",
+    "receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/root-cell3-paired-tail-audit-005/execution-receipt.json",
+    "receipt_sha256": "6c3a8bb85036c540554ecf11948dd91e8b37ccd8b4b4a2f77038e4223cd02228",
+    "request_sha256": "fd74e433e6a17a79efdf230a586781efc117539f37ad36c389052ecbb6c20492",
+    "runner_script": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_paired_transport_audit_v1.py",
+    "runner_script_sha256": "18d3ae5b1a6edf5537bc3be5027bd11aabc8600d700bb224c53e5ff1fdb105c1",
+    "status": "completed",
+    "returncode": 0
+  },
+  "scientific_correction_notice": {
+    "retraction_of_prior_claims": {
+      "prior_commit": "d8ae0eb18472804ed84f1dae56fec6e8c2247ad3",
+      "retracted_statements": [
+        "Claim that integration error on identical particles is negligible (-828 microseconds / -0.000828s)",
+        "Claim that population shift was limited to 55 particles switching"
+      ],
+      "root_correction_rationale": "Root independent paired-tail audit demonstrates that the small signed mean delta (-828 microseconds) is an artifact of mathematical signed cancellation between large positive and negative errors. Furthermore, the net count change (-55 particles) was incorrectly conflated with the gross switching cohort, which actually totals 1,363 particles. Substantial tail divergence (mean absolute delta 0.1538s, p95 absolute delta 1.5494s, max absolute delta 5.1005s) and 2,718 non-overlapping observation brackets disprove the claim of negligible error."
+    },
+    "signed_cancellation_vs_large_tails": {
+      "mean_signed_delta_s": -0.0008279443761916003,
+      "mean_absolute_delta_s": 0.15378192355446377,
+      "absolute_delta_quantiles_s": {
+        "p50_median": 0.0010022609942805794,
+        "p75": 0.004803929117320416,
+        "p90": 0.1362225062949674,
+        "p95": 1.5494017903180908,
+        "p99": 1.8709229309786706,
+        "p100_max": 5.100512079177156
+      },
+      "signed_delta_extrema_s": {
+        "min": -5.100512079177156,
+        "max": 4.922997341940626
+      },
+      "paired_brackets_nonoverlapping_count": 2718,
+      "paired_brackets_nonoverlapping_fraction": 0.24166444385169378,
+      "scientific_takeaway": "While median error is ~1.0 ms and 75% of particles differ by < 4.8 ms, the remaining 25% exhibits a severe error tail with 2,718 particles (24.17% of the jointly observed cohort) having mutually exclusive, non-overlapping saved-frame observation intervals. Signed averaging cancels positive (+4.92s) and negative (-5.10s) errors to near zero, masking substantial physical desynchronization in the late sloshing phase."
+    },
+    "total_switching_cohort_vs_net_count_change": {
+      "jointly_observed_count": 11247,
+      "nominal_only_observed_count": 709,
+      "time_only_observed_count": 654,
+      "switching_uids_total": 1363,
+      "net_observed_count_change": -55,
+      "switching_mass_kg": 0.5750156399153639,
+      "scientific_takeaway": "The net difference of -55 particles between NOMINAL (11,956) and TIME (11,901) is the algebraic sum of 709 particles crossing only in NOMINAL and 654 particles crossing only in TIME. The total cohort of particles whose discrete classification switches between observed and censored is 1,363 particles (0.5750 kg, or 3.94% of total fluid mass), not 55 particles."
+    }
+  },
+  "nominal_vs_output_independent_save_check": {
+    "status": "credible_independent_save_verified",
+    "jointly_observed_count": 11956,
+    "nominal_only_observed_count": 0,
+    "output_only_observed_count": 0,
+    "switching_uids_total": 0,
+    "net_observed_count_change": 0,
+    "switching_mass_kg": 0.0,
+    "paired_brackets_nonoverlapping_count": 0,
+    "mean_signed_delta_s": -2.2090463803669706e-05,
+    "mean_absolute_delta_s": 3.1721365521560546e-05,
+    "absolute_delta_quantiles_s": {
+      "p50_median": 1.6065186345892712e-05,
+      "p75": 3.7453496869316316e-05,
+      "p90": 6.889755182190593e-05,
+      "p95": 0.0001044212168633818,
+      "p99": 0.00025462851059450127,
+      "p100_max": 0.0014985874081503425
+    },
+    "signed_delta_extrema_s": {
+      "min": -0.0014985874081503425,
+      "max": 0.000988324994060541
+    },
+    "all_brackets_overlap": true,
+    "scientific_takeaway": "Refining save cadence from 0.01s (836 frames) to 0.002s (4176 frames) under identical solver integration produces zero switching particles, zero non-overlapping brackets, and a mean absolute chord delta of only 31.7 microseconds (max 1.5 ms). This confirms that temporal interpolation / save cadence is clean and credible."
+  },
+  "qualification_posture": {
+    "t1_macro_qualification": "passed (historical gate F3-075-REF0081818-GATE passed 13/13 panels across total variation, COM, energy)",
+    "t2_transport_qualification": "not_yet_qualified (heavy tails, 2718 non-overlapping brackets, and 1363 switching UIDs remain open scientific characteristics requiring root evaluation)",
+    "q_n_granted": false,
+    "production_granted": false,
+    "no_retrospective_gate_tuning": "The family shall not formulate a retrospective post-hoc Q-N gate to engineer an artificial pass. Observables remain descriptive and immutable."
+  }
+}
