@@ -1,0 +1,104 @@
+{
+  "schema": "ds02.root.prospective-spatial-ladder-comparison.v1",
+  "family_id": "F3",
+  "review_round": "030",
+  "title": "Prospective Points of Comparison and Qualification Design for F3 True Adaptive Spatial Ladder",
+  "spatial_triad": {
+    "coarse_dp015": {
+      "case_id": "F3_CELL3_LONG_DP0150_ADAPTIVE_CFL05_COEF005",
+      "grid": "60 x 12 x 6 fluid cells (4,320 particles)",
+      "total_particles": 24264,
+      "native_fluid_mass_kg": 14.58,
+      "continuum_fluid_mass_kg": 14.58,
+      "h_m": 0.023882555767,
+      "dt_min_theoretical_s": 4.493e-05,
+      "expected_steps_approx": 190000,
+      "expected_wall_seconds": 600,
+      "storage_bytes_estimate": 1073741824
+    },
+    "medium_dp010": {
+      "case_id": "F3_CELL3_LONG_DP0100_ADAPTIVE_CFL05_COEF005",
+      "grid": "90 x 18 x 9 fluid cells (14,580 particles)",
+      "total_particles": 57060,
+      "native_fluid_mass_kg": 14.58,
+      "continuum_fluid_mass_kg": 14.58,
+      "h_m": 0.015921703844,
+      "dt_min_theoretical_s": 2.995e-05,
+      "expected_steps_approx": 285000,
+      "expected_wall_seconds": 1200,
+      "storage_bytes_estimate": 2147483648
+    },
+    "fine_dp0075": {
+      "case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+      "grid": "120 x 24 x 12 fluid cells (34,560 particles)",
+      "total_particles": 108000,
+      "native_fluid_mass_kg": 14.580000378191471,
+      "continuum_fluid_mass_kg": 14.58,
+      "h_m": 0.011941277883,
+      "actual_measured_steps": 383190,
+      "actual_measured_dt_min_s": 2.138642245328374e-05,
+      "actual_measured_dt_max_s": 2.212131971271098e-05,
+      "status": "completed_attempt_007",
+      "macro_021_budget_pass": true,
+      "transport_022_zero_fate_switches": true
+    }
+  },
+  "prospective_points_of_comparison": [
+    {
+      "dimension": "Spatial macro convergence rate (7 metrics)",
+      "metrics": [
+        "tv (Total Variation on 60mm fixed bins)",
+        "com_l2_over_length (Center of mass L2 / 0.9m)",
+        "q90_over_length (90th percentile x position / 0.9m)",
+        "mean_velocity_over_U (Mean velocity / sqrt(g*depth))",
+        "energy_difference (Kinetic energy relative to 0.5*M0*U^2)",
+        "common_support_velocity_over_U (Common support velocity error)",
+        "unmatched_support_mass (Mass fraction in disjoint support)"
+      ],
+      "registered_budget": 0.05,
+      "evaluation_approach": "Compute paired discrepancies: Coarse vs Medium, Medium vs Fine, and Coarse vs Fine over the full [0, 8.35] s window at 836 matching frames. Evaluate spatial order of accuracy p = ln((E_coarse - E_medium)/(E_medium - E_fine)) / ln(r)."
+    },
+    {
+      "dimension": "Boundary layer resolution and particle retention",
+      "details": "With 3 layers of mDBC particles on 5 closed faces, the effective boundary resolution scales with DP (0.015m, 0.010m, 0.0075m). Track near-wall velocity gradient du/dz, shear stress, and whether bottom layer fluid particles stay confined to their streamline separatrix."
+    },
+    {
+      "dimension": "Canonical transport chords and fate stability",
+      "details": "Evaluate discrete center-plane (x=0) crossing events across resolutions. Because particle identities are resolution-specific cohorts (4,320 vs 14,580 vs 34,560), compare aggregate transport observables: cumulative signed crossing count, net exchange mass M_net(t), residence time distribution p95, and destination state shares."
+    },
+    {
+      "dimension": "Timestep telemetry and adaptive floor margin",
+      "details": "Verify for both coarse and medium that total DT adjustments remain 0 and floor incidence fraction is 0.0% (PASS < 1% budget). Confirm native dt_min > CoefDtMin * h / speedsound so that SPH timestepping remains strictly CFL-governed rather than floor-clamped."
+    }
+  ],
+  "independent_qualification_path": {
+    "background_1_cell3": {
+      "name": "CELL3 prescribed acceleration sloshing",
+      "frame": "fixed computational tank coordinates",
+      "forcing": "whole-field CaseSloshingAccData.csv",
+      "status": "candidate numerical family defined (adaptive CFL 0.05 / CoefDtMin 0.005); spatial ladder coarse/medium prepared; fine completed; temporal ladder completed (836 vs 4176 frames); Q-N pending full 2x3 evidence.",
+      "parameter_endpoints": {
+        "drive_amplitude_Gamma": [0.6, 0.9, 1.2],
+        "fill_fraction": [0.18, 0.27, 0.36],
+        "frequency_ratio": [0.8, 1.0, 1.2]
+      }
+    },
+    "background_2_eccentric_baffle": {
+      "name": "Eccentric baffle and channel exchange",
+      "frame": "moving tank in world coordinates",
+      "forcing": "prescribed rigid body tank trajectory",
+      "status": "planned; geometry defined; solver pending live resource lease.",
+      "parameter_endpoints": {
+        "drive_amplitude_Gamma": [0.6, 0.9, 1.2],
+        "fill_fraction": [0.18, 0.27, 0.36],
+        "frequency_ratio": [0.8, 1.0, 1.2]
+      }
+    },
+    "study_alias_clarification": "No 336-case claim is made from study aliases or postprocessing permutations. The 336-case label is an unassessed global placeholder (Q-N 0/336). Derived cadences (0.01s vs 0.002s), integration variants (native adaptive vs fixed-dt), and diagnostic re-runs are validation instruments, not separate physical parameter endpoints."
+  },
+  "rejection_of_historical_fixed_dt": {
+    "historical_case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+    "historical_issue": "Executed with CoefDtMin=0.05 which clamped dt at the floor for 100% of steps, equivalent to fixed-dt. It is NOT equivalent to genuine adaptive SPH timestepping.",
+    "resolution": "Superseded by new adaptive case F3_CELL3_LONG_DP0100_ADAPTIVE_CFL05_COEF005 with decoupled CoefDtMin=0.005."
+  }
+}

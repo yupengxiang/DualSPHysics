@@ -1,0 +1,206 @@
+{
+  "schema": "ds02.f3.adaptive-spatial-ladder-contract.v1",
+  "family_id": "F3",
+  "title": "F3 Genuine Adaptive Spatial Ladder Contract (Coarse DP 0.015m, Medium DP 0.010m, Fine DP 0.0075m)",
+  "physical_mother_continuum": {
+    "geometry_id": "F3_CELL3_PLAIN",
+    "tank_interior_m": {
+      "x_min": -0.45,
+      "x_max": 0.45,
+      "x_length": 0.9,
+      "y_min": -0.09,
+      "y_max": 0.09,
+      "y_width": 0.18,
+      "z_min": 0.0,
+      "z_max": 0.51,
+      "z_height": 0.51
+    },
+    "still_water_column_m": {
+      "depth": 0.09,
+      "volume_m3": 0.01458,
+      "rhop0_kg_m3": 1000.0,
+      "continuum_fluid_mass_kg": 14.58
+    },
+    "forcing": {
+      "kind": "prescribed_body_acceleration",
+      "coordinate_frame": "fixed_tank_acceleration",
+      "centre_m": [0.45, 0.0, 0.0],
+      "globalgravity": false,
+      "file": "CaseSloshingAccData.csv",
+      "file_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3"
+    },
+    "boundary_conditions": {
+      "closed_walls": ["bottom", "left", "right", "front", "back"],
+      "open_faces": ["top"],
+      "method": "mDBC",
+      "slip_mode": "no_slip",
+      "visco_bound_factor": 1.0,
+      "no_penetration": 1
+    },
+    "event_window_s": [0.0, 8.35]
+  },
+  "candidate_numerical_family": {
+    "recipe_description": "Unclamped Symplectic timestepping, Wendland kernel, Artificial viscosity (0.05), Fourtakas full DDT (0.1), no shifting, mDBC no-slip, NoPenetration enabled",
+    "cfl": 0.05,
+    "coef_dt_min": 0.005,
+    "ratio_floor_to_cfl": 0.1,
+    "dt_ini": 0.0,
+    "dt_min": 0.0,
+    "dt_fixed": 0.0,
+    "step_algorithm": "Symplectic (2)",
+    "kernel": "Wendland (2)",
+    "visco": 0.05,
+    "density_dt": "Fourtakas full (3), value 0.1",
+    "shifting": "None (0)",
+    "nominal_timeout_s": 0.01,
+    "expected_frames": 836
+  },
+  "spatial_ladder_triad": {
+    "coarse": {
+      "dp_m": 0.015,
+      "resolution_id": "coarse",
+      "case_id": "F3_CELL3_LONG_DP0150_ADAPTIVE_CFL05_COEF005",
+      "definition_xml": "definitions/F3_CELL3_plain_0p015_Def.xml",
+      "commensurate_ratio_to_fine": "2:1",
+      "commensurate_ratio_to_medium": "3:2",
+      "fluid_grid_cells": [60, 12, 6],
+      "fluid_particles": 4320,
+      "boundary_particles": 19944,
+      "total_particles": 24264,
+      "particle_mass_kg": 0.003375,
+      "initial_fluid_mass_kg": 14.58,
+      "mass_deviation_from_continuum_kg": 0.0,
+      "smoothing_length_h_m": 0.023882555767,
+      "status": "prepared_ready_for_root_gencase"
+    },
+    "medium": {
+      "dp_m": 0.01,
+      "resolution_id": "medium",
+      "case_id": "F3_CELL3_LONG_DP0100_ADAPTIVE_CFL05_COEF005",
+      "definition_xml": "definitions/F3_CELL3_plain_0p010_Def.xml",
+      "commensurate_ratio_to_fine": "4:3",
+      "commensurate_ratio_to_coarse": "2:3",
+      "fluid_grid_cells": [90, 18, 9],
+      "fluid_particles": 14580,
+      "boundary_particles": 42480,
+      "total_particles": 57060,
+      "particle_mass_kg": 0.001,
+      "initial_fluid_mass_kg": 14.58,
+      "mass_deviation_from_continuum_kg": 0.0,
+      "smoothing_length_h_m": 0.015921703844,
+      "preexisting_bi4_sha256": "07444b30c5c956e88651667b591a6ca0ba08bff3e9b9435c80a2fc8437482d38",
+      "status": "prepared_ready_for_root_gencase"
+    },
+    "fine": {
+      "dp_m": 0.0075,
+      "resolution_id": "fine",
+      "case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+      "definition_xml": "definitions/F3_CELL3_plain_0p0075_Def.xml",
+      "fluid_grid_cells": [120, 24, 12],
+      "fluid_particles": 34560,
+      "boundary_particles": 73440,
+      "total_particles": 108000,
+      "particle_mass_kg": 0.000421875,
+      "initial_fluid_mass_kg": 14.580000378191471,
+      "mass_deviation_from_continuum_kg": 3.78191471e-07,
+      "smoothing_length_h_m": 0.011941277883,
+      "status": "completed_root_attempt_007",
+      "completed_evidence": {
+        "solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/execution-receipt.json",
+        "conversion_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-adaptive-floor-fulltyped-nvme-conversion-008/conversion-report.json",
+        "timestep_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-adaptive-floor-native-timestep-diagnostic-v2-009/timestep-report.json",
+        "macro_021_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_GENUINE_ADAPTIVE_SAVE_FREQUENCY_MACRO_001/root-cell3-adaptive-saved-frequency-full835-frozen-macro-v2-021/macro-comparison.json",
+        "transport_022_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_ADAPTIVE_SAVE_FREQUENCY_TRANSPORT_001/root-cell3-same-recipe-full-native-saved-transport-v2-022/saved-transport-report.json"
+      }
+    }
+  },
+  "non_normalization_policy": {
+    "rule": "Report native particle mass and native fluid sum strictly separate from the continuum reference mass (14.58 kg); do not normalize native particle weights to force equality."
+  },
+  "fixed_dt_reuse_prohibition": {
+    "historical_case": "F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen",
+    "rule": "Historical solver run F3_CELL3_LONG_dp0p01_a1p000_noslip_visco1_nopen in l1-resume executed with CoefDtMin=0.05, causing 100% floor-clamped fixed-dt equivalent timestepping. It is strictly rejected from being reused as an adaptive equivalent. The spatial ladder requires genuine adaptive CFL 0.05 / CoefDtMin 0.005 solver execution."
+  },
+  "frozen_observation_contracts": {
+    "macro_operator": "scripts/f3_observation_v2.py",
+    "macro_metrics": [
+      "tv",
+      "com_l2_over_length",
+      "q90_over_length",
+      "mean_velocity_over_U",
+      "energy_difference",
+      "common_support_velocity_over_U",
+      "unmatched_support_mass"
+    ],
+    "macro_budgets": {
+      "time_output_error_budget": 0.01,
+      "spatial_reference_budget": 0.05
+    },
+    "transport_metrics": [
+      "canonical_crossing_chords",
+      "signed_and_net_exchange_mass",
+      "bracket_tightening",
+      "fate_switches",
+      "destination_agreement",
+      "residence_time_p95"
+    ],
+    "transport_cdf_status": "descriptive_only_not_continuous_qualification"
+  },
+  "resource_bounds": {
+    "home_disk_floor_gib": 500.0,
+    "root_nvme_floor_gib": 100.0,
+    "gpu_walltime_cap_seconds_per_case": 7200,
+    "gpu_total_hours_budget": 46.0,
+    "qualification_case_quota": 67,
+    "coarse_dp015_estimates": {
+      "max_wall_seconds": 7200,
+      "expected_wall_seconds": 600,
+      "raw_solver_storage_bytes": 1073741824,
+      "peak_gpu_mib": 2048
+    },
+    "medium_dp010_estimates": {
+      "max_wall_seconds": 7200,
+      "expected_wall_seconds": 1200,
+      "raw_solver_storage_bytes": 2147483648,
+      "peak_gpu_mib": 4096
+    },
+    "device_dispatch_policy": {
+      "allowed_owned_gpus": [2, 5, 6, 7],
+      "protected_foreign_gpus": [0, 1, 3, 4],
+      "device_ids_placeholder": "{LEASED_GPU_DEVICE_ID}"
+    }
+  },
+  "prospective_points_of_comparison": {
+    "spatial_convergence_order": "Observe empirical convergence rates p of the 7 macro metrics across DP 0.015 -> DP 0.010 -> DP 0.0075 against the 5% spatial budget.",
+    "macro_support_overlap": "Evaluate common_support_velocity_over_U and unmatched_support_mass across resolution transitions.",
+    "transport_fate_stability": "Track whether crossing chords and fate switches stabilize or manifest resolution-dependent divergence in the shear boundary layer.",
+    "boundary_layer_resolution": "Assess shear strain du/dz and near-wall particle retention under 3 layers of mDBC boundary particles across resolutions (18, 24, 30 boundary grid lines in y; 6, 9, 12 fluid grid lines in z)."
+  },
+  "independent_qualification_path": {
+    "background_1_cell3_sloshing": {
+      "mechanism_id": "dual_axis_phase",
+      "frame": "fixed_tank_acceleration",
+      "forcing": "whole_field_prescribed_acceleration",
+      "qualification_ladder": "3-resolution spatial ladder (0.015, 0.010, 0.0075) + 2-cadence temporal ladder (0.01, 0.002) + quarter-dt/CFL sensitivity.",
+      "parameter_endpoints": {
+        "drive_amplitude": [0.6, 0.9, 1.2],
+        "fill_fraction": [0.18, 0.27, 0.36],
+        "frequency_over_natural": [0.8, 1.0, 1.2]
+      }
+    },
+    "background_2_eccentric_baffle": {
+      "mechanism_id": "eccentric_baffle_exchange",
+      "frame": "moving_tank_world",
+      "geometry": "eccentric_baffle_channel",
+      "qualification_ladder": "3-resolution spatial ladder (0.012, 0.008, 0.006) + fixed-dt half-minimum step study (0.0025s cadence).",
+      "parameter_endpoints": {
+        "drive_amplitude": [0.6, 0.9, 1.2],
+        "fill_fraction": [0.18, 0.27, 0.36],
+        "frequency_over_natural": [0.8, 1.0, 1.2]
+      }
+    },
+    "rejection_of_alias_counting": "Study variants (sampling cadence, integration step, diagnostic converters) do NOT increment physical case count. Overall campaign status remains Q-N 0/336; qualification domain requires full evidence closure on both mechanisms and parameter endpoints."
+  },
+  "q_n_status": "not_assessed",
+  "production_approval": "none"
+}
