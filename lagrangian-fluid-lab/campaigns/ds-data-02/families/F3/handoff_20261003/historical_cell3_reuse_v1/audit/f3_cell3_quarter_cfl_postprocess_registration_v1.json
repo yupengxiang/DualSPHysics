@@ -1,0 +1,85 @@
+{
+  "schema": "ds02.quarter-cfl-postprocess-registration.v1",
+  "family_id": "F3",
+  "case_id": "F3_CELL3_LONG_DP0075_QUARTER_CFL_001",
+  "registration_scope": "Registration of completed quarter-CFL solver execution, completed full-typed NVMe conversion with PartVTK anchors, and prepared prospective same-UID transport postprocessing and four-way comparison",
+  "solver_execution": {
+    "attempt_id": "root-cell3-quarter-cfl-full835-native-001",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_QUARTER_CFL_001/root-cell3-quarter-cfl-full835-native-001/execution-receipt.json",
+    "receipt_sha256": "f79c7c75c322e7f7ffecf3210e38c99471aaed00254d5b95b137a8123c3a9cfe",
+    "solver_log": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_QUARTER_CFL_001/root-cell3-quarter-cfl-full835-native-001/solver_output/Run.out",
+    "returncode": 0,
+    "status": "completed",
+    "elapsed_seconds": 2029.39955,
+    "total_steps": 1509684,
+    "nominal_steps": 377423,
+    "step_ratio": 3.999978803623547,
+    "native_time_s": 8.350001766627175,
+    "native_frames": 836,
+    "particles_out": 0,
+    "timestep_regime": {
+      "DtMin_s": 5.53067421676747e-06,
+      "DtMax_s": 5.53067421676747e-06,
+      "DTsMin_steps": 3019366,
+      "CoefDtMin": 0.0125,
+      "classification": "minimum_floor_limited_symplectic",
+      "physical_interpretation": "The simulation was clamped at the minimum timestep floor throughout execution; this tests coupled CFL and minimum-floor numerical sensitivity, NOT an unconstrained adaptive floor-safe regime."
+    }
+  },
+  "nvme_conversion": {
+    "attempt_id": "root-cell3-quarter-cfl-fulltyped-nvme-conversion-002",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_QUARTER_CFL_001/root-cell3-quarter-cfl-fulltyped-nvme-conversion-002/execution-receipt.json",
+    "receipt_sha256": "12016dad53f793a5bf0565e050d17a8f5a11c21d399fd537025ff1a9b1c7a1d6",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_QUARTER_CFL_001/root-cell3-quarter-cfl-fulltyped-nvme-conversion-002/conversion-report.json",
+    "report_sha256": "1cda6545aaa93a615ccb1aa63e63a715a62f3b10dfc4bb19b8bc609f2eb42897",
+    "trajectory_h5": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_QUARTER_CFL_001/root-cell3-quarter-cfl-fulltyped-nvme-conversion-002/trajectory.h5",
+    "trajectory_sha256": "0853c71db6f6b31dae1f3f269b895375c9cfbb61f0683e010f387b6ee3ddd0bb",
+    "frames": 836,
+    "particles_total": 108000,
+    "fluid_particles": 34560,
+    "fluid_id_range": [
+      73440,
+      107999
+    ],
+    "boundary_particles": 73440,
+    "partvtk_validation": {
+      "all_passed": true,
+      "anchor_frames": [
+        0,
+        418,
+        835
+      ],
+      "max_abs_position_error_m": 4.768371586472142e-09,
+      "fluid_mass_kg": 14.580000345593948
+    }
+  },
+  "postprocess_architecture": {
+    "prepared_labels_request": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_cell3_quarter_cfl_labels_prepared_001.json",
+    "prepared_four_way_comparison_request": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_cell3_quarter_cfl_four_way_comparison_prepared_001.json",
+    "comparison_script": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/audit/f3_cell3_quarter_cfl_four_way_comparison_v1.py",
+    "comparison_ladder": {
+      "NOMINAL": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen (CFL=0.05, tout=0.01s, 377,423 steps, 836 frames)",
+      "TIME": "F3_REV075_R075-TIME (CFL=0.025, tout=0.01s, 754,843 steps, 836 frames)",
+      "OUTPUT": "F3_REV075_R075-OUTPUT (CFL=0.05, tout=0.002s, 377,423 steps, 4,176 frames)",
+      "QUARTER": "F3_CELL3_LONG_DP0075_QUARTER_CFL_001 (CFL=0.0125, tout=0.01s, 1,509,684 steps, 836 frames)"
+    },
+    "transport_metrics": {
+      "chord_timing_errors": "Absolute and signed deltas (|Δt|, Δt) including mean, median, p75, p90, p95, and max",
+      "interval_brackets": "Paired non-overlapping brackets derived directly from actual interval arrays",
+      "cohort_switching": "Total switching particles vs net cohort change, separating signed cancellation from dispersion tails",
+      "dual_early_denominators": "Early window (t <= 2.5s and t <= 1.5s) switching evaluated against both window-joint denominator and full nominal denominator (11,956)",
+      "unconditional_mass_cdf": "Strictly descriptive native-weighted first-passage CDF differences; NEVER an invented 5% Q-N gate",
+      "depth_layering": "Stratified across bottom boundary (z0 < 0.05m), middle core (0.05 <= z0 <= 0.15m), and top free-surface (z0 > 0.15m)"
+    }
+  },
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "production_granted": false,
+    "q_i": "quarter_cfl_solver_and_conversion_completed_postprocessing_prepared",
+    "q_n": "not_assessed",
+    "q_n_granted": false,
+    "training": "not_authorized",
+    "root_review_required": true
+  }
+}
