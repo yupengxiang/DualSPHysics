@@ -1,0 +1,507 @@
+{
+  "schema": "ds02.f5.actual-three-dp-negative-source-review.v1",
+  "at_utc": "2026-10-03T03:33:53.411084+00:00",
+  "actual_audit_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_NATIVE_THREE_DP_GAUGE_COMPARISON/root-frozen-prefix-three-dp-gauge-comparison-003/execution-receipt.json",
+  "actual_audit_receipt_sha256": "a0fbc8f327710a3db26fd697509f4c0d091373bf64d42422338841566e3d2ab4",
+  "actual_comparison": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_NATIVE_THREE_DP_GAUGE_COMPARISON/root-frozen-prefix-three-dp-gauge-comparison-003/native-gauge-comparison.json",
+  "actual_comparison_sha256": "12ecf7fa8caa6ea8994da0a9bdf89992b35beb9f8739a03e01106baafffa2c14",
+  "frozen_height_m": 0.4,
+  "frozen_macro_budget": 0.05,
+  "scope": "Native gauge spatial diagnostic0--15.98s; does not cover missing16s gauge sample or material transport event gate",
+  "observations": "All3DP initial fluidmass2352kg exact, same listed numerics. Mid/fine WG1/2 RMSE/H remains.0965--.1093 and WG3 .3172--.3503 >.05. WG3floor/dry occupancy and first abovefloor time are strongly resolutiondependent; fineRunup WG4 detects a short wet interval absentcoarse/medium. These are raw gauge diagnostics, not material firstpassage label estimates and not a newly preregisteredgate.",
+  "acceptance": "QN not granted; no threshold or denominator changes",
+  "hypotheses": "Unresolved numerical wavefront/runup sensitivity and native SWL detection sensitivity; exact native inputs exclude initial mass rescaling as an explanation. This report proves neither hydroconvergence nor a particular correctivecause.",
+  "next_executable_tasks": [
+    "Verify moving/fixed geometric surface support and exactcontrol files across actual3DP before consideringanyphysicsrepair",
+    "Prepare commensurateDP.01 CPUinit only as explicitfiner diagnostic candidate; bind originalphysicalmother and exactfluidmass2352; actual countabove5M needs explicitcost review beforefutureGPU",
+    "Compare canonical fullparticle macro/transport labels and gaugewet/dry censorsemantics; keepregistered eventbudget original"
+  ],
+  "sources": [
+    {
+      "mechanism": "runup_return",
+      "dp_m": 0.05,
+      "actual_fluid_particles": 18816,
+      "actual_native_particle_mass_kg": 0.125,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-runup_return-dp005-native-reference-root-padded-domain-015/execution-receipt.json",
+      "native_receipt_sha256": "2192f1c8a2004a5688693394909978a5d0cc589a87300aa43556fa03f4669d10",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-runup_return-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "6fa6c6cf1be18d6cf54ad043585466b8d9e854d384f14e83f1c2a785facf9ee5",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": 0.323454,
+          "height_max_m": 0.434957,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.0034109999999999974
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-runup_return-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "4d66775edaf66793494a3ea2b4660b72aec823d3d1f3d70a628b4061aa5ade81",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": 0.319599,
+          "height_max_m": 0.435732,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.007678999999999991
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-runup_return-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "a18af67a824d2dcaa837f051fb3d58c1bdf98d30a177453ebcf95e61153aaa24",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.488776,
+          "fraction_at_point0_floor": 0.7075,
+          "first_value_above_floor_s": 1.060549,
+          "largest_sample_jump_m": 0.433263
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-runup_return-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "a0ae410f23fca745b84382ad886bc83c3931c5ea9a6dee645cec31408d3d6f4a",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": -0.02,
+          "fraction_at_point0_floor": 1.0,
+          "first_value_above_floor_s": null,
+          "largest_sample_jump_m": 0.0
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_FOUR_DP_NATIVE_REFERENCE_011/F5_REF_RUNUP_NOMINAL_DP005_CELL_CENTRE_010/native_inputs_padded_domain_root_015/piston_f91973457a049db5_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    },
+    {
+      "mechanism": "runup_return",
+      "dp_m": 0.025,
+      "actual_fluid_particles": 150528,
+      "actual_native_particle_mass_kg": 0.015625,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-runup_return-phase-exact-007-native-reference-009-domain-repair-011/execution-receipt.json",
+      "native_receipt_sha256": "764255a73f31a848b7f0b9a4caeecad1a23e360bc94ae698b74c7f4624ebc1d2",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-runup_return-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "f076c1f9632e3bf1da6e9279d7c2395b1c50f67076227d0c045d550d3343fe2b",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980224
+          ],
+          "height_min_m": 0.284968,
+          "height_max_m": 0.460786,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.009577999999999975
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-runup_return-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "704ba2180bae88ecebd07c59ff3309832b16eac6e18c63164b79eb010bb47af4",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980224
+          ],
+          "height_min_m": 0.268994,
+          "height_max_m": 0.44622,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.010832999999999982
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-runup_return-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "f99a71c14cd4fc749bc257050e7c7a241e6ccc60f459a7f4563634fda23f3672",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980224
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.468162,
+          "fraction_at_point0_floor": 0.19625,
+          "first_value_above_floor_s": 0.700005,
+          "largest_sample_jump_m": 0.375187
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-runup_return-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "f1024cd2aad2f7c6d0332d8626202492ec8b642f04a56d6d851d244c69fbf515",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980224
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": -0.02,
+          "fraction_at_point0_floor": 1.0,
+          "first_value_above_floor_s": null,
+          "largest_sample_jump_m": 0.0
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/native_inputs_domain_repair_011/piston_f91973457a049db5_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    },
+    {
+      "mechanism": "runup_return",
+      "dp_m": 0.0125,
+      "actual_fluid_particles": 1204224,
+      "actual_native_particle_mass_kg": 0.001953125,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-runup_return-dp00125-native-reference-root-reviewed-014/execution-receipt.json",
+      "native_receipt_sha256": "1cfa5a1b9df35a4d504acccdde79158f50ac6a55df892f9ba5ebe25b9aa4909f",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-runup_return-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "64b9ced7a720bdae5d4ed242c991db71b8d65ecaa3ecc35d095e537d390229b9",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980014
+          ],
+          "height_min_m": 0.258896,
+          "height_max_m": 0.496511,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.07640000000000002
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-runup_return-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "78e41921101799f35dcfe2b1bdf4a50ac104c4c47230e9ef296300bdda62e5ec",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980014
+          ],
+          "height_min_m": 0.238969,
+          "height_max_m": 0.471766,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.018425999999999998
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-runup_return-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "b18eefce290ffe45c8c9fdf2d23f207843835055c89a759cdfe839e961178587",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980014
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.455903,
+          "fraction_at_point0_floor": 0.10625,
+          "first_value_above_floor_s": 0.500002,
+          "largest_sample_jump_m": 0.317465
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-runup_return-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "929dd206a4e62c86fc0f2d991c7c84fc419038bb7717cd49ae32162d12f71ed4",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980014
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.60989,
+          "fraction_at_point0_floor": 0.95375,
+          "first_value_above_floor_s": 8.560064,
+          "largest_sample_jump_m": 0.613228
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_FOUR_DP_NATIVE_REFERENCE_011/F5_REF_RUNUP_NOMINAL_DP00125_CELL_CENTRE_010/native_inputs_domain_repair_011/piston_f91973457a049db5_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    },
+    {
+      "mechanism": "weir_pair",
+      "dp_m": 0.05,
+      "actual_fluid_particles": 18816,
+      "actual_native_particle_mass_kg": 0.125,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-weir_pair-dp005-native-reference-root-padded-domain-015/execution-receipt.json",
+      "native_receipt_sha256": "7f2af8755920bea3299b0545a7c4933f9b7bd3350a9be3c079c73414bd1a014e",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-weir_pair-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "6fa6c6cf1be18d6cf54ad043585466b8d9e854d384f14e83f1c2a785facf9ee5",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": 0.323454,
+          "height_max_m": 0.434957,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.0034109999999999974
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-weir_pair-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "4d66775edaf66793494a3ea2b4660b72aec823d3d1f3d70a628b4061aa5ade81",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": 0.319599,
+          "height_max_m": 0.435732,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.007678999999999991
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-weir_pair-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "a18af67a824d2dcaa837f051fb3d58c1bdf98d30a177453ebcf95e61153aaa24",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.488776,
+          "fraction_at_point0_floor": 0.7075,
+          "first_value_above_floor_s": 1.060549,
+          "largest_sample_jump_m": 0.433263
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/qualification-f5-weir_pair-dp005-native-reference-root-padded-domain-015/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "a0ae410f23fca745b84382ad886bc83c3931c5ea9a6dee645cec31408d3d6f4a",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980418
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": -0.02,
+          "fraction_at_point0_floor": 1.0,
+          "first_value_above_floor_s": null,
+          "largest_sample_jump_m": 0.0
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_FOUR_DP_NATIVE_REFERENCE_011/F5_REF_WEIR_NOMINAL_DP005_CELL_CENTRE_010/native_inputs_padded_domain_root_015/piston_4c73cd98b7230035_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    },
+    {
+      "mechanism": "weir_pair",
+      "dp_m": 0.025,
+      "actual_fluid_particles": 150528,
+      "actual_native_particle_mass_kg": 0.015625,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/execution-receipt.json",
+      "native_receipt_sha256": "fb37dcfc539cf4430874055ab5fc728e2c97aeb229a89fbbe55a503379b55da1",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "fd40cddbc08938e20dbecd2b181e9eec2b086bc18b11e71cbb1dee4f8640a333",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980127
+          ],
+          "height_min_m": 0.28497,
+          "height_max_m": 0.46121,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.009703000000000017
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "0afe2cb63bd740a0a1408543032b6f868af9a59e1b90da7efbc06f67205cd3e4",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980127
+          ],
+          "height_min_m": 0.268994,
+          "height_max_m": 0.446613,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.011037999999999992
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "5e5f65104948c7d19c8294a58226f7007cdab3be7e1ae6c133685d4e12783ae5",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980127
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.443176,
+          "fraction_at_point0_floor": 0.23,
+          "first_value_above_floor_s": 0.700005,
+          "largest_sample_jump_m": 0.393756
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/qualification-f5-weir_pair-phase-exact-007-native-reference-009-domain-repair-011/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "fbf10d92295099293730ea7bdd05e400ec78714f33b9a15aafbdb4a2468dd41a",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980127
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": -0.02,
+          "fraction_at_point0_floor": 1.0,
+          "first_value_above_floor_s": null,
+          "largest_sample_jump_m": 0.0
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_MEDIUM_CELL_CENTRE_PHASE_EXACT_007_NATIVE_REFERENCE_009/native_inputs_domain_repair_011/piston_4c73cd98b7230035_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    },
+    {
+      "mechanism": "weir_pair",
+      "dp_m": 0.0125,
+      "actual_fluid_particles": 1204224,
+      "actual_native_particle_mass_kg": 0.001953125,
+      "initial_native_fluid_mass_kg": 2352.0,
+      "continuous_mass_kg": 2352.0,
+      "relative_initial_mass_error": 0.0,
+      "numerics": {
+        "StepAlgorithm": "2",
+        "Kernel": "2",
+        "ViscoTreatment": "1",
+        "Visco": "0.01",
+        "DensityDT": "2",
+        "Shifting": "0"
+      },
+      "native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-weir_pair-dp00125-native-reference-root-reviewed-014/execution-receipt.json",
+      "native_receipt_sha256": "f6f7fc3420d685dd1a2da2a080080b03a3431fe99ce188de05f719193ad37682",
+      "gauges": {
+        "WG1": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-weir_pair-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG1.csv",
+          "sha256": "0a628c60a7ed54015d729482aff4d6ba029edf11b65617fccc093eaec8fda9fb",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980077
+          ],
+          "height_min_m": 0.258899,
+          "height_max_m": 0.516393,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.09161399999999997
+        },
+        "WG2": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-weir_pair-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG2.csv",
+          "sha256": "49ade5c3aa89f403bc0b0c67802720003af28cf5bb30d0a2adf3bf1f4ab6d838",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980077
+          ],
+          "height_min_m": 0.238969,
+          "height_max_m": 0.448039,
+          "fraction_at_point0_floor": 0.0,
+          "first_value_above_floor_s": 0.0,
+          "largest_sample_jump_m": 0.014994000000000007
+        },
+        "WG3": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-weir_pair-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG3.csv",
+          "sha256": "2ba137e8af6ad2bdf0c94e5efc1caa8b4198fb3caf3b9304ebf0f692f177f6f5",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980077
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": 0.460924,
+          "fraction_at_point0_floor": 0.11,
+          "first_value_above_floor_s": 0.500002,
+          "largest_sample_jump_m": 0.317465
+        },
+        "WG4": {
+          "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/qualification-f5-weir_pair-dp00125-native-reference-root-reviewed-014/solver_output/GaugesSWL_WG4.csv",
+          "sha256": "4766449db5ebdbf57ff7029481f117f12f38b83c0506a8b5359aec2f30ba46b6",
+          "samples": 800,
+          "time_window_s": [
+            0.0,
+            15.980077
+          ],
+          "height_min_m": -0.02,
+          "height_max_m": -0.02,
+          "fraction_at_point0_floor": 1.0,
+          "first_value_above_floor_s": null,
+          "largest_sample_jump_m": 0.0
+        }
+      },
+      "native_motion_file": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_FOUR_DP_NATIVE_REFERENCE_011/F5_REF_WEIR_NOMINAL_DP00125_CELL_CENTRE_010/native_inputs_domain_repair_011/piston_4c73cd98b7230035_regular_piston.dat",
+        "sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      }
+    }
+  ]
+}
