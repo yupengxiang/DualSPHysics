@@ -1,0 +1,270 @@
+{
+  "claims": {
+    "production_eligibility": "not_evaluated",
+    "q_i": "numerical reference conversion evidence only",
+    "q_n": "not_assessed"
+  },
+  "drive_amplitude_G": 1.0,
+  "family_id": "F3",
+  "gencase_provenance": {
+    "generated_parent_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_HISTORY_CELL3_PARENT/F3_HISTORY_CELL3_PARENT_GENCAS_01/F3_HISTORY_CELL3_PARENT.xml",
+      "role": "historical GenCase parent XML",
+      "bytes": 9412,
+      "sha256": "2d1b6de4e33e3080abc3aae6fae2d1b61bf7c91dbcad19febe8230311a77c926"
+    },
+    "parent_xml_geometry_sha256": "790937df79e914055aa00be09540fd4205cbde8bab3130284895c36515172cc4",
+    "receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_HISTORY_CELL3_PARENT/F3_HISTORY_CELL3_PARENT_GENCAS_01/execution-receipt.json",
+      "role": "historical GenCase receipt",
+      "bytes": 5431,
+      "sha256": "7da82fd6bf3a5972eb8e30de8f7a542813cd411fb596e4ac5f7baa7588a4aca4"
+    },
+    "relation": "historical GenCase CPU receipt uses the same frozen F3_CELL3 plain Def source and identical typed ranges/continuous geometry; no GenCase rerun is performed by this conversion",
+    "source_def_sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5",
+    "typed_ranges": {
+      "actual_y_layers": 24,
+      "fixed_particles": 73440,
+      "fluid_particles": 34560,
+      "total_particles": 108000
+    }
+  },
+  "legacy_split": "historical_reference",
+  "mechanism_id": "legacy_plain_sloshing",
+  "operator_binding": {
+    "operator_file": "campaigns/ds-data-02/families/F3/legacy_plain_8/f3_legacy_plain_operators.v1.json",
+    "transport_status": "planned_until_direct_H5_conversion; labels use finite x=0 tank-plane and separate top open exit"
+  },
+  "physical_binding": {
+    "control_family_id": "F3_CTRL_LEGACY_SINGLE_AXIS",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed legacy single-axis acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "legacy_plain_sloshing",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "legacy_plain",
+    "parameters": {
+      "acceleration_source_semantics": "CaseSloshingAccData.csv from frozen CELL3 nominal source; acctimesfile binding",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "reference_variant": "NOMINAL",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ]
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+  "resolution": "dp_0p0075_nominal_CFL_decoupled_CoefDtMin",
+  "schema": "ds02.f3.legacy-plain-owner-metadata.v1",
+  "solver_parameters": {
+    "cfl_number": 0.05,
+    "definition_dp_m": 0.0075,
+    "dt_fixed_s": 0.0,
+    "native_internal_dt_source": "Actual complete RunPARTs; independent measured floor diagnostic remains separately bound; no Q-N inference.",
+    "save_pos_double": 2,
+    "shifting": 0,
+    "solver_mode": "-mdbc_noslip:1",
+    "time_max_s": 8.35,
+    "time_out_s": 0.01,
+    "coef_dt_min": 0.005,
+    "TimeOut": "0.002"
+  },
+  "source": {
+    "generated_xml_coordinate_frame": "generated XML data2d=false; native fixed tank Cartesian coordinates",
+    "raw_tree_sha256": "computed_by_direct_converter_at_attempt",
+    "solver_dimension_evidence": {
+      "definition": {
+        "basis": "generated XML data2d flag; HDF5 position components are corroborative",
+        "data2d": "false",
+        "solver_dimension": 3,
+        "status": "parsed"
+      },
+      "hdf5_coordinate_components": 3,
+      "solver_dimension_source": "actual generated XML data2d=false plus native HDF5 position[:, :, 3]"
+    },
+    "source_definition": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_Def.xml",
+      "role": "nominal generated Def XML",
+      "bytes": 7021,
+      "sha256": "5ba5f6f2421d7d7631e4213c8ad9bb26fa71cc48ba783da919e756aa456c84b5"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005.xml",
+      "sha256": "d3e4c9960b54940d9512f40ad6637276ec73f50d37a3bdda9de6b96e2a50ae48",
+      "bytes": 9409,
+      "role": "Actual nominal-CFL independent-floor repaired generated XML"
+    },
+    "control": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/CaseSloshingAccData.csv",
+      "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "bytes": 7737549,
+      "role": "Exactnominal prescribeddrive"
+    },
+    "raw_bi4_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/solver_output/data",
+    "solver_log": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/solver_output/Run.out",
+      "sha256": "e48effd9017930867826c90e2611e1dd81c3d17224f0eeaab35c3abd40e3034b",
+      "bytes": 92497,
+      "role": "Actual completed solver log"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/execution-receipt.json",
+      "sha256": "2dfba04185cc5068c51bdbd6ff44baa4cc21f5dd3c100929c134874b273262b7",
+      "bytes": 69263,
+      "role": "Actualruntime solverterminal"
+    },
+    "run_parts": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/solver_output/RunPARTs.csv",
+      "sha256": "63bf1ffe5e595059d4b24f9158297935de068a3211ca4ef8f39d1467be7052d8",
+      "bytes": 174816,
+      "role": "Actual fullnativephysicaltimeline"
+    },
+    "native_attempt_id": "root-cell3-nominal-cfl-decoupled-floor-full835-native-007",
+    "native_attempt_directory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-full835-native-007/solver_output"
+  },
+  "target_role": "numerical_reference",
+  "prospective_reference_scope": {
+    "native_case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+    "same_physical_condition_sha256": "59abc8c59ecbb994aef358a683672feac00ff8d1024d55f0219c8fe257f6ff90",
+    "parent_physical_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "temporal_variant": "nominal_CFL_independent_floor_repair",
+    "same_initial_BI4_sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+    "qualification_claim": "none; original sameUID transportnegative remains until actualsame-operator comparison"
+  },
+  "case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005_DENSE_SAVE002",
+  "effective_execution": {
+    "cli_time_out_s": 0.002,
+    "xml_nominal_time_out_s": 0.01,
+    "expected_native_frames": 4176,
+    "full_window_s": [
+      0,
+      8.35
+    ],
+    "solver_command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "-mdbc_noslip:1",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+      "{attempt_root}/solver_output",
+      "-tmax:8.35",
+      "-tout:0.002"
+    ],
+    "solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005_DENSE_SAVE002/root-cell3-adaptive-baseline-full835-save002-native-018/execution-receipt.json",
+    "solver_receipt_sha256": "d143559f973fde0a5d44bea43426ee7ff06c2ebda9a629c8c024399307bf6bf6"
+  }
+}
