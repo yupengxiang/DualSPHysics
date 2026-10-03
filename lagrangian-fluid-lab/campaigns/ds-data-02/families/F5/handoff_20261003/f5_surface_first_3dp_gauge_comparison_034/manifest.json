@@ -1,0 +1,80 @@
+{
+  "bindings_path": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/f5_surface_first_3dp_gauge_comparison_034/bindings.json",
+  "bindings_sha256": "82b233039f4359e7ac0b0094ff66b7f566f09aa60c9ab8b632b4ee8aa698090c",
+  "date": "2026-10-03",
+  "family": "F5",
+  "historical_negative_preservation": {
+    "historical_4dp_spatial_relative_rmse_range": [
+      0.317,
+      0.35
+    ],
+    "interpretation": "Previous 4DP spatial investigations demonstrated WG3 error of ~0.317-0.350 H on the sloping bed, well exceeding the 5% tolerance threshold. Spatial candidate ladder does not substitute for independent time/save convergence, and WG3 non-convergence remains preserved as an established negative finding.",
+    "negative_finding_preserved": true,
+    "probe": "WG3"
+  },
+  "mechanisms": [
+    "runup",
+    "weir"
+  ],
+  "mechanisms_separation": "Runup and Weir mechanisms are evaluated independently with separate dedicated pipelines and runner requests.",
+  "numerical_padding": {
+    "coarse_xmin_final_m": -1.3,
+    "explanation": "Numerical padding difference arises strictly from ResizeMapLimits for kernel cell division; physical bed STL and fluid domain [-0.9, 3.3] x [-0.7, 0.7] x [0.02, 0.42] m are strictly identical across all resolutions.",
+    "medium_fine_xmin_final_m": -1.22
+  },
+  "physics_and_metrics": {
+    "absolute_error_tolerance_m": 0.02,
+    "dry_occupancy_handled": true,
+    "probes": [
+      "WG1",
+      "WG2",
+      "WG3",
+      "WG4",
+      "RunupToe",
+      "Crest"
+    ],
+    "reference_height_h_m": 0.4,
+    "relative_error_tolerance": 0.05,
+    "resolution_dependent_dropout_tracked": true
+  },
+  "requests": {
+    "runup": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/f5_surface_first_3dp_gauge_comparison_034/requests/F5_RUNUP_SURFACE_FIRST_3DP_GAUGE_COMPARISON_REQUEST.json",
+    "weir": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/f5_surface_first_3dp_gauge_comparison_034/requests/F5_WEIR_SURFACE_FIRST_3DP_GAUGE_COMPARISON_REQUEST.json"
+  },
+  "resolutions": {
+    "coarse": {
+      "dp_m": 0.05,
+      "expected_fluid_mass_kg": 2352.0,
+      "expected_fluid_particles": 18816,
+      "xmin_final_m": -1.3
+    },
+    "fine": {
+      "dp_m": 0.01,
+      "expected_fluid_mass_kg": 2352.0,
+      "expected_fluid_particles": 2352000,
+      "xmin_final_m": -1.22
+    },
+    "medium": {
+      "dp_m": 0.025,
+      "expected_fluid_mass_kg": 2352.0,
+      "expected_fluid_particles": 150528,
+      "xmin_final_m": -1.22
+    }
+  },
+  "schema": "ds02.f5.surface-first-3dp-gauge-comparison-manifest.v1",
+  "scientific_qualification": {
+    "T1_numerical": false,
+    "matrix_credit": 0,
+    "qualification_claim": "none",
+    "status": "spatial_candidate_evidence_only",
+    "time_save_convergence_required": true
+  },
+  "scope_id": "f5_surface_first_3dp_gauge_comparison_034",
+  "time_window": {
+    "dt_cadence_s": 0.02,
+    "gauge_data_rows": 800,
+    "no_extrapolation_to_16s": true,
+    "time_end_s": 15.98,
+    "time_start_s": 0.0
+  }
+}
