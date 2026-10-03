@@ -1,0 +1,41 @@
+{
+  "attempt_id": "root-f6-geometry-orientation-pose-audit-029",
+  "case_id": "F6_ANGULAR_RELEASE_ALL3DP_SUPPORT",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_geometry_orientation_reader_v1.py",
+    "--config",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_geometry_orientation_reader_006/config.json",
+    "--output",
+    "{attempt_root}/f6_geometry_orientation_audit_report.json"
+  ],
+  "cpu_task_kind": "audit",
+  "cpu_threads": 2,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "estimated_storage_bytes": 16777216,
+  "family_id": "F6",
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_geometry_orientation_reader_006/config.json",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_geometry_orientation_reader_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py"
+  ],
+  "input_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_geometry_orientation_reader_006/config.json": "c5998801aa0b8bb6a5dfdbf1dd13cad1346e025191fb634c15df4a65a2306ec8",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_geometry_orientation_reader_v1.py": "f7213749691c57caac7ad5b41b92a77f85cfc4d1ea90b775c6c6b5a074723dc5",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec"
+  },
+  "kind": "cpu",
+  "launch_allowed": false,
+  "max_wall_seconds": 1800,
+  "production_approval": "none",
+  "purpose": "Reconstruct actual SO(3) rigid poses and trajectories across full 241 frames from official full-window floating-node exports 028 using Kabsch SVD algorithm with same UID cohort (Type=2, Mk=60); validate centroids against FloatingInfo on native time; perform coordinate-invariant cross-DP comparison in continuous physical time via Lie group SLERP; report Riemannian geodesic distance and normalized translation error; orientation budget explicitly NULL / unregistered until contract source found; CPU only, <=2 threads, <=1800s; Root review only.",
+  "q_n_status": "not_assessed",
+  "required_output": "f6_geometry_orientation_audit_report.json",
+  "root_review_required": true,
+  "schema": "ds02.runner-request.v2",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics"
+}

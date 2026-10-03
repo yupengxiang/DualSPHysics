@@ -1,0 +1,53 @@
+{
+  "schema": "ds02.f5.source-review-errata.v1",
+  "family_id": "F5",
+  "review_reference": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_owner_F5_F6_source_review_031/review.json",
+  "owner_commit_reviewed": "718dda49",
+  "scope": "f5_spatial_disagreement_source_diagnostic_037",
+  "corrections": [
+    {
+      "subject": "3D smoothing length calculation",
+      "prior_assertion": "Hardcoded h = 1.5 * dp = 0.015m for dp = 0.01m in F5 diagnostic 037.",
+      "authoritative_finding": "In 3D DualSPHysics, smoothing length is calculated as H = Coefh * sqrt(3 * dp^2) = Coefh * sqrt(3) * dp. For Coefh = 1.5 and dp = 0.01m, the actual generated 3D XML specifies H = 0.025980762114m. Coefh 1.5 incorporates the dimensional geometric factor sqrt(3).",
+      "exact_source_citation": "DualSPHysics 3D lattice kernel formulation; review.json:8"
+    },
+    {
+      "subject": "WG3 initial offset budget consumption",
+      "prior_assertion": "Claimed initial node 0.020m shift consumes the whole 5% tolerance budget (0.02m) at Frame 0.",
+      "authoritative_finding": "Actual Root 035 telemetry proves that WG3 initial offset is identically 0.0m. The assumption of an initial 20mm shift consuming the entire frame 0 budget is false.",
+      "exact_source_citation": "Root 035 WG3 initial elevation telemetry; review.json:9"
+    },
+    {
+      "subject": "Disregard of configured weir report",
+      "prior_assertion": "Evaluated only the Runup report while declaring RUNUP and WEIR scope.",
+      "authoritative_finding": "The configured weir report was ignored in diagnostic 037. Both RUNUP and WEIR are declared scope and must be evaluated together in authoritative reports.",
+      "exact_source_citation": "review.json:10"
+    },
+    {
+      "subject": "Geometry below bed semantics",
+      "prior_assertion": "Treated gauge scanline points below the bed STL geometry as invalid probes.",
+      "authoritative_finding": "Geometry below bed is a valid scanline endpoint, not an invalid probe. The official CPU/GPU gauge tool scans along the probe line segment for mass-threshold transitions; when no above-threshold point is found, it returns Point 0.",
+      "exact_source_citation": "DualSPHysics gauge line-scan algorithm; review.json:11"
+    },
+    {
+      "subject": "Unproven threshold-cause causal mechanisms",
+      "prior_assertion": "Attributed spatial gauge disagreement directly to hardcoded MassLimit/no-fluid threshold and guessed 2dp wall padding.",
+      "authoritative_finding": "Threshold-cause attributions are unproven hypotheses. Conditional SSE decomposition can only be descriptive; a wet-only metric cannot be substituted for the original all-frames quality gate. Root actual native CSV/STL/cohort diagnostic 038 is executing to provide definitive evidence without duplication.",
+      "exact_source_citation": "review.json:12"
+    },
+    {
+      "subject": "Gauge time horizon",
+      "prior_assertion": "Assumed or extrapolated native gauge data to 16.0s.",
+      "authoritative_finding": "Actual 800 native gauge rows end at 15.98s (dt = 0.02s); no extrapolation to 16.0s is permitted.",
+      "exact_source_citation": "review.json:13"
+    }
+  ],
+  "governance_and_boundaries": {
+    "f5_diagnostic_037_status": "unadopted_and_preserved",
+    "root_diagnostic_038_duplication": "prohibited (Root 038 running independently)",
+    "five_percent_macro_gate": "inviolable (no threshold waiver or wet-only substitution)",
+    "scientific_qualification_status": "not_assessed",
+    "qualification_claim": "none",
+    "root_qn_products": "0/336"
+  }
+}

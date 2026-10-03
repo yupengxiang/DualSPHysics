@@ -1,0 +1,47 @@
+{
+  "schema": "ds02.f6.source-review-errata.v1",
+  "family_id": "F6",
+  "review_reference": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_owner_F5_F6_source_review_031/review.json",
+  "owner_commit_reviewed": "718dda49",
+  "scope": "f6_so3_and_physical_scale_diagnostic_005",
+  "corrections": [
+    {
+      "subject": "Orientation scale and gate registration",
+      "prior_assertion": "Claimed orientation unit 1.0 rad and angular scale sqrt(g/L) = 3.5018 rad/s were registered physical scales, and evaluated an invented 5% orientation gate (0.05 rad ~= 2.86 deg).",
+      "authoritative_finding": "Physical L = 0.8m, U = sqrt(g*L) = 2.8014 m/s, and a generic 5% macro tolerance exist in observation_plan.json, but unit radian orientation scale and sqrt(g/L) angular velocity scale are NOT proven registered. The orientation budget is NULL / unregistered until an actual contract source is found. No retrospectively invented gate can be substituted to obtain qualification.",
+      "exact_source_citation": "observation_plan.json; review.json:19,24"
+    },
+    {
+      "subject": "Unconstrained simulation time claim from step incidence",
+      "prior_assertion": "Claimed the simulation was 99.9166% unconstrained based on 273 DTsMin sub-stepping adjustments out of 327,414 Symplectic half-steps (273 / 327402 ~= 0.08338%).",
+      "authoritative_finding": "Unweighted step count incidence cannot be equated with simulation duration fraction, because adaptive time steps dt vary dynamically across the simulation window.",
+      "exact_source_citation": "review.json:22"
+    },
+    {
+      "subject": "Step count telemetry",
+      "prior_assertion": "Stated coarse 41200 / medium 51500 steps.",
+      "authoritative_finding": "Actual coarse telemetry is 76399 steps, and medium telemetry is 96697 steps (the earlier 41200 / 51500 were initial plan approximations, not actual completed solver run steps).",
+      "exact_source_citation": "Coarse and Medium Run.out solver logs; review.json:23"
+    },
+    {
+      "subject": "DualSPHysics rotation matrix and Euler angle sequence",
+      "prior_assertion": "Assumed DualSPHysics uses aerospace ZYX Euler convention (R = Rz * Ry * Rx).",
+      "authoritative_finding": "DualSPHysics primary source FunctionsMath.h:345-353 defines RotMatrix3x3 which is an XYZ rotation matrix (R = Rx(ang.x) * Ry(ang.y) * Rz(ang.z)), differing from ZYX. Furthermore, JDsPartFloatSave.cpp:166 persists center, linear velocity, and angular velocity, but does NOT persist angles. Official FloatingInfo_Help.out:66-85 states roll on X-axis, pitch on Y-axis (with sign change since v5.0.204), and yaw on Z-axis, with no proven Euler chart sequence. Reconstructing the rigid pose directly from same-UID floating-node positions via Kabsch SVD is the only mathematically proven, coordinate-invariant method to extract the true SO(3) pose trajectory.",
+      "exact_source_citation": "DualSPHysics FunctionsMath.h:345-353; JDsPartFloatSave.cpp:166; FloatingInfo_Help.out:66-85; review.json:20"
+    },
+    {
+      "subject": "Cross-DP frame pairing",
+      "prior_assertion": "Paired native frames across runs by array index.",
+      "authoritative_finding": "Cross-DP comparison must pair by continuous physical time using SLERP (Spherical Linear Interpolation) on the Lie group SO(3) and linear interpolation of center position, with endpoint validation across t in [0.0, 12.0s], avoiding saved index pairing and avoiding linear interpolation of Euler angles.",
+      "exact_source_citation": "review.json:21"
+    }
+  ],
+  "governance_and_boundaries": {
+    "f6_diagnostic_005_status": "unadopted_and_preserved",
+    "orientation_budget": null,
+    "orientation_budget_status": "unregistered",
+    "scientific_qualification_status": "not_assessed",
+    "qualification_claim": "none",
+    "root_qn_products": "0/336"
+  }
+}
