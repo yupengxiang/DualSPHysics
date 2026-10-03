@@ -1,0 +1,133 @@
+{
+  "schema": "ds02.f3.adaptive-spatial-binding.v1",
+  "case_id": "F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005",
+  "role": "fine_reference",
+  "resolution_id": "dp006",
+  "dp_m": 0.006,
+  "reference_ladder_status": "historically_registered_fine_reference",
+  "protocol": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+  "registered_reference_ladder_dp_m": [
+    0.01,
+    0.0075,
+    0.006
+  ],
+  "coarse_diagnostic_dp_m": 0.015,
+  "definition": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/registered_dp006_adaptive_reference_v1/definitions/F3_CELL3_plain_0p006_Def.xml",
+  "definition_relative": "definitions/F3_CELL3_plain_0p006_Def.xml",
+  "definition_alias": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/registered_dp006_adaptive_reference_v1/definitions/F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005_Def.xml",
+  "fine_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_true_adaptive_spatial_input_review_023/definitions/F3_CELL3_plain_0p0075_Def.xml",
+  "fine_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005.xml",
+  "gen_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+  "solver_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "forcing": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/CaseSloshingAccData.csv",
+  "forcing_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+  "expected_fluid": 67500,
+  "predicted_boundary": 111708,
+  "predicted_total": 179208,
+  "continuum_tank": {
+    "xmin": -0.45,
+    "xmax": 0.45,
+    "x_length_m": 0.9,
+    "ymin": -0.09,
+    "ymax": 0.09,
+    "y_width_m": 0.18,
+    "zmin": 0.0,
+    "zmax": 0.51,
+    "z_height_m": 0.51,
+    "fill_depth_m": 0.09,
+    "water_volume_m3": 0.01458,
+    "nominal_density_kg_m3": 1000.0,
+    "continuum_fluid_mass_kg": 14.58
+  },
+  "discrete_geometry": {
+    "dp_m": 0.006,
+    "pointref_m": [
+      0.003,
+      0.003,
+      0.003
+    ],
+    "fluid_grid_cells": [
+      150,
+      30,
+      15
+    ],
+    "theoretical_discrete_volume_m3": 0.01458,
+    "nominal_particle_mass_kg": 0.000216,
+    "theoretical_discrete_fluid_mass_kg": 14.58,
+    "theoretical_mass_deviation_kg": 0.0,
+    "spacing_alignment": {
+      "x_length_0p9m_divisible": true,
+      "y_width_0p18m_divisible": true,
+      "z_fill_0p09m_divisible": true,
+      "z_height_0p51m_divisible": true,
+      "integer_multiples": [
+        150,
+        30,
+        15,
+        85
+      ],
+      "discretization_mismatch_status": "none",
+      "documentation": "All bounding dimensions of the physical mother geometry (0.9 x 0.18 x 0.51 m) and fluid column depth (0.09 m) are exact integer multiples of dp=0.006m. Discrete lattice fluid volume equals 67,500 * (0.006)^3 = 0.01458 m^3 exactly, resulting in zero volume truncation and zero mass error against the 14.58 kg continuum target. No geometric rescaling or mass normalization is applied."
+    },
+    "boundary_specification": {
+      "type": "5-wall open-top container",
+      "method": "mDBC",
+      "wall_layers": 3,
+      "layers_vdp": "0,1,2",
+      "slip_mode": "no_slip (SlipMode=2)",
+      "no_penetration": 1,
+      "solver_flag": "-mdbc_noslip:1"
+    }
+  },
+  "numerical_recipe": {
+    "step_algorithm": 2,
+    "step_algorithm_name": "Symplectic",
+    "kernel": 2,
+    "kernel_name": "Wendland",
+    "cfl": 0.05,
+    "coef_dt_min": 0.005,
+    "cfl_to_dtmin_decoupling_ratio": 10.0,
+    "dt_ini": 0.0,
+    "dt_min": 0.0,
+    "dt_fixed": 0.0,
+    "visco_treatment": 1,
+    "visco": 0.05,
+    "visco_bound_factor": 1.0,
+    "density_dt": 3,
+    "density_dt_name": "Fourtakas (full)",
+    "density_dt_value": 0.1,
+    "shifting": 0,
+    "time_out_s": 0.01,
+    "time_max_s": 8.35,
+    "expected_frames": 836,
+    "boundary": 2,
+    "slip_mode": 2,
+    "no_penetration": 1,
+    "solver_cli": "-mdbc_noslip:1"
+  },
+  "EOS_policy": "Preserve official GenCase AutomaticEOS. Generated constants B, h, and native particle mass remain unknown until actual GenCase execution by Root. No invented B/h/nativeMass values, no bitwise equality assertions across DP, and no physical mass normalization.",
+  "historical_contrast": {
+    "historical_case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+    "historical_coef_dt_min": 0.05,
+    "historical_clamping": "Historical run had CoefDtMin=0.05, matching CFL=0.05, causing 100% floor clamping to dtmin (fixed-dt equivalent). It cannot be reused as adaptive reference evidence.",
+    "new_case_behavior": "CoefDtMin=0.005 decouples the minimum timestep by a factor of 10, permitting genuine adaptive timestepping driven by CFL physics."
+  },
+  "order_estimation_policy": {
+    "refinement_triad": [
+      0.01,
+      0.0075,
+      0.006
+    ],
+    "refinement_ratios": {
+      "r_21_medium_to_fine": "0.010 / 0.0075 = 1.3333333333 (4/3)",
+      "r_32_fine_to_ref": "0.0075 / 0.006 = 1.2500000000 (5/4)"
+    },
+    "note": "Refinement ratios are non-uniform across the registered ladder. Standard constant-r logarithmic convergence expressions are rejected; generalized non-uniform order estimation or direct compliance with the 5% spatial reference budget must be applied."
+  },
+  "claim_boundaries": {
+    "q_i": "completed (valid definition, aligned geometry, parameter anchor parity, runner requests registered)",
+    "native_array_evidence": "pending_root_dispatch",
+    "q_n": "not_granted",
+    "production_approval": "none"
+  }
+}

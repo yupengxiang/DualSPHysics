@@ -1,0 +1,69 @@
+{
+  "schema": "ds02.f3.adaptive-reference-launch-suggestions.v1",
+  "case_id": "F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005",
+  "dp_m": 0.006,
+  "role": "fine_reference_anchor",
+  "authority_boundary": {
+    "status": "launch_suggestions_only",
+    "launch_owner": "root",
+    "f3_owner_scope": "source preparation, definition, geometry binding, diff explanation, audit; no solver or GenCase dispatch"
+  },
+  "gencase_cpu_suggestion": {
+    "task": "cpu_gencase",
+    "cpu_threads": 2,
+    "max_wall_seconds": 300,
+    "estimated_storage_bytes": 134217728,
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/registered_dp006_adaptive_reference_v1/definitions/F3_CELL3_plain_0p006_Def",
+      "{attempt_root}/prepared/F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005",
+      "-save:all"
+    ],
+    "expected_particles": {
+      "fluid_particles": 67500,
+      "predicted_boundary_particles": 111708,
+      "predicted_total_particles": 179208,
+      "solver_dimension": 3,
+      "initial_fluid_mass_kg": 14.58
+    },
+    "automatic_eos_policy": "Preserve official GenCase AutomaticEOS. Generated constants B, h, and native particle mass remain unknown until actual GenCase execution by Root. No invented B/h/nativeMass values, no bitwise equality assertions across DP, and no physical mass normalization."
+  },
+  "solver_gpu_suggestion": {
+    "task": "gpu_solver_qualification",
+    "device_dispatch_policy": {
+      "device_ids_placeholder": "{LEASED_GPU_DEVICE_ID}",
+      "allowed_owned_gpus": [2, 5, 6, 7],
+      "protected_foreign_gpus": [0, 1, 3, 4],
+      "runtime_note": "Root strict dispatcher binds dynamic live inventory lease to an owned idle GPU (2, 5, 6, or 7). Never hardcode device IDs."
+    },
+    "cpu_threads": 4,
+    "max_wall_seconds": 7200,
+    "estimated_runtime_seconds": 2200,
+    "estimated_peak_gpu_mib": 6144,
+    "estimated_storage_bytes": 8589934592,
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "-mdbc_noslip:1",
+      "{attempt_root}/prepared/F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005",
+      "{attempt_root}/solver_output",
+      "-tmax:8.35",
+      "-tout:0.01"
+    ],
+    "expected_native_frames": 836,
+    "complete_event_window_s": [0.0, 8.35],
+    "recipe_summary": "Symplectic step algorithm, Wendland kernel, CFL 0.05, CoefDtMin 0.005, mDBC no-slip (-mdbc_noslip:1), NoPenetration 1."
+  },
+  "post_launch_verification_checks": [
+    "Verify returncode == 0 and solver completed normally.",
+    "Verify exactly 836 typed native frames produced in interval [0, 8.35]s.",
+    "Check timestep distribution and audit allDTsMin0 compliance.",
+    "Verify fluid particle count is exactly 67,500 with zero excluded particles (PartsOutMax=1 respected, 0 actual lost).",
+    "Record actual GenCase B, h, and native particle mass into receipt without post-hoc mass rescaling."
+  ],
+  "claim_boundaries": {
+    "q_i_status": "complete (definition, binding, diff explanation, and launch suggestions authored and verified)",
+    "native_array_evidence": "pending_root_dispatch",
+    "q_n_status": "not_granted (Q-N requires verified evidence across the full registered ladder, transport metrics, and parameter endpoints; campaign remains Q-N 0/336)",
+    "production_approval": "none"
+  }
+}

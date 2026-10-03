@@ -1,0 +1,77 @@
+{
+  "schema": "ds02.f3.adaptive-reference-diff-explanation.v1",
+  "case_id": "F3_CELL3_LONG_DP006_ADAPTIVE_CFL05_COEF005",
+  "dp_m": 0.006,
+  "diff_sections": {
+    "vs_fine_anchor_dp0075": {
+      "anchor_case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+      "anchor_xml_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005.xml",
+      "solver_parameters_parity": {
+        "status": "identical",
+        "parameter_count": 28,
+        "parameters_differing": 0,
+        "special_forcing_semantics": "identical",
+        "cflnumber": 0.05
+      },
+      "geometry_scaling": {
+        "dp_transition": "0.0075m -> 0.006m (refinement ratio r = 1.25 = 5/4)",
+        "pointref_transition": "(0.00375, 0.00375, 0.00375) -> (0.003, 0.003, 0.003)",
+        "fluid_drawbox_point": "[-0.44625, -0.08625, 0.00375] -> [-0.447, -0.087, 0.003]",
+        "fluid_drawbox_size": "[0.8925, 0.1725, 0.0825] -> [0.894, 0.174, 0.084]",
+        "bound_drawbox_point": "[-0.45375, -0.09375, -0.00375] -> [-0.453, -0.093, -0.003]",
+        "bound_drawbox_size": "[0.9075, 0.1875, 0.51375] -> [0.906, 0.186, 0.513]",
+        "fluid_particles": "34,560 -> 67,500 (+95.31%)",
+        "predicted_boundary_particles": "73,440 -> 111,708 (+52.11%)",
+        "predicted_total_particles": "108,000 -> 179,208 (+65.93%)",
+        "smoothing_length_scaling": "Nominal h = coefh * sqrt(3) * dp scales linearly (0.011941m -> 0.009553m); exact h and B values will be determined by GenCase AutomaticEOS."
+      }
+    },
+    "vs_historical_cell3_dp006": {
+      "historical_case_id": "F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen",
+      "historical_protocol": "campaigns/l1-resume/continuation/F3_CELL3_LONG_dp0p006_a1p000_noslip_visco1_nopen-INPUT-PREFLIGHT.json",
+      "historical_coef_dt_min": 0.05,
+      "adaptive_reference_coef_dt_min": 0.005,
+      "mechanism_contrast": "In the historical run, CoefDtMin=0.05 equaled CFL=0.05, which clamped the timestep 100% of the time to dtmin = coefdtmin * h / speedsound. This produced an effectively fixed-dt simulation. In genuine adaptive execution, CoefDtMin=0.005 decouples the minimum timestep by a factor of 10, allowing the CFL condition to dynamically govern the timestep.",
+      "reuse_prohibition": "Historical fixed-step solver outputs must NOT be reused as adaptive reference evidence."
+    },
+    "vs_coarse_diagnostic_dp015": {
+      "coarse_case_id": "F3_CELL3_LONG_DP0015_ADAPTIVE_CFL05_COEF005",
+      "role_distinction": "DP 0.015m was authored in Root Followup 030 as an auxiliary coarse diagnostic forming a 6:4:3 integer ratio triad (0.015, 0.010, 0.0075) with bounded fast execution (<10 min on GPU). It provides early diagnostic signal but does NOT replace the historically registered reference ladder [0.010, 0.0075, 0.006] established in F3-CELL3-PROTOCOL.json. DP 0.006m remains the registered fine reference anchor of the campaign."
+    },
+    "grid_alignment_and_mass_conservation": {
+      "axes_alignment": {
+        "x_axis": "0.9m / 0.006m = 150 cells (exact integer, 0 remainder)",
+        "y_axis": "0.18m / 0.006m = 30 cells (exact integer, 0 remainder)",
+        "z_fill": "0.09m / 0.006m = 15 cells (exact integer, 0 remainder)",
+        "z_height": "0.51m / 0.006m = 85 cells (exact integer, 0 remainder)"
+      },
+      "mass_conservation": {
+        "continuum_fluid_volume_m3": 0.01458,
+        "continuum_fluid_mass_kg": 14.58,
+        "discrete_fluid_volume_m3": 0.01458,
+        "nominal_discrete_fluid_mass_kg": 14.58,
+        "volume_deviation_pct": 0.0,
+        "mass_deviation_pct": 0.0,
+        "discretization_notes": "Because all dimensions are exact integer multiples of 0.006m, there is zero cell truncation or boundary clipping. Nominal discrete mass matches continuum mass exactly. No artificial mass rescaling or coordinate warping is introduced."
+      }
+    },
+    "order_estimation_policy": {
+      "ladder_nodes": [
+        0.01,
+        0.0075,
+        0.006
+      ],
+      "ratio_21": 1.3333333333333333,
+      "ratio_32": 1.25,
+      "constant_r_rejection": "The spatial refinement ratios (4/3 and 5/4) are non-uniform. Any order-of-convergence evaluation must use generalized non-uniform order estimation or evaluate metric compliance directly against the frozen 5% spatial reference budget from f3_observation_v2.py. Constant-r logarithmic formulas are unphysical and rejected."
+    },
+    "qualification_and_evidence_state": {
+      "f3time_status": "Completed full 8.35s native run and 836 typed frames confirmed positive for DP 0.015, 0.010, and 0.0075.",
+      "savedfrequency_status": "Positive consistency checks between 0.01s nominal output and 0.002s dense control outputs on macro metrics.",
+      "firstpassage_labels": "Finite firstpassage discrete event labels remain strictly unchanged.",
+      "transport_evidence": "Paired Lagrangian transport comparisons showed sensitive trajectory divergence and fate switches in chaotic sloshing zones. Transport CDF observables remain descriptive only; no unsupported continuous CDF pass/fail gates or artificial chaos tolerance bands are applied.",
+      "q_n_status": "not_granted (Q-N qualification requires verified evidence across the full registered ladder, transport metrics, and parameter endpoints; preparation alone does not confer Q-N credit).",
+      "production_status": "none (no production authorization granted)."
+    }
+  }
+}
