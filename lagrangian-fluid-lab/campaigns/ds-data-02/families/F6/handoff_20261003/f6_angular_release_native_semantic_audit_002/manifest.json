@@ -1,0 +1,34 @@
+{
+  "adapters": {
+    "coarse": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/coarse-actual-gencase-adapter.json",
+    "fine": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/fine-actual-gencase-adapter.json",
+    "medium": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/medium-actual-gencase-adapter.json"
+  },
+  "audit_requests": {
+    "coarse": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP025_SEMANTIC_AUDIT_REQUEST.json",
+    "fine": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP0125_SEMANTIC_AUDIT_REQUEST.json",
+    "medium": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP020_SEMANTIC_AUDIT_REQUEST.json"
+  },
+  "bindings_file": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/bindings.json",
+  "bindings_sha256": "d8bc7d7524ed72e38c86b0eaa855c34b2677fe3b86bdbccacf3fdf6db1ea44b1",
+  "family_id": "F6",
+  "gpu_requests": {
+    "coarse": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP025_SOLVER_GPU_REQUEST.json",
+    "fine": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP0125_SOLVER_GPU_REQUEST.json",
+    "medium": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP020_SOLVER_GPU_REQUEST.json"
+  },
+  "launch_allowed": false,
+  "manifest_sha256": "7ec36a33dc95e4597bfbfc5c09d705f4f76fa8a52cdf9318c39b4b71f6eaf9df",
+  "physical_candidate": "Full 12s, unconstrained free 6DOF, initial angular velocity vector [0.08, 0.12, 0.06] rad/s",
+  "q_n_status": "not_assessed",
+  "recipe_id": "F6_ANGULAR_RELEASE_SEMANTIC_AUDIT_002",
+  "root_review_required": true,
+  "schema": "ds02.f6.angular-release-semantic-audit-manifest.v2",
+  "semantic_mass_resolution": {
+    "declared_physical_rigid_mass_kg": 128.0,
+    "resolution_explanation": "Official PartVTK CSV Mass column sums to 256 kg because GenCase assigns support particles mass m_p = rho_0 * dp^3 (fluid density mass). In DualSPHysics, the solver loads physical massbody (128 kg) at JSph.cpp:1138 and uses it in Newton's 2nd law (JSph.cpp:2593) for translation, and uses XML inertia ([8.53333, 8.53333, 13.6533]) at JSph.cpp:2608 for rotation. Native CSV mass is preserved without normalization; declared physical mass 128 kg is confirmed correct.",
+    "support_lattice_weight_sum_kg": 256.0
+  },
+  "untested_hypothesis_notice": "Prospective excitation candidate [0.08, 0.12, 0.06] rad/s is an UNTESTED HYPOTHESIS. It does not guarantee macroscopic signal, numerical convergence, or threshold satisfaction. The frozen 5% relative RMSE macro operator remains unchanged. No third geometry repair.",
+  "velocity_propagation_notice": "GenCase BI4 stores floating body angular velocity in XML, but individual particle velocities remain 0. DualSPHysics solver loads fomega at JSph.cpp:1162 and updates particle velocities vr = v_lin + omega x dist at JSphCpuSingle.cpp:1084-1086 / JSphGpu_ker.cu:2049-2051 during initialization and execution. Verifying non-zero initial particle velocities requires auditing solver Frame 0 (Part_0000.bi4)."
+}
