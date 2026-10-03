@@ -1,0 +1,247 @@
+{
+  "audit_evaluations": {
+    "offset_baseline_fine_dp005": {
+      "case_id": "F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001",
+      "evaluation_against_authoritative_allocation_0p0001467s": {
+        "budget_s": 0.00014672781599876553,
+        "max_observed_half_width_s": 0.005012849578867051,
+        "ratio_observed_to_budget": 34.164275837849495,
+        "status": "FAIL / PENDING"
+      },
+      "evaluation_against_total_budget_0p0007336s": {
+        "budget_s": 0.0007336390799938275,
+        "max_observed_half_width_s": 0.005012849578867051,
+        "ratio_observed_to_budget": 6.8328551675699,
+        "status": "FAIL / PENDING"
+      },
+      "event_counts_by_code": {
+        "cup_top_departure": 189939,
+        "cup_top_return": 23,
+        "receiver_entry": 121991,
+        "receiver_exit": 97580,
+        "tray_entry": 806356,
+        "tray_exit": 644776
+      },
+      "observed_bracket_half_width_range_s": [
+        0.004989347651231046,
+        0.005012849578867051
+      ],
+      "observed_bracket_stats_by_code": {
+        "cup_top_departure": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 189939,
+          "max_s": 0.005008821266103469,
+          "min_s": 0.004991205378860497
+        },
+        "cup_top_return": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 23,
+          "max_s": 0.005002836034086022,
+          "min_s": 0.004997698017057961
+        },
+        "receiver_entry": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 121991,
+          "max_s": 0.005012849578867051,
+          "min_s": 0.004989347651231046
+        },
+        "receiver_exit": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 97580,
+          "max_s": 0.005012849578867051,
+          "min_s": 0.004989806083925075
+        },
+        "tray_entry": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 806356,
+          "max_s": 0.005012849578867051,
+          "min_s": 0.004989806083925075
+        },
+        "tray_exit": {
+          "all_within_applicable_allocation_0p0001467s": false,
+          "all_within_total_budget_0p0007336s": false,
+          "count": 644776,
+          "max_s": 0.005012849578867051,
+          "min_s": 0.004989806083925075
+        }
+      },
+      "observed_save_interval_s": 0.01,
+      "retained_original_negative": "No loosening. Under BOTH standards, the observed ~0.005 s half-bracket exceeds the allowance (by 6.83x against total budget and by 34.16x against authoritative allocation). Event Q-N qualification remains strictly NOT granted (claims.q_n remains 'not_assessed', q_n_granted remains false)."
+    },
+    "spatial_save010_reference_cases": {
+      "case_ids": [
+        "F2_RV4EQ_MATCHED_CENTER_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+        "F2_RV4EQ_MATCHED_CENTER_V1_MEDIUM_DP008_SPATIAL_REFERENCE_SAVE010",
+        "F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+        "F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008_SPATIAL_REFERENCE_SAVE010"
+      ],
+      "evaluation_against_authoritative_allocation_0p0001467s": {
+        "budget_s": 0.00014672781599876553,
+        "ratio_observed_to_budget": 34.07670158494056,
+        "status": "FAIL / PENDING"
+      },
+      "observed_bracket_half_width_s": 0.005,
+      "observed_save_interval_s": 0.01,
+      "retained_original_negative": "Save interval .01 s is insufficient for event temporal allocation 0.0001467278159987655 s. Never grant event Q-N from these spatial macros. Trajectory conversions remain disallowed."
+    }
+  },
+  "audit_id": "root_budget_scope_audit_002",
+  "budget_hierarchy_and_definitions": {
+    "authoritative_applicable_save_allocation_s": 0.00014672781599876553,
+    "characteristic_time_T_char_s": 0.18340976999845687,
+    "event_time_absolute_budget_s": 0.0036681953999691376,
+    "event_time_fraction_max": 0.02,
+    "save_fraction_of_total_max": 0.2,
+    "save_integration_total_budget_s": 0.0007336390799938275,
+    "save_per_study_allocation_fraction": 0.2
+  },
+  "case_id": "F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001",
+  "created_at_utc": "2026-10-03T04:29:28+00:00",
+  "distinction_analysis": {
+    "allocated_output_contribution": {
+      "name": "save_per_study_allocation_s / SAVE_ALLOCATION_S",
+      "preregistration_usage_audit": "Explicitly defined in rv4_matched_three_dp_init_v1/f2_rv4_matched_solver_requests_v1.py as SAVE_ALLOCATION_S = 0.0001467278159987655 s, against which the candidate spatial save half-bracket (0.0005 s for dt=0.001 s, or 0.005 s for dt=0.010 s) was evaluated and marked deferred.",
+      "scientific_meaning": "Authoritative applicable allocation for each discrete save bracket half-width (Delta t_save / 2). To prevent cumulative save integration error from exhausting the total budget, each individual output save bracket must satisfy this fractional allocation (20% of total save budget, i.e. 1/5).",
+      "value_s": 0.00014672781599876553
+    },
+    "authoritative_status": "The authoritative applicable requirement for individual save-interval qualification is SAVE_ALLOCATION_S = 0.0001467278159987655 s (half-bracket <= 0.0001467278159987655 s). Evaluating against SAVE_TOTAL_BUDGET_S (0.0007336390799938275 s) is a looser upper-bound check.",
+    "total_budget": {
+      "name": "save_integration_total_budget_s / SAVE_TOTAL_BUDGET_S",
+      "scientific_meaning": "Maximum cumulative timing integration error budget allocated to save-frequency discretization across the entire 4.0-second event window (20% of total event timing budget).",
+      "sidecar_usage_audit": "In F2_RV4EQ_DP005_OFFSET_actual_pose_labels_qi_sidecar_v1.json (and CENTER sidecar), the field 'save_half_width_budget_s' was set to 0.0007336390799938275 s. This referenced the cumulative save integration total budget rather than the per-save contribution.",
+      "value_s": 0.0007336390799938275
+    }
+  },
+  "family_id": "F2",
+  "preserved_boundaries_and_policies": {
+    "f3_weak_quarter_freeze_preservation": {
+      "actual_conditional_gap_x_m": 0.02248,
+      "actual_conditional_gap_y_m": 0.06929,
+      "original_allocation_x_m": 0.010238388262513484,
+      "original_allocation_y_m": 0.017270993599294474,
+      "status": "fail (preserved original negative; cohort quantile diagnostic is not original preregistered gate; no new F3 GPU)"
+    },
+    "no_loosening_permitted": true,
+    "operational_ledger": {
+      "bounded_cpu_audit_permitted": true,
+      "consumed_h5_preserved": true,
+      "consumed_sidecars_preserved": true,
+      "consumed_sources_preserved": true,
+      "gpu_launches_forbidden_to_delegates": true,
+      "home_floor_gib": 500,
+      "machine_learning_models_forbidden": true,
+      "qualification_cap": 320,
+      "trajectory_conversions_forbidden": true
+    },
+    "production_granted": false,
+    "production_status": "not_evaluated",
+    "q_i_status": "actual integrity structure pass only (Q-I-structure-pass)",
+    "q_n_granted": false,
+    "q_n_status": "not_assessed",
+    "retain_original_negatives": true
+  },
+  "root_partvtkout_independent_mapping": {
+    "initial_fluid_particle_count": 196608,
+    "intact_moving_type1_particle_count": 76676,
+    "interpretation": "The 0.268875 kg unknown fluid mass represents native numerical exclusions (all 2,151 motive 1 position exclusions at domain boundary), NOT physical spill or receiver exit. Unknown mass remains strictly documented in denominator and excluded from physical fate.",
+    "native_motive_code": 1,
+    "native_motive_counts": {
+      "1": 2151,
+      "2": 0,
+      "3": 0
+    },
+    "partvtkout_idp_mapping_finding": "Root independently mapped all 2151 PartVTKOut Idp to terminal initial_type=3 fluid, finalvalid 194457/196608, moving 76676 intact. Unknown fluid mass .268875kg therefore supported.",
+    "retained_valid_fluid_particle_count": 194457,
+    "status": "confirmed_supported_by_root_and_family_owner",
+    "total_native_unknown_fluid_particles": 2151,
+    "unknown_fluid_mass_kg": 0.268875
+  },
+  "schema": "ds02.f2.root-budget-scope-audit.v2",
+  "scope_id": "F2_SCOPE_RV4_MATCHED_THREE_DP_INIT_20261003",
+  "source_bindings": {
+    "center_actual_pose_labels_qi_sidecar_v1": {
+      "bytes": 11054,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/center_baseline_terminal_v1/qi_audit/F2_RV4EQ_DP005_CENTER_actual_pose_labels_qi_sidecar_v1.json",
+      "role": "canonical CENTER baseline actual closure sidecar",
+      "sha256": "ec2bafcdfba1e50bfcdb3b66daae241e83e2c3dc683d6ed39e50216c3a27e7c7"
+    },
+    "offset_actual_pose_labels_qi_sidecar_v1": {
+      "bytes": 20380873,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/offset_baseline_terminal_v1/qi_audit/F2_RV4EQ_DP005_OFFSET_actual_pose_labels_qi_sidecar_v1.json",
+      "role": "canonical OFFSET baseline actual closure sidecar",
+      "sha256": "c179740bbb3be527de7fdb022ac7f11481069d6ab7b767c026a9afa44c701af4"
+    },
+    "offset_labels_receipt": {
+      "bytes": 58884,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/offset-terminal-nvme-labels-v2-002/execution-receipt.json",
+      "role": "OFFSET labels execution receipt (code 0, completed)",
+      "sha256": "cfb379b854b3115daa3797d7d8150642d8eb935e8bf4cb7665a9231839ead260"
+    },
+    "offset_pose_receipt": {
+      "bytes": 56913,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/offset-terminal-nvme-pose-v2-001/execution-receipt.json",
+      "role": "OFFSET pose execution receipt (code 0, completed)",
+      "sha256": "12372a42dd00575aed1aa5612f2c9ba96ea3886d0975c8824acdd34cdd548cab"
+    },
+    "offset_pose_report": {
+      "bytes": 5449,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/offset-terminal-nvme-pose-v2-001/rigid-body-state.json",
+      "role": "OFFSET moving pose fit report",
+      "sha256": "3ea2d046c9fda5da5bc672ecb9445d18d353e7600dba07cf63fb0e7c7c1eaf57"
+    },
+    "offset_qi_receipt": {
+      "bytes": 48029,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/qi-f2-rv4eq-offset-v1-baseline-save001-pose-labels-actual-002/execution-receipt.json",
+      "role": "OFFSET Q-I execution receipt (code 0, completed)",
+      "sha256": "a5972f01c7a3a2244d3ff3b168db1e666ebe98746478647f9272bac978f89553"
+    },
+    "offset_qi_report": {
+      "bytes": 17048645,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/qi-f2-rv4eq-offset-v1-baseline-save001-pose-labels-actual-002/f2-offset-qi-integrity.json",
+      "role": "OFFSET Q-I integrity report (Q-I-structure-pass)",
+      "sha256": "59c82ac170429f7711d2aeaec07991db99a780e8ffaefd45a36bfa38c368f4a9"
+    },
+    "offset_v6_observations": {
+      "bytes": 15616,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/offset-terminal-nvme-labels-v2-002/f2-v6-observations.json",
+      "role": "actual OFFSET v6 finite-cup receiver tray observations",
+      "sha256": "5f2bca3b8d3b4afa263ddffe76de2eaaf087a3633423a5ea9baf297de7d505ef"
+    },
+    "quality_contract": {
+      "bytes": 6581,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/quality_contract.json",
+      "role": "F2 quality contract defining Q-I, Q-N, Q-E and timing budget fractions",
+      "sha256": "81525c55b35df6f1f8a24fbefc73720967c4a35e80d9ff089a1b82d2ef7f149c"
+    },
+    "save_budget_review_v1": {
+      "bytes": 4018,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/rv4_matched_three_dp_init_v1/solver_requests_v1/save-budget-review-v1.json",
+      "role": "save budget review defining event and per-study allocations",
+      "sha256": "5184fc762a5a4a2c6191cfd93f489619718cf7c456431146c3012a96807480e3"
+    },
+    "solver_requests_script": {
+      "bytes": 14305,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/rv4_matched_three_dp_init_v1/f2_rv4_matched_solver_requests_v1.py",
+      "role": "matched RV4 solver requests producer with explicit SAVE_TOTAL_BUDGET and SAVE_ALLOCATION",
+      "sha256": "4abf413395635e101b744b861f3c359b0b1983aeb3f157354cd571a10d06f755"
+    },
+    "spatial_macro_preregistration_manifest": {
+      "bytes": 7725,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/rv4_matched_three_dp_init_v1/artifacts/rv4_matched_spatial_macro_preregistration_manifest_v1.json",
+      "role": "preregistration manifest enforcing save bracket > event allocation boundary",
+      "sha256": "9cd9892931252dfe41b56bade403713303835cf3652ed92b847be0b2dcd485b7"
+    },
+    "spatial_reference_save_budget_review": {
+      "bytes": 15181,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/rv4_matched_three_dp_init_v1/solver_requests_spatial_reference_v1/save-budget-review-v1.json",
+      "role": "spatial reference SAVE010 review marking event qualification deferred",
+      "sha256": "066d49aa6097355a6c056eb9e2e10a5683149e94156f53d81c4787f32920957a"
+    }
+  },
+  "status": "frozen_immutable_timing_scope_audit_complete"
+}
