@@ -1,0 +1,65 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F3",
+  "case_id": "F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005",
+  "attempt_id": "f3-cell3-dp005-a0p97-adaptive-native-prospective-035",
+  "kind": "qualification",
+  "cpu_threads": 4,
+  "max_wall_seconds": 7200,
+  "estimated_peak_gpu_mib": 8192,
+  "estimated_storage_bytes": 17179869184,
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics",
+  "cwd": "{attempt_root}/prepared",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-mdbc_noslip:1",
+    "{attempt_root}/prepared/F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005",
+    "{attempt_root}/solver_output",
+    "-tmax:8.35",
+    "-tout:0.01"
+  ],
+  "device_dispatch_policy": {
+    "device_ids_placeholder": "{LEASED_GPU_DEVICE_ID}",
+    "allowed_owned_gpus": [
+      2,
+      5,
+      6,
+      7
+    ],
+    "protected_foreign_gpus": [
+      0,
+      1,
+      3,
+      4
+    ],
+    "runtime_note": "Root strict dispatcher binds dynamic live inventory lease to an owned idle GPU (2, 5, 6, or 7). Never hardcode device IDs."
+  },
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml",
+    "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/adaptive_control_domain_prospective_v1/definitions/F3_CELL3_plain_0p005_Def.xml",
+    "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/adaptive_control_domain_prospective_v1/definitions/F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml"
+  ],
+  "input_sha256": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml": "a2bc1f88c6ea95347187a64a991ebada177c6314de5c35ab078b06d78235eece",
+    "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/adaptive_control_domain_prospective_v1/definitions/F3_CELL3_plain_0p005_Def.xml": "7d7bd4491cbea507cdaa957aeba24f92cf453d23ba315b1b12d7219672c905fb",
+    "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/adaptive_control_domain_prospective_v1/definitions/F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml": "7d7bd4491cbea507cdaa957aeba24f92cf453d23ba315b1b12d7219672c905fb"
+  },
+  "complete_event_window_s": [
+    0.0,
+    8.35
+  ],
+  "expected_native_frames": 836,
+  "amplitude_scaling": {
+    "amplitude": 0.97,
+    "role": "independent_internal",
+    "zero_drive_relation": "a_lin = g + A*(a_nom - g), alpha = A*alpha_nom"
+  },
+  "q_n_status": "not_assessed",
+  "production_approval": "none",
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "independent_case_count_increment": 0,
+  "purpose": "Prospective GPU solver request for independent_internal amplitude A=0.97 at DP=0.005m under genuine adaptive CFL 0.05 / CoefDtMin 0.005. Launch disabled pending Root review."
+}

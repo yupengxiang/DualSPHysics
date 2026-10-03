@@ -1,0 +1,147 @@
+{
+  "schema": "ds02.f3.resource-estimates.v1",
+  "basis": "Derived from actual execution receipts of dp=0.006m (Root 028-031) and dp=0.0075m (Root 005-014) on identical host hardware.",
+  "hardware_context": {
+    "host_gpu": "NVIDIA RTX 4090 / 3090 (24 GB VRAM)",
+    "host_cpu": "Multi-core Linux Workstation (2-4 threads per job)",
+    "storage_filesystem": "Local NVMe mount (/home/jade/Projects/DualSPHysics-data)"
+  },
+  "candidate_resolution_dp006": {
+    "dp_m": 0.006,
+    "fluid_particles": 67500,
+    "boundary_particles": 111708,
+    "total_particles": 179208,
+    "actual_dp006_nominal_receipts": {
+      "gencase_cpu": {
+        "attempt_id": "root-cell3-dp006-registered-adaptive-actual-gencase-028",
+        "receipt_sha256": "4079a737ec9b85e09c9c8a078a436ea41de3c5dfb9711737f9726a903ed38a6b",
+        "elapsed_seconds": 0.716658,
+        "actual_storage_bytes": 32505856,
+        "storage_human": "31 MB",
+        "cpu_threads": 2
+      },
+      "native_solver_gpu": {
+        "attempt_id": "root-cell3-dp006-registered-adaptive-full836-native-030",
+        "receipt_sha256": "914ab27381676fec4376c6c2276a1454ffe2e8606638920f4721589aecec6886",
+        "elapsed_seconds": 720.063022,
+        "elapsed_human": "12.00 minutes",
+        "actual_storage_bytes": 6657199104,
+        "storage_human": "6.2 GB",
+        "peak_gpu_vram_mib": 2816
+      },
+      "converter_cpu": {
+        "attempt_id": "root-cell3-dp006-registered-adaptive-full836-typed-031",
+        "receipt_sha256": "fd62c894f0af8798f0b8882f42d2d7f26f486c4085134ca5556ae7834a72f87b",
+        "elapsed_seconds": 196.674532,
+        "elapsed_human": "3.28 minutes",
+        "actual_storage_bytes": 2576980377,
+        "storage_human": "2.4 GB",
+        "cpu_threads": 2
+      },
+      "labels_cpu": {
+        "basis_case": "Scaled from dp=0.0075m receipt (root-cell3-adaptive-half-native-transport-labels-014, 63.3s for 34.5k particles)",
+        "estimated_elapsed_seconds": 135.0,
+        "elapsed_human": "2.25 minutes",
+        "estimated_storage_bytes": 31457280,
+        "storage_human": "30 MB",
+        "cpu_threads": 2
+      }
+    },
+    "bounded_limits_per_case": {
+      "gencase_cpu": {
+        "max_wall_seconds": 300,
+        "estimated_storage_bytes": 134217728,
+        "cpu_threads": 2
+      },
+      "native_solver_gpu": {
+        "max_wall_seconds": 7200,
+        "estimated_peak_gpu_mib": 6144,
+        "estimated_storage_bytes": 8589934592,
+        "cpu_threads": 4
+      },
+      "converter_cpu": {
+        "max_wall_seconds": 900,
+        "estimated_storage_bytes": 3221225472,
+        "cpu_threads": 2
+      },
+      "labels_cpu": {
+        "max_wall_seconds": 600,
+        "estimated_storage_bytes": 67108864,
+        "cpu_threads": 2
+      }
+    }
+  },
+  "reference_resolution_dp005": {
+    "dp_m": 0.005,
+    "fluid_particles": 116640,
+    "boundary_particles": 159300,
+    "total_particles": 275940,
+    "scaling_factors_vs_dp006": {
+      "fluid_particle_ratio": 1.728,
+      "total_particle_ratio": 1.540,
+      "spatial_step_ratio": 0.8333,
+      "approximate_computational_work_ratio": 1.848
+    },
+    "projected_dp005_estimates": {
+      "gencase_cpu": {
+        "estimated_elapsed_seconds": 2.2,
+        "elapsed_human": "2.2 seconds",
+        "estimated_storage_bytes": 55000000,
+        "storage_human": "52 MB",
+        "cpu_threads": 2
+      },
+      "native_solver_gpu": {
+        "estimated_elapsed_seconds": 1330.0,
+        "elapsed_human": "22.17 minutes",
+        "estimated_storage_bytes": 11274289152,
+        "storage_human": "10.5 GB",
+        "peak_gpu_vram_mib": 4608
+      },
+      "converter_cpu": {
+        "estimated_elapsed_seconds": 380.0,
+        "elapsed_human": "6.33 minutes",
+        "estimated_storage_bytes": 4509715660,
+        "storage_human": "4.2 GB",
+        "cpu_threads": 2
+      },
+      "labels_cpu": {
+        "estimated_elapsed_seconds": 260.0,
+        "elapsed_human": "4.33 minutes",
+        "estimated_storage_bytes": 52428800,
+        "storage_human": "50 MB",
+        "cpu_threads": 2
+      }
+    },
+    "bounded_limits_per_case": {
+      "gencase_cpu": {
+        "max_wall_seconds": 300,
+        "estimated_storage_bytes": 536870912,
+        "cpu_threads": 2
+      },
+      "native_solver_gpu": {
+        "max_wall_seconds": 7200,
+        "estimated_peak_gpu_mib": 8192,
+        "estimated_storage_bytes": 17179869184,
+        "cpu_threads": 4
+      },
+      "converter_cpu": {
+        "max_wall_seconds": 1200,
+        "estimated_storage_bytes": 6442450944,
+        "cpu_threads": 2
+      },
+      "labels_cpu": {
+        "max_wall_seconds": 900,
+        "estimated_storage_bytes": 104857600,
+        "cpu_threads": 2
+      }
+    }
+  },
+  "prospective_campaign_summary": {
+    "total_staged_cases": 6,
+    "amplitudes_per_resolution": [0.90, 0.97, 1.10],
+    "total_projected_gpu_wall_time_hours": 3.42,
+    "bounded_safe_gpu_wall_time_hours": 12.0,
+    "total_projected_storage_gb": 66.8,
+    "bounded_safe_storage_gb": 105.0
+  }
+}

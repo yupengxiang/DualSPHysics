@@ -1,0 +1,48 @@
+{
+  "schema": "ds02.f3.second-mechanism-proposal.v1",
+  "status": "scientific_proposal_only; no_unreviewed_control_authored_or_launched",
+  "proposal_title": "Bounded Two-Axis Physical Acceleration within Plain Rectangular Tank as Distinct Second Physical Mechanism",
+  "mechanism_classification": {
+    "mechanism_1": "1D Longitudinal Sloshing with Pitch (nominal A=1.00, prospective A in {0.90, 0.97, 1.10})",
+    "mechanism_2_proposed": "Bounded 3D Two-Axis Physical Acceleration with Coupled Pitch-Roll (preserves plain open-top rectangular tank)",
+    "disqualified_candidate": "Internal Baffle Configuration (introduces internal solid boundaries violating plain-tank operator assumptions)",
+    "amplitude_endpoint_clarification": "Control amplitude variations (A=0.90, 0.97, 1.10) scale body acceleration magnitude along the nominal single axis; they are parametric variations within Mechanism 1 and are NOT counted as Mechanism 2."
+  },
+  "baffle_disqualification_rationale": {
+    "boundary_geometry": "Adding internal vertical, inclined, or perforated baffles inserts internal solid boundary particles into the tank interior, transforming the convex simply-connected rectangular domain into a multiply-connected geometry.",
+    "operator_invalidation": "The qualified frozen observation operator for F3 plain rectangular tank (f3_legacy_plain_full_transport_config.v1.json, f3_observation_v2.py) strictly presumes an unobstructed 5-wall rectangular box (0.9 x 0.18 x 0.51 m). Its spatial cell integrals, center-of-mass chords, free-surface quantiles (q90 over length), top-open exit definitions, and fluid partition zones assume continuous fluid chords.",
+    "hydrodynamic_artifacts": "Internal walls create internal contact lines, wetting hysteresis, local singular shear, artificial wake turbulence, and geometric shadow zones where the plain rectangular integration operator yields non-physical artifacts. Blind reuse of the plain operator on a baffled container is mathematically and scientifically invalid."
+  },
+  "proposed_second_mechanism": {
+    "physical_concept": "Bounded two-axis physical acceleration within the exact plain 5-wall open-top rectangular container (0.9 x 0.18 x 0.51 m, depth 0.09 m). The physical fluid domain and boundary surfaces remain identical to the qualified plain container.",
+    "kinematics_and_forcing_derivation": {
+      "linear_acceleration": "a_lin(t) = (a_x(t), a_y(t), a_z(t)), where a_x(t) provides the primary longitudinal drive, a_y(t) introduces a bounded transverse drive, and a_z(t) maintains gravitational equilibrium (-9.81 m/s^2) with vertical dynamic coupling.",
+      "angular_acceleration": "alpha(t) = (alpha_x(t), alpha_y(t), 0), coupling pitch (around Y) and roll (around X) with zero yaw (alpha_z = 0) to avoid artificial rotational drift.",
+      "zero_drive_consistency": "At t=0, a_lin(0) = (0, 0, -9.81) m/s^2, alpha(0) = (0, 0, 0) rad/s^2, initial linear and angular velocities v_lin(0)=0, omega(0)=0. The transverse component a_y(t) is modulated by a smooth C^2 envelope w(t) to prevent impulsive startup shocks.",
+      "coordinate_frame": "Tank-fixed computational coordinates; global gravity disabled in solver XML (globalgravity=0) with full gravitational vector included in CSV body forcing."
+    },
+    "solver_version_physics": {
+      "csv_parsing": "Official JDsAccInput.cpp loads 7 columns (Time, LinearAccX, LinearAccY, LinearAccZ, AngularAccX, AngularAccY, AngularAccZ) via standard delimited parsing.",
+      "native_integration": "Right-endpoint integration in JDsAccInput.cpp computes v_lin[k] and v_ang[k] natively without external preprocessing.",
+      "gpu_coriolis_branch": "In JDsAccInput_ker.cu, the angular acceleration kernel activates when any component of alpha is nonzero. It explicitly computes full 3D inertial frame terms: Euler acceleration (alpha x r), Coriolis acceleration (2 * omega x v_rel), and Centrifugal acceleration (omega x (omega x r)). No textbook rigid-pose frame simplification is substituted."
+    },
+    "observable_and_event_expansion": {
+      "fluid_dynamics": "Excites true 3D sloshing modes: longitudinal sloshing (f_1,0) couples nonlinearly with transverse sloshing (f_0,1), generating 3D swirling waves, diagonal wave runup, and lateral wall pressure peaks.",
+      "energy_decomposition": "Enables physical kinetic energy decomposition into longitudinal (E_kx), transverse (E_ky), and vertical (E_kz) modal components.",
+      "lagrangian_transport": "Induces 3D Lagrangian cross-mixing across the Y=0 symmetry plane, expanding transport metric coverage from quasi-2D longitudinal transport to full 3D residence and transit distributions.",
+      "free_surface_gauges": "Requires bilateral transverse surface elevation tracking along both side walls (Y = +/- 0.08m) in addition to longitudinal centerline probes."
+    },
+    "baseline_study_requirements": {
+      "resolution_ladder": "Preregistered spatial convergence study across at least 3 commensurate resolutions (e.g., dp = 0.0075, 0.006, 0.005 m).",
+      "adaptive_timestepping": "Verification of genuine adaptive CFL timestepping (CFL 0.05 vs 0.025 with CoefDtMin 0.005) ensuring zero dtmin floor clamping under multi-axis 3D velocities.",
+      "macro_window": "Full 8.35s window evaluation verifying energy, momentum, and free-surface boundary compliance within the 5% spatial budget.",
+      "operator_qualification": "Rigorous qualification of updated 3D observation operator before accepting scientific claims."
+    }
+  },
+  "governance_and_claim_boundary": {
+    "claim_status": "entire_domain_prospective",
+    "production_approval": "none",
+    "q_n_status": "not_granted",
+    "execution_policy": "No new control CSVs authored or launched without formal Root pre-registration and review."
+  }
+}
