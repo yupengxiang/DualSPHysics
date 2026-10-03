@@ -1,0 +1,63 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F1",
+  "case_id": "F1_ECC_THICK_DBC_MEDIUM_GENUINE_QUARTER_CFL001",
+  "variant_id": "same-initial-BI4-genuine-quarter-CFL-0.05-CoefDtMin-0.0125",
+  "resolution_token": "DP005",
+  "attempt_id": "root-ecc-thick-dbc-medium-genuine-quarterstep-full1601-native-001",
+  "kind": "qualification",
+  "cpu_threads": 4,
+  "max_wall_seconds": 1800,
+  "estimated_storage_bytes": 107374182400,
+  "estimated_peak_gpu_mib": 8192,
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "{prepared_input_prefix}/F1_ECC_THICK_DBC_MEDIUM_GENUINE_QUARTER_CFL001",
+    "/tmp/ds02-native-staging/f1-thick-dbc-medium-quarterstep-full-root-001",
+    "-tmax:1.6",
+    "-tout:0.001"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "independent_case_count_increment": 0,
+  "production_approval": "none",
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "bounded_resource_rationale": {
+    "evidence_source": "realhalf013 (root-ecc-thick-dbc-medium-genuine-halfstep-full1601-native-013)",
+    "realhalf013_elapsed_seconds": 250.62711460795254,
+    "realhalf013_steps": 70174,
+    "realhalf013_dts_adjusted_to_dtmin": 0,
+    "nominal_elapsed_gpu_seconds": 168.17615791782737,
+    "refutation_of_nominal2x": "Nominal GPU elapsed was 168.18s; halfstep took 250.63s (~1.49x nominal, NOT 2.0x). Stepping is dynamic CFL with zero DtMin clamping. Quarterstep runtime must not use naive nominal 2x/4x scaling; bounded realistically at ~500-600s with conservative 1800s wall ceiling.",
+    "expected_steps_range": [
+      130000,
+      155000
+    ],
+    "estimated_wall_seconds": 550
+  },
+  "expected_native": {
+    "window_s": [
+      0.0,
+      1.6
+    ],
+    "saved_frames": 1601,
+    "save_interval_s": 0.001,
+    "dimension": 3,
+    "total_particles": 1032852,
+    "fluid_particles": 643200,
+    "fixed_particles": 389652,
+    "initial_fluid_mass_kg": 80.4,
+    "massfluid_kg": 0.000125,
+    "native_mass_policy": "native GenCase mass retained; no rescaling",
+    "boundary": "DBC",
+    "open_top": true,
+    "no_birth_or_exit_inferred": true
+  },
+  "quarterstep_integrator_controls": {
+    "CFLnumber": 0.05,
+    "CoefDtMin": 0.0125
+  },
+  "physical_condition_sha256": "b61c7f08a1c1daa97af9340c4743123d38b48c7bd94d5ccf382d06ef5f3fd3bb",
+  "q_n_status": "not_granted"
+}
