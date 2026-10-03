@@ -1,0 +1,257 @@
+{
+  "case_id": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333",
+  "claim_boundary": "F1 fine (DP=0.0033333333333333335) immutable owner binding and conversion contract. Native execution completed 1601 frames (0.0 to 1.6s); byte publication completed on Home. Conversion template only; launch_allowed=False, Q-N not assessed.",
+  "converter_scope": "Use direct upstream BI4 decoder one frame at a time; official PartVTK first/middle/final; HDF5 on NVMe attempt root; raw source tree hashed before/after by converter.",
+  "family_id": "F1",
+  "mechanism": "eccentric_obstacle",
+  "numeric_binding": {
+    "boundary": 1,
+    "boundary_name": "DBC",
+    "dp_m": 0.0033333333333333335,
+    "dt_source": "actual solver Run.out; adaptive native DtIni/DtMin, no time-step qualification inferred",
+    "expected_fixed_particles": 864972,
+    "expected_fluid_mass_kg": 80.4,
+    "expected_fluid_particles": 2170800,
+    "expected_frames": 1601,
+    "expected_particles": 3035772,
+    "h_m": 0.005773502691896257,
+    "save_pos_double": 1,
+    "time_max_s": 1.6,
+    "time_out_s": 0.001
+  },
+  "physical_binding": {
+    "control_family_id": "F1_CONTROL_ECCENTRIC_OBSTACLE_DBC_V1",
+    "controls": {
+      "boundary": 1,
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": 1,
+      "step_algorithm": 1,
+      "viscosity": 0.1
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.35,
+        0.55
+      ],
+      "right_censor_policy": "finite closed initial cohort; open top is a free surface, not an inlet/birth zone; unobserved return is censored",
+      "sequence": [
+        "release",
+        "dam_break_front_advance",
+        "obstacle_impact",
+        "bypass_split",
+        "downstream_wall_impact",
+        "return_wave"
+      ],
+      "time_end_s": 1.6,
+      "time_start_s": 0.0
+    },
+    "family_id": "F1",
+    "geometry": {
+      "fluid_reservoir": {
+        "label": "finite initial fluid reservoir",
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.4,
+          0.67,
+          0.3
+        ]
+      },
+      "obstacle": {
+        "label": "finite eccentric obstacle solid",
+        "low_m": [
+          0.9,
+          0.24,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.12,
+          0.12,
+          0.45
+        ]
+      },
+      "tank": {
+        "label": "continuous five-face tank envelope",
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          1.6,
+          0.67,
+          0.4
+        ]
+      }
+    },
+    "geometry_family_id": "F1_GEOM_ECCENTRIC_OBSTACLE_THICK_DBC_V1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid_reservoir": 80.4
+      },
+      "initial_mass_by_source_kg": {
+        "fluid_reservoir": 80.4
+      },
+      "initial_mass_total_kg": 80.4,
+      "mass_policy": "native GenCase mass; no normalization or rescaling",
+      "source_labels": {
+        "fluid_reservoir": "type=3/mk=1"
+      },
+      "source_regions": [
+        "fluid_reservoir"
+      ],
+      "velocities_m_per_s": {
+        "fluid_reservoir": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "F1_eccentric_obstacle_thick_dbc",
+    "mass_policy": "native mass only; no rescaling",
+    "mechanism_id": "eccentric_obstacle",
+    "open_inlet": false,
+    "paired_background_id": "F1_REF_ECC_NOMINAL",
+    "parameters": {
+      "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+      "fluid_mass_kg": 80.4,
+      "fluid_volume_m3": 0.0804,
+      "initial_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "obstacle_low_m": [
+        0.9,
+        0.24,
+        0.0
+      ],
+      "obstacle_size_m": [
+        0.12,
+        0.12,
+        0.45
+      ],
+      "open_top_free_surface": true,
+      "reservoir_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "reservoir_size_m": [
+        0.4,
+        0.67,
+        0.3
+      ],
+      "tank_low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "tank_size_m": [
+        1.6,
+        0.67,
+        0.4
+      ]
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F1_ECCENTRIC_THICK_BOUNDARY_DBC",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F1_ECCENTRIC_THICK_BOUNDARY_DBC",
+  "production_claim": "none",
+  "q_n_status": "not_assessed",
+  "qualification_claim": "none",
+  "resolution": "fine",
+  "schema": "ds02.f1.direct-conversion-owner-metadata.v1",
+  "solver_parameters": {
+    "Boundary": 1,
+    "BoundaryName": "DBC",
+    "CoefDtMin": 0.05,
+    "DensityDT": 2,
+    "DensityDTvalue": 0.1,
+    "DtFixed": 0.0,
+    "DtIni": 0.0,
+    "DtMin": 0.0,
+    "Kernel": 1,
+    "NoPenetration": 0,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 1,
+    "Shifting": 0,
+    "SlipMode": 1,
+    "StepAlgorithm": 1,
+    "TimeMax": 1.6,
+    "TimeOut": 0.001,
+    "VerletSteps": 40,
+    "Visco": 0.1,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1
+  },
+  "source_immutability": true,
+  "source_provenance": {
+    "child_gencase_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-2-dp003333333333333333-preflight-003/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333.bi4",
+    "child_gencase_bi4_sha256": "8041343cae9a8ea365ca57b5007aadb33950d478f816d6e11ccce33027f4281c",
+    "child_gencase_prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-2-dp003333333333333333-preflight-003/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333",
+    "child_gencase_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-2-dp003333333333333333-preflight-003/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333.xml",
+    "child_gencase_xml_sha256": "506cc585b36bf38e998ec0acd038e1c1f9dc5b6392439cbc0e4c9821ef19ac0f",
+    "cpu_publication_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/root-fine-nvme-home-publication-001/execution-receipt.json",
+    "cpu_publication_receipt_sha256": "4623cdb23bfe3ce6cae5d7bb309be00629fa247e35f506b4cbfa4e694d1822ac",
+    "definition_sha256": "7b5e8144b185033442972778f8fdcd418f05fc04239d5f63b50f8a51e2d1bb70",
+    "definition_source": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/eccentric_thick_boundary_fallback_003_domainfix001/definitions/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333_Def.xml",
+    "definition_source_sha256": "7b5e8144b185033442972778f8fdcd418f05fc04239d5f63b50f8a51e2d1bb70",
+    "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/f1-ecc-thick-boundary-v3-2-dp003333333333333333-preflight-003/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/gencase-child-receipt.json",
+    "gencase_receipt_sha256": "afd8bd908f6b0d3a7a53d4cc0ad15bf7656a038d0dd7b059582d917751051514",
+    "home_data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/qualification-ecc-thick-boundary-v3-2-dp003333333333333333-full-20261003-001-root-nvme-004/solver_output/data",
+    "native_storage_publication": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/qualification-ecc-thick-boundary-v3-2-dp003333333333333333-full-20261003-001-root-nvme-004/native-storage-publication.json",
+    "native_storage_publication_sha256": "ac2a97728162f532943ca53a47a14e17387460126a7374331640b9f4ed91ff8a",
+    "solver_log": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/qualification-ecc-thick-boundary-v3-2-dp003333333333333333-full-20261003-001-root-nvme-004/solver_output/Run.out",
+    "solver_log_sha256": "9e70bfbe22bf483c4355d9b0fe6f756ac2a53f59654e647e6edf6cfc69849089",
+    "solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333/qualification-ecc-thick-boundary-v3-2-dp003333333333333333-full-20261003-001-root-nvme-004/execution-receipt.json",
+    "solver_receipt_sha256": "847ff53bfe5f51bdd3570c0f26535008d3342a06a34682de9eedf57d90d7bb2d",
+    "source_semantics": "DBC=1 actual Run.out; generated input has data2d=false, no motion, no in/out/periodic/birth/adaptive tags"
+  },
+  "typed_contract": {
+    "identity_key": "(Zone,Idp)",
+    "initial_particle_axis": "all generated np=3035772 IDs retained; missing/revival/open birth rejected by converter",
+    "initial_typed_ranges": {
+      "fixed_mk10": {
+        "begin": 0,
+        "count": 808812
+      },
+      "fixed_mk11": {
+        "begin": 808812,
+        "count": 56160
+      },
+      "fluid_mk1": {
+        "begin": 864972,
+        "count": 2170800
+      }
+    },
+    "transient_exclusions": {
+      "observed_count": 179,
+      "policy": "fine 179 excluded particles preserved on initial axis with unknown state; no false zero out; coarse/medium observed zero exclusions"
+    },
+    "types_preserved": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "zone_source": "native BI4 Piece"
+  }
+}
