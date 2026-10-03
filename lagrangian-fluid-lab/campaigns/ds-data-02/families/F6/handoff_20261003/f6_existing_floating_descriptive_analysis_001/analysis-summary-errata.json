@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.f6.descriptive-analysis-and-prereg-errata.v1",
+  "family_id": "F6",
+  "review_reference": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_existing_floating_descriptive_analysis_001/analysis-summary.json",
+  "corrections": [
+    {
+      "subject": "angular_peak_amplitude",
+      "issue": "Previous text loosely characterized angular peaks as '< 0.09 rad'",
+      "authoritative_finding": "The actual peak angular amplitude across the 3 resolutions in the zero-spin case reaches 0.09473341 rad on fine (DP=0.0125) yaw, which exceeds 0.09 rad.",
+      "exact_values_rad": {
+        "coarse_dp025": {"roll": 0.09051735, "pitch": 0.03102740, "yaw": 0.07389807},
+        "medium_dp020": {"roll": 0.02250953, "pitch": 0.07099408, "yaw": 0.03538126},
+        "fine_dp0125": {"roll": 0.01043274, "pitch": 0.07450400, "yaw": 0.09473341}
+      }
+    },
+    {
+      "subject": "orientation_rmse_scaling",
+      "issue": "Previous text loosely claimed sub-degree absolute orientation accuracy across all comparisons",
+      "authoritative_finding": "Maximum absolute orientation RMSE reaches 0.06269848 rad (3.59 degrees) on fine vs coarse yaw, which is not sub-degree. The frozen 5% relative RMSE macro operator remains unchanged; no retroactive threshold relaxations are permitted.",
+      "exact_absolute_rmse_rad": {
+        "medium_vs_coarse": {"roll": 0.01976729, "pitch": 0.02828778, "yaw": 0.03568499},
+        "fine_vs_coarse": {"roll": 0.02126621, "pitch": 0.03442607, "yaw": 0.06269848},
+        "medium_vs_fine": {"roll": 0.00965594, "pitch": 0.05869089, "yaw": 0.03063379}
+      }
+    },
+    {
+      "subject": "initial_angular_node_velocity_propagation",
+      "issue": "General update kernel propagation alone does not establish GenCase particle velocities",
+      "authoritative_finding": "GenCase stores the body initial angular velocity in XML (<execution><particles><floating><angularvelini x='0.08' y='0.12' z='0.06' units_comment='rad/s'/>) while particle velocities in the initial GenCase BI4 remain zero. Particle velocity propagation (vr = v_lin + omega x dist) is performed by the DualSPHysics solver at initialization (JSph.cpp:1162 loading fomega and FtPartsUpdate in JSphCpuSingle.cpp:1084-1086 / JSphGpu_ker.cu:2049-2051). Verification of particle initial velocities requires inspecting actual solver Frame 0 (Part_0000.bi4), not GenCase alone."
+    },
+    {
+      "subject": "prospective_excitation_status",
+      "issue": "Prospective 3D excitation must not be represented as an established cure or guaranteed convergence",
+      "authoritative_finding": "The prospective angular release excitation vector [0.08, 0.12, 0.06] rad/s is an UNTESTED HYPOTHESIS. It provides a physically motivated macroscopic excitation candidate, but convergence and conditioning under the frozen 5% macro operator can only be evaluated from future solver results."
+    },
+    {
+      "subject": "chaos_and_horizon_claims",
+      "issue": "Unmeasured claims of measured chaos or Lyapunov horizon",
+      "authoritative_finding": "All claims of measured chaos, Lyapunov horizon, or 12 corners (geometry is 8 corners and 12 edges) are retracted. Neither 1-DOF heave constraint nor shortened 3s window is accepted; the full 12s unconstrained free 6DOF candidate is preserved."
+    }
+  ],
+  "delegate_boundary": {
+    "launch_allowed": false,
+    "root_authority_only": true
+  }
+}
