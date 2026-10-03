@@ -1,0 +1,223 @@
+{
+  "schema": "ds02.f2.root-spatial-fulltyped-owner.v1",
+  "family_id": "F2",
+  "case_id": "F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008_SPATIAL_REFERENCE_SAVE010",
+  "physical_case_id": "F2H10V2_OFFSET_V1",
+  "mechanism_id": "offset_spill",
+  "background": "OFFSET",
+  "physical_binding": {
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_GEM_V2",
+    "controls": {
+      "boundary": "finite DBC rotating cup, fixed receiver, and finite catch tray; world top open",
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.03
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        4.0
+      ],
+      "right_censor_policy": "saved 4 s window retains initial typed fluid denominator and keeps numerical unknown separate",
+      "sequence": [
+        "static_hold",
+        "prescribed_rotation",
+        "receiver_or_tray_transport",
+        "post_stop_residence"
+      ],
+      "time_end_s": 4.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F2",
+    "geometry": {
+      "cup": {
+        "label": "cup",
+        "low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size_m": [
+          0.425,
+          0.3,
+          0.45
+        ]
+      },
+      "fluid": {
+        "label": "continuous three-band liquid domain",
+        "low_m": [
+          0.0525,
+          -0.12,
+          0.7
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.32,
+          0.24,
+          0.32
+        ]
+      },
+      "receiver": {
+        "label": "receiver",
+        "low_m": [
+          0.45,
+          -0.15999999999999998,
+          0.0
+        ],
+        "size_m": [
+          1.1,
+          0.6,
+          0.45
+        ]
+      },
+      "tray": {
+        "label": "tray",
+        "low_m": [
+          -1.2,
+          -1.0,
+          -0.2
+        ],
+        "size_m": [
+          4.0,
+          2.0,
+          0.15
+        ]
+      }
+    },
+    "geometry_family_id": "F2_GEOM_GEM_CUP_RECEIVER_OFFSET_SPILL_V2",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": [
+        8.191999999999998,
+        8.191999999999998,
+        8.191999999999998
+      ],
+      "initial_mass_by_source_kg": [
+        8.191999999999998,
+        8.191999999999998,
+        8.191999999999998
+      ],
+      "initial_mass_total_kg": 24.575999999999997,
+      "mass_policy": "native BI4 header MassFluid is authoritative; continuous mass is an independent frozen reference",
+      "source_labels": [
+        "source_layer_0",
+        "source_layer_1",
+        "source_layer_2"
+      ],
+      "source_regions": [
+        {
+          "label": "source_layer_0",
+          "low_m": [
+            0.0525,
+            -0.12,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        },
+        {
+          "label": "source_layer_1",
+          "low_m": [
+            0.0525,
+            -0.039999999999999994,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        },
+        {
+          "label": "source_layer_2",
+          "low_m": [
+            0.0525,
+            0.04000000000000001,
+            0.7
+          ],
+          "size_m": [
+            0.32,
+            0.08,
+            0.32
+          ]
+        }
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "lineage_group_id": "F2_GEM_OFFSET_SPILL_V2",
+    "mechanism_id": "offset_spill",
+    "paired_background_id": "F2H10V2_CENTER_V1",
+    "parameters": {
+      "cup_width_m": 0.425,
+      "drive_mechanism": "offset_spill",
+      "motion_axis_origin_m": [
+        0.0,
+        -1.0,
+        0.65
+      ],
+      "motion_axis_unit": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "open_top": true,
+      "receiver_x_m": 0.45,
+      "receiver_y_m": 0.14,
+      "rotation_amplitude_deg": -105.0,
+      "rotation_duration_s": 0.65,
+      "rotation_end_s": 1.15,
+      "rotation_start_s": 0.5
+    },
+    "physical_case_id": "F2H10V2_OFFSET_V1",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "327899e38bbad63951206d5b2fd3ef354c049a32f6671af1af7913a48b77c7ef",
+  "resolution": {
+    "role": "medium",
+    "dp_m": 0.008
+  },
+  "native_expected_total": 668673,
+  "native_expected_fluid": 48000,
+  "native_continuous_mass_kg": 24.576,
+  "source_owner": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/offset_baseline_terminal_v1/owner_metadata/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001.owner.v2-terminal-bound.json",
+  "source_owner_sha256": "f98f776ed44f920ad98aea96e18432f5184c92327a6e05e301e4bdfa34268184",
+  "source_metadata": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/rv4_matched_three_dp_init_v1/artifacts/definitions/F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008/F2_RV4EQ_MATCHED_OFFSET_V1_MEDIUM_DP008.metadata.json",
+  "source_metadata_sha256": "4f5bd1e8f2a7de05fe8ad68aea13a90c1ced74d6c305c1070e63a2193bec0e33",
+  "physical_projection_equality": {
+    "compared_keys": [
+      "bound_boxes",
+      "constantsdef",
+      "motion",
+      "execution_parameters",
+      "time_window_s",
+      "simulationdomain"
+    ],
+    "differences": {},
+    "physical_solids_controls_window_equal": true,
+    "allowed_changes": [
+      "definition dp",
+      "definition pointmin numerical grid phase",
+      "three fluid source blocks",
+      "motion file reference name"
+    ]
+  },
+  "reference_scope": "Full typed spatial/macro reference; SAVE010 not event timing qualification",
+  "q_n_granted": false,
+  "production_granted": false
+}
