@@ -1,0 +1,134 @@
+{
+  "background_contracts": {
+    "center_catch": {
+      "background": "center_catch",
+      "event_thresholds": {
+        "cup_mouth": {
+          "crossing_tolerance_m": 0.0125,
+          "first_departure": "first interpolated outward crossing of the moving finite opening after static hold",
+          "surface": "finite moving opening plane at local x=cup_width_m-0.05 with y/z aperture inside cup rim"
+        },
+        "receiver": {
+          "first_entry": "first interpolated world-space entry; repeated crossings are counted separately",
+          "region": "receiver interior after one boundary layer; x/y/z bounds from generated geometry"
+        },
+        "residence": {
+          "cup_retained": "body-frame cup interior at final frame",
+          "destination_time_series": "receiver/tray/cup/inflight/unknown at every native saved frame",
+          "unknown": "initial fluid ID absent or outside all declared physical regions at event-window end; unknown mass remains in denominator"
+        },
+        "spill_tray": {
+          "region": "finite tray interior after one boundary layer and below receiver lip",
+          "spill": "native particle reaches tray region after leaving cup and is not inside receiver"
+        }
+      },
+      "family_id": "F2",
+      "mass_denominator": "initial_native_fluid_mass_by_source_layer_mk_0_1_2",
+      "q_e": {
+        "blocking": false,
+        "external_experiment_or_analytic_match": "not required for Q-N",
+        "status": "optional"
+      },
+      "q_i": {
+        "boundary_particles_are_not_fluid_mass": true,
+        "required": [
+          "solver_dimension_equals_3_from_actual_output",
+          "coordinate_components_equals_3",
+          "nonzero_fluid_particles_and_positive_active_mass",
+          "finite_increasing_time_axis",
+          "all_active_position_velocity_density_mass_finite",
+          "initial_ids_retained_or_native_lifecycle_classified",
+          "finite_cup_receiver_tray_geometry_and_motion_control"
+        ],
+        "unknown_mass_is_separate_from_spill_or_tray_mass": true
+      },
+      "q_n": {
+        "event_time_absolute_budget_s": 0.0036681953999691376,
+        "event_time_fraction_of_characteristic_time": 0.02,
+        "integration_fraction_of_total_error_budget_max": 0.2,
+        "macro_relative_error_threshold": 0.05,
+        "requires": [
+          "same_recipe_geometry_control_and_event_window_across_reference_resolutions",
+          "independent_integration_step_comparison",
+          "independent_save_frequency_comparison",
+          "native_observables_cover_all_registered_event_phases"
+        ],
+        "save_fraction_of_total_error_budget_max": 0.2,
+        "status_before_native_reference": "pending",
+        "three_resolution_interpretation": "nearby resolutions are reference evidence, not automatic convergence"
+      },
+      "qualification_status": "unqualified_until_actual_native_reference_evidence",
+      "schema": "ds-data-02.f2.quality-contract.v1",
+      "scope_key": "recipe+center_catch+4.000s+native_full_state+resolution",
+      "status": "thresholds_frozen_before_results"
+    },
+    "offset_spill": {
+      "background": "offset_spill",
+      "event_thresholds": {
+        "cup_mouth": {
+          "crossing_tolerance_m": 0.0125,
+          "first_departure": "first interpolated outward crossing of the moving finite opening after static hold",
+          "surface": "finite moving opening plane at local x=cup_width_m-0.05 with y/z aperture inside cup rim"
+        },
+        "receiver": {
+          "first_entry": "first interpolated world-space entry; repeated crossings are counted separately",
+          "region": "receiver interior after one boundary layer; x/y/z bounds from generated geometry"
+        },
+        "residence": {
+          "cup_retained": "body-frame cup interior at final frame",
+          "destination_time_series": "receiver/tray/cup/inflight/unknown at every native saved frame",
+          "unknown": "initial fluid ID absent or outside all declared physical regions at event-window end; unknown mass remains in denominator"
+        },
+        "spill_tray": {
+          "region": "finite tray interior after one boundary layer and below receiver lip",
+          "spill": "native particle reaches tray region after leaving cup and is not inside receiver"
+        }
+      },
+      "family_id": "F2",
+      "mass_denominator": "initial_native_fluid_mass_by_source_layer_mk_0_1_2",
+      "q_e": {
+        "blocking": false,
+        "external_experiment_or_analytic_match": "not required for Q-N",
+        "status": "optional"
+      },
+      "q_i": {
+        "boundary_particles_are_not_fluid_mass": true,
+        "required": [
+          "solver_dimension_equals_3_from_actual_output",
+          "coordinate_components_equals_3",
+          "nonzero_fluid_particles_and_positive_active_mass",
+          "finite_increasing_time_axis",
+          "all_active_position_velocity_density_mass_finite",
+          "initial_ids_retained_or_native_lifecycle_classified",
+          "finite_cup_receiver_tray_geometry_and_motion_control"
+        ],
+        "unknown_mass_is_separate_from_spill_or_tray_mass": true
+      },
+      "q_n": {
+        "event_time_absolute_budget_s": 0.0036681953999691376,
+        "event_time_fraction_of_characteristic_time": 0.02,
+        "integration_fraction_of_total_error_budget_max": 0.2,
+        "macro_relative_error_threshold": 0.05,
+        "requires": [
+          "same_recipe_geometry_control_and_event_window_across_reference_resolutions",
+          "independent_integration_step_comparison",
+          "independent_save_frequency_comparison",
+          "native_observables_cover_all_registered_event_phases"
+        ],
+        "save_fraction_of_total_error_budget_max": 0.2,
+        "status_before_native_reference": "pending",
+        "three_resolution_interpretation": "nearby resolutions are reference evidence, not automatic convergence"
+      },
+      "qualification_status": "unqualified_until_actual_native_reference_evidence",
+      "schema": "ds-data-02.f2.quality-contract.v1",
+      "scope_key": "recipe+offset_spill+4.000s+native_full_state+resolution",
+      "status": "thresholds_frozen_before_results"
+    }
+  },
+  "family_id": "F2",
+  "path_note": "The per-case quality contract is in each definition metadata and is copied into native case manifests after execution.",
+  "q_i_q_n_q_e_separation": true,
+  "reference_matrix_status": "pending_native_solver_evidence",
+  "schema": "ds-data-02.f2.quality-contract-index.v1",
+  "thresholds_frozen_before_results": true
+}
