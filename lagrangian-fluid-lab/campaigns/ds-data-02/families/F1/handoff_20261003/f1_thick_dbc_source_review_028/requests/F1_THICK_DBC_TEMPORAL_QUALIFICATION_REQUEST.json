@@ -1,0 +1,38 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F1",
+  "case_id": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005_TEMPORAL_CFL0133",
+  "attempt_id": "root-ecc-thick-dbc-medium-temporal-cfl0133-001",
+  "kind": "gpu",
+  "gpu_count": 1,
+  "max_wall_seconds": 1800,
+  "estimated_storage_bytes": 10737418240,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/f1-ecc-thick-boundary-v3-1-dp005-preflight-002/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005",
+    "{attempt_root}/solver_output",
+    "-dirdataout",
+    "data",
+    "-gpu",
+    "-tmax:1.6",
+    "-tout:0.001",
+    "-cfl:0.13333333333333333"
+  ],
+  "independent_case_count_increment": 0,
+  "production_approval": "none",
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/f1-ecc-thick-boundary-v3-1-dp005-preflight-002/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005.xml",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/f1-ecc-thick-boundary-v3-1-dp005-preflight-002/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005/F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005.bi4",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64"
+  ],
+  "rationale": "Temporal qualification trial for F1 Thick-DBC recipe to isolate whether 0.06217 COM failure is driven by 50% dt difference between medium (49us) and fine (32us). Reduces CFL from 0.200 to 0.133 on Medium (dp=0.005m) to match Fine dt. Budget cost: ~0.10 GPUh, 1 qualification attempt.",
+  "guards": {
+    "launch_outside_root_prohibited": true,
+    "f5_samewallgap_repeat_prohibited": true,
+    "root_qn_status": "0/336 qualified"
+  }
+}

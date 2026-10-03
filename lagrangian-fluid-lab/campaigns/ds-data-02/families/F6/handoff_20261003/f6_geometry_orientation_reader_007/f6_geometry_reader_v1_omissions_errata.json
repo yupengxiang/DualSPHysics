@@ -1,0 +1,66 @@
+{
+  "schema": "ds02.f6.geometry-orientation-reader-errata.v1",
+  "generated_at": "2026-10-03T22:56:00+08:00",
+  "family_id": "F6",
+  "package_id": "f6_geometry_orientation_reader_007",
+  "author": "codex/ds-data-02-infra",
+  "subject_commit": "65d343f3ddd224567cbafa06c92302426b7d570a",
+  "subject_file": "lagrangian-fluid-lab/scripts/ds_data02_f6_geometry_orientation_reader_v1.py",
+  "remedied_file": "lagrangian-fluid-lab/scripts/ds_data02_f6_geometry_orientation_reader_v2.py",
+  "test_suite": "lagrangian-fluid-lab/tests/test_ds_data02_f6_geometry_orientation_reader_v2.py",
+  "summary": "Authoritative inspection and remediation errata for 5 documented omissions in F6 geometry reader v1 (commit 65d343f3). Strict gates and synthetic verification delivered in v2 without overwriting consumed v1 assets.",
+  "omissions": [
+    {
+      "omission_id": "OMISSION_1_PARSE_SKIPPING_AND_METADATA_IGNORANCE",
+      "v1_lines": "145-156",
+      "defect_description": "parse_partvtk_floating_csv in v1 silently skipped lines with fewer columns (line 146 continue), lines failing integer conversion (line 152 continue), and lines with mismatched Type or Mk (line 155 continue). It completely ignored Line 2 metadata Nfloat and Np, and did not parse or enforce Zone == 0.",
+      "risk_impact": "Could permit corrupted lines, non-floating or foreign zone nodes, or truncated rows to pass undetected as valid floating body nodes.",
+      "v2_resolution": "parse_partvtk_floating_csv_v2 strictly extracts Line 2 metadata (Np, Nfloat); validates all rows have Zone == target_zone (0), Type == target_type (2), Mk == target_mk (60); immediately raises ValueError on any malformed or mismatched line; and enforces parsed node count identically equals metadata Nfloat.",
+      "synthetic_fixture_test": "test_ds_data02_f6_geometry_orientation_reader_v2.py::test_omission_1_strict_cohort_rejections"
+    },
+    {
+      "omission_id": "OMISSION_2_GLOB_INCLUDES_STATS_CSV",
+      "v1_lines": "738, 751",
+      "defect_description": "main() globbed PartFloating_*.csv, which matches PartFloating_stats.csv (DualSPHysics PartVTK summary statistics table).",
+      "risk_impact": "Including stats.csv as a frame file corrupts series indexing, cohort checks, and timestamp sequences.",
+      "v2_resolution": "enumerate_partvtk_files explicitly enumerates PartFloating_{i:04d}.csv for i in range(241). Accompanying stats.csv in the directory is ignored; any missing frame in the sequence raises FileNotFoundError.",
+      "synthetic_fixture_test": "test_ds_data02_f6_geometry_orientation_reader_v2.py::test_strict_full_window_and_explicit_enumeration, test_omission_2_missing_file_detection"
+    },
+    {
+      "omission_id": "OMISSION_3_LOAD_SERIES_SERIES_ENFORCEMENT_GAPS",
+      "v1_lines": "400-505",
+      "defect_description": "load_partvtk_series did not verify total frame count == 241, did not verify timestamps are strictly increasing (t_{i+1} > t_i), and did not verify full window coverage [0.0s, 12.0s].",
+      "risk_impact": "Permitted truncated frame counts, disordered time sequences, or premature end times to produce incomplete trajectory outputs.",
+      "v2_resolution": "load_partvtk_series_v2 enforces exactly 241 frames, finite timestamps, strictly increasing times (raises ValueError if t_{i+1} <= t_i), t_0 == 0.0s, and t_240 == 12.0s coverage.",
+      "synthetic_fixture_test": "test_ds_data02_f6_geometry_orientation_reader_v2.py::test_omission_3_strictly_increasing_and_full_frame_enforcement"
+    },
+    {
+      "omission_id": "OMISSION_4_INTERPOLATION_OUT_OF_SUPPORT_CLAMPING",
+      "v1_lines": "377-380",
+      "defect_description": "interpolate_pose_at_physical_time clamped query times outside [t_start, t_end] to the boundary pose rather than raising an error.",
+      "risk_impact": "Silent artificial extrapolation beyond actual solver support bounds.",
+      "v2_resolution": "interpolate_pose_at_physical_time_v2 raises ValueError for any query time outside [t_start - tol, t_end + tol]. Clamping is restricted strictly to numerical float jitter within 1e-6s tolerance.",
+      "synthetic_fixture_test": "test_ds_data02_f6_geometry_orientation_reader_v2.py::test_omission_4_no_extrapolation"
+    },
+    {
+      "omission_id": "OMISSION_5_FLOATING_INFO_VALIDATION_PARTIAL_MATCH",
+      "v1_lines": "542-554",
+      "defect_description": "validate_center_against_floating_info accepted any non-empty set of matched timestamps (if not diffs: raise ValueError).",
+      "risk_impact": "A run with only a small prefix of matching frames (e.g. 5 out of 241) would report a valid RMSE based on partial coverage.",
+      "v2_resolution": "validate_center_against_floating_info_v2 strictly requires len(diffs) == len(traj_times) == 241; any partial match raises an immediate ValueError.",
+      "synthetic_fixture_test": "test_ds_data02_f6_geometry_orientation_reader_v2.py::test_omission_5_reject_partial_floating_info_match"
+    }
+  ],
+  "preserved_foundations": {
+    "kabsch_svd_math": "Exact SVD covariance formulation with proper det(R) = +1 enforcement, rank 3 verification, uniform geometric weights w_i = 1/N, and rigidity RMS/max residuals.",
+    "slerp_cross_dp": "Unit quaternion Lie group SLERP shortest-arc geodesic comparison; index pairing and Euler angle interpolation rejected.",
+    "orientation_budget": null,
+    "orientation_budget_status": "unregistered",
+    "root_qn_status": "0/336 products qualified"
+  },
+  "asset_hygiene": {
+    "v1_script_modified": false,
+    "actual_array_scan_executed": false,
+    "synthetic_fixtures_only": true
+  }
+}

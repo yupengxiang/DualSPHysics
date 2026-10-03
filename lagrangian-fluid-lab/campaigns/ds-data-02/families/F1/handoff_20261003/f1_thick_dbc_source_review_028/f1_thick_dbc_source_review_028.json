@@ -1,0 +1,131 @@
+{
+  "schema": "ds02.f1.thick-dbc-source-review.v1",
+  "generated_at": "2026-10-03T22:56:00+08:00",
+  "family_id": "F1",
+  "case_id": "F1_ECC_THICK_DBC_ACTUAL_FULL_THREE_DP_MACRO",
+  "attempt_id": "root-ecc-thick-dbc-full1601-three-dp-frozen-macro-009",
+  "author": "codex/ds-data-02-infra",
+  "artifacts": {
+    "macro_comparison_json": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_DBC_ACTUAL_FULL_THREE_DP_MACRO/root-ecc-thick-dbc-full1601-three-dp-frozen-macro-009/macro-comparison.json",
+    "execution_receipt_json": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_DBC_ACTUAL_FULL_THREE_DP_MACRO/root-ecc-thick-dbc-full1601-three-dp-frozen-macro-009/execution-receipt.json",
+    "frozen_sha256": "59d41207d2905e68d09575ddb75b14ee9393defe34eb808b4fc5e53547a7c74b"
+  },
+  "physical_mother_condition": {
+    "continuous_mass_kg": 80.4,
+    "H0_m": 0.3,
+    "water_volume_m3": 0.0804,
+    "tank_dimensions_m": [1.6, 0.67, 0.45],
+    "obstacle_dimensions_m": [0.12, 0.12, 0.45],
+    "obstacle_placement_m": [0.9, 0.24, 0.0],
+    "mother_hash": "b61c7f08a1c1daa97af9340c4743123d38b48c7bd94d5ccf382d06ef5f3fd3bb",
+    "identical_across_resolutions": true
+  },
+  "macro_audit_summary": {
+    "window_s": [0.0, 1.6],
+    "frame_count": 1601,
+    "pairs": {
+      "fine_vs_medium": {
+        "reference": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333",
+        "candidate": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005",
+        "com_over_H0": 0.06217014598246011,
+        "quantiles_over_H0": 0.1391917787430582,
+        "ke_over_MgH0": 0.033003671787046406,
+        "mean_velocity_abs_m_s": 0.06601422772163418,
+        "macro_metric_max": 0.1391917787430582,
+        "macro_budget": 0.05,
+        "within_budget": false
+      },
+      "fine_vs_coarse": {
+        "reference": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333",
+        "candidate": "F1_ECC_THICK_BOUNDARY_DBC_DP010",
+        "com_over_H0": 0.23168950630074403,
+        "quantiles_over_H0": 0.5276568735248274,
+        "ke_over_MgH0": 0.0637361263043301,
+        "mean_velocity_abs_m_s": 0.1324707319320817,
+        "macro_metric_max": 0.5276568735248274,
+        "macro_budget": 0.05,
+        "within_budget": false
+      },
+      "medium_vs_coarse": {
+        "reference": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP005",
+        "candidate": "F1_ECC_THICK_BOUNDARY_DBC_DP010",
+        "com_over_H0": 0.1705290633675675,
+        "quantiles_over_H0": 0.3960723386693769,
+        "ke_over_MgH0": 0.045562499725121726,
+        "mean_velocity_abs_m_s": 0.09630806228454625,
+        "macro_metric_max": 0.3960723386693769,
+        "macro_budget": 0.05,
+        "within_budget": false
+      }
+    },
+    "all_pairs_macro_fail": true
+  },
+  "source_telemetry_findings": {
+    "dt_clamping": {
+      "coarse_dtsmin_sum": 0,
+      "medium_dtsmin_sum": 0,
+      "fine_dtsmin_sum": 0,
+      "dt_clamping_occurred": false,
+      "ruling": "DtMin clamping is conclusively ruled out across all 1601 frames"
+    },
+    "cfl_and_dt_scaling": {
+      "cfl_number": 0.2,
+      "step_algorithm": "Verlet (40 steps)",
+      "coarse_avg_dt_s": 1.0018e-4,
+      "medium_avg_dt_s": 4.9137e-5,
+      "fine_avg_dt_s": 3.2497e-5,
+      "dt_ratio_coarse_to_medium": 2.039,
+      "dt_ratio_medium_to_fine": 1.512,
+      "finding": "Time step scales strictly with dp under constant CFL, coupling spatial and temporal refinement"
+    },
+    "kernel_and_boundary": {
+      "kernel": "CubicSpline",
+      "coefh": 1.0,
+      "viscosity": "Artificial (alpha=0.1, ViscoBoundFactor=1.0)",
+      "boundary_layers": 3,
+      "boundary_thickness_dp_ratio": 2.5,
+      "kernel_support_dp_ratio": 3.4641,
+      "finding": "Boundary thickness (2.5 dp) is less than kernel interaction diameter (3.464 dp), introducing boundary truncation"
+    }
+  },
+  "discriminating_hypotheses": {
+    "hypothesis_t_temporal_discretization": {
+      "description": "50% time-step difference between medium and fine under high-acceleration impact creates temporal phase divergence",
+      "evidence": "COM divergence is >95% along X-axis during impact window [0.358s, 1.287s]; post-slosh error drops to 2.4%",
+      "prior_thinwall_errata": "Previous thinwall half-dt is a different recipe and cannot substitute for thick-DBC temporal qualification"
+    },
+    "hypothesis_b_boundary_cushion_scaling": {
+      "description": "DBC hydrodynamic repulsion standoff scales with H = sqrt(3)*dp, shifting effective obstacle face by O(dp)",
+      "evidence": "Standoff discrepancy between medium and fine is ~4.3mm, directly corresponding to ~1.4% H0 phase lead along X"
+    }
+  },
+  "justified_repair_trials": [
+    {
+      "trial_id": "TRIAL_1_TEMPORAL_QUALIFICATION_THICK_DBC",
+      "hypothesis": "Hypothesis T",
+      "description": "Run F1 Thick-DBC Medium (dp=0.005m) with CFL=0.133 (matching Fine dt ~32.5us) to isolate temporal vs spatial convergence",
+      "estimated_gpu_runtime_s": 350,
+      "gpu_hours": 0.097,
+      "qualification_attempts": 1,
+      "recommended_best_next": true
+    },
+    {
+      "trial_id": "TRIAL_2_FOUR_LAYER_KERNEL_COMPLETE_DBC",
+      "hypothesis": "Hypothesis B",
+      "description": "Expand boundary support from 3 layers (2.5 dp) to 4 layers (3.5 dp > 2H = 3.464 dp) to eliminate boundary kernel truncation",
+      "estimated_gpu_runtime_s": 950,
+      "gpu_hours": 0.264,
+      "qualification_attempts": 3,
+      "recommended_best_next": false
+    }
+  ],
+  "resource_budget_status": {
+    "remaining_gpu_hours": 46.0,
+    "remaining_qualification_attempts": 67,
+    "recommended_trial_gpu_hours": 0.097,
+    "recommended_trial_attempts": 1,
+    "launch_allowed": false,
+    "launch_guard": "Request template only; no solver launch outside Root strict dispatcher",
+    "root_qn_products": "0/336 qualified"
+  }
+}
