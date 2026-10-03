@@ -1,0 +1,28 @@
+{
+  "schema": "ds02.f5.diagnostic-hypothesis-errata.v1",
+  "family_id": "F5",
+  "scope_id": "f5_swl_gauge_discretization_diagnostic_036",
+  "date": "2026-10-03",
+  "clarifications": [
+    {
+      "subject": "Thin-film swash dropout attribution on sloping bed (WG3, WG4)",
+      "prior_assertion": "Attributed high relative RMSE (0.3545 to 0.5645 H) directly to discrete SWL floor drops (-0.02 m) caused by MassLimit thresholding.",
+      "scientific_qualification": "Coincidence of discrete SWL floor drops with high RMSE is a testable scientific hypothesis, not mathematically proven root causality. Thin-film boundary layer dynamics, swash tip aerated spray, and contact line motion interact with the discrete gauge kernel.",
+      "prospective_diagnostic_cohort": "Cohort 3 (Thin-Sheet Swash Slope Probes) with conditional partitioning of continuous vs floor-clamped samples."
+    },
+    {
+      "subject": "Flat-bed 12% relative RMSE attribution (WG1, WG2)",
+      "prior_assertion": "Attributed flat-bed ~12% relative RMSE to artificial viscosity scaling (nu_art ~ alpha * h * cs) and symplectic time-step phase lag.",
+      "scientific_qualification": "Artificial viscosity dissipation and time-step drift are physically grounded explanatory hypotheses, but not proven sole causes. Wave generation paddle displacement fidelity and boundary particle reflections also contribute.",
+      "prospective_diagnostic_cohort": "Cohort 1 (Continuous Deep-Water Flat-Bed Probes) with 100% wet occupancy to isolate wave envelope damping from floor effects."
+    }
+  ],
+  "governance_and_boundary_rules": {
+    "five_percent_relative_gate_waiver": "forbidden (0.05 H = 0.02 m is inviolable)",
+    "reference_scale_relaxation": "forbidden (H = 0.4 m is inviolable)",
+    "family_disposition": "No premature halting of the entire F5 family; automated solver launches paused pending diagnostic evidence review",
+    "third_repair_boundary": "No third repair permitted for wall-gap cause",
+    "scientific_qualification_status": "not_assessed",
+    "qualification_claim": "none"
+  }
+}

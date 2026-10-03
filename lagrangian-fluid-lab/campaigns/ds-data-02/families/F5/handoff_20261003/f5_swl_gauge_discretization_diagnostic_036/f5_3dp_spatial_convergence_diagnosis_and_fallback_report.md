@@ -84,3 +84,30 @@ From the official DualSPHysics source ([`JDsGaugeItem.cpp:758-787`](file:///home
      - The WG3 relative RMSE of $\sim 0.355 - 0.364 H$ reproduces the historical 4DP spatial negative result ($0.317 - 0.350 H$), confirming that this non-convergence is a persistent property of the numerical formulation on sloping beds.
      - Scientific qualification status remains `not_assessed`, and qualification claim remains `none`.
      - Data is cataloged as candidate spatial evidence with preserved negative history, not as a qualified numerical reference.
+
+---
+
+## 4. Scientific Addendum: Hypothesis Qualification & Conditional Cohort Framework
+
+### 4.1 Distinction Between Correlation and Proven Root Causality
+The observations that (1) thin runup swash on sloping beds (WG3, WG4) coincides with discrete drops to `pos0z = -0.02 m`, and (2) artificial viscosity scaling $\nu_{\text{art}} \sim \alpha h c_s$ and Symplectic time-step reduction coincide with flat-bed (WG1, WG2) $\sim 12\%$ relative RMSE are **scientifically grounded hypotheses**, not mathematically proven sole drivers. Discrete SWL floor coincidence alone does not establish complete causal sufficiency. Contact line dynamics, free surface aerated spray, wall boundary particle density deficiency, and paddle generation harmonics interact with the Eulerian SWL gauge kernel.
+
+### 4.2 Bounded Prospective Diagnostic Framework (Conditional Cohorts)
+To rigorously evaluate these mechanisms without premature conclusions, the following conditional cohort partitions are defined:
+- **Cohort 1: Continuous Deep-Water Flat-Bed Probes (WG1, WG2)**:
+  - 100% wet occupancy throughout the entire 16.0s simulation window across all 3 resolutions.
+  - Tests the pure hydrodynamic dissipation hypothesis: evaluates wave envelope damping and spectral phase drift independent of any floor drop or dry occupancy artifacts.
+- **Cohort 2: Intermittent Wetting Front Slope Transition Probes (RunupToe, Crest)**:
+  - Probes experiencing periodic flooding and drainage (790–800 wet frames at toe, ~502 wet frames at crest).
+  - Isolates front arrival timing errors from swash depth errors.
+- **Cohort 3: Thin-Sheet Swash Slope Probes (WG3, WG4)**:
+  - Probes exhibiting thin water layers ($< 0.05\text{ m}$) where kernel mass drops below `MassLimit`.
+  - Compares continuous surface tracking against discrete floor-clamped samples to quantify the exact artifact contribution.
+
+### 4.3 Governance Rules & Boundaries
+1. **No 5% Tolerance Gate Waiver**:
+   - The relative RMSE tolerance of $0.05 H = 0.02\text{ m}$ is inviolable. No relaxed error bands are permitted.
+2. **No Premature Halting of the Entire Family**:
+   - Automated solver launches are paused pending root review of diagnostic evidence; the F5 family is NOT terminated or abandoned.
+3. **Strict Repair Boundary**:
+   - Surface-first boundary discretization was accepted as Repair 2 for wall-gap leakage; no third repair for the wall-gap cause is permissible.
