@@ -1,0 +1,109 @@
+{
+  "schema": "ds02.f5.recipe-parity-review.v1",
+  "family_id": "F5",
+  "date": "2026-10-04",
+  "scope_id": "post_native_gauge_diagnosis_next_step_v1",
+  "empirical_diagnostics_audit": {
+    "source_reports": {
+      "root_038_diagnostic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_ACTUAL_NATIVE_GAUGE_COHORT_DIAGNOSTIC_038/root-both-mechanisms-all-six-gauges-three-dp-native-diagnostic-038/native-gauge-diagnostic.json",
+      "root_038_sha256": "693b1a5583ee55578372f754c0f61e514443f0f1921a15bc6c8afff2bc109bea",
+      "telemetry_036": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F5_F6_COMPLETED_NATIVE_INTERVAL_TELEMETRY_036/root-nine-completed-F5-F6-native-interval-telemetry-036/native-interval-telemetry.json",
+      "telemetry_036_sha256": "7a9255d3b2e45efeb6fa2f6460c041df36dd812022be3b539248d33c7115a078"
+    },
+    "proven_findings": {
+      "initial_offsets": {
+        "WG3_initial_offset_m": 0.0,
+        "WG1_WG2_initial_offset_m": 1.5e-05,
+        "initial_budget_fraction_consumed": 0.00075,
+        "initial_displacement_cause_falsified": true
+      },
+      "always_wet_probes": {
+        "probes": ["WG1", "WG2"],
+        "total_samples": 800,
+        "both_above_floor_samples": 800,
+        "dry_floor_samples": 0,
+        "medium_vs_fine_runup_relative_rmse": [0.128277, 0.121031],
+        "medium_vs_fine_weir_relative_rmse": [0.120430, 0.115880],
+        "dry_floor_mitigation_sufficiency_falsified": true
+      },
+      "sloping_bed_probe": {
+        "probe": "WG3",
+        "dry_cohort_fraction_of_SSE": [0.8991, 0.9269],
+        "conditional_wet_relative_rmse": [0.051417, 0.045349]
+      },
+      "timestep_telemetry": {
+        "total_DT_min_adjustments": 0,
+        "symplectic_floor_incidence": 0.0,
+        "native_NpOut_exclusions": 0,
+        "artificial_clamp_cause_falsified": true
+      }
+    }
+  },
+  "recipe_parity_review": {
+    "dimension_1_eos_sound_speed": {
+      "proven_differences": {
+        "coarse": {"dp_m": 0.050, "hswl_m": 0.350, "cs0_m_s": 37.05941176, "b_pa": 196200.0},
+        "medium": {"dp_m": 0.025, "hswl_m": 0.375, "cs0_m_s": 38.36013515, "b_pa": 210214.28571},
+        "fine": {"dp_m": 0.010, "hswl_m": 0.390, "cs0_m_s": 39.11981615, "b_pa": 218622.85714},
+        "continuum_mother": {"dp_m": 0.0, "hswl_m": 0.400, "cs0_m_s": 39.61817765, "b_pa": 224228.57143}
+      },
+      "cause": "GenCase hswl auto='true' sets hswl = (Nz - 1)*dp = H - dp instead of continuum depth H.",
+      "untested_hypothesis": "Locking hswl=0.4m (B=224228.6 Pa) will close the 12% WG1/WG2 gap.",
+      "theoretical_falsification": "Mach number M ~ 0.05. Compressibility celerity correction is O(M^2) ~ 0.0026. A 1.98% sound speed change alters relative wave elevation by <= 0.08% (< 0.3 mm), proving EOS parity cannot bridge 12%."
+    },
+    "dimension_2_pressure_density_init": {
+      "proven_differences": "rhopgradient=3 applies hydrostatic density rho(z) = rho0*(1 + P(z)/B)^(1/gamma). Because zmax(dp) and B(dp) vary with dp, the t=0 density field is resolution-dependent.",
+      "untested_hypothesis": "Initial density variance causes transient elevation divergence.",
+      "theoretical_falsification": "Initial offsets are measured at <= 15 micrometres, proving initial hydrostatic state is in mechanical equilibrium at t=0."
+    },
+    "dimension_3_smoothing_boundary_support": {
+      "proven_differences": "coefh=1.5 yields 3D h = 1.5*sqrt(3)*dp = 2.598076*dp. Kernel support 2h scales from 0.2598m (coarse) to 0.0520m (fine). DBC repulsive boundary interaction layer changes by 5x.",
+      "untested_hypothesis": "Boundary layer thickness variation causes 12% phase/amplitude shift.",
+      "assessment": "Physical candidate: wall dissipation and effective slip vary with h."
+    },
+    "dimension_4_moving_paddle_nodes": {
+      "proven_differences": "Piston motion file piston_f91973457a049db5_regular_piston.dat is bitwise identical across all cases (sha256 8cb7dab074...). Discrete wall nodes scale from 3,128 (coarse) to 15,947 (medium) to 169,817 (fine).",
+      "untested_hypothesis": "Coarse moving node discretization generates weaker or phase-shifted wave packets.",
+      "assessment": "Piston stroke is 0.0078m (7.8mm). At dp=0.025m, the stroke is smaller than 1 particle spacing (0.31 dp). At dp=0.010m, the stroke is 0.78 dp."
+    },
+    "dimension_5_temporal_controls": {
+      "proven_differences": "All runs completed with 0 DTsMin adjustments (0 clamps). However, spatial ladder refinement coupled space and time (dt ~ h ~ dp). Median dt ranged from 6.4e-4s (coarse) to 7.4e-5s (fine). No independent CFL halfstep study at fixed dp exists.",
+      "untested_hypothesis": "Symplectic integration error contributes significantly to 12% gap.",
+      "theoretical_falsification": "Symplectic local truncation error is O(dt^2) ~ 1e-8, negligible compared to spatial discretization error O(h^2) ~ 6e-4."
+    }
+  },
+  "governing_physical_root_cause": {
+    "identification": "Insufficient small dp (spatial under-resolution of wave profile).",
+    "rationale": "Generated wave height H_wave is ~ 0.04m. At dp=0.025m, H_wave/dp = 1.6 particles. At dp=0.010m, H_wave/dp = 4.0 particles. SPH wave dynamics requires H_wave/dp >= 10 particles to resolve free surface curvature without excessive numerical dissipation from artificial viscosity."
+  },
+  "falsifiable_next_step": {
+    "candidate_experiment": "F5_EOS_PARITY_MEDIUM_FINE_039",
+    "rationale": "Test and falsify the numerical recipe hypothesis (EOS parity) under credible GPU/storage budgets before considering sub-grid resolution shifts.",
+    "prospective_xml_modification": {
+      "hswl": {"value": 0.4, "auto": false},
+      "speedsound": {"value": 39.618177, "auto": false},
+      "b": {"value": 224228.57143, "auto": false}
+    },
+    "preservation_status": {
+      "mother_continuum_fluid_bounds": true,
+      "fluid_mass_kg": 2352.0,
+      "piston_forcing": true,
+      "frozen_quality_contract": true
+    },
+    "resource_estimates": {
+      "medium_gpu_seconds": 120,
+      "medium_storage_bytes": 12025908428,
+      "fine_gpu_seconds": 10135,
+      "fine_storage_bytes": 193492576993,
+      "total_runup_gpu_hours": 2.85,
+      "total_runup_storage_gb": 191.4,
+      "total_both_mechanisms_gpu_hours": 5.70,
+      "total_both_mechanisms_storage_gb": 382.8,
+      "budget_compliance": {
+        "qualification_gpu_cap_hours": 96.0,
+        "qualification_home_floor_gib": 500.0,
+        "compliant": true
+      }
+    }
+  }
+}

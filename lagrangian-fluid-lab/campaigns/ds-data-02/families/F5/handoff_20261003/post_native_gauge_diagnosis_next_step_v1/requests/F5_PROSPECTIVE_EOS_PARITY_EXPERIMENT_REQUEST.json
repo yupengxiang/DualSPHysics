@@ -1,0 +1,52 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "case_id": "F5_EOS_PARITY_MEDIUM_FINE_039",
+  "attempt_id": "root-f5-eos-parity-medium-fine-runup-weir-039",
+  "kind": "qualification",
+  "purpose": "Prospective falsifiable experiment testing whether exact physical continuum EOS parity (hswl=0.4m, cs0=39.62 m/s, B=224228.6 Pa) resolves the 12% WG1/WG2 divergence or proves insufficient small dp; preserves continuum mother definition, bed STL, and frozen 5% budget; launch_allowed=false; root review only.",
+  "launch_allowed": false,
+  "root_review_required": true,
+  "q_n_status": "not_assessed",
+  "production_approval": "none",
+  "max_wall_seconds": 21600,
+  "estimated_gpu_seconds": 20510,
+  "estimated_peak_gpu_mib": 32768,
+  "estimated_storage_bytes": 411000000000,
+  "cpu_threads": 4,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-gpu:0",
+    "{attempt_root}/prepared_xml/case_definition",
+    "{attempt_root}/solver_output",
+    "-tmax:16",
+    "-tout:0.02"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/post_native_gauge_diagnosis_next_step_v1/F5_RECIPE_PARITY_AND_NEXT_STEP_REVIEW.md",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/post_native_gauge_diagnosis_next_step_v1/recipe_parity_review.json",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/post_native_gauge_diagnosis_next_step_v1/prospective_transformation.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_surface_matched_gauge_review_035/gauge_evaluator_v2.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_RUNUP_DP050_SURFACE_FIRST_SUPPORT_028/assets/f5_continuous_bed_profile_slope_0p280.stl",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_RUNUP_DP050_SURFACE_FIRST_SUPPORT_028/piston_f91973457a049db5_regular_piston.dat",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_ACTUAL_NATIVE_GAUGE_COHORT_DIAGNOSTIC_038/root-both-mechanisms-all-six-gauges-three-dp-native-diagnostic-038/native-gauge-diagnostic.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F5_F6_COMPLETED_NATIVE_INTERVAL_TELEMETRY_036/root-nine-completed-F5-F6-native-interval-telemetry-036/native-interval-telemetry.json"
+  ],
+  "input_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_surface_matched_gauge_review_035/gauge_evaluator_v2.py": "8f858144b52a03ef207251bd84458bb8cdd0ee5d73bf2a6799cf168a8fc8e35a",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_RUNUP_DP050_SURFACE_FIRST_SUPPORT_028/assets/f5_continuous_bed_profile_slope_0p280.stl": "93cf180ae6d5439d3ed3e2787b390d3b1268d76f0069dbdeaa10b18bf3314621",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_RUNUP_DP050_SURFACE_FIRST_SUPPORT_028/piston_f91973457a049db5_regular_piston.dat": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_ACTUAL_NATIVE_GAUGE_COHORT_DIAGNOSTIC_038/root-both-mechanisms-all-six-gauges-three-dp-native-diagnostic-038/native-gauge-diagnostic.json": "693b1a5583ee55578372f754c0f61e514443f0f1921a15bc6c8afff2bc109bea",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F5_F6_COMPLETED_NATIVE_INTERVAL_TELEMETRY_036/root-nine-completed-F5-F6-native-interval-telemetry-036/native-interval-telemetry.json": "7a9255d3b2e45efeb6fa2f6460c041df36dd812022be3b539248d33c7115a078"
+  },
+  "resource_and_budget_claims": {
+    "gpu_hours": 5.70,
+    "gpu_hours_cap": 96.0,
+    "storage_gib": 382.8,
+    "home_floor_gib": 500.0,
+    "independent_execution": false,
+    "root_pre_authorization_required": true
+  }
+}

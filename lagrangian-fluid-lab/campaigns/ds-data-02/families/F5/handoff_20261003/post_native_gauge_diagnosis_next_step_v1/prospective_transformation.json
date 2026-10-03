@@ -1,0 +1,88 @@
+{
+  "schema": "ds02.f5.prospective-transformation.v1",
+  "family_id": "F5",
+  "experiment_id": "F5_EOS_PARITY_MEDIUM_FINE_039",
+  "purpose": "Execution-only or pre-case prospective XML transformation enforcing exact continuum EOS parity across Medium and Fine resolutions.",
+  "target_cases": [
+    {
+      "mechanism": "runup",
+      "medium": {
+        "original_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_RUNUP_DP025_SURFACE_FIRST_SUPPORT_028/F5_REF_RUNUP_DP025_SURFACE_FIRST_SUPPORT_028.xml",
+        "dp_m": 0.025,
+        "original_b_pa": 210214.28571,
+        "original_cs0_m_s": 38.36013515030937,
+        "original_hswl_m": 0.375,
+        "prospective_b_pa": 224228.57143,
+        "prospective_cs0_m_s": 39.61817764612666,
+        "prospective_hswl_m": 0.4
+      },
+      "fine": {
+        "original_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024.xml",
+        "dp_m": 0.010,
+        "original_b_pa": 218622.85714,
+        "original_cs0_m_s": 39.11981615019426,
+        "original_hswl_m": 0.390,
+        "prospective_b_pa": 224228.57143,
+        "prospective_cs0_m_s": 39.61817764612666,
+        "prospective_hswl_m": 0.4
+      }
+    },
+    {
+      "mechanism": "weir",
+      "medium": {
+        "original_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_SURFACE_SPATIAL_NATIVE_INPUTS_032/root-four-spatial-native-execution-inputs-v2-032/prepared/F5_REF_WEIR_DP025_SURFACE_FIRST_SUPPORT_028/F5_REF_WEIR_DP025_SURFACE_FIRST_SUPPORT_028.xml",
+        "dp_m": 0.025,
+        "original_b_pa": 210214.28571,
+        "original_cs0_m_s": 38.36013515030937,
+        "original_hswl_m": 0.375,
+        "prospective_b_pa": 224228.57143,
+        "prospective_cs0_m_s": 39.61817764612666,
+        "prospective_hswl_m": 0.4
+      },
+      "fine": {
+        "original_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024.xml",
+        "dp_m": 0.010,
+        "original_b_pa": 218622.85714,
+        "original_cs0_m_s": 39.11981615019426,
+        "original_hswl_m": 0.390,
+        "prospective_b_pa": 224228.57143,
+        "prospective_cs0_m_s": 39.61817764612666,
+        "prospective_hswl_m": 0.4
+      }
+    }
+  ],
+  "exact_xml_diff_specification": {
+    "constantsdef_mode": {
+      "target_node": "<casedef>/<constantsdef>",
+      "original_chunk": "<hswl value=\"0\" auto=\"true\" />\n<gamma value=\"7\" />\n<speedsystem value=\"0\" auto=\"true\" />\n<coefsound value=\"20\" />\n<speedsound value=\"0\" auto=\"true\" />",
+      "replacement_chunk": "<hswl value=\"0.4\" auto=\"false\" />\n<gamma value=\"7\" />\n<speedsystem value=\"0\" auto=\"true\" />\n<coefsound value=\"20\" />\n<speedsound value=\"39.618177\" auto=\"false\" />"
+    },
+    "execution_derivative_mode": {
+      "target_node": "<execution>/<constants>",
+      "fine_original_chunk": "<b value=\"218622.85714\" units_comment=\"Pascal (Pa)\" />",
+      "fine_replacement_chunk": "<b value=\"224228.57143\" units_comment=\"Pascal (Pa)\" />",
+      "medium_original_chunk": "<b value=\"210214.28571\" units_comment=\"Pascal (Pa)\" />",
+      "medium_replacement_chunk": "<b value=\"224228.57143\" units_comment=\"Pascal (Pa)\" />"
+    }
+  },
+  "invariant_parameters": {
+    "gravity": [0.0, 0.0, -9.81],
+    "rhop0": 1000.0,
+    "gamma": 7.0,
+    "coefh": 1.5,
+    "cflnumber": 0.2,
+    "TimeMax": 16.0,
+    "TimeOut": 0.02,
+    "StepAlgorithm": 2,
+    "Kernel": 2,
+    "Visco": 0.01,
+    "DensityDT": 2,
+    "DensityDTvalue": 0.1,
+    "Shifting": 0
+  },
+  "falsification_criteria": {
+    "metric": "Pairwise normalized eta RMSE / H across 800 samples in [0.0, 15.98] s",
+    "falsification_threshold": "If WG1 and WG2 relative RMSE remains >= 0.11 (within 0.01 of original 0.12), the EOS recipe hypothesis is conclusively FALSIFIED, proving under-resolution (insufficient small dp) is the true cause.",
+    "acceptance_threshold": "Relative RMSE <= 0.05 across all 6 gauges for both mechanisms."
+  }
+}
