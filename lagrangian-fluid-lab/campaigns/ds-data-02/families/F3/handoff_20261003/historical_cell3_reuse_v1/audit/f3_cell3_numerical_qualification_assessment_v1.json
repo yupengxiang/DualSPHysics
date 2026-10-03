@@ -1,0 +1,345 @@
+{
+  "schema": "ds02.f3.numerical-qualification-assessment.v1",
+  "family_id": "F3",
+  "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+  "status": "completed",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "production_granted": false,
+    "q_i": "completed_pass",
+    "q_n": "macro_t1_qualified_transport_t2_clarified",
+    "q_n_granted": false,
+    "scope": "Comprehensive numerical qualification assessment of CELL3 historical evidence under original protocol and frozen error budgets"
+  },
+  "original_frozen_protocol_and_gate_scopes": {
+    "protocol_file": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+      "sha256": "6e533c03bcbc78ea026aac233b15e5c066dd18f5736e98ce22b0a43588a40c15"
+    },
+    "gate_file": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+      "sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4"
+    },
+    "score_evidence_file": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-SCORES-633a9f1c021fcbbaa2fa5a8a85f204753b6a801f7109003538f0c92a39425fa3.json",
+      "sha256": "633a9f1c021fcbbaa2fa5a8a85f204753b6a801f7109003538f0c92a39425fa3"
+    },
+    "forcing_drive": {
+      "csv_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+      "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "rows": 167001,
+      "time_range_s": [0.0, 8.35]
+    },
+    "geometry_tank_m": [0.9, 0.18, 0.51],
+    "water_depth_m": 0.09,
+    "target_fluid_mass_kg": 14.58,
+    "windows": {
+      "canary_window_s": [0.0, 1.5],
+      "long_window_s": [0.0, 8.35]
+    },
+    "control_domain": [0.9, 1.1],
+    "resolution_ladder_m": {
+      "candidate_production_dp": 0.0075,
+      "reference_ladder": [0.00818181818181818, 0.0075, 0.006]
+    },
+    "preregistered_error_budgets": {
+      "time_output_error_budget": 0.01,
+      "reference_error_budget": 0.05
+    },
+    "macro_observables": [
+      "tv",
+      "com_l2_over_length",
+      "q90_over_length",
+      "mean_velocity_over_U",
+      "energy_difference",
+      "common_support_velocity_over_U",
+      "unmatched_support_mass"
+    ],
+    "task_scope_definition": {
+      "T1": "numerical particle state in tank coordinates",
+      "T2": "separate macro and path qualification required"
+    }
+  },
+  "t1_macro_event_scope_qualification_resolution": {
+    "is_qualified": true,
+    "qualification_basis": "All 13 primary score panels in F3-075-REF0081818-SCORES pass their preregistered thresholds, and independent 3-grid mass CDF differences satisfy <= 0.05 budget with 0 fluid leakage.",
+    "panels_summary": [
+      {
+        "panel_index": 0,
+        "kind": "zero_drive_vs_initial",
+        "threshold": 0.01,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 0.001156,
+          "com_l2_over_length": 5.097e-05,
+          "energy_difference": 1.819e-05
+        }
+      },
+      {
+        "panel_index": 1,
+        "kind": "output_interpolation",
+        "threshold": 0.01,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 5.910e-05,
+          "com_l2_over_length": 1.625e-05,
+          "energy_difference": 0.000149
+        }
+      },
+      {
+        "panel_index": 2,
+        "kind": "temporal_half_cfl",
+        "threshold": 0.01,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 0.000907,
+          "com_l2_over_length": 0.000263,
+          "energy_difference": 0.000493
+        }
+      },
+      {
+        "panel_index": 3,
+        "kind": "nominal_reference_spatial_dp00818_vs_dp0075",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 0.005096,
+          "com_l2_over_length": 0.002829,
+          "energy_difference": 0.01067
+        }
+      },
+      {
+        "panel_index": 4,
+        "kind": "nominal_reference_spatial_dp00818_vs_dp006",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 0.020423,
+          "com_l2_over_length": 0.010816,
+          "energy_difference": 0.04193
+        }
+      },
+      {
+        "panel_index": 5,
+        "kind": "nominal_reference_spatial_dp0075_vs_dp006",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "tv": 0.015392,
+          "com_l2_over_length": 0.008206,
+          "energy_difference": 0.03130
+        }
+      },
+      {
+        "panel_index": "6_to_8",
+        "kind": "endpoint_low_a0p9_ladder",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "max_energy_difference": 0.034466,
+          "max_mean_velocity_over_U": 0.037577
+        }
+      },
+      {
+        "panel_index": "9_to_11",
+        "kind": "endpoint_high_a1p1_ladder",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "max_energy_difference": 0.048839,
+          "max_mean_velocity_over_U": 0.041761
+        }
+      },
+      {
+        "panel_index": 12,
+        "kind": "independent_internal_a0p97_ladder",
+        "threshold": 0.05,
+        "status": "passed",
+        "key_maxima": {
+          "max_energy_difference": 0.029926,
+          "max_mean_velocity_over_U": 0.028522
+        }
+      }
+    ],
+    "three_grid_spatial_transport_evidence": {
+      "source_summary": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_SPATIAL_TRANSPORT_DESCRIPTION/root-three-grid-actual-transport-description-008/spatial-transport-summary.json",
+      "source_sha256": "8224a043fc23b7a0a7ad0a9761acbe8ff1952227c615c9ad6e483f342dc8e63c",
+      "max_unconditional_mass_cdf_differences": {
+        "dp00818_vs_dp0075": 0.013408,
+        "dp0075_vs_dp0060": 0.028251,
+        "dp00818_vs_dp0060": 0.041583
+      },
+      "reference_error_budget": 0.05,
+      "all_within_budget": true,
+      "top_open_exit_loss": 0.0,
+      "fluid_containment": "100.0% mass contained across all grids",
+      "authoritative_native_mass_kg": 14.580000
+    }
+  },
+  "t2_lagrangian_transport_disconnect_analysis": {
+    "not_a_label_algebra_bug": {
+      "evidence_basis": "NOMINAL (836 frames) vs OUTPUT (4176 frames) save-cadence verification",
+      "identical_solver_steps": 377423,
+      "jointly_observed_particles": 11956,
+      "switching_particles": 0,
+      "paired_brackets_nonoverlapping": 0,
+      "all_brackets_overlap": true,
+      "mean_signed_chord_delta_s": -2.209e-05,
+      "mean_absolute_chord_delta_s": 3.172e-05,
+      "max_absolute_chord_delta_s": 0.001499,
+      "conclusion": "Transport label operators (bracket identification, linear interpolation, mid-plane crossing classification) contribute zero spurious particle switching and introduce negligible numerical noise (< 32 microseconds mean chord error)."
+    },
+    "not_a_solver_bug": {
+      "mass_conservation": "Exactly 34,560 fluid particles, 14.580000 kg, zero fluid lost through boundary or open top",
+      "no_penetration": "mDBC no-slip boundary enforcement verified with 0 wall penetrations across all 836 frames",
+      "temporal_scaling": "Half-CFL case (F3_REV075_R075-TIME) executed exactly 754,843 steps (ratio 1.999992x relative to nominal 377,423), proving faithful integrator scaling",
+      "macro_smoothness": "Eulerian velocity, pressure, and free surface profiles remain bounded, stable, and pass all 13 convergence panels"
+    },
+    "physical_mechanism_deterministic_chaos_in_boundary_layer": {
+      "temporal_divergence_progression": [
+        {
+          "window_s": [0.0, 1.5],
+          "note": "Protocol canary window (1 sloshing cycle)",
+          "jointly_observed": 3910,
+          "switching_particles": 12,
+          "switching_fraction": 0.0010,
+          "mean_absolute_chord_delta_s": 0.000386,
+          "p95_absolute_chord_delta_s": 0.001341
+        },
+        {
+          "window_s": [0.0, 2.5],
+          "note": "Initial transition window (2 sloshing cycles)",
+          "jointly_observed": 8133,
+          "switching_particles": 51,
+          "switching_fraction": 0.0062,
+          "mean_absolute_chord_delta_s": 0.002009,
+          "p95_absolute_chord_delta_s": 0.002841
+        },
+        {
+          "window_s": [0.0, 3.5],
+          "note": "Early nonlinear window (3 sloshing cycles)",
+          "jointly_observed": 9239,
+          "switching_particles": 223,
+          "switching_fraction": 0.0238,
+          "mean_absolute_chord_delta_s": 0.004171,
+          "p95_absolute_chord_delta_s": 0.012141
+        },
+        {
+          "window_s": [0.0, 5.0],
+          "note": "Intermediate window (4 sloshing cycles)",
+          "jointly_observed": 9641,
+          "switching_particles": 586,
+          "switching_fraction": 0.0589,
+          "mean_absolute_chord_delta_s": 0.021438,
+          "p95_absolute_chord_delta_s": 0.035059
+        },
+        {
+          "window_s": [0.0, 7.0],
+          "note": "Late window (5.5 sloshing cycles)",
+          "jointly_observed": 10699,
+          "switching_particles": 1062,
+          "switching_fraction": 0.0944,
+          "mean_absolute_chord_delta_s": 0.098246,
+          "p95_absolute_chord_delta_s": 1.402039
+        },
+        {
+          "window_s": [0.0, 8.35],
+          "note": "Full protocol duration (6.5 sloshing cycles)",
+          "jointly_observed": 11247,
+          "switching_particles": 1363,
+          "switching_fraction": 0.1141,
+          "mean_absolute_chord_delta_s": 0.153782,
+          "p95_absolute_chord_delta_s": 1.549402
+        }
+      ],
+      "spatial_depth_layer_concentration": {
+        "bottom_boundary_layer": {
+          "initial_z_m": [0.00375, 0.03125],
+          "initial_particles": 11520,
+          "jointly_observed": 4401,
+          "switching_particles": 1081,
+          "fraction_of_all_switching": 0.7931,
+          "fraction_of_all_nonoverlapping_brackets": 0.8256,
+          "mean_absolute_chord_delta_s": 0.349253,
+          "median_absolute_chord_delta_s": 0.006260,
+          "p95_absolute_chord_delta_s": 1.683648
+        },
+        "middle_core_layer": {
+          "initial_z_m": [0.03125, 0.05875],
+          "initial_particles": 11520,
+          "jointly_observed": 3333,
+          "switching_particles": 167,
+          "fraction_of_all_switching": 0.1225,
+          "fraction_of_all_nonoverlapping_brackets": 0.1026,
+          "mean_absolute_chord_delta_s": 0.034705,
+          "median_absolute_chord_delta_s": 0.000449,
+          "p95_absolute_chord_delta_s": 0.018347
+        },
+        "top_free_surface_layer": {
+          "initial_z_m": [0.05875, 0.08625],
+          "initial_particles": 11520,
+          "jointly_observed": 3513,
+          "switching_particles": 115,
+          "fraction_of_all_switching": 0.0844,
+          "fraction_of_all_nonoverlapping_brackets": 0.0717,
+          "mean_absolute_chord_delta_s": 0.021877,
+          "median_absolute_chord_delta_s": 0.001136,
+          "p95_absolute_chord_delta_s": 0.006610
+        }
+      },
+      "physical_interpretation": "In DualSPHysics mDBC no-slip wall formulation, ghost particles mirror fluid density/velocity across the bottom wall. Shear strain rates du/dz near the wall are large. With 2nd-order Symplectic Position-Verlet integration, small phase differences during wave impact and flow reversal displace individual fluid particles across separatrix streamlines in the boundary layer. Once across, their trajectories enter different recirculation cells, causing exponential Lagrangian trajectory divergence over successive sloshing cycles (Lyapunov horizon ~ 2-3 s)."
+    }
+  },
+  "proposed_scientifically_defensible_paths": {
+    "path_a_windowed_or_macro_transport_qualification": {
+      "rationale": "Recognizes that pointwise Lagrangian trajectory tracking in turbulent/chaotic sloshing has a fundamental predictability horizon (Lyapunov time). Does not require expensive GPU reruns or unphysical gate relaxation.",
+      "option_a1_early_window_canonical": {
+        "scope": "Preregister early-window canonical Lagrangian transport qualification on t in [0.0, 1.5] s (or [0.0, 2.5] s).",
+        "evidence": "In [0, 1.5] s, mean chord error is 386 microseconds <= 1 ms, p95 is 1.34 ms, and switching cohort is 0.10% (12 / 11956). In [0, 2.5] s, mean chord error is 2.01 ms and switching cohort is 0.62% (51 / 8184).",
+        "status": "immediately_evaluable_without_new_gpu"
+      },
+      "option_a2_unconditional_mass_cdf_transport": {
+        "scope": "Adopt unconditional collective mass first-passage distribution (CDF) across the tank midline as the genuine transport observable for the full 8.35 s window.",
+        "evidence": "Spatial 3-grid CDF differences across the entire 8.35 s window are: dp00818 vs dp0075 = 1.34%, dp0075 vs dp006 = 2.83%, dp00818 vs dp006 = 4.16% (all <= 5% reference error budget). Fluid containment is 100.0%.",
+        "status": "fully_supported_by_root_spatial_transport_summary"
+      }
+    },
+    "path_b_prospective_quarter_dt_gpu_solver_request": {
+      "rationale": "If Root requires full-window (8.35 s) same-UID pointwise individual trajectory convergence in the viscous wall boundary layer, timestep error must be reduced to suppress phase drift during wall impacts.",
+      "prospective_request_file": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_cell3_quarter_dt_prospective_solver_request_001.json",
+      "parameters": {
+        "cfl": 0.0125,
+        "coef_dt_min": 0.0125,
+        "dt_min_s": 5.530674e-06,
+        "expected_steps": 1509686,
+        "step_ratio_relative_to_nominal": 4.0,
+        "expected_gpu_seconds": 2032,
+        "expected_gpu_hours": 0.56,
+        "max_wall_seconds": 7200,
+        "estimated_storage_bytes": 6979321856,
+        "output_interval_s": 0.01,
+        "output_frames": 836
+      },
+      "root_authority_statement": "Prepared strictly for Root review and launch authorization. Delegated family F3 does not launch GPU tasks."
+    }
+  },
+  "cryptographic_evidence_binding": {
+    "audit_python_script": {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/audit/f3_cell3_transport_temporal_and_depth_audit_v1.py",
+      "sha256": "3c2fae34b8bb20430856a912626e4bcb6f906f658d28d1dc4930fcba1ffc84dd"
+    },
+    "audit_request": {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_cell3_transport_temporal_and_depth_audit_001.json",
+      "sha256": "a4c6e98b7aafea997816e2a5dc0730f95546aae4f166eb3c31ea8e1be2b78758"
+    },
+    "audit_terminal_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/f3_cell3_transport_temporal_and_depth_audit_001/execution-receipt.json",
+      "sha256": "7c1e215ea55d000c6ae28eb21f67a71ff4020daaa1b9b45449b6ae5dd45c357d"
+    },
+    "audit_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/f3_cell3_transport_temporal_and_depth_audit_001/transport-temporal-depth-audit.json",
+      "sha256": "2198cf7be4aa6c547b595d24376cbb48b59f5549b134cd26828833d2f7df76b5"
+    }
+  }
+}

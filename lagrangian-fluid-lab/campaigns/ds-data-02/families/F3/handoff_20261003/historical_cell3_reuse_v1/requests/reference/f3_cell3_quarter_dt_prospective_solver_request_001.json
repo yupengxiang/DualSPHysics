@@ -1,0 +1,60 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "family_id": "F3",
+  "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen_QUARTER_DT",
+  "attempt_id": "f3_cell3_quarter_dt_prospective_solver_001",
+  "kind": "qualification",
+  "gpu_launch": true,
+  "launch_authority": "root only through shared ds_data02_runtime_v2.py",
+  "purpose": "Prospective root-reviewed GPU solver run with 4x refined timestep (quarter-CFL) to achieve full-window pointwise Lagrangian trajectory convergence in the bottom wall boundary layer",
+  "complete_event_window_s": [
+    0.0,
+    8.35
+  ],
+  "output_interval_s": 0.01,
+  "expected_native_frames": 836,
+  "cpu_task_kind": "solver",
+  "max_wall_seconds": 7200,
+  "estimated_storage_bytes": 6979321856,
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-gpu:4",
+    "-mdbc_noslip:1",
+    "-cflnumber:0.0125",
+    "-coefdtmin:0.0125",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075",
+    "{attempt_root}/solver_output"
+  ],
+  "cwd": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.xml",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.bi4"
+  ],
+  "input_sha256": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.xml": "bd6c155b2112f0860293283def01b981c0364a1e67fbb146dd267a1dda8b58df",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.bi4": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545"
+  },
+  "timestep_and_cost_rationale": {
+    "cfl": 0.0125,
+    "coef_dt_min": 0.0125,
+    "dt_min_s": 5.530674e-06,
+    "dt_ratio_relative_to_nominal": 0.25,
+    "expected_steps": 1509686,
+    "expected_gpu_seconds": 2032,
+    "expected_gpu_hours": 0.564,
+    "particle_count_fluid": 34560,
+    "particle_count_boundary": 73440,
+    "particle_count_total": 108000,
+    "physics_rationale": "Quarter-dt reduces numerical phase drift during periodic sloshing wall reversals. 79.3% of switching particles originate in the bottom boundary layer (z0 < 0.031m); refined time-integration is required to resolve sharp shear strain gradients du/dz and prevent particles from crossing streamline separatrix boundaries."
+  },
+  "claim_boundary": {
+    "gpu_launch_by_delegate": false,
+    "production_granted": false,
+    "q_n_granted": false,
+    "training_authorized": false
+  }
+}
