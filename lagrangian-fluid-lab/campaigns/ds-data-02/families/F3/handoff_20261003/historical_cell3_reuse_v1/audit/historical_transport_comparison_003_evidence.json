@@ -1,0 +1,363 @@
+{
+  "schema": "ds02.f3.historical-cell3-transport-comparison-evidence.v1",
+  "family_id": "F3",
+  "status": "completed_comparison",
+  "created_at_utc": "2026-10-03T03:32:00+00:00",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "q_i": "completed_pass for NOMINAL, TIME, and OUTPUT direct conversions and label closures",
+    "q_n": "not_assessed",
+    "training": "not_authorized",
+    "scope": "Historical plain single-axis fixed-tank acceleration CELL3 transport comparison only; no dual-axis or baffle transfer"
+  },
+  "control_verification": {
+    "columns": 7,
+    "delimiter": ";",
+    "rows": 167001,
+    "numeric_equivalence": {
+      "nominal_vs_time_max_abs": 0.0,
+      "nominal_vs_output_max_abs": 0.0,
+      "time_vs_output_max_abs": 0.0,
+      "numeric_arrays_exact_equal": true
+    },
+    "nominal_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+    "nominal_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "time_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/CaseSloshingAccData.csv",
+    "time_sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6",
+    "output_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/CaseSloshingAccData.csv",
+    "output_sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6"
+  },
+  "cases": {
+    "NOMINAL": {
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "attempt_id": "f3_cell3_long_dp0075_nominal-direct-nvme-root-reviewed-003",
+      "direct_h5_sha256": "27bb36a538d47aaa34d54dfac9bf02fd0c727fec46931da167dee11a579aee39",
+      "direct_frames": 836,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_cell3_long_dp0075_nominal-labels-root-reviewed-001",
+      "labels_h5_sha256": "18a53b84169a5840138e4c3bfc075fd48787d924f2eb3a057ac5f7e7937f44bc",
+      "closure_attempt_id": "f3_cell3_long_dp0075_nominal-label-closure-root-reviewed-001",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "db346ee6c23bf9a5e848fb77732a3fc267926b42b938558a74e50882e751296a",
+      "closure_receipt_sha256": "ee894451cf4b9148d42c38cbda50bb7f9b8ec3f84e3a0937a85d3810d73a0e67",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/attempts/20260912T082111.942848Z-effdcd7c.complete/RunPARTs.csv",
+        "sha256": "73c2afdd3b176a5227b7c02181141c38d19dca1fc74ce154b1674b6fc9e57fd2",
+        "valid_rows": 836,
+        "parts_range": [0, 835],
+        "total_steps": 377423,
+        "steps_per_part": {
+          "min": 435,
+          "max": 453,
+          "mean": 452.0
+        },
+        "dt_min_s": 2.212269686706988e-05,
+        "dt_max_s": 2.212269686706988e-05,
+        "dt_mean_s": 2.212269686706988e-05,
+        "cfl": 0.05,
+        "time_step_range_s": [0.0, 8.350012828223477],
+        "total_sim_runtime_s": 505.06
+      },
+      "transport_observables": {
+        "fluid_particles": 34560,
+        "initial_fluid_mass_kg": 14.580000378191471,
+        "left_right_exchange": {
+          "observed_count": 11956,
+          "observed_mass_kg": 5.043937631024329,
+          "censored_count": 22604,
+          "censored_mass_kg": 9.536062747167142,
+          "mean_chord_time_s": 2.5054992797619213,
+          "first_observed_chord_s": 0.31181134298150495,
+          "first_observed_bracket_s": [0.310005, 0.320005],
+          "cumulative_net_flux_final_kg": 1.370671910815858,
+          "forward_mass_final_kg": 17.352984825399587,
+          "backward_mass_final_kg": 15.98231291458373,
+          "repeat_crossings": {
+            "exactly_one_count": 252,
+            "exactly_one_mass_kg": 0.1063125027520023,
+            "two_or_more_count": 11704,
+            "two_or_more_mass_kg": 4.937625128272327,
+            "max_crossings": 10,
+            "mean_crossings_observed": 6.609,
+            "total_crossing_events": 79017
+          }
+        },
+        "top_open_exit": {
+          "observed_count": 0,
+          "observed_mass_kg": 0.0,
+          "censored_count": 34560,
+          "censored_mass_kg": 14.580000378191471,
+          "physical_exit_inference": "forbidden from right-censoring"
+        },
+        "residence_time_s": {
+          "region_0_left": {
+            "mean_s": 4.213898745229672,
+            "mass_time_kg_s": 61.43864210943806
+          },
+          "region_1_right": {
+            "mean_s": 4.136114082993805,
+            "mass_time_kg_s": 60.30454826875341
+          }
+        },
+        "integrity_ledgers": {
+          "unknown_mass_max_kg": 0.0,
+          "numerical_loss_max_kg": 0.0,
+          "invalid_state_max_kg": 0.0
+        }
+      }
+    },
+    "TIME": {
+      "case_id": "F3_REV075_R075-TIME",
+      "attempt_id": "f3_rev075_r075-time-direct-nvme-root-reviewed-002",
+      "direct_h5_sha256": "540e2f08df0ed1c1705badca2603efbed5f12cab30df895bfe18bd9613eff590",
+      "direct_frames": 836,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_rev075_r075-time-labels-root-reviewed-003",
+      "labels_h5_sha256": "f0f6ca2cfc9685cd8f73eee2b0857067e1c916967493d40fbf37c2f8218d9821",
+      "closure_attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-003",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "37e2729b2da78de330ee972a27cb7c3ebe2e89eb3044f8150372153b8be37269",
+      "closure_receipt_sha256": "89e7c619b6dc61fd316944bb27f15a3b861badaa74743075e94c3021ab96ea20",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "prior_closures_preserved": [
+        {
+          "attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-001",
+          "reason": "argument binding TypeError; immutable inputs preserved",
+          "status": "failed"
+        },
+        {
+          "attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-002",
+          "reason": "native HDF5 schema corrected separately from report schema; cumulative net flux is signed",
+          "status": "completed_review_required"
+        }
+      ],
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_REV075_R075-TIME/attempts/20260912T182355.019059Z-56634a06.complete/RunPARTs.csv",
+        "sha256": "134dbb14bb156535f103cb17ce6e12b57454033203e609d8e137c0a09f496b90",
+        "valid_rows": 836,
+        "parts_range": [0, 835],
+        "total_steps": 754843,
+        "steps_per_part": {
+          "min": 867,
+          "max": 905,
+          "mean": 904.0
+        },
+        "dt_min_s": 1.106134843353494e-05,
+        "dt_max_s": 1.106134843353494e-05,
+        "dt_mean_s": 1.106134843353494e-05,
+        "cfl": 0.025,
+        "time_step_range_s": [0.0, 8.35000176687708],
+        "total_sim_runtime_s": 1004.82
+      },
+      "transport_observables": {
+        "fluid_particles": 34560,
+        "initial_fluid_mass_kg": 14.580000378191471,
+        "left_right_exchange": {
+          "observed_count": 11901,
+          "observed_mass_kg": 5.020734509172088,
+          "censored_count": 22659,
+          "censored_mass_kg": 9.559265869019383,
+          "mean_chord_time_s": 2.4850700139151246,
+          "first_observed_chord_s": 0.3117342898711429,
+          "first_observed_bracket_s": [0.310005, 0.320005],
+          "cumulative_net_flux_final_kg": 1.3732031608753238,
+          "forward_mass_final_kg": 17.37154732549219,
+          "backward_mass_final_kg": 15.998344164616867
+        },
+        "top_open_exit": {
+          "observed_count": 0,
+          "observed_mass_kg": 0.0,
+          "censored_count": 34560,
+          "censored_mass_kg": 14.580000378191471,
+          "physical_exit_inference": "forbidden from right-censoring"
+        },
+        "residence_time_s": {
+          "region_0_left": {
+            "mean_s": 4.214398982468305,
+            "mass_time_kg_s": 61.44593950153835
+          },
+          "region_1_right": {
+            "mean_s": 4.135602784408775,
+            "mass_time_kg_s": 60.29708919638423
+          }
+        },
+        "integrity_ledgers": {
+          "unknown_mass_max_kg": 0.0,
+          "numerical_loss_max_kg": 0.0,
+          "invalid_state_max_kg": 0.0
+        }
+      }
+    },
+    "OUTPUT": {
+      "case_id": "F3_REV075_R075-OUTPUT",
+      "attempt_id": "f3_rev075_r075-output-direct-nvme-root-reviewed-002",
+      "direct_h5_sha256": "afffa07621978ad912d02d8c1d6447b92b89daa78f2b1fa2ac1538a3b24b8c65",
+      "direct_frames": 4176,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_rev075_r075-output-labels-root-reviewed-001",
+      "labels_h5_sha256": "da60974df28c0eafb05499e4007c57e2ee08bbad9225c34475dd7d79ae3df78a",
+      "closure_attempt_id": "f3_rev075_r075-output-label-closure-root-reviewed-001",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "6119d43646218cf33ef98387c92922e271497da4eefea65fee1f99fd439a4be5",
+      "closure_receipt_sha256": "5ebe934e0ef62c825eda9e254c8efa964caa4267dace76867ffc723857025139",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_REV075_R075-OUTPUT/attempts/20260912T184204.585052Z-20e1ebe2.complete/RunPARTs.csv",
+        "sha256": "d3cc70270df14c73787e7c14d4c09b51123188069cd17a8c339e05f7254dfe59",
+        "valid_rows": 4176,
+        "parts_range": [0, 4175],
+        "total_steps": 377423,
+        "steps_per_part": {
+          "min": 73,
+          "max": 91,
+          "mean": 90.4
+        },
+        "dt_min_s": 2.212269686706988e-05,
+        "dt_max_s": 2.212269686706988e-05,
+        "dt_mean_s": 2.212269686706988e-05,
+        "cfl": 0.05,
+        "time_step_range_s": [0.0, 8.350012828223477],
+        "total_sim_runtime_s": 513.86
+      },
+      "transport_observables": {
+        "fluid_particles": 34560,
+        "initial_fluid_mass_kg": 14.580000378191471,
+        "left_right_exchange": {
+          "observed_count": 11956,
+          "observed_mass_kg": 5.043937631024329,
+          "censored_count": 22604,
+          "censored_mass_kg": 9.536062747167142,
+          "mean_chord_time_s": 2.505477439504746,
+          "first_observed_chord_s": 0.3118617874987114,
+          "first_observed_bracket_s": [0.310005, 0.312019],
+          "cumulative_net_flux_final_kg": 1.370671910815858,
+          "forward_mass_final_kg": 17.353828581628185,
+          "backward_mass_final_kg": 15.983156660812328
+        },
+        "top_open_exit": {
+          "observed_count": 0,
+          "observed_mass_kg": 0.0,
+          "censored_count": 34560,
+          "censored_mass_kg": 14.580000378191471,
+          "physical_exit_inference": "forbidden from right-censoring"
+        },
+        "residence_time_s": {
+          "region_0_left": {
+            "mean_s": 4.213900331006567,
+            "mass_time_kg_s": 61.4386652288078
+          },
+          "region_1_right": {
+            "mean_s": 4.13611250721691,
+            "mass_time_kg_s": 60.304525167098675
+          }
+        },
+        "integrity_ledgers": {
+          "unknown_mass_max_kg": 0.0,
+          "numerical_loss_max_kg": 0.0,
+          "invalid_state_max_kg": 0.0
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "nominal_vs_TIME_internal_step": {
+      "changed_parameter": "CFL / CoefDtMin: 0.05 to 0.025 (internal dt halved from 2.212270e-05 s to 1.106135e-05 s; internal steps doubled from 377,423 to 754,843)",
+      "identical_physical_fields": [
+        "geometry F3_CELL3_PLAIN",
+        "initial fluid layout 34560 particles",
+        "initial fluid mass 14.580000 kg",
+        "control array CaseSloshingAccData.csv (167001x7 exact numeric match)",
+        "simulation time window 0..8.35 s",
+        "output cadence 0.01 s (836 frames)",
+        "boundary recipe mdbc_noslip:1",
+        "viscosity treatment artificial 0.05",
+        "step algorithm symplectic"
+      ],
+      "observable_differences": {
+        "observed_particles_delta": -55,
+        "observed_mass_delta_kg": -0.023203121852241,
+        "observed_mass_relative_change": -0.004600200000000001,
+        "censored_particles_delta": 55,
+        "censored_mass_delta_kg": 0.023203121852241,
+        "mean_chord_time_delta_s": -0.0204292658467967,
+        "first_observed_chord_delta_s": -7.705311036205778e-05,
+        "cumulative_net_flux_delta_kg": 0.0025312500594658,
+        "forward_mass_delta_kg": 0.018562500092603,
+        "backward_mass_delta_kg": 0.016031250033137,
+        "residence_time_left_delta_s": 0.000500237238633,
+        "residence_time_right_delta_s": -0.00051129858503,
+        "unknown_mass_delta_kg": 0.0,
+        "numerical_loss_delta_kg": 0.0,
+        "invalid_state_delta_kg": 0.0
+      },
+      "frozen_budget_accounting": {
+        "frozen_nominal_feature_time_s": 2.559597065628371,
+        "full_2pct_budget_s": 0.05119194131256742,
+        "derived_save_or_integration_share_cap_fraction": 0.2,
+        "derived_save_or_integration_share_allocation_s": 0.010238388262513484,
+        "transport_relative_budget": 0.01,
+        "macro_relative_budget": 0.05,
+        "observed_mass_delta_within_1pct_budget": true,
+        "chord_abs_delta_s": 0.0204292658467967,
+        "chord_abs_delta_within_full_2pct_budget": true,
+        "chord_abs_delta_over_share_allocation": 1.995359489508544,
+        "share_cap_exceeded": true,
+        "accounting_conclusion": "Derived save/integration share allocation exceeded (1.995x cap); retain as an active temporal sensitivity finding requiring a finer integration reference (quarter_dt_same_save). Under registered qualification rules, share-cap exceedance is not silently converted to a Q-N pass."
+      }
+    },
+    "nominal_vs_OUTPUT_save_only": {
+      "changed_parameter": "TimeOut / output cadence: 0.01 s to 0.002 s (836 frames to 4176 frames; identical internal steps 377,423 and Dt 2.212270e-05 s)",
+      "identical_physical_fields": [
+        "internal solver step contract (both 377,423 steps, exact DtMin=DtMax=2.212270e-05 s)",
+        "control array CaseSloshingAccData.csv (167001x7 exact numeric match)",
+        "geometry F3_CELL3_PLAIN",
+        "initial fluid mass 14.580000 kg",
+        "boundary recipe mdbc_noslip:1",
+        "viscosity treatment artificial 0.05",
+        "step algorithm symplectic",
+        "CFL 0.05"
+      ],
+      "observable_differences": {
+        "observed_particles_delta": 0,
+        "observed_mass_delta_kg": 0.0,
+        "observed_mass_relative_change": 0.0,
+        "censored_particles_delta": 0,
+        "censored_mass_delta_kg": 0.0,
+        "mean_chord_time_delta_s": -2.184025717531778e-05,
+        "first_observed_chord_delta_s": 5.044451720645664e-05,
+        "first_observed_bracket_width_nominal_s": 0.010000,
+        "first_observed_bracket_width_output_s": 0.002014,
+        "bracket_width_reduction_factor": 4.965,
+        "cumulative_net_flux_delta_kg": 0.0,
+        "forward_mass_delta_kg": 0.000843756228598,
+        "backward_mass_delta_kg": 0.000843746228598,
+        "residence_time_left_delta_s": 1.5857768947833055e-06,
+        "residence_time_right_delta_s": -1.5757768947833055e-06,
+        "unknown_mass_delta_kg": 0.0,
+        "numerical_loss_delta_kg": 0.0,
+        "invalid_state_delta_kg": 0.0
+      },
+      "frozen_budget_accounting": {
+        "frozen_nominal_feature_time_s": 2.559597065628371,
+        "full_2pct_budget_s": 0.05119194131256742,
+        "derived_save_or_integration_share_allocation_s": 0.010238388262513484,
+        "chord_abs_delta_s": 2.184025717531778e-05,
+        "chord_abs_delta_within_full_2pct_budget": true,
+        "chord_abs_delta_over_share_allocation": 0.002133173361427506,
+        "share_cap_exceeded": false,
+        "accounting_conclusion": "Save cadence refinement confirms exceptional temporal operator invariance under identical internal solver integration. Chord time matches within 22 microseconds, cumulative net flux matches to 1e-8 kg, and zero particles change observed/censored classification."
+      }
+    }
+  },
+  "qualification_barriers_summary": {
+    "q_i_status": "completed_pass (all three reference cases NOMINAL, TIME, and OUTPUT have verified direct HDF5 conversions and pass 58/58 label closure checks)",
+    "q_n_status": "not_assessed (active temporal sensitivity barrier: internal dt refinement nominal_vs_TIME exceeds the 20% share-cap allocation with ratio 1.995x, requiring root-authorized finer reference quarter_dt_same_save before Q-N evaluation)",
+    "spatial_fluid_only_cohort_barrier": "Historical spatial fluid-only references R0081818 and REF-006 omit fixed boundary particle trajectories and full-typed axis metadata; while PartVTK anchor frame audits pass, they cannot be granted full-typed Q-I status or fed into unchanged full-typed readers without the proposed memory adapter.",
+    "production_status": "not_evaluated (no production scope authorized)"
+  }
+}
