@@ -1,0 +1,40 @@
+{
+  "bindings_file": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/bindings.json",
+  "bindings_sha256": "ee9a22e4e61a5445613647c3c5e89cd78a338e0589c87d37005e6653b641ffc2",
+  "candidate": "Full 12s, unconstrained free 6DOF, initial angular velocity vector [0.08, 0.12, 0.06] rad/s",
+  "errata_reference": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_existing_floating_descriptive_analysis_001/analysis-summary-errata.json",
+  "family_id": "F6",
+  "launch_allowed": false,
+  "manifest_sha256": "8bc907da375c438be13ad23b8e7d70bbccb42be75399f525bd25d51189fdb8e6",
+  "preflight_017_source": {
+    "coarse_dp025": {
+      "elapsed_s": 0.472184,
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/execution-receipt.json",
+      "returncode": 0
+    },
+    "fine_dp0125": {
+      "elapsed_s": 1.508639,
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP0125/root-angular-release-dp0125-actual-gencase-preflight-017/execution-receipt.json",
+      "returncode": 0
+    },
+    "medium_dp020": {
+      "elapsed_s": 0.610366,
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP020/root-angular-release-dp020-actual-gencase-preflight-017/execution-receipt.json",
+      "returncode": 0
+    }
+  },
+  "q_n_status": "not_assessed",
+  "recipe_id": "F6_ANGULAR_RELEASE_INITIAL_QA_001",
+  "requests": {
+    "coarse_partvtk": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP025_PARTVTK.json",
+    "coarse_qa": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP025_INITIAL_QA.json",
+    "fine_partvtk": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP0125_PARTVTK.json",
+    "fine_qa": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP0125_INITIAL_QA.json",
+    "medium_partvtk": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP020_PARTVTK.json",
+    "medium_qa": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_initial_qa_001/requests/F6_ANGULAR_RELEASE_DP020_INITIAL_QA.json"
+  },
+  "root_review_required": true,
+  "schema": "ds02.f6.angular-release-initial-qa-manifest.v1",
+  "untested_hypothesis_notice": "Prospective excitation candidate [0.08, 0.12, 0.06] rad/s is an UNTESTED HYPOTHESIS. It does not guarantee macroscopic signal, numerical convergence, or threshold satisfaction. The frozen 5% relative RMSE macro operator remains unchanged.",
+  "velocity_propagation_notice": "GenCase BI4 stores floating body angular velocity in XML, but individual particle velocities remain 0. DualSPHysics solver loads fomega at JSph.cpp:1162 and updates particle velocities vr = v_lin + omega x dist at JSphCpuSingle.cpp:1084-1086 / JSphGpu_ker.cu:2049-2051 during initialization and execution. Verifying non-zero initial particle velocities requires auditing solver Frame 0 (Part_0000.bi4)."
+}
