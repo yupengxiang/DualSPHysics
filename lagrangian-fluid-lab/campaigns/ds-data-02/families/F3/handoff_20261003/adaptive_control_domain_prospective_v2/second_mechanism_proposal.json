@@ -1,0 +1,50 @@
+{
+  "schema": "ds02.f3.second-mechanism-proposal.v2",
+  "status": "scientific_proposal_only; no_unreviewed_control_authored_or_launched",
+  "proposal_title": "Bounded Two-Axis Physical Acceleration within Plain Rectangular Tank as Distinct Second Physical Mechanism (Prospective Proposal)",
+  "mechanism_classification": {
+    "mechanism_1": "1D Longitudinal Sloshing with Pitch (nominal A=1.00, prospective A in {0.90, 0.97, 1.10})",
+    "mechanism_2_proposed": "Bounded 3D Two-Axis Physical Acceleration with Coupled Pitch-Roll (preserves plain open-top rectangular tank)",
+    "disqualified_candidate": "Internal Baffle Configuration (introduces internal solid boundaries dividing fluid domain)",
+    "amplitude_endpoint_clarification": "Control amplitude variations (A=0.90, 0.97, 1.10) scale body acceleration magnitude along the nominal axis; they are parametric variations within Mechanism 1 and are NOT counted as Mechanism 2."
+  },
+  "baffle_disqualification_rationale": {
+    "boundary_geometry": "Adding internal vertical, inclined, or perforated baffles inserts internal solid boundary particles into the tank interior, dividing the fluid domain into multiply-connected compartments.",
+    "operator_correction_and_event_crossing_legality": "Global volumetric integrals such as the fluid Center of Mass (COM, (1/M)*int(r*rho*dV)) and 1D particle coordinate quantiles (e.g., spatial coordinate distributions) remain mathematically well-defined regardless of internal baffles. However, event-crossing legality (such as passage across spatial partition chords, exit tracking, transit thresholds, and wall-normal distance operators) requires an updated internal-wall operator that accounts for internal boundary geometry and non-convex fluid trajectories. Blindly reusing the plain rectangular observation operator (f3_observation_v2.py) for event-crossing legality without an internal-wall operator update is scientifically invalid.",
+    "hydrodynamic_artifacts": "Internal walls introduce internal contact lines, wetting hysteresis, local singular shear, artificial wake turbulence, and geometric shadow zones where the plain rectangular event-crossing criteria yield non-physical artifacts. While COM and quantiles themselves are not mathematically invalid solely because of a baffle, event-crossing legality strictly requires an updated internal-wall operator."
+  },
+  "proposed_second_mechanism": {
+    "physical_concept": "Bounded two-axis physical acceleration within the exact plain 5-wall open-top rectangular container (0.9 x 0.18 x 0.51 m, depth 0.09 m). The physical fluid domain and boundary surfaces remain identical to the plain container.",
+    "kinematics_and_forcing_derivation": {
+      "linear_acceleration": "a_lin(t) = (a_x(t), a_y(t), a_z(t)), where a_x(t) provides the primary longitudinal drive, a_y(t) introduces a bounded transverse drive, and a_z(t) maintains gravitational equilibrium (-9.81 m/s^2) with vertical dynamic coupling.",
+      "angular_acceleration": "alpha(t) = (alpha_x(t), alpha_y(t), 0), coupling pitch (around Y) and roll (around X) with zero imposed yaw acceleration (alpha_z = 0).",
+      "rotation_drift_clarification": "Imposing zero yaw acceleration (alpha_z = 0) does NOT mathematically prevent all rotational drift. Because finite 3D rotations in SO(3) are non-commutative, non-holonomic kinematic coupling between roll (omega_x) and pitch (omega_y) can still induce orientation/yaw drift over extended integration windows. Any assertion that alpha_z=0 prevents all rotational drift is mathematically unjustified and has been formally removed.",
+      "zero_drive_consistency": "At t=0, a_lin(0) = (0, 0, -9.81) m/s^2, alpha(0) = (0, 0, 0) rad/s^2, initial linear and angular velocities v_lin(0)=0, omega(0)=0. The transverse component a_y(t) is modulated by a smooth C^2 envelope w(t) to prevent impulsive startup shocks.",
+      "coordinate_frame": "Tank-fixed computational coordinates; global gravity disabled in solver XML (globalgravity=0) with full gravitational vector included in CSV body forcing."
+    },
+    "solver_version_physics": {
+      "csv_parsing": "Official JDsAccInput.cpp loads 7 columns (Time, LinearAccX, LinearAccY, LinearAccZ, AngularAccX, AngularAccY, AngularAccZ) via standard delimited parsing.",
+      "native_integration": "Right-endpoint integration in JDsAccInput.cpp computes v_lin[k] and v_ang[k] natively: currvellin = vellin0 + acclin * dt; currvelang = velang0 + accang * dt.",
+      "frame_mechanics_activation_review": "In official DualSPHysics (JDsAccInput.cpp and JDsAccInput_ker.cu), rotating frame dynamics involve Euler acceleration (alpha x r), Centripetal acceleration (omega x (omega x r)), and Coriolis acceleration (2 * omega x (v_i - v_lin)). We do not claim that the angular branch turns on only for nonzero instantaneous alpha if actual velocity also activates. In frame dynamics and in solver architecture, angular inertial forces inherently couple both instantaneous angular acceleration (alpha) and accumulated angular velocity (omega); both participate in the rotating frame mechanics and must not be mischaracterized as turning on solely from instantaneous alpha without regard to angular velocity."
+    },
+    "observable_and_event_expansion": {
+      "fluid_dynamics": "Excites true 3D sloshing modes: longitudinal sloshing (f_1,0) couples nonlinearly with transverse sloshing (f_0,1), generating 3D swirling waves, diagonal wave runup, and lateral wall pressure peaks.",
+      "energy_decomposition": "Enables physical kinetic energy decomposition into longitudinal (E_kx), transverse (E_ky), and vertical (E_kz) modal components.",
+      "lagrangian_transport": "Induces 3D Lagrangian cross-mixing across the Y=0 symmetry plane, expanding transport metric coverage from quasi-2D longitudinal transport to full 3D residence and transit distributions.",
+      "free_surface_gauges": "Requires bilateral transverse surface elevation tracking along both side walls (Y = +/- 0.08m) in addition to longitudinal centerline probes."
+    },
+    "baseline_study_requirements": {
+      "resolution_ladder": "Preregistered spatial convergence study across at least 3 commensurate resolutions (e.g., dp = 0.0075, 0.006, 0.005 m).",
+      "adaptive_timestepping": "Verification of genuine adaptive CFL timestepping (CFL 0.05 vs 0.025 with CoefDtMin 0.005) ensuring zero dtmin floor clamping under multi-axis 3D velocities.",
+      "macro_window": "Full 8.35s window evaluation verifying energy, momentum, and free-surface boundary compliance within the 5% spatial budget.",
+      "operator_qualification": "Rigorous qualification of updated 3D observation operator before accepting scientific claims."
+    }
+  },
+  "governance_and_claim_boundary": {
+    "container_status": "Plain container is not yet wholly qualified (campaign status Q-N 0/336; Root Followup 032 spatial macro comparison coarse-vs-fine failed 5% budget on KE, meanV, and localV).",
+    "claim_status": "entire_proposal_prospective",
+    "production_approval": "none",
+    "q_n_status": "not_granted",
+    "execution_policy": "No new control CSVs authored or launched without formal Root pre-registration and review."
+  }
+}

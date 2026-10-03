@@ -1,0 +1,231 @@
+{
+  "schema": "ds02.f3.adaptive-control-domain-prospective.v2",
+  "role": "prospective_control_domain_staging",
+  "authority": "Root Followup 036 continuation under F3 ownership in ds-data-02-f6 isolated worktree; Gemini 3.8 Flash High authorized; overrides legacy Luna metadata",
+  "protocol": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+  "protocol_sha256": "6e533c03bcbc78ea026aac233b15e5c066dd18f5736e98ce22b0a43588a40c15",
+  "historical_macro_evidence_audit": {
+    "root_request": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_registered_adaptive_spatial_macro_032/request.json",
+    "root_attempt_dir": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_REGISTERED_ACTUAL_ADAPTIVE_SPATIAL_MACRO/root-cell3-registered-adaptive-full836-three-dp-spatial-macro-032",
+    "comparison_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_REGISTERED_ACTUAL_ADAPTIVE_SPATIAL_MACRO/root-cell3-registered-adaptive-full836-three-dp-spatial-macro-032/spatial-macro-comparison.json",
+    "spatial_ladder_dp_m": [0.010, 0.0075, 0.006],
+    "frozen_spatial_budget": 0.05,
+    "metrics_verdict": {
+      "coarse_vs_medium (0.010 vs 0.0075)": {
+        "status": "passed_within_budget",
+        "maximum_deviation": 0.034487,
+        "governing_metric": "mean_velocity_over_U",
+        "energy_difference": 0.031775
+      },
+      "medium_vs_fine (0.0075 vs 0.0060)": {
+        "status": "passed_within_budget",
+        "maximum_deviation": 0.031241,
+        "governing_metric": "energy_difference",
+        "mean_velocity_over_U": 0.028642
+      },
+      "coarse_vs_fine (0.010 vs 0.0060)": {
+        "status": "FAILED_budget_exceeded",
+        "energy_difference_maximum": 0.062779,
+        "mean_velocity_over_U_maximum": 0.062644,
+        "common_support_velocity_maximum": 0.060270
+      }
+    },
+    "q_n_status": "not_granted",
+    "production_approval": "none",
+    "negative_evidence_retained": "Spatial budget exceeded on coarse-vs-fine (6.28% KE, 6.26% meanV, 6.03% common support velocity); plain container remains uncertified and proposal is strictly prospective."
+  },
+  "commensurate_reference_anchor_dp005": {
+    "case_id": "F3_CELL3_LONG_DP005_ADAPTIVE_CFL05_COEF005",
+    "actual_gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP005_ADAPTIVE_CFL05_COEF005/root-cell3-dp005-additional-adaptive-actual-gencase-033/execution-receipt.json",
+    "actual_initial_qa_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP005_ADAPTIVE_CFL05_COEF005/root-cell3-dp005-additional-official-native-initial-qa-034/native-initial-qa.json",
+    "nominal_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP005_ADAPTIVE_CFL05_COEF005/root-cell3-dp005-additional-adaptive-full836-native-035/execution-receipt.json",
+    "actual_initial_particles": {
+      "total": 277272,
+      "fluid": 116640,
+      "fixed": 160632,
+      "fluid_mass_sum_kg": 14.580001166400006,
+      "continuous_reference_mass_kg": 14.58
+    },
+    "status": "Actual Gen033 and QA034 particle proof established; nominal solver 035 almost done (telemetry in 036). Prospective scaled endpoints (A=0.90, 0.97, 1.10) remain pending Root dispatch; future endpoint native proof is strictly NOT fabricated."
+  },
+  "prospective_control_domain": {
+    "spatial_resolutions": {
+      "candidate_dp_m": 0.006,
+      "reference_dp_m": 0.005
+    },
+    "amplitude_specification": {
+      "nominal_anchor": 1.00,
+      "endpoint_low": 0.90,
+      "independent_internal": 0.97,
+      "endpoint_high": 1.10,
+      "dp_independence": "Physical binding amplitude values are strictly DP-independent; identical control multipliers apply to candidate and reference grids without tuning."
+    },
+    "zero_drive_relation": {
+      "formula": "a_lin = g + A * (a_nom - g), alpha = A * alpha_nom",
+      "gravity_vector_m_s2": [0.0, 0.0, -9.81],
+      "nominal_zero_drive": "linear=(0,0,-9.81), angular=(0,0,0), globalgravity=0"
+    },
+    "source_forcing_provenance": {
+      "pinned_nominal_csv_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "window_s": [0.0, 8.35],
+      "rows": 167001,
+      "stdlib_transformer": "transform_forcing.py",
+      "materialization_policy": "Do NOT materialize CSV arrays in git repository; transformer provided for future guarded control-copy upon Root authorization."
+    },
+    "solver_kinematics_and_frame_mechanics": {
+      "velocity_integration": "Zero initial velocity; right endpoint integration in JDsAccInput.cpp (currvellin = vellin0 + acclin * dt; currvelang = velang0 + accang * dt) followed by linear interpolation.",
+      "frame_physics": "GPU Coriolis, Euler, and centrifugal acceleration branches in JDsAccInput_ker.cu are executed natively per component without rigid-pose frame overrides.",
+      "activation_condition_review": "Do not claim angular branch turns on only for nonzero instantaneous alpha if actual velocity also activates. Both acceleration and velocity terms participate in rotating frame mechanics.",
+      "rotation_drift_removal": "Removed mathematically unjustified assertion that alpha_z = 0 prevents all rotational drift (SO(3) non-commutative kinematics).",
+      "official_source_hashes": {
+        "JDsAccInput.cpp": "eb3c0f4e6208180d3e6a6ae593cc4274a174c34b013d23cf06caa3cecc0c2f5c",
+        "JDsAccInput_ker.cu": "ab873de4415d7bfae403666a4b08b425222856989da8093f7cc3157f201b865a"
+      }
+    }
+  },
+  "continuum_and_discrete_geometry": {
+    "tank_dimensions_m": [0.9, 0.18, 0.51],
+    "water_depth_m": 0.09,
+    "continuum_fluid_mass_kg": 14.58,
+    "candidate_dp006": {
+      "dp_m": 0.006,
+      "pointref_m": [0.003, 0.003, 0.003],
+      "grid_cells": [150, 30, 15],
+      "predicted_fluid_particles": 67500,
+      "predicted_boundary_particles": 111708,
+      "predicted_total_particles": 179208,
+      "discrete_volume_m3": 0.01458,
+      "volume_truncation": 0.0
+    },
+    "reference_dp005": {
+      "dp_m": 0.005,
+      "pointref_m": [0.0025, 0.0025, 0.0025],
+      "grid_cells": [180, 36, 18],
+      "actual_anchor_fluid_particles": 116640,
+      "actual_anchor_boundary_particles": 160632,
+      "actual_anchor_total_particles": 277272,
+      "discrete_volume_m3": 0.01458,
+      "volume_truncation": 0.0
+    },
+    "anchor_volume_policy": "New case IDs and traced parent studies do NOT claim Root case ID legacy anchor volume has changed. Physical mother geometry (0.9x0.18x0.51m) and water depth (0.09m) remain completely unchanged.",
+    "prediction_boundary": "Actual particle counts, B, h, and native particle mass for prospective scaled endpoints remain pending Root GenCase execution."
+  },
+  "numerical_recipe": {
+    "cfl": 0.05,
+    "coef_dt_min": 0.005,
+    "cfl_to_dtmin_decoupling_ratio": 10.0,
+    "step_algorithm": 2,
+    "step_algorithm_name": "Symplectic",
+    "kernel": 2,
+    "kernel_name": "Wendland",
+    "visco_treatment": 1,
+    "visco": 0.05,
+    "visco_bound_factor": 1.0,
+    "density_dt": 3,
+    "density_dt_name": "Fourtakas (full)",
+    "density_dt_value": 0.1,
+    "shifting": 0,
+    "time_out_s": 0.01,
+    "time_max_s": 8.35,
+    "expected_frames": 836,
+    "no_penetration": 1,
+    "boundary": 2,
+    "slip_mode": 2,
+    "solver_cli": "-mdbc_noslip:1",
+    "EOS_policy": "Preserve official GenCase AutomaticEOS (hswl auto=true, speedsystem auto=true, speedsound auto=true). No freezing or hardcoding of EOS constants derived from other resolutions."
+  },
+  "staged_prospective_cases": [
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A0P90_ADAPTIVE_CFL05_COEF005",
+      "resolution": "candidate",
+      "dp_m": 0.006,
+      "amplitude": 0.90,
+      "role": "endpoint_low",
+      "definition": "definitions/F3_CELL3_LONG_DP006_A0P90_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp006_a0p90_request.json",
+      "solver_request": "requests/solver_gpu_dp006_a0p90_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A0P97_ADAPTIVE_CFL05_COEF005",
+      "resolution": "candidate",
+      "dp_m": 0.006,
+      "amplitude": 0.97,
+      "role": "independent_internal",
+      "definition": "definitions/F3_CELL3_LONG_DP006_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp006_a0p97_request.json",
+      "solver_request": "requests/solver_gpu_dp006_a0p97_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A1P10_ADAPTIVE_CFL05_COEF005",
+      "resolution": "candidate",
+      "dp_m": 0.006,
+      "amplitude": 1.10,
+      "role": "endpoint_high",
+      "definition": "definitions/F3_CELL3_LONG_DP006_A1P10_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp006_a1p10_request.json",
+      "solver_request": "requests/solver_gpu_dp006_a1p10_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A0P90_ADAPTIVE_CFL05_COEF005",
+      "resolution": "reference",
+      "dp_m": 0.005,
+      "amplitude": 0.90,
+      "role": "endpoint_low",
+      "definition": "definitions/F3_CELL3_LONG_DP005_A0P90_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp005_a0p90_request.json",
+      "solver_request": "requests/solver_gpu_dp005_a0p90_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005",
+      "resolution": "reference",
+      "dp_m": 0.005,
+      "amplitude": 0.97,
+      "role": "independent_internal",
+      "definition": "definitions/F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp005_a0p97_request.json",
+      "solver_request": "requests/solver_gpu_dp005_a0p97_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A1P10_ADAPTIVE_CFL05_COEF005",
+      "resolution": "reference",
+      "dp_m": 0.005,
+      "amplitude": 1.10,
+      "role": "endpoint_high",
+      "definition": "definitions/F3_CELL3_LONG_DP005_A1P10_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "gencase_request": "requests/gencase_cpu_dp005_a1p10_request.json",
+      "solver_request": "requests/solver_gpu_dp005_a1p10_request.json",
+      "launch_allowed": false,
+      "actual_counts_pending": true,
+      "actual_hashes_pending": true
+    }
+  ],
+  "lagrangian_transport_evidence_retention": {
+    "prior_negative_evidence": "Genuine adaptive paired transport comparison (root-cell3-genuine-adaptive-paired-transport-v3-016) demonstrated 1388 fate switches (12.38% switching fraction at 8.35s) under CFL halving.",
+    "scientific_integrity": "Ill-posedness of UID trajectory tracking across discretizations is retained without erasure or re-interpretation. No artificial CDF gate or chaos band is fabricated.",
+    "policy": "Transport metrics remain descriptive observables; discrete UID pairing across DP is strictly prohibited."
+  },
+  "second_mechanism_proposal_reference": "second_mechanism_proposal.json",
+  "claim_boundaries": {
+    "container_status": "plain_container_not_yet_wholly_qualified",
+    "domain_status": "prospective",
+    "production_approval": "none",
+    "q_n_status": "not_granted",
+    "launch_allowed": false,
+    "review_status": "pending_root_authorization"
+  }
+}
