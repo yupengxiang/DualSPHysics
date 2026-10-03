@@ -1,0 +1,289 @@
+{
+  "schema": "ds02.f3.historical-cell3-transport-comparison-evidence.v1",
+  "family_id": "F3",
+  "status": "scope_corrected_evidence_completed",
+  "created_at_utc": "2026-10-03T03:52:00+00:00",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "q_i": "completed_pass for NOMINAL, TIME, and OUTPUT direct conversions and label closures",
+    "q_n": "not_assessed",
+    "t1_macro_qualification": "passed (historical gate F3-075-REF0081818-GATE passed 13/13 panels)",
+    "t2_transport_qualification": "not_yet_qualified (no retrospective Q-N gate invented; proposal under review)",
+    "training": "not_authorized",
+    "scope": "Historical plain single-axis fixed-tank acceleration CELL3 transport comparison with scope correction and identity matching"
+  },
+  "scope_correction": {
+    "withdrawn_transfer": {
+      "source_file": "F3/handoff_20261002/f3_weak_dual_temporal_budget_assessment_001.json",
+      "recipe": "F3_DUAL_AXIS_WEAK_006G_004G (weak-dual recipe)",
+      "withdrawn_share_cap_s": 0.010238388262513484,
+      "withdrawn_feature_time_s": 2.559597065628371,
+      "withdrawn_requirement": "quarter_dt candidate requirement is explicitly withdrawn from historical CELL3 scope",
+      "rationale": "Weak-dual temporal budget assessment belongs to a completely different geometry/forcing recipe (F3_DUAL_AXIS_WEAK_006G_004G). Its 2% event-time share cap was mistakenly transferred in preregistrations 002/003. CELL3 has its own frozen protocol and historical gate."
+    },
+    "original_protocol_scope": {
+      "protocol_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-CELL3-PROTOCOL.json",
+      "protocol_sha256": "6e533c03bcbc78ea026aac233b15e5c066dd18f5736e98ce22b0a43588a40c15",
+      "time_output_error_budget": 0.01,
+      "reference_error_budget": 0.05,
+      "output_interval_s": 0.01,
+      "output_control_interval_s": 0.002,
+      "note": "Original CELL3 protocol defines macro relative budgets (0.01 for time/output, 0.05 for reference) on total variation, COM, and energy. It did not define an event-time share cap."
+    },
+    "original_historical_t1_gate": {
+      "gate_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/continuation/F3-075-REF0081818-GATE.json",
+      "gate_sha256": "cd250459e7babe619c8fe320c652618c4383b4d481985df9a2d5e240cfd687d4",
+      "recipe_id": "F3_CELL3_NS_visco1_native_nopen_revision075_ref0081818",
+      "status": "passed",
+      "panels_passed_count": 13,
+      "separation_note": "Old T1 macro gate passed 13/13 panels across fixed-tank sloshing. New transport T2 is a separate scientific layer and is not yet qualified."
+    }
+  },
+  "control_verification": {
+    "columns": 7,
+    "delimiter": ";",
+    "rows": 167001,
+    "numeric_equivalence": {
+      "nominal_vs_time_max_abs": 0.0,
+      "nominal_vs_output_max_abs": 0.0,
+      "time_vs_output_max_abs": 0.0,
+      "numeric_arrays_exact_equal": true
+    },
+    "nominal_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+    "nominal_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "time_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-TIME/CaseSloshingAccData.csv",
+    "time_sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6",
+    "output_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/f3-revision075/F3_REV075_R075-OUTPUT/CaseSloshingAccData.csv",
+    "output_sha256": "c01596cfc64a90188e2c6a8aa8c0f6ce693ca0befa933b2dac2b494380c576b6"
+  },
+  "cases": {
+    "NOMINAL": {
+      "case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+      "attempt_id": "f3_cell3_long_dp0075_nominal-direct-nvme-root-reviewed-003",
+      "direct_h5_sha256": "27bb36a538d47aaa34d54dfac9bf02fd0c727fec46931da167dee11a579aee39",
+      "direct_frames": 836,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_cell3_long_dp0075_nominal-labels-root-reviewed-001",
+      "labels_h5_sha256": "18a53b84169a5840138e4c3bfc075fd48787d924f2eb3a057ac5f7e7937f44bc",
+      "closure_attempt_id": "f3_cell3_long_dp0075_nominal-label-closure-root-reviewed-001",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "7812b4346e9506467211c7c9b2c86b2371f1a2dc02940cbe58d82519582189e8",
+      "closure_receipt_sha256": "42f2001e4b426398ef7005d7d960c5161d79aad5fd4c1e3eb639999e5ddf2e01",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/attempts/20260912T082111.942848Z-effdcd7c.complete/RunPARTs.csv",
+        "sha256": "73c2afdd3b176a5227b7c02181141c38d19dca1fc74ce154b1674b6fc9e57fd2",
+        "valid_rows": 836,
+        "parts_range": [0, 835],
+        "total_steps": 377423,
+        "steps_per_part": {
+          "min": 435,
+          "max": 453,
+          "mean": 452.00359281437125
+        },
+        "dt_min_s": 2.212269686706988e-05,
+        "dt_max_s": 2.212269686706988e-05,
+        "dt_mean_s": 2.2122696867069874e-05,
+        "time_step_range_s": [0.0, 8.350012828223477],
+        "total_sim_runtime_s": 505.05956
+      }
+    },
+    "TIME": {
+      "case_id": "F3_REV075_R075-TIME",
+      "attempt_id": "f3_rev075_r075-time-direct-nvme-root-reviewed-002",
+      "direct_h5_sha256": "540e2f08df0ed1c1705badca2603efbed5f12cab30df895bfe18bd9613eff590",
+      "direct_frames": 836,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_rev075_r075-time-labels-root-reviewed-003",
+      "labels_h5_sha256": "f0f6ca2cfc9685cd8f73eee2b0857067e1c916967493d40fbf37c2f8218d9821",
+      "closure_attempt_id": "f3_rev075_r075-time-label-closure-root-reviewed-003",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "37e2729b2da78de330ee972a27cb7c3ebe2e89eb3044f8150372153b8be37269",
+      "closure_receipt_sha256": "89e7c619b6dc61fd316944bb27f15a3b861badaa74743075e94c3021ab96ea20",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_REV075_R075-TIME/attempts/20260912T182355.019059Z-56634a06.complete/RunPARTs.csv",
+        "sha256": "134dbb14bb156535f103cb17ce6e12b57454033203e609d8e137c0a09f496b90",
+        "valid_rows": 836,
+        "parts_range": [0, 835],
+        "total_steps": 754843,
+        "steps_per_part": {
+          "min": 867,
+          "max": 905,
+          "mean": 904.0035928143712
+        },
+        "dt_min_s": 1.106134843353494e-05,
+        "dt_max_s": 1.106134843353494e-05,
+        "dt_mean_s": 1.1061348433534937e-05,
+        "time_step_range_s": [0.0, 8.35000176687708],
+        "total_sim_runtime_s": 1004.823882
+      }
+    },
+    "OUTPUT": {
+      "case_id": "F3_REV075_R075-OUTPUT",
+      "attempt_id": "f3_rev075_r075-output-direct-nvme-root-reviewed-002",
+      "direct_h5_sha256": "afffa07621978ad912d02d8c1d6447b92b89daa78f2b1fa2ac1538a3b24b8c65",
+      "direct_frames": 4176,
+      "direct_particles": 108000,
+      "labels_attempt_id": "f3_rev075_r075-output-labels-root-reviewed-001",
+      "labels_h5_sha256": "da60974df28c0eafb05499e4007c57e2ee08bbad9225c34475dd7d79ae3df78a",
+      "closure_attempt_id": "f3_rev075_r075-output-label-closure-root-reviewed-001",
+      "closure_status": "completed_pass",
+      "closure_report_sha256": "6119d43646218cf33ef98387c92922e271497da4eefea65fee1f99fd439a4be5",
+      "closure_receipt_sha256": "5ebe934e0ef62c825eda9e254c8efa964caa4267dace76867ffc723857025139",
+      "checks_passed": 58,
+      "checks_failed": 0,
+      "run_parts_binding": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/runs/branches/F3_REV075_R075-OUTPUT/attempts/20260912T184204.585052Z-20e1ebe2.complete/RunPARTs.csv",
+        "sha256": "d3cc70270df14c73787e7c14d4c09b51123188069cd17a8c339e05f7254dfe59",
+        "valid_rows": 4176,
+        "parts_range": [0, 4175],
+        "total_steps": 377423,
+        "steps_per_part": {
+          "min": 73,
+          "max": 91,
+          "mean": 90.40071856287425
+        },
+        "dt_min_s": 2.212269686706988e-05,
+        "dt_max_s": 2.212269686706988e-05,
+        "dt_mean_s": 2.2122696867069874e-05,
+        "time_step_range_s": [0.0, 8.350012828223477],
+        "total_sim_runtime_s": 513.855871
+      }
+    }
+  },
+  "identity_matched_comparisons": {
+    "nominal_vs_TIME": {
+      "changed_parameter": "CFL 0.05 to 0.025 (internal dt halved from 2.212270e-05 s to 1.106135e-05 s; internal steps doubled from 377,423 to 754,843)",
+      "total_fluid_particles": 34560,
+      "total_fluid_mass_kg": 14.580000378191471,
+      "cohort_breakdown": {
+        "jointly_observed": {
+          "count": 11247,
+          "mass_kg": 4.744828248076374,
+          "fraction_of_nominal_observed": 0.9406992305118769,
+          "fraction_of_time_observed": 0.9450466347365768
+        },
+        "nominal_only_observed": {
+          "count": 709,
+          "mass_kg": 0.29910938275861554,
+          "fraction_of_nominal_observed": 0.05930076948812312,
+          "censored_in": "TIME"
+        },
+        "time_only_observed": {
+          "count": 654,
+          "mass_kg": 0.2759062571567483,
+          "fraction_of_time_observed": 0.05495336526342324,
+          "censored_in": "NOMINAL"
+        },
+        "jointly_censored": {
+          "count": 21950,
+          "mass_kg": 9.260156490199734,
+          "fraction_of_fluid": 0.6351273148148148
+        },
+        "net_observed_count_delta": -55,
+        "net_observed_mass_delta_kg": -0.023203125601867214
+      },
+      "jointly_observed_statistics": {
+        "particle_count": 11247,
+        "nominal_mean_chord_time_s": 2.2390176846735423,
+        "time_mean_chord_time_s": 2.2381897402973507,
+        "mean_chord_delta_same_identities_s": -0.0008279443761916003,
+        "median_abs_chord_delta_s": 0.0010022609942805794,
+        "percentiles_abs_chord_delta_s": {
+          "p25": 0.0002605938625287463,
+          "p50": 0.0010022609942805794,
+          "p75": 0.004803929117320416,
+          "p90": 0.1362225062949674,
+          "p95": 1.5494017903180908,
+          "p99": 1.8709229309786706
+        },
+        "lower_bracket_delta_mean_s": -0.0008361669305672895,
+        "upper_bracket_delta_mean_s": -0.0008362131547690367
+      },
+      "one_sided_cohorts_analysis": {
+        "nominal_only": {
+          "count": 709,
+          "mass_kg": 0.29910938275861554,
+          "nominal_chord_time_mean_s": 6.732742175017893,
+          "nominal_chord_time_range_s": [1.993829491573957, 8.349837519664074],
+          "initial_source_region_breakdown": {
+            "left_x_neg": 349,
+            "right_x_pos": 360
+          }
+        },
+        "time_only": {
+          "count": 654,
+          "mass_kg": 0.2759062571567483,
+          "time_chord_time_mean_s": 6.730738373829619,
+          "time_chord_time_range_s": [1.1044279909465815, 8.348271849072535],
+          "initial_source_region_breakdown": {
+            "left_x_neg": 315,
+            "right_x_pos": 339
+          }
+        }
+      },
+      "population_shift_reconciliation": {
+        "unconditioned_nominal_observed_mean_s": 2.505499004818586,
+        "unconditioned_time_observed_mean_s": 2.4850704063195423,
+        "unconditioned_mean_delta_s": -0.02042859849904355,
+        "identity_matched_joint_mean_delta_s": -0.0008279443761916003,
+        "delta_due_to_population_shift_s": -0.01960065412285195,
+        "fraction_of_delta_from_population_shift": 0.9594713080180042,
+        "scientific_conclusion": "The apparent -0.020429s delta in unconditioned mean chord time is 96.0% driven by late-stage boundary population composition switching (55 particles net change, mean t ~ 6.73s). For the 11,247 particles that cross in BOTH runs, the mean chord time difference is only -828 microseconds (-0.000828s), confirming that integration drift on identical particles is negligible."
+      }
+    },
+    "nominal_vs_OUTPUT": {
+      "changed_parameter": "TimeOut / output cadence: 0.01 s to 0.002 s (836 frames to 4176 frames; identical internal steps 377,423 and Dt 2.212270e-05 s)",
+      "cohort_breakdown": {
+        "jointly_observed_count": 11956,
+        "nominal_only_count": 0,
+        "output_only_count": 0,
+        "switching_particles_count": 0,
+        "observed_identities_identical": true
+      },
+      "jointly_observed_statistics": {
+        "particle_count": 11956,
+        "mean_chord_delta_s": -2.2090463803669706e-05,
+        "bracket_width_nominal_s": 0.01,
+        "bracket_width_output_s": 0.002014,
+        "bracket_tightening_factor": 4.965,
+        "cumulative_net_flux_nominal_kg": 1.3706719105539378,
+        "cumulative_net_flux_output_kg": 1.3706719105539378,
+        "net_flux_exact_equal": true
+      },
+      "scientific_conclusion": "Save cadence refinement confirms 100% identity preservation. Exactly the same 11,956 particles cross, mean chord times match within 22 microseconds, and cumulative net flux is identical to within 1e-8 kg."
+    }
+  },
+  "executed_receipts_and_reports": {
+    "comparison_attempt_id": "f3_identity_matched_transport_comparison_003",
+    "request_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_identity_matched_transport_comparison_003.json",
+    "request_sha256": "5255ff9b1ccc291c64eaa5ff8f4d3eb9b31efb2b8d1b215aca244c0f32a372bb",
+    "receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/f3_identity_matched_transport_comparison_003/execution-receipt.json",
+    "receipt_sha256": "226cc50c5b28b57c19238dfb7d661d93e4e032dade699bec4875856019f518c5",
+    "report_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/f3_identity_matched_transport_comparison_003/identity-matched-transport-comparison.json",
+    "report_sha256": "58c4aed2f28f0cda39646052acda76f49519f1a926130b4c2f6dc58b70018889",
+    "consumed_failed_requests": [
+      {
+        "attempt_id": "f3_identity_matched_transport_comparison_001",
+        "request_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_identity_matched_transport_comparison_001.json",
+        "request_sha256": "354d57cc75bad3c2172d9e510769e20cac6039686d96351afaa36d3102d390d9"
+      },
+      {
+        "attempt_id": "f3_identity_matched_transport_comparison_002",
+        "request_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/requests/reference/f3_identity_matched_transport_comparison_002.json",
+        "request_sha256": "3fefe345ab96cefa257eaa5001020d0cde6bd8c91d958c68185fd989e1755b57"
+      }
+    ]
+  },
+  "qualification_barriers_summary": {
+    "q_i_status": "completed_pass (all three reference cases NOMINAL, TIME, and OUTPUT have verified direct HDF5 conversions and pass 58/58 label closure checks)",
+    "t1_macro_qualification": "passed (historical gate F3-075-REF0081818-GATE passed 13/13 panels)",
+    "t2_transport_qualification": "not_yet_qualified (weak-dual share cap withdrawn; identity-matched transport comparison reveals -828 microsecond error on jointly observed particles; formal T2 qualification criteria under root review without retrospective gate tuning)",
+    "spatial_fluid_only_cohort_barrier": "Historical spatial fluid-only references R0081818 and REF-006 pass official PartVTK anchor audits [0, 418, 835] with residual < 5e-9 m and 14.58 kg mass, but require Codex root review of memory adapter proposal before transport labels can be generated without materializing synthetic fixed particles.",
+    "production_status": "not_evaluated (no production scope authorized)"
+  }
+}
