@@ -1,0 +1,27 @@
+{
+  "schema": "ds02.root.angular-mass-semantic-review.v1",
+  "source_commit": "c09949ce",
+  "decision": "Actual semantic initial audit only. Preserve root019 failed mass-match reports; no solver or Q-N acceptance until semantic audit actually completes.",
+  "source_checked": "Baseline JSph.cpp1138 loads massbody to fobj.mass;1139 loads XMLmasspart to fobj.massp;1162loadsomega;2593dividesforce bymassbody;rotationalforce/inertiaini used.",
+  "owner_corrections": [
+    "Mbody/N is a derived uniform physical inertia quadrature weight, NOT actual solver fobj.massp (XMLmasspart). Actual CSV weights remain256kg.",
+    "One-resolution derived inertia within5% is diagnostic, not demonstrated convergence.",
+    "Rigid update kernel source is not proof of frame-zero omega propagation. Actual future saved FloatingInfo/BI4 still required."
+  ],
+  "source_files": [
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/coarse-actual-gencase-adapter.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/fine-actual-gencase-adapter.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/adapters/medium-actual-gencase-adapter.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/bindings.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/manifest.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP0125_SEMANTIC_AUDIT_REQUEST.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP0125_SOLVER_GPU_REQUEST.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP020_SEMANTIC_AUDIT_REQUEST.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP020_SOLVER_GPU_REQUEST.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP025_SEMANTIC_AUDIT_REQUEST.json",
+    "lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_native_semantic_audit_002/requests/F6_ANGULAR_RELEASE_DP025_SOLVER_GPU_REQUEST.json",
+    "lagrangian-fluid-lab/scripts/ds_data02_f6_native_actual_initial_semantic_audit_v2.py"
+  ],
+  "at_utc": "2026-10-03T09:40:06.479926+00:00",
+  "owner_request_stale_preparation_manifest": "Owner requests pin SHA7ec36a33... but committed final manifest c09949ce actual3effc021...; original prepared requests preserved, no runtime launched from them. Root fresh requests bind committed final manifest exact bytes; record this preparation mismatch rather than silently assuming originalhash passes."
+}
