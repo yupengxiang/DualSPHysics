@@ -1,0 +1,116 @@
+{
+  "schema": "ds-data-02.f2.dense-full4001-event-validation-sidecar.v1",
+  "family_id": "F2",
+  "case_id": "F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001",
+  "base_case_id": "F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001",
+  "created_at": "2026-10-03T21:45:00+08:00",
+  "author": "F2 Family Delegated Owner (gemini-3.8-flash-high, high effort)",
+  "solver_execution": {
+    "attempt_id": "root-offset-fine-effective-dense-save001-full4-native-018",
+    "receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-effective-dense-save001-full4-native-018/execution-receipt.json",
+    "receipt_sha256": "b4fd368774eb0ed908bfe3f484af4a4e956ec1c45f5c6f7def223cd0caddd511",
+    "run_out_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-effective-dense-save001-full4-native-018/solver_output/Run.out",
+    "run_out_sha256": "20cdefd40f7f734984bcd564f6b30f14873e98486d7bef0d1d68558067e3cdd6",
+    "elapsed_wall_seconds": 1559.78,
+    "returncode": 0,
+    "device": "GPU 2",
+    "total_frames": 4001,
+    "raw_bi4_bytes": 293291672691,
+    "cli_tout_override_s": 0.001,
+    "xml_nominal_time_out_s": 0.01,
+    "notes": "Immutable original XML TimeOut .01 and actual CLI .001 both retained; execution receipt binds CLI override without in-place mutation of source XML."
+  },
+  "conversion_execution": {
+    "attempt_id": "root-offset-fine-dense-full4001-typed-nvme-conversion-020",
+    "root_review_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_actual_fine_dense_conversion_020/review.json",
+    "root_review_sha256": "43391029b1acfc5f7529e5200085a4bd6992d57f8ba77e8cc48265260825ce7f",
+    "root_owner_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_actual_fine_dense_conversion_020/owner.json",
+    "root_owner_sha256": "1b66f45d7bf0a62b1418034949772a01e82fd548f01d68f438cea23c7fb6c8fb",
+    "target_trajectory_h5": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-dense-full4001-typed-nvme-conversion-020/trajectory.h5",
+    "target_conversion_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-dense-full4001-typed-nvme-conversion-020/conversion-report.json",
+    "nvme_output_peak_limit_bytes": 103079215104,
+    "status": "running_output_only_nvme",
+    "notes": "Direct converter writes output trajectory to NVMe under 96 GiB cap while raw 273 GiB BI4 stays on Home."
+  },
+  "temporal_quality_contract": {
+    "time_window_s": 4.0,
+    "total_frames": 4001,
+    "dt_save_s": 0.001,
+    "save_half_width_s": 0.0005,
+    "contract_save_allowance_s": 0.0007336390799938275,
+    "contract_event_time_budget_s": 0.0036681953999691376,
+    "save_fraction_budget_max": 0.2,
+    "temporal_contract_status": "pass_satisfied",
+    "margin_fraction": 0.31846594,
+    "historical_contrast": "Historical SAVE001 executed at dt=0.010s had half-width 0.0050s exceeding budget 0.0007336s; dense save at dt=0.001s provides first compliant temporal bracket."
+  },
+  "mass_provenance": {
+    "native_float32_authority": {
+      "massfluid_particle_kg": 0.0001250000059371814,
+      "massfluid_hex": "0x6f120339",
+      "cohort_particles": 196608,
+      "cohort_total_mass_kg": 24.576001167297363,
+      "delta_to_continuous_kg": 1.167297363e-06,
+      "relative_error": 4.749745e-08,
+      "provenance": "Established by Root actual native header precision audit 017; authoritative solver saved float32 value."
+    },
+    "historical_v6_xml_decimal_benchmark": {
+      "massfluid_particle_kg": 0.000125,
+      "cohort_particles": 196608,
+      "cohort_total_mass_kg": 24.576,
+      "provenance": "Historical XML decimal ledger retained as separate unnormalized benchmark; no rescaling."
+    },
+    "repeat_count_vs_cohort_mass_semantics": {
+      "repeat_count_crossing_event_mass": "Cumulative transition flux integral across registered boundary surfaces; splash/slosh particles crossing multiple times increment counters. Can exceed total cohort mass. NEVER misrepresent as fluid cohort inventory.",
+      "unique_terminal_destination_mass": "Strict partitioning of the 196,608 particles at t=4.0s across mutually exclusive spatial regions (cup, receiver, tray, inflight, unknown). Sum strictly equals cohort mass (24.576001167 kg native / 24.576 kg XML)."
+    }
+  },
+  "native_exclusion_and_boundary_policy": {
+    "native_invalid_particles_npout": 2151,
+    "classification": "unknown_invalid",
+    "physical_spill_inferred": false,
+    "closed_wall_crossing_count": 0,
+    "zero_physical_mass_defect_asserted": false,
+    "policy_statement": "Particles exiting domain boundary remain strictly unknown loss; no spill inferred from numerical boundary exclusion; native Motive preserved separately."
+  },
+  "rigid_pose_parameters": {
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_GEM_V2",
+    "geometry_family_id": "F2_GEOM_GEM_CUP_RECEIVER_OFFSET_SPILL_V2",
+    "physical_condition_hash": "327899e38bbad63951206d5b2fd3ef354c049a32f6671af1af7913a48b77c7ef",
+    "motion_file_sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70",
+    "motion_file_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001_motion.dat",
+    "rotation_axis_origin_m": [0.0, -1.0, 0.65],
+    "rotation_axis_unit": [0.0, 1.0, 0.0],
+    "cup_low_m": [0.0, -0.15, 0.65],
+    "cup_size_m": [0.425, 0.3, 0.45],
+    "receiver_low_m": [0.45, -0.16, 0.0],
+    "receiver_size_m": [1.1, 0.6, 0.45],
+    "tray_low_m": [-1.2, -1.0, -0.2],
+    "tray_size_m": [4.0, 2.0, 0.15]
+  },
+  "mandatory_payload_datasets": [
+    "id",
+    "position",
+    "velocity",
+    "rhop",
+    "mass",
+    "initial_mass",
+    "type",
+    "time",
+    "part_type",
+    "fluid_type",
+    "substance",
+    "actual_angle_rad",
+    "angular_velocity_rad_s"
+  ],
+  "fixed_fluid_uid_cohort": {
+    "start_id": 1470641,
+    "end_id": 1667248,
+    "count": 196608
+  },
+  "claim_boundary": {
+    "production": "not_evaluated",
+    "q_i": "not_granted; event validation evidence only",
+    "q_n": "not_assessed; evidence staged for root review"
+  }
+}
