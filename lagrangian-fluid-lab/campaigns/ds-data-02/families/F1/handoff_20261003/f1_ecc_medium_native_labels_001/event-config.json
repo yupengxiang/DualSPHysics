@@ -1,0 +1,168 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "geometry_source": "Actual source typed H5 geometry binding; continuous tank, reservoir, obstacle and finite observation apertures preserved",
+  "geometry_sha256": "bdee7f4728505a9bcc8ebb01738d7dde31e59f84bc6419b3f0889ca76a7555bd",
+  "physical_case_id": "F1_ECCENTRIC_THICK_BOUNDARY_DBC",
+  "source_regions": [
+    {
+      "id": "initial_lower_half",
+      "bounds": [
+        [
+          -0.1,
+          1.7
+        ],
+        [
+          -0.1,
+          0.335
+        ],
+        [
+          -0.1,
+          0.6
+        ]
+      ]
+    },
+    {
+      "id": "initial_upper_half",
+      "bounds": [
+        [
+          -0.1,
+          1.7
+        ],
+        [
+          0.335,
+          0.77
+        ],
+        [
+          -0.1,
+          0.6
+        ]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "upstream",
+      "bounds": [
+        [
+          0.0,
+          0.9
+        ],
+        [
+          0.0,
+          0.67
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    },
+    {
+      "id": "lower_channel",
+      "bounds": [
+        [
+          0.9,
+          1.02
+        ],
+        [
+          0.0,
+          0.24
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    },
+    {
+      "id": "upper_channel",
+      "bounds": [
+        [
+          0.9,
+          1.02
+        ],
+        [
+          0.36,
+          0.67
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    },
+    {
+      "id": "downstream",
+      "bounds": [
+        [
+          1.02,
+          1.6
+        ],
+        [
+          0.0,
+          0.67
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "lower_channel_entry",
+      "axis": 0,
+      "value": 0.9,
+      "aperture_bounds": [
+        [
+          0.0,
+          0.24
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    },
+    {
+      "id": "upper_channel_entry",
+      "axis": 0,
+      "value": 0.9,
+      "aperture_bounds": [
+        [
+          0.36,
+          0.67
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    },
+    {
+      "id": "downstream_arrival",
+      "axis": 0,
+      "value": 1.2,
+      "aperture_bounds": [
+        [
+          0.0,
+          0.67
+        ],
+        [
+          0.0,
+          0.4
+        ]
+      ]
+    }
+  ],
+  "interpretation": "static finite wall/channel dimensions from continuous Definition; unknown includes outside or unresolved regions; no posthoc projection",
+  "limitations": [
+    "closed-wall and legal-open-exit causal classification pending geometry evaluator",
+    "first passage is any-direction first observed saved chord",
+    "residence and hidden recrossing errors require saved-cadence study"
+  ],
+  "claim_boundary": "Actual saved-chord labels only; no Q-N or production"
+}
