@@ -1,0 +1,42 @@
+{
+  "schema": "ds02.f2.commit-596d6fc0-errata.v1",
+  "reviewed_commit": "596d6fc0",
+  "root_review": {
+    "reference": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_owner013_actual_data_tests_review_010/review.json",
+    "verdict": "accepted",
+    "conservative_cpu_charge_core_seconds": 32825.6,
+    "conservative_cpu_charge_core_hours": 9.118222,
+    "charge_method": "64 sharedCPU maximum concurrent cores times reported cumulative test wall (456.88s + 56.02s); conservative accounting allowance accepted"
+  },
+  "erratum_1_bitwise_preservation_precision": {
+    "prior_statement": "Bitwise particle invariance across position, velocity, density, mass, type, mk, valid: verified True",
+    "correction": "Semantic floating-point array equality with NaN matching (np.array_equal(..., equal_nan=True)) was verified, NOT binary bit-for-bit bitwise preservation. Float32 arrays can have identical numeric values and identical NaN masks while containing differing bit patterns in NaN payload bits or signed zero (+0.0 vs -0.0). Binary preservation of original source bytes remains strictly bound to the canonical source H5 SHA-256.",
+    "scientific_classification": "semantic_float_equality_not_bitwise_binary"
+  },
+  "erratum_2_mass_defect_claim_retraction": {
+    "prior_statement": "The native measurement is exact in float32 arithmetic and represents zero physical mass defect.",
+    "correction": "The phrase 'zero physical mass defect' is retracted as an unsupported broad scientific extrapolation. The empirical evidence is strictly limited to an IEEE-754 arithmetic representation delta between native float32 summed particle mass (coarse: 24.5760011673 kg, medium: 24.5759999380 kg) and the generated continuous XML decimal mass (24.576 kg). This delta (4.75e-8 coarse, 2.52e-9 medium relative) is within single-precision floating point summation tolerance. Physical exclusions, boundary losses, and invalid native particles remain scientifically classified as 'unknown' loss and are NOT asserted to be zero physical defect or converted to inferred spill.",
+    "scientific_classification": "ieee754_float32_representation_delta_unknown_loss_preserved"
+  },
+  "erratum_3_unmetered_test_data_invocation_policy": {
+    "prior_action": "test_audit_dry_run_scientific_numerical_checks and test_run_audit_end_to_end directly invoked audit_case and run_audit on campaign H5 files outside the shared runner.",
+    "correction": "Accepted Root charge of 9.118 core-hours. All subsequent test suites are strictly confined to synthetic small fixtures (< 10 particles, tmp memory/disk, < 0.5s execution) and pure structural/schema validation. Actual campaign H5 and CSV datasets are processed exclusively through shared runner requests dispatched by Root.",
+    "policy_enforced": true
+  },
+  "retained_bindings": {
+    "center_coarse_source_h5_sha256": "12180cbf5c1f2129ecc55c44650102c05e2f0fcda27842156c06737feae72d03",
+    "center_medium_source_h5_sha256": "26b3dac18c3133ad9d2fde9b0b2044857cc95e1cdda2666c359416107dde8557",
+    "offset_coarse_source_h5_sha256": "4e1611b03650b2db1964a0f8dcac9c55d84da9d0a3da3b3df71e95da2165618c",
+    "offset_medium_source_h5_sha256": "1bc9f9f956bf791ccdac15e67b5dd5bad76201ebeb302371fae98d5ff069b500",
+    "offset_physical_condition_hash": "327899e38bbad63951206d5b2fd3ef354c049a32f6671af1af7913a48b77c7ef",
+    "offset_receiver_low_m": [0.45, -0.16, 0.0],
+    "save_timing_allowance_s": 0.0007336390799938275,
+    "save_timing_relaxation_applied": false
+  },
+  "claim_boundary": {
+    "q_i": "not_granted; errata evidence only",
+    "q_n": "not_assessed",
+    "production": "not_evaluated"
+  },
+  "independent_case_count_increment": 0
+}
