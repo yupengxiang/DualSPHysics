@@ -1,0 +1,23 @@
+{
+  "schema": "ds02.f1.fine-capacity-review-errata.v1",
+  "family_id": "F1",
+  "case_id": "F1_ECC_THICK_BOUNDARY_DBC_V3_1_DP003333333333333333",
+  "review_reference": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/f1_ecc_fine_conversion_review_001/fine-converter-capacity-review.json",
+  "corrections": [
+    {
+      "field": "storage_capacity_analysis.approved_qualification_cap_gib",
+      "issue": "Conflation of global qualification attempts cap with storage capacity",
+      "clarification": "The global approved limit of 320 is QUALIFICATION ATTEMPTS, NOT 320 GiB. There is no 320 GiB storage cap; storage is bounded by NVMe floor (>=100 GiB) and Home floor (>=500 GiB)."
+    },
+    {
+      "field": "memory_and_compute_analysis",
+      "issue": "Cached free capacity (462 GiB) and charged hours (92.1) are informational snapshots without authority",
+      "clarification": "Delegates hold no capacity or conversion queue authority. ROOT owns global scheduling and has registered root_fine_fulltyped_capacity_review_005 with literal venv, NVMe cap 230 GiB, 6h wall / 24 core-hours, awaiting F7 terminal completion before pending dispatch."
+    }
+  ],
+  "delegate_boundary": {
+    "launch_allowed": false,
+    "root_authority_only": true,
+    "duplicate_conversion_launch_forbidden": true
+  }
+}

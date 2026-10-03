@@ -1,0 +1,126 @@
+{
+  "schema": "ds02.f6.prospective-preregistration.v1",
+  "family_id": "F6",
+  "recipe_id": "F6_ANGULAR_RELEASE_FREE6DOF_001",
+  "candidate_name": "Prospective Full 3D Free 6DOF Rigid Angular-Release Physical Case",
+  "scope_classification": "new_physical_control_scope",
+  "is_body_cellcenter_repair": false,
+  "negative_reference_preservation": {
+    "zero_spin_case_id": "F6_BODY_CELLCENTER_TRANSFORM_001",
+    "zero_spin_retained_as_negative_evidence": true,
+    "retroactive_qn_transfer": "forbidden",
+    "rationale": "The original zero-spin case is preserved as a distinct physical control. The new angular-release case establishes an independent physical trajectory with finite 3D angular momentum."
+  },
+  "physical_control_domain": {
+    "motion_type": "free_6dof_rigid_angular_release",
+    "degrees_of_freedom": {
+      "translation": [1, 1, 1],
+      "rotation": [1, 1, 1],
+      "heave_1dof_constraint_rejected": true,
+      "clamps_or_dropped_axes": "none"
+    },
+    "initial_conditions": {
+      "initial_velocity_linear_m_s": [0.0, 0.0, 0.0],
+      "initial_angular_velocity_rad_s": [0.08, 0.12, 0.06],
+      "initial_orientation_deg": [0.0, 0.0, 0.0],
+      "initial_rigid_center_m": [2.4, 1.2, 1.08]
+    },
+    "body_properties": {
+      "massbody_kg": 128.0,
+      "inertia_tensor_diagonal_kg_m2": [8.53333333333, 8.53333333333, 13.6533333333],
+      "continuous_bounding_box_m": {
+        "low": [2.0, 0.8, 0.88],
+        "high": [2.8, 1.6, 1.28],
+        "dimensions": [0.8, 0.8, 0.4]
+      },
+      "rigid_algorithm": 1,
+      "mass_normalization": "forbidden"
+    },
+    "fluid_and_tank_domain": {
+      "fluid_mass_kg": 5120.0,
+      "fluid_rhop0_kg_m3": 1000.0,
+      "tank_dimensions_m": [4.8, 2.4, 2.4],
+      "finite_wall_faces": ["bottom", "left", "right", "front", "back"],
+      "viscosity_model": {
+        "ViscoTreatment": 2,
+        "ViscoTreatment_meaning": "Laminar + SPS sub-particle scale turbulence model",
+        "Visco": 0.000001,
+        "Visco_meaning": "Physical kinematic viscosity = 1.0e-6 m^2/s (water), NOT artificial alpha 1e-6",
+        "ViscoBoundFactor": 1
+      }
+    },
+    "simulation_window": {
+      "time_max_s": 12.0,
+      "time_out_s": 0.05,
+      "total_frames": 241,
+      "shortened_3s_window_rejected": true,
+      "full_12s_product_preserved": true
+    }
+  },
+  "source_code_verification": {
+    "syntax_and_units": {
+      "official_xml_tag": "angularvelini",
+      "official_alias": "omegaini",
+      "units": "rad/s",
+      "definition_source_file": "src/source/JCaseParts.cpp",
+      "read_line": 297,
+      "read_code": "AngularVelini=sxml->ReadElementDouble3(ele,(sxml->ExistsElement(ele,\"angularvelini\")? \"angularvelini\": \"omegaini\"),true);",
+      "write_line": 340,
+      "write_code": "if(AngularVelini!=TDouble3(0))JXml::AddAttribute(sxml->AddElementDouble3(ele,\"angularvelini\",AngularVelini),\"units_comment\",\"rad/s\");"
+    },
+    "solver_initialization": {
+      "solver_source_file": "src/source/JSph.cpp",
+      "assignment_line": 1162,
+      "assignment_code": "fobj->fomega=ToTFloat3(fblock.GetAngularVelini());"
+    },
+    "rigid_velocity_propagation": {
+      "formula": "v_r = v_rigid + omega x (r - r_c)",
+      "cpu_implementation": "src/source/JSphCpuSingle.cpp:1084-1086",
+      "gpu_implementation": "src/source/JSphGpu_ker.cu:2049-2051",
+      "consistency": "Both CPU and GPU kernels identically update node velocity from linear velocity and cross product of omega and particle-centroid offset"
+    }
+  },
+  "macro_convergence_operator": {
+    "frozen_operator": "Relative RMSE <= 5% (0.05) over strict [0, 12] s window",
+    "denominator_conditioning": "With initial angular velocity [0.08, 0.12, 0.06] rad/s, rigid rotation responds with macroscopic angular amplitudes across roll, pitch, and yaw, resolving near-zero denominator inflation",
+    "retroactive_threshold_changes": "forbidden",
+    "relaxations_or_gates": "none"
+  },
+  "resolutions": {
+    "coarse": {
+      "dp_m": 0.025,
+      "case_id": "F6_ANGULAR_RELEASE_DP025",
+      "def_xml": "cases/coarse/F6_ANGULAR_RELEASE_DP025_Def.xml",
+      "expected_body_particles": 16384,
+      "expected_fluid_particles": 327680,
+      "expected_fixed_particles": 73441
+    },
+    "medium": {
+      "dp_m": 0.02,
+      "case_id": "F6_ANGULAR_RELEASE_DP020",
+      "def_xml": "cases/medium/F6_ANGULAR_RELEASE_DP020_Def.xml",
+      "expected_body_particles": 32000,
+      "expected_fluid_particles": 640000,
+      "expected_fixed_particles": 85682,
+      "wall_repair_included": true
+    },
+    "fine": {
+      "dp_m": 0.0125,
+      "case_id": "F6_ANGULAR_RELEASE_DP0125",
+      "def_xml": "cases/fine/F6_ANGULAR_RELEASE_DP0125_Def.xml",
+      "expected_body_particles": 131072,
+      "expected_fluid_particles": 2621440,
+      "expected_fixed_particles": 292996
+    }
+  },
+  "status": {
+    "preparation_only": true,
+    "launch_allowed": false,
+    "solver_or_gpu_started": false,
+    "q_n_status": "not_assessed",
+    "qualification_claim": "none",
+    "production_approval": "none",
+    "root_authority_only": true,
+    "root_review_required": "ROOT must review initial geometry QA before scientific CPU GenCase launch or GPU"
+  }
+}
