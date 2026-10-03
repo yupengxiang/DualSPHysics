@@ -1,0 +1,53 @@
+{
+  "coarse_completed_gpu_021": {
+    "attempt_id": "root-angular-release-dp025-full12-native-gpu-021",
+    "elapsed_seconds": 437.3461598320864,
+    "part_0000_bi4_sha256": "1dd82c6d1ca1251aa736823d638135f86ee22de540caa5b60760aea84d9285e0",
+    "part_0001_bi4_sha256": "bd0cb4d3857927ca67345ba5942cdd88af3231fa91249ffa0be88d6168f0c0b5",
+    "partfloatinfo_ibi4_sha256": "f5a58136cfb6fb1d7d3e41ec6df8e78893fa62a6f68856eb6a59bc5fc90be80f",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/execution-receipt.json",
+    "receipt_sha256": "328470af63b3f0315501d745af77a5f9be1fcc1cf2113eb06029618a19ffb621",
+    "returncode": 0,
+    "run_out_sha256": "43b5f68c255fb6b317f97613d2e18bda76454d76a2371c57c44a11a3c1efef0c",
+    "runparts_csv_sha256": "81d36eafc73929b63823873cf6a8ce3bbd2dfabf5460611288bdfd64e9334a28",
+    "status": "completed"
+  },
+  "family_id": "F6",
+  "launch_allowed": false,
+  "live_other_dp_status": {
+    "fine_dp0125": {
+      "attempt_id": "root-angular-release-dp0125-full12-native-gpu-021",
+      "extraction_requests_deferred": true,
+      "reason": "Live GPU simulation actively writing; mutable files not hashed to prevent invalidation.",
+      "status": "running"
+    },
+    "medium_dp020": {
+      "attempt_id": "root-angular-release-dp020-full12-native-gpu-021",
+      "elapsed_seconds": 982.0139564359561,
+      "extraction_requests_deferred": true,
+      "reason": "Live DP deferred until root terminal intake; ensures zero mutable whole PartFloatInfo hash invalidation.",
+      "returncode": 0,
+      "status": "completed"
+    }
+  },
+  "physical_candidate": "Full 12s, unconstrained free 6DOF, initial angular velocity vector [0.08, 0.12, 0.06] rad/s",
+  "q_n_status": "not_assessed",
+  "recipe_id": "F6_ANGULAR_RELEASE_RIGID_STATE_AUDIT_003",
+  "requests": {
+    "floatinginfo_extraction": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_actual_rigid_state_audit_003/requests/F6_ANGULAR_RELEASE_DP025_FLOATINGINFO_EXTRACTION_REQUEST.json",
+    "partvtk_floating_parts": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_actual_rigid_state_audit_003/requests/F6_ANGULAR_RELEASE_DP025_PARTVTK_FLOATING_PARTS_REQUEST.json",
+    "rigid_state_audit": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/f6_angular_release_actual_rigid_state_audit_003/requests/F6_ANGULAR_RELEASE_DP025_RIGID_STATE_AUDIT_REQUEST.json"
+  },
+  "root_review_required": true,
+  "schema": "ds02.f6.angular-release-rigid-state-audit-manifest.v1",
+  "semantic_mass_resolution": {
+    "declared_physical_rigid_mass_kg": 128.0,
+    "declared_relative_density": 0.5,
+    "derived_quadrature_diagnostic_mass_kg": 0.0078125,
+    "resolution_explanation": "Official PartVTK CSV Mass column sums to 256 kg because GenCase assigns support particles fluid-density mass m_p = rho_0 * dp^3. In DualSPHysics, the solver loads physical massbody (128 kg) at JSph.cpp:1138 and uses it in Newton's 2nd law (JSph.cpp:2593) for translation, and uses XML inertia ([8.53333, 8.53333, 13.6533]) at JSph.cpp:2608 for rotation. Native CSV mass is preserved without normalization; declared physical mass 128 kg is confirmed correct.",
+    "solver_interaction_weight_massp_kg": 0.015625,
+    "support_lattice_weight_sum_kg": 256.0
+  },
+  "untested_hypothesis_notice": "Prospective excitation candidate [0.08, 0.12, 0.06] rad/s is an UNTESTED HYPOTHESIS. It does not guarantee macroscopic signal, numerical convergence, or threshold satisfaction. The frozen 5% relative RMSE macro operator remains unchanged. No third geometry repair.",
+  "velocity_propagation_notice": "GenCase BI4 stores floating body angular velocity in XML, but individual particle velocities remain 0. DualSPHysics solver loads fomega at JSph.cpp:1162 and saves it into PartFloatInfo.ibi4 at step 0. InitRunGpu does not invoke KerFtPartsUpdate before saving Part_0000.bi4, so Part 0 particle velocities are 0.0 m/s. During time integration, KerFtPartsUpdate computes vr = v_lin + omega x dist (JSphGpu_ker.cu:2049-2051), producing physical velocities by Frame 1 (t=0.05s)."
+}
