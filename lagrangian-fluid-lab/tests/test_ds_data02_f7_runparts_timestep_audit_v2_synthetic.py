@@ -9,6 +9,11 @@ import sys
 
 import pytest
 
+# Ensure scripts directory is on sys.path
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
 from ds_data02_f7_runparts_timestep_audit_v2 import (
     SCHEMA,
     audit_timestep_comparison_v2,
