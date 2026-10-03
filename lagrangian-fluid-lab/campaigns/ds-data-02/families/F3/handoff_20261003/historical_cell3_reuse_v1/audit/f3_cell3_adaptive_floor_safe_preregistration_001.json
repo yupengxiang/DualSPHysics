@@ -1,0 +1,129 @@
+{
+  "schema": "ds02.f3.adaptive-floor-safe-preregistration.v1",
+  "family_id": "F3",
+  "status": "preregistered_pending_root_review",
+  "created_at_utc": "2026-10-03T09:35:00+00:00",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "production_granted": false,
+    "q_i": "preparation_only_pending_root_dispatch",
+    "q_n": "not_assessed",
+    "q_n_granted": false,
+    "training": "not_authorized",
+    "scope": "Independent CoefDtMin numerical root-cause repair to achieve true adaptive floor-safe timestep integration for CELL3 single-axis sloshing"
+  },
+  "root_cause_analysis": {
+    "problem_statement": "In NOMINAL, TIME (half-CFL), and QUARTER (quarter-CFL) historical and prospective runs, exactly 99.9999% of all simulation substeps were artificially clamped to DtMin (DTs adjusted to DtMin: 754,844 / 1,509,684 / 3,019,366). The solver never executed in an adaptive timestep regime, but ran as fixed-step Symplectic integration clamped at an artificial floor.",
+    "source_code_lineage": {
+      "solver_constants": "src/source/JSph.cpp:1538: DtMin = (KernelH / Cs0) * CoefDtMin",
+      "acoustic_scale": "DtIni = KernelH / Cs0 = 0.0004424539307483203 s",
+      "adaptive_step_formula": "src/source/JSphGpu.cpp:1104-1137: dt2 = KernelH / (max(Cs0, VelMax * 10.) + KernelH * ViscDtMax); dt = CFLnumber * min(dt1, min(dt2, dt3))",
+      "floor_clamp_logic": "src/source/JSphGpu.cpp:1131: if (dt < DtMin) { dt = DtMin; DtModif++; }"
+    },
+    "mathematical_mechanism": {
+      "derivation": "Because fluid velocity and viscous dissipation terms are non-negative, the Courant denominator (max(Cs0, VelMax*10.) + KernelH*ViscDtMax) is strictly greater than Cs0 whenever viscous dissipation or fluid motion is present. Therefore, dt2 < KernelH / Cs0 = tau_sound. Consequently, dt_adaptive <= CFLnumber * dt2 < CFLnumber * (KernelH / Cs0). In the previous case configurations, CoefDtMin was set exactly equal to CFLnumber (0.05, 0.025, 0.0125). Thus, DtMin = CoefDtMin * (KernelH / Cs0) = CFLnumber * (KernelH / Cs0) > dt_adaptive. This guaranteed dt_adaptive < DtMin at every single step, permanently triggering the clamp.",
+      "empirical_evidence": [
+        {"case": "NOMINAL", "CFLnumber": 0.05, "CoefDtMin": 0.05, "DtMin_s": 2.212269686706988e-05, "steps": 377423, "DTsMin": 754844, "floor_incidence_pct": 99.9997},
+        {"case": "TIME", "CFLnumber": 0.025, "CoefDtMin": 0.025, "DtMin_s": 1.106134843353494e-05, "steps": 754843, "DTsMin": 1509684, "floor_incidence_pct": 99.9999},
+        {"case": "QUARTER", "CFLnumber": 0.0125, "CoefDtMin": 0.0125, "DtMin_s": 5.530674216767470e-06, "steps": 1509684, "DTsMin": 3019366, "floor_incidence_pct": 99.9999}
+      ]
+    },
+    "repair_strategy": "Decouple CoefDtMin from CFLnumber by placing the minimum timestep floor 10x below the nominal Courant timestep. The floor then acts as a numerical safety net against unphysical singularities (particle overlap) while permitting natural SPH adaptive timestep dynamics across the physical flow."
+  },
+  "repair_attempts": [
+    {
+      "attempt_index": 1,
+      "case_id": "F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005",
+      "role": "Baseline CFL with decoupled adaptive floor",
+      "numerical_parameters": {
+        "CFLnumber": 0.05,
+        "CoefDtMin": 0.005,
+        "ratio_floor_to_cfl": 0.10,
+        "DtMin_s": 2.212269686706988e-06,
+        "expected_natural_dt_s": 2.21e-05,
+        "TimeMax_s": 8.35,
+        "TimeOut_s": 0.01,
+        "expected_frames": 836
+      },
+      "hypothesis": "Restores genuine adaptive SPH timestepping at nominal CFL=0.05. Floor incidence will collapse from 99.9997% to < 1%, allowing fluid particles to respond to dynamic local accelerations and shear without artificial numerical clamping."
+    },
+    {
+      "attempt_index": 2,
+      "case_id": "F3_CELL3_LONG_DP0075_REPAIR2_ADAPTIVE_CFL025_COEF0025",
+      "role": "Half-CFL refinement with decoupled adaptive floor",
+      "numerical_parameters": {
+        "CFLnumber": 0.025,
+        "CoefDtMin": 0.0025,
+        "ratio_floor_to_cfl": 0.10,
+        "DtMin_s": 1.106134843353494e-06,
+        "expected_natural_dt_s": 1.106e-05,
+        "TimeMax_s": 8.35,
+        "TimeOut_s": 0.01,
+        "expected_frames": 836
+      },
+      "hypothesis": "Evaluates genuine adaptive CFL-halving convergence by comparing Case 1 (CFL 0.05, adaptive) and Case 2 (CFL 0.025, adaptive) in a regime where neither simulation is distorted by constant-step floor clamping."
+    }
+  ],
+  "physical_equivalence_invariants": {
+    "bi4_source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075.bi4",
+    "bi4_sha256": "87d6af9d03ffcaaec6e19acd87ed9ad04259ee331b38ee89f890a6224212f545",
+    "control_source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/CaseSloshingAccData.csv",
+    "control_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "vtk_source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/cell3-nopen-qualification/F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen/F3_CELL3_plain_0p0075_hdp_Actual.vtk",
+    "vtk_sha256": "85d235cb3e6da5f1b58b5373cb825d2a5a2dafb7a88b53138b985d734dcc8e7c",
+    "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_HISTORY_CELL3_PARENT/F3_HISTORY_CELL3_PARENT_GENCAS_01/execution-receipt.json",
+    "gencase_receipt_sha256": "7da82fd6bf3a5972eb8e30de8f7a542813cd411fb596e4ac5f7baa7588a4aca4",
+    "total_particles": 108000,
+    "fluid_particles": 34560,
+    "boundary_particles": 73440,
+    "particle_spacing_dp_m": 0.0075,
+    "initial_fluid_mass_kg": 14.580000378191471,
+    "time_window_s": [0.0, 8.35],
+    "save_cadence_s": 0.01,
+    "frames_count": 836
+  },
+  "frozen_transport_observables": {
+    "event0": {
+      "name": "sloshing_cross_right_exit",
+      "definition": "particle coordinate x crosses boundary plane x > 0.45 m with aperture [y_min, y_max] x [z_min, z_max]",
+      "observed_passage_window_s": [0.311, 8.35],
+      "metrics": ["chord_time_s", "interval_bracket_s", "censor_code"]
+    },
+    "event1": {
+      "name": "top_open_spill_containment",
+      "definition": "particle coordinate z crosses top boundary z > 0.25 m",
+      "observed_passage_window_s": [0.0, 8.35],
+      "nominal_status": "strictly censored (0 observed passages, 34560 right-censored)",
+      "metrics": ["containment_verification", "censor_code", "numerical_loss_mass_kg", "unknown_mass_kg"]
+    }
+  },
+  "success_criteria_and_measurements": {
+    "primary_floor_diagnostic": {
+      "metric": "actual_floor_incidence = DTsMin / (2 * Steps)",
+      "target": "< 0.01 (< 1% of substeps hitting DtMin)",
+      "unacceptable": "> 0.10 (indicating continued floor clamping)"
+    },
+    "transport_evidence": {
+      "evaluation": "Prospective same-UID comparison against nominal baseline and historical ladder",
+      "metrics": [
+        "mean_absolute_chord_delta_s",
+        "p95_absolute_chord_delta_s",
+        "max_absolute_chord_delta_s",
+        "paired_interval_nonoverlapping_brackets_count",
+        "switching_uids_count",
+        "unconditional_initial_mass_cdf_deviation"
+      ],
+      "governance_rule": "Strictly descriptive empirical measurement; NEVER an invented 5% Q-N gate or chaos excuse."
+    }
+  },
+  "execution_governance": {
+    "launch_allowed": false,
+    "launch_owner": "root_pending_review",
+    "root_actions_required": [
+      "Sourcehash review of XML/BI4/CSV/VTK inputs",
+      "Atomic GPU resource reservation against 96h campaign budget",
+      "Strict runner dispatch of input preparation and GPU solver"
+    ]
+  }
+}
