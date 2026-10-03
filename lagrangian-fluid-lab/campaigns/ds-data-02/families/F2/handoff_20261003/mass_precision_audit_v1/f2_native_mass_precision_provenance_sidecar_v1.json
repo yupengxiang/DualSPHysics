@@ -1,0 +1,173 @@
+{
+  "schema": "ds-data-02.f2.mass-precision-provenance-sidecar.v1",
+  "family_id": "F2",
+  "generated_at": "2026-10-03T19:25:00+08:00",
+  "author": "F2 Family Delegated Owner (gemini-3.8-flash-high, high effort)",
+  "source_inventory": {
+    "JPartDataBi4.h": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartDataBi4.h",
+      "sha256": "80130f90bbb9334315da90c66c63cf9df9723abc431e49cb219af1f038a32dec",
+      "relevant_lines": "216-222 (Get_Dp, Get_H, Get_B, Get_Rhop0, Get_Gamma, Get_MassBound, Get_MassFluid returning double)"
+    },
+    "JPartDataBi4.cpp": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JPartDataBi4.cpp",
+      "sha256": "e507d88c8fac9b990b74d8dce71edb3524f71f46a04b3bdc5d289bf0af4ecdfc",
+      "relevant_lines": "234-244 (ConfigCtes setting Dp, H, B, Rhop0, Gamma, MassBound, MassFluid via SetvDouble)"
+    },
+    "JBinaryData.h": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.h",
+      "sha256": "e63f60e6ae6d3ee8ed1f137ebca1bf45e6b783fb5a54c510fa80a3b09556af38",
+      "relevant_lines": "248 (ValueToXml), 365 (SaveFileXml)"
+    },
+    "JBinaryData.cpp": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JBinaryData.cpp",
+      "sha256": "a166250e1d339b45c549c25ed49e9533742bf52ce722102b96042f54c750566d",
+      "relevant_lines": "564 (FmtDouble = '%.15E'), 721 (DatDouble ValueToXml), 837 (DatDouble switch), 2632-2634 (SetvDouble storing vdouble)"
+    },
+    "JSph.h": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.h",
+      "sha256": "251e19bd812aacb9e3b617becf8b65aefa6467eb35d3dc9a5ef89a89d1d9e3f9",
+      "relevant_lines": "236 (float MassFluid), 237 (float MassBound)"
+    },
+    "JSph.cpp": {
+      "path": "vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+      "sha256": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454",
+      "relevant_lines": "654 (MassFluid = (float)ctes.GetMassFluid()), 1514 (CSP.massfluid = MassFluid), 2740 (parthead.ConfigCtes with float widened to double)"
+    },
+    "ds_data02_direct_convert.py": {
+      "path": "scripts/ds_data02_direct_convert.py",
+      "sha256": "8ec204edb5ac20f2d83e2b9a3b5e70eb45cf1104fe0ee4bd8c3413a241c10ccd",
+      "relevant_lines": "47 (PARTVTK_TOLERANCES mass: 1.0e-7), 569 (_as_float MassFluid), 572 (mass.astype(np.float32)), 623 (dataset mass dtype='f4'), 628 (initial_mass dtype='f4'), 651 (mass[indices] = frame_mass[indices])"
+    },
+    "f8_r008_safe_bi4_decoder_v1.py": {
+      "path": "scripts/f8_r008_safe_bi4_decoder_v1.py",
+      "sha256": "affbbb6c04a4d21d03037e74d0023112c60c7d8e5972cc6dfc882e1c7c5dc319",
+      "relevant_lines": "51-68 (TYPE_INFO type 12 is double, 8 bytes), 239-257 (_value unpacking struct '<d')"
+    },
+    "PartVTK_linux64": {
+      "path": "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+      "relevant_lines": "Official binary reading BI4 and outputting Mass [kg] CSV in single-precision text"
+    },
+    "bi4_dump": {
+      "path": "campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "relevant_lines": "Official tool producing frame XML with double fields printed via %.15E"
+    }
+  },
+  "precision_hierarchy": {
+    "layer_1_source_header_double": {
+      "storage_format": "IEEE-754 binary64 (double precision)",
+      "byte_size": 8,
+      "bi4_type_code": 12,
+      "bi4_type_name": "DatDouble",
+      "setter_api": "JPartDataBi4::Data->SetvDouble(\"MassFluid\", massfluid)",
+      "getter_api": "JPartDataBi4::GetData()->GetvDouble(\"MassFluid\")",
+      "xml_serialization_format": "%.15E"
+    },
+    "layer_2_solver_interaction_float32": {
+      "storage_format": "IEEE-754 binary32 (single precision)",
+      "byte_size": 4,
+      "class_member": "float JSph::MassFluid",
+      "initialization_downcast": "MassFluid = (float)ctes.GetMassFluid()",
+      "simulation_constant_binding": "CSP.massfluid = MassFluid",
+      "kernel_precision": "float32 in all GPU/CPU compute interactions",
+      "output_bi4_widening": "parthead.ConfigCtes(..., (double)MassFluid) stores widened float32 into output BI4 header"
+    },
+    "layer_3_direct_converter_f4": {
+      "storage_format": "HDF5 dataset f4 (IEEE-754 binary32)",
+      "byte_size": 4,
+      "parsing_api": "np.where(types == 3, fluid, bound).astype(np.float32)",
+      "datasets": ["mass", "initial_mass"],
+      "dataset_dtype": "f4",
+      "compression": "lzf",
+      "frame_write_rule": "mass[indices] = frame_mass[indices] (immutable per-particle scalar assignment)"
+    },
+    "layer_4_partvtk_display": {
+      "storage_format": "CSV ASCII text representation of float32",
+      "comparison_tolerance": 1e-07,
+      "text_rounding_note": "Textual display differences up to ~1e-7 occur relative to exact in-memory IEEE-754 float32"
+    },
+    "layer_5_xml_decimal_continuous": {
+      "storage_format": "Continuous decimal real specification",
+      "gencase_xml_continuous_total_kg": 24.576,
+      "initial_domain_volume_m3": 0.024576,
+      "reference_density_kg_per_m3": 1000.0
+    }
+  },
+  "resolution_comparison_table": {
+    "coarse": {
+      "dp_m": 0.01,
+      "particle_count": 24576,
+      "xml_decimal_mass_per_particle_kg": 0.001,
+      "xml_continuous_total_mass_kg": 24.576,
+      "native_float32_mass_per_particle_kg": 0.0010000000474974513,
+      "native_float32_hex": "6f12833a",
+      "widened_double_value_kg": 0.0010000000474974513,
+      "exact_sum_n_times_f32_kg": 24.57600021362305,
+      "native_accumulated_sum_kg": 24.576001167297363,
+      "delta_to_xml_continuous_kg": 1.16729736328125e-06,
+      "relative_delta_to_xml_continuous": 4.7497451293945314e-08
+    },
+    "medium": {
+      "dp_m": 0.008,
+      "particle_count": 48000,
+      "xml_decimal_mass_per_particle_kg": 0.000512,
+      "xml_continuous_total_mass_kg": 24.576,
+      "native_float32_mass_per_particle_kg": 0.0005119999987073243,
+      "native_float32_hex": "bd37063a",
+      "widened_double_value_kg": 0.0005119999987073243,
+      "exact_sum_n_times_f32_kg": 24.57600021362305,
+      "native_accumulated_sum_kg": 24.575999937951565,
+      "delta_to_xml_continuous_kg": -6.204843486328125e-08,
+      "relative_delta_to_xml_continuous": -2.5247572779655455e-09
+    },
+    "fine": {
+      "dp_m": 0.005,
+      "particle_count": 196608,
+      "xml_decimal_mass_per_particle_kg": 0.000125,
+      "xml_continuous_total_mass_kg": 24.576,
+      "native_float32_mass_per_particle_kg": 0.0001250000059371814,
+      "native_float32_hex": "6f120339",
+      "widened_double_value_kg": 0.0001250000059371814,
+      "exact_sum_n_times_f32_kg": 24.57600021362305,
+      "native_accumulated_sum_kg": 24.576001167297363,
+      "delta_to_xml_continuous_kg": 1.16729736328125e-06,
+      "relative_delta_to_xml_continuous": 4.7497451293945314e-08
+    }
+  },
+  "policy_and_scientific_assertions": {
+    "bitwise_payload_invariance_is_not_physical_zero_defect": {
+      "asserted": true,
+      "scientific_rationale": "Bitwise identity of mass datasets across HDF5 frames reflects IEEE-754 scalar preservation of unchanging particle mass attributes in solver memory. It does not demonstrate physical zero mass defect. Fluid particles leaving the computational domain are removed by DualSPHysics and become invalid; these invalid particles represent missing mass strictly accounted for as unknown loss."
+    },
+    "rescaling_and_normalization_forbidden": {
+      "asserted": true,
+      "scientific_rationale": "Rescaling or normalizing particle masses or cohort totals to match 24.576 kg continuous reference is strictly prohibited. All data must preserve native IEEE-754 arithmetic representation."
+    },
+    "v6_labels_ledger_uses_xml_decimal_weights": {
+      "asserted": true,
+      "scientific_rationale": "The v6 label generation multiplying counts by continuous XML decimal reference (0.001, 0.000512, 0.000125 kg) reports total mass 24.576 kg. This ledger is an XML decimal cohort projection and does not equal native typed float32 summation."
+    },
+    "native_weight_bitwise_label_mass_pass_claimable": {
+      "claimable": false,
+      "scientific_rationale": "Because the label mass ledger uses XML decimal weights, one cannot claim a native weight bitwise label mass pass."
+    },
+    "solver_invalid_particles_classified_as_unknown_loss": {
+      "asserted": true,
+      "counts": {
+        "fine_invalid_particles": 2151,
+        "medium_invalid_particles": 210,
+        "coarse_invalid_particles": 118
+      },
+      "scientific_rationale": "Solver invalid particles are permanently categorized as unknown_invalid loss in the campaign ledger. They are never inferred as physical spill or converted into a zero-defect pass."
+    },
+    "timing_save_allowance_fails_preserved": {
+      "asserted": true,
+      "frozen_contract_save_allowance_s": 0.0007336390799938275,
+      "actual_simulation_save_interval_s": 0.01,
+      "status": "diagnostic_failure_preserved",
+      "scientific_rationale": "Actual save interval 0.010 s fails the frozen contract allowance of 0.0007336391 s by ~13.6x. This diagnostic failure is recorded honestly without parameter gate relaxation or synthetic pass."
+    }
+  }
+}
