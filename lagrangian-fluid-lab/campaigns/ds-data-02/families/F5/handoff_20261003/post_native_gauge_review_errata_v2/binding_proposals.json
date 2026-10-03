@@ -1,0 +1,181 @@
+{
+  "schema": "ds02.f5.binding-proposals.v1",
+  "family_id": "F5",
+  "scope_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/post_native_gauge_review_errata_v2",
+  "diagnostic_focus": "independent_temporal_integration_qualification",
+  "purpose": "Standalone prospective execution-only transformer and binding proposals for genuine CFL 0.2->0.1 and CoefDtMin 0.05->0.025 at fine dp 0.010 m across RUNUP and WEIR mechanisms; launch_allowed=false; Root owner only.",
+  "status": "prospective_binding_ready_for_root_review",
+  "source_root_cohort_binding": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_native_gauge_cohort_diagnostic_038/binding.json",
+  "frozen_reader": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_surface_matched_gauge_review_035/gauge_evaluator_v2.py",
+  "frozen_reader_sha256": "8f858144b52a03ef207251bd84458bb8cdd0ee5d73bf2a6799cf168a8fc8e35a",
+  "quality_contract_source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/quality_contract.json",
+  "cases": {
+    "runup": {
+      "case_id": "F5_REF_RUNUP_DP010_TEMPORAL_HALFSTEP_040",
+      "attempt_id": "root-runup-fine-temporal-halfstep-cfl01-dtmin025-040",
+      "mechanism": "runup",
+      "dp_m": 0.010,
+      "physical_window_s": 16.0,
+      "timeout_s": 0.02,
+      "source_baseline_fine": {
+        "case_id": "F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024",
+        "attempt_id": "root-runup-surface-first-full16-native-027",
+        "execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-runup-surface-first-full16-native-027/execution-receipt.json",
+        "elapsed_seconds": 10134.827633891022,
+        "elapsed_gpu_hours": 2.8152298983030616,
+        "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024.xml",
+        "generated_xml_sha256": "1de0a403c525b01208062f46f1b53759ca798edce8221b05c389fc8006ef6c54",
+        "generated_xml_bytes": 32570,
+        "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-runup-surface-first-support-gencase-024/execution-receipt.json",
+        "gencase_receipt_sha256": "f0628e5720f4b3f42833b61ae5b42c2c1ad362560bb06120023a32350e1684b5",
+        "initial_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024.bi4",
+        "initial_bi4_sha256": "bbb32f38b0e5673700ecb09cf2822f3e6728566ebffea0842174532725fdaf86",
+        "bed_stl": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/assets/f5_continuous_bed_profile_slope_0p280.stl",
+        "bed_stl_sha256": "93cf180ae6d5439d3ed3e2787b390d3b1268d76f0069dbdeaa10b18bf3314621",
+        "piston_file": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/piston_f91973457a049db5_regular_piston.dat",
+        "piston_file_sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      },
+      "execution_mutation": {
+        "casedef_historical_cfl": {
+          "xpath": "case/casedef/constantsdef/cflnumber",
+          "value": "0.2",
+          "action": "PRESERVED_UNTOUCHED"
+        },
+        "execution_coefdtmin": {
+          "xpath": "case/execution/parameters/parameter[@key='CoefDtMin']",
+          "baseline_value": "0.05",
+          "mutated_value": "0.025",
+          "action": "MUTATED_EXACT"
+        },
+        "execution_cfl": {
+          "xpath": "case/execution/constants/cflnumber",
+          "baseline_value": "0.2",
+          "mutated_value": "0.1",
+          "action": "MUTATED_EXACT"
+        },
+        "mutated_xml_sha256": "d3f6ebcafdeb3051c32891f18678a3fe0e4e85b918e8711b3c184c2f593e0aed",
+        "mutated_xml_bytes": 32571,
+        "reversibility_proof": "Restoring CoefDtMin 0.025->0.05 and CFL 0.1->0.2 in execution block yields SHA256 1de0a403c525b01208062f46f1b53759ca798edce8221b05c389fc8006ef6c54 (identical to original)."
+      },
+      "clone_governance": {
+        "is_new_gencase": false,
+        "gencase_receipt_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-runup-surface-first-support-gencase-024/execution-receipt.json",
+        "gencase_receipt_sha256": "f0628e5720f4b3f42833b61ae5b42c2c1ad362560bb06120023a32350e1684b5",
+        "initial_bi4_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_RUNUP_DP010_SURFACE_FIRST_SUPPORT_024.bi4",
+        "initial_bi4_sha256": "bbb32f38b0e5673700ecb09cf2822f3e6728566ebffea0842174532725fdaf86",
+        "label": "execution_only_clone_preserving_original_gencase_bi4"
+      },
+      "expected_outputs": {
+        "particle_dumps": 801,
+        "particle_dump_pattern": "Part_%04d.bi4",
+        "gauge_rows": 800,
+        "gauge_probes": ["WG1", "WG2", "WG3", "WG4", "RunupToe", "Crest"],
+        "runparts_rows": 801
+      },
+      "resource_reservation": {
+        "conservative_max_wall_seconds": 28800,
+        "conservative_gpu_hours": 8.0,
+        "cpu_threads": 4,
+        "cpu_core_hours": 32.0,
+        "expected_elapsed_seconds": 20269.655,
+        "expected_gpu_hours": 5.630,
+        "estimated_storage_gib": 256.0
+      }
+    },
+    "weir": {
+      "case_id": "F5_REF_WEIR_DP010_TEMPORAL_HALFSTEP_040",
+      "attempt_id": "root-weir-fine-temporal-halfstep-cfl01-dtmin025-040",
+      "mechanism": "weir",
+      "dp_m": 0.010,
+      "physical_window_s": 16.0,
+      "timeout_s": 0.02,
+      "source_baseline_fine": {
+        "case_id": "F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024",
+        "attempt_id": "root-weir-surface-first-full16-native-027",
+        "execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-weir-surface-first-full16-native-027/execution-receipt.json",
+        "elapsed_seconds": 9465.463597198948,
+        "elapsed_gpu_hours": 2.6292954436663745,
+        "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024.xml",
+        "generated_xml_sha256": "e34fe0f2616f481049553ff122c25e3b2da771258450bec4f07ad34d239f5f5f",
+        "generated_xml_bytes": 33305,
+        "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-weir-surface-first-support-gencase-024/execution-receipt.json",
+        "gencase_receipt_sha256": "bb9bee845378f2c50fe6243ee37c9020161993c7a86f863a677cb2730a4e1d1c",
+        "initial_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024.bi4",
+        "initial_bi4_sha256": "a73ee03e75f5b13acd9df8488fbb1fc1542298ebe103b1aeb9024b610f57a7b1",
+        "bed_stl": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/assets/f5_continuous_bed_profile_slope_0p280.stl",
+        "bed_stl_sha256": "93cf180ae6d5439d3ed3e2787b390d3b1268d76f0069dbdeaa10b18bf3314621",
+        "piston_file": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/piston_4c73cd98b7230035_regular_piston.dat",
+        "piston_file_sha256": "8cb7dab0741348fa726401be9be64eebb3fbb519e2321594e00ee201d8c011be"
+      },
+      "execution_mutation": {
+        "casedef_historical_cfl": {
+          "xpath": "case/casedef/constantsdef/cflnumber",
+          "value": "0.2",
+          "action": "PRESERVED_UNTOUCHED"
+        },
+        "execution_coefdtmin": {
+          "xpath": "case/execution/parameters/parameter[@key='CoefDtMin']",
+          "baseline_value": "0.05",
+          "mutated_value": "0.025",
+          "action": "MUTATED_EXACT"
+        },
+        "execution_cfl": {
+          "xpath": "case/execution/constants/cflnumber",
+          "baseline_value": "0.2",
+          "mutated_value": "0.1",
+          "action": "MUTATED_EXACT"
+        },
+        "mutated_xml_sha256": "c69f453f7f81c670ce6fcc91f91bed0fa39807af7dda8f104d7dfd371194ec2d",
+        "mutated_xml_bytes": 33306,
+        "reversibility_proof": "Restoring CoefDtMin 0.025->0.05 and CFL 0.1->0.2 in execution block yields SHA256 e34fe0f2616f481049553ff122c25e3b2da771258450bec4f07ad34d239f5f5f (identical to original)."
+      },
+      "clone_governance": {
+        "is_new_gencase": false,
+        "gencase_receipt_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-weir-surface-first-support-gencase-024/execution-receipt.json",
+        "gencase_receipt_sha256": "bb9bee845378f2c50fe6243ee37c9020161993c7a86f863a677cb2730a4e1d1c",
+        "initial_bi4_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024/root-execution-inputs-026/F5_REF_WEIR_DP010_SURFACE_FIRST_SUPPORT_024.bi4",
+        "initial_bi4_sha256": "a73ee03e75f5b13acd9df8488fbb1fc1542298ebe103b1aeb9024b610f57a7b1",
+        "label": "execution_only_clone_preserving_original_gencase_bi4"
+      },
+      "expected_outputs": {
+        "particle_dumps": 801,
+        "particle_dump_pattern": "Part_%04d.bi4",
+        "gauge_rows": 800,
+        "gauge_probes": ["WG1", "WG2", "WG3", "WG4", "RunupToe", "Crest"],
+        "runparts_rows": 801
+      },
+      "resource_reservation": {
+        "conservative_max_wall_seconds": 28800,
+        "conservative_gpu_hours": 8.0,
+        "cpu_threads": 4,
+        "cpu_core_hours": 32.0,
+        "expected_elapsed_seconds": 18930.927,
+        "expected_gpu_hours": 5.259,
+        "estimated_storage_gib": 256.0
+      }
+    }
+  },
+  "invariant_physics_and_numerics": {
+    "characteristic_height_h_m": 0.40,
+    "fluid_mass_kg": 2352.0,
+    "fluid_density_kg_m3": 1000.0,
+    "gravity_m_s2": 9.81,
+    "gamma": 7.0,
+    "coefh": 1.5,
+    "b_pa": 218622.85714,
+    "rhopgradient": 3,
+    "density_dt_algorithm": 2,
+    "density_dt_value": 0.1,
+    "shifting": 0,
+    "visco": 0.01
+  },
+  "preregistered_evaluation": {
+    "evaluator_script": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_surface_matched_gauge_review_035/gauge_evaluator_v2.py",
+    "spatial_macro_error_budget": 0.05,
+    "temporal_integration_error_budget": 0.01,
+    "budget_source": "quality_contract.json (macro 0.05 * integration_error_share 0.2 = 0.01)",
+    "no_phase_alignment": true,
+    "no_threshold_loosening": true,
+    "permanence_of_prior_spatial_failure": "12% spatial failure remains strictly negative regardless of temporal diagnostic outcome."
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "ds02.f5.preregistered-integration-diagnostic.v1",
+  "family_id": "F5",
+  "target_scope": "campaigns/ds-data-02/families/F5/handoff_20261003/post_native_gauge_review_errata_v2",
+  "diagnostic_title": "F5 Preregistered Independent Temporal Integration Macro and Gauge Diagnostic",
+  "evaluation_context": {
+    "frozen_reader": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_surface_matched_gauge_review_035/gauge_evaluator_v2.py",
+    "frozen_reader_sha256": "8f858144b52a03ef207251bd84458bb8cdd0ee5d73bf2a6799cf168a8fc8e35a",
+    "characteristic_height_h_ref_m": 0.40,
+    "time_window_gauge_s": [0.0, 15.98],
+    "time_window_particles_s": [0.0, 16.0],
+    "expected_gauge_samples": 800,
+    "expected_particle_parts": 801,
+    "expected_runparts_rows": 801,
+    "probes": ["WG1", "WG2", "WG3", "WG4", "RunupToe", "Crest"]
+  },
+  "error_budget_specification": {
+    "spatial_macro_error_budget": 0.05,
+    "spatial_macro_absolute_tolerance_m": 0.020,
+    "temporal_integration_error_share": 0.20,
+    "temporal_integration_error_budget": 0.01,
+    "temporal_integration_absolute_tolerance_m": 0.004,
+    "budget_source": {
+      "file": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/quality_contract.json",
+      "macro_relative_error_budget_key": "q_n.macro_relative_error_budget (0.05)",
+      "integration_error_share_key": "q_n.integration_error_share (0.2)",
+      "derivation": "macro_relative_error_budget * integration_error_share = 0.05 * 0.20 = 0.01 (1.0% relative error = 4.0 mm absolute tolerance)",
+      "registration_status": "Formally read from frozen F5 quality_contract.json; not an unregistered claim."
+    }
+  },
+  "strict_methodological_invariants": {
+    "no_phase_alignment": true,
+    "no_threshold_loosening": true,
+    "no_time_shift": true,
+    "no_dry_sample_cherry_picking": true,
+    "full_physical_16s_preservation": true
+  },
+  "pairwise_evaluation_definition": {
+    "comparison_pairs": [
+      {
+        "mechanism": "runup",
+        "baseline_fine": "root-runup-surface-first-full16-native-027 (CFL=0.2, CoefDtMin=0.05, dp=0.010m)",
+        "diagnostic_temporal_halfstep": "root-runup-fine-temporal-halfstep-cfl01-dtmin025-040 (CFL=0.1, CoefDtMin=0.025, dp=0.010m)"
+      },
+      {
+        "mechanism": "weir",
+        "baseline_fine": "root-weir-surface-first-full16-native-027 (CFL=0.2, CoefDtMin=0.05, dp=0.010m)",
+        "diagnostic_temporal_halfstep": "root-weir-fine-temporal-halfstep-cfl01-dtmin025-040 (CFL=0.1, CoefDtMin=0.025, dp=0.010m)"
+      }
+    ],
+    "primary_metrics": [
+      "normalized_eta_rmse_m / H_ref (must be <= 0.010 for temporal pass)",
+      "normalized_eta_max_abs_m / H_ref (diagnostic observable)",
+      "runparts_npout_sum (must be == 0 across all 801 parts)",
+      "runparts_total_dtsmin_adjustments (diagnostic telemetry observable)"
+    ]
+  },
+  "falsification_and_permanence_matrix": {
+    "outcome_temporal_converged": {
+      "condition": "Normalized RMSE / H <= 0.01 (<= 4.0 mm) across all 6 gauges for both mechanisms",
+      "scientific_implication": "Baseline fine execution is rigorously confirmed to be temporally converged within the 1% contract budget.",
+      "impact_on_prior_spatial_failure": "The 12% Medium-vs-Fine spatial error observed at always-wet probes WG1 and WG2 is conclusively proven to be independent of temporal integration errors. The spatial convergence failure of the 3DP ladder remains an authentic negative result."
+    },
+    "outcome_temporal_unconverged": {
+      "condition": "Normalized RMSE / H > 0.01 (> 4.0 mm) on any probe or mechanism",
+      "scientific_implication": "Baseline fine execution exhibits non-negligible temporal discretization sensitivity at CFL=0.2, CoefDtMin=0.05.",
+      "impact_on_prior_spatial_failure": "The baseline spatial comparison was corrupted by temporal integration error, and spatial convergence was never demonstrated. The spatial failure stays strictly negative."
+    },
+    "governing_permanence_rule": "The prior always-wet ~12% spatial failure stays negative whichever temporal result occurs. Temporal qualification cannot retrospectively alter or rescue the negative spatial finding; it provides the missing independent verification required by quality_contract.json."
+  }
+}
