@@ -1,0 +1,199 @@
+{
+  "schema": "ds02.f3.fluid-only-adapter-implementation-design.v1",
+  "family_id": "F3",
+  "status": "design_submitted_for_root_review",
+  "created_at_utc": "2026-10-03T04:46:00+00:00",
+  "claim_boundary": {
+    "model_invoked": false,
+    "production": "not_evaluated",
+    "production_granted": false,
+    "q_i": "design_specification_only",
+    "q_n": "not_assessed",
+    "q_n_granted": false,
+    "materialization_status": "strictly_forbidden_pending_root_approval",
+    "shared_scripts_modified": false,
+    "scope": "Detailed implementation design for zero-copy in-memory transport reference adapter for historical fluid-only references R0081818 and REF-006"
+  },
+  "canonical_operator_compatibility_analysis": {
+    "target_canonical_script": "scripts/ds_data02_native_labels.py",
+    "target_canonical_sha256": "3cb07038e1a148a0429f52f36113b28b7fa34522955cf0c29f6356499beea19c",
+    "interface_requirements": {
+      "mandatory_attributes": {
+        "coordinate_frame": "Must equal config['coordinate_frame'] ('DualSPHysics case Cartesian coordinates (x,y,z)')"
+      },
+      "mandatory_datasets": [
+        "time",
+        "particle_id",
+        "particle_zone",
+        "position",
+        "valid",
+        "mass",
+        "type"
+      ],
+      "optional_datasets": [
+        "initial_mk",
+        "initial_type",
+        "initial_mass"
+      ],
+      "access_patterns": {
+        "time": "h['time'][:] -> 1D float64 strictly increasing",
+        "identity_keys": "np.column_stack((h['particle_zone'][:], h['particle_id'][:])) -> unique pairs",
+        "chunked_iteration": "Loops over particle slices sl = slice(begin, end) with particle_chunk=65536",
+        "chunk_datasets": [
+          "chunk_valid = h['valid'][:, sl].astype(bool)",
+          "chunk_type = h['type'][:, sl]",
+          "chunk_pos = h['position'][:, sl].astype(float)",
+          "chunk_mass = h['mass'][:, sl].astype(float)"
+        ],
+        "fluid_filter": "fluid = initial_valid & (chunk_type[0] == 3)",
+        "source_assignment": "locate(initial_pos, config['source_regions']) (initial_regions mode: requires 3D position at frame 0)"
+      },
+      "compatibility_gaps_in_native_files": {
+        "r0081818_and_ref006": [
+          "coordinate_frame attribute is missing from native HDF5 root attrs",
+          "type and mk datasets are stored as float32 rather than integer types",
+          "initial_type and initial_mass datasets are absent",
+          "Fixed boundary particles are not stored (only fluid particles are present)",
+          "ds_data02_native_labels.materialize() takes a filesystem Path, runs hashlib digest, and calls h5py.File(source, 'r')"
+        ]
+      }
+    }
+  },
+  "concrete_adapter_class_design": {
+    "class_name": "FluidOnlyTransportAdapter",
+    "architecture_pattern": "Duck-typed in-memory proxy wrapping a read-only h5py.File instance",
+    "zero_copy_policy": "Position, velocity, density, pressure, and valid arrays are accessed directly via h5py dataset slice proxies without allocating duplicate full-trajectory memory buffers.",
+    "no_synthetic_fixed_rows_policy": "The particle dimension N is strictly N_fluid (26,620 for R0081818, 67,500 for REF-006). The adapter MUST NOT synthesize or insert artificial fixed wall particles (types 0, 1, 2). All N particles are genuine fluid particles.",
+    "virtualized_datasets": {
+      "time": {
+        "backing": "native h['time']",
+        "shape": "(nt,)",
+        "dtype": "float64",
+        "nature": "zero-copy direct passthrough"
+      },
+      "particle_id": {
+        "backing": "native h['particle_id']",
+        "shape": "(n_fluid,)",
+        "dtype": "uint32",
+        "nature": "zero-copy direct passthrough (bound to GenCase fluid ranges: 61908..88527 for R0081818, 111708..179207 for REF-006)"
+      },
+      "particle_zone": {
+        "backing": "native h['particle_zone']",
+        "shape": "(n_fluid,)",
+        "dtype": "int16",
+        "nature": "zero-copy direct passthrough (all Zone 0)"
+      },
+      "position": {
+        "backing": "native h['position']",
+        "shape": "(nt, n_fluid, 3)",
+        "dtype": "float32",
+        "nature": "zero-copy direct passthrough"
+      },
+      "velocity": {
+        "backing": "native h['velocity']",
+        "shape": "(nt, n_fluid, 3)",
+        "dtype": "float32",
+        "nature": "zero-copy direct passthrough"
+      },
+      "valid": {
+        "backing": "native h['valid']",
+        "shape": "(nt, n_fluid)",
+        "dtype": "bool",
+        "nature": "zero-copy direct passthrough"
+      },
+      "density": {
+        "backing": "native h['density']",
+        "shape": "(nt, n_fluid)",
+        "dtype": "float32",
+        "nature": "zero-copy direct passthrough"
+      },
+      "pressure": {
+        "backing": "native h['pressure']",
+        "shape": "(nt, n_fluid)",
+        "dtype": "float32",
+        "nature": "zero-copy direct passthrough"
+      },
+      "type": {
+        "backing": "VirtualUniformSliceProxy(val=3, dtype=int8, shape=(nt, n_fluid))",
+        "shape": "(nt, n_fluid)",
+        "dtype": "int8",
+        "nature": "In-memory virtual array returning integer type 3 (fluid) on arbitrary slices [:, sl] without storing nt*n_fluid bytes on disk"
+      },
+      "mass": {
+        "backing": "VirtualUniformSliceProxy(val=mass_per_fluid_particle, dtype=float64, shape=(nt, n_fluid))",
+        "shape": "(nt, n_fluid)",
+        "dtype": "float64",
+        "nature": "In-memory virtual array returning exact anchor MassFluid (0.0005477085041322314 kg for R0081818, 0.000216 kg for REF-006) on arbitrary slices [:, sl]"
+      },
+      "initial_type": {
+        "backing": "np.full(n_fluid, 3, dtype=np.int8)",
+        "shape": "(n_fluid,)",
+        "dtype": "int8",
+        "nature": "Lightweight 1D numpy array representing fluid type"
+      },
+      "initial_mass": {
+        "backing": "np.full(n_fluid, mass_per_fluid_particle, dtype=np.float64)",
+        "shape": "(n_fluid,)",
+        "dtype": "float64",
+        "nature": "Lightweight 1D numpy array matching exact GenCase initial particle mass"
+      },
+      "initial_mk": {
+        "backing": "np.full(n_fluid, 1, dtype=np.int16)",
+        "shape": "(n_fluid,)",
+        "dtype": "int16",
+        "nature": "Lightweight 1D numpy array indicating MK=1 fluid"
+      }
+    },
+    "virtualized_attrs": {
+      "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+      "coordinate_frame_source": "Prescribed container coordinate frame",
+      "schema": "ds-data-02.hdf5-schema.v1-virtual-adapted",
+      "adapter_provenance": {
+        "adapter_name": "FluidOnlyTransportAdapter",
+        "source_hdf5_immutable": true,
+        "synthetic_fixed_particles": false,
+        "anchor_verified": true
+      }
+    }
+  },
+  "non_intrusive_integration_design": {
+    "boundary_rule": "Shared scripts in scripts/ MUST NOT be modified by family delegations.",
+    "execution_options_for_root_review": [
+      {
+        "option_id": "option_a_scoped_audit_runner",
+        "description": "Implement the adapter in a dedicated scoped file lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/historical_cell3_reuse_v1/audit/f3_fluid_only_transport_adapter_v1.py. The runner imports the canonical mathematical operator functions (validate_config, locate, initial_sources, finite_crossing, chord_box_fraction) directly from scripts/ds_data02_native_labels.py, wraps the native HDF5 with FluidOnlyTransportAdapter, and materializes typed-transport-labels.h5 with identical mathematical and schema contracts.",
+        "pros": "Zero modification to shared repository scripts; fully isolated within Family F3 handoff; 100% mathematical equivalence to canonical operator.",
+        "cons": "Requires a dedicated scoped runner script for fluid-only cases."
+      },
+      {
+        "option_id": "option_b_root_shared_hook",
+        "description": "Codex root adds an open_h5_source(source_path_or_adapter) hook to scripts/ds_data02_native_labels.py during global integration, enabling the canonical script to natively accept adapted objects or register adapter plugins.",
+        "pros": "Single unified CLI entrypoint across all cases.",
+        "cons": "Requires primary root code integration and deployment."
+      }
+    ],
+    "recommended_approach": "Option A for family-level verification and audit; Option B if primary Codex root desires global standardization."
+  },
+  "meaningful_validation_plan": {
+    "step_1_schema_contract_audit": {
+      "method": "Instantiate FluidOnlyTransportAdapter on R0081818-NOMINAL.h5 and REF-006.h5; verify all 11 required datasets exist, have correct shapes, and support slicing [:, sl]. Verify attrs['coordinate_frame'] is present.",
+      "pass_criteria": "No KeyError or AttributeError; shape[1] == n_fluid; initial_type == 3; initial_mass == MassFluid."
+    },
+    "step_2_partvtk_anchor_correspondence": {
+      "method": "Verify positions at frames [0, 418, 835] match the verified PartVTK anchor receipts (r0081818-nominal-partvtk-anchor-audit-001 and ref006-nominal-partvtk-anchor-audit-001).",
+      "pass_criteria": "Max position residual < 5.0e-9 m; total fluid mass == 14.580000 kg exact."
+    },
+    "step_3_dry_run_operator_evaluation": {
+      "method": "Execute canonical crossing and residence operators on the adapted object in memory with output written to a temporary test path; verify zero NaN, zero bracket reversals, and exact mass conservation.",
+      "pass_criteria": "total_initial_mass == 14.580000 kg; destination_time_series values in [-3, -2, -1, 0, 1, 2]; no unhandled exceptions."
+    },
+    "step_4_labels_closure_checks": {
+      "method": "Run the canonical 58-rule label closure suite on the generated labels file.",
+      "pass_criteria": "58/58 checks passed (fluid mass closed, brackets positive, source regions partitioned, unknown/lost/invalid accounting consistent)."
+    },
+    "step_5_root_signoff_gate": {
+      "method": "Present adapter implementation design, anchor evidence, and validation test results to primary Codex root.",
+      "pass_criteria": "Zero label materialization on disk until explicit primary root authorization."
+    }
+  }
+}
