@@ -1,0 +1,72 @@
+{
+  "schema": "ds02.f6.stage1-omega-initial-native-qa-contract.v1",
+  "family_id": "F6",
+  "scope_id": "root_followup_064_stage1_omega_initial_native_qa_v1",
+  "status": "source_only_disabled",
+  "endpoints": [
+    {
+      "endpoint_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S025_DP025",
+      "omega_rad_s": [0.02, 0.03, 0.015]
+    },
+    {
+      "endpoint_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025",
+      "omega_rad_s": [0.16, 0.24, 0.12]
+    }
+  ],
+  "native_counts": {
+    "fixed": 73441,
+    "moving": 0,
+    "floating": 16384,
+    "fluid": 327680,
+    "total": 417505
+  },
+  "physical_contract": {
+    "center_m": [2.4, 1.2, 1.08],
+    "body_low_m": [2.0, 0.8, 0.88],
+    "body_high_m": [2.8, 1.6, 1.28],
+    "fluid_low_m": [0.4, 0.4, 0.04],
+    "fluid_high_m": [4.4, 2.0, 0.84],
+    "density_kg_m3": 1000.0,
+    "fluid_mass_kg": 5120.0,
+    "physical_body_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "masspart_kg": 0.015625,
+    "dp_m": 0.025,
+    "true_3d": true
+  },
+  "checks": [
+    "hash-bound source plan, source definitions, canonical owners, generated XML/BI4, and completed 073 receipts",
+    "generated XML angular declaration equals its own source and the endpoint omega",
+    "generated XML center, physical mass, masspart, free 6DOF, density, count, and data2d contracts",
+    "official PartVTK CSV rows have finite UID/type/mk/position/velocity/weight/density values",
+    "UIDs are unique and complete over [0, 417505)",
+    "type/mk partitions and exact fixed/moving/floating/fluid counts",
+    "true 3D coordinate diversity, unique coordinates, and no gross body-fluid/body-fixed overlap",
+    "finite zero initial fluid velocities and zero serialized GenCase body particle velocities",
+    "weighted floating centroid and physical bounds",
+    "native support mass 256 kg remains distinct from physical body mass 128 kg and masspart 0.015625 kg"
+  ],
+  "angular_boundary": "GenCase particle V0=0 is only a serialization observation; it cannot establish zero angular velocity. Full native FloatingInfo state0 is required for angular propagation.",
+  "mass_boundary": "Do not equate or normalize native support mass, physical rigid-body mass, and solver masspart.",
+  "historical_evidence": {
+    "qa019": "preserved and not rejudged",
+    "semantic020": "preserved and not rejudged"
+  },
+  "output_contract": {
+    "root": "{attempt_root}/initial-native-qa",
+    "per_endpoint": "{attempt_root}/initial-native-qa/<endpoint_id>/",
+    "partvtk_csv": "<endpoint_dir>/partvtk/initial_particles.csv",
+    "partvtk_receipt": "<endpoint_dir>/partvtk/partvtk-receipt.json",
+    "endpoint_report": "<endpoint_dir>/initial-native-qa.json",
+    "index": "{attempt_root}/initial-native-qa/initial-native-qa-index.json",
+    "fresh_csv": true,
+    "solver_output": false,
+    "h5": false,
+    "floatinginfo": false,
+    "production_approval": "none",
+    "q_n_status": "not_assessed",
+    "precision_status": "not_accepted"
+  },
+  "independent_case_count_increment": 0,
+  "launch_allowed": false
+}
