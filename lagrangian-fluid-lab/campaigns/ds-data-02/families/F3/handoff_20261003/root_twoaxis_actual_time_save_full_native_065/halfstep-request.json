@@ -13,10 +13,10 @@
   "command": [
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DP006_TWOAXIS_TIME_SAVE_EXECUTION_CLONES/root-dp006-twoaxis-time-save-exact-initial-clones-064/prepared/halfstep/F3_CELL3_LONG_DP006_AY0P50_HALF_CFL025_COEF0025",
-    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/prepared/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005",
     "{attempt_root}/solver_output",
+    "-tmax:8.35",
     "-tout:0.01",
-    "-tout:0.01"
+    "-mdbc_noslip:1"
   ],
   "gencase_prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DP006_TWOAXIS_TIME_SAVE_EXECUTION_CLONES/root-dp006-twoaxis-time-save-exact-initial-clones-064/prepared/halfstep/F3_CELL3_LONG_DP006_AY0P50_HALF_CFL025_COEF0025",
   "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/execution-receipt.json",
@@ -74,7 +74,7 @@
       "units_comment": "m/s^2"
     },
     "cflnumber": {
-      "value": "0.05"
+      "value": "0.025"
     },
     "gamma": {
       "value": "7"
@@ -140,9 +140,9 @@
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DP006_TWOAXIS_TIME_SAVE_EXECUTION_CLONES/root-dp006-twoaxis-time-save-exact-initial-clones-064/prepared/clone-report.json": "866c94e5637f98ac18278c63527b6ebf534220a3621d96cdcf15900b2b63ab6e",
     "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_twoaxis_authoritative_semantic_sidecars_063/dp006-binding.json": "d0fb0355004b265f1488a44c5923ff18a13e77d823f481a495c0f327f370f5fe"
   },
-  "physical_condition_sha256": "86562c5afee8228131d58c1b53f360eb6c6a700381c01bf807a0f268bbc675c0",
+  "physical_condition_sha256": "49d16330fd5267668670f166a20191bfb00c5223ad5528439630c7e62dd4c6a0",
   "physical_binding": {
-    "control_family_id": "F3_CTRL_LEGACY_SINGLE_AXIS",
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
     "controls": {
       "boundary": {
         "boundary_parameter": 2,
@@ -165,7 +165,7 @@
       "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
       "sequence": [
         "initial static fill",
-        "prescribed legacy single-axis acceleration",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
         "finite x=0 exchange and legal top-open diagnostic"
       ],
       "time_end_s": 8.35,
@@ -285,9 +285,10 @@
     "physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
     "schema": "ds-data-02.physical-binding.v1"
   },
-  "actual_continuum_binding": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_actual_twoaxis_full_native_060/dp006/physical-binding.json",
+  "actual_continuum_binding": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_twoaxis_authoritative_semantic_sidecars_063/dp006-binding.json",
   "input_preparation_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DP006_TWOAXIS_TIME_SAVE_EXECUTION_CLONES/root-dp006-twoaxis-time-save-exact-initial-clones-064/execution-receipt.json",
   "source_input_clone_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DP006_TWOAXIS_TIME_SAVE_EXECUTION_CLONES/root-dp006-twoaxis-time-save-exact-initial-clones-064/prepared/clone-report.json",
   "authoritative_physical_binding": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_twoaxis_authoritative_semantic_sidecars_063/dp006-binding.json",
-  "qualification_boundary": "Full8.35 independent actual twoaxis time/save controls; singleaxis spatial/time/save results do not grant Q-N for this mechanism"
+  "qualification_boundary": "Full8.35 independent actual twoaxis time/save controls; singleaxis spatial/time/save results do not grant Q-N for this mechanism",
+  "original_consumed_condition_sha256": "86562c5afee8228131d58c1b53f360eb6c6a700381c01bf807a0f268bbc675c0"
 }
