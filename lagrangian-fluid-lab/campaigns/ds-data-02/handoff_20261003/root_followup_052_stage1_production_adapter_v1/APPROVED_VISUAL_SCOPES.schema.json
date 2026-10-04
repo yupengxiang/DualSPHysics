@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds02.root-approved-visual-scopes.v1",
+  "title": "DS-DATA-02 root-owned Stage 1 visual production scopes",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "campaign_id", "goal_authority", "scopes"],
+  "properties": {
+    "schema": {"const": "ds02.root-approved-visual-scopes.v1"},
+    "campaign_id": {"const": "DS-DATA-02"},
+    "goal_authority": {
+      "$ref": "#/$defs/binding",
+      "description": "Exact hash of the active updated Stage 1 visual GOAL."
+    },
+    "scopes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/scope"}
+    }
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": true
+    },
+    "evidenceSet": {
+      "type": "object",
+      "required": ["mother", "endpoints", "interior", "final_visualization_decision", "integrity"],
+      "properties": {
+        "mother": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/binding"}},
+        "endpoints": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/binding"}},
+        "interior": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/binding"}},
+        "final_visualization_decision": {"$ref": "#/$defs/binding"},
+        "integrity": {"$ref": "#/$defs/binding"}
+      },
+      "additionalProperties": true
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "family_id", "scope_id", "visual_stage_profile", "root_visual_decision",
+        "visual_evidence", "physical_domain", "case_manifest"
+      ],
+      "properties": {
+        "family_id": {"type": "string"},
+        "scope_id": {"type": "string"},
+        "visual_stage_profile": {"const": "stage1_visual"},
+        "goal_authority": {"$ref": "#/$defs/binding"},
+        "root_visual_decision": {"$ref": "#/$defs/binding"},
+        "visual_evidence": {"$ref": "#/$defs/evidenceSet"},
+        "physical_domain": {"$ref": "#/$defs/binding"},
+        "case_manifest": {"$ref": "#/$defs/binding"}
+      },
+      "additionalProperties": true
+    }
+  }
+}
