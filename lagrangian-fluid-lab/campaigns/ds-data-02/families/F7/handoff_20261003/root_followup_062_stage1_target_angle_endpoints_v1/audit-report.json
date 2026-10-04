@@ -1,0 +1,95 @@
+{
+  "schema": "ds02.f7.target-angle-endpoints-source-audit.v1",
+  "family_id": "F7",
+  "scope_id": "root_followup_062_stage1_target_angle_endpoints_v1",
+  "status": "source prepared; all Root strict requests disabled",
+  "model_policy": {
+    "authorized_model": "GPT-5.6 Luna/max",
+    "gemini": false,
+    "recursive_agents": false
+  },
+  "checks": {
+    "exactly_two_endpoints": {
+      "expected": 2,
+      "observed": 2,
+      "status": "pass"
+    },
+    "first8_target_angle_endpoint_values": {
+      "values_deg": [30.0, 65.0],
+      "status": "pass"
+    },
+    "single_amplitude_dimension": {
+      "axis": "paddle_amplitude_deg",
+      "status": "pass"
+    },
+    "one_dp_per_physical_case": {
+      "dp_m": 0.02,
+      "status": "pass"
+    },
+    "full_native_window": {
+      "frames": 601,
+      "window_s": [0.0, 12.0],
+      "save_interval_s": 0.02,
+      "status": "pass"
+    },
+    "exact_source_definition_clones": {
+      "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "status": "pass"
+    },
+    "source_geometry_pivot_and_moving_type_bound": {
+      "pivot_p1_m": [-0.04, 0.0, 0.05],
+      "pivot_p2_m": [-0.04, 0.0, 1.05],
+      "moving_type": 1,
+      "status": "pass"
+    },
+    "explicit_wet_geometry_and_mass_policy_bound": {
+      "wet_fluid_mass_kg": 325.60001628000003,
+      "continuum_envelope_mass_kg": 320.1984,
+      "rescale": false,
+      "status": "pass"
+    },
+    "motion_source_builder": {
+      "status": "request_only; not_performed"
+    },
+    "genuine_gencase_for_new_endpoints": {
+      "status": "request_only; not_performed"
+    },
+    "initial_native_uid_type_mass_full3d_qa": {
+      "status": "request_only; not_performed"
+    },
+    "source_arrays_materialized": {
+      "status": "not_performed"
+    },
+    "csv_generated": {
+      "status": "not_performed"
+    },
+    "solver": {
+      "status": "not_performed"
+    },
+    "conversion": {
+      "status": "not_performed"
+    },
+    "rendering": {
+      "status": "not_performed"
+    }
+  },
+  "negative_evidence_preserved": [
+    "analytic quintic target is C2 but native sampled interpolation is piecewise linear and not C2",
+    "historical 43.011 percent KE discrepancy",
+    "paired transport and numerical inventories remain unknown where recorded",
+    "q_n is not granted",
+    "visual acceptance is pending whole-window review"
+  ],
+  "root_sequence": [
+    "review the exact source Definition and endpoint amplitude payloads",
+    "run disabled motion preparation for both endpoint amplitudes",
+    "run genuine GenCase for each fresh prepared Definition",
+    "run initial native QA against actual XML/BI4 prefixes and receipts",
+    "review native piecewise-linear motion and full-window dynamic evidence before any solver qualification"
+  ],
+  "independent_case_count_increment": 0,
+  "launch_allowed": false,
+  "production_approval": "none",
+  "q_n_status": "not_assessed",
+  "precision_status": "not_accepted"
+}
