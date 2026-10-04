@@ -237,8 +237,18 @@ def check_rows(binding: dict, case: dict, rows: np.ndarray) -> dict:
     particle_type = rows[:, 5].astype(np.int64)
     mk = rows[:, 6].astype(np.int64)
     require(bool(np.equal(zone, 0).all()), f"{case['case_id']}: nonzero zones present")
-    require(bool(np.array_equal(idp, np.arange(expected["total_particles"]))), f"{case['case_id']}: Idp is not exact sorted 0..N-1")
+    require(bool(np.array_equal(np.sort(idp), np.arange(expected["total_particles"]))), f"{case['case_id']}: Idp set is not exact 0..N-1")
     require(bool(np.unique(idp).size == expected["total_particles"]), f"{case['case_id']}: duplicate/lost Idp")
+    # PartVTK normally emits Idp order, but the contract is per UID rather than
+    # an incidental export order.  Normalize once, then apply every block and
+    # spatial check to the UID-ordered rows.
+    order = np.argsort(idp, kind="stable")
+    rows = rows[order]
+    zone = zone[order]
+    idp = idp[order]
+    particle_type = particle_type[order]
+    mk = mk[order]
+    require(bool(np.array_equal(idp, np.arange(expected["total_particles"]))), f"{case['case_id']}: UID normalization failed")
 
     block_checks = {}
     for block in expected["type_mk_blocks"]:
