@@ -1,0 +1,1 @@
+Full801 visual evidence only, not visual acceptance. Root diagnostic026 actual nativefluid late geometry POSSIBLY crosses bed; gray sidewall obscures profile. GPT source diagnostic056 requested for allframe point-vs-bed support, native states unmodified. Preserve rawoldmacrofailures, no invented rootcause.
