@@ -52,7 +52,7 @@ def main():
     if report['rows_processed'] != 167001 or report['source_sha256_before'] != report['source_sha256_after']:
         raise ValueError('Full original source/time grid missing')
     prefix = args.output_dir / b['case_id']
-    command = [b['gen_binary'], str(target_definition.with_suffix('')), str(prefix), '-save:all']
+    command = [b['gen_binary'], str(target_definition.with_suffix('')), str(prefix), '-save:all', '-threads:1']
     run = subprocess.run(command,capture_output=True,text=True)
     # Preserve official stdout for the shared runner's independent count parser.
     sys.stdout.write(run.stdout)
