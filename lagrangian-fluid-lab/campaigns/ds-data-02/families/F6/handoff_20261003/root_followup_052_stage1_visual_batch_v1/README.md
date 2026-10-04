@@ -25,6 +25,8 @@ The anchor is `F6_ANGULAR_RELEASE_DP025` from the corrected actual coarse releas
 
 The native typed contract is 417505 particles: 73441 fixed, 16384 floating (`Type=2`, `Mk=60`), and 327680 fluid (`Type=3`, `Mk=1`). The floating cohort is the immutable `(Zone, Idp)` identity across all 241 native parts. The actual body geometry report gives coarse centroid RMSE `1.1677086400117034e-09 m`, maximum centroid error `1.4104177250374626e-08 m`, maximum rigidity RMS `3.774058599973532e-06 m`, and maximum rigidity residual `7.582456991238951e-06 m`. These are descriptive source evidence; the report grants no Q-N or production claim, and the orientation budget remains unregistered.
 
+The future fulltyped request preserves all 13 native per-particle state fields: `particle_id`, `particle_zone`, `valid`, `position`, `velocity`, `density`, `mass`, `pressure`, `type`, `mk`, `initial_type`, `initial_mk`, and `initial_mass`. `time` is a separate native frame axis. The requested position scope covers fixed, floating, and fluid particles over all 241 native states; no recount of views, exports, or frames is introduced.
+
 ## Mass and QA boundary
 
 The physical rigid body is 128 kg with diagonal inertia `[8.53333333333, 8.53333333333, 13.6533333333] kg m2`. The native PartVTK support column sums to 256 kg because it represents a `0.256 m3 * 1000 kg/m3` support volume. The semantic audit also reports a derived uniform physical diagnostic node weight of `0.0078125 kg`, while the coarse solver interaction `masspart` is `0.015625 kg`. These quantities are deliberately kept separate. The native support column is preserved byte-for-byte and is never normalized to 128 kg.
