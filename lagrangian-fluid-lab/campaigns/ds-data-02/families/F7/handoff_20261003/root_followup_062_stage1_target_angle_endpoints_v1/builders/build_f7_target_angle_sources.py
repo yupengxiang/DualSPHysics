@@ -133,6 +133,13 @@ def prepare(plan_path: Path, output_root: Path, execute: bool) -> int:
         definition_path = endpoint_root / str(Path(endpoint["prepared_definition_relative"]).name)
         amplitude = float(endpoint["amplitude_deg"])
         motion_content = motion.generate_motion_dat_content(amplitude, 12.0, 0.001)
+        motion_rows = [
+            line.split()
+            for line in motion_content.splitlines()
+            if line and not line.startswith("#")
+        ]
+        if len(motion_rows) != 12001 or motion_rows[0] != ["0", "0"] or float(motion_rows[-1][0]) != 12.0 or float(motion_rows[-1][1]) != 0.0:
+            raise RuntimeError(f"endpoint motion source does not cover the exact 0..12 s window: {endpoint_id}")
         motion_sha = motion.write_motion_file_exclusive(motion_path, motion_content)
         definition_text = motion.generate_smooth_c2_definition_xml(source_clone, motion_path.name)
         definition_path.write_text(definition_text, encoding="utf-8")
@@ -155,7 +162,7 @@ def prepare(plan_path: Path, output_root: Path, execute: bool) -> int:
                 "prepared_definition_sha256": sha256(definition_path),
                 "motion_file": str(motion_path),
                 "motion_file_sha256": motion_sha,
-                "motion_rows": sum(1 for line in motion_content.splitlines() if line and not line.startswith("#")),
+                "motion_rows": len(motion_rows),
                 "source_recipe": source_meta,
                 "motion_only_undo": undo,
                 "geometry_policy": "source Definition geometry and execution fields retained; motion subtree only",
