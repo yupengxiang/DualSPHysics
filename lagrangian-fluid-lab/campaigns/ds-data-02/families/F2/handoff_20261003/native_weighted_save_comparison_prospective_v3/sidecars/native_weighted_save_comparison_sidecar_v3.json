@@ -1,0 +1,88 @@
+{
+  "schema": "ds-data-02.f2.native-weighted-save-comparison-sidecar.v3",
+  "family_id": "F2",
+  "case_id": "F2_RV4EQ_DP005_OFFSET_V1_SAVE_COMPARISON_V3",
+  "generated_at_utc": "2026-10-04T03:30:00Z",
+  "root_038_remediation_summary": {
+    "flaws_identified_in_v2": [
+      "Worker execute_full_h5_comparison still used aggregate JSON residence only; extract_arrays_from_h5 merely checked has_residence_dataset.",
+      "Frozen V6 does not store per-UID residence dataset in H5; per-UID residence must be derived by streaming destination_code array.",
+      "Unsafe output open w overwritten output files; lacked exclusive 'x' mode creation with prior-existence check.",
+      "Temporary copy did not use process-owned tempfile.TemporaryDirectory; lacked 32 GiB registered cap check and pre/post read byte hashes.",
+      "Direct read path ignored expected_sha argument.",
+      "Overlap condition retained invented +1e-12 interval extension instead of literal closed interval intersection."
+    ],
+    "remediations_implemented_in_v3": [
+      "Streams destination_code (frames, n) in bounded chunks, deriving per-UID residence for all 5 destination codes (unknown, cup, receiver, tray, inflight) using unchanged V6 trapezoid rule: 0.5 * (I[k-1] + I[k]) * dt.",
+      "Verifies per-UID residence sum strictly equals full actual duration (times[-1] - times[0]) for all particles.",
+      "Verifies weighted sums reproduce JSON observation residence within floating-point summation reassociation roundoff (< 1e-8 kg*s).",
+      "Reports descriptive per-UID residence gaps (mass-weighted mean absolute gap, max, p50, p90, p95, p99 percentiles, and gap particle counts/fractions) without speculative acceptance thresholds.",
+      "Maintains separate reporting for aggregate JSON residence inventory and cumulative event mass flux.",
+      "Enforces literal closed saved bracket intersection max(t_s,nom, t_s,dense) <= min(t_e,nom, t_e,dense); completely eliminated invented +1e-12 interval extension.",
+      "Verifies event tuple integrity against particle arrays and frame brackets.",
+      "Safe exclusive output file creation using mode 'x' with prior-existence checks for both JSON and Markdown outputs.",
+      "Scratch protected >= 100 GiB floor and <= 32 GiB registered cap checks; process-owned tempfile.TemporaryDirectory with single source copy at a time and pre/post read byte hashes.",
+      "Direct path explicitly verifies expected_sha when provided."
+    ]
+  },
+  "continuum_invariance": {
+    "physical_condition_hash": "327899e38bbad63951206d5b2fd3ef354c049a32f6671af1af7913a48b77c7ef",
+    "geometry_sha256": "dc2f2d1ab3d842a25fd8025a33b1c81920e1caebe0fd354fbff68bfa89b3e9a9",
+    "control_sha256": "c500385285845193cb16f526499b9450bc1691f9744e63e1b03c15fb996eff82",
+    "motion_control_sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70",
+    "operator_version": "f2-moving-cup-local-z-top-v8-native-mass-bound",
+    "operator_sha256": "ab94031d3699bcfa025d2405e5707a2a2f7371877ddcff1b5d132f08c8827406",
+    "frozen_v6_base_version": "f2-moving-cup-local-z-top-v6",
+    "fluid_particles": 196608
+  },
+  "mass_precision_accounting": {
+    "native_single_particle_mass_kg": 0.0001250000059371814,
+    "native_cohort_mass_kg": 24.576001167297363,
+    "continuous_xml_benchmark_kg": 24.576,
+    "continuous_xml_single_mass_kg": 0.000125,
+    "representation_delta_kg": 1.1672973627696592e-06,
+    "relative_representation_delta": 4.749745128457272e-08,
+    "legacy_1e12_budget": 1e-12,
+    "diagnostic_1e12_status": "fail",
+    "no_rescaling": true,
+    "no_automatic_snapping": true
+  },
+  "temporal_save_half_width_budget": {
+    "save_half_width_budget_s": 0.0007336390799938275,
+    "event_time_absolute_budget_s": 0.0036681953999691376,
+    "save_fraction_max": 0.2,
+    "nominal401_observed_half_width_s": 0.005,
+    "nominal401_determination": "fail",
+    "dense4001_observed_half_width_s": 0.0005,
+    "dense4001_determination": "pass",
+    "governance_note": "A passing save bracket half-width satisfies observation discretization budget only; does not grant Q-N or production approval."
+  },
+  "native_exclusions": {
+    "rows": 2151,
+    "motive": 1,
+    "physical_spill_inferred": false,
+    "retained_as": "unknown_invalid",
+    "unknown_mass_kg": 0.2688750127708772
+  },
+  "per_uid_residence_protocol": {
+    "rule": "0.5 * (I[k-1] + I[k]) * dt",
+    "destinations": [
+      "unknown",
+      "cup",
+      "receiver",
+      "tray",
+      "inflight"
+    ],
+    "streaming_chunk_frames": 64,
+    "no_dense_trajectory_copy": true,
+    "duration_equality_invariance": true,
+    "weighted_sum_reproduction_invariance": true,
+    "acceptance_threshold": "none; descriptive gap reporting only"
+  },
+  "claim_boundary": {
+    "q_n": "not_granted",
+    "production": "none",
+    "q_i": "not_granted; post-labels observation cross-comparison",
+    "execution_status": "prospective_worker_staged_for_root_dispatch"
+  }
+}
