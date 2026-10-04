@@ -1,0 +1,150 @@
+{
+  "role": "reference_control_internal_probe",
+  "case_id": "F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005",
+  "dp_m": 0.005,
+  "amplitude": 0.97,
+  "expected_fluid": 116640,
+  "expected_total": 275940,
+  "definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_additional_commensurate_adaptive_input_033/definitions/F3_CELL3_plain_0p005_Def.xml",
+  "anchor_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_true_adaptive_spatial_input_review_023/definitions/F3_CELL3_plain_0p0075_Def.xml",
+  "anchor_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005.xml",
+  "gen_binary": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+  "source_forcing": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/CaseSloshingAccData.csv",
+  "source_forcing_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+  "prediction_status": "Theoretical integer lattice only; actual GenCase/native array audit pending.",
+  "root_nominal_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_additional_commensurate_adaptive_input_033/definitions/F3_CELL3_plain_0p005_Def.xml",
+  "physical_binding": {
+    "control_family_id": "F3_CTRL_LEGACY_SINGLE_AXIS",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed legacy single-axis acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "legacy_plain_sloshing",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "legacy_plain",
+    "parameters": {
+      "acceleration_source_semantics": "CaseSloshingAccData.csv from frozen CELL3 nominal source; acctimesfile binding",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "reference_variant": "NOMINAL",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ]
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_CELL3_LONG_dp0p0075_a1p000_noslip_visco1_nopen",
+    "schema": "ds-data-02.physical-binding.v1"
+  }
+}
