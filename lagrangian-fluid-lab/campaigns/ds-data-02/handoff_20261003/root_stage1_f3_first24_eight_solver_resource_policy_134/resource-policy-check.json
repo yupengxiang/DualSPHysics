@@ -1,0 +1,32 @@
+{
+  "source_path": "/tmp/ds02_root_all_idle_gpu_policy_v2.py",
+  "source_sha256": "4e6f340222f7823ae9df1a145ccda884dcf401c9740fc78c51a88066ae1c88cd",
+  "effective_policy": {
+    "core_file_sha256": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "original_function_sha256": "e3f1339feca00d074e13c96dfd1540c7c3b10d83644cd15beb6e7ffb1b56df1f",
+    "effective_function_sha256": "46e62ea197862a833797556d09350126b3632b2e3b1d496d08816ee42f7abecf",
+    "only_change": {
+      "before": "if len(active) >= 4:",
+      "after": "if len(active) >= 8:"
+    },
+    "other_source_bytes_identical": true,
+    "core_file_modified": false
+  },
+  "checks": [
+    "four active native jobs allow a fifth under explicit cap eight",
+    "eight active native jobs reject a ninth",
+    "GPU budget remains enforced",
+    "CPU budget remains enforced",
+    "deadline remains enforced",
+    "attempt reuse remains rejected",
+    "production attempt cap remains enforced",
+    "Home floor remains enforced",
+    "shared 64-thread cap remains enforced",
+    "two-conversion cap remains enforced",
+    "foreign GPU processes and existing UUID leases remain excluded",
+    "original process-local policy restored after exception"
+  ],
+  "all_passed": true,
+  "fixture_only_no_shared_state_mutation": true,
+  "gpu_started": false
+}
