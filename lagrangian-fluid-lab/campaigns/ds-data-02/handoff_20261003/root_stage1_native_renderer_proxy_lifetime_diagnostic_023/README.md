@@ -1,0 +1,1 @@
+020 produced all three PNG and integrity report but native process exited with segmentation fault during teardown; original receipt failed, not accepted. Bounded normal proxy-lifetime repair: keep reader/scene/filter/views graph referenced through main completion, mirroring proven F3 ownership. No os._exit or ignored error. One-frame root strict diagnostic before full runs.
