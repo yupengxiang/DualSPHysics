@@ -1,0 +1,72 @@
+{
+  "schema": "ds02.f6.frame0-omega-csv-decoder-contract.v1",
+  "family_id": "F6",
+  "scope": "root_followup_059_stage1_frame0_omega_csv_decoder_audit_v1",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "status": "source_only_disabled",
+  "case": {
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+    "native_case_id": "F6_ANGULAR_RELEASE_DP025",
+    "dp_m": 0.025,
+    "native_frames": 241,
+    "native_particles": 417505,
+    "type2": 2,
+    "type2_mk": 60,
+    "type2_start": 73441,
+    "type2_count": 16384,
+    "declared_center_m": [2.4, 1.2, 1.08],
+    "declared_omega_rad_s": [0.08, 0.12, 0.06],
+    "physical_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "mass_policy": "preserve physical body mass and native support sum as distinct; no rescale"
+  },
+  "typed_h5_contract": {
+    "frames": [0, 1],
+    "frame_role": {"0": "native frame zero", "1": "first saved frame if present"},
+    "slice": {"start": 73441, "count": 16384, "type": 2, "mk": 60},
+    "fields": ["position", "velocity", "valid", "particle_id", "particle_zone", "type", "time"],
+    "fit": "least-squares v = Vcm + omega x (r-center)",
+    "outputs": ["frame-specific Vcm", "fitted omega", "rank", "residual RMS/max", "UID coverage", "declared difference"],
+    "read_policy": "H5 read-only, bounded Type2 slice only; no arrays written"
+  },
+  "floatinginfo_contract": {
+    "delimiter": ";",
+    "header_normalization": "lowercase and remove punctuation/whitespace, so fomega.x becomes fomegax",
+    "row_window": "first bounded rows only",
+    "selected_rows": ["row closest to parsed time zero", "first parsed positive saved-time row"],
+    "vectors": ["time", "fomega.xyz", "fvel.xyz", "fcenter.xyz"],
+    "status_policy": "ok only when requested vector fields parse for a selected row; all-null fields are unresolved",
+    "role": "genuine frame-zero and first-saved corroboration only; H5 Type2 fit remains primary"
+  },
+  "native_xml_semantics_contract": {
+    "source": "actual native GenCase XML bound in the request",
+    "extract": [
+      "casedef floating angularvelini",
+      "particles floating angularvelini",
+      "floating massbody, center, inertia, DOF",
+      "initials move mkbound=50 offset",
+      "execution motion element presence/emptiness",
+      "whether an explicit particle velocity element exists"
+    ],
+    "interpretation": "angularvelini is an exact rigid-body/source declaration; direct Type2 particle velocity remains an independent native H5 measurement",
+    "no_physics_start_absence_claim": true
+  },
+  "bound_negative_evidence": {
+    "initial_qa_failure": "zero GenCase particle velocity and native support mass 256 kg versus physical body mass 128 kg retained",
+    "rootstrict048_observation": "frame-zero Type2 particle velocity was reported zero with fitted omega zero; first saved state was nonzero in later strict evidence",
+    "csv_decoder_bug": "fresh056 used comma-oriented parsing and could return one joined semicolon header with all-null vectors while saying ok",
+    "visual_review": "pending",
+    "q_n": "not_assessed",
+    "production": "not_evaluated"
+  },
+  "gates": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined",
+    "acceptance": "not_claimed"
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "ds02.f6.frame0-omega-csv-decoder-source-report.v1",
+  "scope": "root_followup_059_stage1_frame0_omega_csv_decoder_audit_v1",
+  "status": "source_prepared_disabled",
+  "question": "Can the existing native Type2 frame-zero and first-saved angular states be corroborated by correctly decoding FloatingInfo and by the exact XML rigid-body angular declaration?",
+  "answer_boundary": "The exact native XML declares angularvelini [0.08,0.12,0.06] rad/s for the floating body while also declaring a small initial position move and an empty motion element. A future bounded worker will measure native Type2 particle velocities at frame zero and the first saved frame and decode the two corresponding FloatingInfo rows with an explicit semicolon parser. A zero frame-zero particle fit cannot by itself establish that the physical angular release was absent.",
+  "source_anchor": {
+    "native_case_id": "F6_ANGULAR_RELEASE_DP025",
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+    "type2_range": {"start": 73441, "count": 16384, "type": 2, "mk": 60},
+    "declared_center_m": [2.4, 1.2, 1.08],
+    "declared_omega_rad_s": [0.08, 0.12, 0.06],
+    "gencase_initial_velocity_max_m_per_s": 0.0,
+    "physical_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "no_mass_rescale": true
+  },
+  "existing_evidence": {
+    "initial_qa": "genuine initial QA failure retained: zero GenCase particle velocity and native support mass 256 kg versus physical body mass 128 kg",
+    "rootstrict048": "reported all 16,384 Type2 frame-zero velocities zero with fitted omega zero; later fitted state near [0.0298556,0.0378212,0.0599353] rad/s at approximately 0.05006 s with residual near 1e-8",
+    "floatinginfo": "fresh056 parser status was not reliable because semicolon headers were read as a joined field; this scope fixes delimiter and alias handling",
+    "visual": "full241 review described coherent entry/roll/heave; visual/acceptance review remains pending",
+    "mass": "physical 128 kg and native support 256 kg remain separate"
+  },
+  "native_xml_semantics": {
+    "casedef_angularvelini_rad_s": [0.08, 0.12, 0.06],
+    "particles_angularvelini_rad_s": [0.08, 0.12, 0.06],
+    "massbody_kg": 128.0,
+    "center_m": [2.4, 1.2, 1.08],
+    "inertia_kg_m2": [8.53333333333, 8.53333333333, 13.6533333333],
+    "initial_move_m": [0.0125, 0.0125, -0.0075],
+    "motion_element": "empty",
+    "explicit_particle_velocity_element": false,
+    "semantic_boundary": "source rigid angular declaration and initial placement are recorded separately from direct native Type2 velocity"
+  },
+  "worker_plan": {
+    "enabled": false,
+    "h5": "read Type2 slice at frames 0 and first saved frame; fit Vcm plus omega cross r and report residual/UID coverage",
+    "floatinginfo": "read bounded rows using explicit semicolon delimiter; normalize fomega.x/fvel.x/fcenter.x style headers; select frame-zero and first positive saved-time rows",
+    "csv_status": "unresolved when requested fields remain absent; never report all-null vectors as ok",
+    "outputs": "one bounded JSON summary only; no CSV/H5/BI4/arrays or rendering output",
+    "no_physics_zero_start_claim": true
+  },
+  "scope_checks": {
+    "fresh056_immutable": true,
+    "native_xml_bound": true,
+    "solver_receipt_bound": true,
+    "typed_h5_opened_this_turn": false,
+    "floatinginfo_csv_opened_this_turn": false,
+    "pose_arrays_opened_this_turn": false,
+    "raw_particle_arrays_read_this_turn": false,
+    "jobs_or_rendering_executed_this_turn": false,
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined"
+  }
+}
