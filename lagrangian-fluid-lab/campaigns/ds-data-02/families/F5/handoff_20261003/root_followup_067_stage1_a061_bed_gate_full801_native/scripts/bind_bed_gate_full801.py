@@ -52,7 +52,10 @@ PHYSICAL_CASE_ID = "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1"
 CONDITION_ID = "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH"
 CANDIDATE_ID = "A_explicit_closed_mesh_only"
 REPAIR_ID = "F5_BED_REPAIR_A_REMOVE_DUPLICATE_STL_INVOCATION"
-BED_ATTEMPT_ID = "root-stage1-f5-explicit-bed-repair-a-short-event-bed-audit-066"
+# Root131 is the only enabled short-event audit input for this gate. Keep the
+# attempt binding exact so an older 066 receipt cannot be mistaken for the
+# actual XMF/typed trajectory audit.
+BED_ATTEMPT_ID = "root-stage1-f5-short51-actual-framewise-bed-audit-131"
 FULL_ATTEMPT_ID = "root-stage1-f5-explicit-bed-repair-a-full-event-native-801-067"
 
 PROFILE_NODES = [
@@ -271,9 +274,11 @@ def validate_bed_audit(
     receipt = load(receipt_path)
     report = load(report_path)
     receipt_root = Path(str(receipt.get("output_root", ""))).resolve()
+    expected_root = (CASE / BED_ATTEMPT_ID).resolve()
     require(receipt.get("status") == "completed", "bed-audit receipt is not completed")
     require(receipt.get("returncode") == 0, "bed-audit receipt returncode is not zero")
     require(receipt.get("request", {}).get("attempt_id") == BED_ATTEMPT_ID, "bed-audit receipt attempt mismatch")
+    require(receipt_root == expected_root, "bed-audit receipt output root is not the Root131 output root")
     require(receipt_root == report_path.parent.resolve(), "bed-audit report is outside receipt output root")
 
     checks: dict[str, bool] = {}

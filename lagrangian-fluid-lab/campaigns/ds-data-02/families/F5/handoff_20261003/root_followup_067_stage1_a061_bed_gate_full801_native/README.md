@@ -15,8 +15,9 @@ maximum depth `0.5588833029866218 m`. That evidence withheld full16
 authorization. The root cause remains unassigned and the old failure is not
 rewritten.
 
-The fresh gate requires an actual completed receipt and report from the
-fresh066 bed worker. It checks all 51 frame records, the frame-zero Type-3 UID
+The fresh gate requires the actual completed Root131 receipt and report from
+the fresh068 bed worker bound to Root129's typed XMF. It checks all 51 frame
+records, the frame-zero Type-3 UID
 reference, per-frame UID and finite/nonfinite fields, the exact seven profile
 nodes, x domain and bed y footprint, 1DP/2DP counts and fractions, deepest
 depth/sample fields, monotonic actual times, and the no-causal-claim policy.
@@ -29,17 +30,18 @@ Before the actual bed audit exists, run only the source check:
 python3 scripts/bind_bed_gate_full801.py --check
 ```
 
-After Root has a real completed bed-audit attempt, bind its metadata with:
+After Root131 has a real completed bed-audit attempt, bind its metadata with:
 
 ```text
 python3 scripts/bind_bed_gate_full801.py \
-  --bed-receipt /home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/<actual-bed-attempt>/execution-receipt.json \
-  --bed-report /home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/<actual-bed-attempt>/a061-short-event-bed-footprint-audit.json \
+  --bed-receipt /home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-short51-actual-framewise-bed-audit-131/execution-receipt.json \
+  --bed-report /home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-short51-actual-framewise-bed-audit-131/a061-short-event-bed-footprint-audit.json \
   --output-dir /home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_067_stage1_a061_bed_gate_full801_native \
   --force
 ```
 
-The helper writes `bed-gate-binding.json` and
+The helper accepts only the exact Root131 attempt ID and output root above,
+then writes `bed-gate-binding.json` and
 `full801-native-request.json` only after both actual files exist. A malformed
 or incomplete report produces a bound request with
 `bound_status=blocked_bed_audit_validation`; a complete report produces
