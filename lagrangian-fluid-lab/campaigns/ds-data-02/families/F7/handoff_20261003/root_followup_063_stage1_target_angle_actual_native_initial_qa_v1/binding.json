@@ -1,0 +1,354 @@
+{
+  "schema": "ds02.f7.target-angle-actual-native-qa-binding.v1",
+  "family_id": "F7",
+  "scope_id": "root_followup_063_stage1_target_angle_actual_native_initial_qa_v1",
+  "parent_source_scope_id": "root_followup_062_stage1_target_angle_endpoints_v1",
+  "model_policy": {
+    "authorized_model": "GPT-5.6 Luna/max",
+    "gemini": false,
+    "recursive_agents": false
+  },
+  "stage_contract": {
+    "endpoint_count": 2,
+    "axis": "paddle_amplitude_deg",
+    "axis_values_deg": [
+      30.0,
+      65.0
+    ],
+    "independent_case_count_increment": 0,
+    "native_initial_only": true,
+    "full_window_qualification_after_initial_qa": true,
+    "source_geometry_unchanged": true,
+    "launch_allowed": false,
+    "production_approval": "none",
+    "q_n_status": "not_assessed",
+    "precision_status": "not_accepted",
+    "visual_acceptance": "pending actual native/whole-frame review",
+    "no_jobs_in_source_handoff": true,
+    "no_solver_in_source_handoff": true,
+    "no_conversion_or_rendering_in_source_handoff": true,
+    "array_policy": "worker may read actual GenCase BI4 through official PartVTK only when Root enables the disabled request; this source handoff performs no array read"
+  },
+  "mother_recipe": {
+    "native_total_particles": 70179,
+    "native_fixed_particles": 27495,
+    "native_moving_particles": 1984,
+    "native_fluid_particles": 40700,
+    "dp_m": 0.02,
+    "time_max_s": 12.0,
+    "time_out_s": 0.02,
+    "native_frame_count": 601,
+    "motion_rows": 12001,
+    "native_motion_reader": "piecewise_linear_absolute_angle_increment",
+    "analytic_target_regular": "C2",
+    "native_sampled_regular": "not C2",
+    "pivot_p1_m": [
+      -0.04,
+      0.0,
+      0.05
+    ],
+    "pivot_p2_m": [
+      -0.04,
+      0.0,
+      1.05
+    ],
+    "native_fluid_mass_kg": 325.60001628000003,
+    "continuum_envelope_mass_kg": 320.1984,
+    "mass_policy": "native unscaled; report CSV mass against both values and never rescale",
+    "control_policy": {
+      "Boundary": 1,
+      "StepAlgorithm": 2,
+      "Kernel": 2,
+      "Visco": 0.05,
+      "DensityDT": 3,
+      "DensityDTvalue": 0.1,
+      "gravity": [
+        0.0,
+        0.0,
+        -9.81
+      ]
+    }
+  },
+  "source_wet_obstacle_contract": {
+    "meaning": "source and generated typed partition evidence for a wet explicit obstacle; this does not certify solver dynamics or visual acceptance",
+    "required_definition_fragments": [
+      "<setmkbound mk=\"2\"",
+      "<boxfill>all</boxfill>",
+      "<setmkfluid mk=\"1\"",
+      "Explicit native cell-center slab 0",
+      "Explicit native cell-center slab 1",
+      "Explicit native cell-center slab 2",
+      "Explicit native cell-center slab 3",
+      "<boxfill>solid</boxfill>",
+      "<shapeout file=\"\"",
+      "<objreal ref=\"2\">",
+      "motion_obstacle_quintic.dat",
+      "duration=\"12\"",
+      "axisp1 x=\"-0.04\" y=\"0\" z=\"0.05\"",
+      "axisp2 x=\"-0.04\" y=\"0\" z=\"1.05\""
+    ],
+    "generated_xml_blocks": [
+      {
+        "tag": "fixed",
+        "begin": 0,
+        "count": 27495,
+        "type": 0,
+        "mk": 10
+      },
+      {
+        "tag": "moving",
+        "begin": 27495,
+        "count": 1984,
+        "type": 1,
+        "mk": 12
+      },
+      {
+        "tag": "fluid",
+        "begin": 29479,
+        "count": 40700,
+        "type": 3,
+        "mk": 2
+      }
+    ]
+  },
+  "forcing_source": {
+    "source_plan": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_062_stage1_target_angle_endpoints_v1/endpoint-plan.json",
+    "source_plan_sha256": "0e021df2d7f4adce7851206d4f8fda6835a83db6acc0bf6d931f3fdf0b078d76",
+    "motion_preparation_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/motion-source-preparation.json",
+    "motion_preparation_report_sha256": "676bb9d8a63fb26f48bbef2185d7fc50473a14212725db064eab1eb35c236d39",
+    "motion_preparation_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/execution-receipt.json",
+    "motion_preparation_receipt_sha256": "f8644bae9bb3d7fc73d6eb69d51c2ad665f2a4eb5d6daa0d805f914b44ecc9ef",
+    "motion_preparation_schema": "ds02.f7.target-angle-source-preparation.v1",
+    "motion_preparation_status": "not performed by this builder",
+    "endpoint_metadata": {
+      "F7_OBSTACLE_QUINTIC_B08_A030": {
+        "endpoint_id": "F7_OBSTACLE_QUINTIC_B08_A030",
+        "amplitude_deg": 30.0,
+        "motion_rows": 12001,
+        "motion_file": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A030/motion_obstacle_quintic.dat",
+        "motion_file_sha256": "63e2f88524ebdb1f5aedebaf11673134d4dc840a331ed1158433f17e9160ddb8",
+        "physical_condition_sha256": "d23a491656bd152dd8dd0216abcd41b6df8a1f9e4478f9c9fd2f11b79f1f38e4",
+        "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_062_stage1_target_angle_endpoints_v1/source/F7_OBSTACLE_QUINTIC_B08_A030_Def.xml",
+        "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+        "prepared_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A030/F7_OBSTACLE_QUINTIC_B08_A030_Def.xml",
+        "prepared_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+        "source_recipe": {
+          "dp_m": 0.02,
+          "geometry_without_motion_sha256": "d90001561ecc5bb78a68521f2008dc6c6ca973184bc001e03277c0516dbcfe8f",
+          "native_source_particle_counts": {
+            "fixed": 27495,
+            "fluid": 40700,
+            "moving": 1984
+          },
+          "pivot_p1_m": [
+            -0.04,
+            0.0,
+            0.05
+          ],
+          "pivot_p2_m": [
+            -0.04,
+            0.0,
+            1.05
+          ],
+          "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+          "time_max_s": 12.0,
+          "time_out_s": 0.02
+        },
+        "native_reader": "piecewise_linear_absolute_angle_increment",
+        "native_sampled_regular": "not C2"
+      },
+      "F7_OBSTACLE_QUINTIC_B08_A065": {
+        "endpoint_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+        "amplitude_deg": 65.0,
+        "motion_rows": 12001,
+        "motion_file": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/motion_obstacle_quintic.dat",
+        "motion_file_sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814",
+        "physical_condition_sha256": "7694c57f286b25b288fd7813a0abbaa2eac82751a1540c623e3f3268d7eb8600",
+        "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_062_stage1_target_angle_endpoints_v1/source/F7_OBSTACLE_QUINTIC_B08_A065_Def.xml",
+        "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+        "prepared_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/F7_OBSTACLE_QUINTIC_B08_A065_Def.xml",
+        "prepared_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+        "source_recipe": {
+          "dp_m": 0.02,
+          "geometry_without_motion_sha256": "d90001561ecc5bb78a68521f2008dc6c6ca973184bc001e03277c0516dbcfe8f",
+          "native_source_particle_counts": {
+            "fixed": 27495,
+            "fluid": 40700,
+            "moving": 1984
+          },
+          "pivot_p1_m": [
+            -0.04,
+            0.0,
+            0.05
+          ],
+          "pivot_p2_m": [
+            -0.04,
+            0.0,
+            1.05
+          ],
+          "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+          "time_max_s": 12.0,
+          "time_out_s": 0.02
+        },
+        "native_reader": "piecewise_linear_absolute_angle_increment",
+        "native_sampled_regular": "not C2"
+      }
+    }
+  },
+  "partvtk": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64",
+  "partvtk_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+  "runtime": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+  "runtime_sha256": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+  "strict_dispatcher": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+  "strict_dispatcher_sha256": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+  "python": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+  "python_sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+  "qa_template_reference": {
+    "root022_worker": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_native_initial_state_tools_001/qa.py",
+    "root022_worker_sha256": "fde219fb187edaca58af6b340e5f65d8200abb3fde44f54f0a95f18727091188",
+    "reuse": "official PartVTK CSV field order and source-coupled initial-state checks; fresh063 worker extends type/mk/XML/Def/no-overlap/forcing-hash checks"
+  },
+  "cases": [
+    {
+      "role": "endpoint_low",
+      "endpoint_id": "F7_OBSTACLE_QUINTIC_B08_A030",
+      "case_id": "F7_OBSTACLE_QUINTIC_B08_A030",
+      "amplitude_deg": 30.0,
+      "physical_condition_sha256": "d23a491656bd152dd8dd0216abcd41b6df8a1f9e4478f9c9fd2f11b79f1f38e4",
+      "gencase_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085",
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/execution-receipt.json",
+      "gencase_receipt_sha256": "179a8f149dd0893aaa97543a1ac524c9536418c5e2894225805367f5acd116db",
+      "prepared_input_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/prepared-input-report.json",
+      "prepared_input_report_sha256": "06704de4187cd4ac0ef099f84af8e50e4f70a70b04a9b30108917c969bfb916a",
+      "prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A030",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A030.xml",
+      "generated_xml_sha256": "9fbc65975a11ae6078231a212a0e282d657c7468a8a6f7e6403e02496e6ed487",
+      "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A030.bi4",
+      "generated_bi4_sha256": "b31f590f78f25bc011a406d7d6e0827e674a64a47e52467af560a3e7457d425d",
+      "generated_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A030_Def.xml",
+      "generated_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "generated_motion": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A030/root-stage1-f7-angle030-genuine-gencase-085/prepared/motion_obstacle_quintic.dat",
+      "generated_motion_sha256": "63e2f88524ebdb1f5aedebaf11673134d4dc840a331ed1158433f17e9160ddb8",
+      "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_062_stage1_target_angle_endpoints_v1/source/F7_OBSTACLE_QUINTIC_B08_A030_Def.xml",
+      "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "prepared_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A030/F7_OBSTACLE_QUINTIC_B08_A030_Def.xml",
+      "prepared_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "source_motion": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A030/motion_obstacle_quintic.dat",
+      "source_motion_sha256": "63e2f88524ebdb1f5aedebaf11673134d4dc840a331ed1158433f17e9160ddb8",
+      "expected": {
+        "total_particles": 70179,
+        "fixed_particles": 27495,
+        "moving_particles": 1984,
+        "fluid_particles": 40700,
+        "solver_dimension": 3,
+        "data2d": false,
+        "dp_m": 0.02,
+        "time_max_s": 12.0,
+        "time_out_s": 0.02,
+        "motion_rows": 12001,
+        "native_fluid_mass_kg": 325.60001628000003,
+        "continuum_envelope_mass_kg": 320.1984,
+        "mass_tolerance_kg": 1e-05,
+        "velocity_zero_tolerance_m_per_s": 1e-08,
+        "type_mk_blocks": [
+          {
+            "name": "fixed",
+            "begin": 0,
+            "count": 27495,
+            "type": 0,
+            "mk": 10
+          },
+          {
+            "name": "moving",
+            "begin": 27495,
+            "count": 1984,
+            "type": 1,
+            "mk": 12
+          },
+          {
+            "name": "fluid",
+            "begin": 29479,
+            "count": 40700,
+            "type": 3,
+            "mk": 2
+          }
+        ]
+      }
+    },
+    {
+      "role": "endpoint_high",
+      "endpoint_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+      "case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+      "amplitude_deg": 65.0,
+      "physical_condition_sha256": "7694c57f286b25b288fd7813a0abbaa2eac82751a1540c623e3f3268d7eb8600",
+      "gencase_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085",
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/execution-receipt.json",
+      "gencase_receipt_sha256": "92284901720ba0723074de82d29560fbf15cdf79b6796397a76c0f528a5c61f2",
+      "prepared_input_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/prepared-input-report.json",
+      "prepared_input_report_sha256": "ea55ba134a3d06f008a49c2a435f507c3a7970bcd083f98607c3ad1a4060cabe",
+      "prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+      "generated_xml_sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f",
+      "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.bi4",
+      "generated_bi4_sha256": "f905a45f615304877f2a753471639bf812021d1741df7fcd4b5dc536b258864a",
+      "generated_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065_Def.xml",
+      "generated_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "generated_motion": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/motion_obstacle_quintic.dat",
+      "generated_motion_sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814",
+      "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_062_stage1_target_angle_endpoints_v1/source/F7_OBSTACLE_QUINTIC_B08_A065_Def.xml",
+      "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "prepared_definition": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/F7_OBSTACLE_QUINTIC_B08_A065_Def.xml",
+      "prepared_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+      "source_motion": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/motion_obstacle_quintic.dat",
+      "source_motion_sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814",
+      "expected": {
+        "total_particles": 70179,
+        "fixed_particles": 27495,
+        "moving_particles": 1984,
+        "fluid_particles": 40700,
+        "solver_dimension": 3,
+        "data2d": false,
+        "dp_m": 0.02,
+        "time_max_s": 12.0,
+        "time_out_s": 0.02,
+        "motion_rows": 12001,
+        "native_fluid_mass_kg": 325.60001628000003,
+        "continuum_envelope_mass_kg": 320.1984,
+        "mass_tolerance_kg": 1e-05,
+        "velocity_zero_tolerance_m_per_s": 1e-08,
+        "type_mk_blocks": [
+          {
+            "name": "fixed",
+            "begin": 0,
+            "count": 27495,
+            "type": 0,
+            "mk": 10
+          },
+          {
+            "name": "moving",
+            "begin": 27495,
+            "count": 1984,
+            "type": 1,
+            "mk": 12
+          },
+          {
+            "name": "fluid",
+            "begin": 29479,
+            "count": 40700,
+            "type": 3,
+            "mk": 2
+          }
+        ]
+      }
+    }
+  ],
+  "claims_and_boundaries": {
+    "gencase": "actual 085 receipts and generated source assets are completed0 and hash-bound",
+    "native_initial_qa": "pending Root strict worker execution; no pass is claimed here",
+    "full12_solver": "disabled until both endpoint native initial QA cases pass and Root enables each request",
+    "native_mass": "325.60001628000003 kg registered from mother recipe; continuum envelope 320.1984 kg remains a separate comparison and no rescale is allowed",
+    "motion": "074 wrote actual 12001-row endpoint tables; source says native reader is piecewise-linear, so no native C2 claim",
+    "visual_acceptance": "not assessed",
+    "q_n": "not granted"
+  }
+}
