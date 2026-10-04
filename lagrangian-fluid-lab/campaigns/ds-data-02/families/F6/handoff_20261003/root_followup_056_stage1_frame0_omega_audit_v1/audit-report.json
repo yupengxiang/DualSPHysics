@@ -1,0 +1,51 @@
+{
+  "schema": "ds02.f6.frame0-omega-audit-source-report.v1",
+  "scope": "root_followup_056_stage1_frame0_omega_audit_v1",
+  "status": "source_prepared_disabled",
+  "question": "Whether the declared [0.08,0.12,0.06] rad/s angular velocity is present in the existing native Type2 frame-zero velocities after GenCase reported zero initial particle velocity",
+  "source_only_checks": {
+    "worker_present": true,
+    "worker_bounded_to_type2_slice": true,
+    "worker_preview_max_four_frames": true,
+    "worker_fits_vcm_plus_omega_cross_r": true,
+    "worker_reports_uid_coverage": true,
+    "worker_reports_residual_and_declared_difference": true,
+    "worker_compares_bounded_floatinginfo_when_columns_are_available": true,
+    "pose_is_reference_only": true,
+    "no_h5_csv_pose_arrays_opened_in_this_turn": true,
+    "no_worker_execution_in_this_turn": true
+  },
+  "bound_source_evidence": {
+    "typed_source": "existing corrected full241 typed019 H5 fingerprint fc62171deec403c7455f81511615eb9370bdfe5ba7f8d816a6a2b786b503bc89",
+    "native_case": "F6_ANGULAR_RELEASE_DP025",
+    "native_frames": 241,
+    "type2_range": {"start": 73441, "count": 16384, "type": 2, "mk": 60},
+    "declared_center_m": [2.4, 1.2, 1.08],
+    "declared_omega_rad_s": [0.08, 0.12, 0.06],
+    "gencase_initial_velocity_max_m_per_s": 0.0,
+    "physical_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "mass_rescale": false,
+    "initial_qa": "genuine initial QA failure retained: zero GenCase particle velocity and native support mass 256 kg versus physical body mass 128 kg",
+    "qn": "not_assessed",
+    "visual_review": "pending"
+  },
+  "root_enablement": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "required_review": [
+      "Confirm typed H5 dataset names and shapes at dispatch time",
+      "Confirm Type2 UID slice is frame-zero native state",
+      "Inspect bounded fit rank, residual, and omega difference",
+      "Keep FloatingInfo and pose as corroboration only",
+      "Do not turn this audit into a Q-N or numerical precision claim"
+    ]
+  },
+  "deliverables": [
+    "workers/audit_frame0_omega.py",
+    "requests/frame0_omega_audit_request.json",
+    "audit-contract.json",
+    "source_provenance.json"
+  ]
+}

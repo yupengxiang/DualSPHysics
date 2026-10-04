@@ -1,0 +1,84 @@
+{
+  "schema": "ds02.f6.frame0-omega-audit-contract.v1",
+  "family_id": "F6",
+  "scope": "root_followup_056_stage1_frame0_omega_audit_v1",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "status": "source_only_disabled",
+  "question": "Did declared floating angular velocity propagate from GenCase zero-velocity initialization into native frame zero?",
+  "source_case": {
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+    "native_case_id": "F6_ANGULAR_RELEASE_DP025",
+    "dp_m": 0.025,
+    "native_frames": 241,
+    "native_window_s": [0.0, 12.00012416636],
+    "type2": 2,
+    "floating_mk": 60,
+    "floating_count": 16384,
+    "floating_particle_axis": {"start": 73441, "count": 16384},
+    "body_center_m": [2.4, 1.2, 1.08],
+    "physical_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "declared_angular_velocity_rad_s": [0.08, 0.12, 0.06],
+    "gencase_initial_velocity_max_m_s": 0.0
+  },
+  "bounded_read_contract": {
+    "frames": {"required": [0], "preview": [0, 1, 2, 3], "max_preview_count": 4},
+    "particle_range": {"start": 73441, "count": 16384, "type": 2, "mk": 60},
+    "fields": [
+      "position",
+      "velocity",
+      "valid",
+      "particle_id",
+      "particle_zone",
+      "type",
+      "time"
+    ],
+    "read_policy": {
+      "read_frame0_type2_only": true,
+      "read_small_preview_only": true,
+      "read_full_native_window": false,
+      "read_fixed_or_fluid_arrays": false,
+      "write_particle_arrays": false,
+      "write_csv": false,
+      "write_h5": false
+    }
+  },
+  "fit_contract": {
+    "equation": "v_i = Vcm + cross(omega, position_i - center)",
+    "design_matrix": "[I3, -skew(position_i-center)]",
+    "unknowns": ["Vcm_x", "Vcm_y", "Vcm_z", "omega_x", "omega_y", "omega_z"],
+    "solver": "bounded numpy.linalg.lstsq with rcond=None",
+    "frame0_center": "declared physical center [2.4,1.2,1.08] m",
+    "preview_center": "valid Type2 centroid per preview frame for descriptive follow-up fits",
+    "required_outputs": [
+      "valid Type2 count and UID uniqueness",
+      "frame0 Vcm and omega",
+      "frame0 RMS/max velocity residual",
+      "fitted omega minus declared omega and norm",
+      "native frame0 speed min/mean/max",
+      "GenCase zero-velocity propagation status",
+      "small first-state velocity/centroid summary",
+      "optional FloatingInfo frame0 omega comparison"
+    ],
+    "tolerance_policy": {
+      "zero_velocity_m_per_s": 1e-12,
+      "no_precision_acceptance": true,
+      "no_qn_claim": true
+    }
+  },
+  "interpretation_rules": {
+    "native_frame0_nonzero": "report observed propagation only; do not call it numerical validation",
+    "all_zero_native_frame0": "report no observed propagation in the bounded read; do not infer later-frame behavior",
+    "partial_or_invalid": "report insufficient/invalid source state without filling values",
+    "floatinginfo": "corroboration only; do not silently replace H5 Type2 velocities",
+    "pose": "corroboration/reference path only; no new SO(3) or Q-N claim"
+  },
+  "gates": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "mass_rescale": false
+  }
+}
