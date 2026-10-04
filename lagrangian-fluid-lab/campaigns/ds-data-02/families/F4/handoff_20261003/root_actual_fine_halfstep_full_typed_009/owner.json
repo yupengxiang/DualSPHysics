@@ -1,0 +1,524 @@
+{
+  "dp_m": 0.0025,
+  "family_id": "F4",
+  "initialization_evidence": {
+    "continuum_initial_mass_total_kg": 59.07200000000001,
+    "continuum_mass_by_source_kg": {
+      "drop": 5.824000000000001,
+      "pool": 53.24800000000001
+    },
+    "native_initial_mass_by_source_kg": "pending actual native BI4/H5 float32 widened weights; historical declared decimal values are not reused as native array proof",
+    "semantics": "Actual converter binds original nativeMassFluid and actual cohort, no normalization; inherited old numeric metadata retained separately"
+  },
+  "mechanism_id": "finite_drop_pool",
+  "physical_binding": {
+    "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+    "controls": {
+      "boundary": "DBC",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": "Wendland",
+      "step_algorithm": "Verlet",
+      "viscosity": 0.08
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.17,
+        0.35
+      ],
+      "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring",
+      "sequence": [
+        "separated_initial_state",
+        "first_pool_contact",
+        "maximum_spread",
+        "rebound_or_recontact",
+        "transport_tail"
+      ],
+      "time_end_s": 1.2,
+      "time_start_s": 0.0
+    },
+    "family_id": "F4",
+    "geometry": {
+      "drop": {
+        "label": "falling_drop",
+        "low_m": [
+          0.47,
+          0.12,
+          0.42000000000000004
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.26,
+          0.16,
+          0.14
+        ]
+      },
+      "pool": {
+        "label": "pool",
+        "low_m": [
+          0.08,
+          0.04,
+          0.04
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          1.04,
+          0.32,
+          0.16
+        ]
+      },
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "wall_box": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      }
+    },
+    "geometry_family_id": "F4_finite_drop_pool_finite_geometry_v1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "drop": 5.824000000000001,
+        "pool": 53.24800000000001
+      },
+      "initial_mass_by_source_kg": {
+        "drop": 5.824000000000001,
+        "pool": 53.24800000000001
+      },
+      "initial_mass_total_kg": 59.07200000000001,
+      "mass_policy": "native_rho_dp_cubed_no_rescaling",
+      "source_labels": {
+        "mkfluid:0": "pool",
+        "mkfluid:1": "falling_drop"
+      },
+      "source_regions": {
+        "drop": {
+          "label": "falling_drop",
+          "low_m": [
+            0.47,
+            0.12,
+            0.42000000000000004
+          ],
+          "mkfluid": 1,
+          "size_m": [
+            0.26,
+            0.16,
+            0.14
+          ]
+        },
+        "pool": {
+          "label": "pool",
+          "low_m": [
+            0.08,
+            0.04,
+            0.04
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            1.04,
+            0.32,
+            0.16
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "mkfluid:0": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mkfluid:1": [
+          0.0,
+          0.0,
+          -0.5
+        ]
+      }
+    },
+    "lineage_group_id": "finite_drop_pool_frozen_geometry_control_domain",
+    "mass_policy": "native_rho_dp_cubed_no_rescaling",
+    "mechanism_id": "finite_drop_pool",
+    "open_inlet": false,
+    "paired_background_id": "finite_drop_pool",
+    "parameters": {
+      "gap_m": 0.22,
+      "speed_m_per_s": 0.5,
+      "x_offset_m": 0.0,
+      "y_offset_m": 0.0
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "fe9911188f229da4e489a3a47764e9499b37f715b10566cb68986f49e6548c7e",
+  "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+  "q_i_status": "not_granted",
+  "q_n_status": "not_assessed",
+  "qualification_status": "conversion_and_observation_evidence_only",
+  "resolution": "centered_dp0.0025",
+  "schema": "ds02.f4.direct-binding.v1",
+  "time_variant": "genuine_adaptive_halfstep_full1201",
+  "typed_identity_binding": {
+    "fluid_mkfluid_to_native_mk": {
+      "0": 1,
+      "1": 2
+    },
+    "source": "generated XML typed fluid ranges; converter preserves native mk and (Zone,Idp)"
+  },
+  "historical_source_binding": {
+    "binding_statement": "physical_binding is copied from explicit continuum geometry, initial state, physical controls, and event-time semantics; generated XML and native lattice fields remain numerical provenance",
+    "definition_xml": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/finite_drop_pool_fine_Def.xml",
+      "sha256": "24faed7d6d365f751b615601cfd049605931ce0d987e3b1623636562b3d0f057"
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/gencase-drop_pool-fine-nominal-v1/execution-receipt.json",
+      "sha256": "34aa956ff8cad492e87e8d5719423b36c462b50e2b0cba2785170b61abba866d"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/gencase-drop_pool-fine-nominal-v1/F4_drop_pool_fine.xml",
+      "sha256": "1e03cfdc5757923f6d57724010d409caf4215cc5e1f0f51cd29b2163732d94b5"
+    },
+    "owner_metadata_source": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/reference_matrix_001/finite_drop_pool_fine.metadata.json",
+      "sha256": "a90606cbdd296b0a3c37713135a7a2629f57cad88d6bb2de570bd2c275f7a9e4"
+    },
+    "solver_log": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/qualification-drop_pool-fine-fullwindow-v1/solver/Run.out",
+      "sha256": "2ef537c9dd422817c4fa55094cd3b9e5281f32f9d347ae9d9b48117d1aeb56ed"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/qualification-drop_pool-fine-fullwindow-v1/execution-receipt.json",
+      "sha256": "1cbbb87b9e9f9af0322326abd3f8e452a1cdf26f6fa15e1cc062ea6f19e76efd"
+    }
+  },
+  "case_id": "F4_DROP_CENTERED_REFERENCE_001_DP0025_GENUINE_HALF_CFL001",
+  "numerical_initialization": {
+    "schema": "ds02.f4.centered-reference-preregistration.v1",
+    "case_id": "F4_DROP_CENTERED_REFERENCE_001_DP0025",
+    "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+    "dp_m": 0.0025,
+    "physical_binding": {
+      "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+      "controls": {
+        "boundary": "DBC",
+        "density_dt": 2,
+        "density_dt_value": 0.1,
+        "kernel": "Wendland",
+        "step_algorithm": "Verlet",
+        "viscosity": 0.08
+      },
+      "density_kg_m3": 1000.0,
+      "event_window": {
+        "expected_first_contact_range_s": [
+          0.17,
+          0.35
+        ],
+        "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring",
+        "sequence": [
+          "separated_initial_state",
+          "first_pool_contact",
+          "maximum_spread",
+          "rebound_or_recontact",
+          "transport_tail"
+        ],
+        "time_end_s": 1.2,
+        "time_start_s": 0.0
+      },
+      "family_id": "F4",
+      "geometry": {
+        "drop": {
+          "label": "falling_drop",
+          "low_m": [
+            0.47,
+            0.12,
+            0.42000000000000004
+          ],
+          "mkfluid": 1,
+          "size_m": [
+            0.26,
+            0.16,
+            0.14
+          ]
+        },
+        "pool": {
+          "label": "pool",
+          "low_m": [
+            0.08,
+            0.04,
+            0.04
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            1.04,
+            0.32,
+            0.16
+          ]
+        },
+        "tank": {
+          "low_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        },
+        "wall_box": {
+          "low_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "size_m": [
+            1.2,
+            0.4,
+            0.6
+          ]
+        }
+      },
+      "geometry_family_id": "F4_finite_drop_pool_finite_geometry_v1",
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "initial_state": {
+        "continuum_mass_by_source_kg": {
+          "drop": 5.824000000000001,
+          "pool": 53.24800000000001
+        },
+        "initial_mass_by_source_kg": {
+          "drop": 5.824000000000001,
+          "pool": 53.24800000000001
+        },
+        "initial_mass_total_kg": 59.07200000000001,
+        "mass_policy": "native_rho_dp_cubed_no_rescaling",
+        "source_labels": {
+          "mkfluid:0": "pool",
+          "mkfluid:1": "falling_drop"
+        },
+        "source_regions": {
+          "drop": {
+            "label": "falling_drop",
+            "low_m": [
+              0.47,
+              0.12,
+              0.42000000000000004
+            ],
+            "mkfluid": 1,
+            "size_m": [
+              0.26,
+              0.16,
+              0.14
+            ]
+          },
+          "pool": {
+            "label": "pool",
+            "low_m": [
+              0.08,
+              0.04,
+              0.04
+            ],
+            "mkfluid": 0,
+            "size_m": [
+              1.04,
+              0.32,
+              0.16
+            ]
+          }
+        },
+        "velocities_m_per_s": {
+          "mkfluid:0": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "mkfluid:1": [
+            0.0,
+            0.0,
+            -0.5
+          ]
+        }
+      },
+      "lineage_group_id": "finite_drop_pool_frozen_geometry_control_domain",
+      "mass_policy": "native_rho_dp_cubed_no_rescaling",
+      "mechanism_id": "finite_drop_pool",
+      "open_inlet": false,
+      "paired_background_id": "finite_drop_pool",
+      "parameters": {
+        "gap_m": 0.22,
+        "speed_m_per_s": 0.5,
+        "x_offset_m": 0.0,
+        "y_offset_m": 0.0
+      },
+      "periodic_boundary": false,
+      "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+      "schema": "ds-data-02.physical-binding.v1"
+    },
+    "physical_binding_sha256": "fe9911188f229da4e489a3a47764e9499b37f715b10566cb68986f49e6548c7e",
+    "source_regions": {
+      "drop": {
+        "label": "falling_drop",
+        "low_m": [
+          0.47,
+          0.12,
+          0.42000000000000004
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.26,
+          0.16,
+          0.14
+        ]
+      },
+      "pool": {
+        "label": "pool",
+        "low_m": [
+          0.08,
+          0.04,
+          0.04
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          1.04,
+          0.32,
+          0.16
+        ]
+      }
+    },
+    "expected_counts_by_source": {
+      "pool": 3407872,
+      "drop": 372736
+    },
+    "continuous_mass_by_source_kg": {
+      "drop": 5.824000000000001,
+      "pool": 53.24800000000001
+    },
+    "definition_sha256": "175b218f9353e6191e20d0abf1f5f45ad2488851f30275b2bc9169c6693e29fd",
+    "original_source_sha256": {
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/metadata/f4_drop_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000-fine-native.metadata.json": "dbb9896b0f46c3acb49060e4b0de538d10d7634c1ead73e3dcdfced553008b5f",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/gencase-drop_pool-fine-nominal-v1/F4_drop_pool_fine.xml": "1e03cfdc5757923f6d57724010d409caf4215cc5e1f0f51cd29b2163732d94b5",
+      "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/finite_drop_pool_fine_Def.xml": "24faed7d6d365f751b615601cfd049605931ce0d987e3b1623636562b3d0f057",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000/direct-bi4-fine-native-v1/execution-receipt.json": "c66153e15080f142e42c8111a42c1d3b258c9feaeb301cd57daa9f86391415c8",
+      "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/evidence/f4-actual-evidence-v1.json": "e4029a4d0e5a3d9b4781f4036b0dfd0bd07862b772c9dc3c7affe8cd8dfa10cf"
+    },
+    "original_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/definitions/finite_drop_pool_fine_Def.xml",
+    "original_owner_metadata": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/metadata/f4_drop_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000-fine-native.metadata.json",
+    "numeric_changes": "dp and shared half-dp lattice phase; centered finite population in original declared source regions. Walls/initial velocities/constants/execution unchanged.",
+    "repair_class": "first explicit centered initialization recipe; three-resolution reference matrix preregistered before solver results",
+    "comparison_budget": {
+      "macro_relative": 0.05,
+      "event_relative": 0.02,
+      "temporal_share": 0.2
+    },
+    "old_extreme_spread_retained": true,
+    "independent_case_count_increment": 0,
+    "q_n_status": "not_assessed",
+    "production_approval": "none"
+  },
+  "source_binding": {
+    "definition_xml": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP0025_Def.xml",
+      "sha256": "175b218f9353e6191e20d0abf1f5f45ad2488851f30275b2bc9169c6693e29fd"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025_GENUINE_HALF_CFL001/root-drop-fine-genuine-halfstep-exact-initial-clone-007/prepared/F4_DROP_CENTERED_REFERENCE_001_DP0025.xml",
+      "sha256": "72ad45fca462a14eb433c2aec3488a2a35c560b4559fae0c434649ddc6c785bd"
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/gencase-centered-reference-002/execution-receipt.json",
+      "sha256": "d3cc6dce8d0ff2c836c6e1affd4cbb48acf29e689ecf4d9dd00400fba3beb44c"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025_GENUINE_HALF_CFL001/root-drop-fine-genuine-halfstep-full1201-native-008/execution-receipt.json",
+      "sha256": "c8d81de3d5fd4a5d2cd6da88a3bed54bfcfe098e4803bffcf24a6f87f9ff9cf8"
+    },
+    "actual_initial_native_audit": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/root-centered-initial-audit-001/native-preflight-audit.json",
+      "sha256": "71ee515520ced947dcbc76589483200a891458104ecf1b679cd0e344bdb3e02b"
+    },
+    "owner_metadata_source": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP0025.metadata.json",
+      "sha256": "02d35c2a988ea7af5eb0a1c5cbb8cbce4f818e1b7c024918cdc1f17d60a40fa5"
+    }
+  },
+  "production_approval": "none",
+  "genuine_halfstep_view": {
+    "source_clone_proof": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025_GENUINE_HALF_CFL001/root-drop-fine-genuine-halfstep-exact-initial-clone-007/prepared/clone-report.json",
+    "initial_native_asset_policy": "exact sourceBI4 and declaredassets wholeXMLundo",
+    "full_window_s": [
+      0,
+      1.2
+    ],
+    "save_cadence_s": 0.001,
+    "source_native_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025_GENUINE_HALF_CFL001/root-drop-fine-genuine-halfstep-full1201-native-008/execution-receipt.json",
+    "q_n": "not_granted",
+    "native_CFL": 0.1,
+    "native_CoefDtMin": 0.025
+  },
+  "original_source_binding": {
+    "definition_xml": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP0025_Def.xml",
+      "sha256": "175b218f9353e6191e20d0abf1f5f45ad2488851f30275b2bc9169c6693e29fd"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/gencase-centered-reference-002/F4_DROP_CENTERED_REFERENCE_001_DP0025.xml",
+      "sha256": "4a90393ebfb8ac557a0af1771ca799467ff5227c51b157e14b8b8d81e242850b"
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/gencase-centered-reference-002/execution-receipt.json",
+      "sha256": "d3cc6dce8d0ff2c836c6e1affd4cbb48acf29e689ecf4d9dd00400fba3beb44c"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/qualification-centered-fullwindow-001/execution-receipt.json",
+      "sha256": "5ed07dbdef5edd41018c14f83cb167fe7415d724b7bf07a13ea98f2db119ba74"
+    },
+    "actual_initial_native_audit": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/root-centered-initial-audit-001/native-preflight-audit.json",
+      "sha256": "71ee515520ced947dcbc76589483200a891458104ecf1b679cd0e344bdb3e02b"
+    },
+    "owner_metadata_source": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP0025.metadata.json",
+      "sha256": "02d35c2a988ea7af5eb0a1c5cbb8cbce4f818e1b7c024918cdc1f17d60a40fa5"
+    }
+  },
+  "historical_initialization_numeric_claims": {
+    "continuum_initial_mass_total_kg": 59.07200000000001,
+    "continuum_mass_by_source_kg": {
+      "drop": 5.824000000000001,
+      "pool": 53.24800000000001
+    },
+    "native_initial_mass_by_source_kg": {
+      "drop": 5.824000000000001,
+      "pool": 53.24800000000001
+    },
+    "native_initial_mass_total_kg": 59.07200000000001,
+    "semantics": "native lattice initialization error is reported separately; no mass normalization"
+  }
+}
