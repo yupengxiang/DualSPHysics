@@ -248,7 +248,8 @@ def bounded_floatinginfo(path: Path, max_rows: int) -> dict[str, Any]:
     omega, presence = vector_from_row(rows[selected_index], headers, OMEGA_ALIASES, "FloatingInfo.omega")
     return {
         "path": str(path),
-        "sha256": sha256(path),
+        "sha256": None,
+        "hash_policy": "not_computed_because_only_bounded_prefix_is_read",
         "delimiter": ";",
         "header_columns": headers,
         "normalized_headers": [normalise(header) for header in headers],

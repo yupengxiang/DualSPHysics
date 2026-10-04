@@ -32,6 +32,21 @@ there is no fixed mother angular velocity in the worker. It never launches a
 solver or FloatingInfo, reads BI4/H5/particle arrays, or claims that GenCase
 particle `V0=0` disproves angular motion.
 
+After Root has a terminal endpoint solver receipt and its actual FloatingInfo
+CSV, the worker can be invoked directly with the endpoint's own metadata:
+
+```text
+python workers/audit_f6_endpoint_floatinginfo_state0_v1.py \\
+  --floating-info-csv <actual-endpoint-FloatingInfo_mk60.csv> \\
+  --endpoint-xml <exact-073-endpoint.xml> \\
+  --canonical-owner <Root073-canonical-owner.json> \\
+  --solver-receipt <endpoint-execution-receipt.json> \\
+  --output <floatinginfo-state0-omega-audit.json>
+```
+
+The CSV is read only through the worker's bounded prefix (`--max-rows` defaults
+to 8); no full CSV hash is computed.
+
 The source package carries no Q-N, precision, visual, or production approval,
 and increments the independent case count by zero. Root may submit the two
 requests to the strict runner only after reviewing the QA090 gate and the
