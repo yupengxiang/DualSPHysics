@@ -1,0 +1,119 @@
+{
+  "schema": "ds02.f2.frame0-wall-and-frames50-audit-contract.v1",
+  "family_id": "F2",
+  "scope": "root_followup_058_stage1_frame0_wall_frames50_audit_v1",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "status": "source_only_disabled",
+  "case": {
+    "case_id": "F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+    "physical_case_id": "F2H10V2_OFFSET_V1",
+    "background": "OFFSET",
+    "mechanism": "offset_spill",
+    "resolution": "coarse",
+    "dp_m": 0.01,
+    "native_frames": 401,
+    "time_window_s": [0.0, 4.000020828936935],
+    "native_particles": 421566,
+    "native_fluid_particles": 24576,
+    "typed_fixed_type": 0,
+    "typed_moving_type": 1,
+    "typed_fluid_type": 3,
+    "typed_floating_type_2_count": 0
+  },
+  "source_geometry": {
+    "cup": {
+      "low_m": [0.0, -0.15, 0.65],
+      "size_m": [0.425, 0.3, 0.45],
+      "high_m": [0.425, 0.15, 1.1],
+      "physical_floor_z_m": 0.65,
+      "declared_wall_layers": [0, 1, 2],
+      "declared_wall_layer_pitch_m": 0.01,
+      "nominal_three_layer_span_m": 0.03,
+      "layer_span_interpretation": "derived geometry descriptor, not an acceptance threshold"
+    },
+    "fluid": {
+      "continuous_low_m": [0.0525, -0.12, 0.7],
+      "continuous_size_m": [0.32, 0.24, 0.32],
+      "continuous_high_m": [0.3725, 0.12, 1.02],
+      "source_band_y_bounds_m": [[-0.12, -0.04], [-0.04, 0.04], [0.04, 0.12]],
+      "source_band_count": 3,
+      "source_band_particles": 8192,
+      "initial_velocity_m_per_s": [0.0, 0.0, 0.0],
+      "reference_density_kg_m3": 1000.0
+    },
+    "receiver": {
+      "low_m": [0.45, -0.16, 0.0],
+      "size_m": [1.1, 0.6, 0.45]
+    },
+    "tray": {
+      "low_m": [-1.2, -1.0, -0.2],
+      "size_m": [4.0, 2.0, 0.15]
+    }
+  },
+  "frame0_native_coordinate_contract": {
+    "frame": 0,
+    "coordinate_scope": "all native particles visited in chunks; type-0 fixed and type-1 moving finite valid coordinates form the candidate boundary pool; type-3 fluid finite valid coordinates form the query set",
+    "boundary_types": {"fixed": 0, "moving": 1},
+    "fluid_type": 3,
+    "fields": ["position", "particle_id", "type", "valid"],
+    "boundary_selection": "native type and valid/finite coordinate status only; no cup-envelope geometric mask",
+    "tree": {
+      "implementation": "scipy.spatial.cKDTree",
+      "boundary_pool": "complete retained frame-zero type-0/type-1 coordinate pool",
+      "query": "all retained frame-zero type-3 fluid coordinates in bounded chunks",
+      "distance_unit": "m",
+      "outputs": [
+        "minimum",
+        "percentiles",
+        "nearest fluid UID",
+        "nearest boundary UID",
+        "nearest boundary type",
+        "bounded nearest sample records"
+      ],
+      "global_nearest_claim": "distance is global over the retained native type-0/type-1 pool; no claim that the pool is a reconstructed CAD face"
+    },
+    "output_policy": "summaries and bounded nearest records only; no coordinate arrays or CSV/H5/BI4 output"
+  },
+  "saved_frame_window_contract": {
+    "frames": [0, 50],
+    "frame_count": 51,
+    "fluid_type": 3,
+    "expected_initial_fluid_count": 24576,
+    "fields": ["position", "velocity", "particle_id", "type", "valid", "time"],
+    "chunked_particle_read": true,
+    "statistics": [
+      "all valid finite type-3 velocity-squared values",
+      "v2 maximum and percentiles",
+      "unweighted COM",
+      "position envelope",
+      "valid active type-3 count",
+      "missing count relative to initial denominator"
+    ],
+    "active_definition": "valid native type-3 rows with finite position and velocity; nonfinite rows are reported, not relabeled",
+    "missing_definition": "max(expected_initial_fluid_count - active_valid_type3_count, 0); active delta is retained when positive"
+  },
+  "near_wall_contract": {
+    "reference": "declared cup envelope, not a reconstructed moving wall",
+    "near_wall_threshold_m": 0.03,
+    "threshold_source": "nominal three-layer span = 3*dp",
+    "signed_clearance": "minimum of point-to-low and high-to-point coordinate gaps; negative values are outside the declared envelope",
+    "bins": ["near_cup_wall_or_outside", "interior_beyond_threshold"],
+    "policy": "descriptive overlay on every frame's full valid type-3 statistics; no rows removed, no mask used to change denominators, no mass rescale, no generic precision gate"
+  },
+  "existing_evidence_binding": {
+    "initial_qa": "positive initial fluid-solid separation and zero fluid points in declared cup/receiver/tray envelopes",
+    "typed_lifecycle": "frame0/frame25/frame50 missing 0; first missing fluid frame 70; terminal missing 118",
+    "visual_observation": "wall-jet-like features at keys 25 and 50 with coherent bulk retained as descriptive pending review",
+    "interpretation_boundary": "no hydrostatic-causality, explosion, invalid-state, Q-I, Q-N, production, or visual-acceptance conclusion"
+  },
+  "gates": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined",
+    "acceptance": "not_claimed"
+  }
+}
