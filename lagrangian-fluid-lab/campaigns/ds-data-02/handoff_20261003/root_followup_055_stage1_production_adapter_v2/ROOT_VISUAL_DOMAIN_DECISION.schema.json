@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds02.stage1.root-visual-domain-decision.v1",
+  "title": "DS-DATA-02 Stage 1 prospective visual domain decision",
+  "type": "object",
+  "required": [
+    "schema",
+    "family_id",
+    "scope_id",
+    "status",
+    "stage1_label",
+    "goal_authority",
+    "observed_case_ids",
+    "prospective_case_ids",
+    "selected_case_ids",
+    "no_interpolation_or_extrapolation",
+    "production_scope_approval",
+    "numerical_precision_status",
+    "q_n",
+    "q_e"
+  ],
+  "properties": {
+    "schema": {"const": "ds02.stage1.root-visual-domain-decision.v1"},
+    "family_id": {"type": "string", "minLength": 1},
+    "scope_id": {"type": "string", "minLength": 1},
+    "status": {"const": "visual-domain-approved-by-root"},
+    "stage1_label": {"const": "视觉检查通过、数值精度未验收"},
+    "goal_authority": {"$ref": "#/$defs/fileBinding"},
+    "observed_case_ids": {"$ref": "#/$defs/idList"},
+    "prospective_case_ids": {"$ref": "#/$defs/idList"},
+    "selected_case_ids": {"$ref": "#/$defs/idList"},
+    "no_interpolation_or_extrapolation": {"const": true},
+    "production_scope_approval": {"const": false},
+    "numerical_precision_status": {"const": "not_accepted"},
+    "q_n": {"const": "not_granted"},
+    "q_e": {"const": "not_assessed"}
+  },
+  "$defs": {
+    "idList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "fileBinding": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}
