@@ -1,0 +1,77 @@
+{
+  "schema": "ds02.f5.stage1.native-bed-repair-candidate-a.v1",
+  "candidate_id": "A_explicit_closed_mesh_only",
+  "status": "source_only_disabled_preflight",
+  "immutable_source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_compact_equilibrium_actual_clip_direction_fix_050/selected_definitions/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_Def.xml",
+    "sha256": "5ed3359ecbc3d88fd31a0a8e4015929a20041e3b9b3a151475e736c0be513c45",
+    "line_count": 374
+  },
+  "derived_definition": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_060_stage1_native_bed_repair_candidate_a_preflight_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+    "sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+    "line_count": 371
+  },
+  "operations": {
+    "remove_source_lines_1_based": [
+      269,
+      270,
+      271
+    ],
+    "removed_nodes": [
+      "setmkbound mk=40 (duplicate state)",
+      "drawfilestl assets/f5_compact_continuous_bed_profile.stl",
+      "shapeout continuous_bed"
+    ],
+    "retain_source_lines": "27-241 explicit drawtriangles, including 156 points/52 triangles, profile top nodes and lower z=-0.15 closure",
+    "preserve_source_lines": "242-268 tank floor, sidewalls, and piston; 272-281 fluid marker, clipplane, and initial fluid box; motion/constants/execution unchanged"
+  },
+  "geometry_semantics": {
+    "profile_nodes_xz_m": [
+      [
+        -0.2,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.28
+      ],
+      [
+        3.6,
+        0.448
+      ],
+      [
+        3.9,
+        0.448
+      ],
+      [
+        4.4,
+        0.05
+      ],
+      [
+        4.8,
+        0.05
+      ]
+    ],
+    "bed_y_bounds_m": [
+      -0.15,
+      0.15
+    ],
+    "lower_closure_z_m": -0.15,
+    "dp_m": 0.02,
+    "bed_mk": 40,
+    "stl_historical_asset_retained": true,
+    "hollow_or_watertight_claim": false
+  },
+  "choice_basis": "057 reports a filled/lower-closed mk40 cohort; A is the only bounded representation test that removes redundant geometry input without adding overlapping support. It is not a root-cause claim or crossing acceptance.",
+  "candidate_B_disposition": "deferred_rejected_pending_new evidence; existing filled cohort makes x=2..4.8 z=-0.15..0 underlay redundant and overlap-prone",
+  "fresh_actual_gencase_required": true,
+  "fresh_initial_typed_qa_required": true,
+  "short_event_solver_requires_root_authorization": true,
+  "max_repair_candidates_considered": 2,
+  "selected_candidate_count": 1
+}
