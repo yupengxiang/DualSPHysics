@@ -1,0 +1,1 @@
+023 corrected proxy ownership completed0; original020 failed receipt retained. Launch existing F2 full401 animation and F1/F4/F7 threeframe actualgeometry diagnostics through same immutable023 renderer. No new physical count or precision grant.
