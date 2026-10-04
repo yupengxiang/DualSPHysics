@@ -1,0 +1,80 @@
+{
+  "schema": "ds02.f6.stage1-visual-omega-source-audit.v1",
+  "family_id": "F6",
+  "scope": "root_followup_055_stage1_visual_batch_v1",
+  "audit_mode": "source_only_no_execution",
+  "overall_status": "source_handoff_ready_for_root_review",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "checks": [
+    {
+      "id": "scope_boundary",
+      "status": "passed",
+      "detail": "Only the fresh055 handoff is authored; no jobs, GenCase, solver, H5, BI4, CSV arrays, PartVTK, or rendering were launched or copied."
+    },
+    {
+      "id": "batch_size",
+      "status": "passed",
+      "detail": "Exactly eight unique physical_case_id rows are present."
+    },
+    {
+      "id": "single_control_dimension",
+      "status": "passed",
+      "detail": "Every row changes only angular_velocity_scale_s applied to [0.08, 0.12, 0.06] rad/s. Orientation, center/height, geometry, body mass/inertia, fluid, tank, dp, and numerical recipe are fixed."
+    },
+    {
+      "id": "one_dp_per_physical_case",
+      "status": "passed",
+      "detail": "Every row uses dp_m=0.025 exactly once; native frame and view multiplicity do not increment case count."
+    },
+    {
+      "id": "source_anchor",
+      "status": "passed",
+      "detail": "Rows bind to corrected actual coarse source lineage GenCase017, native021, QA019, semantic020, body SO(3) root029, and exact time root030."
+    },
+    {
+      "id": "mass_semantics",
+      "status": "preserved",
+      "detail": "Physical 128 kg, native support 256 kg, derived 0.0078125 kg diagnostic node weight, and solver masspart 0.015625 kg remain separate."
+    },
+    {
+      "id": "initial_bi4_policy",
+      "status": "passed",
+      "detail": "Old zero-velocity BI4 is reference-only; changed angularvelini requires fresh GenCase and actual initial QA. Blind byte cloning is forbidden."
+    },
+    {
+      "id": "frame0_propagation",
+      "status": "pending_root",
+      "detail": "Genuine uncertainty remains: GenCase particle velocity is zero and solver fomega-to-node-velocity propagation at frame zero has not been audited."
+    },
+    {
+      "id": "negative_evidence",
+      "status": "preserved",
+      "detail": "Initial QA mass failure, semantic interpretation boundary, finer-half/all3DP failures, null orientation budget, and q_n uncertainty remain active."
+    },
+    {
+      "id": "request_gate",
+      "status": "passed",
+      "detail": "The root-bindable request is disabled, has zero independent-case increment, and only names source metadata plus the scalar builder."
+    },
+    {
+      "id": "visual_review_gate",
+      "status": "pending_root",
+      "detail": "No visual approval, numerical precision acceptance, Q-N, or production approval is asserted."
+    }
+  ],
+  "claim_boundary": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "q_n": "not_assessed",
+    "visual_approval": "none",
+    "numerical_precision_status": "not_accepted",
+    "production_approval": "none"
+  },
+  "root_next_actions": [
+    "review scalar rows and source hashes",
+    "prepare fresh XML/BI4 for each angularvelini; do not reuse the old BI4",
+    "rerun original initial QA and semantic audit",
+    "audit frame-zero angular propagation",
+    "run strict full native241/fulltyped/visual workflow only after review"
+  ]
+}
