@@ -1,0 +1,81 @@
+{
+  "schema": "ds02.f7.obstacle-smooth-c2-spec.v2",
+  "family_id": "F7",
+  "physical_mother_id": "F7_OBSTACLE_SMOOTH_C2_BASE",
+  "mechanism": "moving_obstacle_exchange",
+  "authoritative_timestamp_utc": "2026-10-04T03:15:00Z",
+  "analytic_target_specification": {
+    "formulation": "piecewise_quintic_polynomial_minimum_jerk",
+    "polynomial": "s(tau) = 10*tau^3 - 15*tau^4 + 6*tau^5",
+    "first_derivative": "ds/dtau = 30*tau^2*(1 - tau)^2",
+    "second_derivative": "d2s/dtau2 = 60*tau*(1 - tau)*(1 - 2*tau)",
+    "boundary_derivative_values": {
+      "s_at_0": 0.0,
+      "s_at_1": 1.0,
+      "ds_at_0": 0.0,
+      "ds_at_1": 0.0,
+      "d2s_at_0": 0.0,
+      "d2s_at_1": 0.0
+    },
+    "nominal_amplitude_deg": 45.0,
+    "total_window_s": 12.0,
+    "active_motion_window_s": [0.0, 8.0],
+    "rest_tail_window_s": [8.0, 12.0],
+    "rest_tail_pose_deg": 0.0,
+    "segments": [
+      {"id": 1, "t_start": 0.0, "t_end": 1.0, "duration": 1.0, "theta_start": 0.0, "theta_end": 45.0},
+      {"id": 2, "t_start": 1.0, "t_end": 3.0, "duration": 2.0, "theta_start": 45.0, "theta_end": -45.0},
+      {"id": 3, "t_start": 3.0, "t_end": 5.0, "duration": 2.0, "theta_start": -45.0, "theta_end": 45.0},
+      {"id": 4, "t_start": 5.0, "t_end": 7.0, "duration": 2.0, "theta_start": 45.0, "theta_end": -45.0},
+      {"id": 5, "t_start": 7.0, "t_end": 8.0, "duration": 1.0, "theta_start": -45.0, "theta_end": 0.0},
+      {"id": 6, "t_start": 8.0, "t_end": 12.0, "duration": 4.0, "theta_start": 0.0, "theta_end": 0.0}
+    ]
+  },
+  "discrete_solver_reader_semantics": {
+    "official_solver_reader": "JMotionMovActive::DfGetNewAng(double t)",
+    "source_file": "src/source/JMotionObj.cpp",
+    "source_lines": "214-226",
+    "interpolation_type": "piecewise_linear",
+    "piecewise_linear_evaluation": "tfactor = (t - DfTimes[DfIndex-1]) / (DfTimes[DfIndex] - DfTimes[DfIndex-1]); newang = ang0 + tfactor * (ang - ang0);",
+    "consequence_in_native_space": "Velocity is piecewise constant on each discrete interval; knot slope jumps delta v_i occur at every sample knot; non-zero start-interval slope exists on [0, dt].",
+    "rejection_of_owner_041_guarantee": "Owner 041 claim of exact zero native velocity/acceleration discontinuities is mathematically REJECTED."
+  },
+  "motion_cadence_options": {
+    "selected_target_cadence": {
+      "dt_s": 0.001,
+      "sampling_frequency_hz": 1000.0,
+      "row_count": 12001,
+      "first_interval_slope_deg_s": 0.0004493253,
+      "max_knot_slope_jump_deg_s": 0.259806,
+      "theoretical_max_interp_error_deg": 3.247595e-5,
+      "file_name": "motion_obstacle_smooth_c2.dat"
+    },
+    "independent_control_cadence": {
+      "dt_s": 0.0005,
+      "sampling_frequency_hz": 2000.0,
+      "row_count": 24001,
+      "first_interval_slope_deg_s": 0.0001124156,
+      "max_knot_slope_jump_deg_s": 0.129904,
+      "theoretical_max_interp_error_deg": 8.118988e-6,
+      "file_name": "motion_obstacle_smooth_c2_dt0005.dat"
+    }
+  },
+  "io_safety_specification": {
+    "format_precision": "%.17g",
+    "format_rationale": "Full IEEE 754 double precision roundtrip without truncation",
+    "write_mode": "exclusive_creation_x",
+    "write_rationale": "Prevents overwrite unsafe operations; fails with FileExistsError if file exists",
+    "worktree_generation_policy": "No actual motion files generated in worktree; Rootguard dispatch only"
+  },
+  "xml_modification_boundary": {
+    "declared_subtree_only": "<casedef><motion><objreal ref=\"2\">",
+    "whole_xml_undo_requirement": "ET.tostring(restored_root) == ET.tostring(ref_root)",
+    "preserved_elements": [
+      "mkconfig",
+      "constantsdef (gravity, rhop0, coefsound, coefh, etc.)",
+      "geometry (definition, pointref, pointmin, pointmax, drawbox, fillbox, etc.)",
+      "execution (parameters, StepAlgorithm, Kernel, Visco, TimeMax, simulationdomain, etc.)"
+    ],
+    "geometry_repair_policy": "Strictly no silent new geometry kernel repair."
+  }
+}

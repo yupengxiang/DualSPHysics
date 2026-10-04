@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.f7.cadence-sensitivity-spec.v1",
+  "family_id": "F7",
+  "physical_mother_id": "F7_OBSTACLE_SMOOTH_C2_BASE",
+  "mechanism": "moving_obstacle_exchange",
+  "description": "Specification for separating input motion sampling cadence from spatial resolution refinement.",
+  "sampling_cadence_comparison": {
+    "cadence_a": {
+      "id": "CADENCE_DT001",
+      "dt_s": 0.001,
+      "rows": 12001,
+      "linear_chord_error_bound_deg": 3.247595e-5,
+      "max_knot_slope_jump_deg_s": 0.259806,
+      "role": "selected_primary_target"
+    },
+    "cadence_b": {
+      "id": "CADENCE_DT0005",
+      "dt_s": 0.0005,
+      "rows": 24001,
+      "linear_chord_error_bound_deg": 8.118988e-6,
+      "max_knot_slope_jump_deg_s": 0.129904,
+      "role": "independent_cadence_control"
+    }
+  },
+  "qualification_boundary": {
+    "status": "not_granted",
+    "rule": "Source input cadence sensitivity requires separate actual full native qualification under Root strict dispatch.",
+    "claim_limit": "No retroactive causal assertion regarding the historical 43% KE spatial discrepancy."
+  }
+}

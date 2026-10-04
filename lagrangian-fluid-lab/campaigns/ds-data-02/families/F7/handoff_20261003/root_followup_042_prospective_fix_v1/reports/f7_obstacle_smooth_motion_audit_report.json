@@ -1,0 +1,374 @@
+{
+  "schema": "ds02.f7.obstacle-smooth-motion-audit-report.v2",
+  "created_at_utc": "2026-10-04T03:15:00Z",
+  "family_id": "F7",
+  "physical_mother_id": "F7_OBSTACLE_SMOOTH_C2_BASE",
+  "mechanism": "moving_obstacle_exchange",
+  "governance_and_resource_state": {
+    "campaign_goal_progress": "0/336",
+    "campaign_qualification_progress": "273/320",
+    "gpu_budget_charged_hours": 65.3,
+    "gpu_budget_total_hours": 96.0,
+    "gpu_budget_remaining_hours": 30.7,
+    "home_disk_floor_gib": 500,
+    "home_disk_free_gib": 2978,
+    "q_n_status": "not_granted",
+    "production_approval": "none",
+    "case_count_prediction": {
+      "prospective_base_definitions": 3,
+      "independent_cadence_control_definitions": 1,
+      "independent_case_count_increment": 0
+    }
+  },
+  "rejection_of_owner_041_guarantee": {
+    "status": "REJECTED",
+    "reason": "Official DualSPHysics motion file reader 'JMotionMovActive::DfGetNewAng' (src/source/JMotionObj.cpp:214-226) performs piecewise LINEAR interpolation between knots. The sampled motion file is therefore piecewise linear in native solver space, possessing finite slope jumps at each knot and a non-zero start-interval slope on [0, dt]. The owner guarantee of exact zero native velocity/acceleration discontinuities is false and rejected."
+  },
+  "analytic_regularity_audit": {
+    "transitions": [
+      {
+        "junction": "t0_start",
+        "time_s": 0.0,
+        "type": "initial_boundary",
+        "left_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "right_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t1_forward_peak",
+        "time_s": 1.0,
+        "type": "internal_junction",
+        "left_limit": {
+          "angle_deg": 45.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "right_limit": {
+          "angle_deg": 45.0,
+          "velocity_deg_s": -0.0,
+          "acceleration_deg_s2": -0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t2_reverse_peak",
+        "time_s": 3.0,
+        "type": "internal_junction",
+        "left_limit": {
+          "angle_deg": -45.0,
+          "velocity_deg_s": -0.0,
+          "acceleration_deg_s2": -0.0
+        },
+        "right_limit": {
+          "angle_deg": -45.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t3_forward_peak",
+        "time_s": 5.0,
+        "type": "internal_junction",
+        "left_limit": {
+          "angle_deg": 45.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "right_limit": {
+          "angle_deg": 45.0,
+          "velocity_deg_s": -0.0,
+          "acceleration_deg_s2": -0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t4_reverse_peak",
+        "time_s": 7.0,
+        "type": "internal_junction",
+        "left_limit": {
+          "angle_deg": -45.0,
+          "velocity_deg_s": -0.0,
+          "acceleration_deg_s2": -0.0
+        },
+        "right_limit": {
+          "angle_deg": -45.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t5_neutral_return",
+        "time_s": 8.0,
+        "type": "rest_tail_junction",
+        "left_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "right_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      },
+      {
+        "junction": "t6_window_end",
+        "time_s": 12.0,
+        "type": "terminal_boundary",
+        "left_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "right_limit": {
+          "angle_deg": 0.0,
+          "velocity_deg_s": 0.0,
+          "acceleration_deg_s2": 0.0
+        },
+        "jumps": {
+          "angle_jump_deg": 0.0,
+          "velocity_jump_deg_s": 0.0,
+          "acceleration_jump_deg_s2": 0.0
+        },
+        "c0_continuous": true,
+        "c1_continuous": true,
+        "c2_continuous": true,
+        "joins_zero_vel": true,
+        "joins_zero_acc": true
+      }
+    ],
+    "max_angle_jump_deg": 0.0,
+    "max_velocity_jump_deg_s": 0.0,
+    "max_acceleration_jump_deg_s2": 0.0,
+    "all_c2_continuous": true,
+    "rest_tail_verified": true
+  },
+  "sampled_io_descriptors": {
+    "selected_target_dt001": {
+      "sampling_dt_s": 0.001,
+      "duration_s": 12.0,
+      "knot_count": 12001,
+      "first_interval_slope_deg_s": 0.00044932527,
+      "initial_start_slope_jump_deg_s": 0.00044932527,
+      "max_interval_slope_deg_s": 84.37494375007049,
+      "min_interval_slope_deg_s": -84.37494375007049,
+      "max_knot_slope_jump_deg_s": 0.2598063470995413,
+      "peak_analytic_acceleration_deg_s2": 259.8076211353316,
+      "theoretical_max_interp_error_deg": 3.2475952641916446e-05,
+      "empirical_max_chord_error_deg": 3.247591037336406e-05,
+      "reader_physical_source_pins": {
+        "solver_reader_function": "JMotionMovActive::DfGetNewAng(double t)",
+        "solver_reader_source_file": "src/source/JMotionObj.cpp",
+        "solver_reader_lines": "214-226",
+        "solver_motion_caller": "src/source/JMotionObj.cpp:615-627 (JMotionMov::RotationFile)",
+        "file_loader_function": "JMotionDataRotAxis::LoadFileAng",
+        "file_loader_source_file": "src/source/JMotionData.cpp",
+        "file_loader_lines": "124-145",
+        "xml_motion_parser": "src/source/JMotion.cpp:214-230 (mvrotfile)"
+      },
+      "rejection_summary": "Because DualSPHysics DfGetNewAng performs piecewise LINEAR interpolation between knots, the native motion experienced by particles has piecewise constant velocity with finite slope jumps up to 0.259806 deg/s at each knot and an initial jump of 4.493253e-04 deg/s at t=0+. Therefore, the sampled motion file is NOT mathematically C2 in the solver, and the owner-041 guarantee of exact zero native velocity/acceleration discontinuities is REJECTED."
+    },
+    "independent_control_dt0005": {
+      "sampling_dt_s": 0.0005,
+      "duration_s": 12.0,
+      "knot_count": 24001,
+      "first_interval_slope_deg_s": 0.000112415641875,
+      "initial_start_slope_jump_deg_s": 0.000112415641875,
+      "max_interval_slope_deg_s": 84.37498593745829,
+      "min_interval_slope_deg_s": -84.37498593751513,
+      "max_knot_slope_jump_deg_s": 0.12990364149345623,
+      "peak_analytic_acceleration_deg_s2": 259.8076211353316,
+      "theoretical_max_interp_error_deg": 8.118988160479111e-06,
+      "empirical_max_chord_error_deg": 8.11898584629489e-06,
+      "reader_physical_source_pins": {
+        "solver_reader_function": "JMotionMovActive::DfGetNewAng(double t)",
+        "solver_reader_source_file": "src/source/JMotionObj.cpp",
+        "solver_reader_lines": "214-226",
+        "solver_motion_caller": "src/source/JMotionObj.cpp:615-627 (JMotionMov::RotationFile)",
+        "file_loader_function": "JMotionDataRotAxis::LoadFileAng",
+        "file_loader_source_file": "src/source/JMotionData.cpp",
+        "file_loader_lines": "124-145",
+        "xml_motion_parser": "src/source/JMotion.cpp:214-230 (mvrotfile)"
+      },
+      "rejection_summary": "Because DualSPHysics DfGetNewAng performs piecewise LINEAR interpolation between knots, the native motion experienced by particles has piecewise constant velocity with finite slope jumps up to 0.129904 deg/s at each knot and an initial jump of 1.124156e-04 deg/s at t=0+. Therefore, the sampled motion file is NOT mathematically C2 in the solver, and the owner-041 guarantee of exact zero native velocity/acceleration discontinuities is REJECTED."
+    }
+  },
+  "motion_file_specifications": {
+    "precision_format": "%.17g",
+    "write_mode": "exclusive_x",
+    "dt001_predicted_sha256": "2b607e700abaab4b687740b1a5a3535ce1cc3fee246cbd02d09ad596a722032f",
+    "dt0005_predicted_sha256": "cfb9b69a57ac5cf1358a91d1c78c0998c41babba75f0fe1d77ba863cb83f5f0f",
+    "actual_generation_state": "Rootguard dispatch only; files not generated in worktree"
+  },
+  "case_audits": [
+    {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_COARSE",
+      "resolution": "COARSE",
+      "dp_m": 0.025,
+      "definition_xml": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/definitions/F7_OBSTACLE_SMOOTH_C2_BASE_COARSE_Def.xml",
+      "definition_sha256": "fe705a8bd9517a5d027e1dd8f2a18b2476c09a4f1c090e0c1290de356c52672c",
+      "manifest_json": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/case_manifests/F7_OBSTACLE_SMOOTH_C2_BASE_COARSE.json",
+      "undo_audit": {
+        "whole_tree_identical_upon_undo": true,
+        "constants_identical": true,
+        "mkconfig_identical": true,
+        "geometry_identical": true,
+        "execution_identical": true,
+        "no_silent_geometry_kernel_repair": true,
+        "declared_motion_subtree_isolated": true
+      }
+    },
+    {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_MEDIUM",
+      "resolution": "MEDIUM",
+      "dp_m": 0.02,
+      "definition_xml": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/definitions/F7_OBSTACLE_SMOOTH_C2_BASE_MEDIUM_Def.xml",
+      "definition_sha256": "a80251091d37753ec3ae762dedb0b4a26aa788396b3da3fcd23729c69aafa6da",
+      "manifest_json": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/case_manifests/F7_OBSTACLE_SMOOTH_C2_BASE_MEDIUM.json",
+      "undo_audit": {
+        "whole_tree_identical_upon_undo": true,
+        "constants_identical": true,
+        "mkconfig_identical": true,
+        "geometry_identical": true,
+        "execution_identical": true,
+        "no_silent_geometry_kernel_repair": true,
+        "declared_motion_subtree_isolated": true
+      }
+    },
+    {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_FINE",
+      "resolution": "FINE",
+      "dp_m": 0.016,
+      "definition_xml": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/definitions/F7_OBSTACLE_SMOOTH_C2_BASE_FINE_Def.xml",
+      "definition_sha256": "793cbbf48ab892f122bb374f93c7a82b02981b8042ef8634f31b80f8d72be187",
+      "manifest_json": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_042_prospective_fix_v1/case_manifests/F7_OBSTACLE_SMOOTH_C2_BASE_FINE.json",
+      "undo_audit": {
+        "whole_tree_identical_upon_undo": true,
+        "constants_identical": true,
+        "mkconfig_identical": true,
+        "geometry_identical": true,
+        "execution_identical": true,
+        "no_silent_geometry_kernel_repair": true,
+        "declared_motion_subtree_isolated": true
+      }
+    }
+  ],
+  "root_motion_regularity_contrast": {
+    "reference_prescribed_motion_flaws": [
+      {
+        "time_s": 2.0,
+        "phenomenon": "Abrupt velocity termination into wait",
+        "old_velocity_jump_deg_s": -34.94899869705837,
+        "old_acceleration_jump_deg_s2": -270.3326854726472,
+        "prospective_target_velocity_jump_deg_s": 0.0,
+        "prospective_target_acceleration_jump_deg_s2": 0.0,
+        "repair_status": "Analytic target smooth; discrete piecewise linear error bounded"
+      },
+      {
+        "time_s": 2.25,
+        "phenomenon": "Impulsive start from wait into segment 3",
+        "old_velocity_jump_deg_s": -113.09733552923255,
+        "old_acceleration_jump_deg_s2": -3.48e-14,
+        "prospective_target_velocity_jump_deg_s": 0.0,
+        "prospective_target_acceleration_jump_deg_s2": 0.0,
+        "repair_status": "Analytic target smooth; discrete piecewise linear error bounded"
+      },
+      {
+        "time_s": 4.25,
+        "phenomenon": "Abrupt velocity termination into wait",
+        "old_velocity_jump_deg_s": 34.948998697058364,
+        "old_acceleration_jump_deg_s2": 270.3326854726472,
+        "prospective_target_velocity_jump_deg_s": 0.0,
+        "prospective_target_acceleration_jump_deg_s2": 0.0,
+        "repair_status": "Analytic target smooth; discrete piecewise linear error bounded"
+      },
+      {
+        "time_s": 4.5,
+        "phenomenon": "Impulsive start from wait into segment 1",
+        "old_velocity_jump_deg_s": 113.09733552923255,
+        "old_acceleration_jump_deg_s2": 0.0,
+        "prospective_target_velocity_jump_deg_s": 0.0,
+        "prospective_target_acceleration_jump_deg_s2": 0.0,
+        "repair_status": "Analytic target smooth; discrete piecewise linear error bounded"
+      }
+    ],
+    "wait_state_comparison": {
+      "old_wait_pose_deg": -42.797543233281914,
+      "old_wait_comment": "Waited at rotated paddle pose, unphysically biasing fluid displacement",
+      "prospective_rest_pose_deg": 0.0,
+      "prospective_rest_comment": "Returns strictly to neutral center pose (0.0 deg) with zero velocity/acceleration for 4.0 s rest tail"
+    },
+    "causality_boundary": "Elimination of source motion discontinuities is a necessary regularity repair. However, per Root governance, this source-level repair alone does NOT constitute a unique causal explanation for the historical 43.011% spatial KE discrepancy, nor does it relax qualification gates."
+  },
+  "causality_and_claim_boundaries": {
+    "spatial_ke_discrepancy_attribution": "Source motion continuity repair does NOT explain the 43.011% spatial KE discrepancy. Multi-resolution discretization and lattice-boundary interaction remain active unisolated factors.",
+    "cadence_sensitivity_boundary": "Sensitivity to input sampling cadence (0.001 s vs 0.0005 s) requires separate actual full native qualification under Root strict dispatch.",
+    "production_proxy": "No whole production proxy claimed.",
+    "pump_fallback": "No pump fallback claims made."
+  }
+}
