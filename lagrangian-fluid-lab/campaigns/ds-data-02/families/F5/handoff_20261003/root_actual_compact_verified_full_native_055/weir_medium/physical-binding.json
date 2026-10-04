@@ -1,0 +1,332 @@
+{
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F5",
+    "physical_case_id": "F5_COMPACT_STILL_WATER_WEIR_V1",
+    "mechanism_id": "weir",
+    "geometry_family_id": "F5_COMPACT_CONTINUOUS_BED_AND_WEIR_V1",
+    "control_family_id": "F5_FINITE_TWO_CYCLE_HANN_PACKET_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          -0.2,
+          -0.18,
+          -0.15
+        ],
+        "size_m": [
+          5,
+          0.36,
+          0.95
+        ],
+        "label": "Finite3Dflume/prescribedpaddle/upstreamstillwater/drydownstreamreceivingbasin"
+      },
+      "bed_profile_envelope": {
+        "low_m": [
+          -0.2,
+          -0.15,
+          -0.15
+        ],
+        "size_m": [
+          5,
+          0.3,
+          0.598
+        ],
+        "label": "Continuous exactpiecewise profile; bednodes inphysicalparameters"
+      },
+      "initial_fluid_envelope": {
+        "low_m": [
+          0,
+          -0.15,
+          0
+        ],
+        "size_m": [
+          3.428571428571429,
+          0.3,
+          0.4
+        ],
+        "mkfluid": 0,
+        "label": "Abovecontinuousbed/belowSWL.4; excludeactualphysicalweirsolid inweirbackground"
+      },
+      "piston": {
+        "low_m": [
+          -0.04,
+          -0.15,
+          0
+        ],
+        "size_m": [
+          0.04,
+          0.3,
+          0.75
+        ],
+        "label": "Finiteprescribed3Dpaddle"
+      },
+      "weir_left": {
+        "low_m": [
+          3.2,
+          -0.15,
+          0.336
+        ],
+        "size_m": [
+          0.15,
+          0.11,
+          0.124
+        ],
+        "label": "Physicalnotchedweirsolid, submergedvolumeexcludedfromfluid"
+      },
+      "weir_right": {
+        "low_m": [
+          3.2,
+          0.04,
+          0.336
+        ],
+        "size_m": [
+          0.15,
+          0.11,
+          0.124
+        ],
+        "label": "Physicalnotchedweirsolid, submergedvolumeexcludedfromfluid"
+      },
+      "weir_notch": {
+        "low_m": [
+          3.2,
+          -0.04,
+          0.336
+        ],
+        "size_m": [
+          0.15,
+          0.08,
+          0.074
+        ],
+        "label": "Physicalnotchedweirsolid, submergedvolumeexcludedfromfluid"
+      }
+    },
+    "initial_state": {
+      "velocities_m_per_s": {
+        "fluid": [
+          0,
+          0,
+          0
+        ]
+      },
+      "source_labels": {
+        "fluid": "CompleteoriginalinitialnativeType3/Mk1, no births/injection"
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 323.7792857142857
+      },
+      "mass_policy": "Unscaled originalbinarynativefloatweights; continuumidealvolume andofficialCSVroundedexport distinctfromactualbinaryinventory"
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 2,
+      "kernel": 2,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.01,
+        "boundary_factor": 1
+      },
+      "density_dt": 2,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "density_kg_m3": 1000,
+    "parameters": {
+      "SWL_H_m": 0.4,
+      "width_m": 0.3,
+      "bed_slope": 0.28,
+      "bed_profile_nodes_x_z_m": [
+        [
+          -0.2,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          0.28
+        ],
+        [
+          3.6,
+          0.448
+        ],
+        [
+          3.9,
+          0.448
+        ],
+        [
+          4.4,
+          0.05
+        ],
+        [
+          4.8,
+          0.05
+        ]
+      ],
+      "shoreline_x_m": 3.428571428571429,
+      "packet_amplitude_coefficient_m": 0.028,
+      "packet_generation_duration_s": 5,
+      "packet_cycles": 2,
+      "motion_table_dt_s": 0.025,
+      "motion_semantics": "17g sampledHannmotion; nativefileinterpolation/parkedpaddle reflections retained, no reflectionsuppression guarantee"
+    },
+    "event_window": {
+      "time_start_s": 0,
+      "time_end_s": 16,
+      "sequence": [
+        "wavegeneration",
+        "shoaling",
+        "notchovertopping",
+        "transmissionandreturn"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "Actual eventpresence/nativeloss/terminalclass must be measured; retain allrawdrycodes andunknownnativeexclusion"
+    },
+    "periodic_boundary": false,
+    "mass_policy": "native_massfluid_no_rescaling",
+    "lineage_group_id": "F5_COMPACT_SHARED_BED_PACKET_ALL_DPS_BACKGROUND_NO_LEAK"
+  },
+  "physical_condition_sha256": "2279b82f06943960693866046f9732c28ebd1f8293cc3b8fb615fbd98c2a7c63",
+  "actual_initial_native_QA": {
+    "role": "weir_medium",
+    "mechanism": "weir",
+    "case_id": "F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053",
+    "prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053/root-compact-equilibrium-weir_medium-weir-ownership-fix-gencase-053/prepared/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053/root-compact-equilibrium-weir_medium-weir-ownership-fix-gencase-053/execution-receipt.json",
+    "expected_total": 669418,
+    "expected_fluid": 165360,
+    "expected_types": [
+      0,
+      1,
+      3
+    ],
+    "compact_f5_geometry": true,
+    "cells_y": 24,
+    "initial_bi4_sha256": "58d9b1bed1c1975f0db8a267b3e346f9a378cbf2390f1f1ee3e0cf206642d449",
+    "generated_xml_sha256": "054d0cd1246c245d1188faa64ecff625ec8b6d93e8377444f62bf4ba220b04c9",
+    "official_csv_sha256": "c1d85bdec0f2ffaf7b29433466ffdcd1cebc691ba06159f48f860d2d6d4ec5d9",
+    "official_csv": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ACTUAL_COARSE_GEOMETRY_QA/root-compact-equilibrium-both-mechanisms-three-dp-corrected-native-geometry-qa-054/weir_medium-initial-all.csv",
+    "passed": true,
+    "native_particles": 669418,
+    "native_fluid": 165360,
+    "actual_3d": true,
+    "native_type_counts": {
+      "0": 489406,
+      "1": 14652,
+      "3": 165360
+    },
+    "actual_fluid_envelope_m": [
+      [
+        0.0062500001,
+        -0.14375,
+        0.0062500001
+      ],
+      [
+        3.39375,
+        0.14375,
+        0.39375001
+      ]
+    ],
+    "official_CSV_fluid_mass_sum_kg": 322.96875,
+    "mass_precision": "Official CSV rounded export; original BI4 binary native weights remain authority for full converter",
+    "original_reference_comparison": null
+  },
+  "actual_initial_geometry_diagnostic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ACTUAL_COARSE_GEOMETRY_QA/root-compact-equilibrium-both-mechanisms-three-dp-corrected-native-geometry-qa-054/weir_medium-physical-geometry-diagnostic.json",
+  "actual_source_preflight_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053/root-compact-equilibrium-weir_medium-weir-ownership-fix-gencase-053/prepared/prepared-input-report.json",
+  "actual_post_gencase_assets": [
+    {
+      "relative_name": "assets/f5_compact_continuous_bed_profile.stl",
+      "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/assets/f5_compact_continuous_bed_profile.stl",
+      "sha256": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c",
+      "bytes": 13386,
+      "copied_to": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053/root-compact-equilibrium-weir_medium-weir-ownership-fix-gencase-053/prepared/assets/f5_compact_continuous_bed_profile.stl",
+      "post_gencase_size_before_restoration": 0,
+      "post_gencase_sha256_before_restoration": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "restored_after_gencase": true,
+      "verified_post_gencase_sha256": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c"
+    },
+    {
+      "relative_name": "assets/f5_compact_packet_motion.dat",
+      "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/assets/f5_compact_packet_motion.dat",
+      "sha256": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a",
+      "bytes": 15023,
+      "copied_to": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053/root-compact-equilibrium-weir_medium-weir-ownership-fix-gencase-053/prepared/assets/f5_compact_packet_motion.dat",
+      "post_gencase_size_before_restoration": 0,
+      "post_gencase_sha256_before_restoration": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "restored_after_gencase": true,
+      "verified_post_gencase_sha256": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a"
+    }
+  ],
+  "actual_execution_parameters": {
+    "SavePosDouble": "1",
+    "StepAlgorithm": "2",
+    "VerletSteps": "40",
+    "Kernel": "2",
+    "ViscoTreatment": "1",
+    "Visco": "0.01",
+    "ViscoBoundFactor": "1",
+    "DensityDT": "2",
+    "DensityDTvalue": "0.1",
+    "Shifting": "0",
+    "RigidAlgorithm": "1",
+    "FtPause": "0.0",
+    "CoefDtMin": "0.05",
+    "DtIni": "0",
+    "DtMin": "0",
+    "DtFixed": "0",
+    "DtAllParticles": "0",
+    "TimeMax": "16.0",
+    "TimeOut": "0.02",
+    "RhopOutMin": "700",
+    "RhopOutMax": "1300",
+    "Boundary": "1",
+    "MinFluidStop": "0"
+  },
+  "actual_generated_constants": {
+    "data2d": {
+      "value": "false"
+    },
+    "gravity": {
+      "x": "0",
+      "y": "0",
+      "z": "-9.81",
+      "units_comment": "m/s^2"
+    },
+    "cflnumber": {
+      "value": "0.2"
+    },
+    "gamma": {
+      "value": "7"
+    },
+    "rhop0": {
+      "value": "1000",
+      "units_comment": "kg/m^3"
+    },
+    "dp": {
+      "value": "0.0125",
+      "units_comment": "metres (m)"
+    },
+    "h": {
+      "value": "0.021650635095",
+      "units_comment": "metres (m)"
+    },
+    "b": {
+      "value": "224228.57143",
+      "units_comment": "Pascal (Pa)"
+    },
+    "massbound": {
+      "value": "0.001953125",
+      "units_comment": "kg"
+    },
+    "massfluid": {
+      "value": "0.001953125",
+      "units_comment": "kg"
+    }
+  },
+  "native_state_scope": "Completeofficial13columnsinitialproof; no equilibrium/no-loss/event/convergence guarantee"
+}
