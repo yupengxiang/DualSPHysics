@@ -1,0 +1,59 @@
+{
+  "schema": "ds02.f1.initial-vx-gencase-qa-source-handoff.v1",
+  "handoff_id": "root_followup_066_f1_initial_vx_gencase_qa_v1",
+  "family_id": "F1",
+  "package_status": "source_only_disabled_pending_root_actual_gencase_and_vx_aware_initial_qa",
+  "source_only": true,
+  "launch_allowed": false,
+  "execution_allowed": false,
+  "gencase_launched": false,
+  "initial_qa_launched": false,
+  "solver_launched": false,
+  "raw_arrays_read": false,
+  "raw_arrays_hashed": false,
+  "shared_index_or_ledger_modified": false,
+  "independent_case_count_increment": 0,
+  "axis": {
+    "name": "uniform_initial_fluid_vx",
+    "values_m_per_s": [0.1, 0.2],
+    "fluid_mk": 0,
+    "fluid_native_type": 3,
+    "vy_vz_m_per_s": [0.0, 0.0],
+    "official_xml_syntax": "<initials><velocity mkfluid=\"0\" x=\"...\" y=\"0\" z=\"0\" /></initials>",
+    "evidence": "evidence/official-initial-velocity-syntax.json"
+  },
+  "parent_first8": [
+    "F1_STAGE1_ECC_H110_DP010",
+    "F1_STAGE1_ECC_H130_DP010",
+    "F1_FALLBACK_ECC_COARSE",
+    "F1_STAGE1_ECC_H190_DP010",
+    "F1_STAGE1_DUAL_H220_DP020",
+    "F1_STAGE1_DUAL_H260_DP020",
+    "F1_FALLBACK_DUAL_COARSE",
+    "F1_STAGE1_DUAL_H340_DP020"
+  ],
+  "case_count": 16,
+  "case_layout": "each parent_first8 condition paired with vx=0.1 and vx=0.2 m/s",
+  "stages": ["gencase", "initial_qa"],
+  "native_solver_requests": 0,
+  "evidence": {
+    "first8_native_voxelization_audit": "evidence/first8-native-voxelization-audit.json",
+    "static_validation": "metadata/static-validation.json",
+    "qa_worker": "qa_initial_vx.py"
+  },
+  "future_digest_policy": "future outputs, execution receipts, and QA receipts stay null until Root runs the disabled requests",
+  "acceptance_policy": "Root must obtain genuine GenCase and vx-aware initial-QA evidence; no V0=0 QA is transferable and no visual/native acceptance is asserted",
+  "files": [
+    "bind_f1_first8_vx_gencase_qa.py",
+    "definitions/",
+    "owners/",
+    "gencase-bindings/",
+    "qa-bindings/",
+    "requests/",
+    "qa_initial_vx.py",
+    "evidence/",
+    "metadata/static-validation.json",
+    "tests/test_source_contract.py"
+  ]
+}
+

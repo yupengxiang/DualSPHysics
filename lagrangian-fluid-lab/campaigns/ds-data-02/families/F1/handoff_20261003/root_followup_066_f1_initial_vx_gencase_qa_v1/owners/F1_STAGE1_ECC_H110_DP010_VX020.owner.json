@@ -1,0 +1,172 @@
+{
+  "schema": "ds02.f1.initial-vx-axis-owner.v1",
+  "family_id": "F1",
+  "case_id": "F1_STAGE1_ECC_H110_DP010_VX020",
+  "physical_case_id": "F1_ECC_HEAD_110_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX020_MS_V1",
+  "physical_condition_sha256": "99aba5f45658900adb00f1dd652f0fb29730753b9334225e3e3683991cc1dd29",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F1",
+    "physical_case_id": "F1_ECC_HEAD_110_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX020_MS_V1",
+    "mechanism_id": "eccentric_obstacle",
+    "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+    "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_INITIAL_VX_AXIS_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          0,
+          0,
+          0
+        ],
+        "size_m": [
+          1.6,
+          0.67,
+          0.4
+        ],
+        "label": "Finite five physical walls with open top; thick DBC numerical support"
+      },
+      "obstacle_or_divider": {
+        "low_m": [
+          0.9,
+          0.24,
+          0
+        ],
+        "size_m": [
+          0.12,
+          0.12,
+          0.45
+        ],
+        "label": "Static physical solid"
+      },
+      "fluid_reservoir": {
+        "low_m": [
+          0,
+          0,
+          0
+        ],
+        "size_m": [
+          0.4,
+          0.67,
+          0.11
+        ],
+        "mkfluid": 0,
+        "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            0.4,
+            0.67,
+            0.11
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.2,
+          0.0,
+          0.0
+        ]
+      },
+      "source_labels": {
+        "fluid": "Initial Type3/Mk1 cohort"
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 29.480000000000004
+      },
+      "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory",
+      "velocity_control": {
+        "axis": "x",
+        "fluid_mk": 0,
+        "fluid_native_type": 3,
+        "velocity_m_per_s": [
+          0.2,
+          0.0,
+          0.0
+        ],
+        "profile": "uniform_direct_initials_velocity"
+      }
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 1,
+      "kernel": 1,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.1,
+        "boundary_factor": 1
+      },
+      "density_dt": 2,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "density_kg_m3": 1000,
+    "parameters": {
+      "fluid_depth_m": 0.11,
+      "physical_top_open": true,
+      "continuum_fluid_volume_m3": 0.029480000000000003
+    },
+    "event_window": {
+      "time_start_s": 0,
+      "time_end_s": 1.6,
+      "sequence": [
+        "release",
+        "obstacle_impact",
+        "bypass",
+        "downstream_return"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+    },
+    "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+    "periodic_boundary": false,
+    "mass_policy": "native_massfluid_no_rescaling"
+  },
+  "parent_case_id": "F1_STAGE1_ECC_H110_DP010",
+  "parent_physical_case_id": "F1_ECC_HEAD_110_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "parent_physical_condition_sha256": "315f2c4209fb1fbd8bb23055c808954f5ece2b3df729f2bbd41289c5e5dbbc13",
+  "parent_source_owner": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_ECC_H110_DP010/owner.json",
+    "sha256": "f3fea180b6c5a8306b422ba39b23a273f901b40370a7b2cc2d31b92293bef4db"
+  },
+  "axis": {
+    "name": "uniform_initial_fluid_vx",
+    "velocity_m_per_s": [
+      0.2,
+      0.0,
+      0.0
+    ],
+    "fluid_mk": 0,
+    "fluid_native_type": 3,
+    "source_xml_expression": "<velocity mkfluid=\"0\" x=\"0.2\" y=\"0\" z=\"0\" />"
+  },
+  "geometry_and_solver": "inherited exactly from the parent source definition and native032 recipe; only the initials velocity element changes",
+  "parent_actual_voxelization_reference": {
+    "total_particles": 130916,
+    "fluid_particles": 29480,
+    "boundary_particles": 101436,
+    "dimension": 3,
+    "status": "parent_metadata_reference_only"
+  },
+  "new_case_status": "prospective_source_only_not_generated",
+  "visual_review_status": "pending_root_actual_initial_qa_and_full_native_visual_review",
+  "launch_allowed": false,
+  "execution_allowed": false,
+  "source_only": true,
+  "production_approval": "none",
+  "launch_owner": "root",
+  "independent_case_count_increment": 0
+}
