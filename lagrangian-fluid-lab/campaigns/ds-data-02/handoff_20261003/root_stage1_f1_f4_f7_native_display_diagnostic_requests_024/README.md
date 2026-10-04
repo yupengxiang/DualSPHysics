@@ -1,0 +1,1 @@
+Source metadata plans only for existing true3D F1/F4/F7 display diagnostics, no new physical counts. Must first resolve actual F2 renderer normal-process-exit failure with023, then new root authorized requests; disabled source plans immutable.
