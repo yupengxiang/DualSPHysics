@@ -1,0 +1,190 @@
+{
+  "schema": "ds02.f3.twoaxis-sloshing-manifest.v1",
+  "handoff_directory": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_040_prospective_recipe_v1",
+  "family": "F3",
+  "authority": "Root Followup 040",
+  "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+  "governance": {
+    "q_n_status": "not_granted",
+    "campaign_q_n_counts": "0/336",
+    "remaining_gpu_hours": "~32",
+    "remaining_qualification_attempts": 53,
+    "production_approval": "none",
+    "all_requests_launch_allowed": false,
+    "claim_status": "prospective_twoaxis_sloshing_control_preparation_only",
+    "solver_launched": false,
+    "conversion_launched": false,
+    "actual_csv_materialized": false,
+    "actual_h5_read": false
+  },
+  "commensurate_ladder": {
+    "candidate": {
+      "dp_m": 0.006,
+      "fluid_lattice": "150 x 30 x 15",
+      "expected_fluid": 67500,
+      "expected_fixed": 111708,
+      "expected_total": 179208,
+      "status": "candidate_twoaxis_study",
+      "prior_evidence": "Passes spatial macro 2.8683% <= 5% vs dp0.005; 2336 final fate switches observed in micro paired analysis (no path-stability claim)."
+    },
+    "reference": {
+      "dp_m": 0.005,
+      "fluid_lattice": "180 x 36 x 18",
+      "expected_fluid": 116640,
+      "expected_fixed": 160632,
+      "expected_total": 277272,
+      "status": "established_fine_anchor",
+      "prior_evidence": "Anchor Gen033/QA034: 277272 total, 116640 fluid, 160632 fixed particles, mass sum 14.580001 kg."
+    },
+    "finer_reference": {
+      "dp_m": 0.0045,
+      "fluid_lattice": "200 x 40 x 20",
+      "expected_fluid": 160000,
+      "expected_fixed": 196692,
+      "expected_total": 356692,
+      "status": "finer_commensurate_reference",
+      "prior_evidence": "Known nominal geometry totals 356692; full 8.35s running under Root dispatch."
+    }
+  },
+  "physical_container": {
+    "type": "plain_open_5_wall",
+    "box_dimensions_m": [0.90, 0.18, 0.51],
+    "water_depth_m": 0.09,
+    "continuum_fluid_volume_m3": 0.01458,
+    "fluid_density_kg_m3": 1000.0,
+    "continuum_fluid_mass_kg": 14.58,
+    "globalgravity": 0,
+    "forcing_mode": "fullbody_g_CSV",
+    "baffle": "none (frozen event config strictly preserved without baffle)",
+    "second_mechanism_status": "active_true3D_twoaxis_sloshing (bounded transverse linear acceleration ay(t) with smooth startup/shutdown envelope)"
+  },
+  "twoaxis_control_mechanism": {
+    "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "description": "True 3D two-axis sloshing control in plain 5-wall open container combining nominal longitudinal pitch angular acceleration with bounded transverse linear acceleration ay(t). Avoids artificial roll rotation or rotating frame integration claims.",
+    "longitudinal_pitch": {
+      "amplitude_x": 1.0,
+      "zero_drive_formula": "ax = Ax*ax_nom; az = gz + Ax*(az_nom - gz); alpha = Ax*alpha_nom",
+      "nominal_alphay_t0": 0.312057592,
+      "gpu_kernel": "cuaccin::KerAddAccInputAng (ALWAYS activated from t=0)"
+    },
+    "transverse_linear_acceleration": {
+      "formula": "ay(t) = Ay * E(t) * sin(omegay * t + phiy)",
+      "omega_y_rad_s": 12.5312,
+      "frequency_y_hz": 1.9944,
+      "period_y_s": 0.5014,
+      "phase_y_rad": 0.0,
+      "tau_ramp_s": 0.50,
+      "window_s": [0.0, 8.35],
+      "amplitudes_m_s2": {
+        "low": 0.25,
+        "nominal": 0.50,
+        "high": 0.75,
+        "identity_zero": 0.0
+      },
+      "gpu_entry": "acclin.y directly entered into accy in KerAddAccInputAng and integrated into vellin.y in JDsAccInput::ComputeVelocity"
+    }
+  },
+  "observed_sourcepair_bounds": {
+    "macro_spatial_budget": 0.05,
+    "macro_time_budget": 0.01,
+    "macro_saved_budget": 0.01,
+    "historical_retained_evidence": {
+      "dp010_vs_dp006": "FAIL (KE 6.28%, meanV 6.26% > 5%)",
+      "dp0075_vs_dp005": "FAIL (~5.991% > 5%, original spatial failures retained)",
+      "dp006_vs_dp005": "PASS (2.8683% <= 5%, candidate remains prospective)",
+      "dp006_fate_switches": "2,336 same-UID paired final fate switches / 67,500 fluid particles"
+    }
+  },
+  "staged_cases_matrix": [
+    {
+      "case_id": "F3_CELL3_LONG_DP006_AY0P25_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude_y": 0.25,
+      "role": "candidate_twoaxis_control_endpoint_low",
+      "binding_file": "bindings/binding_dp006_ay0p25.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_AY0P25_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_ay0p25_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude_y": 0.50,
+      "role": "candidate_twoaxis_control_nominal",
+      "binding_file": "bindings/binding_dp006_ay0p50.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_ay0p50_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_AY0P75_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude_y": 0.75,
+      "role": "candidate_twoaxis_control_endpoint_high",
+      "binding_file": "bindings/binding_dp006_ay0p75.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_AY0P75_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_ay0p75_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_AY0P25_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude_y": 0.25,
+      "role": "reference_twoaxis_control_endpoint_low",
+      "binding_file": "bindings/binding_dp005_ay0p25.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_AY0P25_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_ay0p25_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_AY0P50_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude_y": 0.50,
+      "role": "reference_twoaxis_control_nominal",
+      "binding_file": "bindings/binding_dp005_ay0p50.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_AY0P50_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_ay0p50_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_AY0P75_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude_y": 0.75,
+      "role": "reference_twoaxis_control_endpoint_high",
+      "binding_file": "bindings/binding_dp005_ay0p75.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_AY0P75_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_ay0p75_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP0045_AY0P25_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.0045,
+      "amplitude_y": 0.25,
+      "role": "finer_reference_twoaxis_control_endpoint_low",
+      "binding_file": "bindings/binding_dp0045_ay0p25.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP0045_AY0P25_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp0045_ay0p25_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP0045_AY0P50_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.0045,
+      "amplitude_y": 0.50,
+      "role": "finer_reference_twoaxis_control_nominal",
+      "binding_file": "bindings/binding_dp0045_ay0p50.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP0045_AY0P50_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp0045_ay0p50_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP0045_AY0P75_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.0045,
+      "amplitude_y": 0.75,
+      "role": "finer_reference_twoaxis_control_endpoint_high",
+      "binding_file": "bindings/binding_dp0045_ay0p75.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP0045_AY0P75_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp0045_ay0p75_request.json",
+      "launch_allowed": false
+    }
+  ]
+}

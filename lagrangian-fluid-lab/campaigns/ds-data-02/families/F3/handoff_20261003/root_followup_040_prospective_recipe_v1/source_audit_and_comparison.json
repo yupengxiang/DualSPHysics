@@ -1,0 +1,168 @@
+{
+  "schema": "ds02.f3.source-audit-and-comparison.v2",
+  "handoff": "root_followup_040_prospective_recipe_v1",
+  "family": "F3",
+  "authority": "Root Followup 040",
+  "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+  "governance": {
+    "q_n_status": "not_granted",
+    "campaign_q_n_counts": "0/336",
+    "remaining_gpu_hours": "~32",
+    "remaining_qualification_attempts": 53,
+    "production_approval": "none",
+    "all_requests_launch_allowed": false,
+    "claim_status": "prospective_twoaxis_sloshing_control_preparation_only",
+    "solver_launched": false,
+    "conversion_launched": false,
+    "actual_csv_materialized": false,
+    "actual_h5_read": false
+  },
+  "gpu_v54_force_branch_audit": {
+    "source_file_cuda": "src/source/JDsAccInput_ker.cu",
+    "source_file_cpp": "src/source/JDsAccInput.cpp",
+    "exact_audit_strings": [
+      {
+        "file": "src/source/JDsAccInput_ker.cu",
+        "line": 128,
+        "exact_code": "const bool withaccang=(accang.x!=0 || accang.y!=0 || accang.z!=0);"
+      },
+      {
+        "file": "src/source/JDsAccInput_ker.cu",
+        "line": 129,
+        "exact_code": "if(withaccang)KerAddAccInputAng <<<sgrid,SPHBSIZE,0,stm>>> (n,pini,codesel1,codesel2,Float3(gravity),setgravity,Double3(acclin),Double3(accang),Double3(centre),Double3(velang),Double3(vellin),code,posxy,posz,velrho,ace);"
+      },
+      {
+        "file": "src/source/JDsAccInput_ker.cu",
+        "line": 130,
+        "exact_code": "else          KerAddAccInputLin <<<sgrid,SPHBSIZE,0,stm>>> (n,pini,codesel1,codesel2,Float3(gravity),setgravity,Double3(acclin),code,ace);"
+      },
+      {
+        "file": "src/source/JDsAccInput_ker.cu",
+        "lines": "46-51",
+        "exact_code": "accx+=acclin.x;  accy+=acclin.y;  accz+=acclin.z;\nif(!setgravity){\n  accx-=gravity.x;  accy-=gravity.y;  accz-=gravity.z; \n}"
+      },
+      {
+        "file": "src/source/JDsAccInput_ker.cu",
+        "lines": "64-84",
+        "exact_code": "//-Calculate angular acceleration ((Dw/Dt) x (r_i - r)) + (w x (w x (r_i - r))) + (2w x (v_i - v))\n//(Dw/Dt) x (r_i - r) (term1)\naccx+=(accang.y*dcz)-(accang.z*dcy);\naccy+=(accang.z*dcx)-(accang.x*dcz);\naccz+=(accang.x*dcy)-(accang.y*dcx);\n//-Centripetal acceleration (term2).\n//-First find w x (r_i - r)).\nconst double innerx=(velang.y*dcz)-(velang.z*dcy);\nconst double innery=(velang.z*dcx)-(velang.x*dcz);\nconst double innerz=(velang.x*dcy)-(velang.y*dcx);\n//-Find w x inner.\naccx+=(velang.y*innerz)-(velang.z*innery);\naccy+=(velang.z*innerx)-(velang.x*innerz);\naccz+=(velang.x*innery)-(velang.y*innerx);\n//-Coriolis acceleration 2w x (v_i - v) (term3).\naccx+=((2.0*velang.y)*velz)-((2.0*velang.z)*(vely-vellin.y));\naccy+=((2.0*velang.z)*velx)-((2.0*velang.x)*(velz-vellin.z));\naccz+=((2.0*velang.x)*vely)-((2.0*velang.y)*(velx-vellin.x));"
+      },
+      {
+        "file": "src/source/JDsAccInput.cpp",
+        "line": 349,
+        "exact_code": "const bool withaccang=(v.accang.x!=0 || v.accang.y!=0 || v.accang.z!=0);"
+      },
+      {
+        "file": "src/source/JDsAccInput.cpp",
+        "lines": "254-256",
+        "exact_code": "currvellin.x=vellin0.x+(acclin.x*dt);\ncurrvellin.y=vellin0.y+(acclin.y*dt);\ncurrvellin.z=vellin0.z+(acclin.z*dt);"
+      },
+      {
+        "file": "src/source/JDsAccInput.cpp",
+        "lines": "410-411",
+        "exact_code": "cuaccin::AddAccInput(n,pini,codesel1,codesel2,v.acclin,v.accang,v.centre\n  ,v.velang,v.vellin,v.setgravity,gravity,code,posxy,posz,velrho,ace,NULL);"
+      }
+    ],
+    "activation_analysis": "The nominal forcing CSV has alpha_y(t=0) = 0.312057592 != 0. Thus accang.y != 0 at t=0, so withaccang evaluates to true at every step. cuaccin::KerAddAccInputAng is ALWAYS activated in DualSPHysics GPU v5.4. Prescribing transverse linear acceleration ay(t) via acclin.y directly enters KerAddAccInputAng at line 47 (accy += acclin.y) and is integrated into vellin.y in JDsAccInput::ComputeVelocity at line 255. In the Coriolis term (line 81), vellin.y properly offsets particle vely. This provides a rigorous, physically consistent true 3D excitation without introducing artificial roll rotation or rotating frame integration drift."
+  },
+  "physical_scales_derivation": {
+    "plain_container": {
+      "dimensions_m": [0.90, 0.18, 0.51],
+      "water_depth_m": 0.09,
+      "fluid_density_kg_m3": 1000.0,
+      "fluid_continuum_mass_kg": 14.58,
+      "globalgravity": 0,
+      "baffle": "none (open plain 5-wall geometry strictly preserved)"
+    },
+    "longitudinal_pitch_motion": {
+      "tank_length_L_m": 0.90,
+      "wavenumber_kx_rad_m": 3.49066,
+      "natural_frequency_omegax_rad_s": 3.228,
+      "natural_frequency_fx_hz": 0.5137,
+      "observed_forcing_dominant_freq_hz": 0.6253,
+      "observed_forcing_dominant_period_s": 1.5992,
+      "nominal_alphay_t0": 0.312057592,
+      "zero_drive_formula": "ax = Ax * ax_nom; az = gz + Ax * (az_nom - gz); alpha = Ax * alpha_nom with gz = -9.81 m/s^2"
+    },
+    "transverse_sloshing_control": {
+      "tank_width_W_m": 0.18,
+      "wavenumber_ky_rad_m": 17.45329,
+      "natural_frequency_omegay_rad_s": 12.5312,
+      "natural_frequency_fy_hz": 1.9944,
+      "natural_period_Ty_s": 0.5014,
+      "envelope_ramp_tau_s": 0.50,
+      "envelope_type": "Hann/cosine smooth taper over [0.0, 8.35] s",
+      "formula": "ay(t) = Ay * E(t) * sin(omegay * t + phiy)",
+      "bounded_amplitudes_m_s2": {
+        "AY_0P25": 0.25,
+        "AY_0P50": 0.50,
+        "AY_0P75": 0.75,
+        "AY_0P00": 0.0
+      },
+      "max_displacement_mm": {
+        "AY_0P25": 1.59,
+        "AY_0P50": 3.18,
+        "AY_0P75": 4.78
+      },
+      "identity_property": "When Ay == 0.0 and Ax == 1.0, ay(t) == 0.0 identically, yielding exact numerical identity with nominal forcing CSV"
+    }
+  },
+  "commensurate_ladder": {
+    "candidate": {
+      "dp_m": 0.006,
+      "fluid_lattice": "150 x 30 x 15",
+      "expected_fluid": 67500,
+      "expected_fixed": 111708,
+      "expected_total": 179208,
+      "status": "candidate_twoaxis_study"
+    },
+    "reference": {
+      "dp_m": 0.005,
+      "fluid_lattice": "180 x 36 x 18",
+      "expected_fluid": 116640,
+      "expected_fixed": 160632,
+      "expected_total": 277272,
+      "status": "reference_fine_anchor"
+    },
+    "finer_reference": {
+      "dp_m": 0.0045,
+      "fluid_lattice": "200 x 40 x 20",
+      "expected_fluid": 160000,
+      "expected_fixed": 196692,
+      "expected_total": 356692,
+      "status": "finer_commensurate_reference"
+    },
+    "note": "Actual total particle counts 277272 DP005 / 179208 DP006 / 356692 DP0045 verified from known nominal geometry; predictions marked pending runtime actual GenCase count by Root dispatch."
+  },
+  "consumed_negative_evidence_retained": {
+    "historical_spatial_ladder_failures": [
+      "dp0.010 vs dp0.006 fails spatial macro (~6.28% KE, ~6.26% meanV > 5%)",
+      "dp0.0075 vs dp0.005 fails spatial macro (~5.991% > 5%)"
+    ],
+    "candidate_dp006_micro_transport_instability": "Candidate dp0.006 nominal-vs-half full 8.35s passes 1% macro budget (max 0.00153694 <= 0.01), BUT exhibits 2,336 same-UID paired final fate switches out of 67,500 fluid particles. No path-stable claim is made.",
+    "dense_conversion_status": "Dense full 4,176-step conversion complete 0; new canonical / save-macro underway.",
+    "prospective_status": "Candidate 0.006 vs ref 0.005 spatial macro passes at 2.8683% <= 5%. Endpoints A in {0.90, 0.97, 1.10} passed all six GenCase and official initial steps; first 3 full native runs active. Second physical mechanism staged to evaluate true 3D transverse coupling."
+  },
+  "pinned_source_csv": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/CaseSloshingAccData.csv",
+    "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "expected_rows": 167001,
+    "header_lines": 1,
+    "total_lines": 167002,
+    "time_range": [0.0, 8.35]
+  },
+  "wrapper_guards": {
+    "strict_endpoint_times": {
+      "start_time_float": 0.0,
+      "start_time_token": "0",
+      "end_time_float": 8.35,
+      "end_time_token": "8.35",
+      "tolerance": 0.0
+    },
+    "strictly_increasing_time": "t[k] > t[k-1]",
+    "exact_row_count": 167001,
+    "source_hash_guard": "before_and_after_verified",
+    "exclusive_creation": "mode_x_enforced",
+    "single_case_execution": "one_gencase_per_request_enforced",
+    "format_coord_precision": "IEEE-754 double precision full roundtrip (.17g) without deadbands or small-value quantization"
+  }
+}

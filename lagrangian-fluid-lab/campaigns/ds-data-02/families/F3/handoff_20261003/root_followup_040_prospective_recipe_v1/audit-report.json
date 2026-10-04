@@ -1,0 +1,67 @@
+{
+  "schema": "ds02.f3.twoaxis-sloshing-audit-report.v1",
+  "handoff": "root_followup_040_prospective_recipe_v1",
+  "authority": "Root Followup 040",
+  "overall_status": "PASS",
+  "checks": [
+    {
+      "item": "DualSPHysics GPU v5.4 force branch source code audit",
+      "status": "PASS",
+      "withaccang_present": true,
+      "linear_acc_addition_present": true,
+      "kernel_cu_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/src/source/JDsAccInput_ker.cu",
+      "input_cpp_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/src/source/JDsAccInput.cpp"
+    },
+    {
+      "item": "Pinned source CSV SHA matches and alpha_y(t=0) != 0",
+      "status": "PASS",
+      "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "expected_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "alphay_t0": 0.312057592,
+      "withaccang_evaluates_true_at_t0": true
+    },
+    {
+      "item": "prepare_twoaxis_gencase.py and transform_twoaxis_forcing.py present",
+      "status": "PASS",
+      "worker_sha256": "b24417af4684956cdee05ff79fd940057948cbbb0d2f1821b6769126d499423e",
+      "transformer_sha256": "5ac8112a907c527aaf31791419e7830fe85fe8e53b92ff9d7f1544326f883c99"
+    },
+    {
+      "item": "All 12 XML definitions conform to commensurate plain container standard",
+      "status": "PASS",
+      "count": 12
+    },
+    {
+      "item": "9 Bindings and 9 Requests staged with launch_allowed=false",
+      "status": "PASS",
+      "bindings_count": 9,
+      "requests_count": 9,
+      "all_launch_allowed_false": true,
+      "all_single_gencase_cpu": true,
+      "input_shas_unfabricated": true
+    },
+    {
+      "item": "16 Focused Synthetic Unit Tests",
+      "status": "PASS",
+      "output": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.229s\n\nOK"
+    }
+  ],
+  "known_nominal_particle_counts": {
+    "DP005": {
+      "fluid": 116640,
+      "fixed": 160632,
+      "total": 277272
+    },
+    "DP006": {
+      "fluid": 67500,
+      "fixed": 111708,
+      "total": 179208
+    },
+    "DP0045": {
+      "fluid": 160000,
+      "fixed": 196692,
+      "total": 356692
+    }
+  },
+  "governance_note": "Prospective preparation only; all requests enforce launch_allowed=false; production_approval=none; target seven-family remains 0/336."
+}
