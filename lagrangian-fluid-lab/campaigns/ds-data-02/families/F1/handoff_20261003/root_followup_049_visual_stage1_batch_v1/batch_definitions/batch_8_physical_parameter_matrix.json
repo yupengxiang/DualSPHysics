@@ -1,0 +1,445 @@
+{
+  "schema": "ds02.stage1.physical-batch-matrix.v1",
+  "family_id": "F1",
+  "batch_number": 1,
+  "target_batch_size": 8,
+  "batch_progression_tier": "8_of_336",
+  "accounting_policy": {
+    "physical_cases_in_batch": 8,
+    "multi_resolution_policy": "Resolution studies (coarse/medium/fine) are numerical convergence checks of the same continuum physical condition. They DO NOT increment the independent physical case count.",
+    "time_slices_policy": "Time sub-windows and derived views do not increment case count."
+  },
+  "visual_acceptance_gate": {
+    "mother_cases": [
+      "F1_ECC_PHYS_01_ANCHOR_LOWER_HEAD",
+      "F1_DUAL_PHYS_01_ANCHOR_LOWER_HEAD"
+    ],
+    "policy": "Proposed batch variations are disabled from solver dispatch until Root and User complete full-animation ParaView visual review of the mother cases. User may visually reject mother cases; if rejected, parameters will be re-bounded without repeating old failed modes."
+  },
+  "rows": [
+    {
+      "row_index": 1,
+      "physical_case_id": "F1_ECC_PHYS_01_ANCHOR_LOWER_HEAD",
+      "mechanism_id": "eccentric_obstacle",
+      "variation_role": "anchor_mother",
+      "description": "Baseline validated lower-head eccentric obstacle mother case (completed all 3 DPs in 032/033)",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [1.60, 0.67, 0.40]
+        },
+        "obstacle": {
+          "low_m": [0.90, 0.24, 0.0],
+          "size_m": [0.12, 0.12, 0.45]
+        },
+        "fluid_reservoir": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [0.40, 0.67, 0.15]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.15,
+        "continuum_volume_m3": 0.0402,
+        "continuum_mass_kg": 40.2,
+        "freeboard_m": 0.25,
+        "obstacle_clearance_y_low_m": 0.24,
+        "obstacle_clearance_y_high_m": 0.31,
+        "channel_asymmetry_ratio": 0.774,
+        "time_max_s": 1.6,
+        "time_out_s": 0.01,
+        "expected_frames": 161
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Old ECC mother had H=0.30m, mass=80.4kg, freeboard=0.10m, which caused violent overtopping splash and boundary penetration.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 50.0,
+        "freeboard_margin_m": 0.25,
+        "legal_wall_clearance_m": 0.24,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.01, "expected_fluid_particles": 40200},
+        "medium": {"dp": 0.005, "expected_fluid_particles": 321600}
+      },
+      "status": "mother_completed_native_under_visual_review"
+    },
+    {
+      "row_index": 2,
+      "physical_case_id": "F1_ECC_PHYS_02_LOW_HEAD_DOWNSTREAM",
+      "mechanism_id": "eccentric_obstacle",
+      "variation_role": "endpoint_min_head",
+      "description": "Minimum safe head endpoint with downstream shifted obstacle for high asymmetry bypass",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [1.60, 0.67, 0.40]
+        },
+        "obstacle": {
+          "low_m": [1.05, 0.18, 0.0],
+          "size_m": [0.12, 0.12, 0.45]
+        },
+        "fluid_reservoir": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [0.40, 0.67, 0.10]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.10,
+        "continuum_volume_m3": 0.0268,
+        "continuum_mass_kg": 26.8,
+        "freeboard_m": 0.30,
+        "obstacle_clearance_y_low_m": 0.18,
+        "obstacle_clearance_y_high_m": 0.37,
+        "channel_asymmetry_ratio": 0.486,
+        "time_max_s": 1.6,
+        "time_out_s": 0.01,
+        "expected_frames": 161
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head reduced to 0.10m (66.7% below failed 0.30m); freeboard increased to 0.30m; clearance 0.18m >> 3*dp.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 66.7,
+        "freeboard_margin_m": 0.30,
+        "legal_wall_clearance_m": 0.18,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.01, "expected_fluid_particles": 26800},
+        "medium": {"dp": 0.005, "expected_fluid_particles": 214400}
+      },
+      "status": "disabled_pending_root_visual_review"
+    },
+    {
+      "row_index": 3,
+      "physical_case_id": "F1_ECC_PHYS_03_MAX_SAFE_HEAD_UPSTREAM",
+      "mechanism_id": "eccentric_obstacle",
+      "variation_role": "endpoint_max_head",
+      "description": "Maximum safe head endpoint with upstream shifted obstacle and wider cross-section",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [1.60, 0.67, 0.40]
+        },
+        "obstacle": {
+          "low_m": [0.75, 0.26, 0.0],
+          "size_m": [0.10, 0.14, 0.45]
+        },
+        "fluid_reservoir": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [0.40, 0.67, 0.18]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.18,
+        "continuum_volume_m3": 0.04824,
+        "continuum_mass_kg": 48.24,
+        "freeboard_m": 0.22,
+        "obstacle_clearance_y_low_m": 0.26,
+        "obstacle_clearance_y_high_m": 0.27,
+        "channel_asymmetry_ratio": 0.963,
+        "time_max_s": 1.6,
+        "time_out_s": 0.01,
+        "expected_frames": 161
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head capped at 0.18m (40% below failed 0.30m); freeboard 0.22m maintains 55% reservoir safety margin.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 40.0,
+        "freeboard_margin_m": 0.22,
+        "legal_wall_clearance_m": 0.26,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.01, "expected_fluid_particles": 48240},
+        "medium": {"dp": 0.005, "expected_fluid_particles": 385920}
+      },
+      "status": "disabled_pending_root_visual_review"
+    },
+    {
+      "row_index": 4,
+      "physical_case_id": "F1_ECC_PHYS_04_INTERIOR_WIDE_OBSTACLE",
+      "mechanism_id": "eccentric_obstacle",
+      "variation_role": "interior_check",
+      "description": "Interior check case with intermediate head and elongated rectangular obstacle",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [1.60, 0.67, 0.40]
+        },
+        "obstacle": {
+          "low_m": [0.85, 0.20, 0.0],
+          "size_m": [0.14, 0.10, 0.45]
+        },
+        "fluid_reservoir": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [0.40, 0.67, 0.13]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.13,
+        "continuum_volume_m3": 0.03484,
+        "continuum_mass_kg": 34.84,
+        "freeboard_m": 0.27,
+        "obstacle_clearance_y_low_m": 0.20,
+        "obstacle_clearance_y_high_m": 0.37,
+        "channel_asymmetry_ratio": 0.541,
+        "time_max_s": 1.6,
+        "time_out_s": 0.01,
+        "expected_frames": 161
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head set to 0.13m (56.7% below failed 0.30m); freeboard 0.27m; clearances 0.20m and 0.37m maintain safe 3D wake.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 56.7,
+        "freeboard_margin_m": 0.27,
+        "legal_wall_clearance_m": 0.20,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.01, "expected_fluid_particles": 34840},
+        "medium": {"dp": 0.005, "expected_fluid_particles": 278720}
+      },
+      "status": "disabled_pending_root_visual_review"
+    },
+    {
+      "row_index": 5,
+      "physical_case_id": "F1_DUAL_PHYS_01_ANCHOR_LOWER_HEAD",
+      "mechanism_id": "asymmetric_dual_channel",
+      "variation_role": "anchor_mother",
+      "description": "Baseline validated lower-head asymmetric dual-channel mother case (completed all 3 DPs in 032/035)",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [3.20, 1.00, 0.80]
+        },
+        "divider": {
+          "low_m": [1.20, 0.34, 0.0],
+          "size_m": [0.80, 0.06, 0.70]
+        },
+        "fluid_reservoir": {
+          "low_m": [2.20, 0.0, 0.0],
+          "size_m": [1.00, 1.00, 0.30]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.30,
+        "continuum_volume_m3": 0.30,
+        "continuum_mass_kg": 300.0,
+        "freeboard_m": 0.50,
+        "divider_clearance_y_low_m": 0.34,
+        "divider_clearance_y_high_m": 0.60,
+        "channel_split_ratio": 0.567,
+        "time_max_s": 4.0,
+        "time_out_s": 0.01,
+        "expected_frames": 401
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Old DUAL mother had H=0.55m, mass=616kg, freeboard=0.25m, which caused bore cresting over divider and flume walls.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 45.5,
+        "freeboard_margin_m": 0.50,
+        "legal_wall_clearance_m": 0.34,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.02, "expected_fluid_particles": 37500},
+        "medium": {"dp": 0.01, "expected_fluid_particles": 300000}
+      },
+      "status": "mother_completed_native_under_visual_review"
+    },
+    {
+      "row_index": 6,
+      "physical_case_id": "F1_DUAL_PHYS_02_LOW_HEAD_NARROW_SPLIT",
+      "mechanism_id": "asymmetric_dual_channel",
+      "variation_role": "endpoint_min_head",
+      "description": "Minimum safe head endpoint with narrow primary channel for extreme flow split",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [3.20, 1.00, 0.80]
+        },
+        "divider": {
+          "low_m": [1.10, 0.22, 0.0],
+          "size_m": [0.85, 0.06, 0.70]
+        },
+        "fluid_reservoir": {
+          "low_m": [2.20, 0.0, 0.0],
+          "size_m": [1.00, 1.00, 0.22]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.22,
+        "continuum_volume_m3": 0.22,
+        "continuum_mass_kg": 220.0,
+        "freeboard_m": 0.58,
+        "divider_clearance_y_low_m": 0.22,
+        "divider_clearance_y_high_m": 0.72,
+        "channel_split_ratio": 0.306,
+        "time_max_s": 4.0,
+        "time_out_s": 0.01,
+        "expected_frames": 401
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head set to 0.22m (60% below failed 0.55m); freeboard 0.58m; lower channel width 0.22m >> 3*dp.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 60.0,
+        "freeboard_margin_m": 0.58,
+        "legal_wall_clearance_m": 0.22,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.02, "expected_fluid_particles": 27500},
+        "medium": {"dp": 0.01, "expected_fluid_particles": 220000}
+      },
+      "status": "disabled_pending_root_visual_review"
+    },
+    {
+      "row_index": 7,
+      "physical_case_id": "F1_DUAL_PHYS_03_MAX_SAFE_HEAD_MILD_SPLIT",
+      "mechanism_id": "asymmetric_dual_channel",
+      "variation_role": "endpoint_max_head",
+      "description": "Maximum safe head endpoint with divider placed near centerline for mild asymmetry",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [3.20, 1.00, 0.80]
+        },
+        "divider": {
+          "low_m": [1.30, 0.42, 0.0],
+          "size_m": [0.75, 0.06, 0.70]
+        },
+        "fluid_reservoir": {
+          "low_m": [2.20, 0.0, 0.0],
+          "size_m": [1.00, 1.00, 0.35]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.35,
+        "continuum_volume_m3": 0.35,
+        "continuum_mass_kg": 350.0,
+        "freeboard_m": 0.45,
+        "divider_clearance_y_low_m": 0.42,
+        "divider_clearance_y_high_m": 0.52,
+        "channel_split_ratio": 0.808,
+        "time_max_s": 4.0,
+        "time_out_s": 0.01,
+        "expected_frames": 401
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head capped at 0.35m (36.4% below failed 0.55m); freeboard 0.45m provides ample margin against overtopping.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 36.4,
+        "freeboard_margin_m": 0.45,
+        "legal_wall_clearance_m": 0.42,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.02, "expected_fluid_particles": 43750},
+        "medium": {"dp": 0.01, "expected_fluid_particles": 350000}
+      },
+      "status": "disabled_pending_root_visual_review"
+    },
+    {
+      "row_index": 8,
+      "physical_case_id": "F1_DUAL_PHYS_04_INTERIOR_EXTENDED_DIVIDER",
+      "mechanism_id": "asymmetric_dual_channel",
+      "variation_role": "interior_check",
+      "description": "Interior check case with extended length divider and intermediate initial reservoir head",
+      "geometry": {
+        "tank": {
+          "low_m": [0.0, 0.0, 0.0],
+          "size_m": [3.20, 1.00, 0.80]
+        },
+        "divider": {
+          "low_m": [1.15, 0.30, 0.0],
+          "size_m": [0.90, 0.06, 0.70]
+        },
+        "fluid_reservoir": {
+          "low_m": [2.20, 0.0, 0.0],
+          "size_m": [1.00, 1.00, 0.26]
+        }
+      },
+      "physical_parameters": {
+        "fluid_depth_m": 0.26,
+        "continuum_volume_m3": 0.26,
+        "continuum_mass_kg": 260.0,
+        "freeboard_m": 0.54,
+        "divider_clearance_y_low_m": 0.30,
+        "divider_clearance_y_high_m": 0.64,
+        "channel_split_ratio": 0.469,
+        "time_max_s": 4.0,
+        "time_out_s": 0.01,
+        "expected_frames": 401
+      },
+      "safe_variation_proof": {
+        "failed_mother_reference": "Head set to 0.26m (52.7% below failed 0.55m); freeboard 0.54m; extended partition length 0.90m prolongs dual-channel dynamics.",
+        "fill_below_failed_mother": true,
+        "fill_reduction_percent": 52.7,
+        "freeboard_margin_m": 0.54,
+        "legal_wall_clearance_m": 0.30,
+        "genuine_3d": true,
+        "boundary_model": "4-layer thick DBC (3*dp support box)"
+      },
+      "eos": {
+        "gamma": 7,
+        "rhop0": 1000.0,
+        "cflnumber": 0.2,
+        "coefsound": 20.0
+      },
+      "resolutions": {
+        "coarse": {"dp": 0.02, "expected_fluid_particles": 32500},
+        "medium": {"dp": 0.01, "expected_fluid_particles": 260000}
+      },
+      "status": "disabled_pending_root_visual_review"
+    }
+  ]
+}
