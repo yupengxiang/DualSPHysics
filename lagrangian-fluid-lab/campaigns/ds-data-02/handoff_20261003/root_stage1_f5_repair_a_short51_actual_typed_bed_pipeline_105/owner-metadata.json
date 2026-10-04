@@ -1,0 +1,183 @@
+{
+  "schema": "ds02.f5.a061.short-event-native093-owner.v1",
+  "family_id": "F5",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+  "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+  "condition_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+  "mechanism_id": "runup",
+  "candidate_id": "A_explicit_closed_mesh_only",
+  "repair_id": "F5_BED_REPAIR_A_REMOVE_DUPLICATE_STL_INVOCATION",
+  "physical_condition_sha256": "268d4ea37228fb63ef493a6e535740bb765d165d874f97804443d5e11eb3497c",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F5",
+    "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+    "mechanism_id": "runup",
+    "geometry_family_id": "F5_GEOM_COMPACT_CONTINUOUS_BED_EXPLICIT_CLOSED_MESH_V1",
+    "control_family_id": "F5_CONTROL_PACKET_MOTION_DP020_EQUILIBRIUM_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [-0.2, -0.18, -0.15],
+        "size_m": [5.0, 0.36, 0.95],
+        "label": "finite 3-D flume with prescribed paddle, sidewalls, floor, dry downstream receiver"
+      },
+      "bed_profile_envelope": {
+        "low_m": [-0.2, -0.15, -0.15],
+        "size_m": [5.0, 0.3, 0.598],
+        "label": "A061 explicit closed mesh envelope; exact source profile is retained in parameters"
+      },
+      "initial_fluid": {
+        "low_m": [0.0, -0.15, 0.0],
+        "size_m": [3.428571428571429, 0.3, 0.4],
+        "mkfluid": 0,
+        "label": "complete original still-water fluid volume above the exact source bed"
+      },
+      "paddle": {
+        "low_m": [-0.04, -0.15, 0.0],
+        "size_m": [0.04, 0.3, 0.75],
+        "mkfluid": 0,
+        "label": "finite prescribed 3-D paddle"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [0.0, -0.15, 0.0],
+          "size_m": [3.428571428571429, 0.3, 0.4],
+          "mkfluid": 0,
+          "label": "complete original still-water fluid volume"
+        }
+      },
+      "velocities_m_per_s": {"fluid": [0.0, 0.0, 0.0]},
+      "source_labels": {"fluid": "complete original initial native Type-3/Mk1; no births or injection"},
+      "initial_mass_by_source_kg": {"fluid": 325.7142857142857},
+      "continuum_mass_by_source_kg": {"fluid": 325.7142857142857},
+      "initial_mass_total_kg": 325.7142857142857,
+      "mass_policy": "native BI4 weights are authoritative; continuum and rounded CSV mass remain distinct; no rescaling"
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 2,
+      "kernel": 2,
+      "viscosity": {"treatment": 1, "value": 0.01, "boundary_factor": 1},
+      "density_dt": 2,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "SWL_H_m": 0.4,
+      "width_m": 0.3,
+      "bed_profile_nodes_x_z_m": [[-0.2, 0.0], [2.0, 0.0], [3.0, 0.28], [3.6, 0.448], [3.9, 0.448], [4.4, 0.05], [4.8, 0.05]],
+      "bed_y_bounds_m": [-0.15, 0.15],
+      "bed_lower_closure_z_m": -0.15,
+      "bed_mk": 40,
+      "explicit_mesh_points": 156,
+      "explicit_mesh_triangles": 52,
+      "shoreline_x_m": 3.428571428571429,
+      "packet_amplitude_coefficient_m": 0.028,
+      "packet_generation_duration_s": 5.0,
+      "packet_cycles": 2,
+      "motion_table_dt_s": 0.025,
+      "motion_semantics": "17g sampled Hann motion; native interpolation and parked-paddle reflections retained",
+      "candidate_source_edit": "remove only XML lines 269-271; retain explicit 52-triangle mesh, clipplane, fluid fill, EOS, timestep, domain, gauges and save settings"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 16.0,
+      "sequence": ["wave generation", "shoaling", "runup and return"],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "actual event presence, native loss and terminal class remain measured; no inference from short event"
+    },
+    "lineage_group_id": "F5_COMPACT_SHARED_BED_PACKET_ALL_DPS_BACKGROUND_NO_LEAK",
+    "paired_background_id": "F5_COMPACT_STILL_WATER_RUNUP_V1",
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "mass_policy": "native_massfluid_no_rescaling"
+  },
+  "resolution": "dp020_short_native093",
+  "solver_parameters": {
+    "SavePosDouble": "1", "StepAlgorithm": "2", "VerletSteps": "40", "Kernel": "2",
+    "ViscoTreatment": "1", "Visco": "0.01", "ViscoBoundFactor": "1", "DensityDT": "2",
+    "DensityDTvalue": "0.1", "Shifting": "0", "RigidAlgorithm": "1", "FtPause": "0.0",
+    "CoefDtMin": "0.05", "DtIni": "0", "DtMin": "0", "DtFixed": "0", "DtAllParticles": "0",
+    "TimeMax": "16.0", "TimeOut": "0.02", "RhopOutMin": "700", "RhopOutMax": "1300",
+    "Boundary": "1", "MinFluidStop": "0"
+  },
+  "gencase_provenance": {
+    "attempt_id": "root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075/execution-receipt.json",
+    "receipt_sha256": "6a9cc4bb55ccea1fe4266a8c923027492512a1949d0f3041f553a8f73e636ed6",
+    "prepared_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061.xml",
+    "prepared_xml_sha256": "42af85a482c7b0e179fdf602ec81cee2c49ab9616a740870e83f60f24dd7d285",
+    "prepared_initial_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061.bi4",
+    "prepared_initial_bi4_sha256": "eeb65089d1d5792a879cd299c3dc5555dbc09181f1cc1f0ad9a0f710b8949181",
+    "actual_total_particles": 214385,
+    "actual_fluid_particles": 40710,
+    "actual_dimension": 3
+  },
+  "initial_qa_provenance": {
+    "attempt_id": "root-stage1-f5-explicit-bed-repair-a-native-qa-083",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-native-qa-083/execution-receipt.json",
+    "receipt_sha256": "1417058bf9204284d1d8a2bd285c606e7c0a69aaccc9112f233c0427d2ae9a4a",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-native-qa-083/initial-qa/a061-native-initial-qa.json",
+    "report_sha256": "87bf5f1cfcc8846f046d63bcfe16f0ec13a3eaaefafb3e9833de08d6ae818967",
+    "native_total_particles": 214385,
+    "native_fluid_particles": 40710,
+    "native_fluid_mass_kg": 325.680016284,
+    "continuum_fluid_mass_kg": 325.714285714,
+    "mass_difference_percent": -0.0105213,
+    "mass_rescaled": false,
+    "all_actual_checks_pass": true
+  },
+  "short_event_provenance": {
+    "root_handoff": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f5_repair_a_actual_short_event_native_093",
+    "attempt_id": "root-stage1-f5-explicit-bed-repair-a-short-event-native-093",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-short-event-native-093/execution-receipt.json",
+    "receipt_sha256": "141c389666d669920296938a471b308ed67548629568e4cd941f599b76bc6af3",
+    "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-short-event-native-093",
+    "raw_data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-short-event-native-093/solver_output/data",
+    "time_window_s": [0.0, 1.0],
+    "save_interval_s": 0.02,
+    "expected_frames": 51,
+    "solver_complete_actual": true
+  },
+  "source_recipe": {
+    "source_scope": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1",
+    "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+    "source_definition_sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+    "physical_binding_sidecar": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/physical-binding.json",
+    "physical_binding_sidecar_sha256": "1b056b255096986c67eea5bec969afc1c5f631bc1d8b8f8ca656aeac8854e72d",
+    "strict_source_chain": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/strict-source-chain.json",
+    "strict_source_chain_sha256": "4679069898c4ee83dc18cede54326ef2fc9ea00e324154c05df8a0dbb845c211",
+    "candidate_patch": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_a_patch.json",
+    "candidate_patch_sha256": "8e32c67719b8c92fea8ca0ca55e95ed1cd916a0130918a401a19e90b1d9f1318",
+    "gencase_binding": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/gencase-binding.json",
+    "gencase_binding_sha256": "2938f45c486a649d9c11fc9a7892c3bfb3d3c212b69e511ed3fbb2f7a4d5c0e6",
+    "edit_contract": "remove only XML lines 269-271; retain source061 full16 canonical physical case/condition and exact profile"
+  },
+  "source": {
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061.xml",
+    "motion_asset": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-genuine-gencase-075/prepared/assets/f5_compact_packet_motion.dat",
+    "motion_sha256": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a",
+    "solver_log": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-short-event-native-093/solver_output/Run.out",
+    "native_data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061/root-stage1-f5-explicit-bed-repair-a-short-event-native-093/solver_output/data"
+  },
+  "short_event_contract": {
+    "diagnostic_only": true,
+    "right_censored": true,
+    "independent_case_count_increment": 0,
+    "full16_authorized": false,
+    "q_n_granted": false,
+    "production_approval": "none",
+    "repair_success": "unknown_until_actual_framewise_bed_audit"
+  },
+  "bed_audit_contract": {
+    "profile_nodes_xz_m": [[-0.2, 0.0], [2.0, 0.0], [3.0, 0.28], [3.6, 0.448], [3.9, 0.448], [4.4, 0.05], [4.8, 0.05]],
+    "bed_y_bounds_m": [-0.15, 0.15],
+    "depth_bins_m": [0.02, 0.04],
+    "denominator": "all 40710 frame-zero valid Type-3 fluid UIDs",
+    "unexplained_uid_policy": "report nonfinite/lost/missing/extra UID counts, digests and samples; assign no cause"
+  },
+  "owner_scope": "F5 family isolated source handoff fresh065; Root owns all actual execution and review"
+}
