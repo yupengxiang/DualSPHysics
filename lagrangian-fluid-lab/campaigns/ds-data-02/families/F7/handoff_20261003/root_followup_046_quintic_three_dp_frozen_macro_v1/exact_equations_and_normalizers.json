@@ -1,0 +1,166 @@
+{
+  "schema": "ds02.f7.exact-equations-normalizers-pins.v1",
+  "family_id": "F7",
+  "physical_mother_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+  "lineage_group_id": "F7_OBSTACLE_REFERENCE_BASE_AND_QUINTIC_SHARED_GEOMETRY_NO_LEAK",
+  "physical_condition_sha256": "512cb217f29e716346c249339545ed2599e7cb1aeb8e81fe7f1c0cf7f341c34c",
+  "governance": {
+    "q_n_status": "not_granted",
+    "production_approval": "none",
+    "actual_numbers_pending": true,
+    "no_theoretical_counts_or_proof": true,
+    "historical_spatial_ke_negative_retained": true,
+    "ke_5pct_failure_gate_preserved": true
+  },
+  "geometry": {
+    "tank": {
+      "low_m": [-0.6, -0.4, 0.0],
+      "size_m": [1.2, 0.8, 0.6],
+      "label": "finite walls open top"
+    },
+    "fluid_envelope": {
+      "low_m": [-0.55, -0.35, 0.05],
+      "size_m": [1.1, 0.7, 0.432],
+      "label": "envelope minus paddle"
+    },
+    "paddle": {
+      "low_m": [-0.07, -0.24, 0.05],
+      "size_m": [0.06, 0.48, 0.48],
+      "pivot_axis_point_m": [-0.04, 0.0, 0.05],
+      "pivot_axis_direction": [0.0, 0.0, 1.0],
+      "label": "finite moving solid (Type 1 boundary markers)"
+    }
+  },
+  "resolutions": {
+    "coarse": {
+      "dp_m": 0.02,
+      "case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+      "expected_total_particles": 70179,
+      "expected_fluid_particles": 40700,
+      "expected_type1_moving_markers": 1984,
+      "expected_type0_fixed_boundary": 27495,
+      "official_csv_initial_fluid_mass_kg": 325.60001628
+    },
+    "medium": {
+      "dp_m": 0.016,
+      "case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_MEDIUM",
+      "expected_total_particles": 125142,
+      "expected_fluid_particles": 78732,
+      "expected_type1_moving_markers": 3798,
+      "expected_type0_fixed_boundary": 42612,
+      "official_csv_initial_fluid_mass_kg": 322.486272
+    },
+    "fine": {
+      "dp_m": 0.01,
+      "case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_FINE",
+      "expected_total_particles": 424277,
+      "expected_fluid_particles": 318716,
+      "expected_type1_moving_markers": 4899,
+      "expected_type0_fixed_boundary": 100662,
+      "official_csv_initial_fluid_mass_kg": 318.716
+    }
+  },
+  "refinement_ratio_boundary": {
+    "coarse_to_medium_ratio": 1.25,
+    "medium_to_fine_ratio": 1.6,
+    "coarse_to_fine_ratio": 2.0,
+    "constant_refinement_ratio_claim": false,
+    "constant_refinement_ratio_explanation": "Refinement ratio between coarse (0.02) and medium (0.016) is 1.25, while medium (0.016) to fine (0.01) is 1.60. No constant refinement ratio or uniform grid spacing scaling applies.",
+    "uid_match_across_dp": false,
+    "uid_match_explanation": "Particle IDs are generated independently by GenCase for each resolution; there is no 1-to-1 particle UID mapping across DPs."
+  },
+  "exact_equations": {
+    "quintic_polynomial": {
+      "base_polynomial": "s(tau) = 10*tau^3 - 15*tau^4 + 6*tau^5 for tau in [0, 1]",
+      "first_derivative": "ds/dtau = 30*tau^2 * (1 - tau)^2 for tau in [0, 1]",
+      "second_derivative": "d2s/dtau2 = 60*tau * (1 - tau) * (1 - 2*tau) for tau in [0, 1]",
+      "boundary_derivatives": "s(0) = 0, s(1) = 1, s'(0) = 0, s'(1) = 0, s''(0) = 0, s''(1) = 0",
+      "analytic_segments": [
+        {"segment": 1, "window_s": [0.0, 1.0], "theta_deg": "45 * s(t / 1.0)"},
+        {"segment": 2, "window_s": [1.0, 3.0], "theta_deg": "45 - 90 * s((t - 1.0) / 2.0)"},
+        {"segment": 3, "window_s": [3.0, 5.0], "theta_deg": "-45 + 90 * s((t - 3.0) / 2.0)"},
+        {"segment": 4, "window_s": [5.0, 7.0], "theta_deg": "45 - 90 * s((t - 5.0) / 2.0)"},
+        {"segment": 5, "window_s": [7.0, 8.0], "theta_deg": "-45 + 45 * s((t - 7.0) / 1.0)"},
+        {"segment": 6, "window_s": [8.0, 12.0], "theta_deg": "0.0 (neutral rest tail)"}
+      ]
+    },
+    "native_motion_reader": {
+      "source_pin": "src/source/JMotionObj.cpp:214-226 (JMotionMovActive::DfGetNewAng)",
+      "equation": "tfactor = (t - DfTimes[DfIndex-1]) / (DfTimes[DfIndex] - DfTimes[DfIndex-1]); newang = ang0 + tfactor * (ang - ang0)",
+      "property": "Piecewise linear interpolation with piecewise constant velocity and finite knot velocity jumps; NOT native C2",
+      "knot_slope_jump": "delta_v_i = (theta_{i+1} - theta_i)/(t_{i+1} - t_i) - (theta_i - theta_{i-1})/(t_i - t_{i-1})"
+    },
+    "macro_series_operators": {
+      "active_mass_kg": "M(t) = sum_{i in fluid, valid} m_i",
+      "center_of_mass_m": "R_cm(t) = (sum_{i in fluid, valid} m_i * x_i) / M(t)",
+      "kinetic_energy_j": "KE(t) = 0.5 * sum_{i in fluid, valid} m_i * |v_i|^2"
+    },
+    "type1_moving_paddle_pose": {
+      "marker_selection": "initial_type == 1 and valid == True",
+      "pivot_point": "[-0.04, 0.0, 0.05] m",
+      "relative_coordinates": "Delta x_i(t) = x_i(t) - (-0.04), Delta y_i(t) = y_i(t) - 0.0",
+      "centroid": "x_centroid(t) = (1 / N1) * sum_{i=1}^{N1} x_i(t)",
+      "rotation_angle_rad": "theta(t) = atan2(sum_i (Delta y_i(t)*Delta x_i(0) - Delta x_i(t)*Delta y_i(0)), sum_i (Delta x_i(t)*Delta x_i(0) + Delta y_i(t)*Delta y_i(0)))",
+      "rotation_angle_deg": "theta_deg(t) = theta(t) * 180 / pi",
+      "rigid_body_rms_m": "RMS_rigid(t) = sqrt((1 / N1) * sum_i |r_i(t) - R(theta(t))*r_i(0)|^2)"
+    },
+    "scaled_error_metrics": {
+      "scaled_error_curve": "e_O(t) = |O_cand(t) - O_base(t)| / S_O",
+      "max_scaled_error": "max_t e_O(t)",
+      "rms_scaled_error": "sqrt(mean(e_O(t)^2))",
+      "max_absolute_difference": "max_t |O_cand(t) - O_base(t)|",
+      "kinetic_time_mean_scaled_error": "(1 / (12 * S_KE)) * |integral_0^12 (KE_cand(t) - KE_base(t)) dt|",
+      "kinetic_peak_scaled_error": "|max_t KE_cand(t) - max_t KE_base(t)| / S_KE"
+    }
+  },
+  "normalizers": {
+    "source_file": "frozen_macro_normalizers_001.json",
+    "source_file_sha256": "d16709d4d54e45741f762f1f912a6819b6c0f0f53d188dc4df42356b98faba46",
+    "continuous_initial_mass_kg": 320.1984,
+    "com_axis_scales_m": [1.1, 0.7, 0.432],
+    "com_normalization_rationale": "Physical initial envelope widths, fixed for all references; avoids coordinate-origin-dependent pointwise relative centers",
+    "kinetic_normalization_rationale": "Fine reference peak over fixed 0-12s, same scale for time-mean/peak/full curve errors",
+    "macro_relative_budget": 0.05
+  },
+  "budgets": {
+    "source_file": "frozen_reference_budget_001.json",
+    "source_file_sha256": "d847840b8a78dcbf790fd90a757f539bfa7d87a9c0d140c5ce04bbbb1aa02b4e",
+    "macro_relative_budget": 0.05,
+    "event_time_relative_budget": 0.02,
+    "save_or_integration_share": 0.20,
+    "paddle_corner_radius_m": 0.24186773244895649,
+    "maximum_angular_speed_rad_s": 1.9739208802178716,
+    "maximum_paddle_tip_speed_m_s": 0.4774277673319448,
+    "minimum_continuous_swept_y_clearance_m": 0.15813226755104354,
+    "characteristic_time_s": 0.33121715654443223,
+    "event_absolute_budget_s": 0.006624343130888645,
+    "save_or_integration_event_budget_s": 0.001324868626177729
+  },
+  "pins": {
+    "motion_dat_source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_TARGET_VERIFIED_RECIPE_ACTUAL_SOURCE/root-obstacle-quintic-target-verified-native-recipe-preparation-020/prepared/motion_obstacle_quintic.dat",
+    "motion_dat_sha256": "2b607e700abaab4b687740b1a5a3535ce1cc3fee246cbd02d09ad596a722032f",
+    "original_scale_reference_macro": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_EXPLICIT_WET_CELLS_001_FINE/root-native-macro-series-001/macro-series.json",
+    "original_scale_reference_sha256": "11f15d5fc1ec5231f1b9fe680aab08a705c76eb0578019bf91b6cb0b9c48b284",
+    "coarse_native_xml": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f",
+    "medium_native_xml": "b82003c98ad7a6858307c5a9612a175e8fae3a3dad91b82aa9af315e0cb9656a",
+    "fine_native_xml": "f1ef9bfec8d9504efe02ebdeca08b525a0da5cc25295fdead9403eb8ae46c9c2",
+    "coarse_initial_bi4": "e618440bc55384f8942506929f98ac4c688a8585bf017b532cafbc8ada839425",
+    "medium_initial_bi4": "5f8bf79a8113ef26276faa61636d3ab936bb016df14c72a295a546376076f643",
+    "fine_initial_bi4": "e6c96a652a24785ddd32084bdb0ab04953c1de010c07a0ad118b13f975e86b2f",
+    "coarse_native_solver_receipt": "37a6c24afe2fa30450c42aa6a6e8dae7a35af863d95affe7672eba71e465bedc",
+    "medium_native_solver_receipt": "fdb9764eac2a420db6dd40141a2000b817a3c6726e9e71f78a7aa99749f9a9f3",
+    "fine_native_solver_receipt": "7fd3185a855ee2c3a9c3e2d23b237a1d110dfb59fe82828c2ed74b6862a8c3e0"
+  },
+  "exclusions_policy": {
+    "lifecycle_mode": "FINITE_INITIAL_NUMERICAL_COHORT_WITH_EXCLUSIONS",
+    "policy": "native_unknown_exclusions_retained",
+    "interpretation": "Excluded fluid particles (valid == False) are logged as unknown physical fates without assuming closed cohort. Preserves failure if particles escape domain."
+  },
+  "explicit_gaps": [
+    "ThreeDP macros alone do not grant whole Q-N; independent time/save and motion cadence/protocol sensitivity still required.",
+    "Residence-specific registered budget is None; unnormalised seconds and kg*s reported with no qualification claim.",
+    "DualSPHysics official motion reader performs piecewise linear interpolation; knot velocity jumps exist and native C2 continuity is rejected.",
+    "Historical 43% spatial kinetic energy discrepancy from previous motion is retained; no waiver or threshold modification granted.",
+    "Actual numbers for full 3DP comparison are pending completion of all typed conversions under Root guarded compute."
+  ]
+}
