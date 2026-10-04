@@ -1,0 +1,77 @@
+{
+  "schema": "ds02.stage1.f3.frozen-physics-evidence.v1",
+  "status": "frozen_from_actual_strict012_metadata",
+  "case_id": "F3_STAGE1_DP006_P1000_AY0570",
+  "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0570_STAGE1_BATCH8",
+  "physical_condition_sha256": "df6cd84199c3a105070f144ff2724a3e1b3502a4059f2c0ade9791b924ede67a",
+  "checks": {
+    "finite_state": true
+  },
+  "physics": {
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "periodic_boundary": false,
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    }
+  },
+  "solver_recipe": {
+    "definition_dp_m": 0.006,
+    "cfl_number": 0.05,
+    "coef_dt_min": 0.005,
+    "dt_fixed_s": 0.0,
+    "solver_mode": "-mdbc_noslip:1",
+    "time_max_s": 8.35,
+    "time_out_s": 0.01
+  },
+  "source_bindings": {
+    "prepared_input_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST8_PROSPECTIVE_PHYSICAL_INPUT_PREPARATION/root-stage1-twoaxis-first8-five-new-interior-exact-initial-inputs-012/prepared/interior04/prepared-input-report.json",
+      "sha256": "bba2b704e33742f5d3a7649f9cc9267a63eaf93cd2b09f24a6c13ee03c6605e1"
+    },
+    "parent_native_initial_qa": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_TWOAXIS_NOMINAL_THREE_DP_ACTUAL_INITIAL_QA/root-cell3-twoaxis-nominal-three-dp-official-native-initial-qa-058/native-initial-qa.json",
+      "sha256": "7ff19bd2db1b731071ec0eeaa8dfe43bbb0cc27ecc5c2dc9d1bb8c0cb5f60349"
+    }
+  },
+  "numerical_precision_status": "not_accepted",
+  "no_hidden_precision_gate": true
+}
