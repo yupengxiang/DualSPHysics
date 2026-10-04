@@ -1,0 +1,110 @@
+{
+  "schema": "ds02.f4.drop-gap-request-readiness.v1",
+  "family_id": "F4",
+  "source_scope_id": "root_followup_062_stage1_drop_gap_request_readiness_v1",
+  "reviewed_scope_id": "root_followup_060_stage1_drop_gap_endpoints_v1",
+  "status": "source-ready; Root strict launch disabled",
+  "model_policy": {
+    "authorized_model": "GPT-5.6 Luna/max",
+    "gemini": false,
+    "recursive_agents": false
+  },
+  "strict_validation": [
+    {
+      "request": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_062_stage1_drop_gap_request_readiness_v1/requests/f4_drop_gap_gencase_preflight_request.json",
+      "status": "pass",
+      "input_count": 28,
+      "cpu_task_kind": "gencase",
+      "cwd": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab",
+      "python_binary": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "launch": false,
+      "launch_allowed": false
+    },
+    {
+      "request": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_062_stage1_drop_gap_request_readiness_v1/requests/f4_drop_gap_initial_native_qa_request.json",
+      "status": "pass",
+      "input_count": 21,
+      "cpu_task_kind": "audit",
+      "cwd": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab",
+      "python_binary": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "launch": false,
+      "launch_allowed": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "060-gencase-cpu-kind",
+      "status": "fixed",
+      "old": "gencase_preflight_worker",
+      "new": "gencase",
+      "reason": "runtime v2 CPU_KINDS allowlist"
+    },
+    {
+      "id": "060-gencase-output-parent",
+      "status": "fixed",
+      "old": "worker created endpoint directory with parents=false before gencase root existed",
+      "new": "v2 creates output_root parents=true then endpoint directories",
+      "reason": "fresh strict attempt root contains only {attempt_root}"
+    },
+    {
+      "id": "060-qa-cpu-kind",
+      "status": "fixed",
+      "old": "initial_native_qa",
+      "new": "audit",
+      "reason": "runtime v2 CPU_KINDS allowlist"
+    },
+    {
+      "id": "060-qa-runtime-manifest",
+      "status": "replaced",
+      "old": "placeholder generated-inputs.json had no producer and did not name actual GenCase outputs",
+      "new": "v2 binds gencase/<endpoint>/<endpoint>.xml and .bi4; materializes consumed-audit execution receipt and writes per-endpoint native-preflight-audit.json",
+      "reason": "actual strict output naming and native audit lineage"
+    },
+    {
+      "id": "060-qa-source-separation",
+      "status": "strengthened",
+      "old": "custom XML/Root JSON checker did not require positive drop/pool source rows with distinct bounds",
+      "new": "v2 requires positive drop and pool rows, finite bounds, and vertical separation; preserves actual F4 native UID/type/mass/full3D checks",
+      "reason": "requested fluid drop/bath separation evidence"
+    },
+    {
+      "id": "062-upstream-attempt-binding",
+      "status": "fixed",
+      "old": "QA command used its own {attempt_root} for GenCase result and generated inputs, although strict runtime allocates one output root per attempt",
+      "new": "QA command binds the preceding gencase attempt output root recorded in runtime_preconditions",
+      "reason": "strict runtime substitution supports {attempt_root} only for the current attempt"
+    }
+  ],
+  "disabled_requests": {
+    "gencase": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_062_stage1_drop_gap_request_readiness_v1/requests/f4_drop_gap_gencase_preflight_request.json",
+    "initial_native_qa": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_062_stage1_drop_gap_request_readiness_v1/requests/f4_drop_gap_initial_native_qa_request.json"
+  },
+  "runtime_output_contract": {
+    "gencase_result": "{attempt_root}/gencase-preflight-result.json",
+    "generated_xml": "{attempt_root}/gencase/<endpoint>/<endpoint>.xml",
+    "generated_bi4": "{attempt_root}/gencase/<endpoint>/<endpoint>.bi4",
+    "initial_qa": "{attempt_root}/initial-qa/<endpoint>/native-preflight-audit.json",
+    "initial_qa_index": "{attempt_root}/initial-qa/initial-native-audit-index.json",
+    "gencase_attempt_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_GAP_ENDPOINTS/root-followup-062-gencase-preflight",
+    "qa_attempt_root": "{attempt_root} for root-followup-062-initial-native-qa",
+    "qa_upstream_binding": "QA command uses the concrete gencase_attempt_root; Root must launch GenCase successfully first."
+  },
+  "read_boundary": {
+    "source_handoff_created_no_gencase_outputs": true,
+    "root_qa_may_read_native_bi4_after_strict_gencase": true,
+    "h5": false,
+    "csv": false,
+    "conversion": false,
+    "solver": false,
+    "rendering": false
+  },
+  "claims": {
+    "uid_type_mass_full3d": "pending Root strict outputs",
+    "drop_bath_separation": "pending Root strict outputs",
+    "precision": "not_accepted",
+    "q_n": "not_assessed",
+    "visual": "pending whole-frame review",
+    "production_approval": "none"
+  },
+  "historical_negative_evidence": "preserved from 060; this request-readiness scope does not revise F4 old spatial precision failure, timing uncertainty, or recovered-artifact audit."
+}
