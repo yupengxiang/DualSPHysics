@@ -1,0 +1,236 @@
+{
+  "schema": "ds02.f2.root-followup-040-evaluation-report.v1",
+  "generated_at_utc": "2026-10-04T02:36:00.000000+00:00",
+  "family_id": "F2",
+  "case_id": "F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001",
+  "scope_directory": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_040_prospective_recipe_v1",
+  "executive_summary": {
+    "goal": "Author executable Root-reviewable genuine independent time integration control suite for F2 RV4EQ DP005 OFFSET full 4.0s window.",
+    "status": "completed_preparation_suite",
+    "campaign_target_count": "0/336 across 7 families",
+    "campaign_remaining_gpu_hours": "~32 GPUh",
+    "campaign_qualification_attempts_budget": "53 remaining (max 2 repairs/root causes)",
+    "candidate_gpu_hours_required": 0.307,
+    "candidate_qualification_attempts_used": 1,
+    "q_n_claim": "not_granted",
+    "production_claim": "none",
+    "launch_authority": "strictly launch_allowed: false"
+  },
+  "save_comparison_027_audit": {
+    "source_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_ACTUAL_NATIVE_SAVE_COMPARISON/root-offset-fine-full401-vs4001-native-per-uid-residence-save-comparison-027/save-comparison.json",
+    "source_report_sha256": "2f1a19acfd9d02fc8b45c5144937335c10a33c00a9fb352786345977995eebe8",
+    "nominal401_attempt": "root-offset-fine-full401-frozen-events-native-weights-024",
+    "dense4001_attempt": "root-offset-fine-full4001-frozen-events-native-weights-025",
+    "final_destination_fates": {
+      "total_particles": 196608,
+      "all_final_fates_agree": true,
+      "switched_particles": 0,
+      "destinations": {
+        "unknown": 2151,
+        "cup": 0,
+        "receiver": 24411,
+        "tray": 161580,
+        "inflight": 8466
+      }
+    },
+    "native_exclusions": {
+      "motive_1_count": 2151,
+      "unknown_mass_retained_kg": 0.2688750127708772,
+      "all_retained_as_unknown_invalid": true,
+      "physical_spill_inferred": false
+    },
+    "per_uid_residence": {
+      "inflight_mean_abs_gap_s": 0.008602213998874208,
+      "inflight_max_abs_gap_s": 0.06602083257110325,
+      "cup_mean_abs_gap_s": 0.0031132051729008516,
+      "cup_max_abs_gap_s": 0.05446484463971113,
+      "receiver_mean_abs_gap_s": 0.0010336912029444184,
+      "receiver_max_abs_gap_s": 0.06351374458526049,
+      "tray_mean_abs_gap_s": 0.006876803989153123,
+      "tray_max_abs_gap_s": 0.060492231968668264,
+      "global_max_abs_gap_s": 0.06602083257110325
+    },
+    "episodic_event_matching": {
+      "literal_closed_interval_rule": "max(t_start,nom, t_start,dense) <= min(t_end,nom, t_end,dense) without +1e-12 extension",
+      "proven_unique_1to1_joint_count": 1852580,
+      "proven_unique_1to1_joint_mass_kg": 231.57251099910354,
+      "ambiguous_nominal_count": 8085,
+      "ambiguous_dense_count": 16184,
+      "extra_dense_count": 608223,
+      "unmatched_nominal_count": 0,
+      "retention_of_ambiguity": "Ambiguous multi-overlap clusters are retained explicitly; no speculative 1:1 snapping is permitted."
+    },
+    "scientific_boundary": "Save comparison 027 confirms observation discretization sensitivity between 401 frames (dt=0.01s) and 4001 frames (dt=0.001s) of the same trajectory. It does NOT establish numerical time integration convergence or replace an independent time integration control run."
+  },
+  "existing_time_control_evidence_audit": {
+    "status": "missing_genuine_independent_adaptive_time_control",
+    "evaluation_of_dense_save001": {
+      "attempt_id": "root-offset-fine-effective-dense-save001-full4-native-018",
+      "nature": "Dense output save alias (TimeOut=0.001s, 4001 frames) using standard adaptive timestep (CFL=0.2, CoefDtMin=0.05).",
+      "finding": "Identical physical integration scheme to baseline; provides higher temporal sampling of the trajectory but zero variation in integration step size."
+    },
+    "evaluation_of_reduced_dt_save010_floorsafe001": {
+      "attempt_id": "qualification-f2_rv4eq_dp005_offset_v1_reduced_dt_save010_floorsafe001-native-fullstate-v1",
+      "nature": "Explicit fixed timestep override (DtFixed=3.88682e-6 s, DtIni=3.88682e-6 s, DtMin=3.88682e-6 s, CoefDtMin=0.05, CFL=0.2).",
+      "finding": "Forced 1,029,119 identical fixed time steps rather than genuine adaptive time integration. Further, this attempt lacked postprocessing, PartVtk conversion, actual pose extraction, and frozen v8 operator labels generation.",
+      "consumed_negative_evidence": "Preserved as negative evidence; artificial fixedDt clamps are rejected in favor of independent adaptive CFL and CoefDtMin halving."
+    },
+    "conclusion": "Genuine independent time integration control with adaptive CFL and coupled floor CoefDtMin halving, followed by full 13-typed-field pose and native-weighted labels pipeline, has not been executed."
+  },
+  "candidate_halfstep_specification": {
+    "source_prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001",
+    "source_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001.xml",
+    "source_xml_sha256": "f57c5e5fcf6c7c374ae14a8b28ae40b9e080554e2dfae8824253ae32e42b49cd",
+    "source_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001.bi4",
+    "source_bi4_sha256": "efa7d2a296ed3de308c93b598e47225b36865006977caaa6a9a8898099b922a6",
+    "source_bi4_bytes": 73360382,
+    "source_motion": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_NATIVE_INPUTS_20261002/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001_motion.dat",
+    "source_motion_sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70",
+    "source_motion_bytes": 18799,
+    "motion_binding_invariance": "Original prefix basename F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001 is preserved unchanged in output directory so that <file name=\"F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001_motion.dat\" /> bindings in casedef and execution blocks remain perfectly intact without modifying case definition.",
+    "numerical_parameters": {
+      "baseline": {
+        "casedef_cfl": 0.2,
+        "execution_cfl": 0.2,
+        "execution_coef_dt_min": 0.05,
+        "DtFixed": 0.0,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "TimeMax": 4.0,
+        "TimeOut": 0.01,
+        "frames": 401
+      },
+      "candidate_halfstep": {
+        "casedef_cfl": 0.2,
+        "execution_cfl": 0.1,
+        "execution_coef_dt_min": 0.025,
+        "DtFixed": 0.0,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "TimeMax": 4.0,
+        "TimeOut": 0.01,
+        "frames": 401
+      },
+      "mutation_rationale": "In adaptive DualSPHysics execution, halving independent CFL (0.2 -> 0.1) and coupled floor CoefDtMin (0.05 -> 0.025) while leaving DtFixed=0, DtIni=0, DtMin=0 genuinely halves the adaptive integration timestep at each step while allowing natural CFL-driven timestep evolution, retaining old clamps negative."
+    },
+    "reversibility_proofs": {
+      "byte_level_reversibility": "Verified bitwise-identical roundtrip; replacing mutated tokens back reproduces exact 7618 bytes and original SHA256 f57c5e5fcf6c7c374ae14a8b28ae40b9e080554e2dfae8824253ae32e42b49cd.",
+      "elementtree_undo_proof": "Verified structural roundtrip; resetting execution cfl to 0.2 and CoefDtMin to 0.05 produces E.tostring(restored) == E.tostring(before), satisfying Root run.py contract."
+    }
+  },
+  "pinned_source_receipts": {
+    "gencase": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1/gencase-f2_rv4eq_dp005_offset_v1-20261002-001/execution-receipt.json",
+      "sha256": "f973b151cadea0d97b1f6c0726dec27490764fb91d9855e95fd8483eb9513ac7",
+      "status": "completed",
+      "returncode": 0
+    },
+    "baseline_solver": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/qualification-f2_rv4eq_dp005_offset_v1-baseline-save001-native-fullstate-v1/execution-receipt.json",
+      "sha256": "ad826271229884cc0ecc7245d6fc4f97a888d799fa3596d806ba3e4587b5c9a7",
+      "status": "completed",
+      "returncode": 0
+    },
+    "pose_root_013": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/root-offset-fine-actual-native-pose-v1-013/execution-receipt.json",
+      "sha256": "9b16197cb574f50e1ece72e08601769c4eab74506ed4f11f2dc0b95e37c3cd46",
+      "status": "completed_evidence_only",
+      "frames": 401
+    },
+    "labels_root_024": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_BASELINE_SAVE001/root-offset-fine-full401-frozen-events-native-weights-024/execution-receipt.json",
+      "sha256": "e3f3a39c741b02d74a81a4d3b9832474a171f1a4980cf9b5b14ffa20c6a48710",
+      "status": "completed",
+      "returncode": 0
+    },
+    "dense_solver_root_018": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-effective-dense-save001-full4-native-018/execution-receipt.json",
+      "sha256": "b4fd368774eb0ed908bfe3f484af4a4e956ec1c45f5c6f7def223cd0caddd511",
+      "status": "completed",
+      "returncode": 0
+    },
+    "dense_pose_root_022": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-full4001-actual-pose-13-bitwise-payload-singlecopy-022/execution-receipt.json",
+      "sha256": "c82580ded03bb6a01fbc8d6a377ca82198a485b0d36bdf65143c98a6bae1334e",
+      "status": "completed",
+      "frames": 4001
+    },
+    "dense_labels_root_025": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_RV4EQ_DP005_OFFSET_V1_DENSE_SAVE001/root-offset-fine-full4001-frozen-events-native-weights-025/execution-receipt.json",
+      "sha256": "ea85d05c84f34bcb50e0c4c14e84a43f593bd00cdd74c6a74c7c1b1191c791be",
+      "status": "completed",
+      "returncode": 0
+    }
+  },
+  "fluid_population_and_mass_authority": {
+    "fluid_particles": 196608,
+    "native_single_particle_mass_kg": 0.0001250000059371814,
+    "native_cohort_mass_kg": 24.576001167297363,
+    "continuous_xml_benchmark_kg": 24.576,
+    "representation_delta_kg": 1.1672973627696592e-06,
+    "relative_representation_drift": 4.749745128457272e-08,
+    "legacy_diagnostic_assessment": "Diagnostic on 1e-12 threshold failed; uniform mass-.30 estimate and legacy 24.576 representation gate pass are strictly rejected.",
+    "native_exclusions": {
+      "count": 2151,
+      "retained_as_unknown_invalid": true,
+      "mass_kg": 0.2688750127708772,
+      "retained_in_initial_denominator": true
+    }
+  },
+  "pose_and_13_typed_fields_standard": {
+    "mandatory_payload_fields": [
+      {"name": "time", "dtype": "<f8"},
+      {"name": "particle_id", "dtype": "<u4"},
+      {"name": "particle_zone", "dtype": "<i2"},
+      {"name": "initial_type", "dtype": "|i1"},
+      {"name": "initial_mk", "dtype": "<i2"},
+      {"name": "initial_mass", "dtype": "<f4"},
+      {"name": "mass", "dtype": "<f4"},
+      {"name": "type", "dtype": "|i1"},
+      {"name": "mk", "dtype": "<i2"},
+      {"name": "valid", "dtype": "|b1"},
+      {"name": "position", "dtype": "<f4", "dim": 3},
+      {"name": "velocity", "dtype": "<f4", "dim": 3},
+      {"name": "density", "dtype": "<f4"}
+    ],
+    "augmented_pose_dataset": "rigid_body_state",
+    "corrected_pose_control_sign": -1.0,
+    "moving_node_count": 76676,
+    "max_angle_residual_rad": 3.7694397668746465e-08,
+    "max_position_rms_m": 3.210304112156166e-08
+  },
+  "resource_costs_and_budget_accounting": {
+    "baseline_receipt_actuals": {
+      "elapsed_seconds": 553.287853717804,
+      "steps": 201237,
+      "particles": 1667249,
+      "output_bytes": 29396068905,
+      "frames": 401,
+      "gpu": "NVIDIA RTX 6000 Ada Generation",
+      "gpu_memory_used_mib": 585.76
+    },
+    "candidate_halfstep_estimates": {
+      "estimated_gpu_seconds": 1107,
+      "estimated_steps": 402474,
+      "estimated_frames": 401,
+      "max_wall_seconds": 3600,
+      "estimated_storage_bytes": 35000000000,
+      "estimated_peak_gpu_mib": 16384,
+      "required_gpu_hours": 0.307
+    },
+    "campaign_budget_analysis": {
+      "campaign_gpu_hours_remaining": "~32 GPUh",
+      "campaign_qualification_attempts_remaining": 53,
+      "candidate_attempt_count": 1,
+      "budget_compliance": "Candidate requires ~0.31 GPUh and 1 qualification attempt, well within campaign budget limits."
+    }
+  },
+  "governance_and_claim_boundaries": {
+    "q_n": "not_granted",
+    "q_e": "not_granted",
+    "q_i": "not_granted",
+    "production": "none",
+    "launch_allowed": false,
+    "statement": "Preparation and registration of prospective genuine adaptive true-halfstep execution clone suite only. No numerical reference, Q-N qualification, or production claims are made."
+  }
+}
