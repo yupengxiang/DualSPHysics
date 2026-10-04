@@ -1,0 +1,186 @@
+{
+  "physical_binding": {
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "twoaxis_transverse_linear",
+    "parameters": {
+      "acceleration_source_semantics": "CaseSloshingAccData.csv from frozen CELL3 nominal source; acctimesfile binding",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "reference_variant": "TWOAXIS_AY0P50",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ],
+      "transverse_amplitude_m_s2": 0.5,
+      "transverse_omega_rad_s": 12.531236478398654,
+      "transverse_phase_rad": 0.0,
+      "transverse_ramp_duration_s": 0.5,
+      "transverse_active_window_s": [
+        0,
+        8.35
+      ],
+      "forcing_source_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "actual_forcing_sha256": "a4afb8a99ba1e7404b2892b84a2d2b293b11653d792a118867abfaec6593fb48"
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_condition_sha256": "49d16330fd5267668670f166a20191bfb00c5223ad5528439630c7e62dd4c6a0",
+  "actual_source_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP005_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp005-twoaxis-ay0p50-actual-gencase-057/prepared/prepared-input-report.json",
+  "actual_native_initial_qa": {
+    "role": "twoaxis_dp005",
+    "case_id": "F3_CELL3_LONG_DP005_AY0P50_ADAPTIVE_CFL05_COEF005",
+    "passed": true,
+    "native_particles": 277272,
+    "native_fluid": 116640,
+    "native_fixed": 160632,
+    "actual_3d": true,
+    "native_initial_BI4_sha256": "f0a24702286d36e2b97aa065cf7aa8e521f416b9b0492ed196ed0941c6660a65",
+    "generated_xml_sha256": "691d27918055ac51e0b182a0ce0b9ceb3f25c868e35a8739044da260cb76630c",
+    "official_csv_sha256": "4a3aef8ca5fd6eceb269a1976978d7e1be4af3b217790d1497f339a3d6fb07f3",
+    "actual_fluid_envelope_m": [
+      [
+        -0.44749999,
+        -0.087499999,
+        0.0024999999
+      ],
+      [
+        0.44749999,
+        0.087499999,
+        0.087499999
+      ]
+    ],
+    "official_CSV_fluid_mass_sum_kg": 14.580001166400006,
+    "mass_precision": "Official CSV printed native weights; original BI4 binary mass precision retained for full converter",
+    "continuous_reference_mass_kg": 14.58,
+    "mass_normalization": "none"
+  },
+  "physical_evidence_status": "true3D geometry initialQAactual; second-axis fluid response pendingfullnative",
+  "no_numerical_independent_product_increment": true,
+  "semantic_erratum": {
+    "source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_actual_twoaxis_full_native_060/dp005/physical-binding.json",
+    "source_sha256": "05b7d2c2ffb633ef851b112f52136422ebbca1336ede5a5c596e27d768042e55",
+    "original_condition_sha256": "86562c5afee8228131d58c1b53f360eb6c6a700381c01bf807a0f268bbc675c0",
+    "correction": "Inherited single-axis control_family_id and event-sequence text corrected to actual consumed two-axis forcing; no numeric inputs, geometry, arrays or receipts edited.",
+    "lineage_group": "Inherited conservative common source lineage retained for leakage prevention",
+    "actual_physics_changed": false
+  }
+}
