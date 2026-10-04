@@ -1,0 +1,190 @@
+{
+  "schema": "ds02.f3.actual-adaptive-spatial-owner.v1",
+  "family_id": "F3",
+  "case_id": "F3_STAGE1_DP006_P1000_AY0750",
+  "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0750_VISUAL_DOMAIN",
+  "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+  "resolution": "dp006_twoaxis",
+  "physical_binding": {
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "twoaxis_transverse_linear",
+    "parameters": {
+      "acceleration_source_semantics": "CaseSloshingAccData.csv from frozen CELL3 nominal source; acctimesfile binding",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "reference_variant": "F3_TWOAXIS_PITCH1000_AY0750_VISUAL_DOMAIN",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ],
+      "transverse_amplitude_m_s2": 0.75,
+      "transverse_omega_rad_s": 12.531236478398654,
+      "transverse_phase_rad": 0.0,
+      "transverse_ramp_duration_s": 0.5,
+      "transverse_active_window_s": [
+        0,
+        8.35
+      ],
+      "forcing_source_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "actual_forcing_sha256": "e2d4147be242f539fe08187f6fe5c3377be7060ea2c87386d85a7e97af0d7b67"
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0750_VISUAL_DOMAIN",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "solver_parameters": {
+    "cfl_number": 0.05,
+    "coef_dt_min": 0.005,
+    "definition_dp_m": 0.006,
+    "dt_fixed_s": 0,
+    "time_max_s": 8.35,
+    "time_out_s": 0.01,
+    "save_pos_double": 2,
+    "shifting": 0,
+    "solver_mode": "-mdbc_noslip:1"
+  },
+  "gencase_provenance": {
+    "parent_equivalent_genuine_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/execution-receipt.json",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/execution-receipt.json",
+    "exact_initial_clone_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_PHYSICAL_VISUAL_ENDPOINT_PREPARATION/root-stage1-twoaxis-two-physical-amplitude-endpoints-exact-initial-inputs-006/execution-receipt.json",
+    "prepared_input_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_PHYSICAL_VISUAL_ENDPOINT_PREPARATION/root-stage1-twoaxis-two-physical-amplitude-endpoints-exact-initial-inputs-006/prepared/upper/prepared-input-report.json",
+    "native_3d_initial_qa": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_TWOAXIS_NOMINAL_THREE_DP_ACTUAL_INITIAL_QA/root-cell3-twoaxis-nominal-three-dp-official-native-initial-qa-058/native-initial-qa.json",
+    "equivalence": "New actual byte-identical XML/initial BI4 cloned under strict CPU preparation006; original genuine GenCase particle counts/QA retained; only prescribed forcing AY physics differs."
+  },
+  "source": {
+    "raw_bi4_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_DP006_P1000_AY0750/root-stage1-twoaxis-upper-physical-endpoint-full836-native-009/solver_output/data",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_PHYSICAL_VISUAL_ENDPOINT_PREPARATION/root-stage1-twoaxis-two-physical-amplitude-endpoints-exact-initial-inputs-006/prepared/upper/F3_STAGE1_DP006_P1000_AY0750.xml",
+    "control": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_PHYSICAL_VISUAL_ENDPOINT_PREPARATION/root-stage1-twoaxis-two-physical-amplitude-endpoints-exact-initial-inputs-006/prepared/upper/CaseSloshingAccData.csv",
+    "native_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_DP006_P1000_AY0750/root-stage1-twoaxis-upper-physical-endpoint-full836-native-009/execution-receipt.json"
+  },
+  "claims": {
+    "q_n": "not_assessed",
+    "production_eligibility": "not_evaluated"
+  },
+  "EOS_policy": "Unchanged configured automatic sound-speed/B rule; actual generated B varies with discretization and is bound explicitly, not assumed identical across DP",
+  "physical_condition_sha256": "cdb32062b5490bb208353deb64794522f5d6389457bb5ee807d83eea8206efde",
+  "semantic_erratum": {
+    "actual_input_physics_changed": true,
+    "parent_physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
+    "source_of_canonical_condition_hash": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_visual_domain_endpoint_native_007/upper-physical-binding.json",
+    "precision_status": "not_accepted",
+    "root009_cli_erratum": "Original known-working argv[1] was -mdbc_noslip:1, not -gpu; fresh009 preserves it and uniquely replaces actual prefix. Runtime adds -gpu:0."
+  }
+}
