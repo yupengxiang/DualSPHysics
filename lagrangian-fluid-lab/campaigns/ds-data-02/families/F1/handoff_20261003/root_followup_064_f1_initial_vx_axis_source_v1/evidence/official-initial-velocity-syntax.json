@@ -1,0 +1,254 @@
+{
+  "schema": "ds02.f1.initial-vx-axis-official-syntax-evidence.v1",
+  "checks": {
+    "template_direct_velocity": true,
+    "initialize_doc_fluidvelocity": true,
+    "official_example_direct_velocity": true,
+    "source_reads_mkfluid": true,
+    "source_implements_fluid_velocity": true
+  },
+  "files": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml": {
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e",
+      "matching_lines": [
+        {
+          "line": 671,
+          "text": "<velocity mkfluid=\"0\" x=\"0.1\" y=\"0.4\" z=\"0.2\" active=\"true\" />"
+        },
+        {
+          "line": 672,
+          "text": "<velocity mkfluid=\"9\" x=\"6\" y=\"5\" z=\"4\">"
+        },
+        {
+          "line": 678,
+          "text": "<velocity mkfluid=\"0\">"
+        },
+        {
+          "line": 680,
+          "text": "<velocity v=\"2\" comment=\"Uniform profile velocity\" units_comment=\"m/s\" />"
+        },
+        {
+          "line": 682,
+          "text": "<velocity mkfluid=\"0\">"
+        },
+        {
+          "line": 684,
+          "text": "<velocity2 v=\"1\" v2=\"3\" z=\"1\" z2=\"1.8\" comment=\"Linear profile velocity\" units_comment=\"m/s\" />"
+        },
+        {
+          "line": 686,
+          "text": "<velocity mkfluid=\"0\">"
+        },
+        {
+          "line": 688,
+          "text": "<velocity3 v=\"1\" v2=\"0.608\" v3=\"3\" z=\"2\" z2=\"2.4\" z3=\"2.8\" comment=\"Parabolic profile velocity\" units_comment=\"m/s\" />"
+        }
+      ]
+    },
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/xml_format/_FmtXML_Initialize.xml": {
+      "sha256": "834368475c1476d474e390b410c5841dd99cbb1f6f1a0ed56c6ac3310bc4ae16",
+      "matching_lines": [
+        {
+          "line": 13,
+          "text": "<fluidvelocity mkfluid=\"0\">"
+        },
+        {
+          "line": 15,
+          "text": "<velocity v=\"2\" comment=\"Uniform profile velocity\" units_comment=\"m/s\" />"
+        },
+        {
+          "line": 16,
+          "text": "</fluidvelocity>"
+        },
+        {
+          "line": 17,
+          "text": "<fluidvelocity mkfluid=\"1\">"
+        },
+        {
+          "line": 19,
+          "text": "<velocity2 v=\"1\" v2=\"3\" z=\"2\" z2=\"3\" comment=\"Linear profile velocity\" units_comment=\"m/s\" />"
+        },
+        {
+          "line": 20,
+          "text": "</fluidvelocity>"
+        },
+        {
+          "line": 21,
+          "text": "<fluidvelocity mkfluid=\"2\">"
+        },
+        {
+          "line": 23,
+          "text": "<velocity3 v=\"0\" v2=\"0.608\" v3=\"3\" z=\"4\" z2=\"4.5\" z3=\"5\" comment=\"Parabolic profile velocity\" units_comment=\"m/s\" />"
+        },
+        {
+          "line": 24,
+          "text": "</fluidvelocity>"
+        },
+        {
+          "line": 33,
+          "text": "<!-- *** <fluidvelocity> and <boundnormal_set> options.                    *** -->"
+        },
+        {
+          "line": 36,
+          "text": "<fluidvelocity mkfluid=\"0\">"
+        },
+        {
+          "line": 42,
+          "text": "</fluidvelocity>"
+        },
+        {
+          "line": 58,
+          "text": "<fluidvelocity active=\"true\"/>"
+        }
+      ]
+    },
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/inletoutlet/01_FlowCylinder/CaseFlowCylinder_Re020_Def.xml": {
+      "sha256": "cb748d89ba8e700948d5ee17d75e50804ee3b44d4d8184e8376010d2107dd07d",
+      "matching_lines": [
+        {
+          "line": 71,
+          "text": "<velocity mkfluid=\"0\" x=\"1.0\" y=\"0\" z=\"0\" />"
+        },
+        {
+          "line": 114,
+          "text": "<velocity v=\"1.0\" comment=\"Uniform velocity\" units_comment=\"m/s\" />"
+        }
+      ]
+    },
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/src/source/JDsInitialize.cpp": {
+      "sha256": "4af457f313664474c38557bfa327c492de9e9e8c6424c3b665ea0189a979aff9",
+      "matching_lines": [
+        {
+          "line": 81,
+          "text": ",const word* mktype,const unsigned* idp,const tdouble3* pos"
+        },
+        {
+          "line": 86,
+          "text": "for(unsigned p=0;p<np;p++)if(mktype[p]==mktp && bound==(idp[p]<InitCt.nbound)){"
+        },
+        {
+          "line": 112,
+          "text": "std::string JDsInitializeOp::GetConfigMkBound(std::string mktype)const{"
+        },
+        {
+          "line": 113,
+          "text": "const string tmk=(mktype.empty()? \"ALL\": mktype.c_str());"
+        },
+        {
+          "line": 120,
+          "text": "std::string JDsInitializeOp::GetConfigMkFluid(std::string mktype)const{"
+        },
+        {
+          "line": 121,
+          "text": "const string tmk=(mktype.empty()? \"ALL\": mktype.c_str());"
+        },
+        {
+          "line": 122,
+          "text": "return(fun::PrintStr(\"  MkFluid..: %s %s\",tmk.c_str(),GetConfigNp().c_str()));"
+        },
+        {
+          "line": 134,
+          "text": "//# JDsInitializeOp_FluidVel"
+        },
+        {
+          "line": 139,
+          "text": "void JDsInitializeOp_FluidVel::Reset(){"
+        },
+        {
+          "line": 142,
+          "text": "MkFluid=\"\";"
+        },
+        {
+          "line": 151,
+          "text": "void JDsInitializeOp_FluidVel::ReadXml(const JXml* sxml,TiXmlElement* xele){"
+        },
+        {
+          "line": 154,
+          "text": "MkFluid=sxml->GetAttributeStr(xele,\"mkfluid\",true);"
+        },
+        {
+          "line": 185,
+          "text": "void JDsInitializeOp_FluidVel::Run(unsigned np,unsigned npb,const tdouble3* pos"
+        },
+        {
+          "line": 186,
+          "text": ",const unsigned* idp,const word* mktype,tfloat4* velrho,tfloat3* boundnor)"
+        },
+        {
+          "line": 207,
+          "text": "JRangeFilter rg(MkFluid);"
+        },
+        {
+          "line": 208,
+          "text": "const bool all=(MkFluid.empty());"
+        },
+        {
+          "line": 209,
+          "text": "for(unsigned p=npb;p<np;p++)if((all || rg.CheckValue(mktype[p])) && CheckPos(p,pos)){"
+        },
+        {
+          "line": 222,
+          "text": "void JDsInitializeOp_FluidVel::GetConfig(std::vector<std::string>& lines)const{"
+        },
+        {
+          "line": 224,
+          "text": "lines.push_back(GetConfigMkFluid(MkFluid));"
+        },
+        {
+          "line": 259,
+          "text": ",const tdouble3* pos,const unsigned* idp,const word* mktype,tfloat4* velrho"
+        }
+      ]
+    },
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/src/source/JDsInitialize.h": {
+      "sha256": "ffe1621625f92c7b2b8547bb44da9f120a3e6332dc9fa5fbb6d23dbb89ef3b8c",
+      "matching_lines": [
+        {
+          "line": 116,
+          "text": ",const unsigned* idp,const word* mktype,tfloat4* velrho,tfloat3* boundnor)=0;"
+        },
+        {
+          "line": 118,
+          "text": "unsigned ComputeDomainMk(bool bound,word mktp,unsigned np,const word* mktype"
+        },
+        {
+          "line": 127,
+          "text": "std::string GetConfigMkBound(std::string mktype)const;"
+        },
+        {
+          "line": 128,
+          "text": "std::string GetConfigMkFluid(std::string mktype)const;"
+        },
+        {
+          "line": 133,
+          "text": "//# JDsInitializeOp_FluidVel"
+        },
+        {
+          "line": 136,
+          "text": "class JDsInitializeOp_FluidVel : public JDsInitializeOp"
+        },
+        {
+          "line": 147,
+          "text": "std::string MkFluid;"
+        },
+        {
+          "line": 152,
+          "text": "JDsInitializeOp_FluidVel(const JXml* sxml,TiXmlElement* ele,StInitCt initct)"
+        },
+        {
+          "line": 157,
+          "text": ",const word* mktype,tfloat4* velrho,tfloat3* boundnor);"
+        },
+        {
+          "line": 177,
+          "text": ",const word* mktype,tfloat4* velrho,tfloat3* boundnor);"
+        },
+        {
+          "line": 208,
+          "text": ",const unsigned* idp,const word* mktype,tfloat4* velrho,tfloat3* boundnor);"
+        }
+      ]
+    }
+  },
+  "interpretation": "GenCase accepts direct initials/velocity with mkfluid=0; JDsInitialize applies it to the selected fluid Mk. The source package uses vx=0.1 or 0.2 m/s and vy=vz=0."
+}

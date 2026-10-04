@@ -1,0 +1,232 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F1",
+  "case_id": "F1_STAGE1_DUAL_H220_DP020_VX010",
+  "attempt_id": "root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-native-visual-064",
+  "kind": "production",
+  "max_wall_seconds": 1800,
+  "cpu_threads": 4,
+  "estimated_peak_gpu_mib": 8000,
+  "estimated_storage_bytes": 4294967296,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-gpu:0",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/prepared/F1_STAGE1_DUAL_H220_DP020_VX010",
+    "{attempt_root}/solver_output",
+    "-tmax:4",
+    "-tout:0.01"
+  ],
+  "solver_command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "-gpu:0",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/prepared/F1_STAGE1_DUAL_H220_DP020_VX010",
+    "{attempt_root}/solver_output",
+    "-tmax:4",
+    "-tout:0.01"
+  ],
+  "solver_cwd": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab",
+  "gencase_prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/prepared/F1_STAGE1_DUAL_H220_DP020_VX010",
+  "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/execution-receipt.json",
+  "gencase_receipt_sha256": null,
+  "expected_native_frames": 401,
+  "event_window_s": [
+    0.0,
+    4.0
+  ],
+  "native_frame_interval_s": 0.01,
+  "physical_case_id": "F1_DUAL_HEAD_220_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX010_MS_V1",
+  "physical_condition_sha256": "62124d776d9d3f363ab2626adde5c77422fef16c523a044feb0024cdfbfb8d4c",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F1",
+    "physical_case_id": "F1_DUAL_HEAD_220_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX010_MS_V1",
+    "mechanism_id": "asymmetric_dual_channel",
+    "geometry_family_id": "F1_GEOM_DUAL_THICK_DBC_LOWER_HEAD_V1",
+    "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_INITIAL_VX_AXIS_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          0,
+          0,
+          0
+        ],
+        "size_m": [
+          3.2,
+          1,
+          0.8
+        ],
+        "label": "Finite five physical walls with open top; thick DBC numerical support"
+      },
+      "obstacle_or_divider": {
+        "low_m": [
+          1.2,
+          0.34,
+          0
+        ],
+        "size_m": [
+          0.8,
+          0.06,
+          0.7
+        ],
+        "label": "Static physical solid"
+      },
+      "fluid_reservoir": {
+        "low_m": [
+          2.2,
+          0,
+          0
+        ],
+        "size_m": [
+          1,
+          1,
+          0.22
+        ],
+        "mkfluid": 0,
+        "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [
+            2.2,
+            0,
+            0
+          ],
+          "size_m": [
+            1,
+            1,
+            0.22
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.1,
+          0.0,
+          0.0
+        ]
+      },
+      "source_labels": {
+        "fluid": "Initial Type3/Mk1 cohort"
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 220.0
+      },
+      "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory",
+      "velocity_control": {
+        "axis": "x",
+        "fluid_mk": 0,
+        "fluid_native_type": 3,
+        "velocity_m_per_s": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "profile": "uniform_direct_initials_velocity"
+      }
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 1,
+      "kernel": 1,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.1,
+        "boundary_factor": 1
+      },
+      "density_dt": 2,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "density_kg_m3": 1000,
+    "parameters": {
+      "fluid_depth_m": 0.22,
+      "physical_top_open": true,
+      "continuum_fluid_volume_m3": 0.22
+    },
+    "event_window": {
+      "time_start_s": 0,
+      "time_end_s": 4.0,
+      "sequence": [
+        "release",
+        "divider_encounter",
+        "asymmetric_channel_transport",
+        "downstream_return"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+    },
+    "lineage_group_id": "F1_dual_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+    "periodic_boundary": false,
+    "mass_policy": "native_massfluid_no_rescaling"
+  },
+  "owner_metadata": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/owners/F1_STAGE1_DUAL_H220_DP020_VX010.owner.json",
+    "sha256": "cdca26b07cd69f2778fdee3db30c8af8f0fd381f660b83900402fe58d8354de9"
+  },
+  "initial_qa_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/requests/F1_STAGE1_DUAL_H220_DP020_VX010.initial-qa.request.json",
+    "sha256": "4e8ee4011122967f5dcd803a20029a8e687e1b2341e6206f4b94d4aa04a66373"
+  },
+  "source_native032_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020/root-stage1-dual-h220-physical-endpoint-full-native-032/execution-receipt.json",
+    "sha256": "4a1a9c0fedb929b3168d89f7624a65816af15fdcc3180ccced02641d248d9c04"
+  },
+  "source_native032_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/request.json",
+    "sha256": "fae34b8a13ab4b04d4434d609fea39427a5386624045c0cf549e36a37a41e7e6"
+  },
+  "exact_recipe_rule": "Reuse the native032 receipt command exactly; replace only the GenCase prefix and output path. No extra mdbc/noslip option.",
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_GPT56LUNA_20261004_ZH.md",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/owners/F1_STAGE1_DUAL_H220_DP020_VX010.owner.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/gencase-bindings/F1_STAGE1_DUAL_H220_DP020_VX010.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/qa-bindings/F1_STAGE1_DUAL_H220_DP020_VX010.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020/root-stage1-dual-h220-physical-endpoint-full-native-032/execution-receipt.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/request.json",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/owner.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/qa_initial_vx.py",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/build_f1_initial_vx_axis_source.py"
+  ],
+  "input_sha256": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_GPT56LUNA_20261004_ZH.md": "53d422511b5581266410de92c54627ac67e8085eccb75a9ebfe57de10a34316a",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/owners/F1_STAGE1_DUAL_H220_DP020_VX010.owner.json": "cdca26b07cd69f2778fdee3db30c8af8f0fd381f660b83900402fe58d8354de9",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/gencase-bindings/F1_STAGE1_DUAL_H220_DP020_VX010.json": "62d92475879b67a4fd3a95eabe2f60d38accbc4d1ff2f099a80912bb93158df3",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/qa-bindings/F1_STAGE1_DUAL_H220_DP020_VX010.json": "15141a4dd5ea1a89be7e510b269afbadf84a7cda1715a7c3ef7c83d840c6ef95",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020/root-stage1-dual-h220-physical-endpoint-full-native-032/execution-receipt.json": "4a1a9c0fedb929b3168d89f7624a65816af15fdcc3180ccced02641d248d9c04",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/request.json": "fae34b8a13ab4b04d4434d609fea39427a5386624045c0cf549e36a37a41e7e6",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/owner.json": "972d5d7433b4f38ea63dba14150c8f6705b0d7a8e490c14cc3c6345ebccb5094",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/qa_initial_vx.py": "0524f9ceaf96f663b783c6e75dca785462ba4309f01ff5174cc5c5f864588cf9",
+    "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_064_f1_initial_vx_axis_source_v1/build_f1_initial_vx_axis_source.py": "17f1d763038c80e8afb44c2ca31db81a84b10babff6ae13e4ce486b56b7bea16"
+  },
+  "future_input_files": [
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/prepared/F1_STAGE1_DUAL_H220_DP020_VX010.xml",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/prepared/F1_STAGE1_DUAL_H220_DP020_VX010.bi4",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H220_DP020_VX010/root-stage1-f1-f1-stage1-dual-h220-dp020-vx010-gencase-064/execution-receipt.json"
+  ],
+  "future_input_sha256": null,
+  "visual_review_pending": true,
+  "q_n": "not_granted",
+  "numerical_precision_status": "not_accepted",
+  "launch_allowed": false,
+  "execution_allowed": false,
+  "source_only": true,
+  "production_approval": "none",
+  "launch_owner": "root",
+  "independent_case_count_increment": 0
+}
