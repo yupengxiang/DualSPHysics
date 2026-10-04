@@ -166,7 +166,8 @@ def run(binding_path: Path, output_dir: Path) -> dict[str, object]:
     binding = json.loads(Path(binding_path).read_text(encoding="utf-8"))
     output = Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
-    preexisting = [path.name for path in output.iterdir() if path.name != "stdout.log"]
+    runtime_files = {"stdout.log", "execution-receipt.json"}
+    preexisting = [path.name for path in output.iterdir() if path.name not in runtime_files]
     require(not preexisting, f"fresh QA output directory contains prior artifacts: {preexisting}")
 
     case_id = binding["case_id"]
