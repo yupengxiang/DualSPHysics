@@ -1,0 +1,43 @@
+{
+  "schema": "ds02.f4.drop-gap-endpoints-audit-contract.v1",
+  "family_id": "F4",
+  "scope_id": "root_followup_060_stage1_drop_gap_endpoints_v1",
+  "source_plan": "endpoint-plan.json",
+  "source_only": true,
+  "disabled_requests": {
+    "gencase_preflight": {
+      "request": "requests/f4_drop_gap_gencase_preflight_request.json",
+      "worker": "workers/run_f4_gencase_preflight.py",
+      "launch": false,
+      "root_strict_requirements": [
+        "review endpoint-plan.json and source-build-receipt.json",
+        "verify official GenCase executable hash and source Definition hashes",
+        "launch one CPU GenCase invocation per endpoint only after explicit Root approval",
+        "retain each endpoint's all-numeric generated XML and GenCase execution receipt",
+        "do not infer initial clearance or visual validity from GenCase completion"
+      ],
+      "output_boundary": "fresh generated XML/BI4 may be created only by Root strict dispatch; this handoff created none"
+    },
+    "initial_native_qa": {
+      "request": "requests/f4_drop_gap_initial_native_qa_request.json",
+      "worker": "workers/audit_f4_initial_native.py",
+      "launch": false,
+      "root_strict_requirements": [
+        "bind a generated all-numeric XML and Root-produced initial QA JSON for both endpoint IDs",
+        "check generated 3-D native UID uniqueness/completeness, type partition, native support weights, and tank face/clearance coverage",
+        "retain native rho*dp^3 support-weight policy without continuum rescaling",
+        "leave precision, q_n, solver qualification, and visual acceptance unresolved"
+      ],
+      "read_boundary": "worker reads only XML and Root QA JSON; no BI4/H5/particle arrays/CSV"
+    }
+  },
+  "post_preflight_gates": {
+    "native_full_window": "required after fresh initial QA",
+    "typed_conversion": "forbidden until Root separately reviews generated/native evidence",
+    "solver": "forbidden",
+    "rendering": "forbidden",
+    "visual_decision": "whole-frame evidence required",
+    "numerical_precision": "historical failure remains active; no acceptance"
+  },
+  "negative_evidence": "historical F4 spatial/timing non-convergence, old precision failure, particle-chord uncertainty, q_n not assessed, visual decision pending, and unknown-OS recovered artifact are retained"
+}
