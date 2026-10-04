@@ -1,0 +1,200 @@
+{
+  "schema": "ds02.root.f6.prospective-endpoint-canonical-owner.v1",
+  "family_id": "F6",
+  "case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S025_DP025",
+  "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S025_DP025",
+  "physical_condition_sha256": "923ac5567e77877d9797708cfbe899d367e3b22e6f3260f9f011a84e76818c1e",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F6",
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S025_DP025",
+    "mechanism_id": "F6_FREE6DOF_RIGID_ANGULAR_RELEASE_V1",
+    "geometry_family_id": "F6_ANGULAR_RELEASE_RECTANGULAR_TANK_V1",
+    "control_family_id": "F6_ANGULAR_RELEASE_FREE6DOF_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          4.8,
+          2.4,
+          2.4
+        ],
+        "mkfluid": 0,
+        "label": "finite tank with bottom, left, right, front, and back fixed faces"
+      },
+      "initial_fluid": {
+        "low_m": [
+          0.4,
+          0.4,
+          0.04
+        ],
+        "size_m": [
+          4.0,
+          1.6,
+          0.8
+        ],
+        "mkfluid": 0,
+        "label": "continuous initial fluid volume; density 1000 kg/m3"
+      },
+      "rigid_body": {
+        "low_m": [
+          2.0,
+          0.8,
+          0.88
+        ],
+        "size_m": [
+          0.8,
+          0.8,
+          0.4
+        ],
+        "mkfluid": null,
+        "label": "physical rectangular rigid body; native floating support geometry is separately sourced"
+      },
+      "paddle": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.04
+        ],
+        "size_m": [
+          0.32,
+          2.4,
+          0.8
+        ],
+        "mkfluid": 0,
+        "label": "fixed boundary paddle lineage retained from the commensurate physical geometry"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [
+            0.4,
+            0.4,
+            0.04
+          ],
+          "size_m": [
+            4.0,
+            1.6,
+            0.8
+          ],
+          "mkfluid": 0,
+          "label": "initial fluid"
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source_labels": {
+        "fluid": "initial fluid"
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "initial_mass_total_kg": 5120.0,
+      "mass_policy": "fluid continuum mass is explicit; rigid-body physical mass is bound in parameters and is not folded into the fluid source mass"
+    },
+    "controls": {
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "kernel": "Wendland (Kernel=2)",
+      "viscosity": {
+        "treatment": "Laminar + SPS (ViscoTreatment=2)",
+        "nu_m2_s": 1e-06,
+        "boundary_factor": 1.0
+      },
+      "density_dt": "DensityDT=2",
+      "density_dt_value": 0.1,
+      "boundary": "finite fixed five-face tank; native rigid algorithm; no open inlet"
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "body_mass_kg": 128.0,
+      "body_inertia_diagonal_kg_m2": [
+        8.53333333333,
+        8.53333333333,
+        13.6533333333
+      ],
+      "body_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.02,
+        0.03,
+        0.015
+      ],
+      "initial_orientation_axis_angle": {
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "translation_dof": [
+        1,
+        1,
+        1
+      ],
+      "rotation_dof": [
+        1,
+        1,
+        1
+      ],
+      "body_shape": "axis-aligned rectangular box, 0.8 m x 0.8 m x 0.4 m"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 12.0,
+      "sequence": [
+        "initial angular release from zero linear velocity",
+        "free six degree of freedom rigid response in the finite tank",
+        "retain the terminal state and any right-censored contact label"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final state and unknown labels; no Q-N claim from event labels"
+    },
+    "lineage_group_id": "f6-angular-release-full241-native-dp025",
+    "paired_background_id": "F6_ANGULAR_RELEASE_DP025",
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "mass_policy": "physical rigid mass 128 kg, native lattice support mass 256 kg, and solver interaction masspart 0.015625 kg are distinct; no rescaling"
+  },
+  "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_063_stage1_omega_scale_endpoints_v1/source/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S025_DP025_Def.xml",
+  "source_definition_sha256": "2c7b095e09511137c83ee7413b0d4806b32b7db9d0286cb0964f6686f2d7110a",
+  "source_plan_condition_sha256": "efe72898cc5b10bfe8d4db91432c6619b3804e3b95cea410d447da00da1a6455",
+  "condition_hash_semantics": "Root canonical hash of physical-binding.v1; source plan hash includes numerical/source metadata and is retained separately.",
+  "precision_status": "not_accepted",
+  "q_n": "not_granted",
+  "native_support_vs_physical_mass": "256 kg lattice support and 128 kg physical rigid body remain distinct, no rescale",
+  "independent_case_increment": 0,
+  "source_diff_policy": "casedef identical after restoring only angularvelini; execution/parameters identical. Source removes stale prior generated execution particles/constants/uservars/motion/vtkout and changes root date/comments/whitespace; no native array reused.",
+  "native_initial_qa": "pending after actual genuine GenCase",
+  "full_event_window_s": [
+    0,
+    12
+  ],
+  "expected_frames": 241
+}
