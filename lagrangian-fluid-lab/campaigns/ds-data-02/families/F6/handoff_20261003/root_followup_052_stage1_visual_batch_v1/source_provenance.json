@@ -1,0 +1,197 @@
+{
+  "schema": "ds02.f6.stage1-source-provenance-and-negative-evidence.v1",
+  "family_id": "F6",
+  "scope": "root_followup_052_stage1_visual_batch_v1",
+  "status": "source_only",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "write_boundary": "Only this handoff directory is written by this scoped task; raw data and integration worktree are read-only references",
+  "canonical_source_chain": [
+    {
+      "stage": "gencase",
+      "label": "actual corrected coarse GenCase",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/execution-receipt.json",
+      "receipt_sha256": "229e5a0bfb82239ae84db0f3d428fbdbd6b7e2c120a6aa1e3acd3677195c2817",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.xml",
+      "generated_xml_sha256": "8bce31f6b479b1a6fb021524e5ae375de7ad929e4fb2876dd0caee23fa62fba8",
+      "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.bi4",
+      "generated_bi4_sha256": "d600925454084cb099f2453db0b9fe9d188b4ef9fc7c8e1e857ff151917cfcfb",
+      "use_policy": "reference only; this handoff does not copy, decode, or regenerate BI4"
+    },
+    {
+      "stage": "solver",
+      "label": "full native241 angular-coarse GPU source",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/execution-receipt.json",
+      "receipt_sha256": "328470af63b3f0315501d745af77a5f9be1fcc1cf2113eb06029618a19ffb621",
+      "data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/solver_output/data",
+      "run_log": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/solver_output/Run.out",
+      "run_log_sha256": "43b5f68c255fb6b317f97613d2e18bda76454d76a2371c57c44a11a3c1efef0c",
+      "frame_count": 241,
+      "physical_grid_s": [
+        0.0,
+        12.0,
+        0.05
+      ],
+      "status": "completed_native_solver_receipt; q_n_not_assessed"
+    },
+    {
+      "stage": "initial_qa",
+      "label": "actual initial QA with preserved native mass failure",
+      "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-initial-qa-019/f6_angular_release_initial_qa_report.json",
+      "report_sha256": "6e2f9e5d7c1a2a8e3082ca44ab7299a71bb8eb20645b0fd76bbe8c8f38358476",
+      "overall_initial_qa_passed": false,
+      "observed_counts": {
+        "fixed": 73441,
+        "floating": 16384,
+        "fluid": 327680,
+        "total": 417505
+      },
+      "rigid_mass_check": {
+        "declared_physical_mass_kg": 128.0,
+        "observed_partvtk_mass_sum_kg": 256.0,
+        "mass_match": false,
+        "native_support_interpretation": "body support lattice volume 0.256 m3 multiplied by rho0 1000 kg/m3"
+      },
+      "observed_clearance_m": 0.06977637732848574,
+      "gencase_particle_velocity_max_m_s": 0.0,
+      "claim": "initial QA failure is retained; semantic interpretation does not rewrite this report"
+    },
+    {
+      "stage": "semantic_audit",
+      "label": "actual semantic mass and configuration audit",
+      "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-semantic-audit-v3-020/f6_angular_release_semantic_audit_report.json",
+      "report_sha256": "c4ddf7f87d4f01f0b7242457edaaa6247922e6b34fd42c403a3531e5a926f17c",
+      "semantic_initial_qa_passed": true,
+      "q_n_status": "not_assessed",
+      "semantic_mass": {
+        "declared_physical_rigid_mass_kg": 128.0,
+        "native_csv_mass_sum_kg": 256.0,
+        "derived_uniform_node_mass_kg": 0.0078125,
+        "native_solver_masspart_coarse_kg": 0.015625,
+        "declared_inertia_kg_m2": [
+          8.53333333333,
+          8.53333333333,
+          13.6533333333
+        ],
+        "native_csv_inertia_kg_m2": [
+          17.039999518000315,
+          17.03999931600134,
+          27.279999922001046
+        ],
+        "policy": "all four values remain distinct; no falsification, normalization, or substitution"
+      },
+      "velocity_uncertainty": "GenCase velocities are zero; frame0 solver fomega-to-node-velocity propagation remains unobserved in this source handoff"
+    },
+    {
+      "stage": "actual_body_so3",
+      "label": "native full241 body identity and SO(3) geometry comparison",
+      "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-native-geometry-so3-three-dp-029/geometry-pose-report.json",
+      "report_sha256": "1dc5c72f44e977b289210116ce1b08b168a6a84727a98c15a62a61f575dd537e",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-native-geometry-so3-three-dp-029/execution-receipt.json",
+      "receipt_sha256": "c417791657f02f9e9262969f718d752e233b255cb0d938b4c6cd2531412eecd5",
+      "coarse_summary": {
+        "node_count": 16384,
+        "frame_count": 241,
+        "native_window_s": [
+          0.0,
+          12.0001
+        ],
+        "centroid_rmse_m": 1.1677086400117034e-09,
+        "centroid_max_m": 1.4104177250374626e-08,
+        "rigidity_rms_max_m": 3.774058599973532e-06,
+        "rigidity_residual_max_m": 7.582456991238951e-06,
+        "identity": "exact immutable (Zone=0, Idp) floating cohort; Type=2, Mk=60"
+      },
+      "claim_boundary": {
+        "q_n": "not_granted",
+        "orientation_budget": "null/unregistered",
+        "operator": "Kabsch relative to initial same-UID body plus physical-time SLERP; no Euler chart assumption",
+        "mass_policy": "uniform geometry fit only; no physical mass normalization"
+      }
+    },
+    {
+      "stage": "exact_native_time",
+      "label": "fullprecision native timestamps aligned by actual Part index",
+      "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-exact-native-time-geometry-so3-030/exact-native-time-pose-comparison.json",
+      "report_sha256": "f48afa6e519b114d67659735c6c913c5abceb168a15512dbb166293979577a6b",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-exact-native-time-geometry-so3-030/execution-receipt.json",
+      "receipt_sha256": "35a274a2ff459eaa16eda126410c7730916ad4af0fb871cbd5ee324dd9876a44",
+      "coarse_timestamp_window_s": [
+        0.0,
+        12.00012416636
+      ],
+      "maximum_csv_rounding_difference_s": 4.983040000006156e-05,
+      "alignment": "same actual native Part index; no extrapolation",
+      "q_n_status": "not_granted"
+    }
+  ],
+  "negative_evidence": {
+    "all3dp_comparison_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_ALL3DP_SUPPORT/root-angular-release-three-dp-full12-six-dof-v4-027/f6_angular_release_3dp_comparison_report.json",
+    "all3dp_report_sha256": "4ded21ef7acc570182fc883916ddf2ff7b4a063cdf8cf89addf16557886dc741",
+    "all3dp_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_ALL3DP_SUPPORT/root-angular-release-three-dp-full12-six-dof-v4-027/execution-receipt.json",
+    "all3dp_receipt_sha256": "24fcdf3cf306c5558bc6ba67493e2aff57e34aa52eb04d3277f5e9d6c8a8bbcb",
+    "max_macro_relative_rmse": 0.6316608687244185,
+    "source_shorthand_failures": {
+      "finer_genuine_half_macro_com": {
+        "value_over_L": 0.11135030810216248,
+        "comparison_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP0125_GENUINE_HALFSTEP/root-angular-release-halfstep-recovered-full241-native-geometry-so3-time-034/halfstep-native-geometry-so3-time.json",
+        "report_sha256": "af14a6070c7caca110819a0ef701eee2a2bb9a18724ddc1ec08e8173ae2e7613",
+        "within_generic_5pct_macro_budget": false
+      },
+      "finer_genuine_half_so3": {
+        "geodesic_rmse_rad": 0.07717270190734828,
+        "comparison_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP0125_GENUINE_HALFSTEP/root-angular-release-halfstep-recovered-full241-native-geometry-so3-time-034/halfstep-native-geometry-so3-time.json",
+        "within_generic_5pct_macro_budget": false
+      },
+      "policy": "genuine failures remain negative evidence; no quarter-step cure and no numerical precision prerequisite is introduced"
+    }
+  },
+  "source_geometry": {
+    "physical_geometry": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/commensurate_dp025/physical_mother_geometry.json",
+    "body_low_m": [
+      2.0,
+      0.8,
+      0.88
+    ],
+    "body_size_m": [
+      0.8,
+      0.8,
+      0.4
+    ],
+    "center_m": [
+      2.4,
+      1.2,
+      1.08
+    ],
+    "fluid_low_m": [
+      0.4,
+      0.4,
+      0.04
+    ],
+    "fluid_size_m": [
+      4.0,
+      1.6,
+      0.8
+    ],
+    "tank_size_m": [
+      4.8,
+      2.4,
+      2.4
+    ],
+    "continuous_fluid_mass_kg": 5120.0
+  },
+  "handoff_files": {
+    "batch_table": "batch_param_table.json",
+    "fulltyped_binding": "fulltyped_binding.json",
+    "disabled_request": "requests/fulltyped_dp025_anchor_request.json",
+    "audit_report": "audit-report.json"
+  },
+  "known_gaps": [
+    "No non-anchor row has generated XML, BI4, solver frames, typed HDF5, or animation output.",
+    "No H5 or numeric particle arrays are materialized by this handoff.",
+    "No GenCase, solver, PartVTK, conversion, or rendering command is launched by this handoff.",
+    "Root must re-check planned-row wall/fluid clearance and orientation binding before enabling any request.",
+    "Visual acceptance, numerical precision acceptance, Q-N, and production eligibility remain ungranted."
+  ]
+}

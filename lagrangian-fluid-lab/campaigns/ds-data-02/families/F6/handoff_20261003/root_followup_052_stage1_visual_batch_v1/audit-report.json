@@ -1,0 +1,84 @@
+{
+  "schema": "ds02.f6.stage1-visual-batch8-source-audit.v1",
+  "family_id": "F6",
+  "scope": "root_followup_052_stage1_visual_batch_v1",
+  "audit_mode": "source_only_no_execution",
+  "audited_at": "2026-10-04",
+  "overall_status": "source_handoff_ready_for_root_review",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "checks": [
+    {
+      "id": "scope_boundary",
+      "status": "passed",
+      "detail": "All authored files are under the assigned F6 handoff directory; no jobs, GenCase, solver, H5, BI4, CSV arrays, or rendering were launched or copied."
+    },
+    {
+      "id": "batch_size",
+      "status": "passed",
+      "detail": "Eight source physical rows are present and each has an independent physical_case_id."
+    },
+    {
+      "id": "one_dp_per_physical_case",
+      "status": "passed",
+      "detail": "Every row binds dp_m=0.025 exactly once; frame, export, and view multiplicity are excluded from case counting."
+    },
+    {
+      "id": "physical_parameter_independence",
+      "status": "passed",
+      "detail": "Rows vary only permitted omega, bounded square-body initial orientation, COM height, or horizontal geometry while preserving the F6 body mass/inertia lineage."
+    },
+    {
+      "id": "planned_geometry_preflight",
+      "status": "pending_root",
+      "detail": "Anchor clearance is sourced at 0.06977637732848574 m; every new row remains disabled until root checks actual continuous and generated-particle non-overlap."
+    },
+    {
+      "id": "anchor_provenance",
+      "status": "passed",
+      "detail": "The full native241 coarse source is anchored to GenCase017, solver021, initial QA019, semantic audit020, actual body SO(3) root029, and exact native time root030 with file hashes."
+    },
+    {
+      "id": "mass_semantics",
+      "status": "passed",
+      "detail": "Physical rigid mass 128 kg, native PartVTK support sum 256 kg, derived diagnostic node weight 0.0078125 kg, and solver masspart 0.015625 kg are explicitly separate."
+    },
+    {
+      "id": "initial_qa_failure",
+      "status": "preserved",
+      "detail": "Initial QA remains false because native rigid support mass does not match declared physical mass; semantic audit pass is recorded as interpretation only."
+    },
+    {
+      "id": "negative_evidence",
+      "status": "preserved",
+      "detail": "The genuine finer-half macro COM failure (0.11135030810216248 L) and SO(3) failure (0.07717270190734828 rad), plus all3DP macro failure, remain negative evidence."
+    },
+    {
+      "id": "fulltyped_physical_binding",
+      "status": "passed",
+      "detail": "The explicit ds-data-02.physical-binding.v1 object uses only allowlisted physical fields; native counts, spacing, and solver controls are kept outside the physical binding."
+    },
+    {
+      "id": "request_bindability",
+      "status": "passed",
+      "detail": "The conversion request has 21 registered input files and matching SHA-256 entries, including the strict dispatch guard; launch_allowed remains false."
+    },
+    {
+      "id": "visual_review_gate",
+      "status": "pending_root",
+      "detail": "No visual approval, numerical precision acceptance, Q-N, or production approval is asserted."
+    }
+  ],
+  "claim_boundary": {
+    "q_n": "not_assessed",
+    "visual_approval": "none",
+    "numerical_precision_status": "not_accepted",
+    "production_approval": "none",
+    "root_launch_authority": "root only after review; this request is disabled"
+  },
+  "artifacts": {
+    "batch_table": "batch_param_table.json",
+    "fulltyped_binding": "fulltyped_binding.json",
+    "request": "requests/fulltyped_dp025_anchor_request.json",
+    "provenance": "source_provenance.json"
+  }
+}

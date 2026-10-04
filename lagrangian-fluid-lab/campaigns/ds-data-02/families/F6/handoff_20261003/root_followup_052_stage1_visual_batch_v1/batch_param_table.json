@@ -1,0 +1,444 @@
+{
+  "schema": "ds02.f6.stage1-visual-batch8-parameter-table.v1",
+  "family_id": "F6",
+  "scope": "root_followup_052_stage1_visual_batch_v1",
+  "status": "source_spec_only",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "batch_size": 8,
+  "batch_index": 1,
+  "campaign_target_cases": 336,
+  "independent_physical_case_target": 8,
+  "counting_contract": {
+    "one_dp_per_physical_case": true,
+    "dp_m_used_for_this_source_batch": 0.025,
+    "dp_is_a_case_parameter_not_a_second_case": true,
+    "native_frame_count_is_not_a_case_count": true,
+    "native_view_or_export_count_is_not_a_case_count": true,
+    "same_case_multi_resolution_is_not_allowed_in_this_batch": true,
+    "independent_case_count_increment_until_root_visual_acceptance": 0,
+    "root_may_increment_only_after_actual_preflight_conversion_and_visual_review": true
+  },
+  "canonical_anchor": {
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+    "native_case_id": "F6_ANGULAR_RELEASE_DP025",
+    "resolution": "coarse_dp025",
+    "mechanism_id": "F6_FREE6DOF_RIGID_ANGULAR_RELEASE_V1",
+    "source_lineage": "full native241 angular-coarse root021 + GenCase017 + initial QA019 + semantic audit020 + actual body SO(3) root029 + exact native time root030",
+    "anchor_status": "actual_source_anchored_but_not_visual_or_numerically_qualified"
+  },
+  "physical_constants": {
+    "density_kg_m3": 1000.0,
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "tank_low_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "tank_size_m": [
+      4.8,
+      2.4,
+      2.4
+    ],
+    "fluid_low_m": [
+      0.4,
+      0.4,
+      0.04
+    ],
+    "fluid_size_m": [
+      4.0,
+      1.6,
+      0.8
+    ],
+    "fluid_continuum_mass_kg": 5120.0,
+    "body_size_m": [
+      0.8,
+      0.8,
+      0.4
+    ],
+    "body_mass_kg": 128.0,
+    "body_inertia_diagonal_kg_m2": [
+      8.53333333333,
+      8.53333333333,
+      13.6533333333
+    ],
+    "body_mkbound": 50
+  },
+  "geometry_control": {
+    "policy": "source declaration only; root must perform an actual continuous and generated-particle non-overlap preflight for every row",
+    "continuous_body_low_from_center": "center_m - [0.4, 0.4, 0.2]",
+    "body_must_remain_inside_tank": true,
+    "body_must_not_overlap_initial_fluid": true,
+    "body_fluid_contact_is_not_a_prerequisite": true,
+    "anchor_observed_initial_clearance_m": 0.06977637732848574,
+    "anchor_clearance_source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-initial-qa-019/f6_angular_release_initial_qa_report.json",
+    "planned_rows_clearance_status": "pending_root_actual_geometry_preflight"
+  },
+  "mass_semantics": {
+    "physical_rigid_mass_kg": 128.0,
+    "native_partvtk_support_mass_kg": 256.0,
+    "native_support_interpretation": "0.256 m^3 support volume multiplied by rho0=1000 kg/m^3; observed PartVTK CSV Mass sum",
+    "native_solver_masspart_coarse_kg": 0.015625,
+    "derived_uniform_physical_node_weight_kg": 0.0078125,
+    "policy": "preserve physical body mass, native support weight, derived diagnostic weight, and solver interaction masspart as separate quantities; never renormalize the native support column",
+    "initial_qa_status": "failed_mass_match_is_preserved",
+    "semantic_audit_status": "semantic_interpretation_passed_only; q_n_not_assessed"
+  },
+  "rows": [
+    {
+      "row": 1,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "anchor_mother",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "actual full241 coarse native source; XML declares free6DOF, center, inertia, mass, and omega",
+      "preflight_status": "actual_anchor_evidence_exists; row_relaunch_disabled",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 2,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_LOW",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "omega_endpoint_low",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.04,
+        0.06,
+        0.03
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "anchor physics lineage with one permitted initial-omega change; no XML or BI4 generated",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 3,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_HIGH",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "omega_endpoint_high",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.12,
+        0.18,
+        0.09
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "anchor physics lineage with one permitted initial-omega change; no XML or BI4 generated",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 4,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_YAW_NEG15",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "orientation_interior_negative",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": -15.0
+      },
+      "source_derivation": "anchor physics lineage with a bounded square-body yaw; root must bind the SO(3) operator",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 5,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_YAW_POS15",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "orientation_interior_positive",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 15.0
+      },
+      "source_derivation": "anchor physics lineage with a bounded square-body yaw; root must bind the SO(3) operator",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 6,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_COM_Z1P16",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "com_height_interior_low",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.16
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        0.96
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "anchor physics lineage with a positive COM-height control; root must regenerate and preflight geometry",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 7,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_COM_Z1P24",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "com_height_interior_high",
+      "dp_m": 0.025,
+      "center_m": [
+        2.4,
+        1.2,
+        1.24
+      ],
+      "body_low_m": [
+        2.0,
+        0.8,
+        1.04
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "anchor physics lineage with a positive COM-height control; root must regenerate and preflight geometry",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    },
+    {
+      "row": 8,
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_CENTER_X2P80",
+      "native_anchor_case_id": "F6_ANGULAR_RELEASE_DP025",
+      "role": "geometry_interior_x_shift",
+      "dp_m": 0.025,
+      "center_m": [
+        2.8,
+        1.2,
+        1.08
+      ],
+      "body_low_m": [
+        2.4,
+        0.8,
+        0.88
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_spec": {
+        "kind": "axis_angle",
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "source_derivation": "anchor physics lineage with a horizontal geometry control; root must regenerate and preflight walls/fluid",
+      "preflight_status": "pending_root_actual_geometry_preflight",
+      "visual_review": "pending_root_full_animation_review",
+      "numerical_precision_status": "not_accepted",
+      "launch_allowed": false,
+      "independent_case_count_increment": 0
+    }
+  ],
+  "source_evidence": {
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.xml",
+    "full_native_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/execution-receipt.json",
+    "initial_qa_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-initial-qa-019/f6_angular_release_initial_qa_report.json",
+    "semantic_audit_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-semantic-audit-v3-020/f6_angular_release_semantic_audit_report.json",
+    "actual_full241_geometry_pose_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-native-geometry-so3-three-dp-029/geometry-pose-report.json",
+    "actual_full241_exact_time_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-exact-native-time-geometry-so3-030/exact-native-time-pose-comparison.json",
+    "negative_all3dp_comparison": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_ALL3DP_SUPPORT/root-angular-release-three-dp-full12-six-dof-v4-027/f6_angular_release_3dp_comparison_report.json"
+  },
+  "claim_boundary": {
+    "q_n": "not_assessed",
+    "visual_approval": "none",
+    "numerical_precision_acceptance": "none",
+    "orientation_budget": "unregistered",
+    "negative_evidence_policy": "retain genuine initial QA mass failure, unobserved frame0 velocity propagation, and finer-half/all3DP macro failures without relabeling them as visual or numerical passes"
+  }
+}
