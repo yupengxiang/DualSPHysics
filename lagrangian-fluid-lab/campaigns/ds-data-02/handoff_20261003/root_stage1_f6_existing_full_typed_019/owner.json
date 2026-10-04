@@ -1,0 +1,388 @@
+{
+  "schema": "ds02.f6.stage1-fulltyped-provenance-binding.v1",
+  "family_id": "F6",
+  "case_id": "F6_ANGULAR_RELEASE_DP025",
+  "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+  "resolution": "coarse_dp025",
+  "scope": "root_stage1_f6_existing_full_typed_019",
+  "status": "root-reviewed-conversion-request",
+  "launch_allowed": true,
+  "launch_owner": "root",
+  "root_review_required": false,
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F6",
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_BASELINE",
+    "mechanism_id": "F6_FREE6DOF_RIGID_ANGULAR_RELEASE_V1",
+    "geometry_family_id": "F6_ANGULAR_RELEASE_RECTANGULAR_TANK_V1",
+    "control_family_id": "F6_ANGULAR_RELEASE_FREE6DOF_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          4.8,
+          2.4,
+          2.4
+        ],
+        "mkfluid": 0,
+        "label": "finite tank with bottom, left, right, front, and back fixed faces"
+      },
+      "initial_fluid": {
+        "low_m": [
+          0.4,
+          0.4,
+          0.04
+        ],
+        "size_m": [
+          4.0,
+          1.6,
+          0.8
+        ],
+        "mkfluid": 0,
+        "label": "continuous initial fluid volume; density 1000 kg/m3"
+      },
+      "rigid_body": {
+        "low_m": [
+          2.0,
+          0.8,
+          0.88
+        ],
+        "size_m": [
+          0.8,
+          0.8,
+          0.4
+        ],
+        "mkfluid": null,
+        "label": "physical rectangular rigid body; native floating support geometry is separately sourced"
+      },
+      "paddle": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.04
+        ],
+        "size_m": [
+          0.32,
+          2.4,
+          0.8
+        ],
+        "mkfluid": 0,
+        "label": "fixed boundary paddle lineage retained from the commensurate physical geometry"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [
+            0.4,
+            0.4,
+            0.04
+          ],
+          "size_m": [
+            4.0,
+            1.6,
+            0.8
+          ],
+          "mkfluid": 0,
+          "label": "initial fluid"
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "source_labels": {
+        "fluid": "initial fluid"
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "initial_mass_total_kg": 5120.0,
+      "mass_policy": "fluid continuum mass is explicit; rigid-body physical mass is bound in parameters and is not folded into the fluid source mass"
+    },
+    "controls": {
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "kernel": "Wendland (Kernel=2)",
+      "viscosity": {
+        "treatment": "Laminar + SPS (ViscoTreatment=2)",
+        "nu_m2_s": 1e-06,
+        "boundary_factor": 1.0
+      },
+      "density_dt": "DensityDT=2",
+      "density_dt_value": 0.1,
+      "boundary": "finite fixed five-face tank; native rigid algorithm; no open inlet"
+    },
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "body_mass_kg": 128.0,
+      "body_inertia_diagonal_kg_m2": [
+        8.53333333333,
+        8.53333333333,
+        13.6533333333
+      ],
+      "body_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "initial_orientation_axis_angle": {
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ],
+        "angle_deg": 0.0
+      },
+      "translation_dof": [
+        1,
+        1,
+        1
+      ],
+      "rotation_dof": [
+        1,
+        1,
+        1
+      ],
+      "body_shape": "axis-aligned rectangular box, 0.8 m x 0.8 m x 0.4 m"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 12.0,
+      "sequence": [
+        "initial angular release from zero linear velocity",
+        "free six degree of freedom rigid response in the finite tank",
+        "retain the terminal state and any right-censored contact label"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final state and unknown labels; no Q-N claim from event labels"
+    },
+    "lineage_group_id": "f6-angular-release-full241-native-dp025",
+    "paired_background_id": "F6_ANGULAR_RELEASE_DP025",
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "mass_policy": "physical rigid mass 128 kg, native lattice support mass 256 kg, and solver interaction masspart 0.015625 kg are distinct; no rescaling"
+  },
+  "native_contract": {
+    "native_solver_case_id": "F6_ANGULAR_RELEASE_DP025",
+    "native_solver_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/solver_output",
+    "native_bi4_data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/solver_output/data",
+    "native_frame_count": 241,
+    "native_frame_index_range": [
+      0,
+      240
+    ],
+    "physical_time_grid_s": {
+      "start": 0.0,
+      "end": 12.0,
+      "step": 0.05,
+      "count": 241
+    },
+    "exact_native_time_window_s": [
+      0.0,
+      12.00012416636
+    ],
+    "typed_particle_contract": {
+      "total": 417505,
+      "fixed": 73441,
+      "floating": 16384,
+      "fluid": 327680,
+      "moving": 0,
+      "floating_type": 2,
+      "floating_mk": 60,
+      "fluid_type": 3,
+      "fluid_mk": 1,
+      "identity_key": [
+        "particle_zone",
+        "particle_id"
+      ],
+      "floating_identity": "immutable (Zone=0, Idp) cohort across all 241 native parts; no skipped rows"
+    },
+    "required_typed_datasets": {
+      "scalar_or_index": [
+        "time",
+        "particle_id",
+        "particle_zone",
+        "valid",
+        "density",
+        "mass",
+        "pressure",
+        "type",
+        "mk"
+      ],
+      "vector": [
+        "position",
+        "velocity"
+      ],
+      "semantics": "fixed particle axis, frame-major time axis, finite typed values, explicit valid mask, no silent row dropping"
+    },
+    "all13_fulltyped_state_fields": [
+      "particle_id",
+      "particle_zone",
+      "valid",
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "type",
+      "mk",
+      "initial_type",
+      "initial_mk",
+      "initial_mass"
+    ],
+    "all13_scope": "the fixed typed identity and fields cover every native particle class (fixed, floating, and fluid) for all 241 native frames; time is the separate frame axis",
+    "native_position_scope": "full native positions for fluid and floating cohorts, with fixed cohort retained on the same typed axis, across all 241 native frames",
+    "native_solver_parameters": {
+      "step_algorithm": 2,
+      "verlet_steps": 40,
+      "kernel": 2,
+      "visco_treatment": 2,
+      "visco_m2_s": 1e-06,
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "rigid_algorithm": 1,
+      "coef_dt_min": 0.05,
+      "time_max_s": 12.0,
+      "time_out_s": 0.05,
+      "native_solver_masspart_coarse_kg": 0.015625
+    },
+    "mass_observations": {
+      "declared_physical_rigid_mass_kg": 128.0,
+      "observed_partvtk_support_mass_kg": 256.0,
+      "observed_support_volume_m3": 0.256,
+      "density_kg_m3": 1000.0,
+      "derived_uniform_physical_node_weight_kg": 0.0078125,
+      "observed_native_discrete_inertia_kg_m2": [
+        17.039999518000315,
+        17.03999931600134,
+        27.279999922001046
+      ],
+      "declared_physical_inertia_kg_m2": [
+        8.53333333333,
+        8.53333333333,
+        13.6533333333
+      ],
+      "interpretation": "the 256 kg CSV support sum is preserved as native support weight; it is not the 128 kg rigid-body physical mass and is not replaced by the derived diagnostic weight"
+    }
+  },
+  "source_provenance": {
+    "gencase_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.xml",
+      "sha256": "8bce31f6b479b1a6fb021524e5ae375de7ad929e4fb2876dd0caee23fa62fba8"
+    },
+    "gencase_bi4": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.bi4",
+      "sha256": "d600925454084cb099f2453db0b9fe9d188b4ef9fc7c8e1e857ff151917cfcfb",
+      "use_policy": "source receipt reference only; no BI4 is copied or generated by this handoff"
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/execution-receipt.json",
+      "sha256": "229e5a0bfb82239ae84db0f3d428fbdbd6b7e2c120a6aa1e3acd3677195c2817"
+    },
+    "solver_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/execution-receipt.json",
+      "sha256": "328470af63b3f0315501d745af77a5f9be1fcc1cf2113eb06029618a19ffb621"
+    },
+    "initial_qa_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-initial-qa-019/f6_angular_release_initial_qa_report.json",
+      "sha256": "6e2f9e5d7c1a2a8e3082ca44ab7299a71bb8eb20645b0fd76bbe8c8f38358476",
+      "status": "overall_initial_qa_passed=false because observed rigid support Mass sum is 256 kg against declared physical 128 kg"
+    },
+    "initial_partvtk_csv": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-partvtk-initial-018/initial.csv",
+      "sha256": "62807bb5ebc75a34da0f66356e0b1a18523f6f70fc23e2ed903935a13679d094"
+    },
+    "semantic_audit_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-semantic-audit-v3-020/f6_angular_release_semantic_audit_report.json",
+      "sha256": "c4ddf7f87d4f01f0b7242457edaaa6247922e6b34fd42c403a3531e5a926f17c",
+      "status": "semantic_initial_qa_passed=true is a semantic interpretation only; q_n remains not_assessed"
+    },
+    "full241_export_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full241-floating-nodes-official-export-028/execution-receipt.json",
+      "sha256": "c2dc453e4f8b497ecd407b409f6c007f6d0c38c7e5bf62615c3b2c05de598b71",
+      "frame_folder": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full241-floating-nodes-official-export-028/floating_parts",
+      "frame_folder_policy": "referenced source folder only; individual CSV arrays are not copied into this scope"
+    },
+    "floating_info": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-floatinginfo-022/floating/FloatingInfo_mk60.csv",
+      "sha256": "dda9d305785212a843fef752b1b2e8c64c9d31fdda8cdba0ee1a301e3cd05cbe",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-floatinginfo-022/execution-receipt.json",
+      "receipt_sha256": "984c71a22da462adb465655d0976991c4e670b4e61943301d776bf5e1acccd41"
+    },
+    "full241_geometry_pose_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-native-geometry-so3-three-dp-029/geometry-pose-report.json",
+      "sha256": "1dc5c72f44e977b289210116ce1b08b168a6a84727a98c15a62a61f575dd537e",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-native-geometry-so3-three-dp-029/execution-receipt.json",
+      "receipt_sha256": "c417791657f02f9e9262969f718d752e233b255cb0d938b4c6cd2531412eecd5"
+    },
+    "full241_exact_native_time_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-exact-native-time-geometry-so3-030/exact-native-time-pose-comparison.json",
+      "sha256": "f48afa6e519b114d67659735c6c913c5abceb168a15512dbb166293979577a6b",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ACTUAL_FULL241_GEOMETRY_POSE_THREE_DP/root-angular-release-full241-exact-native-time-geometry-so3-030/execution-receipt.json",
+      "receipt_sha256": "35a274a2ff459eaa16eda126410c7730916ad4af0fb871cbd5ee324dd9876a44"
+    },
+    "negative_all3dp_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_ALL3DP_SUPPORT/root-angular-release-three-dp-full12-six-dof-v4-027/f6_angular_release_3dp_comparison_report.json",
+      "sha256": "4ded21ef7acc570182fc883916ddf2ff7b4a063cdf8cf89addf16557886dc741",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_ALL3DP_SUPPORT/root-angular-release-three-dp-full12-six-dof-v4-027/execution-receipt.json",
+      "receipt_sha256": "24fcdf3cf306c5558bc6ba67493e2aff57e34aa52eb04d3277f5e9d6c8a8bbcb"
+    },
+    "geometry_source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261002/commensurate_dp025/physical_mother_geometry.json"
+  },
+  "conversion_interface": {
+    "request": "requests/fulltyped_dp025_anchor_request.json",
+    "converter": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_nvme_convert_v1.py",
+    "direct_converter": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_direct_convert.py",
+    "output_schema": "ds-data-02.hdf5-schema.v1",
+    "conversion_materialized": false,
+    "h5_materialized": false,
+    "numeric_array_materialized": false,
+    "root_action": "Actual conversion authorized within existing CPU/storage budget; visual review requires resulting full typed native states, not a prerequisite to conversion."
+  },
+  "claim_boundary": {
+    "q_n": "not_assessed",
+    "qualification_claim": "none",
+    "production_approval": "none",
+    "visual_review": "pending_root_review",
+    "orientation_operator": "Kabsch relative to initial same-UID body and physical-time SLERP in root029; orientation budget remains null/unregistered",
+    "rigidity_residuals": "descriptive geometry evidence only; no invented convergence threshold",
+    "negative_precision_evidence": {
+      "finer_half_macro_com": "about 0.11135 L; retained as genuine failure",
+      "finer_half_so3": "about 0.07717 rad; retained as genuine failure",
+      "all3dp_max_macro_relative_rmse": 0.6316608687244185,
+      "no_quarter_step_or_precision_prerequisite": true
+    },
+    "unresolved": [
+      "GenCase particles have zero velocity; frame0 solver angular-velocity propagation has not been independently audited",
+      "non-anchor batch rows have no generated XML, BI4, solver frames, conversion, or visual review",
+      "native initial QA mass mismatch remains a genuine failure even though semantic audit records a corrected interpretation",
+      "root must bind any future non-anchor orientation to an explicit SO(3) representation"
+    ]
+  }
+}
