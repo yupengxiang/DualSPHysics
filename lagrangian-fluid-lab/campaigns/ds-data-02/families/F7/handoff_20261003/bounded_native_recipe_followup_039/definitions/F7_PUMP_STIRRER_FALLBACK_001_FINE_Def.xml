@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DS-DATA-02 Family F7: Legal Fallback Definition
+  Case: F7_PUMP_STIRRER_FALLBACK_001_FINE (dp = 0.016 m)
+  Mechanism: 3D Stirrer / Cyclic Rotating Impeller Fluid Transport
+  Purpose: Legal fallback preserving 3D cyclic hydrodynamic transport, closed mass ledger,
+           and Q-N convergence requirements if bounded obstacle repair paths are exhausted.
+-->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+      <rhop0 value="1000" units_comment="kg/m^3" />
+      <rhopgradient value="2" />
+      <hswl value="0.48" auto="false" units_comment="m" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="30" />
+      <speedsound value="65.0" auto="false" />
+      <coefh value="0.91924" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="240" fluidcount="9" />
+    <geometry>
+      <definition dp="0.016" units_comment="metres (m)">
+        <pointref x="0.008" y="0.008" z="0.008" />
+        <pointmin x="-0.60" y="-0.60" z="-0.10" />
+        <pointmax x="0.60" y="0.60" z="0.70" />
+      </definition>
+      <commands>
+        <mainlist>
+          <setshapemode>real | bound | dp</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="-0.48" y="-0.48" z="0.0" />
+            <size x="0.96" y="0.96" z="0.64" />
+            <layers vdp="0,1,2,3" />
+          </drawbox>
+          <setmkbound mk="2" />
+          <drawcylinder radius="0.032" mask="1">
+            <pointbottom x="0.0" y="0.0" z="0.064" />
+            <pointtop x="0.0" y="0.0" z="0.576" />
+          </drawcylinder>
+          <drawbox>
+            <boxfill>all</boxfill>
+            <point x="-0.192" y="-0.016" z="0.064" />
+            <size x="0.384" y="0.032" z="0.384" />
+            <layers vdp="0,1,2,3" />
+          </drawbox>
+          <setmkfluid mk="1" />
+          <fillbox x="0.20" y="0.20" z="0.25">
+            <modefill>void</modefill>
+            <point x="-0.448" y="-0.448" z="0.0" />
+            <size x="0.896" y="0.896" z="0.480" />
+          </fillbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <motion>
+      <objreal ref="2">
+        <begin mov="1" start="0" finish="12" />
+        <mvrotace id="1" duration="0.5" next="2" anglesunits="degrees">
+          <ace v="288" units_comment="degrees/s^2" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrotace>
+        <mvrot id="2" duration="1.5" next="3" anglesunits="degrees">
+          <vel v="144" units_comment="degrees/s" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrot>
+        <mvrotace id="3" duration="0.5" next="4" anglesunits="degrees">
+          <ace v="-288" units_comment="degrees/s^2" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrotace>
+        <wait id="4" duration="0.25" next="5" />
+        <mvrotace id="5" duration="0.5" next="6" anglesunits="degrees">
+          <ace v="-288" units_comment="degrees/s^2" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrotace>
+        <mvrot id="6" duration="1.5" next="7" anglesunits="degrees">
+          <vel v="-144" units_comment="degrees/s" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrot>
+        <mvrotace id="7" duration="0.5" next="8" anglesunits="degrees">
+          <ace v="288" units_comment="degrees/s^2" />
+          <axisp1 x="0.0" y="0.0" z="0.064" />
+          <axisp2 x="0.0" y="0.0" z="0.576" />
+        </mvrotace>
+        <wait id="8" duration="0.25" next="1" />
+      </objreal>
+    </motion>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="2" />
+      <parameter key="Boundary" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.05" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="DtIni" value="0" />
+      <parameter key="DtMin" value="0" />
+      <parameter key="DtFixed" value="0" />
+      <parameter key="DtAllParticles" value="0" />
+      <parameter key="TimeMax" value="12" units_comment="seconds" />
+      <parameter key="TimeOut" value="0.02" units_comment="seconds" />
+      <parameter key="PartsOutMax" value="1" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <parameter key="MinFluidStop" value="0" />
+      <simulationdomain>
+        <posmin x="default-150%" y="default-150%" z="default-150%" />
+        <posmax x="default+150%" y="default+150%" z="default+150%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

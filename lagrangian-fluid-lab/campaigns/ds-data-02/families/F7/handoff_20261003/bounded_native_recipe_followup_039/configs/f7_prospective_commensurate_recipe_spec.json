@@ -1,0 +1,68 @@
+{
+  "schema": "ds02.f7.prospective-commensurate-recipe-spec.v1",
+  "created_at_utc": "2026-10-04T02:20:00Z",
+  "recipe_id": "F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002",
+  "repair_attempt_number": 2,
+  "max_repairs_per_rootcause": 2,
+  "root_cause_id": "RC2_INCOMMENSURATE_LATTICE_SURFACE_DROP_TRUNCATION",
+  "root_cause_title": "Incommensurate Multi-Resolution Spatial Discretization, Unpreserved Boundary Surfaces, and Initial Phase Gravitational Slap",
+  "physical_mother_id": "F7_OBSTACLE_REFERENCE_BASE",
+  "remediations_applied": [
+    {
+      "remediation": "Uniform Symmetric Lattice Alignment",
+      "implementation": "pointref is set uniformly to (dp/2, dp/2, dp/2) for all tiers, aligning container boundaries with cell faces across resolutions."
+    },
+    {
+      "remediation": "Elimination of Gravitational Drop Air Gap",
+      "implementation": "Fluid fill box is initialized continuously from the tank bottom boundary (z=0.0) up to z=0.482m with modefill=void. Eliminates the 0-35mm air gap and prevents the 39-110 J free-fall kinetic energy shock."
+    },
+    {
+      "remediation": "Full Boundary Kernel Support (Thickness >= 2h)",
+      "implementation": "Boundary layer count increased to 4 (vdp=0,1,2,3), giving boundary thickness = 3*dp >= 2h (2h = 3.18*dp), preventing particle penetrations and corner deletions."
+    },
+    {
+      "remediation": "Explicit Frozen Speed of Sound",
+      "implementation": "speedsound fixed explicitly to 65.23 m/s based on physical fluid height 0.482m, preventing resolution-dependent EOS compressibility."
+    }
+  ],
+  "cases": {
+    "COARSE": {
+      "case_id": "F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_COARSE",
+      "dp_m": 0.025,
+      "definition": "definitions/F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_COARSE_Def.xml",
+      "air_gap_m": 0.0,
+      "gravitational_drop_energy_j": 0.0,
+      "boundary_layers": 4
+    },
+    "MEDIUM": {
+      "case_id": "F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_MEDIUM",
+      "dp_m": 0.020,
+      "definition": "definitions/F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_MEDIUM_Def.xml",
+      "air_gap_m": 0.0,
+      "gravitational_drop_energy_j": 0.0,
+      "boundary_layers": 4
+    },
+    "FINE": {
+      "case_id": "F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_FINE",
+      "dp_m": 0.016,
+      "definition": "definitions/F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_FINE_Def.xml",
+      "air_gap_m": 0.0,
+      "gravitational_drop_energy_j": 0.0,
+      "boundary_layers": 4
+    },
+    "DP001": {
+      "case_id": "F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_DP001",
+      "dp_m": 0.010,
+      "definition": "definitions/F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_DP001_Def.xml",
+      "air_gap_m": 0.0,
+      "gravitational_drop_energy_j": 0.0,
+      "boundary_layers": 4
+    }
+  },
+  "governance": {
+    "launch_allowed": false,
+    "q_n_status": "not_granted",
+    "production_approval": "none",
+    "independent_case_count_increment": 0
+  }
+}

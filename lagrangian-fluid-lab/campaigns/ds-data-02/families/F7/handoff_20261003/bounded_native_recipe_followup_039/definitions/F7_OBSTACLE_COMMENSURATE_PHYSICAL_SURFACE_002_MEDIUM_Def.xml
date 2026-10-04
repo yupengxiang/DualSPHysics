@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DS-DATA-02 Family F7: Moving Obstacle Exchange
+  Prospective Corrected Commensurate Physical-Surface-Preserving Recipe (Repair 2)
+  Case: F7_OBSTACLE_COMMENSURATE_PHYSICAL_SURFACE_002_MEDIUM (dp = 0.020 m)
+  Physical Mother: F7_OBSTACLE_REFERENCE_BASE
+  Key Remediations:
+  1. pointref = (dp/2, dp/2, dp/2) = (0.010, 0.010, 0.010) preserves lattice symmetry.
+  2. Fluid fill starts from tank floor boundary z=0.0 to eliminate gravitational drop gap.
+  3. 4-layer boundary support (layers vdp="0,1,2,3") ensures thickness >= 2h (no kernel truncation).
+  4. Explicit speed of sound c0 based on physical depth H = 0.482 m.
+-->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+      <rhop0 value="1000" units_comment="kg/m^3" />
+      <rhopgradient value="2" />
+      <hswl value="0.482" auto="false" units_comment="m" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="30" />
+      <speedsound value="65.23" auto="false" />
+      <coefh value="0.91924" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="240" fluidcount="9" />
+    <geometry>
+      <definition dp="0.020" units_comment="metres (m)">
+        <pointref x="0.010" y="0.010" z="0.010" />
+        <pointmin x="-0.70" y="-0.50" z="-0.10" />
+        <pointmax x="0.70" y="0.50" z="0.70" />
+      </definition>
+      <commands>
+        <mainlist>
+          <setshapemode>real | bound | dp</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="-0.60" y="-0.40" z="0.0" />
+            <size x="1.20" y="0.80" z="0.60" />
+            <layers vdp="0,1,2,3" />
+          </drawbox>
+          <setmkbound mk="2" />
+          <drawbox>
+            <boxfill>all</boxfill>
+            <point x="-0.07" y="-0.24" z="0.05" />
+            <size x="0.06" y="0.48" z="0.48" />
+            <layers vdp="0,1,2,3" />
+          </drawbox>
+          <setmkfluid mk="1" />
+          <fillbox x="-0.45" y="0" z="0.25">
+            <modefill>void</modefill>
+            <point x="-0.55" y="-0.35" z="0.0" />
+            <size x="1.10" y="0.70" z="0.482" />
+          </fillbox>
+          <fillbox x="0.45" y="0" z="0.25">
+            <modefill>void</modefill>
+            <point x="-0.55" y="-0.35" z="0.0" />
+            <size x="1.10" y="0.70" z="0.482" />
+          </fillbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <motion>
+      <objreal ref="2">
+        <begin mov="1" start="0" finish="12" />
+        <mvrotsinu id="1" duration="2" next="2" anglesunits="degrees">
+          <freq v="0.4" units_comment="1/s" />
+          <ampl v="45" units_comment="degrees" />
+          <phase v="0" units_comment="degrees" />
+          <axisp1 x="-0.04" y="0" z="0.05" />
+          <axisp2 x="-0.04" y="0" z="1.05" />
+        </mvrotsinu>
+        <wait id="2" duration="0.25" next="3" />
+        <mvrotsinu id="3" duration="2" next="4" anglesunits="degrees">
+          <freq v="0.4" units_comment="1/s" />
+          <ampl v="45" units_comment="degrees" />
+          <phase v="180" units_comment="degrees" />
+          <axisp1 x="-0.04" y="0" z="0.05" />
+          <axisp2 x="-0.04" y="0" z="1.05" />
+        </mvrotsinu>
+        <wait id="4" duration="0.25" next="1" />
+      </objreal>
+    </motion>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="2" />
+      <parameter key="Boundary" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.05" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="DtIni" value="0" />
+      <parameter key="DtMin" value="0" />
+      <parameter key="DtFixed" value="0" />
+      <parameter key="DtAllParticles" value="0" />
+      <parameter key="TimeMax" value="12" units_comment="seconds" />
+      <parameter key="TimeOut" value="0.02" units_comment="seconds" />
+      <parameter key="PartsOutMax" value="1" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <parameter key="MinFluidStop" value="0" />
+      <simulationdomain>
+        <posmin x="default-150%" y="default-150%" z="default-150%" />
+        <posmax x="default+150%" y="default+150%" z="default+150%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

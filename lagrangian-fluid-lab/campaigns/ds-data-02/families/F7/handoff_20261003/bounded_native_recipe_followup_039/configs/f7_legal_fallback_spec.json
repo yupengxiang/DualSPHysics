@@ -1,0 +1,27 @@
+{
+  "schema": "ds02.f7.legal-fallback-spec.v1",
+  "created_at_utc": "2026-10-04T02:22:00Z",
+  "fallback_id": "F7_PUMP_STIRRER_FALLBACK_001",
+  "mechanism": "3d_stirrer_cyclic_transport",
+  "trigger_condition": "Exhaustion of bounded repair paths (2 repairs per root cause reached on obstacle background without achieving spatial KE <= 5%)",
+  "plan_authority": "lagrangian-fluid-lab/campaigns/ds-data-02/plan-source/families/F7.md: '失败后备: 复杂CAD泵若长期困难，使用真实3D简化搅拌体作为第二机制模板，保持控制与流体相互作用。'",
+  "case_definitions": {
+    "FINE": {
+      "case_id": "F7_PUMP_STIRRER_FALLBACK_001_FINE",
+      "dp_m": 0.016,
+      "definition": "definitions/F7_PUMP_STIRRER_FALLBACK_001_FINE_Def.xml",
+      "mechanism_description": "Closed-tank rotating 4-blade stirrer impeller with continuous cyclic acceleration/reversal, explicit mass ledger, zero open boundaries, and complete 12.0 s event window."
+    }
+  },
+  "scientific_justification": [
+    "Preserves the 3D rotating fluid transport mechanism required by F7 without geometric singularity.",
+    "Eliminates boundary corner gaps where moving obstacles intersect stationary boundaries.",
+    "Provides an exact closed mass ledger with zero numerical deletions.",
+    "Preserves Q-N numerical convergence and multi-resolution qualification requirements."
+  ],
+  "governance": {
+    "status": "legal_fallback_formalized_ready_for_root_dispatch_if_needed",
+    "q_n_status": "not_granted",
+    "production_approval": "none"
+  }
+}
