@@ -1,0 +1,123 @@
+{
+  "schema": "ds02.f3.twoaxis-amplitude-bracket-specification.v1",
+  "family_id": "F3",
+  "geometry_family_id": "F3_CELL3_PLAIN",
+  "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+  "mother_definition": {
+    "label": "CELL3 plain 5-wall open-top rectangular container",
+    "tank_dimensions_m": {
+      "length_x": 0.90,
+      "width_y": 0.18,
+      "height_z": 0.51
+    },
+    "water_dimensions_m": {
+      "length_x": 0.90,
+      "width_y": 0.18,
+      "depth_z": 0.09
+    },
+    "water_density_kg_m3": 1000.0,
+    "continuum_fluid_mass_kg": 14.58,
+    "gravity_m_s2": [0.0, 0.0, -9.81]
+  },
+  "commensurate_discretization_ladder": {
+    "dp006": {
+      "dp_m": 0.006,
+      "fluid_particles": 67500,
+      "fixed_particles": 111708,
+      "total_particles": 179208
+    },
+    "dp005": {
+      "dp_m": 0.005,
+      "fluid_particles": 116640,
+      "fixed_particles": 160632,
+      "total_particles": 277272
+    },
+    "dp0045": {
+      "dp_m": 0.0045,
+      "fluid_particles": 160000,
+      "fixed_particles": 196692,
+      "total_particles": 356692
+    }
+  },
+  "physical_mechanism_derivation": {
+    "type": "bounded transverse linear acceleration combined with frozen nominal pitch",
+    "transverse_sloshing_eigenmode": {
+      "wavenumber_ky1_rad_m": 17.453292519943295,
+      "depth_product_ky1_h": 1.5707963267948966,
+      "tanh_depth_product": 0.9171523356672744,
+      "circular_frequency_omega_y_rad_s": 12.531236478398654,
+      "cyclic_frequency_f_y_hz": 1.9944062497676605,
+      "period_T_y_s": 0.5014023531393661
+    },
+    "envelope": {
+      "type": "smooth Hann/cosine startup and shutdown envelope E(t)",
+      "tau_ramp_s": 0.50,
+      "window_start_s": 0.0,
+      "window_final_s": 8.35
+    },
+    "formula": "a_y(t) = A_y * E(t) * sin(omega_y * t + phi_y)",
+    "nominal_pitch_source": {
+      "formula": "zero-drive A_x = 1.0 preserved identically",
+      "forcing_source_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3"
+    },
+    "gpu_kernel_audit": "KerAddAccInputAng active unconditionally from t=0; acclin.y enters accy directly and integrates into currvellin.y"
+  },
+  "amplitude_bracket": {
+    "lower_endpoint": {
+      "amplitude_id": "AY0P25",
+      "A_y_m_s2": 0.25,
+      "approx_g_fraction": 0.0255,
+      "nominal_displacement_amplitude_mm": 1.59,
+      "status": "proposed_endpoint_lower"
+    },
+    "interior_points": [
+      {
+        "amplitude_id": "AY0P375",
+        "A_y_m_s2": 0.375,
+        "approx_g_fraction": 0.0382,
+        "nominal_displacement_amplitude_mm": 2.39,
+        "status": "proposed_interior_intermediate_low"
+      },
+      {
+        "amplitude_id": "AY0P50",
+        "A_y_m_s2": 0.50,
+        "approx_g_fraction": 0.0510,
+        "nominal_displacement_amplitude_mm": 3.18,
+        "actual_forcing_sha256": "a4afb8a99ba1e7404b2892b84a2d2b293b11653d792a118867abfaec6593fb48",
+        "canonical_physical_condition_sha256": "49e319c0a874733707a028e916362e74e2301d6681e34bc6b717581dbd7edaeb",
+        "declared_top_level_erratum_marker": "49d16330fd5267668670f166a20191bfb00c5223ad5528439630c7e62dd4c6a0",
+        "evidence_state": "All3native060/typed067 completed 0; 3DP spatial macro 071 PASS 5% max 0.04017; halfstep native065/typed070 completed 0; dense running",
+        "status": "nominal_center_interior_executed"
+      },
+      {
+        "amplitude_id": "AY0P625",
+        "A_y_m_s2": 0.625,
+        "approx_g_fraction": 0.0637,
+        "nominal_displacement_amplitude_mm": 3.98,
+        "status": "proposed_interior_intermediate_high"
+      }
+    ],
+    "upper_endpoint": {
+      "amplitude_id": "AY0P75",
+      "A_y_m_s2": 0.75,
+      "approx_g_fraction": 0.0765,
+      "nominal_displacement_amplitude_mm": 4.78,
+      "status": "proposed_endpoint_upper"
+    },
+    "zero_drive_limit": {
+      "amplitude_id": "AY0P00",
+      "A_y_m_s2": 0.00,
+      "approx_g_fraction": 0.0,
+      "nominal_displacement_amplitude_mm": 0.0,
+      "identity": "exact numerical identity with nominal single-axis pitch forcing to .17g precision"
+    }
+  },
+  "scientific_boundary_declarations": {
+    "existing_domain": "Single-axis amplitude domain (a0p97, a1p00, a1p10) accepted none; 1D longitudinal scaling does not produce true 3D lateral sloshing diversity",
+    "endpoint_convergence": "NO assertion of endpoints convergence is made; nonlinear free surface dynamics, crest breaking, and energy dissipation are physical observables and must not be assumed monotonic or uniform across amplitude bounds",
+    "tracer_policy": "NO need for non-native tracers; native SPH fluid particles (mkfluid=0, type=3) provide complete Lagrangian spatial tracking, residence times, and first passages",
+    "governance": "Source-only proposal; Root reviews all before scientific execution; actual numeric arrays pending Root dispatch",
+    "q_n": "not_granted",
+    "production_approval": "none"
+  }
+}
