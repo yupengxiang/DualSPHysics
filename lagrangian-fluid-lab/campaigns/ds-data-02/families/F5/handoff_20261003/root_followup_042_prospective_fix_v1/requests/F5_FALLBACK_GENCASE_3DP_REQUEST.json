@@ -1,0 +1,66 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_FALLBACK_GENCASE_3DP_REQUEST",
+  "created_at": "2026-10-04T11:20:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "GenCase generation for 6 prospective fallback cases (Runup and Weir across dp050, dp025, dp010); bounded CPU execution strictly under Rootguard.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 -m lagrangian_fluid_lab.gencase_runner --cases-manifest prepared_cases_manifest.json",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_042_prospective_fix_v1",
+    "resource_limits": {
+      "wall_seconds_max": 3600,
+      "cpu_threads_max": 4,
+      "gpu_count": 0,
+      "memory_mb_max": 16384
+    }
+  },
+  "cases": [
+    {
+      "case_id": "F5_REF_RUNUP_DP050_FALLBACK_042",
+      "xml_definition": "definitions/runup/F5_REF_RUNUP_DP050_FALLBACK_042.xml",
+      "dp_m": 0.050,
+      "predicted_fluid_particles": 18816,
+      "predicted_total_particles": 55816
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP025_FALLBACK_042",
+      "xml_definition": "definitions/runup/F5_REF_RUNUP_DP025_FALLBACK_042.xml",
+      "dp_m": 0.025,
+      "predicted_fluid_particles": 150528,
+      "predicted_total_particles": 455528
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP010_FALLBACK_042",
+      "xml_definition": "definitions/runup/F5_REF_RUNUP_DP010_FALLBACK_042.xml",
+      "dp_m": 0.010,
+      "predicted_fluid_particles": 2352000,
+      "predicted_total_particles": 7052000
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP050_FALLBACK_042",
+      "xml_definition": "definitions/weir/F5_REF_WEIR_DP050_FALLBACK_042.xml",
+      "dp_m": 0.050,
+      "predicted_fluid_particles": 18816,
+      "predicted_total_particles": 55816
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP025_FALLBACK_042",
+      "xml_definition": "definitions/weir/F5_REF_WEIR_DP025_FALLBACK_042.xml",
+      "dp_m": 0.025,
+      "predicted_fluid_particles": 150528,
+      "predicted_total_particles": 455528
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP010_FALLBACK_042",
+      "xml_definition": "definitions/weir/F5_REF_WEIR_DP010_FALLBACK_042.xml",
+      "dp_m": 0.010,
+      "predicted_fluid_particles": 2352000,
+      "predicted_total_particles": 7052000
+    }
+  ]
+}

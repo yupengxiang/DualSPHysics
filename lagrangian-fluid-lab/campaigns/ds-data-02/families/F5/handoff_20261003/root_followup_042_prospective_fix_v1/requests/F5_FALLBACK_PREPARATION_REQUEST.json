@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_FALLBACK_PREPARATION_REQUEST",
+  "created_at": "2026-10-04T11:20:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "Prospective preparation request for finite single-wave packet fallback; actual file generation and staging executed exclusively under Rootguard.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 prepare_fallback_cases.py --output-dir . && python3 generate_single_packet_motion.py --output control_single_packet.dat",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_042_prospective_fix_v1",
+    "resource_limits": {
+      "wall_seconds_max": 300,
+      "cpu_threads_max": 1,
+      "gpu_count": 0,
+      "memory_mb_max": 4096
+    }
+  },
+  "inputs": [
+    {
+      "path": "generate_continuous_bed_stl.py",
+      "description": "Bed STL synthesis and watertightness validator"
+    },
+    {
+      "path": "generate_single_packet_motion.py",
+      "description": "Finite single-wave packet motion generator"
+    },
+    {
+      "path": "prepare_fallback_cases.py",
+      "description": "Case preparation worker for nominal pair across 3 commensurate DPs"
+    }
+  ],
+  "expected_outputs": [
+    {
+      "path": "control_single_packet.dat",
+      "description": "Prescribed paddle displacement table (641 rows, 16.0 s, quiescent tail >= 7.5 s)"
+    },
+    {
+      "path": "prepared_cases_manifest.json",
+      "description": "Manifest of 6 prepared XML definitions across Runup and Weir"
+    }
+  ]
+}

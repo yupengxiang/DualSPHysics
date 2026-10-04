@@ -1,0 +1,68 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_FALLBACK_SOLVER_3DP_REQUEST",
+  "created_at": "2026-10-04T11:20:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "DualSPHysics GPU solver execution for nominal pair fallback cases across 3 commensurate DPs; launch strictly governed by Rootguard dispatch with GPU lease reservation.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 -m lagrangian_fluid_lab.solver_runner --cases-manifest prepared_cases_manifest.json --gpu-device 0",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_042_prospective_fix_v1",
+    "resource_limits": {
+      "wall_seconds_max": 57600,
+      "cpu_threads_max": 2,
+      "gpu_count": 1,
+      "gpu_hours_budget": 16.0,
+      "memory_mb_max": 32768
+    }
+  },
+  "cases": [
+    {
+      "case_id": "F5_REF_RUNUP_DP050_FALLBACK_042",
+      "mechanism": "runup",
+      "resolution": "dp050",
+      "estimated_gpu_hours": 0.05
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP050_FALLBACK_042",
+      "mechanism": "weir",
+      "resolution": "dp050",
+      "estimated_gpu_hours": 0.05
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP025_FALLBACK_042",
+      "mechanism": "runup",
+      "resolution": "dp025",
+      "estimated_gpu_hours": 0.50
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP025_FALLBACK_042",
+      "mechanism": "weir",
+      "resolution": "dp025",
+      "estimated_gpu_hours": 0.50
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP010_FALLBACK_042",
+      "mechanism": "runup",
+      "resolution": "dp010",
+      "estimated_gpu_hours": 6.00
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP010_FALLBACK_042",
+      "mechanism": "weir",
+      "resolution": "dp010",
+      "estimated_gpu_hours": 6.00
+    }
+  ],
+  "budget_accounting": {
+    "campaign_budget_gpu_hours": 96.0,
+    "charged_gpu_hours": 65.3,
+    "remaining_reserve_gpu_hours": 30.7,
+    "requested_gpu_hours": 13.1,
+    "headroom_after_run_gpu_hours": 17.6
+  }
+}
