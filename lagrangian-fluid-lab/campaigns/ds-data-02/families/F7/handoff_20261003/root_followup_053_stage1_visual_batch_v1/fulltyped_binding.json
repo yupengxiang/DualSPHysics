@@ -1,0 +1,118 @@
+{
+  "schema": "ds02.f7.fulltyped-source-binding.v1",
+  "family_id": "F7",
+  "scope_id": "root_followup_053_stage1_visual_batch_v1",
+  "binding_status": "source-only; disabled; root review required",
+  "fulltyped_contract": {
+    "time_axis": {
+      "native_frame_count": 601,
+      "physical_window_s": [0.0, 12.0],
+      "preserve_native_timestamps": true,
+      "do_not_recount_views": true,
+      "active_motion_window_s": [0.0, 8.0],
+      "rest_window_s": [8.0, 12.0]
+    },
+    "per_particle_fields": [
+      "particle_id",
+      "particle_zone",
+      "valid",
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "type",
+      "mk",
+      "initial_type",
+      "initial_mk",
+      "initial_mass"
+    ],
+    "required_shape": {
+      "position": "[frame, particle, 3]",
+      "velocity": "[frame, particle, 3]",
+      "scalar_fields": "[frame, particle]",
+      "identity_fields": "[frame, particle]"
+    },
+    "lifecycle_policy": "fixed, moving, and fluid identities must be checked over all 601 frames; missingness is explicit",
+    "materialization": {
+      "h5": "root only after strict approval",
+      "bi4": "root GenCase only after strict approval",
+      "sampled_motion_table": "root motion preparation only after strict approval",
+      "csv": "no generation in this handoff",
+      "arrays": "no materialization in this handoff"
+    }
+  },
+  "anchor_binding": {
+    "source_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+    "physical_condition_sha256": "512cb217f29e716346c249339545ed2599e7cb1aeb8e81fe7f1c0cf7f341c34c",
+    "source_definition_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE.xml",
+    "source_definition_xml_sha256": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f",
+    "source_motion_file": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/motion_obstacle_quintic.dat",
+    "source_motion_file_sha256": "2b607e700abaab4b687740b1a5a3535ce1cc3fee246cbd02d09ad596a722032f",
+    "native_types": {
+      "fixed": [0],
+      "moving": [1],
+      "fluid": [3]
+    },
+    "source_native_particle_counts": {
+      "total": 70179,
+      "fixed": 27495,
+      "moving": 1984,
+      "fluid": 40700
+    },
+    "native_mass_authority": {
+      "wet_fluid_mass_kg": 325.60001628000003,
+      "continuum_envelope_mass_kg": 320.1984,
+      "rescale": false,
+      "interpretation": "support-weighted native wet fluid mass and continuum envelope mass are distinct quantities"
+    },
+    "geometry": {
+      "moving_type": 1,
+      "pivot_p1_m": [-0.04, 0.0, 0.05],
+      "pivot_p2_m": [-0.04, 0.0, 1.05],
+      "geometry_change_policy": "retain exact source geometry; amplitude is motion-only input"
+    },
+    "motion": {
+      "analytic_target": "two finite symmetric quintic cycles",
+      "analytic_target_window_s": [0.0, 8.0],
+      "rest_window_s": [8.0, 12.0],
+      "analytic_regular": "C2",
+      "native_reader": "piecewise_linear_absolute_angle_increment",
+      "native_sampled_regular": "not C2",
+      "sample_interval_s": 0.001
+    },
+    "receipts": {
+      "gencase": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-verified-recipe-coarse-actual-gencase-021/execution-receipt.json",
+      "native": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-restored-motion-coarse-full601-native-025/execution-receipt.json",
+      "typed": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-quintic-target-coarse-full601-typed-026/execution-receipt.json",
+      "dynamic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-stage1-f7-existing-full601-paraview-dynamic-xdmf-005/execution-receipt.json"
+    }
+  },
+  "row_binding_rules": {
+    "one_dimension_per_row": true,
+    "variation_dimension": "paddle_amplitude_deg",
+    "amplitude_bounds_deg": [30.0, 65.0],
+    "mother_amplitude_deg": 45.0,
+    "fixed_for_all_rows": [
+      "explicit-wet fluid fill",
+      "tank and paddle geometry",
+      "pivot and type-1 moving body",
+      "dp and native numerical recipe",
+      "two-cycle/rest timing",
+      "mass policy"
+    ],
+    "fresh_generation_required": true,
+    "fresh_motion_source_required": true,
+    "initial_qa_and_overlap": "root required for every row"
+  },
+  "quality_status": {
+    "source_gencase": "returncode 0",
+    "source_native": "returncode 0",
+    "source_typed": "returncode 0",
+    "visual_evidence": "none supplied; manual/root visual decision pending",
+    "q_i": "source typed conversion evidence only",
+    "q_n": "not_granted",
+    "precision": "not accepted",
+    "production": "none"
+  }
+}

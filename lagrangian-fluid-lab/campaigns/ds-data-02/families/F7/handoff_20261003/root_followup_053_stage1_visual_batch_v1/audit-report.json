@@ -1,0 +1,52 @@
+{
+  "schema": "ds02.f7.stage1-source-audit.v1",
+  "family_id": "F7",
+  "scope_id": "root_followup_053_stage1_visual_batch_v1",
+  "status": "source plan complete; launch disabled",
+  "checks": {
+    "row_count": {"expected": 8, "observed": 8, "status": "pass"},
+    "unique_physical_case_ids": {"status": "pass"},
+    "single_amplitude_dimension": {"status": "pass"},
+    "one_dp_per_physical_case": {"status": "pass", "dp_m": 0.02},
+    "independent_case_increment": {"value": 0, "status": "pass"},
+    "source_xml_hash_recorded": {"status": "pass"},
+    "source_motion_hash_recorded": {"status": "pass"},
+    "source_gencase_receipt": {"returncode": 0, "status": "pass"},
+    "source_native_receipt": {"returncode": 0, "status": "pass"},
+    "source_typed_receipt": {"returncode": 0, "status": "pass"},
+    "source_arrays_materialized": {"status": "not_performed"},
+    "new_motion_table_generated": {"status": "not_performed"},
+    "gencase_for_new_rows": {"status": "not_performed"},
+    "native_solver_for_new_rows": {"status": "not_performed"},
+    "conversion_for_new_rows": {"status": "not_performed"},
+    "visual_render_for_new_rows": {"status": "not_performed"}
+  },
+  "source_geometry_audit": {
+    "pivot": {"p1_m": [-0.04, 0.0, 0.05], "p2_m": [-0.04, 0.0, 1.05], "status": "source anchored"},
+    "moving_type": {"value": 1, "status": "source anchored"},
+    "explicit_wet_fill": {"status": "source anchored"},
+    "new_amplitude_rows": "require fresh root GenCase and initial QA",
+    "no_byte_equality_claim": true
+  },
+  "mass_audit": {
+    "native_wetfluid_mass_kg": 325.60001628000003,
+    "continuum_envelope_mass_kg": 320.1984,
+    "rescale": false,
+    "status": "preserved distinction"
+  },
+  "historical_negatives_preserved": [
+    "analytic C2 target does not make native piecewise-linear sampled motion C2",
+    "historical 43.011 percent KE discrepancy",
+    "paired transport/numerical unknown inventories",
+    "q_n not granted",
+    "visual acceptance pending"
+  ],
+  "root_next_actions": [
+    "review amplitude endpoints/interiors and source lineage",
+    "run the disabled builder only if source motion review is accepted",
+    "prepare a fresh bounded motion source for each amplitude",
+    "perform fresh GenCase and initial QA for each row",
+    "perform strict full-window native/typed/dynamic workflow",
+    "make visual decision from whole-frame evidence"
+  ]
+}
