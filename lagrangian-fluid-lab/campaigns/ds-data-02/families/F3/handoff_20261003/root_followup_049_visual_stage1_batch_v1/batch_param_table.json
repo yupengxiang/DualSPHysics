@@ -1,0 +1,160 @@
+{
+  "schema": "ds02.f3.stage1-batch8-param-table.v1",
+  "family_id": "F3",
+  "geometry_family_id": "F3_CELL3_PLAIN",
+  "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_AND_PITCH_V1",
+  "batch_index": 1,
+  "batch_target_independent_cases": 8,
+  "campaign_target_independent_cases": 336,
+  "stage1_goal": "full-generation-flow, true3D fulltime, ParaView dynamic+full-animation visualreview and independentphysicalcasebatch8/24/48 perF1..7,336total",
+  "counting_rules": {
+    "resolution_ladder_policy": "Spatial ladders (dp0.006, dp0.005, dp0.0045) are discretization convergence studies and NEVER count as separate physical cases.",
+    "reruns_and_time_slices": "Reruns, temporal slices, and derived viewing products do NOT increment the physical case count.",
+    "physical_uniqueness": "Each independent physical case MUST possess distinct physical forcing parameter coordinates (transverse_amplitude_m_s2, pitch_amplitude_ratio)."
+  },
+  "canonical_mother_geometry": {
+    "container_type": "open-top 5-wall rectangular tank",
+    "tank_dimensions_m": {
+      "length_x": 0.90,
+      "width_y": 0.18,
+      "height_z": 0.51
+    },
+    "fluid_dimensions_m": {
+      "length_x": 0.90,
+      "width_y": 0.18,
+      "depth_z": 0.09
+    },
+    "fluid_density_kg_m3": 1000.0,
+    "continuum_fluid_mass_kg": 14.58,
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "coordinate_frame": "fixed tank coordinates with prescribed body acceleration (acctimesfile); walls are fixedType0 in accelerating frame"
+  },
+  "physical_mechanism_derivation": {
+    "longitudinal_axis": {
+      "mechanism": "prescribed pitch rotation alpha_y(t) with coupled linear ax(t), az(t) via zero-drive scaling",
+      "formula": [
+        "a_x(t) = A_pitch * a_x_nom(t)",
+        "a_z(t) = g_z + A_pitch * (a_z_nom(t) - g_z)",
+        "alpha_y(t) = A_pitch * alpha_y_nom(t)"
+      ],
+      "nominal_forcing_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "window_s": [0.0, 8.35],
+      "dt_s": 0.00005,
+      "data_rows": 167001
+    },
+    "transverse_axis": {
+      "mechanism": "bounded transverse linear acceleration a_y(t) exciting fundamental transverse eigenmode",
+      "formula": "a_y(t) = A_y * E(t) * sin(omega_y * t + phi_y)",
+      "eigenmode": {
+        "wavenumber_ky_rad_m": 17.453292519943295,
+        "omega_y_rad_s": 12.531236478398654,
+        "f_y_hz": 1.9944062497676605,
+        "period_T_y_s": 0.5014023531393661
+      },
+      "envelope": {
+        "type": "Hann/cosine smooth startup and shutdown ramp E(t)",
+        "tau_ramp_s": 0.50,
+        "window_s": [0.0, 8.35]
+      },
+      "phase_rad": 0.0
+    }
+  },
+  "cases": [
+    {
+      "index": 1,
+      "case_id": "F3_TWOAXIS_AY0P50_P1P00_NOMINAL",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005",
+      "role": "anchor_user_accepted",
+      "transverse_amplitude_m_s2": 0.50,
+      "pitch_amplitude_ratio": 1.00,
+      "physical_condition_sha256": "49e319c0a874733707a028e916362e74e2301d6681e34bc6b717581dbd7edaeb",
+      "actual_forcing_sha256": "a4afb8a99ba1e7404b2892b84a2d2b293b11653d792a118867abfaec6593fb48",
+      "status": "completed_native_060_and_typed_067",
+      "visual_review": "pending root inspection of full animation",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 2,
+      "case_id": "F3_TWOAXIS_AY0P25_P1P00",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P25_ADAPTIVE_CFL05_COEF005",
+      "role": "transverse_lower_endpoint",
+      "transverse_amplitude_m_s2": 0.25,
+      "pitch_amplitude_ratio": 1.00,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 3,
+      "case_id": "F3_TWOAXIS_AY0P375_P1P00",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P375_ADAPTIVE_CFL05_COEF005",
+      "role": "transverse_interior_low",
+      "transverse_amplitude_m_s2": 0.375,
+      "pitch_amplitude_ratio": 1.00,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 4,
+      "case_id": "F3_TWOAXIS_AY0P625_P1P00",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P625_ADAPTIVE_CFL05_COEF005",
+      "role": "transverse_interior_high",
+      "transverse_amplitude_m_s2": 0.625,
+      "pitch_amplitude_ratio": 1.00,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 5,
+      "case_id": "F3_TWOAXIS_AY0P75_P1P00",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P75_ADAPTIVE_CFL05_COEF005",
+      "role": "transverse_upper_endpoint",
+      "transverse_amplitude_m_s2": 0.75,
+      "pitch_amplitude_ratio": 1.00,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 6,
+      "case_id": "F3_TWOAXIS_AY0P50_P0P90",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P50_P0P90_ADAPTIVE_CFL05_COEF005",
+      "role": "pitch_lower_endpoint",
+      "transverse_amplitude_m_s2": 0.50,
+      "pitch_amplitude_ratio": 0.90,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 7,
+      "case_id": "F3_TWOAXIS_AY0P50_P1P10",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P50_P1P10_ADAPTIVE_CFL05_COEF005",
+      "role": "pitch_upper_endpoint",
+      "transverse_amplitude_m_s2": 0.50,
+      "pitch_amplitude_ratio": 1.10,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    },
+    {
+      "index": 8,
+      "case_id": "F3_TWOAXIS_AY0P25_P0P90",
+      "legacy_case_id": "F3_CELL3_LONG_DP006_AY0P25_P0P90_ADAPTIVE_CFL05_COEF005",
+      "role": "coupled_minimal_endpoint",
+      "transverse_amplitude_m_s2": 0.25,
+      "pitch_amplitude_ratio": 0.90,
+      "status": "ready_source_only",
+      "visual_review": "disabled until root visual review anchor",
+      "numerical_precision_status": "not accepted"
+    }
+  ],
+  "scientific_disclaimers": {
+    "stage1_prerequisites_not_shared": "Spatial convergence, integration/save frequency error budgets, long-term per-particle trajectory consistency, precise transport/event labels, and external experimental validation are NOT shared stage1 prerequisites.",
+    "visual_review_vs_qn": "Visual review approval does NOT equal numerical precision certification. Any visual acceptance is recorded strictly as visual inspection evidence, and numerical precision is marked 'not accepted'.",
+    "negative_evidence_preserved": "Historical coarse-vs-fine 5% macro discrepancies (Followup 032 KE, meanV, localV) and transport discrepancies are preserved and not silently suppressed.",
+    "execution_governance": "Source only. All runner requests are marked launch_allowed: false and launch_owner: root. Dispatching is exclusive to Root dispatcher."
+  }
+}
