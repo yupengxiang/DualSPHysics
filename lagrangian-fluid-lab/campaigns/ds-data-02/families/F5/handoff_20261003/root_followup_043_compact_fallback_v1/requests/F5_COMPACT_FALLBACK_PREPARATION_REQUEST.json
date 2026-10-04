@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_COMPACT_FALLBACK_PREPARATION_REQUEST",
+  "created_at": "2026-10-04T11:50:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU preparation task: generate compact continuous bed STL asset and compact wave packet paddle motion dat file under strict Rootguard dispatch.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 generate_compact_continuous_bed_stl.py --output assets/f5_compact_continuous_bed_profile.stl && python3 generate_compact_packet_motion.py --output control_compact_packet.dat",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_043_compact_fallback_v1",
+    "resource_limits": {
+      "wall_seconds_max": 120,
+      "cpu_threads_max": 1,
+      "gpu_count": 0,
+      "memory_mb_max": 4096
+    }
+  },
+  "artifacts": [
+    {
+      "path": "assets/f5_compact_continuous_bed_profile.stl",
+      "description": "Watertight 52-triangle compact continuous bed STL (slope m=0.280, width 0.30 m, length 5.00 m)."
+    },
+    {
+      "path": "control_compact_packet.dat",
+      "description": "Finite single-wave packet motion table (duration 5.0 s, stroke 2.43 cm, quiescent tail [5.0, 16.0] s)."
+    }
+  ]
+}

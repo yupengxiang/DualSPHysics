@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_COMPACT_FALLBACK_GENCASE_3DP_REQUEST",
+  "created_at": "2026-10-04T11:50:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU GenCase execution for 6 compact fallback cases across runup and weir mechanisms and 3 commensurate DPs (0.02, 0.0125, 0.01); Rootguard execution only.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 -m lagrangian_fluid_lab.gencase_runner --cases-manifest prepared_cases_manifest.json",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_043_compact_fallback_v1",
+    "resource_limits": {
+      "wall_seconds_max": 600,
+      "cpu_threads_max": 4,
+      "gpu_count": 0,
+      "memory_mb_max": 16384
+    }
+  },
+  "cases": [
+    "F5_REF_RUNUP_DP020_COMPACT_043",
+    "F5_REF_WEIR_DP020_COMPACT_043",
+    "F5_REF_RUNUP_DP0125_COMPACT_043",
+    "F5_REF_WEIR_DP0125_COMPACT_043",
+    "F5_REF_RUNUP_DP010_COMPACT_043",
+    "F5_REF_WEIR_DP010_COMPACT_043"
+  ]
+}
