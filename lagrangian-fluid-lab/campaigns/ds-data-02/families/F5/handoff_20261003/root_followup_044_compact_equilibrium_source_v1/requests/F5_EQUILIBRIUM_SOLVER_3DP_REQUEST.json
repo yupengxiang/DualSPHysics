@@ -1,0 +1,84 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_EQUILIBRIUM_SOLVER_3DP_REQUEST",
+  "created_at": "2026-10-04T15:45:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "DualSPHysics GPU solver execution for compact equilibrium configuration cases across 3 commensurate DPs; launch strictly governed by Rootguard dispatch with live UUID inventory, GPU lease reservation, and parent budget tracking.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 -m lagrangian_fluid_lab.solver_runner --cases-manifest prepared_cases_manifest.json --gpu-device 0",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_044_compact_equilibrium_source_v1",
+    "resource_limits": {
+      "wall_seconds_max": 12000,
+      "cpu_threads_max": 2,
+      "gpu_count": 1,
+      "gpu_hours_budget": 4.0,
+      "memory_mb_max": 16384
+    }
+  },
+  "cases": [
+    {
+      "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_044",
+      "mechanism": "runup_return",
+      "resolution": "dp020",
+      "maxwall_seconds": 600,
+      "estimated_gpu_hours": 0.08
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP020_EQUILIBRIUM_044",
+      "mechanism": "weir_overtopping",
+      "resolution": "dp020",
+      "maxwall_seconds": 600,
+      "estimated_gpu_hours": 0.08
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP0125_EQUILIBRIUM_044",
+      "mechanism": "runup_return",
+      "resolution": "dp0125",
+      "maxwall_seconds": 1800,
+      "estimated_gpu_hours": 0.35
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP0125_EQUILIBRIUM_044",
+      "mechanism": "weir_overtopping",
+      "resolution": "dp0125",
+      "maxwall_seconds": 1800,
+      "estimated_gpu_hours": 0.35
+    },
+    {
+      "case_id": "F5_REF_RUNUP_DP010_EQUILIBRIUM_044",
+      "mechanism": "runup_return",
+      "resolution": "dp010",
+      "maxwall_seconds": 3600,
+      "estimated_gpu_hours": 0.90
+    },
+    {
+      "case_id": "F5_REF_WEIR_DP010_EQUILIBRIUM_044",
+      "mechanism": "weir_overtopping",
+      "resolution": "dp010",
+      "maxwall_seconds": 3600,
+      "estimated_gpu_hours": 0.90
+    }
+  ],
+  "budget_accounting": {
+    "campaign_budget_gpu_hours": 96.0,
+    "charged_gpu_hours": 74.0,
+    "remaining_reserve_gpu_hours": 22.0,
+    "campaign_budget_cpu_core_hours": 384.0,
+    "charged_cpu_core_hours": 235.0,
+    "remaining_reserve_cpu_core_hours": 149.0,
+    "fine_pair_maxwall_gpu_hours": 2.00,
+    "total_ladder_maxwall_gpu_hours": 3.334,
+    "expected_ladder_gpu_hours": 2.66,
+    "headroom_after_run_gpu_hours": 19.34,
+    "qualification_state": "281/320 attempts used",
+    "qualification_attempts_limit": 320,
+    "charged_qualification_attempts": 281,
+    "remaining_qualification_attempts": 39,
+    "homefloor_gib": 500
+  }
+}

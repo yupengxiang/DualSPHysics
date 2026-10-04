@@ -1,0 +1,36 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_EQUILIBRIUM_GENCASE_3DP_REQUEST",
+  "created_at": "2026-10-04T15:45:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU GenCase execution for 6 compact equilibrium cases across runup and weir mechanisms and 3 commensurate DPs (0.02, 0.0125, 0.01); includes post-GenCase source asset restoration worker to protect motion dat file from truncation; Rootguard execution only.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 -m lagrangian_fluid_lab.gencase_runner --cases-manifest prepared_cases_manifest.json && python3 prepare_compact_equilibrium_cases.py --post-gencase-verify",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_044_compact_equilibrium_source_v1",
+    "resource_limits": {
+      "wall_seconds_max": 600,
+      "cpu_threads_max": 4,
+      "gpu_count": 0,
+      "memory_mb_max": 16384
+    }
+  },
+  "cases": [
+    "F5_REF_RUNUP_DP020_EQUILIBRIUM_044",
+    "F5_REF_WEIR_DP020_EQUILIBRIUM_044",
+    "F5_REF_RUNUP_DP0125_EQUILIBRIUM_044",
+    "F5_REF_WEIR_DP0125_EQUILIBRIUM_044",
+    "F5_REF_RUNUP_DP010_EQUILIBRIUM_044",
+    "F5_REF_WEIR_DP010_EQUILIBRIUM_044"
+  ],
+  "budget_accounting": {
+    "campaign_budget_cpu_core_hours": 384.0,
+    "charged_cpu_core_hours": 235.0,
+    "remaining_reserve_cpu_core_hours": 149.0,
+    "qualification_state": "281/320 attempts used"
+  }
+}

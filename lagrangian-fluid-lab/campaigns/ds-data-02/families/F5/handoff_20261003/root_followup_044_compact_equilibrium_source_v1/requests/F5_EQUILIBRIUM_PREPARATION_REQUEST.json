@@ -1,0 +1,38 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_EQUILIBRIUM_PREPARATION_REQUEST",
+  "created_at": "2026-10-04T15:45:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU preparation task: generate compact continuous bed STL asset with continuum equilibrium bounds and compact wave packet motion file (17g format, exclusive IO) under strict Rootguard dispatch.",
+    "policy_authority": "plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 generate_compact_continuous_bed_stl.py --output assets/f5_compact_continuous_bed_profile.stl && python3 generate_compact_packet_motion.py --output assets/f5_compact_packet_motion.dat",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_044_compact_equilibrium_source_v1",
+    "resource_limits": {
+      "wall_seconds_max": 120,
+      "cpu_threads_max": 1,
+      "gpu_count": 0,
+      "memory_mb_max": 4096
+    }
+  },
+  "artifacts": [
+    {
+      "path": "assets/f5_compact_continuous_bed_profile.stl",
+      "description": "Watertight 52-triangle compact continuous bed STL (slope m=0.280, width 0.30 m, length 5.00 m)."
+    },
+    {
+      "path": "assets/f5_compact_packet_motion.dat",
+      "description": "Finite single-wave packet motion table (duration 5.0 s, stroke 2.43 cm, 17g format, parked paddle at x=0 reflects returning waves)."
+    }
+  ],
+  "budget_accounting": {
+    "campaign_budget_cpu_core_hours": 384.0,
+    "charged_cpu_core_hours": 235.0,
+    "remaining_reserve_cpu_core_hours": 149.0,
+    "qualification_state": "281/320 attempts used"
+  }
+}

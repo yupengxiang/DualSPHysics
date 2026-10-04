@@ -1,0 +1,211 @@
+{
+  "schema": "ds02.f5.compact-equilibrium-specification.v1",
+  "family_id": "F5",
+  "scope_name": "root_followup_044_compact_equilibrium_source_v1",
+  "description": "Rigorous specification for F5 compact equilibrium configuration with continuous still-water free surface up to shoreline x=24/7, submerged weir exclusion, proven full drawmode syntax, and 17g exclusive IO.",
+  "physical_dimensions": {
+    "flume_width_m": 0.300,
+    "flat_basin_length_m": 2.000,
+    "representative_depth_H_m": 0.400,
+    "bed_slope_m": 0.280,
+    "shoreline_x_m": 3.4285714285714286,
+    "shoreline_x_fraction": "24/7"
+  },
+  "continuum_equilibrium_mass_and_volume": {
+    "flat_basin_volume_m3": 0.240,
+    "sloping_wedge_volume_m3": 0.08571428571428572,
+    "sloping_wedge_volume_fraction": "0.6/7",
+    "continuum_runup_volume_m3": 0.3257142857142857,
+    "continuum_runup_volume_fraction": "2.28/7",
+    "continuum_runup_mass_kg": 325.7142857142857,
+    "submerged_weir_solid_volume_m3": 0.001935,
+    "submerged_weir_solid_mass_displacement_kg": 1.935,
+    "continuum_weir_fluid_volume_m3": 0.3237792857142857,
+    "continuum_weir_fluid_mass_kg": 323.7792857142857,
+    "mass_normalization_policy": "forbidden - discrete particles carry native mass mp = rho0 * dp^3; no mass scaling or normalizing to 325.714 kg",
+    "retraction_statement": "Explicitly retracts provisional 043 assumptions of 240.0 kg flat-only fluid mass and 30000/122880/240000 provisional fluid counts. Flat fluid truncated at x=2.0 m created an unphysical vertical water face at t=0 that collapsed downslope immediately."
+  },
+  "syntax_and_source_pins": {
+    "drawmode_syntax": "full",
+    "solid_drawmode_count": 0,
+    "drawmode_declaration_policy": "Single <setdrawmode mode=\"full\" /> declared at the beginning of commands/mainlist; zero mode=\"solid\" entries.",
+    "motion_syntax": "mvpredef",
+    "motion_source_pin": "src/source/JMotion.cpp:708,814",
+    "motion_source_pin_justification": "JMotion.cpp lines 814-826 explicitly group 'else if(name==\"mvpredef\" || name==\"mvfile\" || name==\"mvrectfile\")' identically, calling MovAddRectilinearFile with identical parameter parsing. mvpredef is a fully verified, accepted alias.",
+    "format_precision": "17g",
+    "io_policy": "exclusiveIO (O_EXCL | O_CREAT), refusing silent overwrite"
+  },
+  "fluid_lattice_generation": {
+    "bed_support_policy": "Source-first bed boundary support and finite tank/piston drawn before fluid.",
+    "native_fill_precedence": "Boundary particles rasterized first prevent fluid overwrite on bed, walls, and weir solids.",
+    "explicit_clipplane": {
+      "point": {"x": "2.00", "y": "0.00", "z": "0.00"},
+      "vector": {"x": "-0.28", "y": "0.00", "z": "1.00"},
+      "purpose": "Clips fluid box strictly above continuous bed slope and below SWL H=0.400 m up to shoreline x=24/7."
+    }
+  },
+  "post_gencase_asset_protection": {
+    "policy": "sourceasset postGen copying required because actual F7 GenCase erased declared motion file to 0 bytes",
+    "worker_function": "restore_declared_motion_post_gencase",
+    "target_asset": "assets/f5_compact_packet_motion.dat"
+  },
+  "continuous_bed": {
+    "nodes": [
+      [-0.20, 0.000],
+      [2.00, 0.000],
+      [3.00, 0.280],
+      [3.60, 0.448],
+      [3.90, 0.448],
+      [4.40, 0.050],
+      [4.80, 0.050]
+    ],
+    "slope_m": 0.280,
+    "stl_facet_count": 52,
+    "stl_asset": "assets/f5_compact_continuous_bed_profile.stl"
+  },
+  "weir_structure": {
+    "x_bounds_m": [3.20, 3.35],
+    "bed_elevation_bounds_m": [0.336, 0.378],
+    "mean_bed_elevation_m": 0.357,
+    "left_segment_y_bounds_m": [-0.15, -0.04],
+    "left_segment_crest_z_m": 0.460,
+    "right_segment_y_bounds_m": [0.04, 0.15],
+    "right_segment_crest_z_m": 0.460,
+    "notch_y_bounds_m": [-0.04, 0.04],
+    "notch_sill_z_m": 0.410,
+    "submerged_height_m": 0.043,
+    "submerged_volume_m3": 0.001935,
+    "displaced_mass_kg": 1.935,
+    "description": "3D notched weir on slope with central notch for candidate shallow overtopping and lateral shoulders retaining/reflecting fluid."
+  },
+  "resolutions_ladder": {
+    "comparison_policy": "Independent reference ladder .02/.0125/.01 is direct unequal-r comparisons without Richardson extrapolation assumptions.",
+    "dp020": {
+      "dp_m": 0.020,
+      "resolution_name": "coarse",
+      "ratio_to_fine": 2.0,
+      "ratio_to_medium": 1.6,
+      "cells_y": 15,
+      "pointref": {"x": "0.010", "y": "0.000", "z": "0.010"},
+      "pointref_y_alignment": "centered on W=0.30m (odd cell count 15: cell center at y=0)",
+      "maxwall_seconds": 600,
+      "maxwall_gpu_hours": 0.167
+    },
+    "dp0125": {
+      "dp_m": 0.0125,
+      "resolution_name": "medium",
+      "ratio_to_fine": 1.25,
+      "ratio_to_medium": 1.0,
+      "cells_y": 24,
+      "pointref": {"x": "0.00625", "y": "0.00625", "z": "0.00625"},
+      "pointref_y_alignment": "centered on W=0.30m (even cell count 24: cell interface at y=0, centers at +-0.00625)",
+      "maxwall_seconds": 1800,
+      "maxwall_gpu_hours": 0.500
+    },
+    "dp010": {
+      "dp_m": 0.010,
+      "resolution_name": "fine",
+      "ratio_to_fine": 1.0,
+      "ratio_to_medium": 0.8,
+      "cells_y": 30,
+      "pointref": {"x": "0.005", "y": "0.005", "z": "0.005"},
+      "pointref_y_alignment": "centered on W=0.30m (even cell count 30: cell interface at y=0, centers at +-0.005)",
+      "maxwall_seconds": 3600,
+      "maxwall_gpu_hours": 1.000
+    }
+  },
+  "observer_specification": {
+    "operator": "DualSPHysics GaugesSWL",
+    "geometry_policy": "Probes local bed true elevation: point0.z = z_bed(x) to prevent sub-bed embedding and false 1.5H floor step jumps.",
+    "gauges": [
+      {
+        "name": "WG1",
+        "x_m": 0.60,
+        "y_m": 0.0,
+        "z_bed_m": 0.000,
+        "point0_z_m": 0.000,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "upstream_flat_basin",
+        "initial_state": "wetted_depth_0.400m"
+      },
+      {
+        "name": "WG2",
+        "x_m": 1.40,
+        "y_m": 0.0,
+        "z_bed_m": 0.000,
+        "point0_z_m": 0.000,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "shoaling_approach",
+        "initial_state": "wetted_depth_0.400m"
+      },
+      {
+        "name": "RunupToe",
+        "x_m": 2.00,
+        "y_m": 0.0,
+        "z_bed_m": 0.000,
+        "point0_z_m": 0.000,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "slope_toe",
+        "initial_state": "wetted_depth_0.400m"
+      },
+      {
+        "name": "WG3",
+        "x_m": 2.60,
+        "y_m": 0.0,
+        "z_bed_m": 0.168,
+        "point0_z_m": 0.168,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "mid_slope_shoaling",
+        "initial_state": "wetted_depth_0.232m"
+      },
+      {
+        "name": "WG4",
+        "x_m": 3.20,
+        "y_m": 0.0,
+        "z_bed_m": 0.336,
+        "point0_z_m": 0.336,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "upper_slope_weir_approach",
+        "initial_state": "wetted_depth_0.064m"
+      },
+      {
+        "name": "Crest",
+        "x_m": 3.75,
+        "y_m": 0.0,
+        "z_bed_m": 0.448,
+        "point0_z_m": 0.448,
+        "point2_z_m": 0.700,
+        "coefdp": 0.5,
+        "zone": "crest_plateau",
+        "initial_state": "dry_code_until_runup"
+      }
+    ]
+  },
+  "control": {
+    "template": "compact_packet",
+    "motion_file": "assets/f5_compact_packet_motion.dat",
+    "motion_duration_s": 5.00,
+    "total_window_s": 16.00,
+    "save_dt_s": 0.02,
+    "output_frames": 800,
+    "amplitude_m": 0.028,
+    "max_stroke_m": 0.030,
+    "reflection_note": "Analytic finite envelope does NOT eliminate wavemaker reflections/chaos; return stationary paddle at x=0 reflects returning waves"
+  },
+  "budget_accounting": {
+    "campaign_budget_gpu_hours": 96.0,
+    "charged_gpu_hours": 74.0,
+    "remaining_reserve_gpu_hours": 22.0,
+    "campaign_budget_cpu_core_hours": 384.0,
+    "charged_cpu_core_hours": 235.0,
+    "remaining_reserve_cpu_core_hours": 149.0,
+    "qualification_attempts_limit": 320,
+    "charged_qualification_attempts": 281,
+    "remaining_qualification_attempts": 39
+  }
+}
