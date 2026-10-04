@@ -1,0 +1,109 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+  "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+  "condition_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+  "physical_condition_sha256": "268d4ea37228fb63ef493a6e535740bb765d165d874f97804443d5e11eb3497c",
+  "candidate_id": "A_explicit_closed_mesh_only",
+  "source_recipe_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+  "repair_id": "F5_BED_REPAIR_A_REMOVE_DUPLICATE_STL_INVOCATION",
+  "attempt_id": "root-followup-061-stage1-native-bed-repair-candidate-a-short-event-v1",
+  "kind": "qualification",
+  "cpu_threads": 4,
+  "max_wall_seconds": 1800,
+  "estimated_peak_gpu_mib": 4096,
+  "estimated_storage_bytes": 4294967296,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics",
+  "source_scope_root": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "{gencase_attempt_root}/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+    "{attempt_root}/solver_output",
+    "-tmax:1.0",
+    "-tout:0.02"
+  ],
+  "gencase_prefix": "{gencase_attempt_root}/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+  "gencase_receipt": "{gencase_attempt_root}/prepared/execution-receipt.json",
+  "gencase_receipt_sha256": "<root-binds-fresh-receipt-sha256>",
+  "initial_typed_qa": "{initial_qa_attempt_root}/strict-initial-audit.json",
+  "initial_typed_qa_sha256": "<root-binds-fresh-qa-sha256>",
+  "genuine_gencase_required": true,
+  "actual_initial_qa_required": true,
+  "fictional_clone_forbidden": true,
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "root_review_required": true,
+  "independent_case_count_increment": 0,
+  "production_approval": "none",
+  "numerical_reference_status": "short 0-1 s event diagnostic template only; no actual solver or visual result",
+  "purpose": "Bounded event-start solver check before any full 16 s run. Uses fresh candidate-A native inputs, original motion/EOS/timestep/save settings, and only shortens TimeMax to 1 s. It cannot establish late 8 s crossing absence.",
+  "event_window_s": [
+    0,
+    1.0
+  ],
+  "full_window_reference_s": [
+    0,
+    16.0
+  ],
+  "save_interval_s": 0.02,
+  "unchanged_controls": {
+    "dp_m": 0.02,
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "boundary": 1,
+    "step_algorithm": 2,
+    "kernel": 2,
+    "visco_treatment": 1,
+    "visco": 0.01,
+    "density_dt": 2,
+    "density_dt_value": 0.1,
+    "time_out_s": 0.02,
+    "motion_file": "assets/f5_compact_packet_motion.dat",
+    "motion_window_s": [
+      0,
+      16
+    ]
+  },
+  "input_files": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/gencase-binding.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/initial-qa-manifest.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/physical-binding.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/strict-source-chain.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/assets/f5_compact_packet_motion.dat",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/assets/f5_compact_continuous_bed_profile.stl",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-f5-actual-native-fixed-bed-support-audit-057/native_initial_fixed_bed_support_audit.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-runup-coarse-full801-nativefluid-bed-footprint-diagnostic-037/nativefluid_bed_support_diagnostic.json"
+  ],
+  "input_sha256": {
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64": "0415b10e5e32af8b8b7ad2a703f9043dca67dfcf7626eb98f1c05a50856fde29",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/gencase-binding.json": "2938f45c486a649d9c11fc9a7892c3bfb3d3c212b69e511ed3fbb2f7a4d5c0e6",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/initial-qa-manifest.json": "41136f4b4862ddd2ac9384e2e201823035f597fd8fabdece62fb3f5e76939c69",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/physical-binding.json": "1b056b255096986c67eea5bec969afc1c5f631bc1d8b8f8ca656aeac8854e72d",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/strict-source-chain.json": "4679069898c4ee83dc18cede54326ef2fc9ea00e324154c05df8a0dbb845c211",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/assets/f5_compact_packet_motion.dat": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/assets/f5_compact_continuous_bed_profile.stl": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-f5-actual-native-fixed-bed-support-audit-057/native_initial_fixed_bed_support_audit.json": "49ff1478139e5f2ca605353ab10cfce4e1e088dc9e416ab9156a8c9d774bc0c6",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-runup-coarse-full801-nativefluid-bed-footprint-diagnostic-037/nativefluid_bed_support_diagnostic.json": "2bef081567648bbc49b45f43e3b3797d14752a20582f4408f028cdcc493af7be"
+  },
+  "strict_dispatch_entrypoint": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+  "execution_contract": {
+    "root_must_bind_actual_gencase_receipt": true,
+    "root_must_bind_actual_initial_qa": true,
+    "short_event_only": true,
+    "full16_not_authorized": true,
+    "no_production_approval": true,
+    "late_crossing_untested_by_design": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "ds02.f5.native-bed-repair-strict-source-chain.v1",
+  "scope_name": "root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1",
+  "family_id": "F5",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+  "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+  "condition_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+  "physical_condition_sha256": "268d4ea37228fb63ef493a6e535740bb765d165d874f97804443d5e11eb3497c",
+  "source_recipe": {
+    "candidate_id": "A_explicit_closed_mesh_only",
+    "source_definition": "candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+    "source_definition_sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+    "immutable_parent_definition_sha256": "5ed3359ecbc3d88fd31a0a8e4015929a20041e3b9b3a151475e736c0be513c45",
+    "edit_contract": {
+      "removed_source_lines_1_based": [269, 270, 271],
+      "removed_nodes": ["duplicate setmkbound mk=40", "drawfilestl", "shapeout"],
+      "retained_mesh_points": 156,
+      "retained_mesh_triangles": 52,
+      "retained_profile_y_bounds_m": [-0.15, 0.15],
+      "retained_lower_closure_z_m": -0.15,
+      "control_changes": []
+    }
+  },
+  "bounded_evidence": {
+    "audit_summary": "audit_057_bounded_summary.json",
+    "audit_summary_sha256": "1ae45853f0f55de0a457b109c5e90f2fe38068d5fd64fc352a29068425417f20",
+    "audit_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-f5-actual-native-fixed-bed-support-audit-057/native_initial_fixed_bed_support_audit.json",
+    "audit_report_sha256": "49ff1478139e5f2ca605353ab10cfce4e1e088dc9e416ab9156a8c9d774bc0c6",
+    "root037_failure_ledger": "root037_failure_ledger_summary.json",
+    "root037_failure_ledger_sha256": "6fadfef279760f18d80875251f51a8f51901cc20a2826ca97afebd5f5bbed3e1",
+    "evidence_interpretation": "The native cohort is retained and mixed with wall/floor rows; no hollow-STL, missing-bed, or solver-root-cause claim is made. A is a bounded representation test only."
+  },
+  "strict_dispatch": {
+    "entrypoint": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "runtime_worktree": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics",
+    "family_worktree": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics",
+    "root_only_enablement": true,
+    "requests_start_disabled": true
+  },
+  "execution_chain": {
+    "genuine_gencase_request": "gencase-request.json",
+    "actual_initial_qa_request": "initial-qa-request.json",
+    "short_event_request": "short-event-solver-request.json",
+    "order": ["genuine_gencase", "actual_initial_typed_qa", "short_event_qualification"],
+    "gencase_receipt_must_be_fresh": true,
+    "qa_report_must_be_fresh": true,
+    "solver_must_use_fresh_gencase_and_qa": true,
+    "no_bi4_clone_or_synthetic_receipt": true,
+    "full16_production": false
+  },
+  "resource_policy": {
+    "independent_case_count_increment": 0,
+    "candidate_count_selected": 1,
+    "candidate_count_limit": 2,
+    "gpu_launch_performed_by_this_scope": false,
+    "cpu_generation_performed_by_this_scope": false,
+    "source_arrays_opened_by_this_scope": false
+  }
+}

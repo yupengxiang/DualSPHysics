@@ -1,0 +1,66 @@
+{
+  "schema": "ds02.f5.physical-binding.v1",
+  "scope_name": "root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1",
+  "family_id": "F5",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+  "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+  "condition_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+  "mechanism_id": "runup",
+  "geometry_family_id": "F5_GEOM_COMPACT_CONTINUOUS_BED_EXPLICIT_CLOSED_MESH_V1",
+  "control_family_id": "F5_CONTROL_PACKET_MOTION_DP020_EQUILIBRIUM_V1",
+  "physical_condition_sha256": "268d4ea37228fb63ef493a6e535740bb765d165d874f97804443d5e11eb3497c",
+  "registry_role": "new_condition_record_same_physical_mother_no_independent_case",
+  "physical_mother_id": "F5_COMPACT_STILL_WATER_RUNUP_V1",
+  "independent_case_count_increment": 0,
+  "geometry": {
+    "profile_nodes_xz_m": [[-0.2, 0.0], [2.0, 0.0], [3.0, 0.28], [3.6, 0.448], [3.9, 0.448], [4.4, 0.05], [4.8, 0.05]],
+    "y_bounds_m": [-0.15, 0.15],
+    "lower_closure_z_m": -0.15,
+    "dp_m": 0.02,
+    "bed_mk": 40,
+    "explicit_mesh_points": 156,
+    "explicit_mesh_triangles": 52,
+    "stl_invocation": "removed_from_candidate_definition_only; historical_asset_retained_for_provenance"
+  },
+  "controls": {
+    "gravity_m_s2": [0, 0, -9.81],
+    "boundary": 1,
+    "step_algorithm": 2,
+    "kernel": 2,
+    "visco_treatment": 1,
+    "visco": 0.01,
+    "density_dt": 2,
+    "density_dt_value": 0.1,
+    "motion_asset": "assets/f5_compact_packet_motion.dat",
+    "motion_window_s": [0, 16],
+    "save_interval_s": 0.02
+  },
+  "source_recipe": {
+    "candidate_id": "A_explicit_closed_mesh_only",
+    "selected_def050_sha256": "5ed3359ecbc3d88fd31a0a8e4015929a20041e3b9b3a151475e736c0be513c45",
+    "derived_definition_sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+    "edit_contract": "remove only source lines 269-271; retain explicit 52-triangle mesh, clipplane, fluid fill, motion, EOS, timestep, domain, gauges and save settings"
+  },
+  "evidence": {
+    "audit_summary": "audit_057_bounded_summary.json",
+    "audit_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-f5-actual-native-fixed-bed-support-audit-057/native_initial_fixed_bed_support_audit.json",
+    "audit_report_sha256": "49ff1478139e5f2ca605353ab10cfce4e1e088dc9e416ab9156a8c9d774bc0c6",
+    "native_mk40_count": 149532,
+    "native_mk40_uid_digest_sha256": "427ad72bf1a11b6f873ddfe5fca96460da5fc41808ff5a43b108cfb92a8cc6a1",
+    "x_segment_count": 6,
+    "near_mid_y_count": 0,
+    "relative_layer_min": -32,
+    "relative_layer_max": 43,
+    "root037_failure_summary": "21018/40710 below 0.02 m at frame 400; 19764/40710 below 0.04 m; deepest 0.5593415 m; root cause unassigned"
+  },
+  "execution_policy": {
+    "genuine_gencase_required": true,
+    "fictional_clone_forbidden": true,
+    "actual_initial_qa_required": true,
+    "short_event_only_after_qa": true,
+    "full16_solver_allowed": false,
+    "conversion_allowed": false,
+    "launch_allowed_in_family_scope": false,
+    "production_approval": "none"
+  }
+}
