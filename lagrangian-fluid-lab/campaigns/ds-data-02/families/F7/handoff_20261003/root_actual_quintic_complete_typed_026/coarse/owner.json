@@ -1,0 +1,206 @@
+{
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F7",
+    "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+    "mechanism_id": "moving_obstacle_exchange",
+    "geometry_family_id": "finite_open_top_tank_rotating_paddle",
+    "control_family_id": "quintic_target_two_cycles_45deg_sampled_rotfile_v1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          -0.6,
+          -0.4,
+          0
+        ],
+        "size_m": [
+          1.2,
+          0.8,
+          0.6
+        ],
+        "label": "finite walls open top"
+      },
+      "fluid_envelope": {
+        "low_m": [
+          -0.55,
+          -0.35,
+          0.05
+        ],
+        "size_m": [
+          1.1,
+          0.7,
+          0.432
+        ],
+        "label": "envelope minus paddle"
+      },
+      "paddle": {
+        "low_m": [
+          -0.07,
+          -0.24,
+          0.05
+        ],
+        "size_m": [
+          0.06,
+          0.48,
+          0.48
+        ],
+        "label": "finite moving solid"
+      }
+    },
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 320.1984
+      },
+      "initial_mass_total_kg": 320.1984,
+      "mass_policy": "unscaled native quadrature; envelope minus paddle",
+      "velocities_m_per_s": {
+        "fluid": [
+          0,
+          0,
+          0
+        ]
+      },
+      "source_labels": {
+        "left": "initial x < -0.04",
+        "right": "initial x >= -0.04"
+      }
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 2,
+      "kernel": 2,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.05
+      },
+      "density_dt": 3,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "density_kg_m3": 1000,
+    "parameters": {
+      "analytic_target": "two finite symmetric quintic cycles active0..8, neutral rest8..12",
+      "motion_reader": "piecewise_linear_absolute_angle_increment",
+      "amplitude_deg": 45.0,
+      "target_window_s": [
+        0,
+        12.0
+      ],
+      "motion_sampling_dt_s": 0.001,
+      "initial_axis_point_m": [
+        -0.04,
+        0,
+        0.05
+      ],
+      "axis_direction": [
+        0,
+        0,
+        1
+      ]
+    },
+    "event_window": {
+      "time_start_s": 0,
+      "time_end_s": 12,
+      "sequence": [
+        "initial static fill",
+        "two finite quintic target rotation cycles",
+        "neutral pose rest and residual fluid exchange"
+      ],
+      "right_censor_policy": "finite-time residence retained; excluded identities unknown without native boundary evidence"
+    },
+    "periodic_boundary": false,
+    "mass_policy": "native MassFluid unscaled",
+    "lineage_group_id": "F7_OBSTACLE_REFERENCE_BASE_AND_QUINTIC_SHARED_GEOMETRY_NO_LEAK"
+  },
+  "physical_condition_sha256": "512cb217f29e716346c249339545ed2599e7cb1aeb8e81fe7f1c0cf7f341c34c",
+  "actual_initial_qa": {
+    "role": "coarse",
+    "case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+    "prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-verified-recipe-coarse-actual-gencase-021/prepared/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-verified-recipe-coarse-actual-gencase-021/execution-receipt.json",
+    "expected_total": 70179,
+    "expected_fluid": 40700,
+    "expected_types": [
+      0,
+      1,
+      3
+    ],
+    "reference_prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_EXPLICIT_WET_CELLS_001_MEDIUM/gencase-explicit-wet-cells-001/F7_OBSTACLE_EXPLICIT_WET_CELLS_001_MEDIUM",
+    "initial_bi4_sha256": "e618440bc55384f8942506929f98ac4c688a8585bf017b532cafbc8ada839425",
+    "generated_xml_sha256": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f",
+    "official_csv_sha256": "d22a3d5e9253d576d3363bc701bfa13569f2363da82b8281b25764ca790052c6",
+    "official_csv": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_RECIPE_ACTUAL_INITIAL_QA/root-obstacle-quintic-verified-recipe-three-dp-original-matched-native-initial-qa-022/coarse-initial-all.csv",
+    "passed": true,
+    "native_particles": 70179,
+    "native_fluid": 40700,
+    "actual_3d": true,
+    "native_type_counts": {
+      "0": 27495,
+      "1": 1984,
+      "3": 40700
+    },
+    "actual_fluid_envelope_m": [
+      [
+        -0.54000002,
+        -0.34,
+        0.059999999
+      ],
+      [
+        0.54000002,
+        0.34,
+        0.47999999
+      ]
+    ],
+    "official_CSV_fluid_mass_sum_kg": 325.60001628000003,
+    "mass_precision": "Official CSV rounded export; original BI4 binary native weights remain authority for full converter",
+    "original_reference_comparison": {
+      "all_13_official_CSV_columns_exactly_equal": true,
+      "provenance": {
+        "initial_bi4_sha256": "5c3a82b35a4fd25cd980d3152d604f194a89588f4d2fec91f197db57c47b8115",
+        "generated_xml_sha256": "f9723539e12b889cefb07f31df7247b8de917dde2d20ffa60af0caff7e5c91e9",
+        "official_csv_sha256": "d22a3d5e9253d576d3363bc701bfa13569f2363da82b8281b25764ca790052c6",
+        "official_csv": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_RECIPE_ACTUAL_INITIAL_QA/root-obstacle-quintic-verified-recipe-three-dp-original-matched-native-initial-qa-022/coarse-original-reference-initial-all.csv"
+      },
+      "scope": "Official text-export equality; binary source hashes also recorded, no claim binary mass precision from CSV"
+    }
+  },
+  "actual_source_forcing": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/motion_obstacle_quintic.dat",
+    "sha256": "2b607e700abaab4b687740b1a5a3535ce1cc3fee246cbd02d09ad596a722032f"
+  },
+  "actual_source_preflight_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-verified-recipe-coarse-actual-gencase-021/prepared/prepared-input-report.json",
+  "claim_boundary": "No old numerical qualification transfers; original spatial failures remain",
+  "production_approval": "none",
+  "source_asset_recovery": {
+    "old_empty_motion_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "fresh_clone_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/clone-report.json",
+    "old023retained": "allthree initialization failures retained",
+    "physical_target_changed": false
+  },
+  "schema": "ds02.root.actual-quintic-owner.v1",
+  "family_id": "F7",
+  "case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+  "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+  "mechanism_id": "moving_obstacle_exchange",
+  "resolution": "coarse",
+  "solver_parameters": {
+    "dp_m": 0.02,
+    "time_max_s": 12,
+    "time_out_s": 0.02,
+    "boundary": 1
+  },
+  "source": {
+    "raw_bi4_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-restored-motion-coarse-full601-native-025/solver_output/data",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE.xml",
+    "native_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE/root-obstacle-quintic-restored-motion-coarse-full601-native-025/execution-receipt.json",
+    "control": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/motion_obstacle_quintic.dat"
+  },
+  "claims": {
+    "q_n": "not_granted",
+    "production_eligibility": "not_evaluated"
+  }
+}
