@@ -1,0 +1,55 @@
+{
+  "case_id": "F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT053",
+  "definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_compact_equilibrium_actual_weir_ownership_fix_053/selected_definitions/F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT053_Def.xml",
+  "definition_sha256": "8651e56f72fb1d92927c5376a4b390725da34999cee691a5b2f4900ec80ced7b",
+  "dp_m": 0.01,
+  "threads": 2,
+  "gencase": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+  "expected_fluid": null,
+  "assets": [
+    {
+      "relative_name": "assets/f5_compact_continuous_bed_profile.stl",
+      "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/assets/f5_compact_continuous_bed_profile.stl",
+      "sha256": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c",
+      "bytes": 13386
+    },
+    {
+      "relative_name": "assets/f5_compact_packet_motion.dat",
+      "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/assets/f5_compact_packet_motion.dat",
+      "sha256": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a",
+      "bytes": 15023
+    }
+  ],
+  "source_preparation_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/prepared-source-report.json",
+  "predictions": {
+    "fluid_inventory": "Unknown until actualGenCase/typedQA; no theoreticalcounts labeled actual",
+    "continuum_fluid_mass_kg": 323.7792857142857
+  },
+  "syntax_erratum": {
+    "failed_source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ROOT_REVIEWED_SOURCE/root-compact-equilibrium-actual-source-preparation-046/prepared/F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT045_Def.xml",
+    "source_sha256": "792d782ffd03e8ab6d539301ae6c595ae402ac88abb90902344986c1d5f9cce6",
+    "actual_error": "GenCase047: constantsdef hswl missing required value attribute (auto=true does not make value optional)",
+    "only_source_change": "hswl value=0 added; auto=true preserved; no physicalgeometry/control alteration"
+  },
+  "physical_placement_erratum": {
+    "original_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_compact_equilibrium_actual_hswl_attribute_fix_048/selected_definitions/F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT048_Def.xml",
+    "original_sha256": "838ffc4222ab52c9ba9d7304534dcb50cc4a1b03ea78e3ef039e8b4ec4804f5e",
+    "actual_geometry_diagnostic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ACTUAL_COARSE_GEOMETRY_QA/root-compact-equilibrium-runup-coarse-full-native-geometry-qa-049/runup_coarse-physical-geometry-diagnostic.json",
+    "actual_geometry_diagnostic_sha256": "79c22b815b4b3bb35109d844efee8023257dafa7365c66d48ea1d8c6e07a306b",
+    "actual_failing_below_bed_fluid_particles": 10860,
+    "native_fluid_total": 10905,
+    "repair": "Reverse clip vector to(.28,0,-1); sourcephysicalplane unchanged; GenCase retained halfspace must keep fluid above continuous bed. Actual newinitialQA stillrequired.",
+    "root_cause_repair_number": 1,
+    "no_Q_N_transfer": true
+  },
+  "native_ownership_erratum": {
+    "original_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_compact_equilibrium_actual_clip_direction_fix_050/selected_definitions/F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT050_Def.xml",
+    "sha256": "c01ac3c478f27f38b9d5281e1384e9206a1679465fce6b017d6a31a64b3c7dc6",
+    "actual_geometry_diagnostic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_ACTUAL_COARSE_GEOMETRY_QA/root-compact-equilibrium-two-mechanism-three-dp-full-native-geometry-qa-052/weir_coarse-physical-geometry-diagnostic.json",
+    "actual_geometry_diagnostic_sha256": "afe6f8c697e1bb331534d10356dcf75ae1d93ae3e267b4a74708d807def54ef4",
+    "actual_native_fluid_inside_weir_solid": 240,
+    "root_cause": "Full fluid draw overwrote previously rasterized submerged weir sites. Actualnativeplacement proved failure; prioranalytical no-overwrite claim rejected.",
+    "repair": "Move exact same weir marker/three physical boxes after fluid and clipreset; no weir dimensions/control/continuousbed/fluidlevelchanges. New nativeQA required.",
+    "root_cause_repair_number": 1
+  }
+}
