@@ -1,0 +1,98 @@
+{
+  "schema": "ds02.f7.smooth-c2-audit-binding.v1",
+  "created_at_utc": "2026-10-04T02:52:00Z",
+  "audit_scope": "handoff_20261003/root_followup_041_bounded_fallback_v1",
+  "family_id": "F7",
+  "mechanism": "moving_obstacle_exchange",
+  "physical_mother_id": "F7_OBSTACLE_SMOOTH_C2_BASE",
+  "root_motion_regularity_report": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_ORIGINAL_PRESCRIBED_MOTION_REGULARITY/root-obstacle-original-source-bound-motion-regularity-017/motion-regularity.json",
+    "sha256": "4301fa313c4187fbdfc6c7f55b68bfa17c093ea65cbff2b9829373eb5266eb4b",
+    "verified_findings": {
+      "explicit_phase_reset": true,
+      "segment1_end_angle_deg": -42.797543233281914,
+      "segment1_end_velocity_left_deg_s": 34.94899869705837,
+      "wait_velocity_deg_s": 0.0,
+      "velocity_jump_1_deg_s": -34.94899869705837,
+      "acceleration_jump_1_deg_s2": -270.3326854726472,
+      "segment3_start_velocity_right_deg_s": -113.09733552923255,
+      "velocity_jump_2_deg_s": -113.09733552923255,
+      "acceleration_jump_2_deg_s2": -3.480992478329677e-14,
+      "rest_at_neutral": false,
+      "interpretation": "Source discontinuity proven; explicit phase resets and discontinuous velocity/acceleration jumps. No unique causal attribution to spatial 43% KE error."
+    }
+  },
+  "official_sources": [
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/src/source/JMotion.cpp",
+      "sha256": "f013c7d7a036f3368d0a3a6a3ab00e6f77977a7aca0e9d786d0187f2164cac1c",
+      "role": "XML motion reader for mvrotfile and attributes (duration, anglesunits)"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/src/source/JMotionObj.cpp",
+      "sha256": "06dafbfcb72028815b83af7c4d1ca7be0bfc99c953d1b93b88f2771968b956b1",
+      "role": "DfConfig, DfGetNewAng linear interpolation, ModPos.Rotate execution"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/src/source/JMotionData.cpp",
+      "sha256": "9ceff90769e9c945752a83b72db98a87e5e42fc6beec3cdf2a43e672b2eae9f1",
+      "role": "JMotionDataRotAxis::LoadFileAng 2-column motion file parser"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/src/source/JMotionMov.h",
+      "sha256": "6c11cc0a4fd71c062fe26478d96e3a91b27c65e25a424470e021b83adc13f87a",
+      "role": "JMotionMovRotFile class declaration"
+    }
+  ],
+  "reference_definitions": {
+    "coarse": {
+      "dp_m": 0.025,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/reference/definitions/F7_OBSTACLE_REFERENCE_BASE_COARSE_Def.xml",
+      "sha256": "bf609364c2055212e81256c01e28bc0b6f3effc28bee92ba95e3b2ec51a3af83"
+    },
+    "medium": {
+      "dp_m": 0.020,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/reference/definitions/F7_OBSTACLE_REFERENCE_BASE_MEDIUM_Def.xml",
+      "sha256": "9ef62d0dd3aab0723dcfbe9406e46718a18eae0e7efd23767fe4bb722eafbfcc"
+    },
+    "fine": {
+      "dp_m": 0.016,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/reference/definitions/F7_OBSTACLE_REFERENCE_BASE_FINE_Def.xml",
+      "sha256": "9c556c2614d501978a60f461acd5a7a8e4e79608e4e6278b5fac4adc617d7a48"
+    }
+  },
+  "prior_evidence_lineage": {
+    "retained_spatial_discrepancy": {
+      "error_magnitude": 0.4301148887269427,
+      "status": "FAIL (budget <= 0.05)",
+      "interpretation": "Spatial KE discrepancy remains an open negative finding; not cured by motion continuity alone."
+    },
+    "time_macro_review": {
+      "review": "root_actual_dense_pair_macro_review_016",
+      "max_scaled_ke_error": 0.01078675,
+      "status": "PASS (1.08% <= 5.0%)",
+      "interpretation": "Time-macro convergence isolates temporal integration; does not guarantee spatial convergence."
+    },
+    "particle_exclusions_and_transport": {
+      "exclusions_kg": [0.410, 0.423],
+      "paired_transport_fates": [8376, 8843],
+      "status": "retained as unknown physical fates"
+    },
+    "rejected_owner_claims": [
+      "No causal airgap > 1mm / kernel-radius claim granted.",
+      "No inference of continuous fluid face from discrete lattice corners.",
+      "No unverified geometry alterations bundled into this motion repair scope."
+    ]
+  },
+  "governance_limits": {
+    "macro_budget_fraction": 0.05,
+    "frozen_kinetic_scale_j": 89.584705923,
+    "max_repairs_per_rootcause": 2,
+    "current_repair_number_for_this_scope": 2,
+    "root_remaining_gpu_hours": 31.0,
+    "root_qualification_progress": "271/320",
+    "root_actual_goal_progress": "0/336",
+    "q_n_status": "not_granted",
+    "production_approval": "none"
+  }
+}

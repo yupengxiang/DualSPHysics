@@ -1,0 +1,176 @@
+{
+  "schema": "ds02.f7.smooth-c2-driving-control-spec.v1",
+  "created_at_utc": "2026-10-04T02:50:00Z",
+  "physical_mother_id": "F7_OBSTACLE_SMOOTH_C2_BASE",
+  "mechanism": "moving_obstacle_exchange",
+  "repair_identity": {
+    "repair_name": "REPAIR_2_SMOOTH_C2_DRIVING_CONTROL",
+    "target_flaw": "Source-bound prescribed motion velocity and acceleration discontinuities audited in Root motion-regularity-017",
+    "justification": "Root audit proved original piecewise sinusoidal motion contains explicit phase resets, non-zero wait angles (-42.8 deg), velocity jumps from +34.9 deg/s to 0 and 0 to -113.1 deg/s, and acceleration jumps of 270.3 deg/s2. This repair provides a strictly C2 angle trajectory with zero velocity and zero acceleration at all joins, start, return, and rest tail."
+  },
+  "motion_formulation": {
+    "mathematical_model": "Piecewise quintic polynomial (minimum-jerk) segments",
+    "base_polynomial": "s(tau) = 10*tau^3 - 15*tau^4 + 6*tau^5, tau in [0, 1]",
+    "first_derivative": "ds/dtau = 30*tau^2*(1 - tau)^2",
+    "second_derivative": "d2s/dtau2 = 60*tau*(1 - tau)*(1 - 2*tau)",
+    "boundary_derivatives": {
+      "tau_0": {"s": 0.0, "ds_dtau": 0.0, "d2s_dtau2": 0.0},
+      "tau_1": {"s": 1.0, "ds_dtau": 0.0, "d2s_dtau2": 0.0}
+    },
+    "stroke_parameter": {
+      "nominal_stroke_amplitude_deg": 45.0,
+      "physically_meaningful_range_deg": [30.0, 45.0],
+      "first_ladder_selection_deg": 45.0
+    },
+    "time_structure": {
+      "time_window_total_s": 12.0,
+      "time_active_interaction_s": 8.0,
+      "time_rest_tail_s": 4.0,
+      "segments": [
+        {
+          "segment_id": 1,
+          "name": "forward_stroke_to_peak",
+          "start_s": 0.0,
+          "end_s": 1.0,
+          "duration_s": 1.0,
+          "theta_start_deg": 0.0,
+          "theta_end_deg": 45.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "formula": "theta(t) = 45.0 * s(t / 1.0)"
+        },
+        {
+          "segment_id": 2,
+          "name": "reverse_swing_across_neutral",
+          "start_s": 1.0,
+          "end_s": 3.0,
+          "duration_s": 2.0,
+          "theta_start_deg": 45.0,
+          "theta_end_deg": -45.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "neutral_crossing_s": 2.0,
+          "formula": "theta(t) = 45.0 - 90.0 * s((t - 1.0) / 2.0)"
+        },
+        {
+          "segment_id": 3,
+          "name": "forward_swing_across_neutral",
+          "start_s": 3.0,
+          "end_s": 5.0,
+          "duration_s": 2.0,
+          "theta_start_deg": -45.0,
+          "theta_end_deg": 45.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "neutral_crossing_s": 4.0,
+          "formula": "theta(t) = -45.0 + 90.0 * s((t - 3.0) / 2.0)"
+        },
+        {
+          "segment_id": 4,
+          "name": "reverse_swing_across_neutral",
+          "start_s": 5.0,
+          "end_s": 7.0,
+          "duration_s": 2.0,
+          "theta_start_deg": 45.0,
+          "theta_end_deg": -45.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "neutral_crossing_s": 6.0,
+          "formula": "theta(t) = 45.0 - 90.0 * s((t - 5.0) / 2.0)"
+        },
+        {
+          "segment_id": 5,
+          "name": "return_to_neutral_rest",
+          "start_s": 7.0,
+          "end_s": 8.0,
+          "duration_s": 1.0,
+          "theta_start_deg": -45.0,
+          "theta_end_deg": 0.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "formula": "theta(t) = -45.0 + 45.0 * s((t - 7.0) / 1.0)"
+        },
+        {
+          "segment_id": 6,
+          "name": "neutral_rest_tail",
+          "start_s": 8.0,
+          "end_s": 12.0,
+          "duration_s": 4.0,
+          "theta_start_deg": 0.0,
+          "theta_end_deg": 0.0,
+          "vel_start_deg_s": 0.0,
+          "vel_end_deg_s": 0.0,
+          "acc_start_deg_s2": 0.0,
+          "acc_end_deg_s2": 0.0,
+          "formula": "theta(t) = 0.0"
+        }
+      ]
+    }
+  },
+  "official_dualsphysics_semantics": {
+    "motion_element": "mvrotfile",
+    "element_attributes": {
+      "id": 1,
+      "duration": 12.0,
+      "anglesunits": "degrees"
+    },
+    "rotation_axis": {
+      "axisp1": [-0.04, 0.0, 0.05],
+      "axisp2": [-0.04, 0.0, 1.05]
+    },
+    "file_semantics": {
+      "file_name": "motion_obstacle_smooth_c2.dat",
+      "reader_class": "JMotionDataRotAxis::LoadFileAng",
+      "reader_source": "src/source/JMotionData.cpp",
+      "columns": ["time_s", "angle_deg"],
+      "delimiter": "whitespace / tab",
+      "comment_prefix": "#",
+      "angle_interpretation": "absolute angle in degrees; DualSPHysics initializes DfLastAng = DfAng[0] and rotates by delta = newang - DfLastAng at each time step",
+      "interpolation": "piecewise linear interpolation DfGetNewAng(t) between sampled points",
+      "sampling_dt_s": 0.001,
+      "sample_count": 12001,
+      "max_linear_interpolation_error_deg": 3.25e-5
+    }
+  },
+  "commensurate_3ladder_suite": {
+    "coarse": {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_COARSE",
+      "dp_m": 0.025,
+      "definition_xml": "definitions/F7_OBSTACLE_SMOOTH_C2_BASE_COARSE_Def.xml",
+      "pointref_m": [0.0125, 0.0125, 0.0125]
+    },
+    "medium": {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_MEDIUM",
+      "dp_m": 0.020,
+      "definition_xml": "definitions/F7_OBSTACLE_SMOOTH_C2_BASE_MEDIUM_Def.xml",
+      "pointref_m": [0.01, 0.01, 0.01]
+    },
+    "fine": {
+      "case_id": "F7_OBSTACLE_SMOOTH_C2_BASE_FINE",
+      "dp_m": 0.016,
+      "definition_xml": "definitions/F7_OBSTACLE_SMOOTH_C2_BASE_FINE_Def.xml",
+      "pointref_m": [0.008, 0.008, 0.008]
+    }
+  },
+  "governance": {
+    "status": "prospective_driving_control_repair_staged_for_root_dispatch",
+    "q_n_status": "not_granted",
+    "production_approval": "none",
+    "independent_case_count_increment": 0,
+    "unique_causal_attribution_claimed": false,
+    "limitations": [
+      "Repair eliminates source-bound motion discontinuities; does not assert unique cause for 43.011% spatial KE discrepancy.",
+      "No retrospective gate relaxation; qualification requires strict execution under Root runner."
+    ]
+  }
+}
