@@ -1,0 +1,205 @@
+{
+  "physical_binding": {
+    "schema": "ds02.physical-binding.v1",
+    "family_id": "F1",
+    "mechanism_id": "asymmetric_dual_channel",
+    "geometry_family_id": "F1_GEOM_DUAL_THICK_DBC_LOWER_HEAD_V1",
+    "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "rho0_kg_m3": 1000,
+    "geometry": {
+      "tank_low_m": [
+        0,
+        0,
+        0
+      ],
+      "tank_size_m": [
+        3.2,
+        1,
+        0.8
+      ],
+      "obstacle_or_divider_low_m": [
+        1.2,
+        0.34,
+        0
+      ],
+      "obstacle_or_divider_size_m": [
+        0.8,
+        0.06,
+        0.7
+      ],
+      "fluid_reservoir_low_m": [
+        2.2,
+        0,
+        0
+      ],
+      "fluid_reservoir_size_m": [
+        1,
+        1,
+        0.3
+      ],
+      "free_top": true
+    },
+    "initialization": {
+      "velocity_m_s": [
+        0,
+        0,
+        0
+      ],
+      "continuum_fluid_volume_m3": 0.3,
+      "continuum_fluid_mass_kg": 300.0,
+      "native_mass_policy": "Unscaled original binary native float weights; CSV initial mass is rounded export evidence only",
+      "source_cohort": {
+        "definition_mkfluid": 0,
+        "native_type": 3,
+        "native_mk": 1
+      }
+    },
+    "event_protocol": {
+      "window_s": [
+        0,
+        4.0
+      ],
+      "expected_event_sequence": [
+        "release",
+        "divider_encounter",
+        "asymmetric_channel_transport",
+        "downstream_return"
+      ],
+      "actual_event_evidence": "pending full native arrays; no guaranteed event or no-loss claim"
+    },
+    "physical_controls": {
+      "boundary": "static thick support DBC",
+      "viscosity_treatment": 1,
+      "viscosity": 0.1,
+      "density_diffusion": 2,
+      "density_diffusion_value": 0.1
+    },
+    "lineage_group": "F1_dual_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK"
+  },
+  "physical_condition_sha256": "c1bc0822eb36ca4f8c1acfe2243bb506885e2e7a2234a1bea064957d07039196",
+  "selected_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_bounded_fallback_three_dp_gencase_027/selected_definitions/F1_FALLBACK_DUAL_MEDIUM_Def.xml",
+  "selected_definition_sha256": "10ddfe301eb4aed2209c30a1b53f6d9d5c10c03fd273572c8a0f81397eff20ed",
+  "actual_initial_native_QA": {
+    "role": "dual_medium",
+    "case_id": "F1_FALLBACK_DUAL_MEDIUM",
+    "prefix": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_FALLBACK_DUAL_MEDIUM/root-fallback-dual-medium-actual-gencase-027/prepared/F1_FALLBACK_DUAL_MEDIUM",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_FALLBACK_DUAL_MEDIUM/root-fallback-dual-medium-actual-gencase-027/execution-receipt.json",
+    "expected_total": 649416,
+    "expected_fluid": 300000,
+    "expected_types": [
+      0,
+      3
+    ],
+    "expected_fluid_envelope_m": [
+      [
+        2.205,
+        0.005,
+        0.005
+      ],
+      [
+        3.1950000000000003,
+        0.995,
+        0.295
+      ]
+    ],
+    "initial_bi4_sha256": "f74ae54221f52365b6b000ad3fae9fa75b1538d8720b106427870dc766e92bbf",
+    "generated_xml_sha256": "69cb70fc20980814639d6ecdf4d7b8a45449848c2645834c6c80670a44cfd47e",
+    "official_csv_sha256": "0bd861ade6fbd13ef154b3557ed0275beb459aabd31677b844ea78cfafd47a0c",
+    "official_csv": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_BOUNDED_FALLBACK_ACTUAL_INITIAL_QA/root-fallback-six-full-native-initial-storage-fix-031/dual_medium-initial-all.csv",
+    "passed": true,
+    "native_particles": 649416,
+    "native_fluid": 300000,
+    "actual_3d": true,
+    "native_type_counts": {
+      "0": 349416,
+      "3": 300000
+    },
+    "actual_fluid_envelope_m": [
+      [
+        2.2049999,
+        0.0049999999,
+        0.0049999999
+      ],
+      [
+        3.1949999,
+        0.995,
+        0.29499999
+      ]
+    ],
+    "official_CSV_fluid_mass_sum_kg": 300.0000000000002,
+    "mass_precision": "Official CSV rounded export; original BI4 binary native weights remain authority for full converter",
+    "original_reference_comparison": null
+  },
+  "actual_generated_constants": {
+    "data2d": {
+      "value": "false"
+    },
+    "gravity": {
+      "x": "0",
+      "y": "0",
+      "z": "-9.81",
+      "units_comment": "m/s^2"
+    },
+    "cflnumber": {
+      "value": "0.2"
+    },
+    "gamma": {
+      "value": "7"
+    },
+    "rhop0": {
+      "value": "1000",
+      "units_comment": "kg/m^3"
+    },
+    "dp": {
+      "value": "0.01",
+      "units_comment": "metres (m)"
+    },
+    "h": {
+      "value": "0.017320508076",
+      "units_comment": "metres (m)"
+    },
+    "b": {
+      "value": "162565.71429",
+      "units_comment": "Pascal (Pa)"
+    },
+    "massbound": {
+      "value": "0.001",
+      "units_comment": "kg"
+    },
+    "massfluid": {
+      "value": "0.001",
+      "units_comment": "kg"
+    }
+  },
+  "actual_execution_parameters": {
+    "Boundary": "1",
+    "SavePosDouble": "1",
+    "StepAlgorithm": "1",
+    "VerletSteps": "40",
+    "Kernel": "1",
+    "ViscoTreatment": "1",
+    "Visco": "0.1",
+    "ViscoBoundFactor": "1",
+    "DensityDT": "2",
+    "DensityDTvalue": "0.1",
+    "Shifting": "0",
+    "RigidAlgorithm": "1",
+    "FtPause": "0",
+    "CoefDtMin": "0.05",
+    "DtIni": "0",
+    "DtMin": "0",
+    "DtFixed": "0",
+    "DtAllParticles": "0",
+    "TimeMax": "4.0",
+    "TimeOut": "0.01",
+    "MinFluidStop": "0",
+    "RhopOutMin": "700",
+    "RhopOutMax": "1300"
+  },
+  "scope": "New lower-head mother; no transfer of old Q-N or path stability. Actual full native independent checks remain pending."
+}
