@@ -1,0 +1,112 @@
+{
+  "schema": "ds02.f5.root-followup-048.audit-specification.v1",
+  "audit_target": "F5 Compact Flume Macro 057 Spatial Failure Diagnosis",
+  "created_at": "2026-10-04T17:35:00+08:00",
+  "audited_macro_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_COMPACT_EQUILIBRIUM_COARSE_MEDIUM_FROZEN_GAUGES/root-compact-both-mechanisms-coarse-medium-full16-all-six-frozen-gauges-057/frozen-native-gauge-comparison.json",
+  "governance": {
+    "status": "DIAGNOSTIC ONLY",
+    "q_n": "NOT GRANTED",
+    "production_approval": "NONE",
+    "qualification_cap": 320,
+    "current_used": 300,
+    "gpu_budget_h": 96.0,
+    "gpu_used_h": 75.0,
+    "home_disk_min_gib": 500
+  },
+  "macro_057_failure_metrics": {
+    "runup": {
+      "WG1_relative_rmse": 0.4271424270265413,
+      "WG1_relative_max_abs": 0.5248911998003741,
+      "WG3_relative_rmse": 0.4198434403141473,
+      "WG3_relative_max_abs": 0.5976798599769549,
+      "WG4_dry_samples_coarse": 782,
+      "WG4_dry_samples_medium": 0,
+      "Crest_dry_samples_coarse": 800,
+      "Crest_dry_samples_medium": 800
+    },
+    "weir": {
+      "WG1_relative_rmse": 0.43309657182626515,
+      "WG1_relative_max_abs": 0.5274192816866886,
+      "WG3_relative_rmse": 0.4242474182414802,
+      "WG3_relative_max_abs": 0.5892810361710631,
+      "WG4_dry_samples_both": 800,
+      "Crest_dry_samples_both": 800
+    },
+    "flat_basin_uniform_discrepancy_m": 0.17085
+  },
+  "source_pins": {
+    "defect_area_1_bed_hollow_shell": {
+      "source_files": [
+        "selected_definitions/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_Def.xml:26-241, 269-271",
+        "generate_compact_continuous_bed_stl.py:127-203",
+        "doc/xml_format/GenCase_CaseTemplate.xml:363-379"
+      ],
+      "finding": "Continuous bed defined as closed 52-facet polyhedron of volume 0.4162 m^3. GenCase <drawtriangles> and <drawfilestl> without autofill='true' only rasterize 2D surface facets. Theoretical solid fill requires 52,023 particles (coarse) and 213,089 particles (medium); actual generated particles are 13,556 (coarse) and 40,561 (medium). The particle counts scale precisely as O(dp^-2) with surface area 5.94 m^2. The continuous bed is completely hollow inside, forming a 1-particle-thick skin over an empty void up to 60 cm high."
+    },
+    "defect_area_2_floor_and_sidewall": {
+      "source_files": [
+        "selected_definitions/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_Def.xml:242-261"
+      ],
+      "finding": "tank_floor uses <boxfill>bottom</boxfill> at z=-0.15 m, leaving a 15 cm empty vertical gap under the upstream fluid basin (z in [0.0, 0.40] m). Sidewalls have width 0.030 m, which is insufficient to accommodate 3 layers (vdp='0,1,2') at dp=0.020 m (requires 0.060 m), causing lateral boundary layer truncation in coarse resolution."
+    },
+    "defect_area_3_support_and_rhopgradient": {
+      "source_files": [
+        "src/source/JSph.cpp:92, 701-705",
+        "src/source/JCaseCtes.cpp:137-139",
+        "src/source/JDsGaugeItem.cpp:728-753"
+      ],
+      "finding": "DualSPHysics Dynamic Boundary Condition (DBC) requires boundary thickness >= 2h (~3.46 dp) for kernel completeness. Single-layer bed provides <35% kernel support. rhopgradient='2' initializes bottom fluid particles at hydrostatic pressure ~3924 Pa, while boundary particles are initialized at reference density pb=0. Under gravity, fluid sags into the hollow bed. SPH boundary penetration depth scales directly with dp, creating a systematic, resolution-dependent fluid column subsidence that accounts for the uniform ~0.17 m SWL discrepancy across all flat-basin gauges."
+    },
+    "defect_area_4_gauge_selection_and_dry_clamping": {
+      "source_files": [
+        "src/source/JDsGaugeItem.cpp:758-787",
+        "doc/xml_format/_FmtXML_Gauges.xml:41-46"
+      ],
+      "finding": "In JGaugeSwl::CalculeCpuT, when no fluid is detected (mpre == 0), the measured SWL is clamped to Point0.z = z_bed. In Runup, WG4 (x=3.20 m, still depth 0.064 m = 3.2 dp in coarse) suffered severe resolution dropout: coarse was dry for 782/800 frames (97.75%) while medium was wet for 800/800 frames. In Weir, WG4 is situated on the upstream face of the weir structure (x=3.20 m) and was 100% dry (800/800 frames) in both resolutions. Crest is sub-aerial (z=0.448 m > SWL 0.400 m) and was 100% dry in both mechanisms."
+    }
+  },
+  "grounded_repair_proposals": {
+    "cause_1_hollow_bed": [
+      {
+        "id": "1A",
+        "title": "Native GenCase STL Autofill",
+        "mechanism": "Add autofill='true' to <drawfilestl file='assets/f5_compact_continuous_bed_profile.stl' autofill='true' /> and remove redundant initial <drawtriangles>.",
+        "pros": "Preserves exact 52-facet STL profile while producing complete solid boundary fill."
+      },
+      {
+        "id": "1B",
+        "title": "Structured Multi-Layer Extrusion",
+        "mechanism": "Use GenCase advanced depth extrusion <drawfilestl file='...' advanced='true'><depth depthmin='0.08' /></drawfilestl> to generate guaranteed >=3-layer boundary shell without deep interior void overhead.",
+        "pros": "Provides 100% kernel support with bounded boundary particle count."
+      }
+    ],
+    "cause_2_floor_and_sidewall": [
+      {
+        "id": "2A",
+        "title": "Floor Datum Realignment",
+        "mechanism": "Align tank_floor directly beneath the flat basin at datum z=0.00 m with solid fill and 3 layers, eliminating the 15 cm void.",
+        "pros": "Ensures contiguous, solid substrate under upstream fluid."
+      },
+      {
+        "id": "2B",
+        "title": "Sidewall Width Expansion",
+        "mechanism": "Increase sidewall box width to 0.060 m (>=3 dp_coarse), ensuring 3 boundary layers instantiate without truncation at coarse resolution.",
+        "pros": "Restores lateral kernel completeness across all commensurate resolutions."
+      }
+    ],
+    "cause_3_shoreline_gauges": [
+      {
+        "id": "3A",
+        "title": "Shoreline Gauge Realignment",
+        "mechanism": "Reposition WG4 from x=3.20 m upstream to x=2.90 m (depth 0.148 m = 7.4 dp_coarse), and reposition Weir WG4 to downstream receiving basin.",
+        "pros": "Eliminates false resolution dropout and weir solid obstruction."
+      },
+      {
+        "id": "3B",
+        "title": "Segmented Evaluation Contract",
+        "mechanism": "Retain native dry codes but report wet_only_relative_eta_rmse and resolution_dropout_fraction separately.",
+        "pros": "Decouples physical free-surface convergence from dry-clamping artifacts."
+      }
+    ]
+  }
+}

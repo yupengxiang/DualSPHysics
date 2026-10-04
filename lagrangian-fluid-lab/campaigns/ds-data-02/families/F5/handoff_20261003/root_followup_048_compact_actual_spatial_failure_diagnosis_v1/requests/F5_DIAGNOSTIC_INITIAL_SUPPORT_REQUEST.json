@@ -1,0 +1,40 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_DIAGNOSTIC_INITIAL_SUPPORT_REQUEST",
+  "created_at": "2026-10-04T17:35:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU diagnostic worker auditing particle support completeness, hollow bed cavity absence, and boundary layer thickness from completed Round 054 CSV exports across all 6 cases; diagnostic only, not Q-N, zero simulation re-run; Rootguard execution only.",
+    "policy_authority": "AGENTS.md line 18, plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 diagnostic_initial_support_worker.py --binding requests/f5_diagnostic_initial_support_binding.json --output-dir {attempt_root}",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_048_compact_actual_spatial_failure_diagnosis_v1",
+    "resource_limits": {
+      "wall_seconds_max": 600,
+      "cpu_threads_max": 2,
+      "gpu_count": 0,
+      "memory_mb_max": 4096
+    }
+  },
+  "cases": [
+    "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050",
+    "F5_REF_RUNUP_DP0125_EQUILIBRIUM_ROOT050",
+    "F5_REF_RUNUP_DP010_EQUILIBRIUM_ROOT050",
+    "F5_REF_WEIR_DP020_EQUILIBRIUM_ROOT053",
+    "F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT053",
+    "F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT053"
+  ],
+  "budget_accounting": {
+    "campaign_budget_cpu_core_hours": 384.0,
+    "actual_cpu_core_hours": 242.0,
+    "remaining_reserve_cpu_core_hours": 142.0,
+    "campaign_budget_gpu_hours": 96.0,
+    "actual_gpu_hours": 75.0,
+    "remaining_reserve_gpu_hours": 21.0,
+    "qualification_state": "300/320 attempts used",
+    "storage_policy": "Homefree >= 500 GiB user policy; no storage 1 TiB cap"
+  }
+}
