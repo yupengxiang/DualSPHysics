@@ -1,0 +1,115 @@
+{
+  "schema": "ds02.f4.drop-gap-qualification-rebind-source-binding.v1",
+  "family_id": "F4",
+  "scope_id": "root_followup_065_stage1_drop_gap_qualification_rebind_v1",
+  "upstream_source_scope_id": "root_followup_060_stage1_drop_gap_endpoints_v1",
+  "actual_qa_scope_id": "root_followup_064_stage1_drop_gap_initial_native_qa_rebind_v1",
+  "actual_qa_index": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_GAP_ENDPOINTS/root-stage1-f4-gap0180-0260-actual-native-initial-qa-069/initial-qa/initial-native-audit-index.json",
+  "actual_qa_index_sha256": "a6fbe94141a3274ea80b6fdea01ea41a95541c9f5c3c4775f850e2b49c44ffc0",
+  "actual_qa_execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_GAP_ENDPOINTS/root-stage1-f4-gap0180-0260-actual-native-initial-qa-069/execution-receipt.json",
+  "actual_qa_execution_receipt_sha256": "3c9c60e7eab5b5dde097ddc29a24bdf3be07c38e7096558324b5559d28ea466e",
+  "actual_qa_status": "initial-native-input-integrity-pass",
+  "actual_qa_launch_allowed": false,
+  "actual_qa_checks_required": [
+    "true_3d",
+    "gencase_completed",
+    "finite_unique_complete_ids",
+    "complete_type_partition",
+    "all_source_population_checks",
+    "finite_tank_face_coverage",
+    "same_constants_initial_velocities_execution"
+  ],
+  "genuine_individual_gencase_result": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_GAP_ENDPOINTS/root-stage1-f4-gap0180-0260-genuine-gencase-063/gencase-preflight-result.json",
+  "genuine_individual_gencase_result_sha256": "17a410c1e51f15606cb6f992edd495a11e5cba7a81848c47a51de7f41ec3d174",
+  "original_shared_execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_GAP_ENDPOINTS/root-stage1-f4-gap0180-0260-genuine-gencase-063/execution-receipt.json",
+  "original_shared_execution_receipt_sha256": "27ad60625be85416246bf9225bd90a780d04ac791c25deb267a1979427db67f3",
+  "original_shared_execution_receipt_status": "failed",
+  "original_shared_execution_receipt_error": "GenCase actual particle count missing",
+  "original_shared_receipt_mutation": false,
+  "mother_case_id": "F4_DROP_CENTERED_REFERENCE_001_DP010",
+  "mother_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/F4_DROP_CENTERED_REFERENCE_001_DP010.xml",
+  "mother_qualification_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/qualification-centered-fullwindow-001/execution-receipt.json",
+  "solver": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+  "solver_options_inherited": [
+    "-tmax:1.2",
+    "-tout:0.001"
+  ],
+  "frame_contract": {
+    "time_start_s": 0.0,
+    "time_max_s": 1.2,
+    "time_out_s": 0.001,
+    "expected_frames": 1201
+  },
+  "control_inheritance": {
+    "boundary": "DBC",
+    "no_slip_binding": {
+      "ViscoTreatment": 1,
+      "Visco": 0.08,
+      "ViscoBoundFactor": 1
+    },
+    "dt": {
+      "cflnumber": 0.2,
+      "CoefDtMin": 0.05,
+      "DtIni": 0,
+      "DtMin": 0,
+      "DtFixed": 0,
+      "DtAllParticles": 0
+    },
+    "integrator": {
+      "StepAlgorithm": 1,
+      "VerletSteps": 40,
+      "Kernel": 2,
+      "DensityDT": 2,
+      "DensityDTvalue": 0.1,
+      "Shifting": 0,
+      "RigidAlgorithm": 1
+    }
+  },
+  "endpoint_contract": {
+    "physical_endpoint_ids": [
+      "F4_DROP_ENDPOINT_GAP0p18000_DP010",
+      "F4_DROP_ENDPOINT_GAP0p26000_DP010"
+    ],
+    "gaps_m": [0.18, 0.26],
+    "physical_ids_preserved": true,
+    "counts_per_endpoint": {
+      "total_particles": 83233,
+      "fixed_particles": 24161,
+      "fluid_particles": 59072,
+      "drop": 5824,
+      "pool": 53248
+    }
+  },
+  "builder_contract": {
+    "worker": "workers/build_f4_gap_qualification_bindings_v1.py",
+    "reads": [
+      "069 actual-native-audit-index.json",
+      "069 generated endpoint XML/BI4 and native QA JSON",
+      "063 gencase-preflight-result.json",
+      "063 failed shared execution-receipt.json",
+      "060 endpoint plan",
+      "062 endpoint metadata",
+      "mother generated XML and completed qualification receipt"
+    ],
+    "writes": [
+      "fresh per-endpoint exact-byte XML/BI4 staging",
+      "fresh runtime-compatible derived GenCase evidence sidecars",
+      "disabled per-endpoint qualification request JSON"
+    ],
+    "does_not_run": [
+      "GenCase",
+      "DualSPHysics solver",
+      "BI4 decoder",
+      "H5/particle-array reads",
+      "conversion",
+      "CSV generation",
+      "rendering"
+    ],
+    "derived_sidecar_is_new_gencase_process": false,
+    "launch_owner": "root",
+    "launch_allowed": false,
+    "q_n_status": "not_assessed",
+    "precision_status": "not_accepted",
+    "production_approval": "none"
+  }
+}
