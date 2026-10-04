@@ -1,0 +1,1 @@
+F4 centered DROP: Root reviewed all 1201 saved states and six full-size keyframes. Accepted as visual-only independent case 8/336. Existing precision failures preserved. No production-domain authorization.
