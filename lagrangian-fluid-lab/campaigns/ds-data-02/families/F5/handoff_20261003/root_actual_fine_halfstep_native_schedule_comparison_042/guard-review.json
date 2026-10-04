@@ -1,0 +1,12 @@
+{
+  "previous_attempt": "root-fine-two-mechanism-full-native-halfstep-all-six-gauges-041",
+  "previous_failure": "Root added exact-grid assertion incorrectly; actual gauge captures first native solver step at/after requested time. No scientific comparison ran.",
+  "source_evidence": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/src/source/JDsGaugeItem.cpp",
+  "source_functions": [
+    "JGaugeItem::SetTimeStep",
+    "JGaugeSwl::StoreResult",
+    "JGaugeSwl::SaveResults"
+  ],
+  "replacement": "Requested .02 schedule plus measured native dt_max and six-decimal timestamp rounding; preserve actual timestamps and unchanged interpolation, all six RMSE/max budgets remain .01.",
+  "physical_or_scientific_repair_count_increment": 0
+}
