@@ -1,0 +1,95 @@
+{
+  "schema": "ds02.f2.initial-support-audit-source-report.v1",
+  "scope": "root_followup_057_stage1_initial_support_audit_v1",
+  "status": "source_prepared_disabled",
+  "case_id": "F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+  "source_question": "Does the existing source explicitly define a non-equilibrium fill or a fluid-wall overlap/gap that explains pre-rotation wall-jet-like visual features?",
+  "answer_boundary": "The source explicitly defines a uniform three-band, zero-velocity fill and a finite three-layer wall construction. Existing initial QA reports positive fluid-solid separation and no fluid inside the declared solids. The source does not explicitly encode hydrostatic pre-relaxation. These observations do not establish a numerical root cause, explosion, invalid state, or acceptance result.",
+  "canonical_source_facts": {
+    "physical_cup_low_m": [0.0, -0.15, 0.65],
+    "physical_cup_size_m": [0.425, 0.3, 0.45],
+    "physical_cup_floor_z_m": 0.65,
+    "fluid_continuous_low_m": [0.0525, -0.12, 0.7],
+    "fluid_continuous_high_m": [0.3725, 0.12, 1.02],
+    "fluid_box_gap_to_declared_cup_low_m": {
+      "x_low": 0.0525,
+      "x_high": 0.0525,
+      "y_low": 0.03,
+      "y_high": 0.03,
+      "z_low_floor": 0.05,
+      "z_high": 0.08
+    },
+    "fluid_source_bands_y_m": [[-0.12, -0.04], [-0.04, 0.04], [0.04, 0.12]],
+    "fluid_source_band_particle_counts": [8192, 8192, 8192],
+    "dp_m": 0.01,
+    "wall_layer_labels": [0, 1, 2],
+    "nominal_three_layer_pitch_span_m": 0.03,
+    "nominal_layer_span_qualification": "derived geometry descriptor only"
+  },
+  "initialization_evidence": {
+    "owner_initial_velocity_m_per_s": [0.0, 0.0, 0.0],
+    "xml_reference_density_kg_m3": 1000.0,
+    "xml_gravity_m_per_s2": [0.0, 0.0, -9.81],
+    "xml_hydrostatic_pre_relaxation_clause": false,
+    "xml_explicit_initial_velocity_clause": false,
+    "source_interpretation": "A uniform fill with zero initial velocity is explicit. Hydrostatic initialization is not explicit in the inspected XML; this is an initialization-description boundary, not a demonstrated cause of the visual feature."
+  },
+  "existing_initial_qa": {
+    "all_checks_pass": true,
+    "initial_fluid_solid_separation": true,
+    "fluid_points_inside_cup_declared_envelope": 24576,
+    "fluid_points_inside_receiver_declared_envelope": 0,
+    "fluid_points_inside_tray_declared_envelope": 0,
+    "interior_margin_lower_bound_m": 0.0375,
+    "margin_definition": "minimum coordinate distance over fluid points to the cup declared envelope; minimum is not floor-only",
+    "fluid_count": 24576,
+    "fluid_mk_counts": {"1": 8192, "2": 8192, "3": 8192},
+    "fluid_mass_kg": 24.576,
+    "initial_qa_claim_boundary": "geometry/population/finite-face evidence only; no full Q-I lifecycle, Q-N, or production eligibility"
+  },
+  "existing_typed_lifecycle": {
+    "frames": 401,
+    "frame0_time_s": 0.0,
+    "frame25_time_s": 0.2500285569214772,
+    "frame50_time_s": 0.5000392333366036,
+    "prescribed_rotation_start_s": 0.5,
+    "frame0_fluid_missing": 0,
+    "frame25_fluid_missing": 0,
+    "frame50_fluid_missing": 0,
+    "first_missing_fluid_frame": 70,
+    "terminal_fluid_missing": 118,
+    "terminal_fluid_active": 24458,
+    "lifecycle_interpretation": "Retain missing identities as a numerical/lifecycle observation; do not rename them as spill or invalid state."
+  },
+  "visual_handoff": {
+    "artifact": "root-stage1-f2-full401-native-geometry-animation-025",
+    "keys": [25, 50],
+    "observation": "wall-jet-like features before or at the prescribed rotation start; fluid bulk described as coherent",
+    "evidence_status": "source handoff observation; animation metadata says visual review pending",
+    "do_not_infer": ["explosion", "invalid state", "overlap cause", "hydrostatic failure cause", "acceptance"]
+  },
+  "optional_worker": {
+    "prepared": true,
+    "enabled": false,
+    "frame": 0,
+    "fixed_wall_type": 0,
+    "fluid_type": 3,
+    "sample_count_per_type": 51,
+    "outputs": ["position", "velocity", "speed", "kinetic energy", "sample-to-sample nearest distances"],
+    "global_nearest_or_root_cause_claim": false
+  },
+  "scope_checks": {
+    "owner_and_current_xml_bound": true,
+    "actual_generated_xml_bound": true,
+    "actual_existing_initial_qa_bound": true,
+    "typed_and_animation_metadata_bound": true,
+    "no_h5_bi4_csv_png_gif_or_particle_arrays_opened": true,
+    "no_jobs_or_rendering_executed": true,
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined"
+  }
+}

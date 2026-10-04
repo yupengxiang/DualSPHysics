@@ -1,0 +1,112 @@
+{
+  "schema": "ds02.f2.initial-support-audit-contract.v1",
+  "family_id": "F2",
+  "scope": "root_followup_057_stage1_initial_support_audit_v1",
+  "model_policy": "GPT-5.6 Luna/max; no Gemini; no recursive agents",
+  "status": "source_only_disabled",
+  "case": {
+    "case_id": "F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+    "physical_case_id": "F2H10V2_OFFSET_V1",
+    "background": "OFFSET",
+    "mechanism": "offset_spill",
+    "resolution": "coarse",
+    "dp_m": 0.01,
+    "native_frames": 401,
+    "time_window_s": [0.0, 4.000020828936935],
+    "native_particles": 421566,
+    "native_fluid_particles": 24576,
+    "typed_fluid_type": 3,
+    "typed_moving_type": 1,
+    "typed_fixed_type": 0,
+    "typed_floating_type_2_count": 0
+  },
+  "source_geometry": {
+    "cup": {
+      "low_m": [0.0, -0.15, 0.65],
+      "size_m": [0.425, 0.3, 0.45],
+      "physical_floor_z_m": 0.65,
+      "boxfill": "bottom | left | right | front | back",
+      "declared_wall_layers": [0, 1, 2],
+      "declared_wall_layer_pitch_m": 0.01,
+      "nominal_three_layer_span_m": 0.03,
+      "layer_span_interpretation": "derived from vdp labels and dp; not a measured acceptance threshold"
+    },
+    "fluid": {
+      "continuous_low_m": [0.0525, -0.12, 0.7],
+      "continuous_size_m": [0.32, 0.24, 0.32],
+      "continuous_high_m": [0.3725, 0.12, 1.02],
+      "source_band_y_bounds_m": [[-0.12, -0.04], [-0.04, 0.04], [0.04, 0.12]],
+      "source_band_count": 3,
+      "source_band_particles": 8192,
+      "initial_velocity_m_per_s": [0.0, 0.0, 0.0],
+      "reference_density_kg_m3": 1000.0
+    },
+    "declared_box_margin_low_m": [0.0525, 0.03, 0.05],
+    "declared_box_margin_high_m": [0.0525, 0.03, 0.08],
+    "initial_partvtk_center_extent_m": {
+      "fluid_min": [0.059999999, -0.1125, 0.70749998],
+      "fluid_max": [0.37, 0.1175, 1.0175]
+    },
+    "initial_partvtk_margin_lower_bound_m": 0.0375,
+    "margin_lower_bound_definition": "minimum coordinate distance from fluid points to the cup declared box envelope; it is not a floor-only measurement"
+  },
+  "initialization_semantics": {
+    "xml_reference_density_present": true,
+    "xml_gravity_m_per_s2": [0.0, 0.0, -9.81],
+    "xml_hydrostatic_pre_relaxation_clause": false,
+    "xml_explicit_initial_velocity_clause": false,
+    "owner_initial_velocity_clause": true,
+    "owner_initial_velocity_m_per_s": [0.0, 0.0, 0.0],
+    "interpretation": "Source explicitly defines a uniform three-band fill, reference density, and zero initial fluid velocity; the available XML does not explicitly define hydrostatic pre-equilibration. This does not by itself establish a numerical root cause."
+  },
+  "existing_evidence": {
+    "initial_geometry_audit_all_checks_pass": true,
+    "initial_fluid_solid_separation": true,
+    "initial_fluid_inside_cup_declared_envelope": 24576,
+    "initial_fluid_inside_receiver_declared_envelope": 0,
+    "initial_fluid_inside_tray_declared_envelope": 0,
+    "fulltyped_frame0_missing": 0,
+    "fulltyped_frame25_missing": 0,
+    "fulltyped_frame50_missing": 0,
+    "fulltyped_terminal_missing": 118,
+    "fulltyped_terminal_fluid_active": 24458,
+    "first_missing_fluid_frame": 70,
+    "source_claim_boundary": "descriptive initial geometry and lifecycle evidence only; Q-I/Q-N/production remain ungranted"
+  },
+  "visual_observation_binding": {
+    "animation_artifact": "existing full401 native geometry animation 025",
+    "keys": [25, 50],
+    "times_s": [0.2500285569214772, 0.5000392333366036],
+    "prescribed_rotation_start_s": 0.5,
+    "observation": "wall-jet-like features are recorded before or at rotation start; fluid bulk is described as coherent",
+    "visual_review_status": "pending root inspection of full animation and contact sheets",
+    "interpretation_boundary": "do not infer explosion, invalid state, or cause from this observation"
+  },
+  "optional_worker_contract": {
+    "trajectory_frame": 0,
+    "sample_count_per_type": 51,
+    "types": {"fixed_wall": 0, "fluid": 3},
+    "fields": ["valid", "particle_id", "particle_zone", "initial_mk", "mass", "velocity", "position", "type"],
+    "outputs": [
+      "bounded first-51 position and velocity summaries",
+      "speed and kinetic-energy summaries when mass is available",
+      "pairwise nearest distances between sampled fixed and fluid points",
+      "explicit sample-limited qualifier"
+    ],
+    "read_full_native_window": false,
+    "read_raw_bi4": false,
+    "write_particle_arrays": false,
+    "write_csv": false,
+    "global_nearest_neighbor_claim": false
+  },
+  "gates": {
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined",
+    "acceptance": "not_claimed"
+  }
+}
