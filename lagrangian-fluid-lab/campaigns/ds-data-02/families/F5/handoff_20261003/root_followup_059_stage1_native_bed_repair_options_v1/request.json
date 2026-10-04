@@ -1,0 +1,83 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050",
+  "attempt_id": "root-followup-059-stage1-native-bed-repair-options-v1",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 2,
+  "max_wall_seconds": 300,
+  "estimated_storage_bytes": 10485760,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics",
+  "source_scope_root": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_059_stage1_native_bed_repair_options_v1",
+  "command": [
+    "/usr/bin/python3",
+    "{source_scope_root}/scripts/review_source.py",
+    "--binding",
+    "{source_scope_root}/binding.json",
+    "--options",
+    "{source_scope_root}/repair_options.json",
+    "--output-dir",
+    "{attempt_root}"
+  ],
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "independent_case_count_increment": 0,
+  "production_approval": "none",
+  "numerical_reference_status": "source_geometry_recipe_only; no Q-N and no solver result",
+  "visual_review_status": "not_applicable_source_review",
+  "input_files": [
+    "{source_scope_root}/binding.json",
+    "{source_scope_root}/repair_options.json",
+    "{source_scope_root}/scripts/review_source.py",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f5_full801_nativefluid_bed_footprint_diagnostic_037/request.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-runup-coarse-full801-nativefluid-bed-footprint-diagnostic-037/nativefluid_bed_support_diagnostic.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_058_stage1_native_initial_fixed_bed_support_audit_v1/binding.json",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_058_stage1_native_initial_fixed_bed_support_audit_v1/request.json"
+  ],
+  "input_sha256": {
+    "{source_scope_root}/binding.json": "d981cf3f4b678cda3f51b1a7937f94399cfe6a11862f8c11d8d61b47218664b1",
+    "{source_scope_root}/repair_options.json": "0b3f11d4a851fa4360e009e24bcf53288517f8b89b802f4eed88db08658b854c",
+    "{source_scope_root}/scripts/review_source.py": "bf83fc5591541580c6048582a3c0697ac547a483a1b358696bb1e54f59fdac2f",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f5_full801_nativefluid_bed_footprint_diagnostic_037/request.json": "cfa030850491ea1847e2289761ef999216f4eb539f40ad5800cedbea23217ef7",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-runup-coarse-full801-nativefluid-bed-footprint-diagnostic-037/nativefluid_bed_support_diagnostic.json": "2bef081567648bbc49b45f43e3b3797d14752a20582f4408f028cdcc493af7be",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_058_stage1_native_initial_fixed_bed_support_audit_v1/binding.json": "f0abc30bf990021bd4f5d878cdd784ec1229da256ad25824b17dffe0155b85d8",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_058_stage1_native_initial_fixed_bed_support_audit_v1/request.json": "9287325f821a4217b237ebc29cdac065e3b9aa29c7ce3b0754e67171f9cca104"
+  },
+  "candidate_contract": {
+    "max_candidates": 2,
+    "candidate_ids": ["A_explicit_closed_mesh_only", "B_mk40_profile_underlay_x2_to_x4p8"],
+    "must_wait_for_058_native_audit": true,
+    "each_candidate_requires_fresh_gencase": true,
+    "each_candidate_requires_fresh_initial_typed_qa": true,
+    "preserve_root037_failure_ledger": true,
+    "no_changed_physics": true,
+    "no_changed_motion": true,
+    "no_changed_initial_fluid_window": true
+  },
+  "strict_dispatch_policy": {
+    "root_only_launch": true,
+    "source_only_until_root_changes_launch_allowed": true,
+    "no_h5_read": true,
+    "no_bi4_decode": true,
+    "no_native_array_read": true,
+    "no_array_edit": true,
+    "no_gencase": true,
+    "no_solver": true,
+    "no_conversion": true,
+    "no_paraview": true,
+    "source_xml_stl_json_metadata_read_only": true
+  },
+  "claim_boundary": {
+    "native_fixed_bed_result": false,
+    "missing_bed_result": false,
+    "boundary_fault_result": false,
+    "hollow_stl_result": false,
+    "solver_root_cause": false,
+    "repair_authorization": false,
+    "numerical_precision_acceptance": false,
+    "visual_acceptance": false,
+    "production_approval": false
+  }
+}

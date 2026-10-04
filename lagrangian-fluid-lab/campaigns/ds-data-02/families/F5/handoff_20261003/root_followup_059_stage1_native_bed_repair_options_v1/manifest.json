@@ -1,0 +1,37 @@
+{
+  "schema": "ds02.f5.stage1.source-only-repair-options-manifest.v1",
+  "scope_name": "root_followup_059_stage1_native_bed_repair_options_v1",
+  "family_id": "F5",
+  "status": "planned_source_only",
+  "execution_performed": false,
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "h5_bi4_csv_arrays_opened_by_this_scope": false,
+  "source_xml_stl_json_metadata_read_by_this_scope": true,
+  "gencase_or_solver_invoked_by_this_scope": false,
+  "paraview_render_performed_by_this_scope": false,
+  "files": [
+    {"path": "README.md", "bytes": 2841, "sha256": "884168011fa9391304b45d39033e3ace71f1979aafb7fdd7ba6fa7c802e50a4c"},
+    {"path": "binding.json", "bytes": 4132, "sha256": "d981cf3f4b678cda3f51b1a7937f94399cfe6a11862f8c11d8d61b47218664b1"},
+    {"path": "repair_options.json", "bytes": 6573, "sha256": "0b3f11d4a851fa4360e009e24bcf53288517f8b89b802f4eed88db08658b854c"},
+    {"path": "request.json", "bytes": 4920, "sha256": "38576d8ee23b71ff90002e8e66a739524cdd0bddc1cf7442f8a81588cd6920ba"},
+    {"path": "scripts/review_source.py", "bytes": 7569, "sha256": "bf83fc5591541580c6048582a3c0697ac547a483a1b358696bb1e54f59fdac2f"}
+  ],
+  "validation": {
+    "static_review_command": "python3 scripts/review_source.py --binding binding.json --options repair_options.json --output-dir <attempt_root>",
+    "expected_candidate_count": 2,
+    "expected_status": "completed_static_source_review",
+    "native_arrays_must_remain_unopened": true
+  },
+  "claim_boundary": {
+    "native_fixed_bed_result": false,
+    "missing_bed_result": false,
+    "boundary_fault_result": false,
+    "hollow_stl_result": false,
+    "solver_root_cause": false,
+    "repair_authorization": false,
+    "numerical_precision_acceptance": false,
+    "visual_acceptance": false,
+    "production_approval": false
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema": "ds02.f5.stage1.native-filled-bed-repair-options.v1",
+  "scope_name": "root_followup_059_stage1_native_bed_repair_options_v1",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050",
+  "status": "source_only_options_pending_root_audit",
+  "source_edit_allowed": false,
+  "execution_allowed": false,
+  "root037_failure_ledger": {
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-stage1-runup-coarse-full801-nativefluid-bed-footprint-diagnostic-037/nativefluid_bed_support_diagnostic.json",
+    "report_sha256": "2bef081567648bbc49b45f43e3b3797d14752a20582f4408f028cdcc493af7be",
+    "summary": "historical Root037 full801 fluid/profile crossing evidence; retained unchanged",
+    "root_cause_status": "unassigned_pending_058_native_fixed_bed_audit"
+  },
+  "source_anchor": {
+    "selected_definition": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_compact_equilibrium_actual_clip_direction_fix_050/selected_definitions/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_Def.xml",
+      "sha256": "5ed3359ecbc3d88fd31a0a8e4015929a20041e3b9b3a151475e736c0be513c45",
+      "line_27": "<setmkbound mk=\"40\" cmt=\"root_numeric_bed_surface_support added boundary marker\" />",
+      "line_28_241": "drawtriangles: 156 points and 52 triangles; top profile plus z=-0.15 closure and y=+-0.15 sides",
+      "line_269": "<setmkbound mk=\"40\" />",
+      "line_270": "<drawfilestl file=\"assets/f5_compact_continuous_bed_profile.stl\" />",
+      "line_271": "<shapeout file=\"continuous_bed\" reset=\"true\" />",
+      "line_272": "<setmkfluid mk=\"0\" />",
+      "line_273_281": "clipplane and initial fluid drawbox preserved by both options"
+    },
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050.xml",
+      "sha256": "7f06bb8cb950c8d445d84353751b04ea0ba8c94265ea9a5e14e04ad54e37d8b6",
+      "line_373_387": "generated particle ranges; fixed mk=40 begin=5020 count=149532"
+    },
+    "bed_stl": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/assets/f5_compact_continuous_bed_profile.stl",
+      "sha256": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c",
+      "facets": 52,
+      "bounds_m": {
+        "x": [-0.2, 4.8],
+        "y": [-0.15, 0.15],
+        "z": [-0.15, 0.448]
+      }
+    }
+  },
+  "exact_profile": {
+    "top_nodes_xz_m": [[-0.2, 0.0], [2.0, 0.0], [3.0, 0.28], [3.6, 0.448], [3.9, 0.448], [4.4, 0.05], [4.8, 0.05]],
+    "y_bounds_m": [-0.15, 0.15],
+    "lower_closure_z_m": -0.15,
+    "dp_m": 0.02,
+    "bed_marker_mk": 40
+  },
+  "candidates": [
+    {
+      "id": "A_explicit_closed_mesh_only",
+      "sequence": 1,
+      "edit_kind": "remove_external_bed_asset_path",
+      "source_operations": [
+        "Keep selected/generated drawtriangles lines 27-241 byte-for-byte and keep setmkbound mk=40.",
+        "Remove generated/selected lines 269-271 (the duplicate mk=40 state, drawfilestl, and shapeout); do not alter line 272 or lines 273-281.",
+        "Do not alter motion, constants, EOS, timestep, save cadence, domain, initial fluid box, gauges, or particle type semantics."
+      ],
+      "geometry_semantics": {
+        "native_boundary_source": "explicit 52-triangle profile mesh already present in the bound source",
+        "profile_preserved": true,
+        "y_bounds_preserved": true,
+        "lower_closure_preserved": true,
+        "stl_used_for_native_generation": false,
+        "stl_historical_asset_retained": true,
+        "no_hollow_or_watertight_claim": true
+      },
+      "fresh_gencase_initial_qa": [
+        "Generate into a new candidate-specific directory; never overwrite Gen050 or original013.",
+        "Verify generated XML/Def hashes and the particle range source; require fixed Type0 mk=40 particles with the candidate's new count.",
+        "Verify frame-zero typed identity, mass, x/y/z bounds, and no initial fluid particle is below the exact continuous profile at the declared diagnostic tolerances.",
+        "Reject if the explicit mesh produces no native bed cohort, duplicates, or changes any non-bed cohort."
+      ]
+    },
+    {
+      "id": "B_mk40_profile_underlay_x2_to_x4p8",
+      "sequence": 2,
+      "edit_kind": "add_bounded_native_support_volume",
+      "source_operations": [
+        "Keep all existing mesh, STL, shapeout, fluid, motion, and physics commands unchanged.",
+        "Immediately before current line 272 insert setmkbound mk=40 with an explicit candidate comment.",
+        "Insert drawbox with boxfill=solid, point x=2.00 y=-0.15 z=-0.15, size x=2.80 y=0.30 z=0.15, and layers vdp=0,1,2.",
+        "Return to setmkfluid mk=0 at the original line-272 position; do not move or modify the clipplane or initial fluid drawbox."
+      ],
+      "geometry_semantics": {
+        "native_boundary_source": "existing profile mesh/STL plus a solid mk=40 underlay only below z=0 on x=2..4.8",
+        "underlay_bounds_m": {"x": [2.0, 4.8], "y": [-0.15, 0.15], "z": [-0.15, 0.0]},
+        "profile_preserved_as_upper_boundary": true,
+        "y_bounds_preserved": true,
+        "lower_closure_preserved": true,
+        "no_hollow_or_watertight_claim": true
+      },
+      "fresh_gencase_initial_qa": [
+        "Generate into a new candidate-specific directory; never overwrite Gen050 or original013.",
+        "Verify the new mk=40 Type0 count, per-range UID identity, mass, and x/y/z bounds against the exact underlay box.",
+        "Explicitly check duplicate/overlapping native particles against the existing tank-floor bottom layers and reject on overlap or unintended marker changes.",
+        "Verify frame-zero fluid/profile separation and that no non-bed geometry, motion, EOS, or numerical setting changed."
+      ]
+    }
+  ],
+  "shared_gate": {
+    "max_repair_candidates": 2,
+    "requires_058_audit_review": true,
+    "requires_fresh_gencase": true,
+    "requires_fresh_initial_typed_qa": true,
+    "solver_launch_allowed": false,
+    "conversion_allowed": false,
+    "array_edit_allowed": false,
+    "amplitude_batch_allowed": false,
+    "production_approval": "none",
+    "old_failures_preserved": true,
+    "root_cause_claim": false
+  }
+}
