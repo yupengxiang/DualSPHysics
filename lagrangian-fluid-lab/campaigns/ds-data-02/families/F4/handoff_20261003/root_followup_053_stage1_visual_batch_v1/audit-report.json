@@ -1,0 +1,40 @@
+{
+  "schema": "ds02.f4.stage1-source-audit.v1",
+  "family_id": "F4",
+  "scope_id": "root_followup_053_stage1_visual_batch_v1",
+  "status": "source plan complete; launch disabled",
+  "checks": {
+    "row_count": {"expected": 8, "observed": 8, "status": "pass"},
+    "unique_physical_case_ids": {"status": "pass"},
+    "one_dp_per_physical_case": {"status": "pass", "dp_m": 0.01},
+    "independent_case_increment": {"value": 0, "status": "pass"},
+    "single_variation_dimension_per_row": {"status": "pass"},
+    "mother_source_definitions_present": {"status": "pass"},
+    "known_source_receipts": {"drop_gencase": 0, "drop_native": 0, "columns_gencase": 0, "columns_native": 0, "status": "pass"},
+    "source_arrays_materialized": {"status": "not_performed"},
+    "gencase_for_new_rows": {"status": "not_performed"},
+    "native_solver_for_new_rows": {"status": "not_performed"},
+    "conversion_for_new_rows": {"status": "not_performed"},
+    "visual_render_for_new_rows": {"status": "not_performed"}
+  },
+  "legal_overlap_audit": {
+    "source_mothers": "existing receipt-backed source definitions",
+    "new_rows": "pending root particle-level overlap and legal-window QA",
+    "no_preflight_pass_claim": true
+  },
+  "historical_negatives_preserved": [
+    "F4 spatial non-convergence and collision timing shifts",
+    "old precision failure",
+    "half-step/chord timing uncertainty",
+    "q_n not assessed",
+    "visual acceptance pending",
+    "recovered ~147 GB artifact has unknown original OS and remains a separate audit"
+  ],
+  "root_next_actions": [
+    "review batch_param_table and source provenance",
+    "run the disabled builder only if source definition review is accepted",
+    "perform fresh GenCase and initial QA for each changed physical condition",
+    "perform strict full-window native/typed/dynamic workflow after QA",
+    "make visual decision from whole-frame evidence"
+  ]
+}

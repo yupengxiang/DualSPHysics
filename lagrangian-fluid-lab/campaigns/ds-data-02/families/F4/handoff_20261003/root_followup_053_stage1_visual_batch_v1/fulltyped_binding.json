@@ -1,0 +1,108 @@
+{
+  "schema": "ds02.f4.fulltyped-source-binding.v1",
+  "family_id": "F4",
+  "scope_id": "root_followup_053_stage1_visual_batch_v1",
+  "binding_status": "source-only; disabled; root review required",
+  "fulltyped_contract": {
+    "time_axis": {
+      "unit": "s",
+      "native_frame_count_by_mother": {
+        "drop": 1201,
+        "columns": "source receipt expected full window; root must confirm actual frame count before conversion"
+      },
+      "drop_window": [0.0, 1.2],
+      "columns_window": [0.0, 1.2],
+      "preserve_native_timestamps": true,
+      "do_not_recount_views": true
+    },
+    "per_particle_fields": [
+      "particle_id",
+      "particle_zone",
+      "valid",
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "type",
+      "mk",
+      "initial_type",
+      "initial_mk",
+      "initial_mass"
+    ],
+    "required_shape": {
+      "position": "[frame, particle, 3]",
+      "velocity": "[frame, particle, 3]",
+      "scalar_fields": "[frame, particle]",
+      "identity_fields": "[frame, particle]"
+    },
+    "lifecycle_policy": "fixed identity and type/mk lineage must be checked over the whole native window; missingness is explicit",
+    "materialization": {
+      "h5": "root only after strict approval",
+      "bi4": "root GenCase only after strict approval",
+      "csv": "no generation in this handoff",
+      "arrays": "no materialization in this handoff"
+    }
+  },
+  "drop_anchor_binding": {
+    "source_case_id": "F4_DROP_CENTERED_REFERENCE_001_DP010",
+    "physical_condition_sha256": "fe9911188f229da4e489a3a47764e9499b37f715b10566cb68986f49e6548c7e",
+    "source_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP010_Def.xml",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/F4_DROP_CENTERED_REFERENCE_001_DP010.xml",
+    "generated_xml_sha256": "39ead4fa268715af15bba6879537ad7cf2a564283049af921f4bb1a1ba31acd0",
+    "native_types": {
+      "fixed": [0],
+      "fluid": [3],
+      "moving": []
+    },
+    "source_native_particle_counts": {
+      "total": 83233,
+      "fixed": 24161,
+      "fluid": 59072
+    },
+    "source_mass_policy": "native body support weights; physical mass is rho*dp^3 and is not a continuum rescale",
+    "source_receipts": {
+      "gencase": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/execution-receipt.json",
+      "native": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/qualification-centered-fullwindow-001/execution-receipt.json",
+      "dynamic": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/root-stage1-f4-existing-full1201-paraview-dynamic-xdmf-005/execution-receipt.json"
+    }
+  },
+  "columns_anchor_binding": {
+    "source_case_id": "F4_COL_CENTERED_REFERENCE_001_DP010",
+    "physical_condition_sha256": "dbc97c0081fa8622c1f5da4348e2b78a56eca55bdcdcc39f1e601976dbdcca85",
+    "source_definition": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_COL_CENTERED_REFERENCE_001_DP010_Def.xml",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/F4_COL_CENTERED_REFERENCE_001_DP010.xml",
+    "generated_xml_sha256": "d717cf2d5d92d96fc0fca104dcd683be1322dd289923cae76594a53f2941ce04",
+    "native_types": {
+      "fixed": [0],
+      "fluid": [3],
+      "moving": []
+    },
+    "source_mass_policy": "native body support weights; physical mass is rho*dp^3 and is not a continuum rescale",
+    "source_receipts": {
+      "gencase": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/execution-receipt.json",
+      "native": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP010/qualification-centered-fullwindow-001/execution-receipt.json",
+      "conversion_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP010/root-centered-fullstate-conversion-001/conversion-report.json"
+    }
+  },
+  "row_binding_rules": {
+    "allowed_mothers": ["drop", "columns"],
+    "allowed_variation_dimensions": {
+      "drop": ["anchor", "initial_height_gap", "initial_velocity", "initial_horizontal_offset", "initial_transverse_offset"],
+      "columns": ["anchor", "initial_horizontal_separation", "initial_transverse_offset", "initial_velocity"]
+    },
+    "one_dimension_per_row": true,
+    "fixed_geometry_policy": "body sizes, tank, wall list, material, control values, and dp stay on the mother; only initial physical values in batch_param_table may change",
+    "fresh_generation_required": true,
+    "overlap_and_legal_window": "root initial QA required for every row"
+  },
+  "quality_status": {
+    "source_gencase_receipts": "returncode 0 for both mothers",
+    "source_native_receipts": "returncode 0 for both mothers",
+    "visual_evidence": "none supplied; manual/root visual decision pending",
+    "q_i": "conversion evidence only",
+    "q_n": "not_assessed",
+    "precision": "not accepted",
+    "production": "none"
+  }
+}
