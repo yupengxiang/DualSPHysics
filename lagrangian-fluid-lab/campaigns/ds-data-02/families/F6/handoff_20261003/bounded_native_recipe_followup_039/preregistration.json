@@ -1,0 +1,124 @@
+{
+  "schema": "ds02.f6.preregistered-genuine-halfstep-control.v1",
+  "scope": "handoff_20261003/bounded_native_recipe_followup_039",
+  "author": "F6 Agent (Gemini 3.8 Flash High)",
+  "date_utc": "2026-10-04T02:12:00Z",
+  "case_id": "F6_ANGULAR_RELEASE_DP0125_HALF_CFL",
+  "base_case_id": "F6_ANGULAR_RELEASE_DP0125",
+  "role": "fine_halfstep_control",
+  "nominal_dp_m": 0.0125,
+  "target_event_window_s": [
+    0.0,
+    12.0
+  ],
+  "expected_frames": 241,
+  "expected_floating_nodes": 131072,
+  "expected_total_particles": 3045508,
+  "execution_only_policy": {
+    "bi4_reuse": "Exact original generated BI4 bytes retained from root-angular-release-dp0125-actual-gencase-preflight-017 (SHA256: 90248a50c0041ae6fbfe85555166331f97710ce57937c3cdaddafe0b33f8169d)",
+    "new_gencase_generation": false,
+    "particle_count_status": "Immutable exact match (3,045,508 particles; Fixed: 292,996, Floating: 131,072, Fluid: 2,621,440)",
+    "initial_typed_identity_proof": "Historical typed initial proof preserved intact"
+  },
+  "timestep_halving_mechanism": {
+    "dt_fixed_value": 0.0,
+    "dt_fixed_semantics": "Since DtFixed is 0, time integration is variable/adaptive under the CFL condition. Legal genuine halfstep is achieved by halving CFL number (0.2 -> 0.1) and halving CoefDtMin (0.05 -> 0.025) within the <execution> block.",
+    "cflnumber_casedef": 0.2,
+    "cflnumber_execution_nominal": 0.2,
+    "cflnumber_execution_halfstep": 0.1,
+    "coefdtmin_execution_nominal": 0.05,
+    "coefdtmin_execution_halfstep": 0.025,
+    "step_algorithm": "2 (Symplectic)",
+    "verlet_steps": 40
+  },
+  "whole_xml_undo_proof": {
+    "method": "Revert <cflnumber value=\"0.1\" /> to <cflnumber value=\"0.2\" /> and <parameter key=\"CoefDtMin\" value=\"0.025\" /> to <parameter key=\"CoefDtMin\" value=\"0.05\" /> in the <execution> block",
+    "verified_byte_identical": true,
+    "verified_tree_identical": true,
+    "casedef_defaults_untouched": true
+  },
+  "exact_initial_rigid_and_eos_preservation": {
+    "massbody_kg": 128.0,
+    "masspart_kg": 0.001953125,
+    "support_particle_mass_sum_kg": 256.0,
+    "center_m": [
+      2.4,
+      1.2,
+      1.08
+    ],
+    "inertia_tensor_kg_m2": [
+      8.53333333333,
+      8.53333333333,
+      13.6533333333
+    ],
+    "initial_angular_velocity_rad_s": [
+      0.08,
+      0.12,
+      0.06
+    ],
+    "translation_dof": [
+      1,
+      1,
+      1
+    ],
+    "rotation_dof": [
+      1,
+      1,
+      1
+    ],
+    "tank_dimensions_m": [
+      4.8,
+      2.4,
+      2.4
+    ],
+    "eos_constants": {
+      "rhop0_kg_m3": 1000.0,
+      "gamma": 7.0,
+      "coefsound": 20.0,
+      "b_Pa": 441450.0,
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "viscosity_treatment": 2,
+      "visco_m2_s": 1e-06,
+      "density_diffusion_dt": 2,
+      "density_diffusion_value": 0.1
+    }
+  },
+  "downstream_proven_pipeline_reuse": {
+    "floating_node_export": "PartVTK4_linux64 with -vars:-all,+idp,+zone,+type,+mk yielding PartFloating_0000.csv .. PartFloating_0240.csv (241 frames)",
+    "floating_info_export": "FloatingInfo4_linux64 yielding FloatingInfo_mk60.csv (241 frames)",
+    "so3_reconstruction": "owner_geometry_v1.py Kabsch SVD algorithm enforcing det(R)=+1, rank 3 covariance, and uniform UID body support weights (1/N)",
+    "physical_time_pairing": "Continuous SLERP on unit quaternions and linear interpolation on centroids evaluated at 241 points (t = 0.0, 0.05, ..., 12.0s)",
+    "translation_scale": {
+      "L_char_m": 0.8,
+      "generic_macro_tolerance": 0.05,
+      "generic_macro_budget_m": 0.04
+    },
+    "orientation_scale": {
+      "metric": "geodesic angle Phi = arccos(clip((tr(R1^T R2) - 1) / 2, -1, 1)) [rad]",
+      "budget": null,
+      "budget_status": "unregistered",
+      "invented_gate_policy": "STRICTLY PROHIBITED: Never invent 1 rad normalization or 5% SO(3) threshold"
+    }
+  },
+  "causal_and_qualification_boundaries": {
+    "q_n": "not_granted",
+    "production_approval": "none",
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "budget_limits": {
+      "attempt_index": 1,
+      "max_repairs_per_root_cause": 2,
+      "root_remaining_gpu_hours": 32,
+      "estimated_halfstep_cost_gpu_hours": 4.0
+    },
+    "causal_interpretation": [
+      "If halfstep matches nominal fine within generic 5% translation and small geodesic angle, the fine run is temporally converged, proving that the fine-vs-medium translation gap (0.0862m) is purely a spatial discretization phenomenon.",
+      "If halfstep diverges significantly from nominal fine, time integration error was significant in nominal fine, requiring temporal resolution repair before spatial convergence can be asserted.",
+      "Neither outcome establishes Q-N qualification or product completion."
+    ]
+  }
+}
