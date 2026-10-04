@@ -232,6 +232,19 @@ def run(binding_path: Path, output_dir: Path) -> dict[str, object]:
     require(int(particles.get("np", "-1")) == binding["expected_total_particles"], "generated XML np mismatch")
     require(len(root.findall(".//drawtriangles/points/point")) == 156, "generated XML mesh point count mismatch")
     require(len(root.findall(".//drawtriangles/triangles/triangle")) == 52, "generated XML mesh triangle count mismatch")
+    generated_triangles = root.find(".//drawtriangles")
+    require(generated_triangles is not None, "generated XML explicit mesh missing")
+    require(generated_triangles.attrib == source_triangles[0].attrib, "generated mesh attributes differ from source")
+    require(
+        [node.attrib for node in generated_triangles.findall("./points/point")]
+        == [node.attrib for node in source_triangles[0].findall("./points/point")],
+        "generated mesh points differ from source",
+    )
+    require(
+        [node.attrib for node in generated_triangles.findall("./triangles/triangle")]
+        == [node.attrib for node in source_triangles[0].findall("./triangles/triangle")],
+        "generated mesh triangles differ from source",
+    )
 
     csv_path = output / f"{case_id}-initial-all.csv"
     partvtk = Path(binding["partvtk"]).resolve()
