@@ -1,0 +1,70 @@
+{
+  "schema": "ds02.f5.audit-specification.v2",
+  "created_at": "2026-10-04T18:05:00+08:00",
+  "title": "F5 Stage 1 Support Diagnosis, Bed Layer Audit & Visual Inspection Specification v2",
+  "governance": {
+    "stage": "STAGE 1 FULL-GENERATION-FLOW & VISUAL REVIEW",
+    "goal_reference": "lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_20261004_ZH.md",
+    "primary_objective": "Establish end-to-end flow, 3D ParaView dynamic + full-animation visual review, and independent physical case batching (8/24/48 progression towards 336 total across F1..7)",
+    "prerequisite_decoupling": "Spatial grid convergence, dt/save error budgets, particle trajectory identity matching, and experimental Q-E are NOT Stage 1 shared prerequisites",
+    "evidence_preservation": "All historical negative results preserved; macro 058 all-pair failure retained; numerical precision explicitly marked NOT ACCEPTED",
+    "anchor_case": "Existing user-accepted F3 two-axis case is anchor; DP-resolution reruns and time-step repeats never recount towards independent case total",
+    "resource_caps": {
+      "qualification_attempts_cap": 320,
+      "production_attempts_cap": 420,
+      "gpu_hours_cap": 96.0,
+      "cpu_core_hours_cap": 384.0,
+      "disk_free_min_gib": 500.0
+    }
+  },
+  "root_corrections_implemented": {
+    "csv_format_tolerance": {
+      "issue": "PartVTK CSV exports contain preamble lines (TimeStep summary + blank lines) before the column header; gauge CSVs use semicolon delimiters. Prior worker failed with readline() and comma-only assumption.",
+      "resolution": "Preamble skipping implemented, scanning lines until 'Pos.x [m]' token is found; automatic delimiter detection (',' or ';'); column indices extracted dynamically."
+    },
+    "spatial_query_complexity": {
+      "issue": "Prior worker instantiated a 500 x N_bound broadcast array (up to 1.43 billion elements, >11.4 GB RAM per chunk), causing severe OOM and billion-distance quadratic costs.",
+      "resolution": "scipy.spatial.cKDTree spatial indexing implemented (available in Root venv); O(N log M) query time, strictly bounded RAM (<= 100 MB), bounded fluid sample (<= 10,000 particles)."
+    },
+    "hollow_bed_vs_layer_support": {
+      "issue": "Prior worker inferred 'hollow 1-layer shell' purely from macro particle count comparisons against theoretical 3D solid volume.",
+      "resolution": "Geometric separation: sloped skin (m=0.28) distinguished from horizontal floor (z=0, z=0.05) and sidewalls (|y|>=0.145). Direct normal distance profile computed across bins [0, 1dp), [1dp, 2dp), [2dp, 3dp), [3dp, 4dp), [4dp+). Local deep interior cavity audited separately."
+    },
+    "sidewall_marker_interpretation": {
+      "issue": "Sidewalls modeled with multi-face boxfill produce markers on multiple faces, leading to misleading count-based inferences.",
+      "resolution": "Explicit notice that marker counts across multiple faces do not indicate truncation or inadequate thickness from count alone."
+    },
+    "causal_hypotheses_labeling": {
+      "issue": "Prior worker asserted the ~0.17 m macro subsidence was definitively caused by a hollow bed shell.",
+      "resolution": "Macro 057 ~0.17 m subsidence is an empirical observation; specific causal mechanisms are explicitly labeled NOT PROVEN."
+    },
+    "frozen_gauge_operators": {
+      "issue": "Risk of gauge relocation or artificial masking to force passing results.",
+      "resolution": "All 6 frozen gauge operators (WG1, WG2, RunupToe, WG3, WG4, Crest) are preserved without relocation or masks. Macro 058 FAIL for both mechanisms retained as negative evidence."
+    }
+  },
+  "visual_inspection_protocol": {
+    "export_format": "ParaView dynamic XDMF temporal sidecars (case.xmf) pointing to native trajectory HDF5 / PartVTK exports",
+    "diagnostic_frames": [0, 400, 800],
+    "acceptance_criteria": [
+      "No non-finite coordinates (NaN/Inf)",
+      "Zero unphysical boundary penetration or leakage through the continuous bed",
+      "No catastrophic explosive blowup or unphysical particle scattering",
+      "Stable quiescent water surface at t=0",
+      "Coherent wave generation, propagation, runup/overtopping, and reflection dynamics",
+      "Full 16.0s simulation completion with expected 801 frames"
+    ]
+  },
+  "conditional_geometry_repair_policy": {
+    "trigger_condition": "ONLY if actual native solver simulation or visual inspection PROVES physical fluid penetration through the bed boundary.",
+    "repair_scope": "Minimal non-intrusive XML geometry backing (e.g. adding 3-4 layer prism backing beneath bed STL surface); strictly NO automatic GPU spatial studies or unverified re-runs."
+  },
+  "batch_progression_plan": {
+    "tier_1_target": 8,
+    "tier_2_target": 24,
+    "tier_3_target": 48,
+    "family_id": "F5",
+    "total_all_families_target": 336,
+    "parameter_space": "Varied wavemaker paddle stroke S in [0.03, 0.06] m, wave period T in [1.2, 2.0] s, quiescent water depth H_swl in [0.38, 0.41] m, weir crest elevation in [0.42, 0.46] m"
+  }
+}
