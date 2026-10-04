@@ -1,0 +1,116 @@
+{
+  "schema": "ds02.f5.root-followup-045.audit-specification.v1",
+  "audit_target": "F5 Root048 compact equilibrium source definitions",
+  "created_at": "2026-10-04T16:30:00+08:00",
+  "audited_commit": "e4a0f26bc5f8af030bc47e464d1e0c8ff69f15d6",
+  "audited_definitions": [
+    "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT048_Def.xml",
+    "F5_REF_RUNUP_DP0125_EQUILIBRIUM_ROOT048_Def.xml",
+    "F5_REF_RUNUP_DP010_EQUILIBRIUM_ROOT048_Def.xml",
+    "F5_REF_WEIR_DP020_EQUILIBRIUM_ROOT048_Def.xml",
+    "F5_REF_WEIR_DP0125_EQUILIBRIUM_ROOT048_Def.xml",
+    "F5_REF_WEIR_DP010_EQUILIBRIUM_ROOT048_Def.xml"
+  ],
+  "source_pins": {
+    "constants_hswl_auto_value": {
+      "source_file": "src/source/JCaseCtes.cpp",
+      "line": 110,
+      "code_snippet": "value=sxml->GetAttributeDouble(xele,\"value\"); valueauto=sxml->GetAttributeBool(xele,\"auto\");",
+      "finding": "ReadXmlElementAuto unconditionally queries 'value' attribute without optional fallback, throwing run exception if 'value' attribute is omitted even when auto='true'. Root048 fix value='0' is strictly confirmed necessary."
+    },
+    "constants_rhopgradient": {
+      "source_file": "src/source/JCaseCtes.cpp",
+      "lines": "137-139",
+      "code_snippet": "const TpRhoGradient rhog=GetRhoGradientType(sxml->ReadElementInt(node,\"rhopgradient\",\"value\",true,RhopGradientDef));",
+      "finding": "Value 2 maps to RHOG_WaterCol (hydrostatic water column density gradient), which matches the physical initialization requirements of sloped beach equilibrium."
+    },
+    "solver_simulationdomain_incz_conflict": {
+      "source_file": "src/source/JSph.cpp",
+      "line": 846,
+      "code_snippet": "if(!eparms.IsPosDefault() && resizeold)Run_ExceptioonFile(\"Combination of <simulationdomain> with IncZ or DomainFixedXXX in <parameters> section of XML is not allowed.\",FileXml);",
+      "finding": "Explicit domain definition inside <simulationdomain> is mutually exclusive with IncZ / DomainFixedXXX parameters. Root048 removal of IncZ resolves fatal solver initialization exception."
+    },
+    "parameters_saveposdouble_vs_posdouble": {
+      "source_file": "src/source/JSph.cpp",
+      "lines": "667-671",
+      "code_snippet": "if(eparms.Exists(\"PosDouble\")){ Log->PrintWarning(\"The parameter 'PosDouble' is deprecated.\"); SvPosDouble=(eparms.GetValueInt(\"PosDouble\")==2); } if(eparms.Exists(\"SavePosDouble\"))SvPosDouble=(eparms.GetValueInt(\"SavePosDouble\",true,0)!=0);",
+      "finding": "PosDouble is officially deprecated; SavePosDouble value='1' is canonical modern keyword."
+    },
+    "parameters_minfluidstop_vs_partsoutmax": {
+      "source_file": "src/source/JSph.cpp",
+      "lines": "810-811",
+      "code_snippet": "if(eparms.Exists(\"PartsOutMax\"))Log->PrintWarning(\"The XML option 'PartsOutMax' is deprecated. Use 'MinFluidStop' option.\"); MinFluidStop=eparms.GetValueFloat(\"MinFluidStop\",true,0);",
+      "finding": "PartsOutMax is officially deprecated; MinFluidStop value='0' is canonical modern keyword."
+    },
+    "motion_syntax": {
+      "source_file": "src/source/JMotion.cpp",
+      "lines": "700, 717, 814-825, 892-901",
+      "code_snippet": "else if(name==\"mvpredef\" || name==\"mvfile\" || name==\"mvrectfile\"){ ... MovAddRectilinearFile(...); }",
+      "finding": "Tag <mvpredef id='1' duration='16'> with child <file name='...' fields='2' fieldtime='0' fieldx='1' /> and event <begin mov='1' start='0.00' finish='16' /> strictly matches the C++ parser."
+    },
+    "gauges_swl_points": {
+      "source_file": "src/source/JDsGaugeSystem.cpp",
+      "lines": "284-288",
+      "code_snippet": "const tdouble3 pt0=sxml->ReadElementDouble3(ele,\"point0\"); const tdouble3 pt2=sxml->ReadElementDouble3(ele,\"point2\"); gau=AddGaugeSwl(name,cfg.computestart,cfg.computeend,cfg.computedt,true,pt0,pt2,pointdp,masslimit);",
+      "finding": "Gauge <swl> takes only <point0> (initial) and <point2> (final). The tag <point1> present in Root048 is completely ignored by the parser and represents an invalid/vestigial attribute."
+    },
+    "gauges_underscored_intervals": {
+      "source_file": "src/source/JDsGaugeSystem.cpp",
+      "line": 253,
+      "code_snippet": "if(cmd.length() && cmd[0]!='_' && cmd!=\"default\"){ ... }",
+      "finding": "Tags with leading underscores (e.g. <_computedt>, <_computetime>, <_outputdt>, <_outputtime>) are completely ignored by the parser, falling back to CfgDefault values. Patched source restores canonical active tag names."
+    },
+    "clipplane_retained_fluid_semantics": {
+      "binary": "GenCase_linux64",
+      "disassembly_symbol": "JClipShape::ClipPoint(tdouble3 const&) const",
+      "address": "0x4f6a30",
+      "branch_condition_address": "0x4f6a64",
+      "finding": "In GenCase, ClipPoint evaluates PlanePoint = (p - pt) . v_unit. If PlanePoint > 0, the function jumps to 0x4f6aa0 returning 0 (point discarded/clipped). If PlanePoint <= 0, the point is kept. The vector v points in the direction of the half-space to be removed. Root048 specified vector (-0.28, 0, 1.00), which pointed upwards into the fluid, discarding all fluid above the continuous bed and retaining fluid underneath the slope (empirical QA049 failure: 10,860 fluid particles below bed). The mathematically and empirically required vector is (0.28, 0, -1.00)."
+    }
+  },
+  "physical_geometry_parameters": {
+    "flume_width_m": 0.300,
+    "swl_depth_h_m": 0.400,
+    "continuous_bed_slope": 0.280,
+    "bed_toe_x_m": 2.000,
+    "shoreline_x_m": 3.4285714285714286,
+    "weir_x_range_m": [3.20, 3.35],
+    "weir_base_z_m": 0.336,
+    "notch_crest_z_m": 0.410,
+    "side_crest_z_m": 0.460
+  },
+  "commensurate_resolutions": {
+    "dp020": {
+      "dp_m": 0.020,
+      "cells_y": 15,
+      "expected_runup_fluid": 40740,
+      "expected_runup_mass_kg": 325.92,
+      "expected_weir_fluid": 40485,
+      "expected_weir_mass_kg": 323.88
+    },
+    "dp0125": {
+      "dp_m": 0.0125,
+      "cells_y": 24,
+      "expected_runup_fluid": 166824,
+      "expected_runup_mass_kg": 325.828125,
+      "expected_weir_fluid": 165840,
+      "expected_weir_mass_kg": 323.90625
+    },
+    "dp010": {
+      "dp_m": 0.010,
+      "cells_y": 30,
+      "expected_runup_fluid": 325800,
+      "expected_runup_mass_kg": 325.80,
+      "expected_weir_fluid": 323880,
+      "expected_weir_mass_kg": 323.88
+    }
+  },
+  "budget_accounting_snapshot": {
+    "actual_gpu_hours": 75.0,
+    "budget_gpu_hours": 96.0,
+    "actual_cpu_core_hours": 236.0,
+    "budget_cpu_core_hours": 384.0,
+    "qualification_state": "288/320",
+    "storage_policy": "Homefree >= 500 GiB user policy; no storage 1 TiB cap"
+  }
+}

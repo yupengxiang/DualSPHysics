@@ -1,0 +1,40 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_EQUILIBRIUM_045_QA_3DP_REQUEST",
+  "created_at": "2026-10-04T16:30:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU Native Initial Geometry QA execution for 6 patched compact equilibrium cases across runup and weir mechanisms and 3 commensurate DPs; verifies fluid strictly above continuous bed and below SWL 0.400 m, exact y-cell counts (15, 24, 30), hydrostatic zero initial velocity, retained moving piston, and zero fluid inside weir solid; Rootguard execution only.",
+    "policy_authority": "AGENTS.md line 18, plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 native_initial_geometry_qa.py --binding requests/f5_equilibrium_045_qa_binding.json --output-dir {attempt_root}",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_045_source_contract_audit_v1",
+    "resource_limits": {
+      "wall_seconds_max": 1200,
+      "cpu_threads_max": 2,
+      "gpu_count": 0,
+      "memory_mb_max": 8192
+    }
+  },
+  "cases": [
+    "F5_REF_RUNUP_DP020_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP020_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_RUNUP_DP0125_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP0125_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_RUNUP_DP010_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP010_EQUILIBRIUM_045_PATCHED"
+  ],
+  "budget_accounting": {
+    "campaign_budget_cpu_core_hours": 384.0,
+    "actual_cpu_core_hours": 236.0,
+    "remaining_reserve_cpu_core_hours": 148.0,
+    "campaign_budget_gpu_hours": 96.0,
+    "actual_gpu_hours": 75.0,
+    "remaining_reserve_gpu_hours": 21.0,
+    "qualification_state": "288/320 attempts used",
+    "storage_policy": "Homefree >= 500 GiB user policy; no storage 1 TiB cap"
+  }
+}

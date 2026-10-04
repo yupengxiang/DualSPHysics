@@ -1,0 +1,40 @@
+{
+  "schema": "ds02.runner-request.v2",
+  "family_id": "F5",
+  "request_id": "F5_EQUILIBRIUM_045_GENCASE_3DP_REQUEST",
+  "created_at": "2026-10-04T16:30:00+08:00",
+  "governance": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "rationale": "CPU GenCase execution for 6 patched compact equilibrium cases across runup and weir mechanisms and 3 commensurate DPs (0.02, 0.0125, 0.01); incorporates clipplane normal vector fix (0.28, 0, -1), SWL gauge point contract fix, and canonical active gauge intervals; strictly dispatched under Rootguard.",
+    "policy_authority": "AGENTS.md line 18, plan-source/families/F5.md line 47"
+  },
+  "execution": {
+    "command": "python3 prepare_patched_equilibrium_cases.py && python3 -m lagrangian_fluid_lab.gencase_runner --cases-manifest definitions/patched_definitions_manifest.json",
+    "working_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_045_source_contract_audit_v1",
+    "resource_limits": {
+      "wall_seconds_max": 600,
+      "cpu_threads_max": 4,
+      "gpu_count": 0,
+      "memory_mb_max": 16384
+    }
+  },
+  "cases": [
+    "F5_REF_RUNUP_DP020_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP020_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_RUNUP_DP0125_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP0125_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_RUNUP_DP010_EQUILIBRIUM_045_PATCHED",
+    "F5_REF_WEIR_DP010_EQUILIBRIUM_045_PATCHED"
+  ],
+  "budget_accounting": {
+    "campaign_budget_cpu_core_hours": 384.0,
+    "actual_cpu_core_hours": 236.0,
+    "remaining_reserve_cpu_core_hours": 148.0,
+    "campaign_budget_gpu_hours": 96.0,
+    "actual_gpu_hours": 75.0,
+    "remaining_reserve_gpu_hours": 21.0,
+    "qualification_state": "288/320 attempts used",
+    "storage_policy": "Homefree >= 500 GiB user policy; no storage 1 TiB cap"
+  }
+}
