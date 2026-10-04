@@ -79,7 +79,10 @@ def run(
     report_path: Path,
     execute: bool,
     expected_gencase_sha256: str | None,
+    threads: int,
 ) -> int:
+    if threads < 1:
+        raise ValueError("threads must be positive")
     plan = load_json(plan_path)
     if plan.get("stage_contract", {}).get("launch_allowed") is not False:
         raise RuntimeError("endpoint plan must keep launch_allowed=false")
@@ -100,7 +103,13 @@ def run(
         endpoint_id = source["endpoint_id"]
         endpoint_root = output_root / endpoint_id
         prefix = endpoint_root / endpoint_id
-        command = [str(gencase_exe), str(Path(source["source_definition"]).with_suffix("")), str(prefix), "-save:all"]
+        command = [
+            str(gencase_exe),
+            str(Path(source["source_definition"]).with_suffix("")),
+            str(prefix),
+            "-save:all",
+            f"-threads:{threads}",
+        ]
         record: dict[str, Any] = {
             "endpoint_id": endpoint_id,
             "source_definition": source["source_definition"],
@@ -173,6 +182,7 @@ def main() -> int:
     parser.add_argument("--expected-gencase-sha256", default=DEFAULT_GENCASE_SHA256)
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--report", required=True, type=Path)
+    parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--execute", action="store_true", help="Root-only explicit launch switch")
     args = parser.parse_args()
     return run(
@@ -182,6 +192,7 @@ def main() -> int:
         args.report,
         args.execute,
         args.expected_gencase_sha256,
+        args.threads,
     )
 
 

@@ -73,6 +73,13 @@
       "old": "QA command used its own {attempt_root} for GenCase result and generated inputs, although strict runtime allocates one output root per attempt",
       "new": "QA command binds the preceding gencase attempt output root recorded in runtime_preconditions",
       "reason": "strict runtime substitution supports {attempt_root} only for the current attempt"
+    },
+    {
+      "id": "062-gencase-thread-binding",
+      "status": "fixed",
+      "old": "v2 command inherited GenCase default thread count because the Python worker was not eligible for runtime auto-binding",
+      "new": "v2 passes explicit -threads:2 to official GenCase per endpoint",
+      "reason": "strict CPU reservation and frozen command must agree"
     }
   ],
   "disabled_requests": {
