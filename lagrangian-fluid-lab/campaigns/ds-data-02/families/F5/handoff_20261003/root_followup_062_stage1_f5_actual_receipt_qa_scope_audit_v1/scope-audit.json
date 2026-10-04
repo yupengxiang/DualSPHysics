@@ -1,0 +1,127 @@
+{
+  "schema": "ds02.f5.stage1.actual-receipt-qa-scope-audit.v1",
+  "scope": "root_followup_062_stage1_f5_actual_receipt_qa_scope_audit_v1",
+  "status": "source_audit_only_no_execution",
+  "raw_arrays_read": false,
+  "solver_started": false,
+  "genuine_case": {
+    "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A061",
+    "physical_case_id": "F5_COMPACT_STILL_WATER_RUNUP_REPAIR_A_V1",
+    "condition_id": "F5_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_EXPLICIT_CLOSED_MESH",
+    "consumed_chain_commit": "aa25dbde",
+    "consumed_chain_path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1"
+  },
+  "source_inputs": [
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_native_source_preflight_tools_003/gencase.py",
+      "sha256": "6e09e6b83234200e2481ecb9c34d4e9f03fd96996fafd1d166c70e95076d5d07",
+      "line_anchors": "40-43 stdout inheritance; 62-72 data2d, XML particle counts, expected fluid, np, BI4"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+      "sha256": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+      "line_anchors": "186-197 stdout parser; 227-247 actual count/3D solver guard; 391-396 receipt completion and GenCase field update"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f5_initial_mass_qa_v2.py",
+      "sha256": "1d7aa99952183d82956c5c0ad48ca5104370622e956268fa4e1dfcedfcdbe278",
+      "line_anchors": "44-76 receipt/3D/count and PartVTK entry; 87-143 native finite, UID, typed block, velocity, fluid mass checks; 161-163 explicit coverage limitation"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f5_commensurate_dp_reference_010.py",
+      "sha256": "09d5e34ba4420b59c1c3da596f12c65845afdaaf83eae3d95d6f4ac81fc664e6",
+      "line_anchors": "57-60 generic fluid box/mass; 668-737 fluid-only lattice parser; 740-808 generic PartVTK checks"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/gencase-binding.json",
+      "sha256": "2938f45c486a649d9c11fc9a7892c3bfb3d3c212b69e511ed3fbb2f7a4d5c0e6",
+      "contract": "expected_fluid=40710; explicit A061 definition sha bound"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/initial-qa-manifest.json",
+      "sha256": "41136f4b4862ddd2ac9384e2e201823035f597fd8fabdece62fb3f5e76939c69",
+      "contract": "expected_fluid_particles=40710; expected_fluid_mass_kg=325.7142857142857; total_particles=214515"
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+      "sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b",
+      "contract": "explicit drawtriangles mesh and A061 fluid/clip geometry; no drawfilestl node"
+    }
+  ],
+  "gencase_receipt_contract": {
+    "status": "satisfies_unmodified_runtime_guard_when_official_stdout_is_parseable",
+    "actual_new_receipt_required": true,
+    "required_fields": [
+      "status=completed",
+      "returncode=0",
+      "total_particles positive integer",
+      "fluid_particles positive integer and <= total_particles",
+      "solver_dimension_from_gencase=3"
+    ],
+    "wrapper_checks_before_receipt": [
+      "generated XML data2d=false",
+      "generated XML dp matches binding",
+      "fixed and fluid counts positive",
+      "fluid count equals binding expected_fluid=40710",
+      "XML np equals typed XML count sum",
+      "fresh BI4 positive",
+      "source definition hash unchanged"
+    ],
+    "metadata_only_prior_wrapper_corroboration": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT048/root-compact-equilibrium-runup_coarse-hswl-attribute-fix-gencase-048/execution-receipt.json",
+      "sha256": "04959e686026614eed70dc9034cd74a675a0d26c2e2208cad7d041eb3a347be0",
+      "status": "completed",
+      "returncode": 0,
+      "total_particles": 196655,
+      "fluid_particles": 10905,
+      "solver_dimension_from_gencase": 3,
+      "interpretation": "confirms wrapper/stdout parser path only; not A061 evidence"
+    }
+  },
+  "initial_qa_contract": {
+    "status": "generic_helper_not_A061_compatible_as_written",
+    "checks_present": {
+      "receipt_status_hash_returncode": true,
+      "actual_3d": true,
+      "manifest_fluid_count": true,
+      "finite_rows_and_positive_mass_density": true,
+      "consecutive_unique_idp": true,
+      "typed_xml_block_type_mk_consistency": true,
+      "zero_initial_velocity": true,
+      "fluid_mass_against_manifest": true,
+      "fluid_coordinate_grid_duplicate_detection": "fluid lattice only"
+    },
+    "checks_absent": {
+      "continuous_bed_surface_coverage": true,
+      "fixed_moving_fluid_spatial_no_overlap": true,
+      "bed_triangle_or_wall_intersection": true,
+      "mk40_bed_only_provenance": true
+    },
+    "generic_partvtk_mismatch": {
+      "generic_fluid_low_m": [-0.9, -0.7, 0.02],
+      "generic_fluid_size_m": [4.2, 1.4, 0.4],
+      "generic_dp020_expected_lattice_count": 294000,
+      "generic_continuum_mass_kg": 5880.0,
+      "a061_manifest_fluid_count": 40710,
+      "a061_manifest_fluid_mass_kg": 325.7142857142857,
+      "generic_required_marker": "drawfilestl file=assets/f5_continuous_bed_profile_slope_0p280.stl",
+      "a061_source_marker": "explicit drawtriangles; no drawfilestl node",
+      "conclusion": "the existing imported audit would fail or be scientifically mis-scoped for A061; no execution was attempted"
+    }
+  },
+  "057_evidence_boundary": {
+    "mk40_is_mixed_boundary_cohort": true,
+    "allowed_statement": "bounded selected-point/mid-layer indicators show nonzero mk40 rows in profile x segments and a lower-layer crest sample",
+    "forbidden_inference": "continuous solid slope-bed completeness, STL watertightness, or no-overlap",
+    "open_hypotheses": [
+      "A061 fresh generated bed support covers the intended slope surface",
+      "fixed/wall/bed rows have no spatial overlap",
+      "Candidate A changes the severe crossing mechanism"
+    ]
+  },
+  "root_next_action": {
+    "gencase": "run the disabled strict genuine A061 GenCase request and bind its fresh execution-receipt.json hash",
+    "qa": "do not call the generic helper as an A061 acceptance; use a fresh A061-specific evaluator/sidecar that binds the new receipt and tests the explicit mesh/clip geometry",
+    "solver": "remain disabled until fresh A061 QA is complete; no full16 authorization"
+  }
+}
