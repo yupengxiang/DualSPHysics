@@ -1,0 +1,76 @@
+{
+  "schema": "ds02.f5.manifest.v1",
+  "family_id": "F5",
+  "scope_name": "full_halfstep_negative_fallback_v1",
+  "scope_directory": "campaigns/ds-data-02/families/F5/handoff_20261003/full_halfstep_negative_fallback_v1",
+  "date": "2026-10-04",
+  "process_mode": "Root Followup 038 F5 under strict single-process execution (no recursive subagents)",
+  "governance": {
+    "commit_ref": "codex/ds-data-02-infra",
+    "reviewed_root_result": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_FINE_ACTUAL_FULL_HALFSTEP_ALL_GAUGES/root-fine-two-mechanism-native-schedule-halfstep-all-six-gauges-042/halfstep-gauge-comparison.json",
+    "two_mechanism_halfstep_status": "Both COMPLETED0; both failed conjunction gate (RMSE/H <= 0.01 AND maxabs/H <= 0.01); native DTsMin=0, NpOut=0.",
+    "spatial_ladder_permanence": "Prior actual ~12% spatial failure between Medium and Fine remains strictly negative.",
+    "quarterstep_status": "Proposing 12h quarterstep rejected; would consume ~24 GPUh of ~32 GPUh remaining budget without resolving observer defects or spatial failure.",
+    "fallback_authority": "plan-source/families/F5.md line 47: \u5148\u89c4\u5219/\u5355\u6ce2\u6709\u9650\u4e8b\u4ef6\uff0c\u518d\u6ce2\u5305\uff1b\u4e3b\u8303\u56f4\u53ef\u6bd4\u590d\u6742\u5730\u5f62\u66f4\u7b80\u5355\uff0c\u4f46\u5fc5\u987b\u5305\u542b\u722c\u5347/\u8d8a\u5824\u771f\u5b9e\u4e8b\u4ef6\u3002",
+    "execution_guardrails": {
+      "no_actual_array_or_csv_analysis_launched": true,
+      "no_solver_execution": true,
+      "no_gencase_execution": true,
+      "no_recursive_delegation": true,
+      "no_ledger_edits": true,
+      "no_production_promotions": true,
+      "no_cleanup_actions": true,
+      "launch_allowed": false,
+      "launch_owner": "root"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "F5_HALFSTEP_NEGATIVE_AND_LEGAL_FALLBACK_REVIEW.md",
+      "description": "Comprehensive review of Root042 negative halfstep result, source-operator detector analysis, and legal fallback specification.",
+      "sha256": "6be7ce435402744d73abaa6c1a75d7bdfb9cad29bfebe711efb01e2e82f337b1",
+      "bytes": 19946
+    },
+    {
+      "path": "audit_halfstep_discrepancies.py",
+      "description": "Standalone bounded CPU audit script for F5 fine halfstep gauge discrepancies, contributor concentration, and descriptive SWL floor flags.",
+      "sha256": "d682fb6c8da8e1b16e9cfc07d0d0b6bf4dcf5e28b8ec392da7a930e4cd7049e8",
+      "bytes": 18490
+    },
+    {
+      "path": "requests/F5_HALFSTEP_DISCREPANCY_AUDIT_REQUEST.json",
+      "description": "Bounded CPU runner request for discrepancy and concentration audit (launch_allowed=false, launch_owner=root).",
+      "sha256": "a3cc47a466f19bf13f388ade316f0ec8d6ce47aa934f8edc30c5708a33ba366b",
+      "bytes": 18164
+    },
+    {
+      "path": "prospective_fallback_definition.json",
+      "description": "Prospective legal fallback specification for single-packet runup and weir mechanisms with corrected observer baseline geometry.",
+      "sha256": "771ac108c0558ade41fed98752d7632ae285858b154ea5b0b311b55eb7bafd8d",
+      "bytes": 8630
+    },
+    {
+      "path": "requests/F5_PROSPECTIVE_FALLBACK_PREPARATION_REQUEST.json",
+      "description": "Prospective fallback preparation runner request (launch_allowed=false, launch_owner=root).",
+      "sha256": "0e1a836f06ea58cc28d8016438ff78ff5b4998e2e10d7695f9efee7b566d011b",
+      "bytes": 3677
+    },
+    {
+      "path": "test_audit_and_fallback.py",
+      "description": "Test suite verifying source assets, metric replication against Root042, concentration bounds, schema, and contracts (7/7 passing).",
+      "sha256": "44ae95b237ee04ee31db13416325bf757ca80a55b81d8b6dcb1e383949147217",
+      "bytes": 9044
+    }
+  ],
+  "resource_accounting": {
+    "remaining_campaign_gpu_hours": 32.0,
+    "qualification_attempt_soft_cap": 20,
+    "production_attempt_soft_cap": 60,
+    "halfstep_runup_gpu_seconds": 21706.06,
+    "halfstep_weir_gpu_seconds": 22093.59,
+    "total_halfstep_gpu_hours": 12.17,
+    "predicted_quarterstep_gpu_hours": 24.3,
+    "audit_cpu_request_wall_seconds": 300,
+    "audit_cpu_threads": 1
+  }
+}
