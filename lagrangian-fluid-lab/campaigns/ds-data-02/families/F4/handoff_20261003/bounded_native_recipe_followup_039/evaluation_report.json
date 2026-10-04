@@ -1,0 +1,147 @@
+{
+  "schema": "ds02.f4.drop-temporal-root-cause-and-mechanism-evaluation.v1",
+  "family_id": "F4",
+  "generated_at_utc": "2026-10-04T02:11:45Z",
+  "evaluation_scope": "handoff_20261003/bounded_native_recipe_followup_039",
+  "worktree": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics",
+  "root_cause_evaluation": {
+    "question": "Which candidate root cause (missing independent time control vs physical surface/lattice/source/EOS inconsistency) has concrete source evidence in Family F4 DROP?",
+    "evaluated_candidates": {
+      "physical_surface_lattice_source_eos_inconsistency": {
+        "has_concrete_source_evidence": false,
+        "evidence_summary": [
+          "Physical geometry is a simple rectangular prism tank [0, 0, 0] to [1.2, 0.4, 0.6] m with 5 planar DBC walls (bottom, left, right, front, back) and open top; no complex STL surfaces or irregular geometries.",
+          "Discrete particle lattice spacing dp=0.0025 m is perfectly commensurate with tank and fluid bounds.",
+          "Continuous mass matches discrete mass to machine precision: continuous pool=53.248 kg (3,407,872 particles * 1.5625e-5 kg = 53.248 kg); continuous drop=5.824 kg (372,736 particles * 1.5625e-5 kg = 5.824 kg); total continuous mass 59.072 kg.",
+          "Equation of state is uniform across resolutions: Tait EOS (gamma=7, rhop0=1000 kg/m^3, sound speed=24.8602 m/s).",
+          "Conclusion: No physical surface, lattice spacing, source mass, or EOS inconsistency exists between definition and discrete generation."
+        ]
+      },
+      "missing_independent_time_control": {
+        "has_concrete_source_evidence": true,
+        "evidence_summary": [
+          "Zero independent temporal controls (neither halfstep, quarterstep, nor dense save) have ever been executed or registered for F4 fine DROP.",
+          "The completed spatial 3-resolution study (root_drop_three_dp_full_macro_review_006) failed the 5% continuum macro budget on fluid kinetic energy (0.08196 vs 0.05), vertical momentum (0.329525 vs 0.05), and drop kinetic energy (0.356088 vs 0.05).",
+          "The contact audit (root_drop_three_dp_contact_review_005) observed fine contact at 0.187003 s with whole event budget 0.0025542 s, and medium-fine bracket separation [0.001974 s, 0.003964 s] spans across the budget, leaving the bracket unresolved.",
+          "The fine native simulation incurred 13,986 excluded particles (0.218531 kg), which must remain classified as unknown numerical exclusions (not domain spill).",
+          "Crucially, the completed baseline solver log (Run.out) shows that 4,833 timesteps were clamped by DtMin starting at t=0.105067 s (impact onset), because the default CoefDtMin=0.05 enforced an acoustic floor.",
+          "If one only halved CFL (0.2 -> 0.1) without halving CoefDtMin (0.05 -> 0.025), the CFL-governed timestep would be artificially clamped by the unhalved CoefDtMin floor, creating unintended fixedDt floors.",
+          "Conclusion: Unresolved temporal shock dynamics and acoustic timestep clamping represent the primary physical mechanism behind the macro divergence; an exact true-halfstep execution clone with both CFL and CoefDtMin halved and zero fixedDt floors is the rigorous, bounded evidence-based path."
+        ]
+      }
+    },
+    "selected_path": "Deliver single-case exact execution-only truehalfstep clone worker and runnable native request (launch_allowed: false) with valid same BI4, whole-XML reverse proof, casedef preservation, and both CFL (0.2->0.1) and CoefDtMin (0.05->0.025) halved with zero fixedDt floors."
+  },
+  "mechanism_validation": {
+    "family_id": "F4",
+    "mechanisms": {
+      "finite_drop_pool": {
+        "canonical_name": "DROP",
+        "description": "Finite liquid droplet falling into liquid pool in closed-wall tank",
+        "case_count_nominal": 24,
+        "event_window_s": 1.2,
+        "centered_reference_case_id": "F4_DROP_CENTERED_REFERENCE_001_DP0025",
+        "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+        "physical_binding_sha256": "fe9911188f229da4e489a3a47764e9499b37f715b10566cb68986f49e6548c7e",
+        "status": "baseline_completed_spatial_divergent_temporal_control_missing",
+        "baseline_run": {
+          "attempt_id": "qualification-centered-fullwindow-001",
+          "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/qualification-centered-fullwindow-001/execution-receipt.json",
+          "status": "completed",
+          "returncode": 0,
+          "elapsed_seconds": 2057.4732309391256,
+          "particles": 4165249,
+          "steps": 68322,
+          "frames": 1201,
+          "storage_bytes": 159818413945,
+          "excluded_particles": 13986,
+          "excluded_mass_kg": 0.21853125,
+          "dts_adjusted_to_dtmin": 4833
+        },
+        "spatial_macro_review_status": "FAIL (medium-fine fluidKE 0.08196, verticalmomentum 0.329525, dropKE 0.35609; coarser fails too)",
+        "contact_bracket_status": "UNRESOLVED (fine contact 0.187003 s, budget 0.0025542 s, bracket separation [0.001974 s, 0.003964 s])",
+        "native_unknown_mass_status": "0.218531 kg retained as unknown (not domain spill)",
+        "prior_truehalfstep_consumed": false,
+        "current_action": "deliver single-case exact truehalfstep clone worker and runnable request (launch_allowed: false)"
+      },
+      "oblique_finite_columns": {
+        "canonical_name": "COLLISION (COL)",
+        "description": "Two finite liquid columns colliding obliquely in closed-wall tank",
+        "case_count_nominal": 24,
+        "event_window_s": 1.2,
+        "centered_reference_case_id": "F4_COL_CENTERED_REFERENCE_001_DP0025",
+        "physical_case_id": "F4_COL_gap0p52000_vy0p25000_yoff0p00000_lx0p22000",
+        "physical_binding_sha256": "dbc97c0081fa8622c1f5da4348e2b78a56eca55bdcdcc39f1e601976dbdcca85",
+        "status": "baseline_completed_prior_floorsafe_temporal_attempt_consumed_negative",
+        "baseline_run": {
+          "attempt_id": "qualification-centered-fullwindow-001",
+          "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP0025/qualification-centered-fullwindow-001/execution-receipt.json",
+          "status": "completed",
+          "returncode": 0,
+          "elapsed_seconds": 2321.43,
+          "particles": 1195649,
+          "steps": 77671,
+          "frames": 1201
+        },
+        "prior_temporal_study": {
+          "case_id": "F4_COL_CENTERED_REFERENCE_001_DP0025_HALF_DT_SAVE001_FLOORSAFE001",
+          "attempt_id": "qualification-f4_col_centered_reference_001_dp0025_half_dt_save001_floorsafe001-native-fullstate-v1",
+          "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_COL_CENTERED_REFERENCE_001_DP0025_HALF_DT_SAVE001_FLOORSAFE001/qualification-f4_col_centered_reference_001_dp0025_half_dt_save001_floorsafe001-native-fullstate-v1/execution-receipt.json",
+          "elapsed_seconds": 4613.518,
+          "steps": 155343,
+          "method": "floor-safe fixed timestep clamping (DtFixed=DtIni=DtMin=4.1018e-6 s)",
+          "outcome": "negative; audited in commit 7793441d and bound to its own native exclusions (2,410 particles, 0.037656 kg)"
+        },
+        "prior_truehalfstep_consumed": true,
+        "current_action": "retained as consumed historical negative; no duplicate rerun"
+      }
+    },
+    "both_mechanisms_validated": true
+  },
+  "resource_estimate_audit": {
+    "source_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP0025/qualification-centered-fullwindow-001/execution-receipt.json",
+    "actual_baseline_particles": 4165249,
+    "actual_baseline_fluid_particles": 3780608,
+    "actual_baseline_boundary_particles": 384641,
+    "actual_baseline_steps": 68322,
+    "actual_baseline_elapsed_seconds": 2057.4732309391256,
+    "actual_baseline_gpu_seconds": 2057.4732309391256,
+    "actual_baseline_cpu_core_seconds": 1663.579455,
+    "actual_baseline_peak_gpu_mib": 680,
+    "actual_baseline_storage_bytes": 159818413945,
+    "actual_baseline_frames": 1201,
+    "truehalfstep_projected": {
+      "projected_steps": 136644,
+      "estimated_gpu_seconds": 4115,
+      "max_wall_seconds": 7200,
+      "gpu_hours_required": 1.14,
+      "estimated_peak_gpu_mib": 8192,
+      "estimated_storage_bytes": 214748364800,
+      "frames": 1201
+    },
+    "root_budget_check": {
+      "root_remaining_gpu_hours": 32,
+      "root_remaining_qualification_attempts": 56,
+      "home_free_bytes_floor": 536870912000,
+      "home_actual_free_bytes": 3965051797504,
+      "budget_satisfied": true
+    }
+  },
+  "governance_and_safety_guards": {
+    "launch_allowed": false,
+    "launch_owner": "root",
+    "claims": {
+      "q_n_status": "not_assessed",
+      "q_i_status": "not_assessed",
+      "q_e_status": "not_assessed",
+      "production_approval": "none",
+      "product_completion_claim": false
+    },
+    "repair_limitations": {
+      "evidence_based_repairs_count": 1,
+      "max_allowed_repairs_per_root_cause": 2,
+      "no_cdf_proximity_quantile_substitution_fake_zero": true,
+      "full_physical_event_windows_preserved": true
+    }
+  }
+}
