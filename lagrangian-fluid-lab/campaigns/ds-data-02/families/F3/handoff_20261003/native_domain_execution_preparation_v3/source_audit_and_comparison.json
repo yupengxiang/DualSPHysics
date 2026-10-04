@@ -1,0 +1,88 @@
+{
+  "schema": "ds02.f3.source-audit-and-comparison.v1",
+  "handoff": "native_domain_execution_preparation_v3",
+  "authority": "Root Followup 038",
+  "compared_source_commit": "f630fe489a7f8b62b8ffa91441e013d7da5abd26",
+  "compared_source_file": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/adaptive_control_domain_prospective_v2/transform_forcing.py",
+  "compared_source_sha256": "c2498ff54514536ebf2a229022e5fd555d4869f61f197159ace05fb685dff934",
+  "generator_basis": {
+    "generator033_script": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_additional_commensurate_adaptive_input_033/prepare.py",
+    "generator033_sha256": "f9ab1bdf9287312fdce14e1f964f3c3d41569854d49b2c8e2768103c44aad319",
+    "generator028_script": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_registered_adaptive_reference_input_028/prepare.py",
+    "generator028_sha256": "f9ab1bdf9287312fdce14e1f964f3c3d41569854d49b2c8e2768103c44aad319",
+    "shared_mechanics_adopted": [
+      "semantic_xml normalization and recursive parameter matching against fine adaptive anchor",
+      "special execution whole-field forcing preservation check",
+      "baseline CFL number strict preservation (0.05)",
+      "commensurate cell-centre grid validation (pointref == dp/2 for all axes)",
+      "single GenCase subprocess invocation with -save:all",
+      "generated XML constants validation (data2d='false', dp=dp_m, cflnumber=0.05)",
+      "actual XML particle count extraction and SHA256 compilation",
+      "clear claim separation: XML counts are not native array audit; EOS is dp-dependent automatic; Q-N not granted"
+    ]
+  },
+  "exact_selected_functions": [
+    {
+      "name": "compute_sha256",
+      "role": "Standard chunked 64KB binary SHA256 hash calculation",
+      "source_status": "byte-equivalent algorithm preserved"
+    },
+    {
+      "name": "format_coord",
+      "role": "IEEE-754 double precision full roundtrip (.17g) coordinate formatting",
+      "precision": "17 significant figures (float(format_coord(x)) == x)",
+      "deadband_clamping": "none (no 1e-15 or 1e-12 deadbands)",
+      "quantization": "none (no .2E truncation)",
+      "non_finite_guard": "raises ValueError on NaN, Inf, -Inf"
+    },
+    {
+      "name": "transform_row",
+      "role": "Zero-drive physical amplitude scaling for a single 7-token record",
+      "formula": "a_lin = g + A * (a_nom - g); alpha = A * alpha_nom, with g = (0, 0, -9.81) m/s^2",
+      "identity_at_unity": "exact numerical identity when A == 1.0",
+      "time_field_handling": "original string token passed through verbatim without string or float drift"
+    },
+    {
+      "name": "transform_forcing_stream_with_guards",
+      "role": "Streaming line transformer with strict Root 038 wrapper guards",
+      "guards": [
+        "Strict start time token '0' and float value 0.0 (zero tolerance)",
+        "Strict end time token '8.35' and float value 8.35 (zero tolerance)",
+        "Strictly increasing time: t[k] > t[k-1]",
+        "Exact row count: exactly 167,001 data rows",
+        "All 7 columns finite",
+        "Rejection of malformed records immediately without silent dropping"
+      ]
+    },
+    {
+      "name": "transform_and_validate_forcing_file",
+      "role": "File-level forcing transformation with before/after source hash verification and exclusive non-overwrite mode",
+      "guards": [
+        "Source hash verified before transformation against pinned 6f42660a...",
+        "Exclusive creation mode ('x') prevents clobbering existing target files",
+        "Source hash re-verified after transformation to confirm source immutability",
+        "Destination SHA256 recorded in output report"
+      ]
+    }
+  ],
+  "pinned_source_csv": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP0075_REPAIR1_ADAPTIVE_CFL05_COEF005/root-cell3-nominal-cfl-decoupled-floor-input-005/prepared/CaseSloshingAccData.csv",
+    "sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "expected_rows": 167001,
+    "header_lines": 1,
+    "total_lines": 167002,
+    "time_range": [0.0, 8.35]
+  },
+  "wrapper_guards": {
+    "strict_endpoint_times": {
+      "start_time_float": 0.0,
+      "start_time_token": "0",
+      "end_time_float": 8.35,
+      "end_time_token": "8.35",
+      "tolerance": 0.0
+    },
+    "source_hash_guard": "before_and_after_verified",
+    "exclusive_creation": "mode_x_enforced",
+    "single_case_execution": "one_gencase_per_request_enforced"
+  }
+}

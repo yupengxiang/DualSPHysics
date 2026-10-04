@@ -1,0 +1,151 @@
+{
+  "schema": "ds02.f3.native-domain-execution-preparation-manifest.v3",
+  "handoff_directory": "lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/native_domain_execution_preparation_v3",
+  "family": "F3",
+  "authority": "Root Followup 038",
+  "governance": {
+    "q_n_status": "not_granted",
+    "campaign_q_n_counts": "0/336",
+    "production_approval": "none",
+    "all_requests_launch_allowed": false,
+    "claim_status": "prospective_worker_and_requests_preparation_only",
+    "solver_launched": false,
+    "conversion_launched": false,
+    "actual_csv_materialized": false,
+    "actual_h5_read": false
+  },
+  "commensurate_ladder": {
+    "candidate": {
+      "dp_m": 0.006,
+      "fluid_lattice": "150 x 30 x 15",
+      "expected_fluid": 67500,
+      "expected_total": 179208,
+      "status": "prospective_candidate",
+      "observation": "passes 2.8683% vs 0.005 on unchanged f3_observation_v2 all 7 fixed .06 kernels"
+    },
+    "reference": {
+      "dp_m": 0.005,
+      "fluid_lattice": "180 x 36 x 18",
+      "expected_fluid": 116640,
+      "expected_total": 275940,
+      "status": "established_fine_anchor",
+      "anchor_qa_034": {
+        "native_particles": 277272,
+        "native_fluid": 116640,
+        "native_fixed": 160632,
+        "fluid_mass_sum_kg": 14.580001
+      }
+    },
+    "finer_prospective": {
+      "dp_m": 0.0045,
+      "fluid_lattice": "200 x 40 x 20",
+      "expected_fluid": 160000,
+      "status": "prospective_ladder_extension",
+      "note": "never assert actual counts before GenCase execution"
+    }
+  },
+  "observed_sourcepair_bounds": {
+    "macro_spatial_budget": 0.05,
+    "macro_time_budget": 0.01,
+    "macro_saved_budget": 0.01,
+    "fixed_primary_budgets": {
+      "spatial": 0.05,
+      "temporal": 0.01,
+      "saved_frequency": 0.01
+    },
+    "historical_retained_evidence": {
+      "dp010_vs_dp0075": "PASS (max meanV 3.45%, KE 3.18% <= 5%)",
+      "dp0075_vs_dp006": "PASS (max KE 3.12%, meanV 2.86% <= 5%)",
+      "dp010_vs_dp006": "FAIL (KE 6.28%, meanV 6.26%, localV 6.03% > 5%)",
+      "dp0075_vs_dp005": "FAIL (~5.991% > 5%, original spatial failures retained)",
+      "dp006_vs_dp005": "PASS (2.8683% <= 5%, candidate remains prospective)"
+    }
+  },
+  "physical_container": {
+    "type": "plain_open_5_wall",
+    "box_dimensions_m": [0.9, 0.18, 0.51],
+    "water_depth_m": 0.09,
+    "continuum_fluid_volume_m3": 0.01458,
+    "fluid_density_kg_m3": 1000.0,
+    "continuum_fluid_mass_kg": 14.58,
+    "globalgravity": 0,
+    "forcing_mode": "fullbody_g_CSV",
+    "baffle": "none (frozen event config strictly preserved without baffle)",
+    "second_mechanism_status": "deferred_unreviewed (will review after real current time/path evidence; no unreviewed 2axis claims added)"
+  },
+  "automatic_eos_rules": {
+    "status": "explicit_dp_dependent",
+    "parameters": {
+      "hswl": "auto",
+      "speedsound": "auto",
+      "speedsystem": "auto",
+      "coefsound": 30,
+      "gamma": 7,
+      "coefh": 0.91924,
+      "cflnumber": 0.05
+    },
+    "note": "Automatic GenCase B and h retained per DualSPHysics physics formulation without cross-DP override"
+  },
+  "staged_cases_matrix": [
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A0P90_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude": 0.9,
+      "role": "candidate_control_endpoint_low",
+      "binding_file": "bindings/binding_dp006_a0p90.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_A0P90_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_a0p90_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A0P97_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude": 0.97,
+      "role": "candidate_control_internal_probe",
+      "binding_file": "bindings/binding_dp006_a0p97.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_a0p97_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP006_A1P10_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.006,
+      "amplitude": 1.1,
+      "role": "candidate_control_endpoint_high",
+      "binding_file": "bindings/binding_dp006_a1p10.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP006_A1P10_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp006_a1p10_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A0P90_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude": 0.9,
+      "role": "reference_control_endpoint_low",
+      "binding_file": "bindings/binding_dp005_a0p90.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_A0P90_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_a0p90_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude": 0.97,
+      "role": "reference_control_internal_probe",
+      "binding_file": "bindings/binding_dp005_a0p97.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_A0P97_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_a0p97_request.json",
+      "launch_allowed": false
+    },
+    {
+      "case_id": "F3_CELL3_LONG_DP005_A1P10_ADAPTIVE_CFL05_COEF005",
+      "dp_m": 0.005,
+      "amplitude": 1.1,
+      "role": "reference_control_endpoint_high",
+      "binding_file": "bindings/binding_dp005_a1p10.json",
+      "definition_file": "definitions/F3_CELL3_LONG_DP005_A1P10_ADAPTIVE_CFL05_COEF005_Def.xml",
+      "request_file": "requests/gencase_cpu_dp005_a1p10_request.json",
+      "launch_allowed": false
+    }
+  ]
+}
