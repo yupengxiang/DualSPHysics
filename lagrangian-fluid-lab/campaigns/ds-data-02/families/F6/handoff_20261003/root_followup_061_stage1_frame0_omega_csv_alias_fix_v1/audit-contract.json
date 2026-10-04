@@ -1,0 +1,83 @@
+{
+  "schema": "ds02.f6.frame0-omega-csv-alias-fix-contract.v1",
+  "family_id": "F6",
+  "scope_id": "root_followup_061_stage1_frame0_omega_csv_alias_fix_v1",
+  "model_policy": {
+    "authorized_model": "GPT-5.6 Luna/max",
+    "gemini": false,
+    "recursive_agents": false
+  },
+  "status": "source_only_disabled",
+  "previous_scope": {
+    "scope_id": "root_followup_059_stage1_frame0_omega_csv_decoder_audit_v1",
+    "commit": "a35fb265b75cf1eae88a60e6bdaba6ce3f9b844c",
+    "worker": "../root_followup_059_stage1_frame0_omega_csv_decoder_audit_v1/workers/audit_frame0_omega_csv.py",
+    "worker_sha256": "db137e44603b463395f8d69be7c43d71d3af4f0e86d2e9b585827e50c6402f6e",
+    "immutable": true,
+    "change_boundary": "successor overrides only _floatinginfo_summary; H5/XML/native-fit implementation is delegated unchanged"
+  },
+  "alias_contract": {
+    "normalization": "lowercase and remove punctuation, whitespace, and unit punctuation",
+    "delimiter": ";",
+    "actual_header_examples": {
+      "fomega.x [rad/s]": "fomegaxrads",
+      "fvel.x [m/s]": "fvelxms",
+      "center.x [m]": "centerxm"
+    },
+    "required_aliases": [
+      "fomegaxrads",
+      "fomegayrads",
+      "fomegazrads",
+      "fvelxms",
+      "fvelyms",
+      "fvelzms",
+      "centerxm",
+      "centerym",
+      "centerzm"
+    ],
+    "row_selection": ["closest parsed time zero", "first parsed positive saved time"],
+    "status_policy": "ok only when omega, linear velocity, and center vectors are all present; unresolved remains explicit"
+  },
+  "synthetic_regression": {
+    "test": "tests/test_csv_aliases.py",
+    "fixture": "actual unit-bearing semicolon header with numeric zero and positive-time rows",
+    "expected_059": "unresolved",
+    "expected_061": "ok with complete vectors at both selected rows"
+  },
+  "actual_corroboration": {
+    "worker052_output_json": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-stage1-f6-native-rigid-state-semicolon-corroboration-052/frame0-omega-csv-audit.json",
+    "worker052_output_json_sha256": "5c34f14ae1f1a9b683f63e5fb4d8723e167b06ec49970fc565f29acdecf5625b",
+    "frame_zero_fit": {
+      "omega_rad_s": [0.0, 0.0, 0.0],
+      "native_velocity_state": "zero",
+      "valid_type2_count": 16384,
+      "residual_rms_m_per_s": 0.0
+    },
+    "first_positive_fit": {
+      "time_s": 0.0500618259755158,
+      "omega_rad_s": [0.029855592234520324, 0.03782121456401951, 0.059935286652847586],
+      "native_velocity_state": "nonzero",
+      "valid_type2_count": 16384,
+      "residual_rms_m_per_s": 1.027968642110641e-08
+    },
+    "csv_state_in_052": "unresolved due unit-bearing normalized names; no successor rerun in this source handoff",
+    "xml_declared_omega_rad_s": [0.08, 0.12, 0.06],
+    "physics_boundary": "frame-zero direct particle fit does not establish absence of the declared rigid angular release"
+  },
+  "read_and_launch_gates": {
+    "h5_read_this_turn": false,
+    "csv_read_this_turn": false,
+    "arrays_read_this_turn": false,
+    "jobs_executed": false,
+    "solver_executed": false,
+    "rendering_executed": false,
+    "launch_allowed": false,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_i": "not_granted",
+    "q_n": "not_assessed",
+    "visual_review": "pending",
+    "root_cause": "undetermined",
+    "acceptance": "not_claimed"
+  }
+}

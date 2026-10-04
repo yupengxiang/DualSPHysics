@@ -1,0 +1,58 @@
+{
+  "schema": "ds02.f6.frame0-omega-csv-alias-fix-source-report.v1",
+  "family_id": "F6",
+  "scope_id": "root_followup_061_stage1_frame0_omega_csv_alias_fix_v1",
+  "status": "source_prepared_disabled",
+  "checks": {
+    "previous_059_immutable": {"status": "pass"},
+    "unit_bearing_normalized_aliases_bound": {"status": "pass"},
+    "explicit_semicolon_parser_retained": {"status": "pass"},
+    "synthetic_actual_header_test": {"status": "pass"},
+    "synthetic_zero_and_positive_rows": {"status": "pass"},
+    "genuine_052_json_bound": {"status": "pass"},
+    "genuine_052_json_reread": {"status": "not_performed_source_reference_only"},
+    "genuine_csv_rerun": {"status": "not_performed"},
+    "h5_reread": {"status": "not_performed"},
+    "jobs": {"status": "not_performed"},
+    "solver": {"status": "not_performed"},
+    "rendering": {"status": "not_performed"}
+  },
+  "decoder_fix": {
+    "old_normalized_fields": ["fomegaxrads", "fvelxms", "centerxm"],
+    "old_result_on_actual_052": "unresolved",
+    "new_aliases": ["fomegaxrads", "fomegayrads", "fomegazrads", "fvelxms", "fvelyms", "fvelzms", "centerxm", "centerym", "centerzm"],
+    "synthetic_result": "ok for frame-zero and first-positive rows"
+  },
+  "genuine_observations_preserved": {
+    "frame_zero": {
+      "fit_omega_rad_s": [0.0, 0.0, 0.0],
+      "native_velocity_state": "zero",
+      "residual_rms_m_per_s": 0.0
+    },
+    "first_positive": {
+      "time_s": 0.0500618259755158,
+      "fit_omega_rad_s": [0.029855592234520324, 0.03782121456401951, 0.059935286652847586],
+      "native_velocity_state": "nonzero",
+      "residual_rms_m_per_s": 1.027968642110641e-08
+    },
+    "xml_declared_omega_rad_s": [0.08, 0.12, 0.06],
+    "physical_mass_kg": 128.0,
+    "native_support_mass_kg": 256.0,
+    "mass_rescaled": false,
+    "interpretation": "direct native Type2 fits and XML rigid declaration remain separate observations"
+  },
+  "negative_and_uncertainty": [
+    "frame-zero particle fit is zero while the XML declaration remains nonzero",
+    "the 052 genuine CSV result remains unresolved until Root runs successor061",
+    "no physics-zero-start conclusion",
+    "root cause remains undetermined",
+    "q_n not assessed",
+    "visual review pending",
+    "production approval none"
+  ],
+  "independent_case_count_increment": 0,
+  "launch_allowed": false,
+  "production_approval": "none",
+  "q_i": "not_granted",
+  "q_n": "not_assessed"
+}
