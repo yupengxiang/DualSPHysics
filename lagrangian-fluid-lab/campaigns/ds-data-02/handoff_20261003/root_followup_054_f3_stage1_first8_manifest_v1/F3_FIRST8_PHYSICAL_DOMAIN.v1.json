@@ -1,0 +1,292 @@
+{
+  "schema": "ds02.f3.stage1-first8-physical-domain.v1",
+  "campaign_id": "DS-DATA-02",
+  "family_id": "F3",
+  "scope_id": "F3_STAGE1_FIRST8_AY0250_AY0750_CANDIDATE",
+  "manifest_kind": "candidate_physical_domain",
+  "status": "pending_root_visual_scope_decision",
+  "production_scope_approval": false,
+  "q_n": "not_granted",
+  "q_e": "not_assessed",
+  "stage1_label": "视觉检查通过、数值精度未验收",
+  "domain_design": "First8 controls only AY=.25,.32,.39,.46,.50,.57,.64,.75; nominal pitch1, unchanged finite plain tank/window8.35, one resolution. Anchor AY.50 is interior; .25/.75 are physical endpoints. No unreviewed pitch/geometry range extrapolation.",
+  "physical_axis": {
+    "transverse_amplitude_m_s2": [
+      0.25,
+      0.32,
+      0.39,
+      0.46,
+      0.5,
+      0.57,
+      0.64,
+      0.75
+    ],
+    "nominal_pitch_multiplier": 1.0,
+    "definition_dp_m": 0.006,
+    "time_window_s": [
+      0.0,
+      8.35
+    ],
+    "save_interval_s": 0.01,
+    "expected_saved_frames": 836,
+    "geometry_is_unchanged": true,
+    "numerical_recipe_is_unchanged": true,
+    "event_window_is_unchanged": true,
+    "no_interpolation_or_extrapolation": true
+  },
+  "canonical_physical_keys": {
+    "family_id": "F3",
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "paired_background_id": "twoaxis_transverse_linear",
+    "density_kg_m3": 1000.0,
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "periodic_boundary": false,
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "geometry": {
+      "tank": {
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ],
+        "label": "continuous finite tank; top physically open"
+      },
+      "initial_fluid": {
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ],
+        "mkfluid": 0,
+        "label": "continuous initial fluid volume"
+      }
+    },
+    "initial_state": {
+      "initial_mass_total_kg": 14.58,
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "fluid_velocity_m_per_s": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "controls": {
+      "boundary_parameter": 2,
+      "no_penetration": 1,
+      "slip_mode": 2,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "viscosity_treatment": "Artificial (ViscoTreatment=1)",
+      "viscosity_value": 0.05,
+      "viscosity_boundary_factor": 1.0
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 8.35,
+      "sequence": [
+        "initial static fill",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone"
+    },
+    "forcing": {
+      "source_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "omega_rad_s": 12.531236478398654,
+      "phase_rad": 0.0,
+      "ramp_duration_s": 0.5,
+      "active_window_s": [
+        0.0,
+        8.35
+      ]
+    },
+    "mass_policy": "native_massfluid_no_rescaling",
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af"
+  },
+  "solver_recipe": {
+    "definition_dp_m": 0.006,
+    "cfl_number": 0.05,
+    "coef_dt_min": 0.005,
+    "dt_fixed_s": 0.0,
+    "time_max_s": 8.35,
+    "time_out_s": 0.01,
+    "save_pos_double": 2,
+    "shifting": 0,
+    "solver_mode": "-mdbc_noslip:1",
+    "actual_generated_constants": {
+      "data2d": false,
+      "gamma": 7.0,
+      "rhop0_kg_m3": 1000.0,
+      "h_m": 0.0095530223061,
+      "massbound_kg": 0.000216,
+      "massfluid_kg": 0.000216
+    },
+    "eos_policy": "Unchanged configured automatic sound-speed/B rule; actual generated B varies with discretization and is bound explicitly, not assumed identical across DP"
+  },
+  "cases": [
+    {
+      "order": 1,
+      "role": "lower_endpoint",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0250",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0250_VISUAL_DOMAIN",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.25
+      },
+      "physical_condition_sha256": "f1cf8ea6901f12c39f43714cc16e62fd22a69462cf2ffd20177418b0812abb0f",
+      "source_owner": "root_stage1_f3_visual_endpoints_full_typed_011/lower-owner.json",
+      "source_status": "endpoint_visual_accepted; production_scope_pending"
+    },
+    {
+      "order": 2,
+      "role": "interior01",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0320",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0320_STAGE1_BATCH8",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.32
+      },
+      "physical_condition_sha256": "4f1f90c4f3cc9c12a6c016bac7199436ac9540d3af8249000637562b5304e5e0",
+      "source_owner": "root_stage1_f3_first8_prospective_inputs_012/prepared/interior01/prepared-input-report.json",
+      "source_status": "prospective_input_only; no solver or visual decision"
+    },
+    {
+      "order": 3,
+      "role": "interior02",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0390",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0390_STAGE1_BATCH8",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.39
+      },
+      "physical_condition_sha256": "a7821ee8ef0d72cf3f503ef043ebcf76248d0316d5ea29226c075fe489c4e201",
+      "source_owner": "root_stage1_f3_first8_prospective_inputs_012/prepared/interior02/prepared-input-report.json",
+      "source_status": "prospective_input_only; no solver or visual decision"
+    },
+    {
+      "order": 4,
+      "role": "interior03",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0460",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0460_STAGE1_BATCH8",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.46
+      },
+      "physical_condition_sha256": "1ddefb9be61452ae973a9f8982a27f09b170b70b41524311d483d71240e08863",
+      "source_owner": "root_stage1_f3_first8_prospective_inputs_012/prepared/interior03/prepared-input-report.json",
+      "source_status": "prospective_input_only; no solver or visual decision"
+    },
+    {
+      "order": 5,
+      "role": "anchor_existing_mother",
+      "case_id": "F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005",
+      "physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.5
+      },
+      "physical_condition_sha256": "49e319c0a874733707a028e916362e74e2301d6681e34bc6b717581dbd7edaeb",
+      "source_owner": "root_stage1_f3_visual_domain_endpoint_inputs_006/baseline_physical_binding",
+      "source_status": "existing_mother_visual_accepted; preserve_source_identity; do_not_recast_or_recount"
+    },
+    {
+      "order": 6,
+      "role": "interior04",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0570",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0570_STAGE1_BATCH8",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.57
+      },
+      "physical_condition_sha256": "df6cd84199c3a105070f144ff2724a3e1b3502a4059f2c0ade9791b924ede67a",
+      "source_owner": "root_stage1_f3_first8_prospective_inputs_012/prepared/interior04/prepared-input-report.json",
+      "source_status": "prospective_input_only; no solver or visual decision"
+    },
+    {
+      "order": 7,
+      "role": "interior05",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0640",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0640_STAGE1_BATCH8",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.64
+      },
+      "physical_condition_sha256": "1a2663c161f036da596ae67a67d58ec2eac0c3568cb5c058f53b1f561c410daf",
+      "source_owner": "root_stage1_f3_first8_prospective_inputs_012/prepared/interior05/prepared-input-report.json",
+      "source_status": "prospective_input_only; no solver or visual decision"
+    },
+    {
+      "order": 8,
+      "role": "upper_endpoint",
+      "case_id": "F3_STAGE1_DP006_P1000_AY0750",
+      "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0750_VISUAL_DOMAIN",
+      "parameter_tuple": {
+        "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+        "nominal_pitch_multiplier": 1.0,
+        "transverse_amplitude_m_s2": 0.75
+      },
+      "physical_condition_sha256": "cdb32062b5490bb208353deb64794522f5d6389457bb5ee807d83eea8206efde",
+      "source_owner": "root_stage1_f3_visual_endpoints_full_typed_011/upper-owner.json",
+      "source_status": "endpoint_visual_accepted; production_scope_pending"
+    }
+  ],
+  "provenance_policy": {
+    "identity": "case_id and physical_case_id are source identities; do not rename the existing AY.50 mother to a Stage1 batch identity",
+    "clone_semantics": "The five interiors and two endpoints reuse exact initial XML/BI4 bytes from the genuine 3D DP006 parent; this is exact-clone provenance, not a new GenCase receipt",
+    "counts": "Initial native counts and mass QA are carried from the genuine parent QA; this candidate does not increment independent physical-case count",
+    "precision": "not accepted; no spatial/time/save/macro/external numerical gate is inferred from this visual domain"
+  },
+  "source_bindings": {
+    "active_goal": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_GPT56LUNA_20261004_ZH.md",
+      "sha256": "53d422511b5581266410de92c54627ac67e8085eccb75a9ebfe57de10a34316a"
+    },
+    "endpoint_visual_acceptance_scope": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_endpoint_visual_acceptance_021",
+      "status": "directory provenance; per-file decision bindings are in the case provenance manifest"
+    },
+    "strict_first8_preparation_binding": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_first8_prospective_inputs_012/binding.json",
+      "sha256": "1df424ddbb6a024a9071ce65d5aeca2c96ddd6c13ab5e2356108bc1ea473f4c6"
+    }
+  }
+}

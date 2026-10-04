@@ -1,0 +1,106 @@
+{
+  "schema": "ds02.stage1.visual-authorizer-v2-requirements.v1",
+  "campaign_id": "DS-DATA-02",
+  "family_id": "F3",
+  "scope_id": "F3_STAGE1_FIRST8_AY0250_AY0750_CANDIDATE",
+  "status": "requirements_only",
+  "source_only": true,
+  "launch_allowed": false,
+  "production_scope_approval": false,
+  "q_n": "not_granted",
+  "q_e": "not_assessed",
+  "current_goal": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_GPT56LUNA_20261004_ZH.md",
+    "sha256": "53d422511b5581266410de92c54627ac67e8085eccb75a9ebfe57de10a34316a"
+  },
+  "known_source_052_limitation": {
+    "description": "The source052 authorizer currently assumes clone-equality in its actual-case bindings and hashes evidence bindings without interpreting every decision/report document. Do not edit source052 in this scope; v2 requirements below are the integration contract for a later root change.",
+    "source_files": [
+      {
+        "path": "../root_followup_052_stage1_production_adapter_v1/ds_data02_stage1_production.py",
+        "sha256": "cb8916e9e39a9cdb602966127c4388616e8080402535e797acd0e0ab7c133fee"
+      },
+      {
+        "path": "../root_followup_052_stage1_production_adapter_v1/ds_data02_stage1_dispatch_v1.py",
+        "sha256": "0b236bfb200278dd5744a0c23ddd63696c8cfd7fe63172ee4a96c0ffa570f7af"
+      },
+      {
+        "path": "../root_followup_052_stage1_production_adapter_v1/ds_data02_stage1_production_adapter_v1.py",
+        "sha256": "9bcf26ab29ea5e21127b14593464399b7f7b003c5fabd8cf688120fb601c5a3f"
+      }
+    ]
+  },
+  "required_v2_changes": [
+    {
+      "id": "qa-semantics-branch",
+      "requirement": "Select QA validation by explicit case provenance: genuine_3d_generation requires actual generated XML/BI4/counts/initial QA; exact_initial_clone_of_genuine_3d requires the original genuine GenCase receipt, byte-equal XML/BI4 hashes, clone-preparation receipt, and the original initial QA. Never fabricate a new GenCase receipt or turn a clone into an independent count.",
+      "f3_application": "The AY.50 mother is the genuine parent. The .25/.75 endpoints and five strict012 interiors are exact initial clones with changed forcing physics."
+    },
+    {
+      "id": "aggregate-domain-decision",
+      "requirement": "Require an actual root-authored document with schema ds02.stage1.root-visual-domain-decision.v1, status visual-domain-approved-by-root, the current GPT56LUNA goal binding, explicit selected case IDs or a scope ID, precisionnotaccepted, production_scope_approval false, q_n not_granted, and q_e not_assessed.",
+      "f3_application": "Do not use a broad case_ids field to imply that the five unrun interiors were reviewed. A narrow endpoint-bounded decision may list only the observed lower endpoint, mother, and upper endpoint and mark the five interior IDs prospective."
+    },
+    {
+      "id": "per-case-visual-decision",
+      "requirement": "For every selected case, read and hash the decision JSON and require schema ds02.stage1.root-visual-case-decision.v1, status visual-approved-by-root, matching family/case/physical condition/window, Stage1 label, production_scope_approval false, q_n not_granted or not_assessed, q_e not_granted or not_assessed, and numerical precision not accepted.",
+      "f3_application": "The endpoint decisions 021 satisfy this case-level shape. The mother decision 010 remains immutable historical evidence under its prior goal and is not rewritten; the aggregate domain decision must bind the current goal."
+    },
+    {
+      "id": "full-original-frame-evidence",
+      "requirement": "Read each referenced JSON integrity report and require all_frames_rendered true, diagnostic_only false, actual_times_preserved_exactly true, expected frame count 836, no missing/nonfinite active states, and the actual original saved-frame/GIF/trajectory bindings. Preserve unknown-loss and other review observations as evidence rather than silently converting them to a pass.",
+      "f3_application": "The endpoint reports are bound in the candidate manifest; each selected interior must receive its own actual typed/ParaView report and original frame hashes before it can be selected."
+    },
+    {
+      "id": "frozen-membership",
+      "requirement": "Authorize the exact frozen case manifest selected by Root. Reject arbitrary interpolation between the observed .25/.50/.75 values and reject unreviewed pitch, geometry, resolution, time-window, save-rate, or macro variants.",
+      "f3_application": "The candidate axis is exactly AY=.25,.32,.39,.46,.50,.57,.64,.75 at pitch multiplier 1.0, DP006, [0,8.35] s, 0.01 s saves, with unchanged F3_CELL3_PLAIN geometry."
+    },
+    {
+      "id": "mother-identity-and-count",
+      "requirement": "Permit the existing AY.50 mother as the anchor/interior sample by its original case_id and physical_case_id. Do not require a fourth sample, rename it to a Stage1 batch identity, or recount it when adding endpoint/prospective records.",
+      "f3_application": "Preserve F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005 and F3_TWOAXIS_AY0P50_PITCH_NOMINAL exactly."
+    },
+    {
+      "id": "evidence-completeness",
+      "requirement": "Before launch, bind actual physics, geometry, motion, no-initial-overlap, initial mass-discrepancy, solver argv/cwd/recipe, event-window, native/typed, clone/genuine QA, and visual integrity evidence. Hash every file and reject missing or mismatched files before the unchanged runtime is called.",
+      "f3_application": "The current candidate has source metadata and pending nulls for unrun interiors; it is intentionally not launchable."
+    }
+  ],
+  "explicit_pending_links": {
+    "aggregate_root_decision": {
+      "schema": "ds02.stage1.root-visual-domain-decision.v1",
+      "path": null,
+      "sha256": null,
+      "status": "pending"
+    },
+    "final_visualization_decision": {
+      "path": null,
+      "sha256": null,
+      "status": "pending"
+    },
+    "full_scope_frame_integrity": {
+      "path": null,
+      "sha256": null,
+      "status": "pending; one original saved-frame record per selected case"
+    },
+    "five_interior_visual_decisions": {
+      "case_ids": [
+        "F3_STAGE1_DP006_P1000_AY0320",
+        "F3_STAGE1_DP006_P1000_AY0390",
+        "F3_STAGE1_DP006_P1000_AY0460",
+        "F3_STAGE1_DP006_P1000_AY0570",
+        "F3_STAGE1_DP006_P1000_AY0640"
+      ],
+      "status": "pending_solver_and_root_visual_review"
+    }
+  },
+  "forbidden_actions_in_this_scope": [
+    "write APPROVED_VISUAL_SCOPES.json",
+    "grant production or numerical approval",
+    "launch a solver, GenCase, converter, or ParaView job",
+    "create a fake Q-N/Q-E or precision pass",
+    "read raw numeric frames as a substitute for visual decisions",
+    "mutate consumed runtime, strict dispatcher, or old production source bytes"
+  ]
+}
