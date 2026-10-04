@@ -1,0 +1,43 @@
+{
+  "schema": "ds02.stage1.paraview-batch-render-request.v1",
+  "status": "template_only_not_launched",
+  "family_id": "F2",
+  "scope_id": "root_followup_052_stage1_visual_batch_renderer_v1",
+  "renderer": {
+    "script": "<root-bind-to-this-scope>/render.py",
+    "renderer_revision": "f2-root-followup-053-stage1-visual-renderer-v2",
+    "manifest_schema": "ds02.stage1.paraview-temporal-product.v1",
+    "report_schema": "ds02.stage1.paraview-full-animation-integrity.v1",
+    "software": {
+      "entrypoint": "pvpython",
+      "display_backend": "EGL/software-llvmpipe",
+      "threads": 2,
+      "hdf5_reader": false
+    },
+    "default_selection": "all_saved_frames",
+    "diagnostic_selection_example": [0, 200, 400],
+    "contact_sheet_page_size": 24,
+    "gif_frame_delay_ms": 40,
+    "camera_margin": 1.12,
+    "boundary_display": "native fixed points through display-only y-mid Clip plus optional outline",
+    "marker_display": "native moving/floating points through the same display-only y-mid Clip"
+  },
+  "cases": [],
+  "case_binding_requirements": {
+    "manifest_path": "absolute root-reviewed path",
+    "manifest_sha256": "64-character SHA-256",
+    "xdmf_path_and_sha256": "must agree with manifest",
+    "source_h5_sha256": "copied from the immutable temporal product manifest",
+    "physical_case_id": "must be a unique physical case identifier",
+    "type_aliases": "native integer values; no renderer remap",
+    "unknown_exclusions": "copy source provenance; do not infer loss semantics"
+  },
+  "launch_policy": {
+    "root_only": true,
+    "source_only": true,
+    "allow_solver_or_gencase": false,
+    "allow_source_mutation": false,
+    "numerical_precision_status": "not accepted",
+    "visual_review": "pending root inspection"
+  }
+}

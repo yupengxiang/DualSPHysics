@@ -1,0 +1,638 @@
+{
+  "schema": "ds02.f2.stage1.independent-physics8-plan.v1",
+  "family_id": "F2",
+  "scope_id": "root_followup_053_f2_independent_physics8_plan_v1",
+  "status": "planned_not_materialized",
+  "launch_allowed": false,
+  "root_only": true,
+  "physical_case_count": 8,
+  "resolution_counting_rule": "one true3D dp010 view per physical tuple; no coarse/medium/fine aliases and no repeated windows count",
+  "allowlist": {
+    "initial_cup_tilt_deg": [
+      -4.0,
+      0.0,
+      4.0
+    ],
+    "rotation_duration_s": [
+      0.65,
+      1.2
+    ],
+    "fluid_fill_ratio": [
+      0.8,
+      1.0
+    ],
+    "mouth_geometry": [
+      "open_rim",
+      "short_spout"
+    ],
+    "receiver_x_m": [
+      0.45,
+      0.65
+    ],
+    "receiver_y_m": [
+      0.0,
+      0.14,
+      0.22
+    ]
+  },
+  "common_physical_contract": {
+    "event_window_s": 4.0,
+    "save_interval_s": 0.01,
+    "dp_m": 0.01,
+    "solver_dimension": 3,
+    "xml_data2d": false,
+    "full_native_fields_required": [
+      "valid",
+      "particle_id",
+      "particle_zone",
+      "initial_mk",
+      "mass",
+      "velocity",
+      "density",
+      "pressure",
+      "type"
+    ],
+    "visual_acceptance": "root reviews every full temporal animation; visual pass and numerical precision remain separate"
+  },
+  "source_bindings": {
+    "family_card": "campaigns/ds-data-02/families/F2/family_card.json",
+    "split_range_design": "campaigns/ds-data-02/families/F2/split_range_design.json",
+    "event_definitions": "campaigns/ds-data-02/families/F2/event_definitions.json"
+  },
+  "cases": [
+    {
+      "case_id": "F2_STAGE1_B08_C01",
+      "physical_case_id": "F2_STAGE1_B08_C01",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "8066955ba7d20384e6267dd13153fb3af138e5cf0ef8b5fdbd32bdadc67f91c0",
+      "mother": {
+        "mechanism_id": "center_catch",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "fe8fe641461402170f6dc112fef0d960138a39cbfc0ab1354aba47f3b42a594a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "open_rim",
+        "receiver_x_m": 0.45,
+        "receiver_y_m": 0.0,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": 0.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 1.2,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 1.0,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C02",
+      "physical_case_id": "F2_STAGE1_B08_C02",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "6b67699720462238931240fb93c697dca41796f7d33b2177f4763bf1825ba57f",
+      "mother": {
+        "mechanism_id": "offset_spill",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "2ec50a458648fe63dc1b0c706ded645af2a589e5d8e21613dfb5ba369f749a1a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "open_rim",
+        "receiver_x_m": 0.45,
+        "receiver_y_m": 0.22,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": 0.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 1.2,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 1.0,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C03",
+      "physical_case_id": "F2_STAGE1_B08_C03",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "8a19685f13844a5005f7934114473b48678fb2fd548b776642ac1b9dbb010dd7",
+      "mother": {
+        "mechanism_id": "center_catch",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "fe8fe641461402170f6dc112fef0d960138a39cbfc0ab1354aba47f3b42a594a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "open_rim",
+        "receiver_x_m": 0.65,
+        "receiver_y_m": 0.0,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": -4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 0.65,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 0.8,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C04",
+      "physical_case_id": "F2_STAGE1_B08_C04",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "a1055e6f9160ad3ba836fd93a4aadb5a6cf17c7030b0f74ea9e05b498e6aa6da",
+      "mother": {
+        "mechanism_id": "offset_spill",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "2ec50a458648fe63dc1b0c706ded645af2a589e5d8e21613dfb5ba369f749a1a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "open_rim",
+        "receiver_x_m": 0.65,
+        "receiver_y_m": 0.14,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": 4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 0.65,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 0.8,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C05",
+      "physical_case_id": "F2_STAGE1_B08_C05",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "fa6dbd186d49f12a2ed76dafd4bfda4006afc9d7854858219129721be8a1f565",
+      "mother": {
+        "mechanism_id": "center_catch",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "fe8fe641461402170f6dc112fef0d960138a39cbfc0ab1354aba47f3b42a594a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "short_spout",
+        "receiver_x_m": 0.45,
+        "receiver_y_m": 0.0,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": 4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 0.65,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 1.0,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C06",
+      "physical_case_id": "F2_STAGE1_B08_C06",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "4ec448b1e82cfafcd6ecff02cf08a7ec82fd3f33db8fddb119413a61d2729e51",
+      "mother": {
+        "mechanism_id": "offset_spill",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "2ec50a458648fe63dc1b0c706ded645af2a589e5d8e21613dfb5ba369f749a1a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "short_spout",
+        "receiver_x_m": 0.45,
+        "receiver_y_m": 0.22,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": -4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 0.65,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 1.0,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C07",
+      "physical_case_id": "F2_STAGE1_B08_C07",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "2908e71a133f84225a847825f1ff2894a289e8e27ceea16a4108aba5f1751ce5",
+      "mother": {
+        "mechanism_id": "center_catch",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "fe8fe641461402170f6dc112fef0d960138a39cbfc0ab1354aba47f3b42a594a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "short_spout",
+        "receiver_x_m": 0.65,
+        "receiver_y_m": 0.0,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": -4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 1.2,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 0.8,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    },
+    {
+      "case_id": "F2_STAGE1_B08_C08",
+      "physical_case_id": "F2_STAGE1_B08_C08",
+      "independent_case_count_increment": 1,
+      "status": "planned_not_materialized",
+      "physical_condition_sha256": "324b812845eb6d405a64e552d5e8d21af725d9e651e0201bf5489271f720c6ec",
+      "mother": {
+        "mechanism_id": "offset_spill",
+        "definition_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml",
+        "definition_template_sha256": "2ec50a458648fe63dc1b0c706ded645af2a589e5d8e21613dfb5ba369f749a1a",
+        "motion_template": "campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_motion.dat",
+        "motion_template_sha256": "547a941301b2a3d2fcce8633e4ff43b86fe08c4633c41e8fa9a0e85567f45c4b",
+        "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+        "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+      },
+      "geometry_and_endpoints": {
+        "mouth_geometry": "short_spout",
+        "receiver_x_m": 0.65,
+        "receiver_y_m": 0.14,
+        "interior_regions": [
+          "cup_interior",
+          "receiver_interior",
+          "spill_tray_interior",
+          "inflight",
+          "unknown"
+        ],
+        "finite_boundary_policy": "preserve cup, receiver and tray finite walls; world top remains the only open face"
+      },
+      "physics_tuple": {
+        "initial_cup_tilt_deg": 4.0,
+        "tilt_axis": "world_x_candidate_requires_geometry_preflight",
+        "rotation_duration_s": 1.2,
+        "rotation_endpoint_deg": -105.0,
+        "native_rotation_axis_endpoints": {
+          "axis_p1": [
+            0.0,
+            -1.0,
+            0.65
+          ],
+          "axis_p2": [
+            0.0,
+            1.0,
+            0.65
+          ]
+        },
+        "fluid_fill_ratio": 0.8,
+        "gravity_m_s2": [
+          0.0,
+          0.0,
+          -9.81
+        ]
+      },
+      "single_resolution_policy": {
+        "dp_m": 0.01,
+        "resolution_views_per_physical_case": 1,
+        "three_dimensional": true,
+        "solver_dimension": 3,
+        "xml_data2d": false,
+        "event_window_s": 4.0,
+        "save_interval_s": 0.01
+      },
+      "provenance_policy": {
+        "unknown_excluded_uid_retained": true,
+        "excluded_uid_count_source": "actual native receipt after root launch",
+        "physical_spill_inference": false,
+        "native_mass_rescaling": false,
+        "source_mutation_allowed": false,
+        "materialize_only_after_root_visual_scope_review": true,
+        "numerical_precision_status": "not accepted"
+      }
+    }
+  ],
+  "unknowns_and_gates": [
+    "tilt candidate must pass source geometry non-overlap and finite-boundary preflight before materialization",
+    "actual native excluded UID/loss remains unknown until a root-authorized fulltyped trajectory exists",
+    "no H5/CSV/BI4/solver reads or numerical generation are performed by this plan",
+    "a visual renderer output never grants Q-N or production approval"
+  ]
+}
