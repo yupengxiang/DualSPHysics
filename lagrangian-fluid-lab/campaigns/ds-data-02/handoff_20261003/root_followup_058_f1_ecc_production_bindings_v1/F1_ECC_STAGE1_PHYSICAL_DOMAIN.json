@@ -1,0 +1,958 @@
+{
+  "schema": "ds02.stage1.frozen-physical-domain.v1",
+  "status": "source_fixture_only_pending_h130_audit",
+  "source_only": true,
+  "execution_allowed": false,
+  "family_id": "F1",
+  "scope_id": "F1_ECC_STAGE1_FIRST4_HEAD0110_0190_VISUAL_V1",
+  "goal_authority": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE1_VISUAL_GPT56LUNA_20261004_ZH.md",
+    "sha256": "53d422511b5581266410de92c54627ac67e8085eccb75a9ebfe57de10a34316a"
+  },
+  "root_visual_domain_decision": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_ecc_four_head_observed_domain_062/root-visual-domain-decision.json",
+    "sha256": "97ff1530d4c9fb357fd455d9f405004d278ded801312000bfc1c06450cedee16"
+  },
+  "event_window_s": [
+    0.0,
+    1.6
+  ],
+  "time_window_s": [
+    0.0,
+    1.6
+  ],
+  "save_interval_s": 0.01,
+  "expected_saved_frames": 161,
+  "no_interpolation_or_extrapolation": true,
+  "unchanged_obstacle_and_boundary_geometry": true,
+  "cases": [
+    {
+      "case_id": "F1_STAGE1_ECC_H110_DP010",
+      "physical_case_id": "F1_ECC_HEAD_110_UNCHANGED_MOTHER_GEOMETRY_V1",
+      "physical_condition_sha256": "315f2c4209fb1fbd8bb23055c808954f5ece2b3df729f2bbd41289c5e5dbbc13",
+      "parameter_tuple": {
+        "mechanism_id": "eccentric_obstacle",
+        "fluid_depth_m": 0.11,
+        "dp_m": 0.01
+      },
+      "role": "observed",
+      "source_owner": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_ECC_H110_DP010/owner.json",
+        "sha256": "f3fea180b6c5a8306b422ba39b23a273f901b40370a7b2cc2d31b92293bef4db"
+      },
+      "physical_binding": {
+        "schema": "ds-data-02.physical-binding.v1",
+        "family_id": "F1",
+        "physical_case_id": "F1_ECC_HEAD_110_UNCHANGED_MOTHER_GEOMETRY_V1",
+        "mechanism_id": "eccentric_obstacle",
+        "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+        "geometry": {
+          "tank": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              1.6,
+              0.67,
+              0.4
+            ],
+            "label": "Finite five physical walls with open top; thick DBC numerical support"
+          },
+          "obstacle_or_divider": {
+            "low_m": [
+              0.9,
+              0.24,
+              0
+            ],
+            "size_m": [
+              0.12,
+              0.12,
+              0.45
+            ],
+            "label": "Static physical solid"
+          },
+          "fluid_reservoir": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              0.4,
+              0.67,
+              0.11
+            ],
+            "mkfluid": 0,
+            "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+          }
+        },
+        "initial_state": {
+          "source_regions": {
+            "fluid": {
+              "low_m": [
+                0,
+                0,
+                0
+              ],
+              "size_m": [
+                0.4,
+                0.67,
+                0.11
+              ],
+              "mkfluid": 0,
+              "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+            }
+          },
+          "velocities_m_per_s": {
+            "fluid": [
+              0,
+              0,
+              0
+            ]
+          },
+          "source_labels": {
+            "fluid": "Initial Type3/Mk1 cohort"
+          },
+          "continuum_mass_by_source_kg": {
+            "fluid": 29.480000000000004
+          },
+          "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory"
+        },
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "parameters": {
+          "fluid_depth_m": 0.11,
+          "physical_top_open": true,
+          "continuum_fluid_volume_m3": 0.029480000000000003
+        },
+        "event_window": {
+          "time_start_s": 0,
+          "time_end_s": 1.6,
+          "sequence": [
+            "release",
+            "obstacle_impact",
+            "bypass",
+            "downstream_return"
+          ],
+          "expected_first_contact_range_s": null,
+          "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+        },
+        "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+        "periodic_boundary": false,
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "mechanism_id": "eccentric_obstacle",
+      "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+      "physics": {
+        "mechanism_id": "eccentric_obstacle",
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "geometry": {
+        "tank": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            1.6,
+            0.67,
+            0.4
+          ],
+          "label": "Finite five physical walls with open top; thick DBC numerical support"
+        },
+        "obstacle_or_divider": {
+          "low_m": [
+            0.9,
+            0.24,
+            0
+          ],
+          "size_m": [
+            0.12,
+            0.12,
+            0.45
+          ],
+          "label": "Static physical solid"
+        },
+        "fluid_reservoir": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            0.4,
+            0.67,
+            0.11
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "motion": {
+        "mode": "gravity_release",
+        "initial_velocities_m_per_s": {
+          "fluid": [
+            0,
+            0,
+            0
+          ]
+        },
+        "prescribed_forcing": "none",
+        "event_sequence": [
+          "release",
+          "obstacle_impact",
+          "bypass",
+          "downstream_return"
+        ]
+      },
+      "event_window_s": [
+        0,
+        1.6
+      ],
+      "complete_event_window_s": [
+        0,
+        1.6
+      ],
+      "expected_saved_frames": 161,
+      "native_frame_interval_s": 0.01,
+      "independent_case_count_increment": 0,
+      "parent_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+      "split": "observed"
+    },
+    {
+      "case_id": "F1_FALLBACK_ECC_COARSE",
+      "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "physical_condition_sha256": "687c069f836dd81b3c4c85ea6f977f9f2775debea01d3657b81356801ced71d3",
+      "parameter_tuple": {
+        "mechanism_id": "eccentric_obstacle",
+        "fluid_depth_m": 0.15,
+        "dp_m": 0.01
+      },
+      "role": "observed",
+      "source_owner": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/ecc_coarse/owner.json",
+        "sha256": "7a901cb5c91525529ea87680aabdff0f0b2496fd0db88bacc206004b88520472"
+      },
+      "physical_binding": {
+        "schema": "ds-data-02.physical-binding.v1",
+        "family_id": "F1",
+        "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "mechanism_id": "eccentric_obstacle",
+        "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+        "geometry": {
+          "tank": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              1.6,
+              0.67,
+              0.4
+            ],
+            "label": "Finite five physical walls with open top; thick DBC numerical support"
+          },
+          "obstacle_or_divider": {
+            "low_m": [
+              0.9,
+              0.24,
+              0
+            ],
+            "size_m": [
+              0.12,
+              0.12,
+              0.45
+            ],
+            "label": "Static physical solid"
+          },
+          "fluid_reservoir": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              0.4,
+              0.67,
+              0.15
+            ],
+            "mkfluid": 0,
+            "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+          }
+        },
+        "initial_state": {
+          "source_regions": {
+            "fluid": {
+              "low_m": [
+                0,
+                0,
+                0
+              ],
+              "size_m": [
+                0.4,
+                0.67,
+                0.15
+              ],
+              "mkfluid": 0,
+              "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+            }
+          },
+          "velocities_m_per_s": {
+            "fluid": [
+              0,
+              0,
+              0
+            ]
+          },
+          "source_labels": {
+            "fluid": "Initial Type3/Mk1 cohort"
+          },
+          "continuum_mass_by_source_kg": {
+            "fluid": 40.2
+          },
+          "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory"
+        },
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "parameters": {
+          "fluid_depth_m": 0.15,
+          "physical_top_open": true,
+          "continuum_fluid_volume_m3": 0.0402
+        },
+        "event_window": {
+          "time_start_s": 0,
+          "time_end_s": 1.6,
+          "sequence": [
+            "release",
+            "obstacle_impact",
+            "bypass",
+            "downstream_return"
+          ],
+          "expected_first_contact_range_s": null,
+          "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+        },
+        "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+        "periodic_boundary": false,
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "mechanism_id": "eccentric_obstacle",
+      "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+      "physics": {
+        "mechanism_id": "eccentric_obstacle",
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "geometry": {
+        "tank": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            1.6,
+            0.67,
+            0.4
+          ],
+          "label": "Finite five physical walls with open top; thick DBC numerical support"
+        },
+        "obstacle_or_divider": {
+          "low_m": [
+            0.9,
+            0.24,
+            0
+          ],
+          "size_m": [
+            0.12,
+            0.12,
+            0.45
+          ],
+          "label": "Static physical solid"
+        },
+        "fluid_reservoir": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            0.4,
+            0.67,
+            0.15
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "motion": {
+        "mode": "gravity_release",
+        "initial_velocities_m_per_s": {
+          "fluid": [
+            0,
+            0,
+            0
+          ]
+        },
+        "prescribed_forcing": "none",
+        "event_sequence": [
+          "release",
+          "obstacle_impact",
+          "bypass",
+          "downstream_return"
+        ]
+      },
+      "event_window_s": [
+        0,
+        1.6
+      ],
+      "complete_event_window_s": [
+        0,
+        1.6
+      ],
+      "expected_saved_frames": 161,
+      "native_frame_interval_s": 0.01,
+      "independent_case_count_increment": 0,
+      "parent_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+      "split": "observed"
+    },
+    {
+      "case_id": "F1_STAGE1_ECC_H190_DP010",
+      "physical_case_id": "F1_ECC_HEAD_190_UNCHANGED_MOTHER_GEOMETRY_V1",
+      "physical_condition_sha256": "62ebe9e74cc7cdef79d72dae15d5d38c257660b0f7352304a2996de09c422d76",
+      "parameter_tuple": {
+        "mechanism_id": "eccentric_obstacle",
+        "fluid_depth_m": 0.19,
+        "dp_m": 0.01
+      },
+      "role": "observed",
+      "source_owner": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_ECC_H190_DP010/owner.json",
+        "sha256": "d3d691019faaaebacd178cc0a3d72f204399f22b227e6fde86d55596d3d327bb"
+      },
+      "physical_binding": {
+        "schema": "ds-data-02.physical-binding.v1",
+        "family_id": "F1",
+        "physical_case_id": "F1_ECC_HEAD_190_UNCHANGED_MOTHER_GEOMETRY_V1",
+        "mechanism_id": "eccentric_obstacle",
+        "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+        "geometry": {
+          "tank": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              1.6,
+              0.67,
+              0.4
+            ],
+            "label": "Finite five physical walls with open top; thick DBC numerical support"
+          },
+          "obstacle_or_divider": {
+            "low_m": [
+              0.9,
+              0.24,
+              0
+            ],
+            "size_m": [
+              0.12,
+              0.12,
+              0.45
+            ],
+            "label": "Static physical solid"
+          },
+          "fluid_reservoir": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              0.4,
+              0.67,
+              0.19
+            ],
+            "mkfluid": 0,
+            "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+          }
+        },
+        "initial_state": {
+          "source_regions": {
+            "fluid": {
+              "low_m": [
+                0,
+                0,
+                0
+              ],
+              "size_m": [
+                0.4,
+                0.67,
+                0.19
+              ],
+              "mkfluid": 0,
+              "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+            }
+          },
+          "velocities_m_per_s": {
+            "fluid": [
+              0,
+              0,
+              0
+            ]
+          },
+          "source_labels": {
+            "fluid": "Initial Type3/Mk1 cohort"
+          },
+          "continuum_mass_by_source_kg": {
+            "fluid": 50.92000000000001
+          },
+          "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory"
+        },
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "parameters": {
+          "fluid_depth_m": 0.19,
+          "physical_top_open": true,
+          "continuum_fluid_volume_m3": 0.05092000000000001
+        },
+        "event_window": {
+          "time_start_s": 0,
+          "time_end_s": 1.6,
+          "sequence": [
+            "release",
+            "obstacle_impact",
+            "bypass",
+            "downstream_return"
+          ],
+          "expected_first_contact_range_s": null,
+          "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+        },
+        "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+        "periodic_boundary": false,
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "mechanism_id": "eccentric_obstacle",
+      "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+      "physics": {
+        "mechanism_id": "eccentric_obstacle",
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "geometry": {
+        "tank": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            1.6,
+            0.67,
+            0.4
+          ],
+          "label": "Finite five physical walls with open top; thick DBC numerical support"
+        },
+        "obstacle_or_divider": {
+          "low_m": [
+            0.9,
+            0.24,
+            0
+          ],
+          "size_m": [
+            0.12,
+            0.12,
+            0.45
+          ],
+          "label": "Static physical solid"
+        },
+        "fluid_reservoir": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            0.4,
+            0.67,
+            0.19
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "motion": {
+        "mode": "gravity_release",
+        "initial_velocities_m_per_s": {
+          "fluid": [
+            0,
+            0,
+            0
+          ]
+        },
+        "prescribed_forcing": "none",
+        "event_sequence": [
+          "release",
+          "obstacle_impact",
+          "bypass",
+          "downstream_return"
+        ]
+      },
+      "event_window_s": [
+        0,
+        1.6
+      ],
+      "complete_event_window_s": [
+        0,
+        1.6
+      ],
+      "expected_saved_frames": 161,
+      "native_frame_interval_s": 0.01,
+      "independent_case_count_increment": 0,
+      "parent_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+      "split": "observed"
+    },
+    {
+      "case_id": "F1_STAGE1_ECC_H130_DP010",
+      "physical_case_id": "F1_ECC_HEAD_130_UNCHANGED_MOTHER_GEOMETRY_V1",
+      "physical_condition_sha256": "16ba07faf7b61f7d97f4bfc9d88a315293292107f1390ca860c15825a3bdb36e",
+      "parameter_tuple": {
+        "mechanism_id": "eccentric_obstacle",
+        "fluid_depth_m": 0.13,
+        "dp_m": 0.01
+      },
+      "role": "prospective",
+      "source_owner": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_ecc_four_head_observed_domain_062/ecc-h130-owner.json",
+        "sha256": "e281b1179254ddbb39f0e7667a04fcafa56707e37c4e3129885d2496bf9fed8d"
+      },
+      "physical_binding": {
+        "schema": "ds-data-02.physical-binding.v1",
+        "family_id": "F1",
+        "physical_case_id": "F1_ECC_HEAD_130_UNCHANGED_MOTHER_GEOMETRY_V1",
+        "mechanism_id": "eccentric_obstacle",
+        "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+        "geometry": {
+          "tank": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              1.6,
+              0.67,
+              0.4
+            ],
+            "label": "Finite five physical walls with open top; thick DBC numerical support"
+          },
+          "obstacle_or_divider": {
+            "low_m": [
+              0.9,
+              0.24,
+              0
+            ],
+            "size_m": [
+              0.12,
+              0.12,
+              0.45
+            ],
+            "label": "Static physical solid"
+          },
+          "fluid_reservoir": {
+            "low_m": [
+              0,
+              0,
+              0
+            ],
+            "size_m": [
+              0.4,
+              0.67,
+              0.13
+            ],
+            "mkfluid": 0,
+            "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+          }
+        },
+        "initial_state": {
+          "source_regions": {
+            "fluid": {
+              "low_m": [
+                0,
+                0,
+                0
+              ],
+              "size_m": [
+                0.4,
+                0.67,
+                0.13
+              ],
+              "mkfluid": 0,
+              "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+            }
+          },
+          "velocities_m_per_s": {
+            "fluid": [
+              0,
+              0,
+              0
+            ]
+          },
+          "source_labels": {
+            "fluid": "Initial Type3/Mk1 cohort"
+          },
+          "continuum_mass_by_source_kg": {
+            "fluid": 34.84
+          },
+          "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory"
+        },
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "parameters": {
+          "fluid_depth_m": 0.13,
+          "physical_top_open": true,
+          "continuum_fluid_volume_m3": 0.03484
+        },
+        "event_window": {
+          "time_start_s": 0,
+          "time_end_s": 1.6,
+          "sequence": [
+            "release",
+            "obstacle_impact",
+            "bypass",
+            "downstream_return"
+          ],
+          "expected_first_contact_range_s": null,
+          "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+        },
+        "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+        "periodic_boundary": false,
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "mechanism_id": "eccentric_obstacle",
+      "geometry_family_id": "F1_GEOM_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+      "physics": {
+        "mechanism_id": "eccentric_obstacle",
+        "gravity_m_s2": [
+          0,
+          0,
+          -9.81
+        ],
+        "density_kg_m3": 1000,
+        "controls": {
+          "boundary": 1,
+          "step_algorithm": 1,
+          "kernel": 1,
+          "viscosity": {
+            "treatment": 1,
+            "value": 0.1,
+            "boundary_factor": 1
+          },
+          "density_dt": 2,
+          "density_dt_value": 0.1
+        },
+        "mass_policy": "native_massfluid_no_rescaling"
+      },
+      "geometry": {
+        "tank": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            1.6,
+            0.67,
+            0.4
+          ],
+          "label": "Finite five physical walls with open top; thick DBC numerical support"
+        },
+        "obstacle_or_divider": {
+          "low_m": [
+            0.9,
+            0.24,
+            0
+          ],
+          "size_m": [
+            0.12,
+            0.12,
+            0.45
+          ],
+          "label": "Static physical solid"
+        },
+        "fluid_reservoir": {
+          "low_m": [
+            0,
+            0,
+            0
+          ],
+          "size_m": [
+            0.4,
+            0.67,
+            0.13
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "motion": {
+        "mode": "gravity_release",
+        "initial_velocities_m_per_s": {
+          "fluid": [
+            0,
+            0,
+            0
+          ]
+        },
+        "prescribed_forcing": "none",
+        "event_sequence": [
+          "release",
+          "obstacle_impact",
+          "bypass",
+          "downstream_return"
+        ]
+      },
+      "event_window_s": [
+        0,
+        1.6
+      ],
+      "complete_event_window_s": [
+        0,
+        1.6
+      ],
+      "expected_saved_frames": 161,
+      "native_frame_interval_s": 0.01,
+      "independent_case_count_increment": 0,
+      "parent_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+      "split": "prospective"
+    }
+  ]
+}

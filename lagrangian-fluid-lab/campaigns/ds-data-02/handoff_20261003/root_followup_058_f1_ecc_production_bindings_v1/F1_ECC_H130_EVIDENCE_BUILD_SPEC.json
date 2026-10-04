@@ -1,0 +1,36 @@
+{
+  "schema": "ds02.stage1.f1.ecc.h130-derived-sidecar-builder.v1",
+  "source_only": true,
+  "case_id": "F1_STAGE1_ECC_H130_DP010",
+  "status": "builder_only_pending_worker_output",
+  "builder": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_followup_058_f1_ecc_production_bindings_v1/derive_f1_ecc_sidecars.py",
+  "derivation_policy": "Copy only scalar checks and path/hash provenance emitted by the Root strict CPU worker; do not claim an independent experiment.",
+  "required_worker_sidecars": [
+    "initial_mass_discrepancy_report",
+    "physics_evidence",
+    "geometry_evidence",
+    "motion_evidence",
+    "no_overlap_finite_state_evidence"
+  ],
+  "required_checks": {
+    "physics_evidence": [
+      "finite_state"
+    ],
+    "geometry_evidence": [
+      "finite_state"
+    ],
+    "motion_evidence": [
+      "finite_state"
+    ],
+    "no_overlap_finite_state_evidence": [
+      "finite_state",
+      "no_initial_fluid_solid_overlap"
+    ]
+  },
+  "mass_policy": {
+    "native_weight_source": "actual BI4/XML worker output",
+    "continuum_reference_source": "Root062 H130 owner physical_binding.initial_state.continuum_mass_by_source_kg.fluid",
+    "rescaling": false,
+    "builder_calculates_mass": false
+  }
+}
