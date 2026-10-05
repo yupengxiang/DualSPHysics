@@ -1,0 +1,15 @@
+{
+  "schema": "ds02.f2.stage1.fresh106.command-input-closure-contract.v1",
+  "source_only": true,
+  "request_invariants": [
+    "set(input_files) == set(input_sha256)",
+    "every input_sha256 value is a 64-hex digest",
+    "static command files are content-hash checked",
+    "raw CSV/DAT/BI4/H5/VTK/science inputs use producer-recorded digests and are never opened by this package",
+    "future output placeholders and prepared prefix directories are not inputs",
+    "runtime interpreter is environment provenance; worker, approved solver, and approved PartVTK are command inputs"
+  ],
+  "upstream_policy": "Root416/418 request bytes are immutable evidence; missing command inputs are reported and are not silently repaired here",
+  "native_policy": "fresh106 native requests include the approved solver and all actual QA/semantic JSON bindings",
+  "runtime_v2_validate_request_called": false
+}

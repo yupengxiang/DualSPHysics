@@ -1,0 +1,231 @@
+{
+  "control_family_id": "F5_CTRL_COMPACT_PACKET_SCALE_A080_099",
+  "controls": {
+    "boundary": 1,
+    "density_dt": 2,
+    "density_dt_value": 0.1,
+    "kernel": 2,
+    "step_algorithm": 2,
+    "viscosity": 1
+  },
+  "density_kg_m3": 1000.0,
+  "event_window": {
+    "expected_first_contact_range_s": null,
+    "right_censor_policy": "short diagnostic does not certify the canonical full event",
+    "sequence": "canonical 16 s runup event; short 0..1 s typed conversion is right censored",
+    "time_end_s": 16.0,
+    "time_start_s": 0.0
+  },
+  "family_id": "F5",
+  "geometry": {
+    "closed_bed_envelope": {
+      "label": "closed analytic xz profile extruded across y",
+      "low_m": [
+        -0.2,
+        -0.22,
+        -0.2
+      ],
+      "size_m": [
+        5.0,
+        0.44,
+        0.648
+      ]
+    },
+    "finite_tank": {
+      "label": "finite floor and two finite sidewalls",
+      "low_m": [
+        -0.2,
+        -0.18,
+        -0.15
+      ],
+      "size_m": [
+        5.0,
+        0.36,
+        1.1
+      ]
+    },
+    "fluid_continuum_region": {
+      "label": "source solid drawbox fluid region; native count remains producer bound",
+      "low_m": [
+        0.01,
+        -0.14,
+        0.01
+      ],
+      "size_m": [
+        3.42,
+        0.28,
+        0.38
+      ]
+    },
+    "prescribed_piston": {
+      "label": "moving source mkbound 10, native moving identity is producer bound",
+      "low_m": [
+        -0.04,
+        -0.15,
+        0.0
+      ],
+      "size_m": [
+        0.04,
+        0.3,
+        0.75
+      ]
+    },
+    "simulation_domain": {
+      "label": "generated XML pointmin to pointmax",
+      "low_m": [
+        -0.3,
+        -0.25,
+        -0.25
+      ],
+      "size_m": [
+        5.3,
+        0.5,
+        1.15
+      ]
+    }
+  },
+  "geometry_family_id": "F5_C082S1_CLOSED_ANALYTIC_PROFILE_EXTRUDED_Y_V1",
+  "gravity_m_s2": [
+    0.0,
+    0.0,
+    -9.81
+  ],
+  "initial_state": {
+    "continuum_mass_by_source_kg": {
+      "fluid": 325.7142857142857
+    },
+    "initial_mass_total_kg": 325.7142857142857,
+    "mass_policy": "continuum mass is a legacy reporting baseline; native weights are authoritative and are never rescaled",
+    "source_labels": {
+      "fluid": "still-water continuum region; native Type-3 identity is producer bound"
+    },
+    "source_regions": {
+      "fluid": {
+        "low_m": [
+          0.01,
+          -0.14,
+          0.01
+        ],
+        "relation": "clipplane separator followed by solid drawbox and clipreset",
+        "size_m": [
+          3.42,
+          0.28,
+          0.38
+        ]
+      }
+    },
+    "velocities_m_per_s": {
+      "fluid": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "lineage_group_id": "F5_COMPACT_STILL_WATER_RUNUP_RECOVERY",
+  "mass_policy": "native particle weights are authoritative; continuum mass is a reporting baseline and is never rescaled",
+  "mechanism_id": "3D_runup_with_prescribed_piston_and_extruded_analytic_slope_bed",
+  "open_inlet": false,
+  "paired_background_id": "F5_COMPACT_STILL_WATER_RUNUP_V1",
+  "parameters": {
+    "bed_closed": true,
+    "bed_extrusion_y_bounds_m": [
+      -0.22,
+      0.22
+    ],
+    "bed_profile_lower_xz_m": [
+      [
+        4.8,
+        -0.15
+      ],
+      [
+        4.4,
+        -0.15
+      ],
+      [
+        3.9,
+        0.248
+      ],
+      [
+        3.6,
+        0.248
+      ],
+      [
+        3.0,
+        0.08
+      ],
+      [
+        2.0,
+        -0.2
+      ],
+      [
+        -0.2,
+        -0.2
+      ]
+    ],
+    "bed_profile_upper_xz_m": [
+      [
+        -0.2,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.28
+      ],
+      [
+        3.6,
+        0.448
+      ],
+      [
+        3.9,
+        0.448
+      ],
+      [
+        4.4,
+        0.05
+      ],
+      [
+        4.8,
+        0.05
+      ]
+    ],
+    "bed_representation": "closed analytic xz profile extruded along y",
+    "boundary_method": "finite floor and sidewalls with prescribed moving piston",
+    "fluid_box_m": [
+      [
+        0.01,
+        -0.14,
+        0.01
+      ],
+      [
+        3.43,
+        0.14,
+        0.39
+      ]
+    ],
+    "piston_motion": {
+      "amplitude_scale": 0.8,
+      "asset_relative_name": "assets/f5_c082s1_motion_s080.dat",
+      "base_asset_relative_name": "assets/f5_compact_packet_motion.dat",
+      "base_asset_sha256": "51e197f0831915a73534c619704658b06812c9d52c38c470ab4cbb8d59f5614a",
+      "base_asset_sha256_provenance": "copied from registered C082S1 producer metadata; this source package did not read or hash DAT",
+      "duration_s": 16.0,
+      "fieldtime": 0,
+      "fieldx": 1,
+      "kind": "prescribed_table_motion"
+    },
+    "pointref_m": [
+      0.01,
+      0.0,
+      0.01
+    ],
+    "source_draw_order": "closed analytic bed/tank/piston followed by clipplane separator, solid fluid drawbox, and clipreset"
+  },
+  "periodic_boundary": false,
+  "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_A080",
+  "schema": "ds-data-02.physical-binding.v1"
+}
