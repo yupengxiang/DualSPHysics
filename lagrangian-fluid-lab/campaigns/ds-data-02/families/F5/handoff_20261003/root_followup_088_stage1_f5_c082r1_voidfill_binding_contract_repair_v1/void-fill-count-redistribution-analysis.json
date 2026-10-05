@@ -1,0 +1,64 @@
+{
+  "actual_metadata_counts": {
+    "delta_void_fill_minus_r1": {
+      "fixed": 3446,
+      "floating": 0,
+      "fluid": -3716,
+      "moving": 270,
+      "total": 0
+    },
+    "r1_gencase_234": {
+      "fixed_particles": 158559,
+      "floating_particles": 0,
+      "fluid_particles": 31658,
+      "moving_particles": 4210,
+      "solver_dimension": 3,
+      "total_particles": 194427
+    },
+    "void_fill_gencase_265": {
+      "fixed_particles": 162005,
+      "floating_particles": 0,
+      "fluid_particles": 27942,
+      "moving_particles": 4480,
+      "solver_dimension": 3,
+      "total_particles": 194427,
+      "xml_particle_counts": {
+        "fixed": 162005,
+        "floating": 0,
+        "fluid": 27942,
+        "moving": 4480
+      }
+    }
+  },
+  "arrays_opened_by_source_agent": false,
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082R1",
+  "interpretation": "The official void-fill producer redistributed category ownership while preserving total rows. This is an observed metadata delta, not proof of the exact overlap/ownership mechanism, bed containment, or QA success. No count is forced and no threshold is relaxed.",
+  "jobs_started_by_source_agent": false,
+  "official_syntax_evidence": {
+    "case_template_sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e",
+    "free_draw_beach_sha256": "8da870eda6ff5d1f96234de09f3f445c107275bfb8045e08e4787c13990daf99",
+    "still_wedge_sha256": "8a207c9288caf5c5cddc62ebf71bd66e741647498bbb6c6cb962aebaa127de99"
+  },
+  "required_next_evidence": [
+    "new actual QA with explicit producer/consumer identities",
+    "actual Type0/Mk50 six-segment footprint",
+    "per-fluid residual classification against declared float32/text bounds"
+  ],
+  "schema": "ds02.f5.c082r1.void-fill-count-redistribution-analysis.fresh088.v1",
+  "source_representations": {
+    "prior_r1": {
+      "definition_sha256": "b3ef5e5addf559a1e6b170ef7fd6964673374b6739009358dbc459c8f310bdeb",
+      "fluid_primitive": "drawbox boxfill=solid"
+    },
+    "void_fill": {
+      "definition_sha256": "c523936bc9640f211494b22a63c7ac82c9cf8dde06973c4c37b93a078392e39b",
+      "fluid_primitive": "fillbox modefill=void with interior seed and same point/size window"
+    }
+  },
+  "source_sequence": {
+    "bed": "closed drawextrude, layers 0,-1,-2,-3,-4, source mkbound 40",
+    "fluid": "setmkfluid, unchanged clipplane, then official fillbox modefill=void, then clipreset",
+    "tank_and_controls": "solid tank floor, sidewalls, piston; unchanged"
+  },
+  "status": "metadata_source_semantics_only"
+}
