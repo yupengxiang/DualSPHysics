@@ -1,0 +1,9 @@
+# F4 fresh083: Root196 native initial QA producer
+
+This source-only handoff closes the blocker in fresh082. Root may enable the disabled CPU2 `audit` request only after review. The producer opens each exact Root195 `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_INTERNAL_GAP8_DP010/root-stage1-f4-internal8-genuine-gencase-195/gencase/<endpoint>/<endpoint>.bi4` through the pinned R008 safe decoder, verifies the frozen producer SHA and held-file identity, and reads the native `Posd`, `Idp`, `Mk`, and `Type` arrays through read-only memmaps. It checks dynamic XML/BI4 counts, complete UIDs, finite 3-D positions, fixed-face/domain coverage, native marker/type partition, separated drop/pool bounds, source lattice populations, and native support-weight mass.
+
+Each case gets `native-preflight-audit.json`; the producer then writes `initial-native-qa-index.json` and calls the fresh082 metadata binder. The Root195 aggregate `execution-receipt.json` remains `failed`, returncode 0, error `GenCase actual particle count missing`; the eight genuine per-case OS0 receipts and producer XML/BI4 hashes remain the evidence authority. BI4 is never copied or rewritten, and the source package reads no Root195 BI4.
+
+Use `requests/initial-native-qa-196-producer.request.json`. It is `launch=false`, `launch_allowed=false`, `status=source_only_disabled`, `cpu_task_kind=audit`, CPU2. Root's actual job supplies the deferred Root195 paths and receives the future reports/index. A passing index is input-integrity evidence only: it grants no solver, conversion, visual, precision, Q-N, or production approval.
+
+Static check: `python3 tests/test_fresh083_contract.py`. No job, GenCase, solver, conversion, array read, shared registry, ledger, or global index was executed or modified while preparing this package.
