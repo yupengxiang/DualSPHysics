@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- F6 prospective physical candidate: full 3D free 6DOF rigid angular release; dp=0.025 -->
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="03-10-2026 16:30:00">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <rhopgradient value="3" />
+            <hswl value="0" auto="true" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="20" />
+            <speedsound value="0" auto="true" />
+            <coefh value="1.2" />
+            <cflnumber value="0.2" />
+        </constantsdef>
+        <mkconfig boundcount="230" fluidcount="9">
+            <mkorientfluid mk="0" orient="Xyz" />
+        </mkconfig>
+        <geometry>
+            <definition dp="0.025">
+                <pointref x="0" y="0" z="0" />
+                <pointmin x="-0.2" y="-0.2" z="-0.1" />
+                <pointmax x="4.825" y="2.425" z="2.425" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | bound</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkfluid mk="0" />
+                    <drawbox cmt="Frozen continuous fluid cell-centre population">
+                        <boxfill>solid</boxfill>
+                        <point x="0.4125" y="0.4125" z="0.0525" />
+                        <size x="3.975001" y="1.575001" z="0.775" />
+                    </drawbox>
+                    <setdrawmode mode="face" />
+                    <setmkbound mk="20" />
+                    <drawbox cmt="Finite tank walls; physical endpoints frozen">
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="0" y="0" z="0" />
+                        <size x="4.8" y="2.4" z="2.4" />
+                    </drawbox>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="50" />
+                    <drawbox cmt="Native floatingtype=2 body; initial bottom at fluid upper face">
+                        <boxfill>solid</boxfill>
+                        <point x="2" y="0.8" z="0.9" />
+                        <size x="0.775" y="0.775" z="0.375" />
+                    </drawbox>
+                    <shapeout file="" reset="true" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <initials>
+            <move mkbound="50" x="0.0125" y="0.0125" z="-0.0075" />
+        </initials>
+        <floatings>
+            <floating mkbound="50">
+                <massbody value="128" />
+                <center x="2.4" y="1.2" z="1.08" units_comment="metres (m); frozen physical center" />
+                <inertia x="8.53333333333" y="8.53333333333" z="13.6533333333" units_comment="kg*m^2; frozen physical inertia" />
+                <translationDOF x="1" y="1" z="1" />
+                <rotationDOF x="1" y="1" z="1" />
+                <angularvelini x="0.068" y="0.102" z="0.051" units_comment="rad/s; finite 3D angular release excitation" />
+            </floating>
+        </floatings>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="2" />
+            <parameter key="Visco" value="0.000001" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" comment="native SPH rigid body; Chrono/contact disabled" />
+            <parameter key="FtPause" value="0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="12" />
+            <parameter key="TimeOut" value="0.05" />
+            <parameter key="PartsOutMax" value="1" comment="**DEPRECATED** " />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default" y="default" z="default" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default" y="default" z="default + 20%" />
+            </simulationdomain>
+        </parameters>
+    </execution>
+</case>
