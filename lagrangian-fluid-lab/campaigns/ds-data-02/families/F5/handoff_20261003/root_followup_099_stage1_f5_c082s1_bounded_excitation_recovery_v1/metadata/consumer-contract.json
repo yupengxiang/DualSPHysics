@@ -1,0 +1,73 @@
+{
+  "mass_semantics": "native mass and continuum labels remain separate; no rescaling",
+  "precision_semantics": "Root314 exact-lattice negative is preserved as numerical_precision and cannot be relaxed or reclassified",
+  "schema": "ds02.f5.c082s1.bounded-excitation-consumer-contract.fresh099.v1",
+  "source_baseline": {
+    "dimension": 3,
+    "dp_m": 0.02,
+    "geometry": "C082S1 solid analytic closed bed and tank controls byte-preserved",
+    "initial_population": "must be obtained from each fresh GenCase producer; no 194427/31658 copy is allowed",
+    "mk_mapping": {
+      "native_bed_mk": 50,
+      "source_mkbound": 40
+    },
+    "motion": "only referenced asset changes, produced by the registered transform worker",
+    "time_window_s": [
+      0.0,
+      16.0
+    ]
+  },
+  "stage_gates": [
+    {
+      "required": [
+        "641 rows",
+        "time 0..16",
+        "strictly increasing",
+        "scale exactly 0.8 or 1.2",
+        "fresh output SHA in worker report"
+      ],
+      "stage": "motion_transform"
+    },
+    {
+      "required": [
+        "fresh XML/BI4 producer receipt",
+        "actual total/fixed/moving/fluid/floating counts",
+        "actual 3-D",
+        "motion asset hash matches transform report"
+      ],
+      "stage": "genuine_gencase"
+    },
+    {
+      "required": [
+        "all actual UID/type/Mk/finite/positive mass-density/zero-velocity/no-overlap checks",
+        "fresh actual counts",
+        "15 transverse y levels",
+        "central Type0/Mk50 support",
+        "fluid/profile separation",
+        "precision failure reported separately"
+      ],
+      "stage": "initial_placement_mk50"
+    },
+    {
+      "required": [
+        "Root manually approves QA",
+        "1.0 s, 0.02 s, 51 saved states",
+        "same bed/profile and motion provenance",
+        "future receipt only after actual completed/0"
+      ],
+      "stage": "short_native"
+    },
+    {
+      "required": [
+        "all 51 frames",
+        "all initial-fluid UID denominator",
+        "exact profile footprint",
+        "1DP/2DP counts/fractions/max depths",
+        "nonfinite and unexplained UID changes",
+        "visual review",
+        "no automatic full801 promotion"
+      ],
+      "stage": "short_dynamic_bed_audit"
+    }
+  ]
+}
