@@ -74,6 +74,11 @@ def check_candidate(tag, report):
         if path.name.endswith('-gencase-request.json'):
             require(d.get('genuine_gencase') is True and d.get('genuine_gencase_required') is True, f'{path.name}: genuine GenCase')
             require(d.get('actual_counts') is None and d.get('generated_xml') is None and d.get('generated_bi4') is None, f'{path.name}: no future result')
+        if path.name.endswith('-gencase-binding.json'):
+            require(isinstance(d.get('assets'), list) and len(d['assets']) == 1, f'{path.name}: Root003 assets list')
+            asset=d['assets'][0]
+            require(asset.get('sha256') is None and asset.get('bytes') is None, f'{path.name}: future motion asset remains unbound')
+            require(d.get('physical_condition_sha256') == owner['canonical_physical_condition_sha256'], f'{path.name}: physical owner alias')
         if path.name.endswith('-short-native-request.json'):
             require(d.get('kind')=='qualification' and d.get('expected_frames')==51 and d.get('expected_particles') is None, f'{path.name}: short qualification')
         if path.name.endswith('-short-bed-audit-request.json'):
