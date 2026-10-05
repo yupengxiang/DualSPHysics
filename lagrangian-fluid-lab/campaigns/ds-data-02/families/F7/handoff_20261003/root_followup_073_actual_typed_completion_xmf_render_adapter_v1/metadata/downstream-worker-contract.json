@@ -1,0 +1,133 @@
+{
+  "schema": "ds02.f7.fresh073.actual-typed-downstream-contract.v1",
+  "model_profile": "gpt-5.6-luna/max",
+  "family_id": "F7",
+  "case_count": 16,
+  "source_package": "root_followup_072_stage1_actualQA310_full601_typed_xmf_render_v1",
+  "source_package_must_remain_immutable": true,
+  "source_only": true,
+  "arrays_read": false,
+  "jobs_started": false,
+  "shared_state_written": false,
+  "downstream_requests_remain_disabled": true,
+  "future_output_hashes_null": true,
+  "interpreter": {
+    "old_template_value": "/usr/bin/python3.10",
+    "required_integration_value": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "reason": "Root discovered the template's first argument was the system interpreter; downstream requests must run from the integration L/.venv ABI."
+  },
+  "actual_typed_gate": {
+    "typed_receipt": {
+      "required": ["status", "returncode"],
+      "values": {"status": "completed", "returncode": 0},
+      "source_read_policy": "JSON metadata only"
+    },
+    "conversion_report": {
+      "required": [
+        "schema",
+        "conversion_status",
+        "output_hdf5",
+        "output_sha256",
+        "frames",
+        "particles",
+        "coordinate_frame",
+        "hash_scopes.physical_condition.schema",
+        "hash_scopes.physical_condition_sha256",
+        "partvtk_validation.all_passed"
+      ],
+      "schema": "ds-data-02.bi4-direct-conversion.v1",
+      "conversion_status": "completed",
+      "frames": 601,
+      "particles": 70179,
+      "h5_digest_origin": "conversion_report.output_sha256",
+      "h5_digest_must_be_computed_by_adapter": false,
+      "source_h5_may_be_opened_by_adapter": false,
+      "producer_physical_scope_schema": "ds-data-02.physical-binding.v1",
+      "producer_hash_semantics": "producer physical hash must equal canonical owner physical_binding hash; source-plan condition hash remains a separate declared field"
+    },
+    "native_receipt": {
+      "required": ["status", "returncode"],
+      "values": {"status": "completed", "returncode": 0},
+      "must_be_present_in_downstream_input_closure": true
+    }
+  },
+  "xmf_worker_contract": {
+    "worker": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f5_repair_a_short51_actual_typed_bed_pipeline_105/workers/export_xmf.py",
+    "required_binding_keys": [
+      "conversion_report",
+      "expected_frames",
+      "physical_case_id",
+      "physical_condition_sha256",
+      "physical_window_s",
+      "trajectory_h5"
+    ],
+    "required_receipt_keys": ["status", "returncode"],
+    "required_report_keys": ["coordinate_frame", "frames", "output_sha256", "particles"],
+    "required_h5_datasets": [
+      "valid",
+      "initial_type",
+      "particle_id",
+      "particle_zone",
+      "initial_mk",
+      "initial_mass",
+      "mass",
+      "velocity",
+      "density",
+      "pressure",
+      "type",
+      "position",
+      "time"
+    ],
+    "output_directory": "{attempt_root}/xdmf",
+    "vector_shape_contract": {
+      "implementation": "outshape = shape[1:]",
+      "position_and_velocity": "70179 3",
+      "dynamic_scalars": "70179"
+    },
+    "read_policy": "Root XMF worker may read the actual H5; fresh073 only binds producer-attested metadata"
+  },
+  "renderer_contract": {
+    "worker": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_native_renderer_proxy_lifetime_diagnostic_023/render.py",
+    "renderer_sha256": "5e78f7b92ad7c6f1d15902e3ccacc9099affb04b1b992a42f540eb88241bde66",
+    "required_manifest_keys": [
+      "actual_time_s",
+      "frames",
+      "particles",
+      "xdmf",
+      "xdmf_sha256"
+    ],
+    "required_manifest_semantics": {
+      "frames": 601,
+      "particles": 70179,
+      "all_saved_times": true,
+      "automatic_native_bounds": true,
+      "fixed_camera_bounds_forbidden": true,
+      "source_reader_unclipped": true,
+      "all_native_fields_retained": true,
+      "contact_pages": 26
+    },
+    "output_directory": "{attempt_root}/render",
+    "environment": {
+      "software_offscreen": true,
+      "vtk_smp_max_threads": 2,
+      "lp_num_threads": 2,
+      "omp_num_threads": 2,
+      "qt_qpa_platform": "offscreen",
+      "mesa_loader_driver_override": "llvmpipe"
+    }
+  },
+  "hash_policy": {
+    "metadata_and_source_inputs": "hash normally for strict input closure",
+    "trajectory_h5": "use conversion_report.output_sha256 only; do not open or hash",
+    "bi4_csv_motion_payloads": "never register or hash in fresh073",
+    "xmf_sha256": "null until Root runs export_xmf.py",
+    "render_manifest_sha256": "null until Root runs Root023"
+  },
+  "status_vocabulary": {
+    "actual_typed": "completed/0 producer evidence",
+    "xmf_request": "disabled_pending_root_review_actual_typed",
+    "render_request": "disabled_pending_actual_xmf_root_review",
+    "visual_acceptance": "not granted",
+    "q_n": "not granted"
+  }
+}
