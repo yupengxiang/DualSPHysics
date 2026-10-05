@@ -1,0 +1,9 @@
+# F3 fresh077 remaining first24 native-to-typed source handoff
+
+This source-only package binds fourteen real F3 first24 full836 native receipts to disabled Root142 NVMe typed conversion requests, followed by disabled read-only XMF and Root023 all-native-bounds render requests. The F3 native contract is 179208 total particles, 67500 fluid, 111708 fixed, 0 moving, dimension 3, and 836 saved frames at 0.01 s through 8.35 s.
+
+The package only reads bounded JSON/XML/source metadata. It does not open or hash BI4, CSV, H5/HDF5, PartVTK CSV, or numerical arrays. BI4/XML digests are producer-reported metadata. Root142 keeps two conversion slots, a 24 GiB NVMe staging limit, and a 100 GiB free-space floor. All typed/XMF/render requests are disabled; future hashes, visual decisions, Q-N, and precision remain null/unaccepted.
+
+Included: F3_STAGE1_DP006_P1000_AY0340, F3_STAGE1_DP006_P1000_AY0360, F3_STAGE1_DP006_P1000_AY0370, F3_STAGE1_DP006_P1000_AY0410, F3_STAGE1_DP006_P1000_AY0430, F3_STAGE1_DP006_P1000_AY0440, F3_STAGE1_DP006_P1000_AY0480, F3_STAGE1_DP006_P1000_AY0520, F3_STAGE1_DP006_P1000_AY0540, F3_STAGE1_DP006_P1000_AY0590, F3_STAGE1_DP006_P1000_AY0610, F3_STAGE1_DP006_P1000_AY0640, F3_STAGE1_DP006_P1000_AY0670, F3_STAGE1_DP006_P1000_AY0710 . Excluded first24 cases are the seven existing accepted/mother lineage cases AY0250, AY0320, AY0390, AY0460, AY0500, AY0570, AY0750; Root154 typed/XMF/render AY0290 and AY0300; and the separate AY0270 Root143/Root202 artifact lineage whose original child status remains preserved.
+
+Root may review requests/typed and enable at most two through Root142. After actual typed completed/0 and PartVTK evidence, use the corresponding XMF request with its independent `{attempt_root}/xdmf` output child, then the Root023 renderer with `{attempt_root}/render`. This package adds no independent case count or visual acceptance.
