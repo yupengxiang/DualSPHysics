@@ -1,0 +1,9 @@
+# F4 first48 source-only extension (fresh102)
+
+This package inventories F4 condition identities and adds 24 disjoint prospective finite-drop-pool rows to the current exact24 target. The current exact24 uses gaps 0.18, 0.22, and 0.24 m with x offsets +/-0.08 m, y offsets +/-0.04 m, and initial drop speeds 0.4/0.6 m/s. The fresh102 rows use gaps 0.20, 0.25, and 0.26 m over the same four offset combinations and two speeds. Therefore current24 plus fresh102 is 48 distinct physical tuples.
+
+The historical centered internal8 (`.185` through `.255`, x=y=0, speed=.5) is inventoried separately. Root216 recorded a negative native initial check for that scope; those rows are preserved and excluded from the 48 target. The six centered lattice-aligned fallback rows and the three accepted centered/endpoint visual anchors are also separate condition scopes. The overlap audit is explicit and must remain empty before any Root registration.
+
+Each new XML changes only the finite falling-drop point and the `mkfluid=1` vertical velocity relative to the frozen F4 DP010 source. Pool, tank, wall faces, controls, DP=.01, no forcing/no mdbc, `TimeMax=1.2`, `TimeOut=.001`, and 1201 frames remain fixed. Candidate bounds stay inside the tank and maintain the source one-DP clearance above the pool; actual native occupancy, mass, generated hashes, QA, solver, typed, XMF, render, visual, precision, and Q-N status remain unknown or ungranted.
+
+The 24 GenCase requests are disabled and Root-owned. They are source-only metadata handoffs with `launch_allowed=false`, `execution_allowed=false`, `independent_case_count_increment=0`, and null generated output hashes/counts. Root must review the exact adopted commit and run each request only through the registered CPU worker. No solver, conversion, render, scientific payload, shared registry, or ledger was touched while producing this package.
