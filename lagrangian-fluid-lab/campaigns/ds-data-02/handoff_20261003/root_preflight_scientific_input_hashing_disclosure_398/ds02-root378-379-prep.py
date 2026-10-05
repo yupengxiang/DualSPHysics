@@ -1,0 +1,20 @@
+from pathlib import Path
+import json,hashlib,ast,sys
+R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');L=R/'lagrangian-fluid-lab';H=L/'campaigns/ds-data-02/handoff_20261003';D=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02');load=lambda p:json.loads(Path(p).read_text());sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest();put=lambda p,v:p.write_text(json.dumps(v,indent=2)+'\n');sys.path.insert(0,str(L/'scripts'));import ds_data02_runtime_v2 as rt,ds_data02_strict_dispatch_v1 as strict,ds_data02_direct_convert as cv
+config=[('F7','root_followup_077_actual_converter_scope_root142_adapter_v1','requests/typed/*.json','root_stage1_f7_actual24_native358_correctedscope077_typed_376','root_stage1_f7_actual24_typed_guarded_cap2_controller_377',24,2,'typed'),('F2','root_followup_103_f2_fresh102_native_path_xmf_adapter_v1','requests/*initial-qa-semantic*json','root_stage1_f2_actual16_GenCase354_semantic103_initialQA_378','root_stage1_f2_semantic103_initialQA_guarded_cap4_controller_379',16,4,'initial-qa')]
+for family,package,glob,dirname,ctrlname,count,cap,kind in config[1:]:
+ P=L/f'campaigns/ds-data-02/families/{family}/handoff_20261003'/package;O=H/dirname;assert O.is_dir() and not list(O.iterdir());fs=sorted(P.glob(glob));assert len(fs)==count;rows=[]
+ for p in fs:
+  q=load(p);md=q['input_sha256'];assert set(q['input_files'])==set(md)
+  for path,digest in md.items():
+   assert digest,path
+   if Path(path).suffix.lower() not in {'.dat','.bi4','.h5','.csv','.vtk','.npy','.npz','.ibi4'}:assert sha(path)==digest,path
+  if family=='F7':
+   op=Path(q['owner_metadata']['path']);scope=cv._physical_condition_scope(load(op));assert cv.canonical_hash(scope)==q['physical_condition_sha256'];nr=Path(q['native_dependency']['receipt']);assert (load(nr)['status'],load(nr)['returncode'])==('completed',0)
+  else:
+   c=q['command'];raw=load(c[c.index('--gencase-receipt')+1]);side=load(c[c.index('--runtime-evidence')+1]);assert (raw['status'],raw['returncode'])==('completed',0);assert side['raw_gencase_receipt']['solver_dimension_from_gencase']==3
+  for key in ['disabled','disabled_reason','future_input_files','future_input_sha256']:q.pop(key,None)
+  q.update(source_only=False,launch=True,launch_allowed=True,execution_allowed=True,no_jobs_started=False,status='root_enabled_actual_upstream_metadata_pass_pending_real_registered_job',cwd=str(L),worktree_root=str(R),root_dataset_inventory_profile='root_home_floor_no_legacy_dataset_walk_v1',root_reviewed_source_request=str(p),root_reviewed_source_request_sha256=sha(p))
+  q['input_sha256'][str(p)]=sha(p);q['input_files']=sorted(q['input_sha256']);assert not (D/'families'/family/q['case_id']/q['attempt_id']).exists();norm=rt.validate_request(q);strict.check_registered_hashes(q,norm);qp=O/(q['case_id']+'-'+kind+'-request.json');put(qp,q);rows.append(str(qp))
+ put(O/'actual-root-metadata-preflight.json',{'family':family,'count':count,'actual_upstream_receipts_completed0':True,'request_runtime_and_strict_metadata_passed':True,'raw_science_payloads_read_or_hashed_by_preparer':False,'pending_actual_registered_jobs':True,'case_increment':0,'requests':rows})
+ C=H/ctrlname;assert not C.exists();C.mkdir();text=(H/'root_stage1_f2_actual16_initialQA_guarded_cap4_controller_367/batch-QA-controller.py').read_text().replace('root_stage1_f2_actual16_GenCase354_initialQA_fresh102_366',dirname).replace('*-initial-qa-request.json','*-'+kind+'-request.json').replace('len(queue)==16','len(queue)=='+str(count)).replace('max_workers=4','max_workers='+str(cap)).replace('len(active)<4','len(active)<'+str(cap)).replace("'requested':16","'requested':"+str(count)).replace("'parallel_cap':4","'parallel_cap':"+str(cap));ast.parse(text);(C/'batch-controller.py').write_text(text);put(C/'controller-review.json',{'parallel_cap':cap,'first_failure_holds_pending':True,'CPU_registered_Root142_only':True,'scientific_payloads_read_by_controller':False});print(family,count,'registered-request preflight ready cap',cap)
