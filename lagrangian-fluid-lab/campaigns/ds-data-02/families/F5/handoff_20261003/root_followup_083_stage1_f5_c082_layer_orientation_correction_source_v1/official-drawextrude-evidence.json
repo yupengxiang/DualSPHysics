@@ -1,0 +1,31 @@
+{
+  "schema": "ds02.f5.c082.layer-orientation-official-evidence.v1",
+  "evidence_scope": "official XML syntax and draw-order examples only; no solver or particle arrays",
+  "entries": [
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml",
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e",
+      "lines": "329-338",
+      "fact": "drawextrude accepts an explicit extrude vector and vdp layers, including negative and positive offsets."
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/01_StillWedge/CaseStillWedgeHR_Def.xml",
+      "sha256": "8a207c9288caf5c5cddc62ebf71bd66e741647498bbb6c6cb962aebaa127de99",
+      "lines": "43-63",
+      "fact": "boundary drawextrude with layers 0,-0.5,-1,-1.5,-2 is followed by fluid fillbox."
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/others/FreeDrawMode/CaseFrBeach.xml",
+      "sha256": "8da870eda6ff5d1f96234de09f3f445c107275bfb8045e08e4787c13990daf99",
+      "lines": "41-55",
+      "fact": "boundary drawextrude with layers 0,-1,-2 is followed by fluid fillbox."
+    },
+    {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/vresolution/04_FallingWedge2D/CaseFallingWedge2DVRes_Def.xml",
+      "sha256": "a886d2af2ced68f3880bffd2bad3d34513b51a34bcd3531fd61d67653e42286c",
+      "lines": "56-94",
+      "fact": "fluid is drawn before the closed wedge and the wedge uses positive layers 0,1,2,3; this is the opposite draw order from C082."
+    }
+  ],
+  "inference": "For C082 boundary-before-fluid ordering, negative inward layers are the documented-compatible minimal direction to retain thickness without consuming the fluid-facing side."
+}

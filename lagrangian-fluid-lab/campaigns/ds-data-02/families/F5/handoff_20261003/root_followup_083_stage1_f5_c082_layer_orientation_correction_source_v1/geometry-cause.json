@@ -1,0 +1,148 @@
+{
+  "schema": "ds02.f5.c082.layer-orientation-cause-analysis.v1",
+  "observed_failure": {
+    "actual_fluid": 31658,
+    "source_contract_fluid": 40710,
+    "deficit": 9052,
+    "actual_moving": 4210,
+    "B071_moving": 3794,
+    "moving_delta": 416
+  },
+  "c082_geometry": {
+    "profile_nodes_xz_m": [
+      [
+        -0.2,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.28
+      ],
+      [
+        3.6,
+        0.448
+      ],
+      [
+        3.9,
+        0.448
+      ],
+      [
+        4.4,
+        0.05
+      ],
+      [
+        4.8,
+        0.05
+      ],
+      [
+        4.8,
+        -0.15
+      ],
+      [
+        4.4,
+        -0.15
+      ],
+      [
+        3.9,
+        0.248
+      ],
+      [
+        3.6,
+        0.248
+      ],
+      [
+        3.0,
+        0.08
+      ],
+      [
+        2.0,
+        -0.2
+      ],
+      [
+        -0.2,
+        -0.2
+      ]
+    ],
+    "signed_area_xz_m2": -1.0,
+    "orientation": "clockwise",
+    "extrude_vector_m": [
+      0.0,
+      0.44,
+      0.0
+    ],
+    "source_layers_vdp": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "dp_m": 0.02,
+    "extra_layer_span_m": 0.08,
+    "h_m": 0.034641016151377546,
+    "two_h_m": 0.06928203230275509,
+    "top_segment_direction_near_x_minus_0_2_to_2": "+x; with +y extrusion, the right-hand exterior normal is +z"
+  },
+  "draw_order_from_source": [
+    "closed analytic bed drawextrude, full mode, source mkbound=40",
+    "tank floor, finite sidewalls, moving piston drawbox",
+    "shapeout reset=true",
+    "setmkfluid then unchanged clipplane",
+    "fluid drawbox",
+    "clipreset"
+  ],
+  "unchanged_controls": {
+    "fluid_box_point_m": [
+      0.01,
+      -0.14,
+      0.01
+    ],
+    "fluid_box_size_m": [
+      3.42,
+      0.28,
+      0.38
+    ],
+    "clipplane_point_m": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "clipplane_vector": [
+      0.28,
+      0.0,
+      -1.0
+    ],
+    "piston_point_m": [
+      -0.04,
+      -0.15,
+      0.0
+    ],
+    "piston_size_m": [
+      0.04,
+      0.3,
+      0.75
+    ],
+    "motion_ref": 10,
+    "time_max_s": 16.0,
+    "time_out_s": 0.02
+  },
+  "mechanism_assessment": {
+    "primary": "The positive layer offsets are placed on the fluid-facing exterior of the clockwise profile; because fluid is drawn afterward, those boundary cells remove fluid lattice positions. This is a source-order/layer-direction cause, not a relaxed threshold or a proven STL erase effect.",
+    "fluid_deficit_strength": "strong metadata-level evidence: the unchanged fluid controls and generated XML show a 9052 deficit exactly after adding the positive thick-bed layers; exact layer-by-layer occupancy is intentionally not decomposed without arrays.",
+    "moving_count_change": "the bed extra layers reach the shared piston neighborhood and the bed y extent [-0.22,0.22] overlaps the piston y extent [-0.15,0.15]. Later draw ownership can change the moving block count even though the piston drawbox is source-identical; exact 416-particle attribution remains unverified.",
+    "erase_assessment": "C082 contains no erase/eraseall command. shapeout reset=true is retained as an output/reset operation; the source-level evidence does not support blaming a later erase selector.",
+    "stl_assessment": "C082 does not use STL or autofill, so the failure isolates the analytic drawextrude layer/order issue from the earlier STL candidate failures."
+  },
+  "source_comparison_paths": {
+    "c082_source": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_082_stage1_f5_c082_analytic_extruded_thick_bed_fallback_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082_Def.xml",
+    "mother_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050/root-compact-equilibrium-runup_coarse-clip-direction-fix-gencase-050/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050.xml",
+    "b071_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_B071/root-stage1-f5-b071-genuine-gencase-163/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_B071.xml",
+    "mother_generated_xml_sha256": "7f06bb8cb950c8d445d84353751b04ea0ba8c94265ea9a5e14e04ad54e37d8b6",
+    "b071_generated_xml_sha256": "9abb26c6a364618f588038410c748606ec481aaf61ea2f9a9cd235143ca8af90"
+  },
+  "confidence": "strong root-cause candidate from source geometry/order and actual generated counts; not a dynamic success claim"
+}
