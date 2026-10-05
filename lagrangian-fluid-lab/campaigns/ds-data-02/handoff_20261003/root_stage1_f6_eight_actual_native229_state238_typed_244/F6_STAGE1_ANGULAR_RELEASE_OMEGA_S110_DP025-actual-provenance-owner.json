@@ -1,0 +1,313 @@
+{
+  "case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025",
+  "condition_hash_semantics": "SHA-256(json.dumps(physical_binding, sort_keys=True, separators=(',', ':'))); source-plan condition hash is intentionally null for the fresh072 internal endpoints and is never fabricated.",
+  "expected_frames": 241,
+  "expected_native": {
+    "center_m": [
+      2.4,
+      1.2,
+      1.08
+    ],
+    "dimension": 3,
+    "dp_m": 0.025,
+    "fixed": 73441,
+    "floating": 16384,
+    "floating_mk": 60,
+    "floating_type": 2,
+    "fluid": 327680,
+    "fluid_mk": 1,
+    "fluid_type": 3,
+    "initial_fluid_velocity_m_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "masspart_kg": 0.015625,
+    "moving": 0,
+    "native_support_mass_kg": 256.0,
+    "physical_mass_kg": 128.0,
+    "total": 417505,
+    "true_3d": true
+  },
+  "family_id": "F6",
+  "full_event_window_s": [
+    0,
+    12
+  ],
+  "independent_case_increment": 0,
+  "launch_allowed": false,
+  "native_initial_qa": "pending_root_actual_partvtk_qa",
+  "native_support_vs_physical_mass": "256 kg lattice support and 128 kg physical rigid body remain distinct, no rescale",
+  "physical_binding": {
+    "control_family_id": "F6_ANGULAR_RELEASE_FREE6DOF_V1",
+    "controls": {
+      "boundary": "finite fixed five-face tank; native rigid algorithm; no open inlet",
+      "density_dt": "DensityDT=2",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "nu_m2_s": 1e-06,
+        "treatment": "Laminar + SPS (ViscoTreatment=2)"
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final state and unknown labels; no Q-N claim from event labels",
+      "sequence": [
+        "initial angular release from zero linear velocity",
+        "free six degree of freedom rigid response in the finite tank",
+        "retain the terminal state and any right-censored contact label"
+      ],
+      "time_end_s": 12.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F6",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume; density 1000 kg/m3",
+        "low_m": [
+          0.4,
+          0.4,
+          0.04
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          4.0,
+          1.6,
+          0.8
+        ]
+      },
+      "paddle": {
+        "label": "fixed boundary paddle lineage retained from the commensurate physical geometry",
+        "low_m": [
+          0.0,
+          0.0,
+          0.04
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.32,
+          2.4,
+          0.8
+        ]
+      },
+      "rigid_body": {
+        "label": "physical rectangular rigid body; native floating support geometry is separately sourced",
+        "low_m": [
+          2.0,
+          0.8,
+          0.88
+        ],
+        "mkfluid": null,
+        "size_m": [
+          0.8,
+          0.8,
+          0.4
+        ]
+      },
+      "tank": {
+        "label": "finite tank with bottom, left, right, front, and back fixed faces",
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          4.8,
+          2.4,
+          2.4
+        ]
+      }
+    },
+    "geometry_family_id": "F6_ANGULAR_RELEASE_RECTANGULAR_TANK_V1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 5120.0
+      },
+      "initial_mass_total_kg": 5120.0,
+      "mass_policy": "fluid continuum mass is explicit; rigid-body physical mass is bound in parameters and is not folded into the fluid source mass",
+      "source_labels": {
+        "fluid": "initial fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            0.4,
+            0.4,
+            0.04
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            4.0,
+            1.6,
+            0.8
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "f6-angular-release-full241-native-dp025",
+    "mass_policy": "physical rigid mass 128 kg, native lattice support mass 256 kg, and solver interaction masspart 0.015625 kg are distinct; no rescaling",
+    "mechanism_id": "F6_FREE6DOF_RIGID_ANGULAR_RELEASE_V1",
+    "open_inlet": false,
+    "paired_background_id": "F6_ANGULAR_RELEASE_DP025",
+    "parameters": {
+      "body_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "body_inertia_diagonal_kg_m2": [
+        8.53333333333,
+        8.53333333333,
+        13.6533333333
+      ],
+      "body_mass_kg": 128.0,
+      "body_shape": "axis-aligned rectangular box, 0.8 m x 0.8 m x 0.4 m",
+      "initial_angular_velocity_rad_s": [
+        0.088,
+        0.132,
+        0.066
+      ],
+      "initial_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "initial_orientation_axis_angle": {
+        "angle_deg": 0.0,
+        "axis": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "rotation_dof": [
+        1,
+        1,
+        1
+      ],
+      "translation_dof": [
+        1,
+        1,
+        1
+      ]
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025",
+  "physical_condition_sha256": "ff424e8e3117af83d077b2314cddc577f32ed3295a5cb09b929cdac79c8429a2",
+  "precision_status": "not_accepted",
+  "q_n": "not_granted",
+  "schema": "ds02.root.f6.prospective-endpoint-canonical-owner.v1",
+  "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_079_stage1_omega_stage24_extension_v1/source/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025_Def.xml",
+  "source_definition_sha256": "0d731c3bddc65415c8bbb3f2caddbac59a4bdc6d41f83eb8fbb3961350a781c2",
+  "source_diff_policy": "Only casedef.floatings.floating.angularvelini x/y/z changes from the reviewed DP025 source; geometry, controls, mass semantics, free six-DOF declaration, and 12 s/0.05 s solver recipe stay unchanged.",
+  "source_plan_condition_sha256": "2f651fd32544b3cb5d4d680f01e64380acdc9dd5343b3b797f89dc58e04dc033",
+  "source_plan_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_079_stage1_omega_stage24_extension_v1/metadata/stage24-omega-plan.json",
+  "status": "prospective_source_only",
+  "source_owner_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_079_stage1_omega_stage24_extension_v1/owners/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.canonical-owner.json",
+  "source_owner_sha256": "ce3313ae99da2776c87a9c2535f2a861a65a19e8cd5a9495816d4d2d858f0eaf",
+  "actual_gencase": {
+    "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.bi4",
+    "generated_bi4_sha256": "58ae445281088b36057e320bda06480f083adf6d80c4beab6bcc3cb4706a239b",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.xml",
+    "generated_xml_sha256": "9590bc6925e1bf0c9d11b8a3b82b3982ffb0412feb1c3cabf7b404e226e9a2b7",
+    "hash_policy": "producer-attested Root223; source package does not read BI4",
+    "producer_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/execution-receipt.json",
+    "producer_receipt_sha256": "9a713ed7af89de25dca58e52108d6c3fdcf26e2ad5a2b9287c43bde7498e1d8b",
+    "source_request": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f6_eight_new_omega_genuine_gencase_222/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025-gencase-request.json",
+    "source_request_sha256": "8971bd457def86f9008fe99afdfc47287dd82fe838ad938c9a6b3ad3922d8ab4",
+    "status": "completed_returncode_zero"
+  },
+  "actual_native": {
+    "data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-full241-native-qualification-079/solver_output/data",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-full241-native-qualification-079/execution-receipt.json",
+    "receipt_sha256": "0a480cfb34599e09c6385c7a90f90f29de060848400d839bf5e5e68b0655726a",
+    "request": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f6_eight_actual_qa226_full241_native_229/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025-full241-native-request.json",
+    "request_sha256": "39da413dbef3db36fce86a07a4f45bcdd85c8b3cf9879689da1539caa49e85e3",
+    "status": "completed_returncode_zero"
+  },
+  "actual_initial_native_qa": {
+    "index": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_INITIAL_QA/root-stage1-f6-stage24-actual-native-initial-qa-plan-schema-repair-226/initial-native-qa/initial-native-qa-index.json",
+    "index_sha256": "9818970b111380857a1f2ecbf255272726495fbb1eeb1e4d490d97fc1b4875ad",
+    "pass": true,
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_INITIAL_QA/root-stage1-f6-stage24-actual-native-initial-qa-plan-schema-repair-226/execution-receipt.json",
+    "receipt_sha256": "12efd2befc0743f4b12ceb8980bf05aa7371c2a9ae4f4412dec85ef05895160f",
+    "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_INITIAL_QA/root-stage1-f6-stage24-actual-native-initial-qa-plan-schema-repair-226/initial-native-qa/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/initial-native-qa.json",
+    "report_sha256": "a21f3b944c9697c6d7508b0af7072e7fff790764a949c7d371613c4250f3a1b2",
+    "status": "actual_root226_completed_pass"
+  },
+  "actual_independent_floatinginfo_state0": {
+    "aggregate_execution_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_STATE0_FLOATINGINFO/root-stage1-f6-eight-native229-independent-state0-omega-238/execution-receipt.json",
+    "aggregate_execution_receipt_sha256": "9faba75e39246fd79927dc60b4095f7f892521b68666c6ec0b4b18575270d5cc",
+    "aggregate_execution_returncode": 0,
+    "aggregate_execution_status": "completed",
+    "aggregate_summary": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_STATE0_FLOATINGINFO/root-stage1-f6-eight-native229-independent-state0-omega-238/audit/eight-endpoint-omega-summary.json",
+    "aggregate_summary_sha256": "5c718fd47359ebf8166ac1bf8b0ea60fc5218aaf8ecf79fd79881e9f5a57f7c8",
+    "audit_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_STAGE24_STATE0_FLOATINGINFO/root-stage1-f6-eight-native229-independent-state0-omega-238/audit/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/state0-omega-audit.json",
+    "audit_report_sha256": "5cf57a5efd540f2828efd973bec7bb28ddcd018feebd32cbefe28b4b3af0e9ad",
+    "audit_status": "pass",
+    "canonical_owner": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_079_stage1_omega_stage24_extension_v1/owners/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.canonical-owner.json",
+    "canonical_owner_sha256": "ce3313ae99da2776c87a9c2535f2a861a65a19e8cd5a9495816d4d2d858f0eaf",
+    "case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025",
+    "declared_angular_velocity_rad_s": [
+      0.088,
+      0.132,
+      0.066
+    ],
+    "delta_observed_minus_declared_rad_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/execution-receipt.json",
+    "gencase_receipt_sha256": "9a713ed7af89de25dca58e52108d6c3fdcf26e2ad5a2b9287c43bde7498e1d8b",
+    "gencase_source_request": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f6_eight_new_omega_genuine_gencase_222/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025-gencase-request.json",
+    "gencase_source_request_sha256": "8971bd457def86f9008fe99afdfc47287dd82fe838ad938c9a6b3ad3922d8ab4",
+    "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.bi4",
+    "generated_bi4_sha256": "58ae445281088b36057e320bda06480f083adf6d80c4beab6bcc3cb4706a239b",
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-genuine-gencase-079/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025.xml",
+    "generated_xml_sha256": "9590bc6925e1bf0c9d11b8a3b82b3982ffb0412feb1c3cabf7b404e226e9a2b7",
+    "observed_state0_angular_velocity_rad_s": [
+      0.088,
+      0.132,
+      0.066
+    ],
+    "omega_tolerance_rad_s": 1e-05,
+    "per_case_execution_receipt": null,
+    "per_case_execution_receipt_policy": "not produced; Root238 has one aggregate execution receipt",
+    "per_case_execution_receipt_sha256": null,
+    "physical_condition_sha256": "ff424e8e3117af83d077b2314cddc577f32ed3295a5cb09b929cdac79c8429a2",
+    "root223_audit": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE24_GENERATED_HASH_AUDIT/root-stage1-f6-eight-actual-generated-payload-hash-audit-223/generated-payload-hash-audit.json",
+    "root223_audit_sha256": "8648461784ed20214993a5379cc73b01b86462760eb1381a7199c0344485bbff",
+    "solver_native_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S110_DP025/root-stage1-f6-omega-110p0-full241-native-qualification-079/execution-receipt.json",
+    "solver_native_receipt_sha256": "0a480cfb34599e09c6385c7a90f90f29de060848400d839bf5e5e68b0655726a",
+    "solver_native_status": "completed",
+    "state0_time_s": 0.0
+  },
+  "canonical_physical_binding_sha256": "ff424e8e3117af83d077b2314cddc577f32ed3295a5cb09b929cdac79c8429a2",
+  "input_gencase_bi4_sha256": "58ae445281088b36057e320bda06480f083adf6d80c4beab6bcc3cb4706a239b",
+  "root_semantic_note": "Actual provenance sidecar; physical_binding preserved exactly, canonical physical-condition and source recipe hash remain separate; original source owner unchanged."
+}
