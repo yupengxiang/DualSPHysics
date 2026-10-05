@@ -1,0 +1,46 @@
+{
+  "actual_report_schema_observation": {
+    "nested_solver_dimension": 3,
+    "run_out_dimensions": [
+      3
+    ],
+    "solver_dimension_type": "object",
+    "xml_data2d": "false"
+  },
+  "claim_boundary": "Observed metadata contract and source fix only; no scientific output or downstream acceptance claim.",
+  "consumed_source": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_077_actual_converter_scope_root142_adapter_v1",
+  "consumed_source_immutable": true,
+  "fresh078_fixes": [
+    {
+      "bug": "Path.format on pathlib.Path",
+      "fix": "template_paths returns string patterns and expand_template(pattern, case_id) constructs Path before load/stat"
+    },
+    {
+      "bug": "solver_dimension object treated as integer",
+      "fix": "accept nested solver_dimension only with run_out_dimensions=[3] and xml_data2d=false"
+    }
+  ],
+  "root_reported_observations": [
+    {
+      "attempt": "Root383",
+      "case_map": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f7_actual_first2_typed077_metadata_XMF_adapter_383/case-map.json",
+      "status": "actual first two typed receipts completed/0; adapter invoked metadata-only"
+    },
+    {
+      "attempt": "Root384",
+      "failure": "fresh077 copy failed at template_typed = load_json(typed_binding_template_path.format(case=case_id)) because template_paths returned pathlib.Path"
+    },
+    {
+      "attempt": "Root384",
+      "failure": "after isolated Path expansion fix, conversion report rejected actual solver_dimension metadata object"
+    }
+  ],
+  "schema": "ds02.f7.fresh078.actual-adapter-compatibility-evidence.v1",
+  "scope_id": "root_followup_078_stage48_gap_a052p5_v1",
+  "source_only_execution": {
+    "arrays_read": false,
+    "jobs_started": false,
+    "payloads_read_or_hashed": false,
+    "shared_state_written": false
+  }
+}
