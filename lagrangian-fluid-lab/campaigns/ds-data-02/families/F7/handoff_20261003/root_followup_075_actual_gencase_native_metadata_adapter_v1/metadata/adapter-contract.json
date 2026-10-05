@@ -1,0 +1,77 @@
+{
+  "schema": "ds02.f7.fresh075.actual-gencase-native-qa-adapter-contract.v1",
+  "model_profile": "gpt-5.6-luna/max",
+  "family_id": "F7",
+  "source_package": "root_followup_075_actual_gencase_native_metadata_adapter_v1",
+  "source_only": true,
+  "arrays_read": false,
+  "jobs_started": false,
+  "shared_state_written": false,
+  "producer_chain": {
+    "motion_attempt": "root-stage1-f7-next24-motion-preparation-074",
+    "gencase_binding_attempt": "root-stage1-f7-next24-gencase-binding-074",
+    "gencase_attempt_suffix": "074",
+    "native_initial_qa_attempt": "root-stage1-f7-next24-native-initial-qa-075",
+    "native_suffix": "full601-native-qualification-075"
+  },
+  "flat_gencase_layout": {
+    "attempt_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/{case}/root-stage1-f7-{case_lower}-genuine-gencase-074",
+    "prepared_directory": "{attempt_root}/prepared",
+    "generated_xml": "{prepared_directory}/{case}.xml",
+    "generated_bi4": "{prepared_directory}/{case}.bi4",
+    "generated_definition": "{prepared_directory}/{case}_Def.xml",
+    "prepared_input_report": "{prepared_directory}/prepared-input-report.json",
+    "copied_motion": "{prepared_directory}/motion_obstacle_quintic.dat",
+    "source_prefix_field_is_provenance_only": true,
+    "source_prefix_warning": "Root003 prepared-input-report.prefix names the case prefix; it is not a directory containing another case subdirectory."
+  },
+  "metadata_policy": {
+    "hash_allowed": ["json", "xml", "source code", "official binaries", "bounded metadata"],
+    "bi4": "presence check only; generated_bi4_sha256 remains null; producer report digest may be retained as attestation",
+    "motion_dat": "presence check only; no read or hash",
+    "csv": "not read",
+    "h5": "not read",
+    "future_output_hashes": "null until Root executes the dependent job"
+  },
+  "qualification_runtime_evidence": {
+    "schema": "ds02.f7.fresh075.actual-gencase-runtime-evidence.v1",
+    "reason": "The Python GenCase wrapper's execution receipt can contain completed/0 without parsed count fields at top level, while the qualification runner requires total_particles/fluid_particles/solver_dimension_from_gencase.",
+    "derivation": "fresh075 adapter takes actual prepared-input-report counts and generated XML 3D/count metadata and writes a bounded JSON evidence sidecar; it preserves the raw execution receipt path and digest and never reads BI4.",
+    "native_request_gencase_receipt": "adapter output binding/cases/{case}.gencase-runtime-evidence.json",
+    "raw_execution_receipt_field": "gencase_execution_receipt",
+    "future_sidecar_hash": null
+  },
+  "actual_gencase_contract": {
+    "receipt": {"status": "completed", "returncode": 0, "total_particles": 70179, "fluid_particles": 40700, "solver_dimension_from_gencase": 3},
+    "prepared_report_schema": "ds02.root.actual-native-source-preflight.v1",
+    "xml": {"data2d": false, "dp_m": 0.02, "time_max_s": 12.0, "time_out_s": 0.02},
+    "counts": {"total": 70179, "fixed": 27495, "moving": 1984, "floating": 0, "fluid": 40700},
+    "block_contract": [
+      {"name": "fixed", "begin": 0, "count": 27495, "type": 0, "mk": 10},
+      {"name": "moving", "begin": 27495, "count": 1984, "type": 1, "mk": 12},
+      {"name": "fluid", "begin": 29479, "count": 40700, "type": 3, "mk": 2}
+    ],
+    "missing_zero_floating_node_is_valid": true
+  },
+  "native_recipe": {
+    "frames": 601,
+    "time_window_s": [0.0, 12.0],
+    "save_interval_s": 0.02,
+    "motion_control": "existing explicit-wet quintic source; no source-level control change",
+    "native_fluid_mass_kg": 325.60001628,
+    "continuum_envelope_mass_kg": 320.1984,
+    "mass_policy": "retain native and continuum masses separately; no rescale"
+  },
+  "root_runtime": {
+    "qualification_entrypoint": "root_stage1_native_home_floor_eight_solver_dispatch_230/launch.py",
+    "shared_gpu_policy": "eight-live-UUID lease with foreign-process protection",
+    "cpu_threads": 4,
+    "estimated_peak_gpu_mib": 4096,
+    "estimated_storage_bytes": 17179869184,
+    "home_floor_gib": 500,
+    "nvme_floor_gib": 100,
+    "future_requests_disabled": true,
+    "launch_owner": "root"
+  },
+  "claim_boundary": "Metadata binding and static worker contract only. Native initial QA, full native completion, visual acceptance, Q-N, precision, and production status remain pending actual Root execution."
+}
