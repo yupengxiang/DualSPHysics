@@ -1,0 +1,45 @@
+{
+  "native_contract": {
+    "dimension": 3,
+    "fixed_particles": 111708,
+    "fluid_particles": 67500,
+    "frames": 836,
+    "moving_particles": 0,
+    "tmax": 8.35,
+    "total_particles": 179208,
+    "tout": 0.01
+  },
+  "preflight_checks": [
+    "typed_receipt.status == 'completed' and typed_receipt.returncode == 0",
+    "native_receipt.status == 'completed' and native_receipt.returncode == 0",
+    "all bound metadata hashes match and no raw payload suffix is hashed",
+    "conversion_report.hash_scopes.physical_condition_sha256 == binding.physical_condition_sha256",
+    "conversion_report.hash_scopes.physical_condition.schema == binding.producer_scope_schema",
+    "conversion_report.hash_scopes.physical_condition.physical_case_id == binding.physical_case_id",
+    "conversion_report.output_hdf5 == binding.trajectory_h5",
+    "conversion_report.partvtk_validation.all_passed is True",
+    "dynamic vectors use outshape=shape[1:] and N 3, scalar fields use N"
+  ],
+  "producer_scope_schema": "legacy-owner-scope.v0",
+  "required_binding_get_keys": [
+    "xmf_shape_contract"
+  ],
+  "required_binding_keys": [
+    "typed_receipt",
+    "native_receipt",
+    "bound_metadata_sha256",
+    "conversion_report",
+    "physical_condition_sha256",
+    "producer_scope_schema",
+    "physical_case_id",
+    "trajectory_h5",
+    "expected_frames",
+    "physical_window_s"
+  ],
+  "schema": "ds02.f3.fresh079.xmf-worker-contract.v1",
+  "source_agent_reads_bi4_csv": false,
+  "source_agent_reads_h5": false,
+  "worker": "export_xmf.py",
+  "worker_origin": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_084_stage1_omega_typed274_xmf_render_v1/workers/export_xmf.py",
+  "worker_origin_sha256": "da50e26d5322b1b6f1539bca3109dfc115164427b37e1b2f86f56b153f56b0b0"
+}

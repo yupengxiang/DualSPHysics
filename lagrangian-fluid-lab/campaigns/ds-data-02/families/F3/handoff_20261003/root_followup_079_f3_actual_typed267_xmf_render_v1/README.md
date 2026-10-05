@@ -1,0 +1,7 @@
+# F3 fresh079 actual typed267 to XMF/render source handoff
+
+This package binds the four real Root267 typed products for `AY0340`, `AY0360`, `AY0370`, and `AY0410`. Each actual typed receipt is `completed` with return code 0; each conversion report records 836 saved frames, 179208 native particles, 3-D metadata, and `partvtk_validation.all_passed=true`. The actual converter scope is explicitly `legacy-owner-scope.v0`; every source-plan condition hash remains separate and no cross-resolution physical identity is asserted.
+
+Each disabled XMF request uses the corrected local exporter with the literal `producer_scope_schema`, the actual typed receipt and conversion-report JSON hashes, the actual native receipt, official base-binary metadata, and the dynamic vector contract `shape[1:] -> 179208 3`. Each disabled Root023 render request uses a separate `{attempt_root}/render` directory, depends on the future XMF child directory, retains all 836 saved frames/native fields, and requests automatic native position bounds with 35 contact pages. Future XMF, manifest, render, receipt, visual, Q-N, and precision outputs remain null or ungranted.
+
+The source builder read and hashed bounded JSON/XML/source metadata only. It did not open or hash H5/BI4/CSV scientific payloads, did not launch conversion/XMF/render/solver jobs, and did not touch shared registry or resource state. The producer H5 digest stored in each binding is adopted from the already completed conversion report; Root's future exporter will verify the H5 itself.
