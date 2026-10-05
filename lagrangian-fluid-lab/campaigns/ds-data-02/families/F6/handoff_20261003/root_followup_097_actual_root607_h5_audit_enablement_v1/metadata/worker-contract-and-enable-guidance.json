@@ -1,0 +1,87 @@
+{
+  "cli": [
+    "python3",
+    "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_097_actual_root607_h5_audit_enablement_v1/workers/audit_f6_typed_h5_full241_fresh097.py",
+    "--request",
+    "<case-request>",
+    "--output-dir",
+    "<new-empty-audit-dir>"
+  ],
+  "contract": {
+    "cli_args": [
+      "--request",
+      "--output-dir"
+    ],
+    "fresh094_original_worker_is_immutable": true,
+    "fresh097_time_contract": {
+      "declared_window_s": [
+        0.0,
+        12.0
+      ],
+      "frame_count_required": 241,
+      "h5_times_must_match_producer_per_frame": true,
+      "match_tolerance_s": 1e-12,
+      "no_resampling": true,
+      "nominal_schedule_is_report_only": true,
+      "nominal_tout_s": 0.05,
+      "producer_source": "conversion_report.lifecycle.frame_summary[].time",
+      "strictly_increasing_required": true
+    },
+    "h5_payload_hash_policy": "producer attestation only; result trajectory_h5.sha256 remains null",
+    "nested_case_required": true,
+    "normalized_count_contract": {
+      "helper": "normalized_counts",
+      "missing_nonzero_codes_rejected": true,
+      "mk_expected_counts": {
+        "1": 327680,
+        "30": 73441,
+        "60": 16384
+      },
+      "synthetic_validator": "validate_fresh097_source.py runs numpy valid, unexpected-type, missing-fluid, and missing-Mk cases",
+      "type_expected_counts": {
+        "0": 73441,
+        "1": 0,
+        "2": 16384,
+        "3": 327680
+      },
+      "unexpected_codes_rejected": true,
+      "zero_expected_codes_are_materialized": true
+    },
+    "output_dir_must_be_new": true,
+    "required_case_keys": [
+      "case_id",
+      "canonical_owner",
+      "source_definition",
+      "typed_terminal_dependency",
+      "state0_dependency",
+      "expected_native_contract"
+    ],
+    "result_schema": "ds02.f6.fresh097.typed-h5-full241-audit-result.v1",
+    "state0_provenance_field": "provenance_status",
+    "state0_worker_token": "actual_pass",
+    "worker_schema": "ds02.f6.fresh094.typed-h5-full241-audit-request.v1"
+  },
+  "parent_enablement": {
+    "disabled_source_package": true,
+    "h5_policy": "Root enabled worker may read H5 in frame slices; source package never reads/copies/hashes H5.",
+    "normalized_count_preflight": "The enabled worker normalizes np.unique output over all expected codes before comparing; type code 1 may be absent because its expected count is zero, while missing fluid or any unexpected code fails.",
+    "one_case_per_request": true,
+    "per_case_requirements": [
+      "Root607 receipt completed/0",
+      "Root607 report 241/417505/dim3/PartVTK all_passed",
+      "producer scope equals classified Root606 scope",
+      "exact Root582/Root595 state0 pass",
+      "producer frame_summary 241 finite strictly increasing times",
+      "fresh097 frame-by-frame time comparison; nominal .05 report only",
+      "Root142 strict non-science SHA closure"
+    ],
+    "scope_policy": "source canonical and source-plan remain provenance; only actual Root607 producer scope may match classified Root606",
+    "source_only": true,
+    "standard_entry": "Root142 audit dispatch / shared runner"
+  },
+  "request_schema": "ds02.f6.fresh094.typed-h5-full241-audit-request.v1",
+  "result_schema": "ds02.f6.fresh097.typed-h5-full241-audit-result.v1",
+  "schema": "ds02.f6.fresh097.worker-contract-and-enable-guidance.v2",
+  "worker": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_097_actual_root607_h5_audit_enablement_v1/workers/audit_f6_typed_h5_full241_fresh097.py",
+  "worker_sha256": "1991da7d78e029fdf2f0cdfdbe5e4da6932dc17f9adf88b747751c07500ff5f1"
+}
