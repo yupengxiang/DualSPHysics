@@ -1,0 +1,173 @@
+{
+  "candidate_actual_counts": {
+    "fixed_particles": 162005,
+    "floating_particles": 0,
+    "fluid_particles": 27942,
+    "moving_particles": 4480,
+    "total_particles": 194427
+  },
+  "candidate_gencase_attempt_id": "root-stage1-f5-c082r1-official-void-fill-genuine-gencase-265",
+  "future_artifacts_must_remain_unhashed": true,
+  "old_csv_producer_actual_counts": {
+    "fixed_particles": 158559,
+    "floating_particles": 0,
+    "fluid_particles": 31658,
+    "moving_particles": 4210,
+    "total_particles": 194427
+  },
+  "old_csv_producer_attempt_id": "root-stage1-f5-c082r1-inward-analytic-bed-genuine-gencase-234",
+  "requests": {
+    "central-bed-coverage-request.json": {
+      "attempt_id": "root-stage1-f5-c082r1-voidfill-bed-footprint-audit-287",
+      "binding": "central-bed-coverage-binding.json",
+      "depends_on_attempt": "root-stage1-f5-c082r1-voidfill-actual-native-initial-qa-286",
+      "execution_allowed": false,
+      "worker": "workers/direct_partvtk_initial_mk50_coverage.py"
+    },
+    "fluid-lattice-cohort-diagnostic-request.json": {
+      "attempt_id": "root-stage1-f5-c082r1-actual-cohort-yindex-diagnostic-288",
+      "binding": "fluid-lattice-cohort-diagnostic-binding.json",
+      "execution_allowed": false,
+      "worker": "workers/diagnose_r1_fluid_lattice_text_rounding.py"
+    },
+    "initial-qa-request.json": {
+      "attempt_id": "root-stage1-f5-c082r1-voidfill-actual-native-initial-qa-286",
+      "binding": "initial-qa-binding.json",
+      "execution_allowed": false,
+      "worker": "workers/initial_qa_worker.py"
+    }
+  },
+  "schema": "ds02.f5.c082r1.fresh089.worker-binding-contract.v1",
+  "scientific_thresholds_changed": false,
+  "status": "source_only_metadata_contract",
+  "workers": {
+    "diagnose_r1_fluid_lattice_text_rounding.py": {
+      "binding_file": "fluid-lattice-cohort-diagnostic-binding.json",
+      "count_role": "old234 producer for registered CSV only; candidate265 is sidecar and cannot replace old counts",
+      "required_binding_paths": [
+        "schema",
+        "case_id",
+        "diagnostic_attempt_id",
+        "actual_gencase_attempt_id",
+        "actual_gencase.attempt_id",
+        "actual_gencase.actual_counts.total_particles",
+        "actual_gencase.actual_counts.fixed_particles",
+        "actual_gencase.actual_counts.moving_particles",
+        "actual_gencase.actual_counts.floating_particles",
+        "actual_gencase.actual_counts.fluid_particles",
+        "actual_candidate_gencase.attempt_id",
+        "actual_candidate_gencase.actual_counts.total_particles",
+        "actual_candidate_gencase.actual_counts.fluid_particles",
+        "actual_root246.attempt_id",
+        "actual_root246.metadata_report",
+        "actual_root256.attempt_id",
+        "actual_root256.official_csv",
+        "actual_root256.official_csv_sha256",
+        "actual_root256.receipt",
+        "actual_root256.receipt_sha256",
+        "actual_root256.report",
+        "actual_root256.report_sha256",
+        "actual_root256.actual_csv_mass_kg",
+        "actual_root256.actual_csv_mass_source.report",
+        "actual_root256.actual_csv_mass_source.report_sha256",
+        "actual_root256.actual_csv_mass_source.field",
+        "actual_root264.attempt_id",
+        "actual_root264.report"
+      ],
+      "source_access_lines": {
+        "actual_gencase": "contract preflight,488,502",
+        "actual_gencase_attempt_id": "contract preflight,500",
+        "actual_root256.actual_csv_mass_kg": "509",
+        "actual_root256.official_csv": "477",
+        "actual_root256.official_csv_sha256": "480",
+        "case_id": "497",
+        "diagnostic_attempt_id": "474,498-499",
+        "schema": "474 contract preflight"
+      }
+    },
+    "direct_partvtk_initial_mk50_coverage.py": {
+      "binding_file": "central-bed-coverage-binding.json",
+      "count_role": "candidate265 only; coverage waits for QA286 actual report",
+      "required_binding_paths": [
+        "schema",
+        "case_id",
+        "attempt_id",
+        "gencase_attempt_id",
+        "depends_on_initial_qa_attempt",
+        "actual_counts.total_particles",
+        "actual_counts.fixed_particles",
+        "actual_counts.moving_particles",
+        "actual_counts.floating_particles",
+        "actual_counts.fluid_particles",
+        "files.actual_gencase_binding.path",
+        "files.actual_gencase_binding.sha256",
+        "files.gencase_receipt.path",
+        "files.gencase_receipt.sha256",
+        "files.prepared_input_report.path",
+        "files.prepared_input_report.sha256",
+        "files.qa_provenance.path",
+        "files.official_csv.path",
+        "files.gencase_output_root.path"
+      ],
+      "source_access_lines": {
+        "actual_counts": "55,57-59",
+        "attempt_id": "71",
+        "case_id": "57",
+        "depends_on_initial_qa_attempt": "71",
+        "files.actual_gencase_binding": "56",
+        "files.gencase_output_root": "57",
+        "files.gencase_receipt": "56,57,71",
+        "files.official_csv": "58,71",
+        "files.prepared_input_report": "56,71",
+        "files.qa_provenance": "56,57,71",
+        "gencase_attempt_id": "57,71",
+        "schema": "54"
+      }
+    },
+    "initial_qa_worker.py": {
+      "binding_file": "initial-qa-binding.json",
+      "count_role": "candidate265 only; old234 count is historical provenance and cannot satisfy this binding",
+      "required_binding_paths": [
+        "schema",
+        "qa_attempt_id",
+        "gencase_attempt_id",
+        "case_id",
+        "actual_counts.total_particles",
+        "actual_counts.fixed_particles",
+        "actual_counts.moving_particles",
+        "actual_counts.floating_particles",
+        "actual_counts.fluid_particles",
+        "continuum_mass_kg_legacy",
+        "files.gencase_receipt.path",
+        "files.gencase_receipt.sha256",
+        "files.prepared_input_report.path",
+        "files.prepared_input_report.sha256",
+        "files.generated_xml.path",
+        "files.generated_xml.sha256",
+        "files.generated_bi4.path",
+        "files.generated_bi4.sha256",
+        "files.gencase_output_root.path",
+        "files.partvtk.path",
+        "files.qa054_tool.path",
+        "files.actual_gencase_binding.path",
+        "files.actual_gencase_binding.sha256"
+      ],
+      "source_access_lines": {
+        "actual_counts": "89,94,95,110,111,112",
+        "case_id": "93",
+        "continuum_mass_kg_legacy": "120",
+        "files.actual_gencase_binding": "32-39 contract preflight",
+        "files.gencase_output_root": "96",
+        "files.gencase_receipt": "90,91,106",
+        "files.generated_bi4": "90,106",
+        "files.generated_xml": "90,98,106",
+        "files.partvtk": "99",
+        "files.prepared_input_report": "90,91,106",
+        "files.qa054_tool": "101",
+        "gencase_attempt_id": "88,93,122",
+        "qa_attempt_id": "88,122",
+        "schema": "88"
+      }
+    }
+  }
+}
