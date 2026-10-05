@@ -1,0 +1,127 @@
+{
+  "schema": "ds02.f3.native-nvme-staging-contract.v1",
+  "fresh_id": "fresh067",
+  "family_id": "F3",
+  "status": "design_only_blocked_until_shared_runtime_support",
+  "source_only": true,
+  "jobs_started": false,
+  "shared_state_modified": false,
+  "scope_boundary": "F3 family source research only; no shared runtime, registry, ledger, or active native attempt is changed",
+  "runtime_reference": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "sha256": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "observed_anchors": {
+      "request_validation_required_fields_lines": [207, 210],
+      "cpu_allowlist_lines": [218, 221],
+      "home_attempt_root_line": 302,
+      "home_headroom_guard_lines": [313, 316],
+      "attempt_root_substitution_line": 338,
+      "home_free_monitor_lines": [364, 370],
+      "home_tree_storage_guard_lines": [382, 383],
+      "native_wait_and_status_lines": [390, 392],
+      "receipt_bytes_home_tree_line": 408,
+      "receipt_publish_line": 420
+    }
+  },
+  "capacity_snapshot": {
+    "home_min_free_bytes": 536870912000,
+    "home_min_free_gib": 500.0,
+    "nvme_min_free_bytes": 107374182400,
+    "nvme_min_free_gib": 100.0,
+    "single_stage_limit_bytes": 25769803776,
+    "single_stage_limit_gib": 24.0,
+    "observed_tmp_free_bytes": 516395835392,
+    "observed_tmp_free_gib": 480.9310989379883,
+    "requested_max_native_solver_concurrency": 8,
+    "current_runtime_initial_solver_concurrency_cap": 4,
+    "current_runtime_conversion_concurrency_cap": 2,
+    "observation_is_read_only": true
+  },
+  "blockers": [
+    {
+      "id": "runtime-home-attempt-root",
+      "severity": "hard",
+      "evidence": "run_request() constructs output=data_root/families/attempt and publishes its receipt there",
+      "impact": "A solver argv path pointing into /tmp would be outside the runtime output tree."
+    },
+    {
+      "id": "runtime-storage-guard-home-only",
+      "severity": "hard",
+      "evidence": "headroom, live free-floor, tree_bytes, and receipt bytes inspect data_root or the Home attempt output",
+      "impact": "Raw native bytes in /tmp would evade reserved-storage accounting, Home free-floor monitoring, and receipt byte totals."
+    },
+    {
+      "id": "runtime-native-exit-boundary",
+      "severity": "hard",
+      "evidence": "the current launcher waits for one child process and assigns completed/failed from proc.returncode before publishing the receipt",
+      "impact": "A solver-plus-archive wrapper would make archive exit indistinguishable from native solver exit."
+    },
+    {
+      "id": "runtime-no-archive-task-contract",
+      "severity": "hard",
+      "evidence": "CPU_KINDS contains conversion/audit/etc. but no native_archive task, and no post-native archive hook exists",
+      "impact": "A separate CPU archive cannot be reserved, accounted, or linked to the native receipt by the current runtime."
+    },
+    {
+      "id": "runtime-solver-concurrency-mismatch",
+      "severity": "review",
+      "evidence": "the user window allows up to eight solver leases while current check_reservation caps active qualification/production reservations at four",
+      "impact": "An eight-solver staging policy cannot be claimed without a reviewed runtime/ledger change."
+    }
+  ],
+  "required_runtime_extension_before_enable": {
+    "scope": "shared runtime change required; this package does not implement it",
+    "request_fields": {
+      "native_stage_root": "/tmp/ds02-native-stage/{family}/{case}/{attempt_id}",
+      "native_stage_limit_bytes": 25769803776,
+      "native_stage_free_floor_bytes": 107374182400,
+      "native_archive_request_path": "{attempt_root}/native-archive-request.json"
+    },
+    "guard_requirements": [
+      "Reserve both Home and NVMe capacities before launch under the same ledger lock.",
+      "Check Home free >= 536870912000 and NVMe free >= stage_limit + 107374182400 before launch and during the native process.",
+      "Count every staged byte against the native reservation, including stdout, Run.out, BI4-derived solver output, and all data frames.",
+      "Keep the official DualSPHysics executable as the direct child; preserve argv, cwd, XML/BI4, DP, physical controls, tmax, tout, and saved-frame recipe exactly.",
+      "Write a native receipt only after proc.wait(); native_status/native_returncode must reflect the official solver process alone.",
+      "Release the GPU lease only after the official native child has exited and its native receipt is atomically published.",
+      "Create the CPU archive reservation only from a completed native receipt and a frozen staged-file manifest."
+    ],
+    "native_stage_publication": [
+      "For every staged file, record source path, size, mode, mtime_ns, and SHA256 without mutating the source.",
+      "Before copying, capture source stat; stream-copy to a same-filesystem temporary file; fsync; verify digest and source stat after the copy.",
+      "Publish the staged manifest atomically only after every required native artifact passes verification.",
+      "On any failure, preserve the partial manifest/proof and original source; never publish a completed native or archive receipt."
+    ],
+    "cpu_archive": [
+      "Run as a separate CPU request using the existing conversion/audit resource accounting only after the native receipt is completed.",
+      "Keep archive_status/archive_returncode in a separate archive receipt; never overwrite native status or native_returncode.",
+      "Copy from /tmp to the canonical Home attempt path with the same stat-before/after and digest-before-publish protocol.",
+      "Publish an archive-complete marker only after all required BI4/log/data files match the staged manifest.",
+      "A failed archive leaves the native completed receipt authoritative but blocks downstream typed conversion and visual review."
+    ]
+  },
+  "canonical_invariants": {
+    "solver_options_unchanged": true,
+    "physical_inputs_unchanged": true,
+    "save_interval_unchanged": true,
+    "native_os_exit_is_authoritative": true,
+    "archive_exit_is_separate": true,
+    "original_files_read_only": true,
+    "no_home_or_nvme_guard_bypass": true,
+    "no_case_count_or_qn_grant": true
+  },
+  "minimal_root_diagnostic": {
+    "path": "diagnose_native_stage_support.py",
+    "command": "python3 -B diagnose_native_stage_support.py --json",
+    "reads": "runtime source text only",
+    "starts_jobs": false,
+    "result_when_current_runtime_is_unchanged": "blocked",
+    "required_root_decision": "either land and review the shared runtime extension above, or keep native output on the existing Home attempt root"
+  },
+  "future_hash_policy": {
+    "stage_manifest_sha256": null,
+    "native_archive_receipt_sha256": null,
+    "archive_output_sha256": null,
+    "source_package_does_not_fabricate_runtime_evidence": true
+  }
+}
