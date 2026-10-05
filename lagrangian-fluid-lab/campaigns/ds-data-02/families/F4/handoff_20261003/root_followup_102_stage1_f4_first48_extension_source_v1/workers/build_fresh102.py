@@ -185,8 +185,6 @@ def source_core(cfg: dict[str, Any], definition: Path) -> dict[str, Any]:
         "tank_size_m": [1.2, 0.4, 0.6],
         "initial_drop_velocity_m_per_s": [0.0, 0.0, -cfg["speed_m_per_s"]],
         "solver_options": ["-tmax:1.2", "-tout:0.001"],
-        "source_definition_path": str(definition),
-        "source_definition_sha256": digest_file(definition),
     }
 
 
