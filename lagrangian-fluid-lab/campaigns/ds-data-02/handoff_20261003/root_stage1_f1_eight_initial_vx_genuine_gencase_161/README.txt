@@ -1,0 +1,1 @@
+Eight initial-fluid VX corner genuine GenCase requests, source06788d28544 unchanged. Root142 CPU shared strict entry with original cumulative ledger. GenCase raw velocities are not solver initial VX evidence. Future strict native qualification and actual solver saved-frame0 PartVTK audit required. No precision/visual/count increase from generation.
