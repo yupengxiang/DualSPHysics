@@ -1,0 +1,9 @@
+# F3 fresh078 actual converter scope and typed/XMF/render handoff
+
+This source-only package preserves the fourteen fresh077 native conditions and binds their actual completed/0 full836 receipts: 179208 total particles, 111708 fixed, 67500 fluid, zero moving, genuine 3-D, and 836 saved frames through 8.35 s. No case count, Q-N, production, visual, or precision claim is added.
+
+The fresh077 owners contain only a `canonical_physical_binding` summary and no explicit `physical_binding` object. The metadata-only builder imports the actual `ds_data02_direct_convert.py` under a temporary `sys.modules` name, calls `_physical_condition_scope(owner)` and `canonical_hash`, then restores the module entry. Each fresh078 owner records that actual `legacy-owner-scope.v0` scope/hash used by conversion. The original source parameter tuple and source physical-condition hash remain separately recorded; the actual scope hash is never presented as the source planned hash.
+
+Typed requests are disabled and use the base-lab `campaigns/l1-resume/artifacts/bi4_dump` executable with Root's fixed digest `b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e`. They also carry the official base-lab PartVTK executable with its fixed digest `62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00`, explicit `--partvtk`, and explicit validation output. Future typed receipt/report/H5 hashes remain null. XMF and Root023 render requests are also disabled. The XMF contract explicitly binds the reviewed N3 velocity-vector spec (`velocity`, `vx/vy/vz`) and retains all native fields; future XMF/render hashes and visual decisions remain null.
+
+The package reads JSON/source metadata only. It does not open or hash BI4, CSV, H5/HDF5, VTK, or numerical arrays; it does not start conversion, XMF, render, or any registered job; and it does not modify shared registry, runner, resource ledger, or historical fresh077 evidence.

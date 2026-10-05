@@ -1,0 +1,13 @@
+# F5 fresh087: C082R1 official void-fill actual-bound QA and Mk50 source gate
+
+Root265 genuinely completed the fresh official void-fill GenCase. Its actual metadata is bound here as **194427 = 162005 fixed + 4480 moving + 0 floating + 27942 fluid**, 3-D. The generated XML SHA is `4c4a57a3fefb3991443507b08184b0bcc6e63309daabbb7b3a28265079f0415a`, the prepared-input-report SHA is `5a72b305616c99477cdfe1964fb7b2e4f56f385dc3584e734efb8c4af1a2473b`, the execution-receipt SHA is `672a22e4062cbc858b796e86d2127f1116b9d62a08e4da641d99846a226ce8fa`, and the BI4 SHA is the producer-declared opaque value `ea361f560a6b6aa3f10d46ed379efde01a026a46dd3e515b5ebc61b8540064bc`. Source preparation did not open or rehash BI4/CSV/H5 arrays.
+
+The count change relative to R1 is recorded as an observation of official fill ownership: fresh087 binds the producer values and never copies `194427/158559/4210/31658` or predicts `40710`. A fresh GenCase success is not native QA or dynamic acceptance.
+
+`workers/initial_qa_worker.py` is a disabled Root CPU worker. It invokes the official QA helper via `sys.executable`, checks the actual Root265 receipt/XML/report identities, derives all expected counts from the bound producer metadata, and retains the existing scientific checks: finite rows, positive mass/density, categorical columns excluding density, unique IDs, zero initial velocity, spatial non-overlap, source-profile/box containment, zero initial below-profile fluid, DP lattice/15 y levels, Type0/Mk50 marker presence, and unrescaled mass difference. The old lattice residual criterion is unchanged.
+
+`workers/direct_partvtk_initial_mk50_coverage.py` is a separate disabled dependency after QA 266. It reads the actual official CSV only when Root enables it, reports Type0/Mk50 support over six x segments at half/one/two DP, and reports fluid below-profile evidence. Support counts are a patchiness diagnostic; they do not certify a uniform or dynamically stable bed.
+
+The copied per-fluid diagnostic corrects fresh086's cohort labels: `pointref.y=0` and the source fluid window is `[-0.14,0.14]`, so nearest source keys are **-7..+7**, not 0..14. Root264's consumed report remains immutable historical evidence; fresh087 does not relabel it in place. The corrected worker is disabled and uses only Root-supplied opaque CSV SHA if Root later enables it.
+
+Source-plan hash `c523936bc9640f211494b22a63c7ac82c9cf8dde06973c4c37b93a078392e39b` and canonical physical-owner hash `280c865dae624ad8ee2c16ef1f3ca9ff72c4fd27b13846a192bfe620993faeaa` remain separate. Source `mkbound=40` maps to native bed Type0/Mk50. All short solver, typed conversion, XMF, dynamic audit, full16, and full801 stages remain disabled.
