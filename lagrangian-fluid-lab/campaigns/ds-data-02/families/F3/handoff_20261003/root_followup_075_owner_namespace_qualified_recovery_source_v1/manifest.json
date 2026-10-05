@@ -1,0 +1,122 @@
+{
+  "schema": "ds02.fresh075.owner-namespace-qualified-recovery-source-manifest.v1",
+  "fresh_id": "fresh075",
+  "family_id": "F3",
+  "source_only": true,
+  "jobs_started": false,
+  "ledger_mutation_performed": false,
+  "native_gpu_reconciliation": "prohibited",
+  "payloads_read_by_source": false,
+  "application_gate": {
+    "authorization_token": "ROOT_REVIEWED_FRESH075",
+    "cli_disabled": true,
+    "enabled": false,
+    "application_requires_root_review": true
+  },
+  "current_root_binding": {
+    "attempt_label": "Root184",
+    "path": "requests/root184_owner_aware_reconciliation_binding.json",
+    "sha256": "0c2e4739ccef15c7690fd15547b6003f07ba9e312c155677dc0724d9b7aa7fc4"
+  },
+  "actual_owner": {
+    "uid": 1001,
+    "gid": 1001,
+    "username": "jade",
+    "is_os_root": false,
+    "caller_must_match_owner": true,
+    "ledger_and_receipt_stable_owner_required": true,
+    "pid1_expected": {
+      "name": "systemd",
+      "uid": 0,
+      "gid": 0,
+      "caller_must_remain_1001": true
+    }
+  },
+  "namespace_proof": {
+    "expected_host": {
+      "hostname": "user-SYS-421GE-TNRT",
+      "boot_id": "c2e65531-6320-430a-a872-6b048837d47d",
+      "pid_namespace": "pid:[4026531836]",
+      "pid1": {
+        "name": "systemd",
+        "uid": 0,
+        "gid": 0
+      }
+    },
+    "same_host": "hostname and boot_id must match the reviewed expected tuple in both fresh samples",
+    "status_files": [
+      "/proc/self/status",
+      "/proc/1/status"
+    ],
+    "caller_owner": "self status Uid/Gid all 1001",
+    "pid1_owner": "PID1 status Name systemd and Uid/Gid all 0",
+    "nspid": "self and PID 1 must each contain exactly one value",
+    "pid1_stat": "readable /proc/1/stat with pid=1 and ppid=0",
+    "pid_namespace_link": "/proc/self/ns/pid must equal expected_host.pid_namespace",
+    "proc_1_ns_link_required": false,
+    "reason_proc_1_ns_link_acl": "actual owner cannot read /proc/1/ns/pid",
+    "root_caller_claim": false
+  },
+  "historical_pid_policy": {
+    "start_ticks": null,
+    "status": "unknown_historical_start_ticks",
+    "zero_proxy_forbidden": true,
+    "identity_source": "runtime_v2 start_new_session plus immutable launcher/child receipt PIDs"
+  },
+  "cases": [
+    {
+      "case_id": "DS02_P03_TYPED_ARTIFACT_INTEGRITY",
+      "reservation_id": "F2/F2_STAGE1_OFFSET_P03_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-offset-p03-full401-native-typed-nvme-135",
+      "reservation_sha256_at_source_review": "0f2db6cc70e8ad82eeb0747db18a23976775bb8fd67bfe8be7cd8e62d129a1ae",
+      "cpu_core_seconds_upper_bound": 10800,
+      "launcher_pid": 2339863,
+      "child_pid": 2345366,
+      "group_leader_pid": 2345366,
+      "process_group_id": 2345366,
+      "old_tool_status": 143,
+      "receipt_status": "running",
+      "receipt_returncode": null,
+      "owner_receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_OFFSET_P03_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-offset-p03-full401-native-typed-nvme-135/execution-receipt.json",
+      "requires_fresh_in_lock_double_absence_probe": true
+    },
+    {
+      "case_id": "F3_STAGE1_DP006_P1000_AY0270",
+      "reservation_id": "F3/F3_STAGE1_DP006_P1000_AY0270/root-stage1-f3-ay0270-full836-typed-nvme-154",
+      "reservation_sha256_at_source_review": "882cb1db6bca9c224f8920392ff7088c4789a14bd3375ae81d27ffd1bef504e3",
+      "cpu_core_seconds_upper_bound": 21600,
+      "launcher_pid": 2367173,
+      "child_pid": 2367325,
+      "group_leader_pid": 2367325,
+      "process_group_id": 2367325,
+      "old_tool_status": 143,
+      "receipt_status": "running",
+      "receipt_returncode": null,
+      "owner_receipt_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_DP006_P1000_AY0270/root-stage1-f3-ay0270-full836-typed-nvme-154/execution-receipt.json",
+      "requires_fresh_in_lock_double_absence_probe": true
+    }
+  ],
+  "observed_source_evidence": {
+    "path": "evidence/current-owner-namespace-evidence.json",
+    "sha256": "2b4ef0db5d95763456908ea2e22f73fa519d34b2c4f2aa343fb6098a42a51257",
+    "is_not_in_lock_authorization": true
+  },
+  "settlement_contract": {
+    "target": "exact CPU conversion reservation only",
+    "dead_proof": "two fresh samples under runtime_v2 ledger_locked; all exact PIDs ENOENT and complete process group empty",
+    "stale_caller_evidence": "refuse",
+    "present_pid_or_namespace_ambiguity": "refuse",
+    "charge": "full original reserved cpu_core_seconds conservative upper bound",
+    "attempt_status": "interrupted_unfinalized",
+    "child_returncode": null,
+    "os_exit_zero": false,
+    "non_target_ledger_state": "byte-equivalent",
+    "replay": "idempotent"
+  },
+  "source_files": {
+    "README.md": "1c40c1d1677ee85a610b5ba86d9ccc779c81337eebe6cab8c54bfbb82c05e24f",
+    "evidence/current-owner-namespace-evidence.json": "0967363ab0cf3b92d1f08adb8307cbcc1554cea2b7494217e1c003a6763926e8",
+    "reconcile_typed_conversion.py": "465f7baeaad770d6dd42f893b16e6bf47a151ca11f4ba23a050f91188bbd157d",
+    "requests/root184_owner_aware_reconciliation_binding.json": "0c2e4739ccef15c7690fd15547b6003f07ba9e312c155677dc0724d9b7aa7fc4",
+    "tests/test_fresh075_owner_namespace_qualification.py": "e281b4a0d939f5a9577fe8401ef5d0f81ac2c0b434fa69b65b7740240b99a4cb"
+  }
+}
