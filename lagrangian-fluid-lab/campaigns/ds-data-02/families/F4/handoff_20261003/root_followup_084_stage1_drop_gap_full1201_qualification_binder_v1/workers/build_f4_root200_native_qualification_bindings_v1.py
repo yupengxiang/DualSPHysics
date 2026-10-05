@@ -28,7 +28,8 @@ ROOT196_ATTEMPT = "root-stage1-f4-internal8-native-initial-qa-196"
 ROOT210_ATTEMPT = "root-stage1-f4-internal8-native-initial-qa-source-binding-repair-210"
 ROOT211_ATTEMPT = "root-stage1-f4-internal8-native-initial-qa-source-binding-repair-211"
 ROOT212_ATTEMPT = "root-stage1-f4-internal8-native-initial-qa-212"
-ACCEPTED_QA_ATTEMPTS = (ROOT210_ATTEMPT, ROOT211_ATTEMPT, ROOT212_ATTEMPT)
+ROOT216_ATTEMPT = "root-stage1-f4-internal8-native-initial-qa-metadata-contract-repair-216"
+ACCEPTED_QA_ATTEMPTS = (ROOT210_ATTEMPT, ROOT211_ATTEMPT, ROOT212_ATTEMPT, ROOT216_ATTEMPT)
 QA_CASE = "F4_INTERNAL_GAP8_DP010_INITIAL_QA"
 SOLVER = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64")
 POLICY = INTEGRATION / "lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_first24_eight_solver_resource_policy_134/ds02_root_all_idle_gpu_policy_v2.py"
@@ -81,7 +82,7 @@ def future_qa(provider_attempt: str) -> dict[str, Any]:
         "binding_sha256": None,
         "per_case_report_directory": str(root / "native-audit/cases"),
         "required": "completed0 execution receipt, completed/pass index, pass binding, and eight pass reports",
-        "status": "future_root212_cpu_audit",
+        "status": f"future_{provider_attempt}_cpu_audit",
     }
 
 
@@ -147,14 +148,14 @@ def validate_root195() -> tuple[dict[str, Any], dict[str, Any], list[dict[str, A
 
 def qa_binding(args: argparse.Namespace) -> dict[str, Any]:
     if not any((args.qa_index, args.qa_binding, args.qa_receipt)):
-        return future_qa(ROOT212_ATTEMPT)
+        return future_qa(ROOT216_ATTEMPT)
     if not all((args.qa_index, args.qa_binding, args.qa_receipt)):
         raise ValueError("--qa-index, --qa-binding, and --qa-receipt must be supplied together")
     index_path = Path(args.qa_index)
     binding_path = Path(args.qa_binding)
     receipt_path = Path(args.qa_receipt)
     if not all(any(attempt in str(path) for attempt in ACCEPTED_QA_ATTEMPTS) for path in (index_path, binding_path, receipt_path)):
-        raise ValueError("only an actual completed/pass Root212 (or explicitly reviewed corrected attempt) can enable the binder; Root196/210/211 failure evidence remains preserved")
+        raise ValueError("only an actual completed/pass Root212/Root216 (or explicitly reviewed corrected attempt) can enable the binder; Root196/210/211 failure evidence remains preserved")
     receipt = load_json(require_file(receipt_path))
     index = load_json(require_file(index_path))
     binding = load_json(require_file(binding_path))
@@ -292,7 +293,7 @@ def build_request(endpoint: dict[str, Any], owner: dict[str, Any], metadata: dic
             **root196,
             "status": "preserved_failed_or_superseded",
             "accepted_as_dependency": False,
-            "failure_reason": "Root196 rejected the adopted source binding; Root210 failed before arrays on aggregate producer path drift; Root211 failed before usable QA because the BI4 lacked raw Mk/Type arrays. Root212 must use the XML/UID-derived partition and raw Posd/Idp audit contract.",
+            "failure_reason": "Root196 rejected the adopted source binding; Root210 failed before arrays on aggregate producer path drift; Root211 failed before usable QA because the BI4 lacked raw Mk/Type arrays; Root212 then failed before arrays on a nested generated_bi4 adapter-key bug. Root216 must use the XML/UID-derived partition, the raw Posd/Idp audit contract, and the repaired metadata/row adapter.",
         },
         "physical_case_id": physical["physical_case_id"],
         "physical_condition_sha256": owner["physical_condition_sha256"],
@@ -331,7 +332,7 @@ def build_request(endpoint: dict[str, Any], owner: dict[str, Any], metadata: dic
             "expected_frames": 1201,
             "time_window_s": 1.2,
             "output_interval_s": 0.001,
-            "status": "disabled_pending_Root212_XML_UID_native_initial_QA",
+            "status": "disabled_pending_Root216_XML_UID_metadata_repair_native_initial_QA",
         },
         "scientific_scope": {
             "physical_case_id": physical["physical_case_id"],
@@ -367,7 +368,7 @@ def build_request(endpoint: dict[str, Any], owner: dict[str, Any], metadata: dic
         "root_review_required": True,
         "source_only": True,
         "status": "source_only_disabled",
-        "disabled_reason": "Root200 may be enabled only after Root212 actual XML/UID-derived native initial QA completed0/pass index, binding, and eight per-case reports; raw Mk/Type is not claimed, Root195 aggregate failure and Root196/210/211 failed receipts remain immutable, and the native recipe stays exact.",
+        "disabled_reason": "Root200 may be enabled only after Root216 actual XML/UID-derived native initial QA completed0/pass index, binding, and eight per-case reports; raw Mk/Type is not claimed, Root195 aggregate failure and Root196/210/211/212 failed receipts remain immutable, and the native recipe stays exact.",
         "independent_case_count_increment": 0,
         "precision_status": "not_accepted",
         "q_n_status": "not_assessed",
