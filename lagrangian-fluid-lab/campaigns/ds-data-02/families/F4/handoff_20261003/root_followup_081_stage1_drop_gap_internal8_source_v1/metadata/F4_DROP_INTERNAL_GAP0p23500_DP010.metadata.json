@@ -1,0 +1,214 @@
+{
+  "case_id": "F4_DROP_INTERNAL_GAP0p23500_DP010",
+  "family_id": "F4",
+  "mass_semantics": {
+    "continuum_mass_kg": 59.07200000000001,
+    "native_mass": "pending actual generated native weights; no rescale"
+  },
+  "native_marker_semantics": {
+    "expected_generated_mkfluid_to_native_mk": {
+      "0": 1,
+      "1": 2
+    },
+    "native_fluid_mk_is_not_particle_count": true,
+    "source_mkfluid": {
+      "0": "pool",
+      "1": "falling_drop"
+    }
+  },
+  "physical_binding": {
+    "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+    "controls": {
+      "boundary": "DBC",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": "Wendland",
+      "step_algorithm": "Verlet",
+      "viscosity": 0.08
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.17,
+        0.35
+      ],
+      "right_censor_policy": "qualification_requires_completed_tail_or_explicit_censoring",
+      "sequence": [
+        "separated_initial_state",
+        "first_pool_contact",
+        "maximum_spread",
+        "rebound_or_recontact",
+        "transport_tail"
+      ],
+      "time_end_s": 1.2,
+      "time_start_s": 0.0
+    },
+    "family_id": "F4",
+    "geometry": {
+      "drop": {
+        "label": "falling_drop",
+        "low_m": [
+          0.47,
+          0.12,
+          0.435
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.26,
+          0.16,
+          0.14
+        ]
+      },
+      "pool": {
+        "label": "pool",
+        "low_m": [
+          0.08,
+          0.04,
+          0.04
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          1.04,
+          0.32,
+          0.16
+        ]
+      },
+      "tank": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      },
+      "wall_box": {
+        "low_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.4,
+          0.6
+        ]
+      }
+    },
+    "geometry_family_id": "F4_finite_drop_pool_finite_geometry_v1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "drop": 5.824000000000001,
+        "pool": 53.24800000000001
+      },
+      "initial_mass_by_source_kg": {
+        "drop": 5.824000000000001,
+        "pool": 53.24800000000001
+      },
+      "initial_mass_total_kg": 59.07200000000001,
+      "mass_policy": "native_rho_dp_cubed_no_rescaling",
+      "source_labels": {
+        "mkfluid:0": "pool",
+        "mkfluid:1": "falling_drop"
+      },
+      "source_regions": {
+        "drop": {
+          "label": "falling_drop",
+          "low_m": [
+            0.47,
+            0.12,
+            0.435
+          ],
+          "mkfluid": 1,
+          "size_m": [
+            0.26,
+            0.16,
+            0.14
+          ]
+        },
+        "pool": {
+          "label": "pool",
+          "low_m": [
+            0.08,
+            0.04,
+            0.04
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            1.04,
+            0.32,
+            0.16
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "mkfluid:0": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "mkfluid:1": [
+          0.0,
+          0.0,
+          -0.5
+        ]
+      }
+    },
+    "lineage_group_id": "finite_drop_pool_frozen_geometry_control_domain",
+    "mass_policy": "native_rho_dp_cubed_no_rescaling",
+    "mechanism_id": "finite_drop_pool",
+    "open_inlet": false,
+    "paired_background_id": "finite_drop_pool",
+    "parameters": {
+      "gap_m": 0.235,
+      "speed_m_per_s": 0.5,
+      "x_offset_m": 0.0,
+      "y_offset_m": 0.0
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F4_DROP_B08_gap0p23500_xoff0p00000_yoff0p00000_uz0p50000",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_binding_sha256": "35ba7c28b80f491d3282bc8f8634b36899cc536d491bc6def709181d44f17a42",
+  "precision_status": "not_accepted",
+  "production_approval": "none",
+  "q_n_status": "not_assessed",
+  "schema": "ds02.f4.internal8.metadata.v1",
+  "source_definition": {
+    "changed_literal": "0.44000000000000006",
+    "mother_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261002/centered_reference_matrix_001/F4_DROP_CENTERED_REFERENCE_001_DP010_Def.xml",
+    "mother_sha256": "c0bb0c46bb2eba912d57e4c4bd4f0d4e017facb61d00ae5f805927e529e22d48",
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_081_stage1_drop_gap_internal8_source_v1/definitions/F4_DROP_INTERNAL_GAP0p23500_DP010_Def.xml",
+    "sha256": "d0175e35f5a259b9683f5b7054d9e5353caa723e5e499c90aa0de1ceed614f1d"
+  },
+  "source_plan_condition_sha256": "b946cd1a25e0ee1e8dc625a2f557706f53c52c7c9101948aedd3ac11d87e8f82",
+  "source_recipe": {
+    "dp_m": 0.01,
+    "fixed_native_types": [
+      0
+    ],
+    "fluid_native_types": [
+      3
+    ],
+    "mass_policy": "native body support weights; rho*dp^3 physical mass; no continuum rescale",
+    "moving_native_types": [],
+    "native_frame_count": 1201,
+    "source_particle_counts": {
+      "fixed": 24161,
+      "fluid": 59072,
+      "total": 83233
+    },
+    "time_max_s": 1.2,
+    "time_out_s": 0.001
+  },
+  "status": "source_only_disabled",
+  "topphysical_case_id": "F4_DROP_B08_gap0p23500_xoff0p00000_yoff0p00000_uz0p50000"
+}
