@@ -1,0 +1,75 @@
+{
+  "actual_root185_coverage_bound": true,
+  "actual_root185_supports_short_review_only": true,
+  "arrays_read_by_source_agent": false,
+  "no_jobs_started": true,
+  "package_id": "root_followup_076_stage1_f5_b071_short_native_qualification_typed_xmf_render_v1",
+  "prohibitions": {
+    "do_not_bind_root183_as_bed_gate": true,
+    "do_not_claim_autofill_success_from_gen_case": true,
+    "do_not_count_short_event_as_independent_case": true,
+    "do_not_filter_native_mk40_as_bed": true,
+    "do_not_modify_consumed_attempts": true,
+    "do_not_relax_penetration_thresholds": true
+  },
+  "review_sequence": [
+    "Root reviews actual Mk50 frame-zero coverage",
+    "Root manually promotes disabled short native request",
+    "Root captures actual 51 native states",
+    "Root runs disabled typed conversion",
+    "Root publishes XMF",
+    "Root audits every saved frame for penetration/UID/nonfinite",
+    "Root renders all frames and reviews",
+    "Root decides whether any later full16 request is justified; no automatic full801 enablement"
+  ],
+  "root185_report_sha256": "d6f99d4830accac0b97315d4707cc7009434e8fc6084b1af0c59dc08731c575d",
+  "schema": "ds02.f5.b071.short-downstream-disabled.v1",
+  "shared_registry_write_allowed": false,
+  "source_only": true,
+  "stages": {
+    "full801_native": {
+      "attempt_id": null,
+      "execution_allowed": false,
+      "full801_authorized": false,
+      "launch_allowed": false,
+      "reason": "A short event is right-censored; B initial support is patchy; no dynamic penetration evidence exists"
+    },
+    "short_bed_audit": {
+      "attempt_id": "root-stage1-f5-b071-short-native-bed-audit-076",
+      "depends_on": "root-stage1-f5-b071-short-native-xmf-076",
+      "dynamic_acceptance": false,
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_all_51_actual_states": true
+    },
+    "short_full_saved_render": {
+      "attempt_id": "root-stage1-f5-b071-short-native-render-076",
+      "depends_on": "root-stage1-f5-b071-short-native-xmf-076",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_root_visual_review": true
+    },
+    "short_native_qualification": {
+      "attempt_id": "root-stage1-f5-b071-short-native-qualification-187",
+      "enablement": "Root may manually promote after reviewing this package and the actual Root185 report",
+      "execution_allowed": false,
+      "full16_authorized": false,
+      "full801_authorized": false,
+      "launch_allowed": false
+    },
+    "short_typed_nvme": {
+      "attempt_id": "root-stage1-f5-b071-short-native-typed-nvme-076",
+      "depends_on": "root-stage1-f5-b071-short-native-qualification-187",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_actual_short_receipt": true
+    },
+    "short_xmf": {
+      "attempt_id": "root-stage1-f5-b071-short-native-xmf-076",
+      "depends_on": "root-stage1-f5-b071-short-native-typed-nvme-076",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_actual_typed_and_native_receipts": true
+    }
+  }
+}
