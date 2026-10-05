@@ -1,0 +1,13 @@
+# F5 fresh101 converter-scope and disabled GenCase flow
+
+This package is a source-only contract repair for the two fresh099 bounded-motion candidates `A080` (scale 0.8) and `A120` (scale 1.2). It does not edit fresh099 or fresh100 and does not start a job.
+
+The direct converter contract is now recorded from the real integration implementation. `ds_data02_direct_convert._physical_condition_scope` returns an explicit `ds-data-02.physical-binding.v1` only when the owner has a validated `physical_binding` object. A fresh099 `canonical-physical-owner.json` has no such object. Calling the real function on it therefore produces a `legacy-owner-scope.v0` probe, and the candidate owner is incomplete as a converter owner. The fresh099 `canonical_physical_condition_sha256` is a custom self-excluding whole-owner identity; it is retained as `fresh099_owner_identity_sha256` and is never called the converter physical-condition hash.
+
+Each report also keeps the candidate Definition SHA as a separate source-plan identity. Future GenCase producer values remain null: actual total/fixed/moving/fluid/floating counts, generated XML particle counts and SHA, BI4 producer SHA, prepared-input-report SHA, receipt SHA, and producer 3-D evidence. The disabled request records the Root230 semantic fields required after a real producer run (`output_root`, `actual_total_particles`, `generated_xml_particle_counts`, `solver_dimension_from_gencase=3`, prepared-report counts, and generated XML `data2d=false`) without manufacturing them.
+
+The actual C082S1 baseline remains provenance only: total 194427, fixed 158559, moving 4210, fluid 31658, floating 0, dimension 3. Those values are never copied into A080/A120 future candidate counts. Native Mk50/source Mk40 and no mass rescaling remain explicit. A080/A120 motion changes are the only prospective physical change, with all downstream GenCase, placement, short solver, conversion, XMF/render, and full801 stages disabled.
+
+Root402's completed fresh100 mechanism diagnostic is included as a hold: the original C082S1 full801 run reached only about `+0.00387573 m` shoreward from the initial `x=3.30999994 m` and had maximum absolute surface-proxy change about `0.01073093 m`; all 31658 fluid UIDs remained finite and present. This quantifies that the existing motion is a weak mechanism signal. It does not approve A080/A120, certify runup, or grant full801/case credit.
+
+Run the metadata-only validator with the exact disabled request command, or run the local preflight script. It reads JSON/XML/Python metadata only, imports the real converter scope helpers, and refuses science suffix inputs. Root must review the resulting reports before any future producer or converter request is enabled.
