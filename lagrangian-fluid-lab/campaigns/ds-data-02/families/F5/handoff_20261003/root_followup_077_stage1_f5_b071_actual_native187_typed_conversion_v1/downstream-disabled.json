@@ -1,0 +1,75 @@
+{
+  "actual_native187_completed0": true,
+  "actual_native187_receipt_sha256": "b1028f85aa11eb6890dd8c7d9206f9414aff739a473aee9b47b64217a4cc546a",
+  "actual_root185_coverage_bound": true,
+  "actual_root185_supports_short_review_only": true,
+  "arrays_read_by_source_agent": false,
+  "no_jobs_started": true,
+  "package_id": "root_followup_077_stage1_f5_b071_actual_native187_typed_conversion_v1",
+  "prohibitions": {
+    "do_not_bind_root183_as_bed_gate": true,
+    "do_not_claim_autofill_success_from_gen_case": true,
+    "do_not_count_short_event_as_independent_case": true,
+    "do_not_filter_native_mk40_as_bed": true,
+    "do_not_modify_consumed_attempts": true,
+    "do_not_relax_penetration_thresholds": true
+  },
+  "review_sequence": [
+    "Root verifies native187 receipt nested request identity and completed0",
+    "Root manually promotes disabled strict CPU typed conversion189",
+    "After actual conversion0, Root binds XMF with native187 receipt and actual typed receipt",
+    "After actual XMF, Root binds all-frame bed audit and render",
+    "Root reviews all 51 states; full801/full16 remain disabled"
+  ],
+  "root185_report_sha256": "d6f99d4830accac0b97315d4707cc7009434e8fc6084b1af0c59dc08731c575d",
+  "schema": "ds02.f5.b071.short-downstream-disabled.v1",
+  "shared_registry_write_allowed": false,
+  "source_only": true,
+  "stages": {
+    "full801_native": {
+      "attempt_id": null,
+      "execution_allowed": false,
+      "full801_authorized": false,
+      "launch_allowed": false,
+      "reason": "A short event is right-censored; B initial support is patchy; no dynamic penetration evidence exists"
+    },
+    "short_bed_audit": {
+      "attempt_id": "root-stage1-f5-b071-short-native-bed-audit-076",
+      "depends_on": "root-stage1-f5-b071-short-native-xmf-pending",
+      "dynamic_acceptance": false,
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_all_51_actual_states": true
+    },
+    "short_full_saved_render": {
+      "attempt_id": "root-stage1-f5-b071-short-native-render-076",
+      "depends_on": "root-stage1-f5-b071-short-native-xmf-pending",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_root_visual_review": true
+    },
+    "short_native_qualification": {
+      "actual_status": "completed0_bound",
+      "attempt_id": "root-stage1-f5-b071-short-native-qualification-187",
+      "execution_allowed": false,
+      "full16_authorized": false,
+      "full801_authorized": false,
+      "launch_allowed": false
+    },
+    "short_typed_nvme": {
+      "attempt_id": "root-stage1-f5-b071-short-native-typed-nvme-189",
+      "depends_on": "root-stage1-f5-b071-short-native-qualification-187",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_actual_native_receipt": true,
+      "requires_root189_manual_promotion": true
+    },
+    "short_xmf": {
+      "attempt_id": "root-stage1-f5-b071-short-native-xmf-076",
+      "depends_on": "root-stage1-f5-b071-short-native-typed-nvme-189",
+      "execution_allowed": false,
+      "launch_allowed": false,
+      "requires_actual_typed_and_native_receipts": true
+    }
+  }
+}
