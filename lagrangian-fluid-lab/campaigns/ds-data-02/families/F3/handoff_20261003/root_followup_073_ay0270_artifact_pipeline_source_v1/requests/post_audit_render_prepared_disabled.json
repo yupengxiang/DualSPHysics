@@ -1,0 +1,73 @@
+{
+  "schema": "ds02.fresh073.post-audit-pipeline-request.v1",
+  "fresh_id": "fresh073",
+  "family_id": "F3",
+  "stage": "render",
+  "status": "prepared_disabled",
+  "launch_allowed": false,
+  "execution_allowed": false,
+  "source_case_bindings": "requests/post_audit_case_bindings.json",
+  "source_case_bindings_sha256": "4edefedc42f3e21e6b586e79b859cddb14b72b97d99fc71476f8d009b3b46b65",
+  "gate": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_073_ay0270_artifact_pipeline_source_v1/recovery_aware_pipeline_gate.py",
+    "sha256": "de62ca35e23779dec1649aaa3c212452a783200aa8e4434c4b3fc19f8c4827ed",
+    "command_template": [
+      "/usr/bin/python3.10",
+      "{gate_path}",
+      "--stage",
+      "render",
+      "--source-receipt",
+      "{case.typed_source.receipt.path}",
+      "--report",
+      "{case.typed_source.report.path}",
+      "--audit",
+      "{case.artifact_audit.receipt_path}",
+      "--native-receipt",
+      "{case.canonical_native.receipt}",
+      "--physical-case-id",
+      "{case.physical_case_id}",
+      "--physical-condition-sha256",
+      "{case.physical_condition_sha256}",
+      "--expected-frames",
+      "{case.expected_frames}",
+      "--expected-particles",
+      "{case.expected_particles}",
+      "--output",
+      "{attempt_root}/{case.case_id}/prepared-render-binding.json"
+    ],
+    "does_not_open_hdf5_or_arrays": true,
+    "does_not_modify_source_receipt": true
+  },
+  "consumer": {
+    "role": "native-geometry full-frame render after a reviewed temporal manifest",
+    "source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_native_renderer_proxy_lifetime_diagnostic_023/render.py",
+    "source_sha256": "5e78f7b92ad7c6f1d15902e3ccacc9099affb04b1b992a42f540eb88241bde66",
+    "direct_invocation_allowed": false,
+    "requires_recovery_aware_temporal_manifest": true,
+    "camera_policy": "mature auto-all-frame native bounds and fixed display cutaway; no source clipping or physical rescale",
+    "future_manifest": null,
+    "future_render_receipt": null,
+    "future_render_sha256": null
+  },
+  "lifecycle_policy": {
+    "source_receipt_status_allowed": ["running", "interrupted_unfinalized"],
+    "source_receipt_returncode": null,
+    "source_conversion_reclassified": false,
+    "converter_completed_claim": false,
+    "independent_audit_status": "completed",
+    "independent_audit_worker_returncode": 0,
+    "native_receipt_status": "completed",
+    "native_receipt_returncode": 0,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_n": "not_granted"
+  },
+  "future_outputs": {
+    "prepared_bindings": null,
+    "manifest": null,
+    "render_receipt": null,
+    "contact_sheets": null,
+    "sha256": null,
+    "worker_returncode": null
+  }
+}

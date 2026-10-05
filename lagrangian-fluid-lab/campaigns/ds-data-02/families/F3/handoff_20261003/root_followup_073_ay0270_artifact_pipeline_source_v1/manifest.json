@@ -1,0 +1,84 @@
+{
+  "schema": "ds02.fresh073.ay0270-artifact-pipeline-source-manifest.v1",
+  "fresh_id": "fresh073",
+  "family_id": "F3",
+  "source_only": true,
+  "jobs_started": false,
+  "ledger_mutation_performed": false,
+  "payloads_read_by_source": false,
+  "opaque_arrays_read_by_source": false,
+  "opaque_h5_hash_by_source": false,
+  "application_gate": {
+    "request_status": "disabled_pending_root_review",
+    "launch_allowed": false,
+    "execution_allowed": false,
+    "launch_owner": "root",
+    "root_attempt_label": "Root172",
+    "strict_cpu_worker_must_be_executed_by_root": true
+  },
+  "ay0270_actual_binding": {
+    "case_id": "F3_STAGE1_DP006_P1000_AY0270",
+    "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0270_STAGE1_FIRST24_NEW",
+    "physical_condition_sha256": "a6a7dfcc6a3c45b895ae096d652c4bf4d203b6b3b9d228e40c7c7518e8d109e9",
+    "expected_frames": 836,
+    "expected_particles": 179208,
+    "native_receipt_status": "completed/0",
+    "native_actual_3d": true,
+    "native_particles": {"total": 179208, "fluid": 67500, "fixed": 111708},
+    "typed_receipt_status": "running",
+    "typed_receipt_returncode": null,
+    "typed_launcher_tool_status": 143,
+    "report_status": "completed_metadata_only",
+    "independent_audit_status": "future_disabled"
+  },
+  "source_contract": {
+    "worker": {
+      "path": "artifact_integrity_worker.py",
+      "sha256": "5343fce724be98175ce595b6d30c99960ed98d1011903ac6df7aeee29236c150"
+    },
+    "audit_output": {
+      "worker_returncode": null,
+      "artifact_integrity_status": null,
+      "source_receipt_returncode": null,
+      "source_conversion_reclassified": false,
+      "arrays_decoded": false
+    },
+    "h5_policy": "Root hashes trajectory.h5 as opaque bytes; source request omits H5 input_sha256 and source package never opens it"
+  },
+  "post_audit_pipeline": {
+    "stages": ["normal", "export", "render"],
+    "templates": [
+      "requests/post_audit_normal_prepared_disabled.json",
+      "requests/post_audit_export_prepared_disabled.json",
+      "requests/post_audit_render_prepared_disabled.json"
+    ],
+    "lifecycle_source_status_allowed": ["running", "interrupted_unfinalized"],
+    "source_returncode_required": null,
+    "independent_audit_worker_returncode_required": 0,
+    "converter_completed_claim": false,
+    "direct_legacy_consumers_disabled": true,
+    "independent_case_count_increment": 0
+  },
+  "case_bindings": {
+    "path": "requests/post_audit_case_bindings.json",
+    "sha256": "4edefedc42f3e21e6b586e79b859cddb14b72b97d99fc71476f8d009b3b46b65",
+    "includes_p03": true,
+    "includes_ay0270": true
+  },
+  "evidence": {
+    "path": "evidence/ay0270-published-artifact-source-binding.json",
+    "sha256": "a748bd997f4503b66d11c254d3f03d35f8ba5b36e4c6f7a7e5e7d45d7a1e52dc"
+  },
+  "source_files": {
+    "README.md": "f3ef21384f9846ad515a58864726158206355fe968e0bea8686022b5669f788e",
+    "artifact_integrity_worker.py": "5343fce724be98175ce595b6d30c99960ed98d1011903ac6df7aeee29236c150",
+    "recovery_aware_pipeline_gate.py": "de62ca35e23779dec1649aaa3c212452a783200aa8e4434c4b3fc19f8c4827ed",
+    "requests/ay0270_artifact_integrity_request.json": "95ba83b1fe39ce5bcec0aaeaf97c3c65127fea3476d365cb0e0420ff3393bb5c",
+    "requests/post_audit_case_bindings.json": "4edefedc42f3e21e6b586e79b859cddb14b72b97d99fc71476f8d009b3b46b65",
+    "requests/post_audit_normal_prepared_disabled.json": "26cf167863c1bb05370a71f13ca93fb4a69319e6667b3bbad426a62d9d8f4841",
+    "requests/post_audit_export_prepared_disabled.json": "2e24380a21e51ecf88f9d9157683069b7df03298b7edd817b30612f6c9e32727",
+    "requests/post_audit_render_prepared_disabled.json": "8e007ace8a201fe53050dd9f362f98796d3c2c91ce9c17b71b05942509563839",
+    "evidence/ay0270-published-artifact-source-binding.json": "a748bd997f4503b66d11c254d3f03d35f8ba5b36e4c6f7a7e5e7d45d7a1e52dc",
+    "tests/test_fresh073_artifact_contract.py": "273bb1b2a2b891c1f0c11eb0e42d7297b563b44a6fbbc1928aa1bd9b43663ba9"
+  }
+}

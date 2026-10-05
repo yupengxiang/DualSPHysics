@@ -1,0 +1,72 @@
+{
+  "schema": "ds02.fresh073.post-audit-pipeline-request.v1",
+  "fresh_id": "fresh073",
+  "family_id": "F3",
+  "stage": "export",
+  "status": "prepared_disabled",
+  "launch_allowed": false,
+  "execution_allowed": false,
+  "source_case_bindings": "requests/post_audit_case_bindings.json",
+  "source_case_bindings_sha256": "4edefedc42f3e21e6b586e79b859cddb14b72b97d99fc71476f8d009b3b46b65",
+  "gate": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_073_ay0270_artifact_pipeline_source_v1/recovery_aware_pipeline_gate.py",
+    "sha256": "de62ca35e23779dec1649aaa3c212452a783200aa8e4434c4b3fc19f8c4827ed",
+    "command_template": [
+      "/usr/bin/python3.10",
+      "{gate_path}",
+      "--stage",
+      "export",
+      "--source-receipt",
+      "{case.typed_source.receipt.path}",
+      "--report",
+      "{case.typed_source.report.path}",
+      "--audit",
+      "{case.artifact_audit.receipt_path}",
+      "--native-receipt",
+      "{case.canonical_native.receipt}",
+      "--physical-case-id",
+      "{case.physical_case_id}",
+      "--physical-condition-sha256",
+      "{case.physical_condition_sha256}",
+      "--expected-frames",
+      "{case.expected_frames}",
+      "--expected-particles",
+      "{case.expected_particles}",
+      "--output",
+      "{attempt_root}/{case.case_id}/prepared-export-binding.json"
+    ],
+    "does_not_open_hdf5_or_arrays": true,
+    "does_not_modify_source_receipt": true
+  },
+  "consumer": {
+    "role": "recovery-aware export binding after the independent audit",
+    "reference_source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_recovered_four_full836_dynamic_078/export_recovered.py",
+    "reference_source_sha256": "57d7742f25e7e8205050a6808d3313dcd87785963dc08a726b8140231c68f37d",
+    "direct_invocation_allowed": false,
+    "requires_recovery_aware_adapter": true,
+    "reason": "the reference exporter requires typed receipt completed/0 and therefore cannot be invoked against interrupted_unfinalized; the gate output must be consumed by a reviewed adapter",
+    "future_binding": null,
+    "future_export_sha256": null
+  },
+  "lifecycle_policy": {
+    "source_receipt_status_allowed": ["running", "interrupted_unfinalized"],
+    "source_receipt_returncode": null,
+    "source_conversion_reclassified": false,
+    "converter_completed_claim": false,
+    "independent_audit_status": "completed",
+    "independent_audit_worker_returncode": 0,
+    "native_receipt_status": "completed",
+    "native_receipt_returncode": 0,
+    "independent_case_count_increment": 0,
+    "production_approval": "none",
+    "q_n": "not_granted"
+  },
+  "future_outputs": {
+    "prepared_bindings": null,
+    "manifest": null,
+    "xdmf": null,
+    "export_receipt": null,
+    "sha256": null,
+    "worker_returncode": null
+  }
+}
