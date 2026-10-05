@@ -1,0 +1,74 @@
+{
+  "consumer": {
+    "direct_invocation_allowed": false,
+    "future_manifest": null,
+    "future_xdmf_sha256": null,
+    "reason": "the historical exporter asserts typed receipt completed/0; use the gate output with a reviewed lifecycle-aware adapter rather than altering the old receipt",
+    "requires_recovery_aware_adapter": true,
+    "role": "normal temporal XDMF preparation after the lifecycle gate",
+    "source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_visual_dynamic_xdmf_001/export.py",
+    "source_sha256": "d70184e700ee23c6812d3185f37890df0174718445744643822f70ca03bd4e85"
+  },
+  "execution_allowed": false,
+  "family_id": "F3",
+  "fresh_id": "fresh076",
+  "future_outputs": {
+    "manifest": null,
+    "prepared_bindings": null,
+    "sha256": null,
+    "worker_returncode": null,
+    "xdmf": null
+  },
+  "gate": {
+    "command_template": [
+      "/usr/bin/python3.10",
+      "{gate_path}",
+      "--stage",
+      "normal",
+      "--source-receipt",
+      "{case.typed_source.receipt.path}",
+      "--report",
+      "{case.typed_source.report.path}",
+      "--audit",
+      "{case.artifact_audit.receipt_path}",
+      "--native-receipt",
+      "{case.canonical_native.receipt}",
+      "--physical-case-id",
+      "{case.physical_case_id}",
+      "--physical-condition-sha256",
+      "{case.physical_condition_sha256}",
+      "--expected-frames",
+      "{case.expected_frames}",
+      "--expected-particles",
+      "{case.expected_particles}",
+      "--output",
+      "{attempt_root}/{case.case_id}/prepared-normal-binding.json"
+    ],
+    "does_not_modify_source_receipt": true,
+    "does_not_open_hdf5_or_arrays": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_076_reconciled_artifact_audits_pending_typed_v1/recovery_aware_pipeline_gate.py",
+    "sha256": "9f7cd1770b600c8a3673d67235e6b49bdb2e3a0786f973a00d4576ab40a6f4a1"
+  },
+  "launch_allowed": false,
+  "lifecycle_policy": {
+    "converter_completed_claim": false,
+    "independent_audit_status": "completed",
+    "independent_audit_worker_returncode": 0,
+    "independent_case_count_increment": 0,
+    "native_receipt_returncode": 0,
+    "native_receipt_status": "completed",
+    "production_approval": "none",
+    "q_n": "not_granted",
+    "source_conversion_reclassified": false,
+    "source_receipt_returncode": null,
+    "source_receipt_status_allowed": [
+      "running",
+      "interrupted_unfinalized"
+    ]
+  },
+  "schema": "ds02.fresh076.post-audit-pipeline-request.v1",
+  "source_case_bindings": "requests/post_audit_case_bindings.json",
+  "source_case_bindings_sha256": "a28cfec295c6519a302fc8f63f83a1d2cc1f985ec4533e6911dd5c3cf786b20d",
+  "stage": "normal",
+  "status": "prepared_disabled"
+}

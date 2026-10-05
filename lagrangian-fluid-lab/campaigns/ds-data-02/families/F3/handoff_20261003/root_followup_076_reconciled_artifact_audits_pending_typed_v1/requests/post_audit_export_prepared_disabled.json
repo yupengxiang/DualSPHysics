@@ -1,0 +1,75 @@
+{
+  "consumer": {
+    "direct_invocation_allowed": false,
+    "future_binding": null,
+    "future_export_sha256": null,
+    "reason": "the reference exporter requires typed receipt completed/0 and therefore cannot be invoked against interrupted_unfinalized; the gate output must be consumed by a reviewed adapter",
+    "reference_source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_recovered_four_full836_dynamic_078/export_recovered.py",
+    "reference_source_sha256": "57d7742f25e7e8205050a6808d3313dcd87785963dc08a726b8140231c68f37d",
+    "requires_recovery_aware_adapter": true,
+    "role": "recovery-aware export binding after the independent audit"
+  },
+  "execution_allowed": false,
+  "family_id": "F3",
+  "fresh_id": "fresh076",
+  "future_outputs": {
+    "export_receipt": null,
+    "manifest": null,
+    "prepared_bindings": null,
+    "sha256": null,
+    "worker_returncode": null,
+    "xdmf": null
+  },
+  "gate": {
+    "command_template": [
+      "/usr/bin/python3.10",
+      "{gate_path}",
+      "--stage",
+      "export",
+      "--source-receipt",
+      "{case.typed_source.receipt.path}",
+      "--report",
+      "{case.typed_source.report.path}",
+      "--audit",
+      "{case.artifact_audit.receipt_path}",
+      "--native-receipt",
+      "{case.canonical_native.receipt}",
+      "--physical-case-id",
+      "{case.physical_case_id}",
+      "--physical-condition-sha256",
+      "{case.physical_condition_sha256}",
+      "--expected-frames",
+      "{case.expected_frames}",
+      "--expected-particles",
+      "{case.expected_particles}",
+      "--output",
+      "{attempt_root}/{case.case_id}/prepared-export-binding.json"
+    ],
+    "does_not_modify_source_receipt": true,
+    "does_not_open_hdf5_or_arrays": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_076_reconciled_artifact_audits_pending_typed_v1/recovery_aware_pipeline_gate.py",
+    "sha256": "9f7cd1770b600c8a3673d67235e6b49bdb2e3a0786f973a00d4576ab40a6f4a1"
+  },
+  "launch_allowed": false,
+  "lifecycle_policy": {
+    "converter_completed_claim": false,
+    "independent_audit_status": "completed",
+    "independent_audit_worker_returncode": 0,
+    "independent_case_count_increment": 0,
+    "native_receipt_returncode": 0,
+    "native_receipt_status": "completed",
+    "production_approval": "none",
+    "q_n": "not_granted",
+    "source_conversion_reclassified": false,
+    "source_receipt_returncode": null,
+    "source_receipt_status_allowed": [
+      "running",
+      "interrupted_unfinalized"
+    ]
+  },
+  "schema": "ds02.fresh076.post-audit-pipeline-request.v1",
+  "source_case_bindings": "requests/post_audit_case_bindings.json",
+  "source_case_bindings_sha256": "a28cfec295c6519a302fc8f63f83a1d2cc1f985ec4533e6911dd5c3cf786b20d",
+  "stage": "export",
+  "status": "prepared_disabled"
+}
