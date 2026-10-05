@@ -1,0 +1,11 @@
+# F5 fresh089: complete binding preflight after Root285/282 failures
+
+fresh089 is a source-only contract repair for the C082R1 official void-fill candidate. Root265 remains the genuine GenCase producer bound to candidate counts `194427 total / 162005 fixed / 4480 moving / 0 floating / 27942 fluid`, 3-D. The old Root234 producer remains the only producer for the registered Root246 CSV diagnostic, with counts `194427 / 158559 / 4210 / 0 / 31658`. The two count sets are explicit and cannot substitute for one another.
+
+Root285 reused the fresh088 QA request and failed before array work because `initial_qa_worker.py` reached `files['gencase_output_root']`, which fresh088 omitted. Root282 reached the diagnostic report assembly after CSV processing and failed because `actual_root256.actual_csv_mass_kg` was absent. fresh089 adds both fields and validates every binding path before a worker can read scientific output. The mass is copied from the registered Root256 JSON report field `mass_metadata.actual_csv_mass_kg_from_root246 = 253.26401266320002`; it is neither inferred nor recomputed.
+
+`preflight_fresh089.py` checks 70 worker binding paths, registered Root265 receipt/prepared-report metadata, the registered Root256 mass metadata, request command wiring, disabled flags, local input hashes, and a synthetic JSON round trip. It deliberately rejects a candidate265/old234 count swap. It does not open CSV, BI4, H5, or array payloads and does not launch a worker. `verify_fresh089.py` is a direct entry point to the same preflight.
+
+Fresh089 provides disabled Root-owned entries for a new QA attempt 286, a QA286-dependent Type0/Mk50 coverage attempt 287, and a corrected old234 CSV metadata diagnostic attempt 288. Attempts 279, 280, 281/Root285, and 282 remain immutable evidence. A Root282 exit is recorded as a binding failure only; it is not a physical negative or pass. Full16, full801, solver, conversion, dynamic, and visual stages remain disabled.
+
+If this same metadata contract class fails again before science output, `fallback-policy.json` permits reuse of the already approved official `qa.py` only behind the complete fresh089 binding preflight. That fallback cannot bypass receipt/output-root identity, alter a scientific check, relax a threshold, or reuse old234 counts.
