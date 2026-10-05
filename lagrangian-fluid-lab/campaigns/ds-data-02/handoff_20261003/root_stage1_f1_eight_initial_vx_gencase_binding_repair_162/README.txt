@@ -1,0 +1,1 @@
+Bounded repair of missing worker threads field before actual official GenCase. New identities preserve old four failed DUAL attempts and four unexecuted ECC requests. Definition physics, worker and official binary unchanged. Root142 shared CPU launcher required. Genuine generation alone is not actual solver initial Vx or visual acceptance.
