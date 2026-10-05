@@ -1,0 +1,217 @@
+{
+  "canonical_physical_binding_sha256": "9c74474f9a820256a981598c662bd450a3f3f3d9167e5cb1032891c5334cac36",
+  "case_id": "F7_OBSTACLE_QUINTIC_B08_A049P5",
+  "claims": {
+    "actual_native_initial_qa": false,
+    "full_native_solver": false,
+    "genuine_gencase": false,
+    "numerical_precision": "not_accepted",
+    "production_approval": "none",
+    "q_n": "not_granted",
+    "visual_acceptance": "not_assessed"
+  },
+  "condition_hash_semantics": {
+    "converter_hash_scope": "sha256(canonical JSON of this owner physical_binding.v1 only)",
+    "declared_source_hash": "0a143a5cac735d43257fd4c2041acdfd96cff0774b3ac2fb08698d56dd24ac37",
+    "declared_source_hash_scope": "fresh074 source plan physical_condition_payload",
+    "equality_claim": "none",
+    "source_and_canonical_hashes_are_distinct": true,
+    "source_plan_sha256": "56317e7b475f147979e3dd0242ce1d2591b239e9b276ecd4fc5f3152de87fae2"
+  },
+  "condition_id": "F7_OBSTACLE_QUINTIC_B08_A049P5_FRESH074_CANONICAL_V1",
+  "family_id": "F7",
+  "launch_allowed": false,
+  "native_recipe_expected": {
+    "continuum_envelope_mass_kg": 320.1984,
+    "dp_m": 0.02,
+    "mass_policy": "native remains unscaled; continuum comparison separate; no rescale",
+    "motion_rows": 12001,
+    "native_fluid_mass_kg": 325.60001628,
+    "native_frame_count": 601,
+    "native_particle_counts": {
+      "fixed": 27495,
+      "floating": 0,
+      "fluid_type3": 40700,
+      "moving_type1": 1984,
+      "total": 70179
+    },
+    "time_max_s": 12.0,
+    "time_out_s": 0.02
+  },
+  "physical_binding": {
+    "control_family_id": "quintic_target_two_cycles_endpoint_amplitude_v1",
+    "controls": {
+      "boundary": 1,
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.05
+      }
+    },
+    "event_window": {
+      "right_censor_policy": "prospective full native window; no Q-N or production claim before actual evidence",
+      "sequence": [
+        "initial static explicit wet fill",
+        "two finite symmetric quintic target rotation cycles",
+        "neutral pose rest and residual fluid exchange"
+      ],
+      "time_end_s": 12.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F7",
+    "geometry": {
+      "paddle": {
+        "label": "source062 all-filled moving type-1 obstacle",
+        "low_m": [
+          -0.07,
+          -0.24,
+          0.05
+        ],
+        "size_m": [
+          0.06,
+          0.48,
+          0.48
+        ]
+      },
+      "tank": {
+        "label": "source062 finite explicit-wet tank, open top",
+        "low_m": [
+          -0.6,
+          -0.4,
+          0.0
+        ],
+        "size_m": [
+          1.2,
+          0.8,
+          0.6
+        ]
+      },
+      "wet_slab_0": {
+        "label": "source062 explicit native cell-center slab 0",
+        "low_m": [
+          -0.54,
+          -0.34,
+          0.06
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.460000001,
+          0.680000001,
+          0.420000001
+        ]
+      },
+      "wet_slab_1": {
+        "label": "source062 explicit native cell-center slab 1",
+        "low_m": [
+          0.0,
+          -0.34,
+          0.06
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.540000001,
+          0.680000001,
+          0.420000001
+        ]
+      },
+      "wet_slab_2": {
+        "label": "source062 explicit native cell-center slab 2",
+        "low_m": [
+          -0.06,
+          -0.34,
+          0.06
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.040000001,
+          0.080000001,
+          0.420000001
+        ]
+      },
+      "wet_slab_3": {
+        "label": "source062 explicit native cell-center slab 3",
+        "low_m": [
+          -0.06,
+          0.26,
+          0.06
+        ],
+        "mkfluid": 1,
+        "size_m": [
+          0.040000001,
+          0.080000001,
+          0.420000001
+        ]
+      }
+    },
+    "geometry_family_id": "finite_open_top_explicit_wet_tank_rotating_paddle_v1",
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 320.1984
+      },
+      "mass_policy": "native 325.60001628 kg remains separate and is never rescaled",
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "F7_OBSTACLE_QUINTIC_B08_SHARED_EXPLICIT_WET_MOTHER_GEOMETRY",
+    "paired_background_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE",
+    "parameters": {
+      "amplitude_deg": 49.5,
+      "amplitude_encoding": "A049P5",
+      "analytic_target": "two finite symmetric quintic cycles active on 0..8 s, neutral rest on 8..12 s",
+      "cycle_schedule": "two finite symmetric cycles; active window 0..8 s; neutral/rest window 8..12 s",
+      "explicit_wet_slab_count": 4,
+      "motion_asset_name": "motion_obstacle_quintic.dat",
+      "motion_function": "theta=A*(10*u^3-15*u^4+6*u^5), u in [0,1] per half-cycle",
+      "motion_reader": "piecewise_linear_absolute_angle_increment",
+      "motion_sampling_dt_s": 0.001,
+      "moving_obstacle_boundary_mk": 2,
+      "pivot_p1_m": [
+        -0.04,
+        0.0,
+        0.05
+      ],
+      "pivot_p2_m": [
+        -0.04,
+        0.0,
+        1.05
+      ],
+      "rotation_axis": "p1_to_p2",
+      "target_angle_units": "degrees"
+    },
+    "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A049P5",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A049P5",
+  "physical_condition_sha256": "0a143a5cac735d43257fd4c2041acdfd96cff0774b3ac2fb08698d56dd24ac37",
+  "planned_execution": {
+    "gencase_binding_attempt": "root-stage1-f7-next24-gencase-binding-074",
+    "motion_preparation_attempt": "root-stage1-f7-next24-motion-preparation-074",
+    "native_initial_qa_attempt": "root-stage1-f7-next24-native-initial-qa-074",
+    "native_initial_qa_binding_attempt": "root-stage1-f7-next24-native-qa-binding-074",
+    "solver_attempt": "root-stage1-f7-f7_obstacle_quintic_b08_a049p5-full601-native-qualification-074"
+  },
+  "schema": "ds02.f7.next24-target-angle-owner.v1",
+  "scope_id": "root_followup_074_stage1_next24_target_angles_v1",
+  "source": {
+    "selected_motion_module": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_actual_quintic_target_verified_recipe_preparation_020/selected_owner_motion.py",
+    "selected_motion_module_sha256": "ff6660d75a6601ade901c2bf0513582161255d279142395f9697fa77e5ce3451",
+    "source_definition": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_074_stage1_next24_target_angles_v1/source/F7_OBSTACLE_QUINTIC_B08_A049P5_Def.xml",
+    "source_definition_sha256": "f45a212f48ae0d55485e795b63e38702edd5cd2aac40aa69d4be9c155e7a4d37",
+    "source_plan": "/home/jade/.codex/worktrees/ds-data-02-f7/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/handoff_20261003/root_followup_074_stage1_next24_target_angles_v1/metadata/next24-plan.json",
+    "source_plan_sha256": "56317e7b475f147979e3dd0242ce1d2591b239e9b276ecd4fc5f3152de87fae2"
+  },
+  "status": "source_only_disabled_pending_root_chain"
+}

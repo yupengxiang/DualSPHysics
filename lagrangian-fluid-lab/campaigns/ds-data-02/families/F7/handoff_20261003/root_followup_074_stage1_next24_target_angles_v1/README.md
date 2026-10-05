@@ -1,0 +1,7 @@
+# F7 fresh074 — prospective next24 target-angle source
+
+This package registers 24 new physical motion conditions at distinct half-degree target amplitudes in the reviewed 30–65° envelope. IDs encode the half-degree explicitly (`A030P5` = 30.5°). Existing first24 conditions, accepted decisions, and the mother geometry remain historical references; no existing case is rerun or counted again.
+
+Every case keeps the verified explicit-wet mother: DP 0.02, four wet slabs, all-filled moving type-1 paddle, pivots `(-0.04,0,0.05)` to `(-0.04,0,1.05)`, Boundary 1, StepAlgorithm 2, Kernel 2, viscosity 0.05, DensityDT 3/0.1, gravity, two finite symmetric quintic cycles on 0–8 s, rest on 8–12 s, native save interval 0.02 and 601 frames. The native reader is piecewise-linear; C2 applies only to the analytic source, and numerical precision is not certified. Native 325.60001628 kg and continuum 320.1984 kg are retained separately without rescaling.
+
+`requests/` contains disabled Root230-compatible motion preparation, GenCase binding and per-case GenCase, bounded native-QA binding, the separate official PartVTK initial-QA execution request, and full601 native qualification requests. The qualification requests carry the required future GenCase receipt and initial-QA report paths but leave all hashes null until Root binds actual completed evidence. This source package performed no scientific array reads, no hashes of BI4/CSV/H5/motion payloads, no jobs, and no shared-registry or ledger writes.
