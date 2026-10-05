@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.f7.fresh075.worker-contract-review.v1",
+  "model_profile": "gpt-5.6-luna/max",
+  "source_only": true,
+  "fresh074_findings": [
+    {
+      "bug": "flat_output_path",
+      "old_assumption": "prepared/{case}/{case}.xml, prepared/{case}/{case}.bi4 and prepared/{case}/prepared-input-report.json",
+      "Root343_actual_layout": "prepared/{case}.xml, prepared/{case}.bi4, prepared/{case}_Def.xml, prepared/prepared-input-report.json",
+      "fresh075_repair": "adapter and worker consume the flat Root003 layout; the report prefix is provenance, not a directory path"
+    },
+    {
+      "bug": "zero_floating_node",
+      "old_assumption": "XML must contain a floating node",
+      "Root343_actual_layout": "floating count is zero and the generated XML omits the floating node",
+      "fresh075_repair": "missing floating is interpreted as count zero and is excluded from positional overlap indexing"
+    },
+    {
+      "bug": "positional_blocks",
+      "old_assumption": "all XML blocks form a fixed positional list",
+      "fresh075_repair": "named fixed/moving/floating/fluid blocks are checked; absent zero floating does not shift fluid"
+    }
+  ],
+  "adapter_required_fields": [
+    "motion receipt completed/0",
+    "motion report schema and 24 endpoint IDs",
+    "GenCase aggregate schema and 24 per-case bindings",
+    "per-case GenCase receipt status/returncode/total/fluid/dimension",
+    "prepared report schema and XML digest/count agreement",
+    "flat XML/Def/BI4/motion path presence",
+    "owner source-plan and canonical physical hash equality"
+  ],
+  "worker_required_checks": [
+    "official PartVTK CSV is isolated under the Root attempt",
+    "all 13 requested fields finite",
+    "UID set exactly 0..70178 and Zone zero",
+    "named Type/Mk blocks exact",
+    "weights and density positive",
+    "initial velocities within 1e-12 m/s",
+    "unique coordinates and zero pairwise block overlap",
+    "fluid count 40700 and genuine 3D extent",
+    "native mass 325.60001628 kg checked separately from continuum 320.1984 kg"
+  ],
+  "raw_payload_policy": {"bi4": "Root PartVTK job only", "csv": "Root QA output only", "h5": "not used", "motion_dat": "Root solver/GenCase only"},
+  "future_status": {"execution_allowed": false, "launch_allowed": false, "q_n": "not_granted", "visual_acceptance": "not_assessed", "precision": "not_accepted"}
+}
