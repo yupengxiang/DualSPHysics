@@ -174,7 +174,7 @@ def _scalar_memmap(native: Path, desc: Any) -> np.memmap:
 
 
 def scan_arrays(native: Path, scanner: Any) -> tuple[str, dict[str, Any], Any, Any, Any, Any, Any]:
-    fd = os.open(native, os.O_RDONLY)
+    fd = os.open(native, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
     try:
         expected_sha = scanner._hash_fd(fd, native.stat().st_size)
         scan = scanner.scan_bi4_fd(fd, expected_sha)
