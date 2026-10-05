@@ -1,0 +1,94 @@
+{
+  "base_candidate_a": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_069_stage1_f5_bed_fill_contract_diagnostic_v1/../root_followup_061_stage1_native_bed_repair_candidate_a_strict_v1/candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_A_Def.xml",
+    "sha256": "726be20862d03a4a4b06ca9dd3383450aabc9f8a1d726cbdee5106807c80270b"
+  },
+  "candidate_id": "B_surface_first_stl_autofill_and_explicit_mesh",
+  "effect_status": "unknown_until_actual_gencase_and_initial_distribution_audit",
+  "evidence": {
+    "historical_full_mesh": "root_finer_full_mesh_surface_support_021",
+    "historical_surface_first": "root_surface_first_boundary_preservation_024",
+    "official_closed_stl_example": "mdbc/09_FloatingDuck/CaseDuckling_Def.xml uses autofill=true",
+    "official_template": "GenCase_CaseTemplate.xml permits solid/full and drawfilestl autofill"
+  },
+  "maximum_repair_candidates": 2,
+  "new_source": {
+    "path": "candidate_source/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_B_Def.xml",
+    "sha256": "e912c12cc6cf9d3e754cba69a307f47588e717a8a4717f1ed190c63443cc3e72",
+    "stl_autofill": true,
+    "stl_relative": "assets/f5_compact_continuous_bed_profile.stl",
+    "stl_sha256": "9a64a266c64d0eeee0194efc102263ba89e61538acf94095733f73827fd7f87c"
+  },
+  "not_included": [
+    "no underlay box",
+    "no geometry enlargement",
+    "no penetration-threshold change",
+    "no mdbc/runtime parameter change",
+    "no array editing",
+    "no full16 solver request"
+  ],
+  "operations": [
+    {
+      "location": "geometry.commands.mainlist before existing 52-triangle mesh",
+      "operation": "replace initial drawmode full with solid physical-geometry state, then enter full only for the exact mesh surface",
+      "reason": "matches official solid/full drawmode separation and prevents inherited full state from defining later boxes"
+    },
+    {
+      "location": "immediately after unchanged drawtriangles block",
+      "operation": "restore solid drawmode before floor, sidewalls, and moving piston",
+      "reason": "follows historical surface-first source so subsequent physical geometry owns overlaps"
+    },
+    {
+      "location": "after unchanged piston drawbox and before setmkfluid",
+      "operation": "enter full, set mk40, draw the retained historical closed STL with autofill=true, emit shapeout, then setmkfluid",
+      "reason": "explicitly requests the official closed-STL fill contract while retaining exact surface rasterization"
+    }
+  ],
+  "repair_count": 1,
+  "schema": "ds02.f5.stage1.native-bed-repair-candidate-b-fill-contract.v1",
+  "status": "source_only_pending_fresh_gencase_and_initial_audit",
+  "unchanged_contract": {
+    "bed_y_bounds_m": [
+      -0.15,
+      0.15
+    ],
+    "clipplane_unchanged": true,
+    "dp_m": 0.02,
+    "fluid_box_unchanged": true,
+    "lower_closure_z_m": -0.15,
+    "motion_unchanged": true,
+    "physics_execution_unchanged": true,
+    "profile_nodes_xz_m": [
+      [
+        -0.2,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.28
+      ],
+      [
+        3.6,
+        0.448
+      ],
+      [
+        3.9,
+        0.448
+      ],
+      [
+        4.4,
+        0.05
+      ],
+      [
+        4.8,
+        0.05
+      ]
+    ],
+    "triangle_count": 52,
+    "triangle_mesh_byte_identical_to_A": true
+  }
+}
