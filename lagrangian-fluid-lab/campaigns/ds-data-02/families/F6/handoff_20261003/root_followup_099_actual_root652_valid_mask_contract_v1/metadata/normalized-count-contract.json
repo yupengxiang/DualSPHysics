@@ -1,0 +1,66 @@
+{
+  "mk_expected_counts": {
+    "1": 327680,
+    "30": 73441,
+    "60": 16384
+  },
+  "no_science_payload_read": true,
+  "rules": [
+    "materialize every expected code, including zero",
+    "reject unexpected codes",
+    "reject missing nonzero populations",
+    "conserve total observations"
+  ],
+  "schema": "ds02.f6.fresh099.normalized-count-contract.v1",
+  "source_only": true,
+  "synthetic_cases": {
+    "missing_fluid_type3": {
+      "passes": false,
+      "values": [
+        0,
+        0,
+        2
+      ]
+    },
+    "missing_mk60": {
+      "passes": false,
+      "values": [
+        30,
+        30,
+        1
+      ]
+    },
+    "unexpected_type4": {
+      "passes": false,
+      "values": [
+        0,
+        0,
+        2,
+        3,
+        4
+      ]
+    },
+    "valid_zero_type1": {
+      "expected": {
+        "0": 2,
+        "1": 0,
+        "2": 1,
+        "3": 1
+      },
+      "passes": true,
+      "values": [
+        0,
+        0,
+        2,
+        3
+      ]
+    }
+  },
+  "type_expected_counts": {
+    "0": 73441,
+    "1": 0,
+    "2": 16384,
+    "3": 327680
+  },
+  "worker_helper": "normalized_counts"
+}

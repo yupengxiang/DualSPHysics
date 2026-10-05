@@ -1,0 +1,52 @@
+{
+  "accepted": {
+    "bool": "native bool dataset is converted to a boolean mask without numeric rejection",
+    "numeric": "finite numeric values exactly 0 or 1"
+  },
+  "no_science_payload_read": true,
+  "rejected": [
+    "nonfinite numeric values",
+    "numeric values other than 0 or 1",
+    "string/object values"
+  ],
+  "schema": "ds02.f6.fresh099.valid-mask-contract.v1",
+  "source_only": true,
+  "synthetic_cases": {
+    "bool_true_false": {
+      "passes": true,
+      "values": [
+        true,
+        false
+      ]
+    },
+    "nonfinite_numeric": {
+      "passes": false,
+      "values": [
+        0.0,
+        NaN
+      ]
+    },
+    "numeric_zero_one": {
+      "passes": true,
+      "values": [
+        0,
+        1
+      ]
+    },
+    "string_mask": {
+      "passes": false,
+      "values": [
+        "0",
+        "1"
+      ]
+    },
+    "unexpected_numeric_two": {
+      "passes": false,
+      "values": [
+        0,
+        2
+      ]
+    }
+  },
+  "worker_helper": "valid_mask_values"
+}
