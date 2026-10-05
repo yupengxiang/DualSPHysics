@@ -1,0 +1,206 @@
+{
+  "axis": {
+    "fluid_mk": 0,
+    "fluid_native_type": 3,
+    "name": "uniform_initial_fluid_vx",
+    "source_xml_expression": "<velocity mkfluid=\"0\" x=\"0.2\" y=\"0\" z=\"0\" />",
+    "velocity_m_per_s": [
+      0.2,
+      0.0,
+      0.0
+    ]
+  },
+  "case_id": "F1_STAGE1_DUAL_H220_DP020_VX020",
+  "execution_allowed": false,
+  "family_id": "F1",
+  "gencase_velocity_evidence": {
+    "claim": "GenCase raw BI4 velocity is intentionally not used as proof of solver initial velocity.",
+    "expected_generated_xml_velocity_m_per_s": [
+      0.2,
+      0.0,
+      0.0
+    ],
+    "status": "metadata_only_pending_root_actual_gencase"
+  },
+  "geometry_and_solver": "inherited exactly from the parent source definition and native032 recipe; only the initials velocity element changes",
+  "independent_case_count_increment": 0,
+  "launch_allowed": false,
+  "launch_owner": "root",
+  "native_frame0_velocity_evidence": {
+    "expected_velocity_m_per_s": [
+      0.2,
+      0.0,
+      0.0
+    ],
+    "source": "solver_output/data/Part_0000.bi4",
+    "status": "pending_root_actual_solver_and_official_partvtk",
+    "tolerance_m_s": 1e-06
+  },
+  "native_qualification": {
+    "expected_native_frames": 401,
+    "future_receipt_sha256": null,
+    "launch_status": "disabled",
+    "physical_window_s": [
+      0.0,
+      4.0
+    ],
+    "root_entry": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f6_actual_qualifications_strict_entry_146/launch.py"
+  },
+  "new_case_status": "prospective_source_only_not_generated",
+  "parent_actual_voxelization_reference": {
+    "boundary_particles": 87816,
+    "dimension": 3,
+    "fluid_particles": 27500,
+    "status": "parent_metadata_reference_only",
+    "total_particles": 115316
+  },
+  "parent_case_id": "F1_STAGE1_DUAL_H220_DP020",
+  "parent_physical_case_id": "F1_DUAL_HEAD_220_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "parent_physical_condition_sha256": "2e45d934536a68f61598f01fc0a0bb7ad7c10d4efeffb89693062857132cba56",
+  "parent_source_owner": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f1_four_physical_head_endpoints_native_032/F1_STAGE1_DUAL_H220_DP020/owner.json",
+    "sha256": "972d5d7433b4f38ea63dba14150c8f6705b0d7a8e490c14cc3c6345ebccb5094"
+  },
+  "physical_binding": {
+    "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_INITIAL_VX_AXIS_V1",
+    "controls": {
+      "boundary": 1,
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": 1,
+      "step_algorithm": 1,
+      "viscosity": {
+        "boundary_factor": 1,
+        "treatment": 1,
+        "value": 0.1
+      }
+    },
+    "density_kg_m3": 1000,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence.",
+      "sequence": [
+        "release",
+        "divider_encounter",
+        "asymmetric_channel_transport",
+        "downstream_return"
+      ],
+      "time_end_s": 4.0,
+      "time_start_s": 0
+    },
+    "family_id": "F1",
+    "geometry": {
+      "fluid_reservoir": {
+        "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1",
+        "low_m": [
+          2.2,
+          0,
+          0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          1,
+          1,
+          0.22
+        ]
+      },
+      "obstacle_or_divider": {
+        "label": "Static physical solid",
+        "low_m": [
+          1.2,
+          0.34,
+          0
+        ],
+        "size_m": [
+          0.8,
+          0.06,
+          0.7
+        ]
+      },
+      "tank": {
+        "label": "Finite five physical walls with open top; thick DBC numerical support",
+        "low_m": [
+          0,
+          0,
+          0
+        ],
+        "size_m": [
+          3.2,
+          1,
+          0.8
+        ]
+      }
+    },
+    "geometry_family_id": "F1_GEOM_DUAL_THICK_DBC_LOWER_HEAD_V1",
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 220.0
+      },
+      "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory",
+      "source_labels": {
+        "fluid": "Initial Type3/Mk1 cohort"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1",
+          "low_m": [
+            2.2,
+            0,
+            0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            1,
+            1,
+            0.22
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.2,
+          0.0,
+          0.0
+        ]
+      },
+      "velocity_control": {
+        "axis": "x",
+        "fluid_mk": 0,
+        "fluid_native_type": 3,
+        "profile": "uniform_direct_initials_velocity",
+        "velocity_m_per_s": [
+          0.2,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "F1_dual_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "asymmetric_dual_channel",
+    "parameters": {
+      "continuum_fluid_volume_m3": 0.22,
+      "fluid_depth_m": 0.22,
+      "physical_top_open": true
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F1_DUAL_HEAD_220_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX020_MS_V1",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F1_DUAL_HEAD_220_UNCHANGED_MOTHER_GEOMETRY_V1_INITIAL_VX020_MS_V1",
+  "physical_condition_sha256": "3cb92e52bc27790290ecc74a047342724b8f496261aaf5d5e62e9400fe099b50",
+  "production_approval": "none",
+  "q_n": "not_assessed",
+  "schema": "ds02.f1.vx-corner-native-qualification-owner.v1",
+  "source_handoff_id": "root_followup_067_f1_vx_corner_native_qualification_v1",
+  "source_only": true,
+  "source_plan_condition_sha256": "944bab9b77a7ec1a53b1b86b52266d741663bf1c1d71e514678523490bf9cbcc",
+  "source_plan_path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_067_f1_vx_corner_native_qualification_v1/source-plans/F1_STAGE1_DUAL_H220_DP020_VX020.json",
+  "source_plan_sha256": "42200779d170aee445c57fb035dfdca69b389d48b9d5ed3043cc9a4b0a02e3ec",
+  "visual_review_status": "pending_root_actual_gencase_native_frame0_vx_audit_and_full_native_visual_review"
+}
