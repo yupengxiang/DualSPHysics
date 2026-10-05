@@ -1,0 +1,194 @@
+{
+  "case_id": "F4_DROP_gap0p26000_xoff0p08000_yoffm0p04000_uz0p40000",
+  "claim_boundary": {
+    "actual_gencase": false,
+    "actual_initial_qa": false,
+    "actual_native": false,
+    "actual_render": false,
+    "actual_typed": false,
+    "actual_xmf": false,
+    "precision_status": "not_accepted",
+    "q_n": "not_granted",
+    "status": "prospective_source_only",
+    "visual_approval": false
+  },
+  "control_family_id": "F4_native_dbc_verlet_wendland_v1",
+  "controls": {
+    "boundary": "DBC",
+    "density_dt": 2,
+    "density_dt_value": 0.1,
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "kernel": "Wendland",
+    "open_inlet": false,
+    "periodic_boundary": false,
+    "step_algorithm": "Verlet",
+    "viscosity": 0.08
+  },
+  "family_id": "F4",
+  "future_artifacts": {
+    "gencase_receipt_sha256": null,
+    "generated_bi4_sha256": null,
+    "generated_xml_sha256": null,
+    "initial_qa_receipt_sha256": null,
+    "native_receipt_sha256": null,
+    "render_sha256": null,
+    "typed_receipt_sha256": null,
+    "xmf_sha256": null
+  },
+  "geometry": {
+    "drop": {
+      "low_m": [
+        0.5549999999999999,
+        0.08499999999999999,
+        0.46499999999999997
+      ],
+      "mkfluid": 1,
+      "size_m": [
+        0.25,
+        0.15,
+        0.13
+      ]
+    },
+    "pool": {
+      "low_m": [
+        0.085,
+        0.045,
+        0.045
+      ],
+      "mkfluid": 0,
+      "size_m": [
+        1.03,
+        0.31,
+        0.15
+      ]
+    },
+    "tank": {
+      "low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size_m": [
+        1.2,
+        0.4,
+        0.6
+      ],
+      "wall_faces_closed": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ]
+    }
+  },
+  "geometry_family_id": "F4_finite_drop_pool_finite_geometry_v1",
+  "initial_state": {
+    "actual_counts": null,
+    "actual_solver_dimension": null,
+    "initial_mass_by_source_kg": null,
+    "initial_mass_total_kg": null,
+    "initial_native_mass_status": "pending actual GenCase/initial QA; no mass rescale",
+    "source_labels": {
+      "mkfluid:0": "pool",
+      "mkfluid:1": "falling_drop"
+    },
+    "velocities_m_per_s": {
+      "mkfluid:0": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mkfluid:1": [
+        0.0,
+        0.0,
+        -0.4
+      ]
+    }
+  },
+  "lineage_group_id": "finite_drop_pool_frozen_geometry_control_domain",
+  "mechanism_id": "finite_drop_pool",
+  "mother_definition": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_087_stage1_drop_gap_lattice_aligned_fallback6_source_v1/definitions/F4_DROP_LATTICE_GAP0p19000_DP010_Def.xml",
+    "sha256": "f2353ab2f9aecc4c49d57b73aa2791bd3128851ff88a2c123a04b8d98245d403"
+  },
+  "mutation_contract": {
+    "changed_fields": [
+      "casedef.geometry.commands.mainlist.setmkfluid(mk=1).drawbox.point.x",
+      "casedef.geometry.commands.mainlist.setmkfluid(mk=1).drawbox.point.y",
+      "casedef.geometry.commands.mainlist.setmkfluid(mk=1).drawbox.point.z",
+      "casedef.initials.velocity[@mkfluid=1].z"
+    ],
+    "drop_low_m": [
+      0.5549999999999999,
+      0.08499999999999999,
+      0.46499999999999997
+    ],
+    "drop_size_m": [
+      0.25,
+      0.15,
+      0.13
+    ],
+    "drop_velocity_m_per_s": [
+      0.0,
+      0.0,
+      -0.4
+    ],
+    "unchanged_fields": [
+      "pool point/size and mkfluid=0",
+      "drop size and mkfluid=1",
+      "tank/wall geometry",
+      "gravity and solver controls",
+      "DP=.01",
+      "TimeMax=1.2",
+      "TimeOut=.001",
+      "no forcing",
+      "no mdbc"
+    ]
+  },
+  "parameters": {
+    "gap_m": 0.26,
+    "speed_m_per_s": 0.4,
+    "x_offset_m": 0.08,
+    "y_offset_m": -0.04
+  },
+  "physical_case_id": "F4_DROP_gap0p26000_xoff0p08000_yoffm0p04000_uz0p40000",
+  "physical_condition_sha256": "882e8b68f943c484fbe2c3bd4480ac92c3e33beba9c68087b7ac8cb833feb7bd",
+  "schema": "ds-data-02.physical-binding.v1",
+  "solver_recipe": {
+    "dp_m": 0.01,
+    "native_frame_count": 1201,
+    "native_types": {
+      "fixed": [
+        0
+      ],
+      "floating": [],
+      "fluid": [
+        3
+      ],
+      "moving": []
+    },
+    "no_forcing": true,
+    "no_mdbc": true,
+    "solver_options": [
+      "-tmax:1.2",
+      "-tout:0.001"
+    ],
+    "time_max_s": 1.2,
+    "time_out_s": 0.001
+  },
+  "source_definition": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_102_stage1_f4_first48_extension_source_v1/definitions/F4_DROP_gap0p26000_xoff0p08000_yoffm0p04000_uz0p40000_Def.xml",
+    "sha256": "4dc327d8f546d548e600f2dbe72c5252942df5fb80960580c107278e3bb23b35"
+  },
+  "source_plan": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f4/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F4/handoff_20261003/root_followup_102_stage1_f4_first48_extension_source_v1/source-plan.json",
+    "sha256": "0b3a5de98c14611046f7921d272b5f94593856ad9ec66e6ac3889b61be86f454"
+  },
+  "source_plan_condition_sha256": "3fcd5823ade10cc61e74a94c1051fe19e4d9d1028b5b80ab74e26febcc4629f8",
+  "status": "prospective_source_only"
+}
