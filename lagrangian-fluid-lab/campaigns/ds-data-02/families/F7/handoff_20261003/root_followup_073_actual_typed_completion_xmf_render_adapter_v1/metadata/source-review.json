@@ -1,0 +1,40 @@
+{
+  "schema": "ds02.f7.fresh073.source-review.v1",
+  "source_package": "root_followup_072_stage1_actualQA310_full601_typed_xmf_render_v1",
+  "review_method": "stdlib JSON plus Python AST literal-subscript audit; no solver or scientific payload access",
+  "review_findings": {
+    "fresh072_original_files_preserved": true,
+    "fresh072_native_receipt_binding_paths_checked": true,
+    "fresh072_native_receipts_must_be_added_to_new_input_closure": true,
+    "fresh072_xmf_binding_worker_field_physical_condition_sha256_missing": true,
+    "fresh073_actual_xmf_binding_adds_physical_condition_sha256": true,
+    "fresh072_template_interpreter_needs_integration_venv_rebinding": true,
+    "fresh072_future_xmf_and_render_hashes_are_not_promoted": true,
+    "canonical_and_source_plan_hashes_remain_distinct": true,
+    "h5_hash_is_producer_attested_only": true
+  },
+  "xmf_literal_subscripts": {
+    "binding": [
+      "conversion_report",
+      "expected_frames",
+      "physical_case_id",
+      "physical_condition_sha256",
+      "physical_window_s",
+      "trajectory_h5"
+    ],
+    "receipt": ["returncode", "status"],
+    "report": ["coordinate_frame", "frames", "output_sha256", "particles"],
+    "h5": ["position", "time"]
+  },
+  "renderer_manifest_literal_subscripts": {
+    "manifest": ["actual_time_s", "camera_bounds", "domain_bounds", "frames", "particles", "xdmf", "xdmf_sha256"]
+  },
+  "renderer_contract_notes": [
+    "Root023 scans native valid positions when camera_bounds/domain_bounds are absent.",
+    "Root023 requires the actual XMF manifest digest and preserves all saved times.",
+    "The adapter does not manufacture an XMF manifest or render report."
+  ],
+  "no_science_payload_read": true,
+  "no_job_started": true,
+  "no_shared_mutation": true
+}
