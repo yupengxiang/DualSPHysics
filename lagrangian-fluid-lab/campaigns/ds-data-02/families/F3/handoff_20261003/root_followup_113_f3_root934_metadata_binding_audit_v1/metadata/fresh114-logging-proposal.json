@@ -1,0 +1,72 @@
+{
+  "schema": "ds02.stage1.f3.fresh114.renderer-failure-evidence-proposal.v1",
+  "status": "proposal_only",
+  "target_source_schema": "ds02.stage1.f3.fresh112.nvme-render-successor.v1",
+  "target_worker_sha256_attested": "b9fd883037342e549fcdee9ea61c07cdc6e108dfcb0d92380660c00c3fbd1679",
+  "do_not_modify": [
+    "fresh112 source bytes",
+    "Root934 controller or requests",
+    "running science processes",
+    "shared ledger and reservations"
+  ],
+  "observed_gap": {
+    "root934_case": "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0625_YAWM06_DP025",
+    "status": "renderer_failed",
+    "returncode": 1,
+    "stdout_summary_present": true,
+    "renderer_stderr_tail_present": false,
+    "actual_argv_present": false,
+    "stage_removed_before_rejection_evidence": true,
+    "root_cause_known": false
+  },
+  "required_fresh114_behavior": {
+    "capture_before_stage_cleanup": [
+      "bounded renderer stderr tail, at most 16384 bytes",
+      "bounded renderer stdout tail, at most 16384 bytes",
+      "exact renderer argv list after placeholder expansion",
+      "renderer pid, process group id, returncode, and termination reason",
+      "stage root and private NVMe root",
+      "request attempt_id and reservation_id"
+    ],
+    "rejection_json_fields": [
+      "renderer_stderr_tail",
+      "renderer_stdout_tail",
+      "actual_argv",
+      "renderer_pid",
+      "renderer_pgid",
+      "renderer_returncode",
+      "termination_reason",
+      "stage_removed_after_rejection"
+    ],
+    "return_summary_fields": [
+      "status",
+      "returncode",
+      "renderer_returncode",
+      "renderer_stderr_tail_present",
+      "renderer_stdout_tail_present",
+      "actual_argv_present",
+      "stage_removed_after_rejection"
+    ],
+    "cleanup_order": [
+      "capture bounded diagnostics",
+      "write rejection JSON atomically in private NVMe",
+      "remove private stage",
+      "return failure"
+    ],
+    "payload_boundary": "Read only renderer stdout/stderr metadata; never open, copy, or hash H5/BI4/CSV/DAT/VTK payloads."
+  },
+  "bounded_tests": [
+    "renderer failure preserves stderr/stdout tails and argv before stage removal",
+    "BaseException/SIGTERM preserves diagnostics and terminates only the owned process group",
+    "successful publication still performs the existing Home floor and fixed-point checks",
+    "diagnostic strings containing private stage paths are redacted or rejected",
+    "the fresh114 source remains disabled until Root registers a real request"
+  ],
+  "diagnostic_entrypoint": {
+    "kind": "CPU audit",
+    "cpu_threads": 2,
+    "input_contract": "Lvenv + registered pvpython/import diagnostic only",
+    "h5_import_or_science_payload_access_by_source_agent": false,
+    "root_cause_statement": "Do not infer ParaView/VTK/NumPy/Pillow failure until Root-owned diagnostic evidence is captured."
+  }
+}
