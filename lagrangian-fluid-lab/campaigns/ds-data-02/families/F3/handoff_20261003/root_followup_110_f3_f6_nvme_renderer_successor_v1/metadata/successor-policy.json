@@ -1,0 +1,23 @@
+{
+  "cleanup_rule": "Success removes private NVMe stage after atomic publication; failure removes large staged render bytes and retains only a bounded rejection JSON.",
+  "cpu_threads": 24,
+  "environment_threads": 2,
+  "execution_binding_rule": "Source disabled requests retain null future hashes; Root creates a separate enabled binding with source_only=false, future_input_hashes_null=false, input_files/input_sha256 populated for non-payload metadata, and reservation_id=current_attempt_id.",
+  "foreign_process_policy": "Root runtime protects foreign GPU/CPU processes and owns shared leases; this wrapper never probes or stops them.",
+  "global_renderer_cap": 2,
+  "home_free_space_floor_bytes": 536870912000,
+  "home_publish_cap_bytes": 3221225472,
+  "live_ledger_rule": "Under resource-ledger.lock, reread resource-ledger.json limits/reservations, exclude the own reservation.id from other storage/thread/cap totals, and use the live Home floor; static request home_reserved_bytes is never used.",
+  "max_wall_seconds": 14400,
+  "nvme_free_space_floor_bytes": 107374182400,
+  "nvme_stage_peak_limit_bytes": 25769803776,
+  "payload_boundary": "Wrapper does not open/hash BI4/H5/CSV/DAT/VTK; Root023 is the only future CPU task that reads the registered XDMF/H5 source.",
+  "private_nvme_root": "/tmp/ds02-visual-render-cache-fresh110",
+  "publication_rule": "After full report path rebinding, derived files are stat/hash verified under resource-ledger.lock, copied to an exclusive sibling, and atomically renamed. Existing products are never overwritten.",
+  "pvsm_rule": "Derived case.pvsm private stage paths are rebound to final Home before size/hash/cap checks; source XMF/H5 paths remain delegated to Root023.",
+  "renderer_argv": "Root732 exact pvpython --force-offscreen-rendering render_native023.py --manifest {manifest} --output-dir {stage_render}; no diagnostic-frame option",
+  "reservation_rule": "Root creates the runtime reservation first; reservation_id and current_attempt_id must match before execution.",
+  "resource_ledger_lock": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.lock",
+  "schema": "ds02.f3.fresh110.nvme-render-successor-policy.v1",
+  "staging_rule": "Root023 writes all frames, contacts, GIF, and PVSM under private NVMe stage/render; stat-only monitor rejects cap/floor violations and leaves Home untouched."
+}
