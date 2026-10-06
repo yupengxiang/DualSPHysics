@@ -1,0 +1,9 @@
+# fresh108 F7 A041/A042 visual review handoff
+
+This F3-scoped package records a delegated visual review of the two original integer-angle F7 cases `F7_OBSTACLE_QUINTIC_B08_A041` and `F7_OBSTACLE_QUINTIC_B08_A042`. The review uses the actual Root329 full-601 render products and is deliberately separate from the P5 variants `F7_OBSTACLE_QUINTIC_B08_A041P5` and `F7_OBSTACLE_QUINTIC_B08_A042P5`. A040 is excluded as already accepted; A038/A039 are assigned to another reviewer.
+
+The reviewer opened all 26 contact sheets and the ten event frames (0, 14, 125, 200, 300, 400, 450, 500, 550, 600) for each case. Both animations are temporally continuous and show coherent obstacle/fluid evolution without premature termination or broad explosive dispersion. Early impact views contain a small number of isolated blue points above/around the nominal open tank envelope; this is recorded as an observation only. It is not a particle-containment, mass-conservation, precision, Q-N, production, or case-credit claim.
+
+The evidence chain is metadata-only: actual GenCase, native, shared native initial-QA, typed, XMF, and Root023 render receipts/reports are referenced with their JSON/XML/XMF hashes. BI4/H5/CSV/DAT/VTK scientific payloads were not opened or independently hashed. Canonical physical-binding/converter scope, source-plan condition scope, and the historical owner digest remain separate. The owner metadata retains a historical 63-character source-plan digest; the actual plan file has a 64-character SHA256 digest ending in `5`, and the package records the discrepancy without silently correcting the source.
+
+`visual-approved-by-delegated-agent` is the strongest status in this package. Numerical precision remains `not_accepted`, Q-N is `not_granted`, production approval is `none`, and independent case-count increment is `0`; root adoption is required.
