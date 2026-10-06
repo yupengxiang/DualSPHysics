@@ -1,0 +1,269 @@
+{
+  "schema": "ds02.stage1.f3.internal16-pitch-ay-owner-template.v1",
+  "status": "prospective_source_only_pending_root_cpu_input_preparation",
+  "family_id": "F3",
+  "case_id": "F3_STAGE1_DP006_P1100_AY0290",
+  "physical_case_id": "F3_TWOAXIS_P1100_AY0290_STAGE1_FIRST48_PITCH_VARIANT",
+  "role": "pitch110_ay0290",
+  "split": "internal16_pitch_variant",
+  "nominal_pitch_multiplier": 1.1,
+  "transverse_amplitude_m_s2": 0.29,
+  "canonical_physical_binding_template": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_107_f3_internal16_pitch_ay_source_v1/canonical-physical-binding-template.json",
+    "sha256": "a644c1d4826f1b688362b20935574b3c9055bbd66db82404f061e6df27c1a345"
+  },
+  "condition_template": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_107_f3_internal16_pitch_ay_source_v1/conditions/F3_STAGE1_DP006_P1100_AY0290.json",
+    "sha256": "90d33903995395657adfc148e0bc84e795a6b7b504cc33ad38722f85bb5c938c"
+  },
+  "prospective_physical_binding": {
+    "control_family_id": "F3_CTRL_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "controls": {
+      "boundary": {
+        "boundary_parameter": 2,
+        "no_penetration": 1,
+        "slip_mode": 2
+      },
+      "density_dt": "Fourtakas full (DensityDT=3)",
+      "density_dt_value": 0.1,
+      "kernel": "Wendland (Kernel=2)",
+      "step_algorithm": "Symplectic (StepAlgorithm=2)",
+      "viscosity": {
+        "boundary_factor": 1.0,
+        "treatment": "Artificial (ViscoTreatment=1)",
+        "value": 0.05
+      }
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "retain final category and unknown state; no Q-N from label materialization alone",
+      "sequence": [
+        "initial static fill",
+        "prescribed nominal pitch acceleration plus windowed transverse linear acceleration",
+        "finite x=0 exchange and legal top-open diagnostic"
+      ],
+      "time_end_s": 8.35,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "initial_fluid": {
+        "label": "continuous initial fluid volume",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.09
+        ]
+      },
+      "tank": {
+        "label": "continuous finite tank; top physically open",
+        "low_m": [
+          -0.45,
+          -0.09,
+          0.0
+        ],
+        "mkfluid": 0,
+        "size_m": [
+          0.9,
+          0.18,
+          0.51
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_by_source_kg": {
+        "fluid": 14.58
+      },
+      "initial_mass_total_kg": 14.58,
+      "mass_policy": "native MassFluid from GenCase/BI4; no normalization or rescaling",
+      "source_labels": {
+        "fluid": "fluid"
+      },
+      "source_regions": {
+        "fluid": {
+          "label": "initial fluid",
+          "low_m": [
+            -0.45,
+            -0.09,
+            0.0
+          ],
+          "mkfluid": 0,
+          "size_m": [
+            0.9,
+            0.18,
+            0.09
+          ]
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "lineage_group_id": "3616afe39cddc01baba11af1c3cd11fad14101d7173dd39315339f1de6d748af",
+    "mass_policy": "native_massfluid_no_rescaling",
+    "mechanism_id": "F3_TWOAXIS_TRANSVERSE_LINACC_V1",
+    "open_inlet": {
+      "faces": [
+        "top"
+      ],
+      "semantics": "physical open top; no injected/born/adaptive particles"
+    },
+    "paired_background_id": "twoaxis_transverse_linear",
+    "parameters": {
+      "acceleration_source_semantics": "CaseSloshingAccData.csv from frozen CELL3 nominal source; acctimesfile binding",
+      "coordinate_frame": "fixed tank coordinates with prescribed linear/angular acceleration input",
+      "drive_amplitude_G": 1.0,
+      "fluid_depth_m": 0.09,
+      "reference_variant": "F3_TWOAXIS_P1100_AY0290_STAGE1_FIRST48_PITCH_VARIANT",
+      "tank_low_m": [
+        -0.45,
+        -0.09,
+        0.0
+      ],
+      "tank_size_m": [
+        0.9,
+        0.18,
+        0.51
+      ],
+      "transverse_amplitude_m_s2": 0.29,
+      "transverse_omega_rad_s": 12.531236478398654,
+      "transverse_phase_rad": 0.0,
+      "transverse_ramp_duration_s": 0.5,
+      "transverse_active_window_s": [
+        0,
+        8.35
+      ],
+      "forcing_source_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+      "actual_forcing_sha256": null,
+      "nominal_pitch_multiplier": 1.1
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "F3_TWOAXIS_P1100_AY0290_STAGE1_FIRST48_PITCH_VARIANT",
+    "schema": "ds-data-02.physical-binding.v1",
+    "template_policy": {
+      "status": "prospective_source_only",
+      "candidate_pitch_and_ay_are_bound": true,
+      "canonical_condition_sha256": null,
+      "future_forcing_sha256": null,
+      "future_bi4_sha256": null,
+      "future_dat_sha256": null,
+      "future_receipts": null
+    }
+  },
+  "source_preparation": {
+    "builder": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_107_f3_internal16_pitch_ay_source_v1/source/source_builder.py",
+      "sha256": "6002bf2a6dd13675f31611559e0120d5c5d95ca0b944507b745213adc8fad893"
+    },
+    "binding": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_107_f3_internal16_pitch_ay_source_v1/source-binding.json",
+      "sha256": "19865d74a1d671d00ecaaeeaebbff0b23bd04d826ed54d23e0f1711d2760bf99"
+    },
+    "preparation_script": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_107_f3_internal16_pitch_ay_source_v1/source/prepare_pitch_axis.py",
+      "sha256": "cef1dc14034fd9cfe7c71d2b5d65684df6be5d57a066d14ecca69aec75719cc0"
+    },
+    "frozen_transformer": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_actual_twoaxis_source_preparation_056/selected_owner_transformer.py",
+      "sha256": "5ac8112a907c527aaf31791419e7830fe85fe8e53b92ff9d7f1544326f883c99"
+    },
+    "output_report_template": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_INTERNAL16_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-internal16-pitch-ay-source-preparation-107/prepared/pitch110_ay0290/F3_STAGE1_DP006_P1100_AY0290/prepared-input-report.json",
+    "output_xml_template": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_INTERNAL16_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-internal16-pitch-ay-source-preparation-107/prepared/pitch110_ay0290/F3_STAGE1_DP006_P1100_AY0290/F3_STAGE1_DP006_P1100_AY0290.xml",
+    "output_bi4_template": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_INTERNAL16_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-internal16-pitch-ay-source-preparation-107/prepared/pitch110_ay0290/F3_STAGE1_DP006_P1100_AY0290/F3_STAGE1_DP006_P1100_AY0290.bi4",
+    "output_forcing_template": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_INTERNAL16_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-internal16-pitch-ay-source-preparation-107/prepared/pitch110_ay0290/F3_STAGE1_DP006_P1100_AY0290/CaseSloshingAccData.csv",
+    "future_output_hashes": {
+      "report": null,
+      "xml": null,
+      "bi4": null,
+      "forcing": null,
+      "physical_condition": null
+    },
+    "output_pitch_multiplier_argument": "amplitude_x",
+    "output_transverse_amplitude_argument": "amplitude_y"
+  },
+  "shared_initial_state_reference": {
+    "genuine_parent_gencase_056": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/execution-receipt.json",
+      "sha256": "6ed670c0f33e5fc5b9df7d81cb49f9174f0f7e43f6963edc98e99134e9ad761f"
+    },
+    "parent_initial_qa_058": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_TWOAXIS_NOMINAL_THREE_DP_ACTUAL_INITIAL_QA/root-cell3-twoaxis-nominal-three-dp-official-native-initial-qa-058/native-initial-qa.json",
+      "sha256": "7ff19bd2db1b731071ec0eeaa8dfe43bbb0cc27ecc5c2dc9d1bb8c0cb5f60349"
+    },
+    "root704_705_exact_initial_proof": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f3_actual704_new24_forcing_exact_initial_independent_review_705/actual-new24-exact-initial-forcing-independent-review.json",
+      "sha256": "7522e4c80b456bd58fa59fbc7fa19709b8856a24c5a94c7d31183c83c13976dd"
+    },
+    "reference_native_particles": 179208,
+    "reference_native_fluid": 67500,
+    "reference_native_fixed": 111708,
+    "reference_native_moving": 0,
+    "reference_actual_3d": true,
+    "future_actual_particle_counts": null,
+    "future_generated_xml_sha256": null,
+    "future_generated_bi4_sha256": null,
+    "mass_policy": "native MassFluid from actual Root input preparation; no normalization/rescaling"
+  },
+  "visual_domain_gate": {
+    "release_reference": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_F3_next20_actual704_exact_initial_await_four_corner_visual_shared_native230_839/actual-four-corner-visual-range-release.json",
+      "sha256": "e3085d4cc0c272a46b33924e7c6e79a7c7c807db32366b722a761403b018884a"
+    },
+    "released_pitch_range": [
+      0.8,
+      1.2
+    ],
+    "released_ay_range_m_s2": [
+      0.25,
+      0.75
+    ],
+    "point_is_internal_to_range": true,
+    "visual_decision_for_this_case": null,
+    "registration_status": "not_registered",
+    "q_n": "not_granted",
+    "precision_status": "not_accepted"
+  },
+  "production_gate": {
+    "launch_allowed": false,
+    "execution_allowed": false,
+    "production_approval": "none",
+    "independent_case_count_increment": 0,
+    "requires_actual_prepared_input_report": true,
+    "requires_actual_native_initial_qa": true,
+    "requires_full836_saved_frames_and_visual_decision": true,
+    "q_n": "not_granted",
+    "numerical_precision_status": "not_accepted"
+  },
+  "future_native_recipe": {
+    "status": "disabled_template_only",
+    "definition_dp_m": 0.006,
+    "time_max_s": 8.35,
+    "time_out_s": 0.01,
+    "expected_saved_frames": 836,
+    "solver_mode": "-mdbc_noslip:1",
+    "future_native_receipt": null,
+    "future_typed_receipt": null,
+    "future_h5_sha256": null,
+    "future_visual_decision": null
+  }
+}
