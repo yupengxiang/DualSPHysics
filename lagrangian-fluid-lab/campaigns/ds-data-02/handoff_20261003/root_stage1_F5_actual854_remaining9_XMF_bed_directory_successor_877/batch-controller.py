@@ -1,0 +1,47 @@
+from pathlib import Path
+import json,hashlib,time,subprocess,fcntl,xml.etree.ElementTree as ET
+O=Path(__file__).parent;R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');L=R/'lagrangian-fluid-lab';H=L/'campaigns/ds-data-02/handoff_20261003';D=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02');SCI={'.h5','.hdf5','.bi4','.ibi4','.dat','.csv','.vtk','.vtu','.npy','.npz'};load=lambda p:json.loads(Path(p).read_text())
+def sha(p):
+ p=Path(p);assert p.suffix.lower() not in SCI;return hashlib.sha256(p.read_bytes()).hexdigest()
+def put(p,v):
+ p=Path(p);p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,indent=2)+'\n')
+def live(c):
+ p=Path('/proc')/str(c['pid'])
+ if not p.exists():return False
+ f=(p/'stat').read_text().split(') ',1)[1].split();return f[0]!='Z' and f[19]==c['proc_start_ticks']
+c=load(O/'controller-config.json');tc=load(c['typed_controller_launch']);P=Path(c['source_package']);base=load(c['source_profile_request']);profile={k:v for k,v in base.items() if k.startswith('root_') or k=='resource_window'};done=set();results=[];failed=False;xw=Path(c['export_worker']);bw=Path(c['bed_worker']);assert sha(xw)==c['export_worker_sha256'] and sha(bw)==c['bed_worker_sha256']
+def run_stage(tag,stage,binding,worker,extra,h5,h5sha):
+ bp=O/'bindings'/(tag+'-'+stage+'-actual-ready-binding.json');put(bp,binding);md={str(p):sha(p) for p in [bp,worker,O/'controller-config.json',Path(__file__),L/'.venv/bin/python',L/'scripts/ds_data02_runtime_v2.py',L/'scripts/ds_data02_strict_dispatch_v1.py',H/'root_stage1_home_floor_inventory_dispatch_142/launch.py',H/'root_stage1_home_floor_inventory_dispatch_142/root_home_floor_inventory_policy.py',H/'root_user_resource_window_512gpu_3840cpu_064/resource-window-approval.json']};md.update(extra);md[str(h5)]=h5sha;attempt='root-stage1-f5-c082s1-'+tag.lower()+'-actual854-full801-'+stage+'-root877';ap=D/'families/F5'/binding['case_id']/attempt;assert not ap.exists()
+ if stage=='xmf':cmd=[str(L/'.venv/bin/python'),str(worker),'--binding',str(bp),'--output-dir','{attempt_root}/xdmf']
+ else:cmd=[str(L/'.venv/bin/python'),str(worker),'--binding',str(bp),'--trajectory-h5',str(h5),'--xdmf',binding['xdmf'],'--output-dir','{attempt_root}/audit-output']
+ q={**profile,'schema':'ds02.runner-request.v2','family_id':'F5','case_id':binding['case_id'],'physical_case_id':binding['physical_case_id'],'physical_condition_sha256':binding['physical_condition_sha256'],'attempt_id':attempt,'attempt_root':str(ap),'kind':'cpu','cpu_task_kind':'audit','cpu_threads':2,'max_wall_seconds':7200 if stage=='bed' else 1800,'estimated_storage_bytes':1024**3,'launch_owner':'root','worktree_root':str(R),'cwd':str(L),'command':cmd,'input_files':sorted(md),'input_sha256':md,'disabled':False,'source_only':False,'launch':True,'launch_allowed':True,'execution_allowed':True,'root_review_required':False,'production_approval':'none','q_n_granted':False,'independent_case_count_increment':0};qp=O/'requests'/(tag+'-'+stage+'-request.json');put(qp,q)
+ with Path(c['shared_CPU2_lock']).open('a') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX)
+  while sum(x.get('cpu_threads',0) for x in load(D/'runtime/resource-ledger.json')['reservations'])+2>64:time.sleep(3)
+  p=subprocess.run([str(L/'.venv/bin/python'),str(H/'root_stage1_home_floor_inventory_dispatch_142/launch.py'),str(qp)],cwd=L,capture_output=True,text=True)
+ rp=ap/'execution-receipt.json';r=load(rp) if rp.exists() else {};out={'tag':tag,'stage':stage,'request':str(qp),'actual_receipt':str(rp),'status':r.get('status'),'returncode':r.get('returncode'),'launcher_returncode':p.returncode,'actual_completed0':(r.get('status'),r.get('returncode'))==('completed',0) and p.returncode==0,'launcher_error':p.stderr[-1500:]};print(json.dumps(out),flush=True);return ap,out
+while len(done)<9 and not failed:
+ ready=[]
+ for tp in Path(c['typed_requests_directory']).glob('*request.json'):
+  tq=load(tp);tag=tq['tag'];trp=Path(tq['attempt_root'])/'execution-receipt.json'
+  if tag in done or not trp.exists():continue
+  tr=load(trp)
+  if (tr['status'],tr.get('returncode'))==('completed',0):ready.append((tp,tq,trp))
+  elif tr['status'] in ['failed','terminated','aborted']:failed=True;put(O/'typed-upstream-failure-hold.json',{'receipt':str(trp),'status':tr['status'],'no_restart':True})
+ if failed:break
+ if not ready:
+  if not live(tc):
+   assert Path(c['typed_controller_result']).exists(),'typed controller handle missing without terminal evidence'
+   assert load(c['typed_controller_result'])['actual_full801_typed_pass_count']==9,'upstream typed incomplete'
+  time.sleep(3);continue
+ tp,tq,trp=sorted(ready,key=lambda x:x[1]['tag'])[0];tag=tq['tag'];cp=Path(tq['attempt_root'])/'typed/conversion-report.json';t=load(cp);assert t['conversion_status']=='completed' and t['frames']==801 and t['particles']==194427 and t['solver_dimension']['solver_dimension']==3 and t['partvtk_validation']['all_passed'] and t['time_evidence']['last_s']>=16;legacy=t['hash_scopes']['physical_condition_sha256'];scope=t['hash_scopes']['physical_condition'];assert legacy==tq['root_prospective_legacy_scope_sha256'] and scope['schema']=='legacy-owner-scope.v0' and scope['semantic_binding_status']=='legacy_incomplete; no cross-resolution physical claim';h5=Path(t['output_hdf5']);assert h5==Path(tq['attempt_root'])/'typed/trajectory.h5';xsrc=P/'bindings'/(tag+'-full801-xmf-binding.json');bsrc=P/'bindings'/(tag+'-full801-bed-audit-binding.json');xb=load(xsrc);assert xb['physical_condition_sha256']==tq['physical_condition_sha256']!=legacy;nrp=Path(xb['full_native_receipt']);assert (load(nrp)['status'],load(nrp)['returncode'])==('completed',0);common={'disabled':False,'source_only':False,'execution_allowed':True,'launch_allowed':True,'conversion_allowed':True,'solver_allowed':False,'full_typed_attempt_id':tq['attempt_id'],'full_typed_request':str(tp),'full_typed_request_sha256':sha(tp),'full_typed_receipt':str(trp),'full_typed_receipt_sha256':sha(trp),'typed_receipt':str(trp),'native_receipt':str(nrp),'native_receipt_sha256':sha(nrp),'conversion_report':str(cp),'full_typed_conversion_report':str(cp),'full_typed_conversion_report_sha256':sha(cp),'trajectory_h5':str(h5),'trajectory_h5_sha256':t['output_sha256'],'trajectory_h5_physical_condition_sha256':legacy,'source_h5_physical_condition_sha256':legacy,'source_h5_scope_schema':scope['schema'],'source_h5_scope_status':scope['semantic_binding_status'],'source_h5_legacy_scope':{'schema':scope['schema'],'sha256':legacy,'status':scope['semantic_binding_status']},'physical_condition_hash_semantics':{'canonical_owner_sha256':tq['physical_condition_sha256'],'source_h5_sha256':legacy,'source_h5_scope_schema':scope['schema'],'source_h5_scope_status':scope['semantic_binding_status']},'future_output_hashes':None,'q_n_granted':False,'independent_case_count_increment':0};xb.update(common);extra={str(p):sha(p) for p in [tp,trp,cp,nrp,xsrc,bsrc,Path(tq['root_compatibility_owner'])]}
+ for key in ['gencase_receipt','gencase_prepared_report','canonical_generated_xml','initial_qa_receipt','initial_qa_report','full_native_request']:
+  p=Path(xb[key]);assert sha(p)==xb[key+'_sha256'];extra[str(p)]=sha(p)
+ xa,xout=run_stage(tag,'xmf',xb,xw,extra,h5,t['output_sha256']);mp=xa/'xdmf/manifest.json';m=load(mp) if mp.exists() else {};xpass=xout['actual_completed0'] and m.get('frames')==801 and m.get('particles')==194427 and m.get('physical_condition_sha256')==tq['physical_condition_sha256'] and m.get('source_h5_physical_condition_sha256')==legacy and m.get('source_h5_sha256')==t['output_sha256']
+ if xpass:
+  xf=Path(m['xdmf']);gs=ET.parse(xf).getroot().findall('.//Grid[@GridType="Uniform"]');xpass=sha(xf)==m['xdmf_sha256'] and len(gs)==801 and all(g.find('Geometry/DataItem').get('Dimensions')==g.find('Attribute[@Name="velocity"]/DataItem').get('Dimensions')=='194427 3' for g in gs)
+ xout['actual_full801_N3_xmf_pass']=xpass;result={'tag':tag,'xmf':xout,'bed':None,'actual_full801_xmf_and_bed_complete':False,'independent_case_increment':0,'renderer_and_visual_acceptance_pending':True}
+ if xpass:
+  bb=load(bsrc);bb.update(common);bb.update(xmf_attempt_id=xa.name,xmf_receipt=str(xa/'execution-receipt.json'),xmf_receipt_sha256=sha(xa/'execution-receipt.json'),xmf_manifest=str(mp),xmf_manifest_sha256=sha(mp),xdmf=str(xf),xdmf_sha256=sha(xf));ex=extra.copy();ex.update({str(p):sha(p) for p in [mp,xf,xa/'execution-receipt.json']});ba,bout=run_stage(tag,'bed',bb,bw,ex,h5,t['output_sha256']);brp=ba/'audit-output/c082s1-full-event-bed-footprint-audit.json';br=load(brp) if brp.exists() else {};bpass=bout['actual_completed0'] and br.get('physical_condition_sha256')==tq['physical_condition_sha256'] and br.get('source_h5_physical_condition_sha256')==legacy and len(br.get('frame_reports',[]))==801;bout.update(actual_bed_report=str(brp),actual_full801_bed_scan_complete=bpass,diagnostic_only=True);result['bed']=bout;result['actual_full801_xmf_and_bed_complete']=bpass
+ results.append(result);print(json.dumps(result),flush=True);done.add(tag);failed=not result['actual_full801_xmf_and_bed_complete']
+put(O/'controller-result.json',{'requested':9,'actual_full801_xmf_and_bed_complete_count':sum(x['actual_full801_xmf_and_bed_complete'] for x in results),'pending_held':9-len(done),'results':results,'upstream_failure_hold':failed,'scientific_payloads_read_or_hashed_by_controller':False,'independent_case_increment':0,'renderer_and_visual_still_required':True});raise SystemExit(1 if failed else 0)
