@@ -716,8 +716,8 @@ def _remove_stage(stage_root: Path) -> None:
 MAX_DIAGNOSTIC_TAIL_BYTES = 16 * 1024
 
 
-def _bounded_text_tail(path: Path, *, limit: int = MAX_DIAGNOSTIC_TAIL_BYTES) -> str | None:
-    """Read at most the final bounded diagnostic bytes from an owned log."""
+def _bounded_bytes_tail(path: Path, *, limit: int = MAX_DIAGNOSTIC_TAIL_BYTES) -> bytes | None:
+    """Read at most ``limit`` raw bytes from the end of an owned log."""
 
     if limit <= 0:
         raise ContractError("diagnostic tail limit must be positive")
@@ -726,10 +726,16 @@ def _bounded_text_tail(path: Path, *, limit: int = MAX_DIAGNOSTIC_TAIL_BYTES) ->
             stream.seek(0, os.SEEK_END)
             size = stream.tell()
             stream.seek(max(0, size - limit), os.SEEK_SET)
-            data = stream.read(limit)
+            return stream.read(limit)
     except OSError:
         return None
-    return data.decode("utf-8", errors="replace")
+
+
+def _bounded_text_tail(path: Path, *, limit: int = MAX_DIAGNOSTIC_TAIL_BYTES) -> str | None:
+    """Decode a bounded owned-log tail without enlarging its raw-byte bound."""
+
+    data = _bounded_bytes_tail(path, limit=limit)
+    return None if data is None else data.decode("utf-8", errors="replace")
 
 
 def _renderer_diagnostics(
@@ -749,8 +755,10 @@ def _renderer_diagnostics(
     renderer cannot create an unbounded rejection record.
     """
 
-    stdout_tail = _bounded_text_tail(stdout_path)
-    stderr_tail = _bounded_text_tail(stderr_path)
+    stdout_raw = _bounded_bytes_tail(stdout_path)
+    stderr_raw = _bounded_bytes_tail(stderr_path)
+    stdout_tail = None if stdout_raw is None else stdout_raw.decode("utf-8", errors="replace")
+    stderr_tail = None if stderr_raw is None else stderr_raw.decode("utf-8", errors="replace")
     return {
         "actual_argv": [str(value) for value in argv],
         "pid": pid,
@@ -759,8 +767,8 @@ def _renderer_diagnostics(
         "reason": None if reason is None else str(reason)[:MAX_DIAGNOSTIC_TAIL_BYTES],
         "stdout_tail": stdout_tail,
         "stderr_tail": stderr_tail,
-        "stdout_tail_bytes": None if stdout_tail is None else len(stdout_tail.encode("utf-8")),
-        "stderr_tail_bytes": None if stderr_tail is None else len(stderr_tail.encode("utf-8")),
+        "stdout_tail_bytes": None if stdout_raw is None else len(stdout_raw),
+        "stderr_tail_bytes": None if stderr_raw is None else len(stderr_raw),
         "tail_limit_bytes": MAX_DIAGNOSTIC_TAIL_BYTES,
         "logs_owned_by_wrapper": True,
     }
