@@ -1,0 +1,47 @@
+{
+  "schema": "ds02.stage1.f3.fresh114.renderer-failure-evidence-contract.v1",
+  "package_id": "F3_fresh114_bounded_renderer_failure_diagnostics",
+  "derived_from": {
+    "fresh112_package": "root_followup_112_f3_fresh110_publication_lifecycle_hardening_v1",
+    "fresh112_worker_sha256": "b9fd883037342e549fcdee9ea61c07cdc6e108dfcb0d92380660c00c3fbd1679",
+    "fresh112_adopted_commit": "2dec0f58bd4916671ad244f32a01909bc7300e51",
+    "fresh113_audit_commit": "bb880addabc0bf2458c9d8e552def94716ab2012"
+  },
+  "source_only": true,
+  "disabled": true,
+  "no_jobs_started": true,
+  "no_shared_ledger_or_controller_writes": true,
+  "scientific_payload_boundary": {
+    "opened_by_package": ["wrapper-owned renderer.stdout.log", "wrapper-owned renderer.stderr.log", "JSON/XML metadata in tests/preflight"],
+    "never_opened_or_hashed": ["H5", "BI4", "CSV", "DAT", "VTK", "XMF DataItem targets"],
+    "root_owned_followup": "Root142 may register a no-H5 diagnostic; fresh114 does not infer the Root934 ParaView cause."
+  },
+  "diagnostic_capture": {
+    "capture_point": "after renderer wait and before private stage cleanup",
+    "tail_limit_bytes": 16384,
+    "tail_encoding": "utf-8-replace",
+    "fields_nested_under_renderer_diagnostics": [
+      "actual_argv", "pid", "pgid", "returncode", "reason", "stdout_tail", "stderr_tail", "stdout_tail_bytes", "stderr_tail_bytes", "tail_limit_bytes"
+    ],
+    "flat_rejection_aliases": [
+      "actual_argv", "renderer_pid", "renderer_pgid", "renderer_returncode", "termination_reason", "renderer_stdout_tail", "renderer_stderr_tail"
+    ],
+    "context_fields": ["attempt_id", "reservation_id", "stage_root", "nvme_root", "stage_removed_after_rejection"],
+    "cleanup_order": [
+      "write preliminary bounded rejection record",
+      "remove only the owned private stage",
+      "rewrite rejection with post-cleanup stage_removed_after_rejection truth"
+    ],
+    "cleanup_error_behavior": "retain the preliminary/final rejection record with cleanup_error and re-raise"
+  },
+  "success_contract": {
+    "publication_logic_changed": false,
+    "root112_publish_receipt_schema_preserved": "ds02.stage1.f3.fresh112.render-publish-receipt.v1",
+    "home_floor_fixed_point_and_process_group_cleanup": "unchanged from fresh112"
+  },
+  "toy_validation": {
+    "failed_renderer": "nonzero toy process writes oversized stdout/stderr; rejection retains <=16384-byte tails, argv, pid/pgid, returncode/reason after stage removal",
+    "existing_success_path": "fresh112 success/publication tests remain green",
+    "test_count": 10
+  }
+}

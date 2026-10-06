@@ -1,0 +1,26 @@
+--- 
++++ 
+@@ -433,7 +433,13 @@
+ def _manifest_metadata(request: Mapping[str, Any]) -> dict[str, Any]:
+     """Read only the JSON/XMF metadata needed before ParaView starts."""
+ 
+-    manifest = _load_json(_absolute(request["manifest"], "manifest"), "XDMF manifest")
++    # Keep the parsed JSON object separate from the path passed to Root023.
++    # ``str(manifest)`` is a Python-dict representation and can turn a small
++    # metadata object into a huge invalid ``--manifest`` argument.  Root023
++    # must receive the original absolute JSON path; it opens that manifest
++    # inside the registered renderer task.
++    manifest_path = _absolute(request["manifest"], "manifest")
++    manifest = _load_json(manifest_path, "XDMF manifest")
+     if manifest.get("schema") != "ds02.stage1.paraview-temporal-product.v1":
+         raise ContractError("unexpected Root023 manifest schema")
+     if int(manifest.get("frames", -1)) != int(request["expected_frames"]):
+@@ -447,7 +453,7 @@
+     # parse it and never follows its H5 DataItem references.
+     return {
+         "schema": manifest["schema"],
+-        "manifest": str(manifest),
++        "manifest": str(manifest_path),
+         "frames": int(manifest["frames"]),
+         "particles": int(manifest["particles"]),
+         "xdmf": str(xdmf),

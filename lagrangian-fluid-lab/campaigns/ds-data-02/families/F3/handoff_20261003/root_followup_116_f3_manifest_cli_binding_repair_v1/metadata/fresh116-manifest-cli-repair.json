@@ -1,0 +1,38 @@
+{
+  "schema": "ds02.stage1.f3.fresh116.manifest-cli-binding-repair.v1",
+  "package_id": "F3_fresh116_manifest_cli_binding_repair",
+  "derived_from_commit": "c151d5b8",
+  "derived_from_package": "root_followup_114_f3_bounded_renderer_failure_diagnostics_v1",
+  "repair_class": "manifest-cli-binding",
+  "source_failures_preserved": [
+    "fresh112",
+    "fresh114",
+    "Root934",
+    "Root945"
+  ],
+  "root945_evidence": {
+    "registered_attempt": "Root945",
+    "observed_manifest_argument_bytes": 49002,
+    "observed_manifest_argument_is_absolute_path": false,
+    "observed_failure_before_home_publish": true,
+    "root_cause_scope": "_manifest_metadata returned str(parsed_manifest) rather than str(manifest_path)",
+    "scientific_payload_read_or_hashed_by_source_package": false
+  },
+  "repair": {
+    "manifest_path_variable": "manifest_path = _absolute(request['manifest'], 'manifest')",
+    "parsed_metadata_variable": "manifest = _load_json(manifest_path, 'XDMF manifest')",
+    "returned_cli_value": "str(manifest_path)",
+    "root023_argv_contract": "--manifest receives the original absolute JSON path",
+    "renderer_source_and_scientific_recipe_changed": false
+  },
+  "tests": {
+    "toy_only": true,
+    "observes_actual_popen_argv": true,
+    "asserts_absolute_manifest_path": true,
+    "rejects_python_dict_repr": true,
+    "does_not_launch_paraview": true,
+    "does_not_open_or_hash_scientific_payload": true
+  },
+  "source_only": true,
+  "no_shared_registry_or_ledger_write": true
+}
