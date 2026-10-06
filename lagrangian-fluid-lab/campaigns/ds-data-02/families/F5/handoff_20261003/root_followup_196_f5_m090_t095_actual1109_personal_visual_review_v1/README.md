@@ -1,0 +1,9 @@
+# F5 fresh196: M090_T095 personal full801 visual review
+
+This source-only handoff records the personal visual review of the already published Root1109 render for `M090_T095`. The producer receipt is `completed/0`, the publish receipt reports an atomic published output, and the producer report contains 801 source frames, 34 contact sheets, and nine requested keyframes. No solver, converter, renderer, ledger mutation, or new scientific task was started by this source agent.
+
+I viewed every contact sheet (`all_frames_000.png` through `all_frames_033.png`) and every requested keyframe (`frame_0000`, `0100`, `0200`, `0300`, `0400`, `0500`, `0600`, `0700`, and `0800`). The sequence is visually coherent and shows a weak, mostly non-breaking response with modest shoreline/free-surface change and return. I saw no global explosion, broad spray cloud, or obvious severe visible bed-through. Sparse blue points near the downstream/slope region remain visible and are recorded as a display limitation. This is a standalone first-stage visual approval for this review; it does not claim large inundation, strict particle-level containment, sub-DP penetration absence, numerical precision, Q-N, or case credit.
+
+The preceding full-event bed report remains diagnostic-only. Its zero 1DP/2DP bins are retained as producer evidence and are not interpreted as proof about sub-DP depth. Historical A/B penetration failures and the exact-DP lattice precision negative remain preserved. Scope roles are kept separate: native/canonical `86f551df541509d9c144829b591dcf77489df72947246e0c39b79509f408eff6`, SourceDef/bed declaration `c6f01b78a9f13939affb65d9770fb9d560b178f374e606ad2f45c63308159f29`, actual native source-plan file `366adc5200604490871116a0a5b8503c9bef4bfb1e72195df94995605fa7d324`, and typed legacy H5 `86317cd2d3f6f0a226438229a842dbe74bc991b759abcaeb300c79d2c4b1f06e`.
+
+Main integration must independently adopt this package before any case credit.
