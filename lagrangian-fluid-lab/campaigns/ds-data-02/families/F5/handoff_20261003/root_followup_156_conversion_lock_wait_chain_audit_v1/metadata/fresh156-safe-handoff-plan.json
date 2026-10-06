@@ -1,0 +1,162 @@
+{
+  "audit_metadata": "metadata/fresh156-lock-audit.json",
+  "case_credit": 0,
+  "decision": "metadata-only audit; no source-agent retirement, launch, restart, or shared-state mutation",
+  "four_gib_successor": {
+    "attempt_id": null,
+    "can_be_prepared_as_distinct_metadata": true,
+    "can_be_registered_by_this_package": false,
+    "downstream_hashes": null,
+    "home_floor_bytes": 536870912000,
+    "new_publish_cap_bytes": 4294967296,
+    "nvme_free_reserve_bytes": 107374182400,
+    "nvme_staging_limit_bytes": 25769803776,
+    "old_storage_reservation_32_gib_unchanged": true,
+    "requires": [
+      "fresh157 repairs and toy-tests fresh155 publish path",
+      "Root creates new attempt and reservation",
+      "Root142 validates exact wrapper/source hashes",
+      "old attempt/completed output is never overwritten"
+    ],
+    "reservation_id": null,
+    "typed_output_hash": null
+  },
+  "global_state_actions_performed": [],
+  "not_safe_now": [
+    {
+      "action": "retire_or_replace_root854",
+      "reason": "owns conversion lock and has an active case"
+    },
+    {
+      "action": "retire_or_replace_any_conversion_waiter",
+      "reason": "live PID/start_ticks and lock wait state; no zero-job proof"
+    },
+    {
+      "action": "launch_from_root871_pending_count",
+      "reason": "pending_not_launched=5 conflicts with 7 request files without results and 11 overall native-pending tags"
+    },
+    {
+      "action": "invent_root873_XMF_requests",
+      "reason": "no request file or receipt at snapshot"
+    },
+    {
+      "action": "use_root920_or_root924_as_conversion_capacity",
+      "reason": "both protected renderer work with separate locks/reservations"
+    }
+  ],
+  "package_id": "F5_fresh156_conversion_lock_wait_chain_audit",
+  "safe_handoff_after_root854_terminal": [
+    {
+      "case_credit": 0,
+      "cases": [
+        "M095_T080",
+        "M095_T090",
+        "M095_T100",
+        "M105_T080",
+        "M105_T090",
+        "M105_T100",
+        "M115_T080",
+        "M115_T090"
+      ],
+      "new_attempt_required": false,
+      "owner": "Root854 existing controller",
+      "preconditions": [
+        "actual owner receipt status completed/0 or explicit terminal result",
+        "per-case request and native receipt bound",
+        "same conversion lock",
+        "same 32 GiB estimate plus 16 GiB wait margin",
+        "Home/NVMe guards unchanged"
+      ],
+      "stage": "F5 typed conversion"
+    },
+    {
+      "case_credit": 0,
+      "cases": [
+        "M086_T095"
+      ],
+      "new_attempt_required": true,
+      "owner": "Root864 existing controller",
+      "preconditions": [
+        "Root864 remains live or distinct successor after terminal proof",
+        "native receipt completed/0",
+        "concrete request unchanged",
+        "shared lock available"
+      ],
+      "stage": "F5 typed conversion"
+    },
+    {
+      "case_credit": 0,
+      "cases": [
+        "M098_T085"
+      ],
+      "new_attempt_required": true,
+      "owner": "Root872 existing controller",
+      "preconditions": [
+        "Root872 remains live or distinct successor after terminal proof",
+        "native receipt completed/0",
+        "concrete request unchanged",
+        "shared lock available"
+      ],
+      "stage": "F5 typed conversion"
+    },
+    {
+      "case_credit": 0,
+      "cases": [
+        "M086_T085",
+        "M085_T100"
+      ],
+      "new_attempt_required": true,
+      "owner": "Root865/Root877 existing downstream waiters",
+      "preconditions": [
+        "upstream typed receipt/report completed/0",
+        "actual producer metadata",
+        "Root142 task-kind/CLI validation",
+        "render remains downstream"
+      ],
+      "stage": "F5 XMF/bed"
+    }
+  ],
+  "safe_now": [
+    {
+      "action": "preserve_root854_owner",
+      "case_credit": 0,
+      "controller": "F5-854",
+      "new_attempt": null,
+      "reason": "live conversion owner; M095_T080 acquired shared lock"
+    },
+    {
+      "action": "preserve_all_live_waiters",
+      "controllers": [
+        "F5-864",
+        "F5-865",
+        "F5-872",
+        "F5-873",
+        "F5-877",
+        "F3-879",
+        "F3-885",
+        "F2-891"
+      ],
+      "reason": "live PID/start_ticks and lock wait evidence; no zero-job proof"
+    },
+    {
+      "action": "preserve_completed_outputs",
+      "items": [
+        "Root820 M085_T090 typed",
+        "Root854 M085_T100 typed",
+        "Root864 M086_T085 typed",
+        "Root808 remaining10 native",
+        "Root871 23 next34 native"
+      ],
+      "reason": "completed receipts/results are immutable evidence and must not be rerun"
+    },
+    {
+      "action": "protect_renderers",
+      "controllers": [
+        "F6-920",
+        "F4-924"
+      ],
+      "reason": "live renderer processes/reservations and render-registration lock are outside conversion handoff"
+    }
+  ],
+  "schema": "ds02.f5.fresh156.safe-handoff-plan.v1"
+}
