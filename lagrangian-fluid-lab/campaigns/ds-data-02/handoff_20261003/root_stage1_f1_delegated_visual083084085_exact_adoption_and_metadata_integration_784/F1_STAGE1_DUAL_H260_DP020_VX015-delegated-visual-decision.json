@@ -1,0 +1,485 @@
+{
+  "schema": "ds02.stage1.delegated-visual-metadata-integration.v1",
+  "decision_id": "fresh084-f1_stage1_dual_h260_dp020_vx015",
+  "at_utc": "2026-10-06T04:17:25.111145+00:00",
+  "family_id": "F1",
+  "case_id": "F1_STAGE1_DUAL_H260_DP020_VX015",
+  "physical_case_id": "F1_DUAL_HEAD_260_VX_150_FRESH090_V1",
+  "physical_condition_sha256": "8bff5d20b2f7f169b2ccb60b20f189d21afa971d75a19c88b84ee0d394394e48",
+  "physical_scope": {
+    "head_height_m": 0.26,
+    "initial_velocity_m_per_s": [
+      0.15,
+      0.0,
+      0.0
+    ],
+    "dp_m": 0.02,
+    "geometry": "DUAL unchanged mother geometry; fresh090 physical control is head height plus initial horizontal vx",
+    "solver_dimension": 3,
+    "physical_window_s": [
+      0.0,
+      4.0
+    ],
+    "save_interval_s": 0.01,
+    "expected_frames": 401,
+    "actual_active_bounds_frame0_and_400": {
+      "frame0": [
+        [
+          -0.05000000074505806,
+          3.25
+        ],
+        [
+          -0.05000000074505806,
+          1.0499999523162842
+        ],
+        [
+          -0.05000000074505806,
+          0.8500000238418579
+        ]
+      ],
+      "frame400": [
+        [
+          -0.05000000074505806,
+          3.25
+        ],
+        [
+          -0.05000000074505806,
+          1.0499999523162842
+        ],
+        [
+          -0.05000000074505806,
+          0.8500000238418579
+        ]
+      ]
+    }
+  },
+  "status": "visual-approved-by-delegated-agent",
+  "stage1_label": "视觉检查通过、数值精度未验收",
+  "reviewer": {
+    "agent": "/root/production_recovery",
+    "role": "delegated visual reviewer",
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "max",
+    "review_scope": "F1 fresh090 DUAL full401 render only"
+  },
+  "review_method": {
+    "contact_sheets_reviewed": 17,
+    "contact_sheet_layout": "two-camera chronological pages all_frames_000..016; page 016 contains frame 384..400",
+    "fullsize_keyframes_reviewed": [
+      0,
+      65,
+      115,
+      400
+    ],
+    "fullsize_keyframe_paths_are_listed": true,
+    "tool": "view_image",
+    "claim_limit": "visual inspection of rendered PNGs; no continuous-video playback claim"
+  },
+  "visual_observations": [
+    "Page 000 shows a valid initial 3D reservoir/head state and intact gray fixed-wall cutaway in both cameras.",
+    "Pages 001..015 show continuous release and wave/front evolution with coherent blue-fluid occupancy; no blank page or abrupt frame termination is visible.",
+    "The wall/cutaway remains spatially coherent through the wave and later settling; no obvious catastrophic penetration or explosive nonphysical visual state is visible at the rendered resolution.",
+    "Page 016 reaches the final saved frame near 4 s with fluid and boundary geometry still rendered, so the full window is visually present."
+  ],
+  "visual_rejection_checks": {
+    "obvious_bad_initial_state": false,
+    "obvious_severe_penetration_at_render_resolution": false,
+    "obvious_explosion_or_nonfinite_visual": false,
+    "early_termination_or_blank_tail": false,
+    "visual_review_passes": true
+  },
+  "render_metadata_evidence": {
+    "report_schema": "ds02.stage1.paraview-full-animation-integrity.v1",
+    "frames": 401,
+    "source_frames": 401,
+    "all_frames_rendered": true,
+    "actual_times_preserved_exactly": true,
+    "native_identity_axis_preserved": true,
+    "nonfinite_active_states": 0,
+    "max_missing_particles_in_frame_diagnostics": 0,
+    "all_finite_positions": true,
+    "all_finite_fields": true,
+    "all_identity_axes_preserved": true,
+    "active_count_min": 120316,
+    "active_count_max": 120316,
+    "actual_last_time_s": 4.000013688086806,
+    "frame0_type_counts_active": {
+      "fixed": 87816,
+      "moving": 0,
+      "floating": 0,
+      "fluid": 32500,
+      "unknown": 0
+    },
+    "frame400_type_counts_active": {
+      "fixed": 87816,
+      "moving": 0,
+      "floating": 0,
+      "fluid": 32500,
+      "unknown": 0
+    },
+    "frame0_active_bounds": [
+      [
+        -0.05000000074505806,
+        3.25
+      ],
+      [
+        -0.05000000074505806,
+        1.0499999523162842
+      ],
+      [
+        -0.05000000074505806,
+        0.8500000238418579
+      ]
+    ],
+    "frame400_active_bounds": [
+      [
+        -0.05000000074505806,
+        3.25
+      ],
+      [
+        -0.05000000074505806,
+        1.0499999523162842
+      ],
+      [
+        -0.05000000074505806,
+        0.8500000238418579
+      ]
+    ]
+  },
+  "uid_and_finiteness_evidence": {
+    "native_frame0_qa_passed": true,
+    "native_particles": 120316,
+    "native_fluid_particles": 32500,
+    "native_unique_identity_count": 120316,
+    "native_finite_row_count": 120316,
+    "uid_loss_observed_at_frame0": false,
+    "framewise_render_missing_max": 0,
+    "framewise_render_nonfinite_active_states": 0,
+    "framewise_render_all_finite_positions": true,
+    "framewise_render_all_finite_fields": true,
+    "native_frame0_velocity_error_max_m_per_s": 9.999999994736442e-09,
+    "native_frame0_velocity_evidence": "official PartVTK report already present; no CSV payload was read by this review"
+  },
+  "actual_counts_and_window": {
+    "gencase_total_particles": 120316,
+    "gencase_fluid_particles": 32500,
+    "gencase_fixed_particles": 87816,
+    "gencase_solver_dimension": 3,
+    "native_frame0_particles": 120316,
+    "native_frame0_fluid_particles": 32500,
+    "typed_frames": 401,
+    "typed_particles": 120316,
+    "xmf_frames": 401,
+    "xmf_particles": 120316,
+    "render_frames": 401,
+    "render_last_time_s": 4.000013688086806
+  },
+  "physical_scope_provenance": {
+    "canonical_physical_case": {
+      "physical_case_id": "F1_DUAL_HEAD_260_VX_150_FRESH090_V1",
+      "physical_condition_sha256": "8bff5d20b2f7f169b2ccb60b20f189d21afa971d75a19c88b84ee0d394394e48",
+      "source_plan_condition_sha256": "8bff5d20b2f7f169b2ccb60b20f189d21afa971d75a19c88b84ee0d394394e48",
+      "source_plan_sha256": "55c7308627411e82af88f5b751ef1fa7f670f55b39df8ee7fe727d8d26f170a0",
+      "canonical_owner_sha256": "9cc0d35e2d7edbd941a65ef456367c8411a6574b79f4acc9fa1ed4988665e8f9",
+      "scope_semantics": "canonical source physical case; one condition"
+    },
+    "actual_converter_scope": {
+      "physical_condition_sha256": "8bff5d20b2f7f169b2ccb60b20f189d21afa971d75a19c88b84ee0d394394e48",
+      "status": "producer_report_attested",
+      "scope_semantics": "actual converter producer scope from the XMF manifest",
+      "separate_from_canonical_source_scope": true,
+      "scope_equality_claim": "none"
+    },
+    "legacy_converter_scope": {
+      "schema": "legacy-owner-scope.v0",
+      "status": "actual_converter_scope_attested_legacy_scope_retained",
+      "scope_status": "actual_converter_scope_attested; legacy H5 scope retained separately",
+      "physical_case_id": "F1_DUAL_HEAD_260_VX_150_FRESH090_V1",
+      "legacy_h5_physical_condition_sha256": null,
+      "source_owner_sha256": "9cc0d35e2d7edbd941a65ef456367c8411a6574b79f4acc9fa1ed4988665e8f9",
+      "source_plan_hash_must_not_be_substituted_for_converter_scope": true,
+      "payload_hash_recomputed": false,
+      "scope_semantics": "legacy converter/owner scope is retained as a distinct metadata namespace; no scientific payload was read or rehashed"
+    }
+  },
+  "bindings": {
+    "source_definition": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_090_f1_first24_to48_source_expansion_v1/definitions/F1_STAGE1_DUAL_H260_DP020_VX015_Def.xml",
+      "sha256_from_actual_prepared_report": "0836339da85519bcf103bd51cf7296bd48ff7565bd5496939b38c4069a1e4a1f"
+    },
+    "source_plan": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_090_f1_first24_to48_source_expansion_v1/source-plans/F1_STAGE1_DUAL_H260_DP020_VX015.json",
+      "sha256_from_actual_xmf_manifest": "55c7308627411e82af88f5b751ef1fa7f670f55b39df8ee7fe727d8d26f170a0"
+    },
+    "canonical_owner": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_090_f1_first24_to48_source_expansion_v1/owners/F1_STAGE1_DUAL_H260_DP020_VX015.owner.json",
+      "sha256": "9cc0d35e2d7edbd941a65ef456367c8411a6574b79f4acc9fa1ed4988665e8f9"
+    },
+    "gencase": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090",
+        "finished_at_utc": "2026-10-05T16:41:35.088231+00:00",
+        "termination_reason": null
+      },
+      "prepared_input_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090/prepared/prepared-input-report.json",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090/prepared/F1_STAGE1_DUAL_H260_DP020_VX015.xml"
+    },
+    "native_solver": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-qualification-095-root480/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-qualification-095-root480",
+        "finished_at_utc": "2026-10-05T18:17:45.015101+00:00",
+        "termination_reason": null
+      }
+    },
+    "native_frame0_qa": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-native-frame0-vx-qa-096-root490-root492/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-native-frame0-vx-qa-096-root490-root492",
+        "finished_at_utc": "2026-10-05T18:33:33.579112+00:00",
+        "termination_reason": null
+      },
+      "audit_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-native-frame0-vx-qa-096-root490-root492/native-initial-vx-audit.json"
+    },
+    "typed_nvme": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-typed-nvme-098-root497/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-typed-nvme-098-root497",
+        "finished_at_utc": "2026-10-05T18:52:14.670974+00:00",
+        "termination_reason": null
+      },
+      "conversion_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-typed-nvme-098-root497/conversion-report.json",
+      "status": "completed/0"
+    },
+    "normal_xmf": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517",
+        "finished_at_utc": "2026-10-05T19:22:03.473912+00:00",
+        "termination_reason": null
+      },
+      "manifest": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/xdmf/manifest.json",
+      "case_xmf": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/xdmf/case.xmf"
+    },
+    "render": {
+      "execution_receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/execution-receipt.json",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568",
+        "finished_at_utc": "2026-10-05T21:20:48.203771+00:00",
+        "termination_reason": null
+      },
+      "animation_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/paraview-full-animation-report.json",
+      "contact_sheets": [
+        {
+          "page": 0,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_000.png",
+          "sha256": "4280103ee553fef7fe370eafe0d95a1124fda0e19d8e6c7c5d63b941dbc05782"
+        },
+        {
+          "page": 1,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_001.png",
+          "sha256": "82944d9b4265422db77694eaa7715d783dd0f8905ada72c1db5213ddbf75f36b"
+        },
+        {
+          "page": 2,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_002.png",
+          "sha256": "0ee4cd0256c7f08c2e3d95f4d6762efd0977ecf9abfd8313efd2840409c210c9"
+        },
+        {
+          "page": 3,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_003.png",
+          "sha256": "a0af05d1335f6f2edcfb20c562a32f8d13c8aa5bbcb2f162c65a55dded6158e4"
+        },
+        {
+          "page": 4,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_004.png",
+          "sha256": "fbf603d3f3b5e00f2c9ea0f275ecaa5cf79c42c214cddc468f11a2270ec913f4"
+        },
+        {
+          "page": 5,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_005.png",
+          "sha256": "642e4411c57a9febbb024d44aeb2b3688257f7133c1a9acc7b8e3d2324318784"
+        },
+        {
+          "page": 6,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_006.png",
+          "sha256": "def15bdf3e47f3726a63e612eaba4d264dfe29af4c34fb2bffe5ef58ef5818df"
+        },
+        {
+          "page": 7,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_007.png",
+          "sha256": "cdfc3b236f744b92c170d262f5f64a8cd896c020085b82c6d20c59abbe6f50d7"
+        },
+        {
+          "page": 8,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_008.png",
+          "sha256": "711c493735f60bc778ea6dc8ef37e30a1c53e41f121005efd94a822ef4e8bd22"
+        },
+        {
+          "page": 9,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_009.png",
+          "sha256": "81abbdd187ded71b6cf5749b5d4217f5943582cdee8c7a88979b5aba091a0d08"
+        },
+        {
+          "page": 10,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_010.png",
+          "sha256": "cd8c2561fb1da21bb23af3381518724d1fca8f5470da49d56e688c6581621884"
+        },
+        {
+          "page": 11,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_011.png",
+          "sha256": "c2fc9e183a0f920c41fa3028507c2d93263610c7aba6081925b02990171ed013"
+        },
+        {
+          "page": 12,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_012.png",
+          "sha256": "c94fe8d0f785e3ac3d60cd5bdc573e8613728d9ae78ed64de1b775a707ac6ba7"
+        },
+        {
+          "page": 13,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_013.png",
+          "sha256": "76bb127cadc73b4a7760c407f5698f1ca9fd0d839627b2877215288b1b586b8a"
+        },
+        {
+          "page": 14,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_014.png",
+          "sha256": "d457c09538ee78943991233e2e8a2c7e90ecf3aea72e8edf4889c108d1c5e169"
+        },
+        {
+          "page": 15,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_015.png",
+          "sha256": "d4fe3aa7795119b414a5b3e67e74d91992c4ca048194f878e373af4179c2a5c0"
+        },
+        {
+          "page": 16,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/all_frames_016.png",
+          "sha256": "247149ac3d206609b4c8f0339f325bf6dffe396760a1dcec4ea2ef6af7828171"
+        }
+      ],
+      "keyframes": [
+        {
+          "frame": 0,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/frames/frame_0000.png",
+          "sha256": "1678c612745180cd077c947cd9d9376c02cb05bd20733ac82a2725ef3938c68a"
+        },
+        {
+          "frame": 65,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/frames/frame_0065.png",
+          "sha256": "a18b5cec42ec9e6bbe677976afafc163ff9e11347b7ab8e5897a980204eb8a9e"
+        },
+        {
+          "frame": 115,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/frames/frame_0115.png",
+          "sha256": "e4bf515de49afdfa1e1de61662efff5206b7208d04d5d1ab6757dc6787186bb8"
+        },
+        {
+          "frame": 400,
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/frames/frame_0400.png",
+          "sha256": "8ce00b5b6a9122452845422eb5972c1097e72fc032d37c6b15379f1aaaff9d00"
+        }
+      ]
+    }
+  },
+  "source_scope_and_claim_limits": {
+    "production_scope_approval": false,
+    "numerical_precision_status": "not_accepted",
+    "q_n": "not_granted",
+    "q_e": "not_assessed",
+    "independent_physical_case_count_increment": 0,
+    "global_count_update": "not written; primary agent owns checkpoint and acceptance counts",
+    "alias_counting": "One fresh090 DUAL condition only; render, typed, XMF, retries, and visual products do not add cases.",
+    "payload_policy": "No H5/BI4/CSV/DAT/VTK scientific payload was read or hashed by this sidecar. Existing JSON reports are referenced as producer evidence; their payload hashes are intentionally omitted."
+  },
+  "provenance_status": {
+    "actual_gencase_receipt_status": "completed",
+    "actual_native_receipt_status": "completed",
+    "actual_frame0_qa_receipt_status": "completed",
+    "actual_typed_receipt_status": "completed",
+    "actual_xmf_receipt_status": "completed",
+    "actual_render_receipt_status": "completed",
+    "all_required_terminal_returncodes_zero": true
+  },
+  "independent_physical_case_count_increment": 1,
+  "global_count_update": "metadata integration by Root",
+  "source_review_commit": "80aa7ea969cf2207fd66d39cd45a242a1e9a1c3f",
+  "source_review_decision": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_084_f1_dual_visual_decisions_v1/decisions/F1_STAGE1_DUAL_H260_DP020_VX015.json",
+    "sha256": "be8d3b15c33f4d9465f0410828e10c0d45e54b464426c8bdbe0a6e24833faa0a"
+  },
+  "root_metadata_evidence": {
+    "gencase": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090/execution-receipt.json",
+      "sha256": "c320c10da907df368f68f1247b8a6e42bb5e66ca922863fd8a4fc05ea38c3a03"
+    },
+    "native_solver": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-qualification-095-root480/execution-receipt.json",
+      "sha256": "a3f136188b0b7c4f5c4668874c4dbaa38c001ec0039891bc6dac390d21732524"
+    },
+    "native_frame0_qa": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-native-frame0-vx-qa-096-root490-root492/execution-receipt.json",
+      "sha256": "f1be4053de9ab1edc05b9cb6f84797266797c86348a8355ec2b0faf79faafa37"
+    },
+    "typed_nvme": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-typed-nvme-098-root497/execution-receipt.json",
+      "sha256": "af220047c926cb36dc0c092944e72b5a490b076a0c611b96bc8228a1c6e36159"
+    },
+    "normal_xmf": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/execution-receipt.json",
+      "sha256": "a23d31761ba850983605f3638d147efa1d6834563ef39b88abb5450735ace6da"
+    },
+    "render": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/execution-receipt.json",
+      "sha256": "8505cc6a79fb932845a50350db3f5b0ea0abf6809561d0c2182fa226214b2217"
+    },
+    "owner": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f1/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_followup_090_f1_first24_to48_source_expansion_v1/owners/F1_STAGE1_DUAL_H260_DP020_VX015.owner.json",
+      "sha256": "9cc0d35e2d7edbd941a65ef456367c8411a6574b79f4acc9fa1ed4988665e8f9"
+    },
+    "prepared": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-genuine-gencase-090/prepared/prepared-input-report.json",
+      "sha256": "7dafa9be35143d7e8200068ca14f00c12863343d0e80d8df216f2fc0125f1ee3"
+    },
+    "native_qa": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-native-frame0-vx-qa-096-root490-root492/native-initial-vx-audit.json",
+      "sha256": "88d49933f2634b9a6262ef91ef4a5068c8356cec33f5309a66d4ece3e98d889d"
+    },
+    "conversion": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-native-typed-nvme-098-root497/conversion-report.json",
+      "sha256": "f699f559a7d49d72c3812d4861d2ef08a77b9231fdfd4fc4de159200f1868677"
+    },
+    "manifest": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/xdmf/manifest.json",
+      "sha256": "6ac9f55101d377b004b54843bb846680d7ec947014db27df2fa5e1baeb0d3033"
+    },
+    "xmf": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-normal-xmf-100-root517/xdmf/case.xmf",
+      "sha256": "f82050e850908a0c28d2ccf60c1e03c0b5d9b354e9951ac755c10896954983bf"
+    },
+    "render_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020_VX015/root-stage1-f1-f1-stage1-dual-h260-dp020-vx015-full401-actualXMF517-native023-render-root523-root568/render/paraview-full-animation-report.json",
+      "sha256": "f863fd9589aeb8a545157d3c45182ad0910ce8185e756441c3ac2db0980c3ded"
+    }
+  },
+  "main_role": "immutable metadata, PNG hash and unique physical case integration",
+  "main_personally_viewed_pngs": false,
+  "agent_personally_viewed_all_contacts_and_keys": true,
+  "independent_case_increment": 1,
+  "previous_count": 95,
+  "resulting_count": 96,
+  "PNG_hash_check_is_not_Root_visual_review": true,
+  "scientific_payload_not_read_or_hashed_by_Root": true,
+  "producer_H5_hash_verified_from_metadata_only": true
+}
