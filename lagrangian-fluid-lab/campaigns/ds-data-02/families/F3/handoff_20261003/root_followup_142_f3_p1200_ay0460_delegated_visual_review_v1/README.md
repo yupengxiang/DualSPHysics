@@ -1,0 +1,9 @@
+# F3 fresh142 visual review: F3_STAGE1_DP006_P1200_AY0460
+
+This F3-only handoff records a personal visual review of Root1103's completed full836 renderer output for `F3_STAGE1_DP006_P1200_AY0460` / `F3_TWOAXIS_P1200_AY0460_STAGE1_FIRST48_PITCH_VARIANT`. I used `view_image` on all 35 chronological contact-sheet pages (`all_frames_000.png` through `all_frames_034.png`) and all nine requested event frames (0, 104, 208, 312, 417, 521, 626, 730, 835). The PNG paths and hashes are in `metadata/png-hashes/F3_STAGE1_DP006_P1200_AY0460.json`; the native→typed→XMF→render metadata chain is in `metadata/chain-audit/F3_STAGE1_DP006_P1200_AY0460.json`.
+
+The visual result is recorded as `visual-approved-by-delegated-agent` for Root's review. It documents a continuous, legible 3-D animation with stable framing and no blank tail or gross scene loss. A few isolated blue points are visible above/left of the main band around frame 626; that observation is retained without reclassification, and the producer's `unknown_exclusions` remains authoritative.
+
+The package records 836 frames, 179208 particles, 3-D/N3 metadata, the exact 0–8.35001458225984 s window, and completed/0 receipts for native, typed, XMF, and Root1103 render. The producer-attested H5 digest is copied as an attestation only; this review did not open or hash H5/BI4/CSV/DAT/VTK payloads. Numerical precision, Q-N/Q-E, production qualification, and global case credit remain unset; `case_credit` and `independent_case_increment` are 0 and Root retains deduplication ownership.
+
+The source template, actual native/converter scope, canonical source scope, and any legacy scope are represented separately. Source bytes and shared state were not changed. `scripts/validate_fresh142.py` performs only JSON/XML/PNG metadata checks and package-integrity validation.
