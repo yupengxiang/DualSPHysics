@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+import hashlib,json
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+def sha(p):
+ h=hashlib.sha256()
+ with p.open("rb") as f:
+  for b in iter(lambda:f.read(1024*1024),b""): h.update(b)
+ return h.hexdigest()
+idx=json.loads((ROOT/"metadata/visual-frontier-index.json").read_text()); assert idx["batch_size"]==1 and idx["independent_case_increment"]==0 and idx["status"]=="visual-approved-by-delegated-agent"
+for rel in idx["decision_paths"]:
+ d=json.loads((ROOT/rel).read_text()); assert d["family_id"]=="F1" and d["status"]=="visual-approved-by-delegated-agent"
+ assert d["review_method"]["contact_sheets_reviewed"]==17 and d["review_method"]["fullsize_keyframes_reviewed"]==[0,65,115,400]
+ e=d["render_metadata_evidence"]; assert e["frames"]==401 and e["source_frames"]==401 and e["all_frames_rendered"] is True and e["actual_times_preserved_exactly"] is True and e["nonfinite_active_states"]==0 and e["max_missing_particles_in_frame_diagnostics"]==0
+ assert e["all_finite_positions"] is True and e["all_finite_fields"] is True
+ p=d["physical_scope_provenance"]; assert p["actual_converter_scope"]["separate_from_canonical_source_scope"] is True and p["legacy_converter_scope"]["payload_hash_recomputed"] is False
+ x=d["bindings"]["xmf"]; assert x["manifest_xdmf_matches_render_xdmf"] is True and x["manifest_xdmf_sha_matches_render_report"] is True
+ old=d["bindings"]["typed_nvme"]["historical_failed_attempt"]; assert old["status"]=="failed" and old["returncode"]==1
+ assert d["claim_limits"]["qualification_or_precision_grant"] is False and d["claim_limits"]["production_approval_grant"] is False
+ assert len(d["bindings"]["render"]["contact_sheets"])==17 and len(d["bindings"]["render"]["keyframes"])==4
+ for item in d["bindings"]["render"]["contact_sheets"]+d["bindings"]["render"]["keyframes"]:
+  p=Path(item["path"]); assert p.is_file(),p; assert sha(p)==item["sha256"],p; assert not any(s in item["path"].lower() for s in (".h5",".bi4",".csv",".dat",".vtk"))
+ for n in ("actual_gencase_receipt_status","actual_initial_qa_receipt_status","actual_native_receipt_status","actual_native_frame0_qa_receipt_status","actual_typed_receipt_status","actual_xmf_receipt_status","actual_render_receipt_status"): assert d["provenance_status"][n]=="completed"
+print("fresh094 F1 H320 visual metadata, XDMF closure, and PNG hash validation: PASS")
