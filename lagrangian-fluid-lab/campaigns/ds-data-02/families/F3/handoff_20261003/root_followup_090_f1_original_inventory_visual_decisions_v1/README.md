@@ -11,4 +11,4 @@ Both cases show a valid initial 3D reservoir/head state, coherent release/front 
 
 These are delegated visual decisions only. They do not grant Q-N, numerical precision, production approval, or a global accepted-case increment. The primary agent owns checkpoint and global count changes. The sidecar did not read, copy, or hash H5, BI4, CSV, DAT, or VTK scientific payloads.
 
-`metadata/root781_remaining_actual_status.json` records the five remaining inventory entries. They each have a terminal render report/receipt and complete 17-contact/401-frame PNG inventory in the read-only audit, but remain unreviewed by this package; no job was restarted.
+`metadata/root781_remaining_actual_status.json` records the three remaining inventory entries after excluding the two fresh089 reviews. They each have a terminal render report/receipt and complete 17-contact/401-frame PNG inventory in the read-only audit, but remain unreviewed by this package; no job was restarted.
