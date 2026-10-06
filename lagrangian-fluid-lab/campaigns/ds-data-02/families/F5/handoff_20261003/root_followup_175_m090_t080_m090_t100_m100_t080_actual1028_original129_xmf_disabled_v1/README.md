@@ -1,0 +1,11 @@
+# fresh175 — M090_T080 / M090_T100 / M100_T080 actual1028 original129 XMF bindings
+
+This F5-only source package binds the three real chains GenCase root848 → initial Mk50 QA root849 → native full801 root1017 → typed1028. Each producer receipt is completed/0, 3-D, 801 frames, with 194427 particles (158559 fixed, 4210 moving, 31658 fluid). The stage-one placement proof passes while the historical precision negative remains explicit.
+
+The three original129 N3 XMF requests are disabled: `execution_allowed=false`, `launch_allowed=false`, `solver_allowed=false`, `full801_authorized=false`, future XMF/receipt hashes are null, and case credit is zero. Root may register them later after independent review. This source preparation launched no scientific task and did not open or hash H5, BI4, CSV, DAT, or VTK payloads.
+
+Scope roles stay separate for each case. Native/owner canonical and source-plan roles come from that case's own native producer request. The actual converter legacy scope comes from that case's typed1028 `conversion-report.json` `hash_scopes.physical_condition_sha256`; the owner/source hash and typed legacy hash are recorded independently even where their serialized physical content differs. The Source_Def SHA, source-plan file SHA, and source172 subset correction are provenance roles. The source172 subset is historical evidence only and is never copied into actual1028 scope fields.
+
+The future exporter is the unchanged Root1035 original129 legacy-aware worker at `/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_129_stage1_f5_c082s1_root142_runtime_binding_disabled_v1/workers/export_xmf_legacy_aware.py` with SHA `aeccc3204d751250bd94ffab704ed65c2c691c4739f4b2f5e0d51aefb21b4e3c`. Future XMF outputs remain placeholders under `{attempt_root}`. All requests use Root142 CPU/audit metadata, CPU2, Home 500 GiB floor, 4 GiB publish cap, 24 GiB NVMe staging limit, and shared conversion cap 1.
+
+The manifest excludes the generated validator report to avoid self-reference. Final request hashes are bound by the manifest rather than embedded in the source-plan sidecar, which is itself a request input.
