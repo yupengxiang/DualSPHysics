@@ -22,7 +22,7 @@ def main():
     plan=load(ROOT/'metadata/fresh160-source-plan.json'); att=load(ROOT/'metadata/terminal-typed-attestations.json'); contract=load(ROOT/'metadata/worker-contract.json')
     req(plan['source_only'] and plan['no_jobs_started'] and plan['no_shared_state_modified'],'source policy')
     worker=pathlib.Path(contract['worker_path']); req(worker.is_file() and sha(worker)==contract['worker_sha256'],'worker SHA')
-    req(contract['required_binding_keys']==['typed_receipt','native_receipt','conversion_report','trajectory_h5','physical_condition_sha256','source_h5_physical_condition_sha256','physical_condition_hash_semantics','physical_case_id','expected_frames','physical_window_s'],'worker key contract')
+    req(contract['required_binding_keys']==['typed_receipt','native_receipt','conversion_report','trajectory_h5','physical_condition_sha256','source_h5_physical_condition_sha256','physical_condition_hash_semantics','physical_case_id','expected_frames','physical_window_s','initial_qa_receipt','initial_qa_output_root','initial_qa_report','actual_counts'],'worker key contract')
     results={}
     for tag in ('M095_T080','M085_T100'):
         bpath=ROOT/'bindings'/f'{tag}-terminal-xmf-binding.json'; qpath=ROOT/'requests'/f'{tag}-terminal-xmf-request.json'; b=load(bpath); q=load(qpath); a=att['cases'][tag]
@@ -36,6 +36,13 @@ def main():
         req(b['conversion_report']==b['full_typed_conversion_report'] and b['conversion_report_sha256']==b['full_typed_conversion_report_sha256'],'report aliases')
         req(b['native_receipt']==b['full_native_receipt'] and b['native_receipt_sha256']==b['full_native_receipt_sha256'],'native receipt alias')
         req(b['actual_counts']['total_particles']==194427 and b['actual_counts']['fluid_particles']==31658 and b['actual_counts']['solver_dimension']==3,'actual counts')
+        qa_receipt=pathlib.Path(b['initial_qa_receipt']); qa_report=pathlib.Path(b['initial_qa_report']); qr=load(qa_receipt); qreport=load(qa_report)
+        req(qr['status']=='completed' and qr['returncode']==0,'initial QA receipt')
+        req(b['initial_qa_output_root']==str(pathlib.Path(str(qr['output_root'])).resolve()),'initial QA output root')
+        req(sha(qa_receipt)==b['initial_qa_receipt_sha256'] and sha(qa_report)==b['initial_qa_report_sha256'],'initial QA metadata hashes')
+        req(b['actual_counts']==qreport['actual_counts'],'actual counts normalized to initial QA report')
+        req(qreport['all_basic_placement_checks_pass'] is True and qreport['stage1_basic_placement_proof']=='pass_excluding_numerical_precision','initial placement proof')
+        req(qreport['numerical_precision_result_accepted'] is False,'precision negative retained')
         req(b['expected_frames']==801 and b['expected_particle_axis']==194427 and b['expected_dimension']==3,'dimensions')
         can=b['physical_condition_sha256']; sp=b['source_plan_physical_condition_sha256']; leg=b['source_h5_physical_condition_sha256']
         req(all(isinstance(x,str) and len(x)==64 and set(x)<=HEX for x in (can,sp,leg)) and len({can,sp,leg})==3,'scope separation')
@@ -56,7 +63,7 @@ def main():
         if tag=='M095_T080':
             st=h5.stat(); obs=b['trajectory_h5_stat']; req(obs['exists_at_source_preparation'] is True and obs['size_bytes']==st.st_size,'M095 H5 stat')
         req(a['producer_h5_sha256']==b['trajectory_h5_sha256'],'attestation')
-        results[tag]={'typed_receipt':'completed/0','frames':rep['frames'],'particles':rep['particles'],'native_receipt_alias_verified':True,'future_xmf_hashes_null':True,'source_h5_opened_or_hashed':False}
+        results[tag]={'typed_receipt':'completed/0','frames':rep['frames'],'particles':rep['particles'],'native_receipt_alias_verified':True,'initial_qa_output_root_bound':True,'actual_counts_bound_from_initial_qa_report':True,'future_xmf_hashes_null':True,'source_h5_opened_or_hashed':False}
     manifest=load(ROOT/'manifest.json'); paths={x['path'] for x in manifest['files']}
     req('manifest.json' not in paths and 'metadata/fresh160-validator-report.json' not in paths,'manifest self reference')
     for entry in manifest['files']:
