@@ -1,13 +1,27 @@
 {
   "adapter": {
+    "actual_counts_normalization": "Fresh159/158 retained verbatim; fresh161 copies actual_counts exactly from the completed M086 initial-QA report because the original gate compares that object byte-for-byte and the report omits only the legacy data2d=false bookkeeping key",
     "arrays_edited": false,
     "delegation": "original.main after rebind",
-    "metadata_regression": "worker --check executes a stub original.main that asserts module CASE_ID equals binding case_id, then loads the real original module and checks its base CASE_ID before rebinding",
+    "initial_qa_output_root": "Copied from the completed actual initial-QA receipt output_root; this is a mutable producer-root field required by the original gate",
+    "metadata_regression": "--check executes unchanged original._verify_bound_metadata on real producer JSON/XML metadata copied into a temporary metadata-only fixture, after CASE_ID rebind, through the original XMF manifest gate; no science payload is opened or hashed",
+    "mutable_root_bound_fields": [
+      "actual_counts",
+      "initial_qa_output_root",
+      "xmf_manifest",
+      "xmf_manifest_sha256",
+      "xdmf",
+      "xdmf_sha256",
+      "xmf_receipt",
+      "xmf_receipt_sha256",
+      "xmf_attempt_id"
+    ],
     "numerical_logic_unchanged": true,
     "only_in_memory_change": "original loaded module global CASE_ID",
     "receipts_edited": false,
     "schema": "ds02.f5.c082s1.m086.case-rebind-adapter.fresh161.v2",
-    "thresholds_changed": false
+    "thresholds_changed": false,
+    "xmf_attempt_id_policy": "Null in this disabled package; Root may fill only from the actual XMF receipt/manifest identity, without changing execution/source/physics flags"
   },
   "downstream_gate": "disabled until Root has actual XMF manifest/XDMF and independently approves full801 bed/render/visual review; no Q-N or case credit",
   "fresh159_preserved": true,

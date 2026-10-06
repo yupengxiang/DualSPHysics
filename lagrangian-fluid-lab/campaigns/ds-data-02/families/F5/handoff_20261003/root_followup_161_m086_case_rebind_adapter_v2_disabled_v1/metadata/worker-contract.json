@@ -1,10 +1,23 @@
 {
+  "actual_counts": "Fresh161 uses the actual initial-QA report object exactly; numeric fixed/moving/fluid/floating/total counts are unchanged from fresh159",
   "adapter_worker": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_161_m086_case_rebind_adapter_v2_disabled_v1/workers/identity_bound_bed_audit_fresh161.py",
-  "adapter_worker_sha256": "d9ee32115f5b81b779c40baf4c0253f4662ccc271a23d8ca22b88b21ad80f98d",
+  "adapter_worker_sha256": "15903c829e994e1847c42a8b12f41b7322ee5b1419f0dd4e74b41ce4110ffa47",
   "disabled_only": true,
+  "initial_qa_output_root": "Must equal actual initial_qa_receipt.output_root",
+  "mutable_root_bound_fields": [
+    "actual_counts",
+    "initial_qa_output_root",
+    "xmf_manifest",
+    "xmf_manifest_sha256",
+    "xdmf",
+    "xdmf_sha256",
+    "xmf_receipt",
+    "xmf_receipt_sha256",
+    "xmf_attempt_id"
+  ],
   "original_worker": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_138_stage1_f5_remaining10_full801_downstream_disabled_v1/workers/bed_audit_full801_fresh138.py",
   "original_worker_sha256": "89be048da1df6bae49627308edb35a8a1936bc0888259cb5ab3d195307b550e2",
-  "real_metadata_gate": "original._verify_bound_metadata sees producer case_id after module rebind",
+  "real_metadata_gate": "Unchanged original._verify_bound_metadata is run after in-memory CASE_ID rebind on a temporary fixture made only from actual JSON/XML metadata plus empty Part_* name placeholders; it reaches the original XMF checks without opening science payloads",
   "regression_command": "python3 workers/identity_bound_bed_audit_fresh161.py --check",
   "required_cli": [
     "--binding",
@@ -13,5 +26,6 @@
     "--output-dir"
   ],
   "required_rebind": "original.CASE_ID = binding.case_id immediately before original.main",
-  "schema": "ds02.f5.fresh161.adapter-contract.v1"
+  "schema": "ds02.f5.fresh161.adapter-contract.v1",
+  "xmf_attempt_id": "Null while disabled; if Root binds it later, worker requires a non-empty identity and matching XMF receipt/manifest case/attempt metadata"
 }
