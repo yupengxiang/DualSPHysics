@@ -30,6 +30,23 @@ def validate_inputs(req):
    if cats[raw]!='metadata_current_hash' or sha(p)!=hs[raw]: fail(f"{req['tag']}: current metadata hash {raw}")
   else:
    if cats[raw]!='registered_binary_attestation' or not hs[raw]: fail(f"{req['tag']}: binary attestation {raw}")
+def validate_wait_snapshot(pkg):
+ s=load(pkg/'metadata/fresh172-root984-root1016-status.json')
+ r=s['root1016_three_original138_bed']
+ if r.get('status')!='WAIT_registration_or_execution_in_progress_no_terminal_science_receipts': fail('root1016: wait status')
+ if r.get('same_controller_handle_for_all_requests') is not True or r.get('all_execution_receipts_absent_at_source_prep') is not True: fail('root1016: controller/receipt wait state')
+ if r.get('controller_requests_match_launch_process') is not True or r.get('request_count')!=3: fail('root1016: controller request closure')
+ if r.get('controller_config_sha256')!=sha(r['controller_config']): fail('root1016: config sha')
+ if r.get('controller_launch_process_sha256')!=sha(r['controller_launch_process']): fail('root1016: launch sha')
+ rows=r.get('requested_original138_tags',[])
+ if len(rows)!=3: fail('root1016: request rows')
+ handles={(r['pid'],r['proc_start_ticks'])}
+ for row in rows:
+  p=Path(row['request'])
+  if not p.is_file() or sha(p)!=row.get('request_sha256'): fail(f"root1016: request file/hash {row.get('tag')}")
+  if (row.get('controller_pid'),row.get('controller_proc_start_ticks')) not in handles: fail(f"root1016: controller handle {row.get('tag')}")
+  if row.get('execution_receipt_exists') is not False or Path(row['expected_execution_receipt']).exists(): fail(f"root1016: terminal receipt appeared {row.get('tag')}")
+ return True
 def one(pkg,p):
  r=load(p); tag=r['tag']; b=load(r['physical_binding_path']);
  if r['package_id']!=PKGID or b['package_id']!=PKGID or tag not in TAGS: fail(f'{tag}: identity')
@@ -61,6 +78,7 @@ def main():
  if [x['tag'] for x in out]!=sorted(TAGS): fail('request tags/order')
  census=load(pkg/'metadata/fresh172-accepted219-and-exclusion-census.json')
  if census['selected_tags']!=TAGS or census['selected_not_in_checkpoint147'] is not True: fail('selection census')
+ validate_wait_snapshot(pkg)
  # Meaningful negative: a directory is rejected as an input without opening it.
  try: validate_inputs({'tag':'negative','input_files':[str(pkg)],'input_sha256':{str(pkg):None},'input_sha256_categories':{str(pkg):'producer_payload_attestation'},'input_sha256_provenance':{str(pkg):'producer directory'}})
  except AssertionError: neg=True
