@@ -1,0 +1,14 @@
+# F5 fresh183 — four disabled original138 bed handoffs
+
+This F5-only source package binds four actual XMF producers to the unchanged original138 full801 bed audit. The upstream chains are independently closed to each case's genuine GenCase, initial Mk50 QA, full801 native, typed157, XMF receipt/manifest, generated XML, `Source_Def.xml`, canonical owner, source-plan role, and actual typed/XMF producer scope.
+
+| tag | GenCase | initial QA | native | typed | XMF |
+|---|---|---|---|---|---|
+| M094_T095 | root-stage1-f5-next34-m094_t095-own824-genuine-gencase-root848 | root-stage1-f5-next34-m094_t095-own848-initial-placement-mk50-root849 | root-stage1-f5-next34-m094_t095-own848849-full801-native-root850 | root-stage1-f5-m094_t095-actual-native0-full801-typed157-home4gib-root988 | root-stage1-f5-m094_t095-actual988-full801-N3-xmf129-root1060 |
+| M096_T085 | root-stage1-f5-next34-m096_t085-own824-genuine-gencase-root848 | root-stage1-f5-next34-m096_t085-own848-initial-placement-mk50-root849 | root-stage1-f5-next34-m096_t085-own848849-full801-native-root850 | root-stage1-f5-m096_t085-actual-native0-full801-typed157-home4gib-root988 | root-stage1-f5-m096_t085-actual988-full801-N3-xmf129-root1060 |
+| M096_T095 | root-stage1-f5-next34-m096_t095-own824-genuine-gencase-root848 | root-stage1-f5-next34-m096_t095-own848-initial-placement-mk50-root849 | root-stage1-f5-next34-m096_t095-own848849-full801-native-root850 | root-stage1-f5-m096_t095-actual-native0-full801-typed157-home4gib-root988 | root-stage1-f5-m096_t095-actual988-full801-N3-xmf129-root1060 |
+| M114_T085 | root-stage1-f5-next34-m114_t085-own824-genuine-gencase-root848 | root-stage1-f5-next34-m114_t085-own848-initial-placement-mk50-root849 | root-stage1-f5-next34-m114_t085-own848849-full801-native-source170-root1017 | root-stage1-f5-m114_t085-actual-native0-full801-typed157-home4gib-root1045 | root-stage1-f5-m114_t085-actual1045-full801-N3-xmf129-root1107 |
+
+All four requests remain disabled, declare `kind=cpu`, `cpu_task_kind=audit`, CPU2, and a shared serial cap of one for future Root142 registration. The identity adapter only binds the producer case identity; original138 numeric logic, 3-D/801-frame contract, Mk50/native-mkbound40 mapping, UID/finite checks, and 0.02/0.04 m bins are unchanged. Future bed receipts/reports are null, no visual/Q-N/case credit is granted, and exact-DP precision plus A/B penetration negatives remain retained. Canonical owner, `Source_Def`/source-plan roles, producer typed/XMF scope, and historical legacy scope are carried in separate fields; no cross-resolution equality is inferred.
+
+Validation is metadata-only and may execute original138's pre-array metadata gate. It does not open or hash H5/BI4/CSV/DAT/VTK payloads, launch work, write shared state, or add case credit. A future Root run must perform the actual 801-frame bed audit and separately review full visual evidence.
