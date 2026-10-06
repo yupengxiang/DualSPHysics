@@ -1,0 +1,233 @@
+from pathlib import Path
+import json, hashlib, subprocess, runpy, re, datetime
+
+R = Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics')
+L = R/'lagrangian-fluid-lab'
+H = L/'campaigns/ds-data-02/handoff_20261003'
+W = Path('/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics')
+D = Path('/home/jade/Projects/DualSPHysics-data/ds-data-02')
+root = lambda n: next(H.glob(f'root*_{n:03d}'))
+load = lambda p: json.loads(Path(p).read_text())
+def put(p, value):
+    Path(p).write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n')
+def sha(p):
+    p = Path(p)
+    assert p.is_file() and p.suffix.lower() in {'.json','.jsonl','.py','.md','.xml','.xmf','.sh','.toml','.ini'}
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+ref = lambda p: {'path':str(p), 'sha256':sha(p)}
+prefix = 'lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_173_f5_native1017_remaining6_typed157_home4gib_disabled_v1'
+commit = 'baab880f6a5810dd1227f353f963da937f533ae9'
+names = subprocess.check_output(['git','ls-tree','-r','--name-only',commit,'--',prefix],cwd=W,text=True).splitlines()
+assert len(names)>=17
+adopted=[]
+for name in names:
+    assert Path(name).suffix in {'.json','.py','.md'}
+    raw=subprocess.check_output(['git','show',f'{commit}:{name}'],cwd=W)
+    assert raw==(W/name).read_bytes()
+    p=R/name
+    assert not p.exists() or p.read_bytes()==raw
+    p.parent.mkdir(parents=True,exist_ok=True)
+    p.write_bytes(raw)
+    adopted.append(ref(p))
+P=R/prefix
+O=H/'root_stage1_F5_source173_six_actual_native0_full801_typed157_actual974_tools_Home4GiB_1045'
+O.mkdir(exist_ok=True)
+assert not (O/'controller-config.json').exists()
+validator=W/prefix/'scripts/validate_fresh173.py'
+source_target=W/prefix/'metadata/fresh173-validation-report.json'
+source_report_before=ref(source_target)
+proof=root(1044)/'source173-six-full801-independent-metadata-review.json'
+proof_data=load(proof)
+assert proof_data['source_commit']==commit and proof_data['requests_remain_disabled'] and len(proof_data['cases'])==6
+v={'SAFE':{'.json','.xml','.py','.md','.sh','.toml','.ini','.yaml','.yml'},'SCI':{'.bi4','.dat','.csv','.h5','.vtk','.vtu','.pvtu','.npy','.npz','.png','.jpg','.jpeg'}}
+requests=sorted((P/'requests').glob('*.json'))
+assert len(requests)==6
+put(O/'actual-source173-independent-validator.json',{'source_validator':ref(validator),'status':'pass-disabled-metadata-only','original_assertions_and_full_independent_metadata_review_already_executed':ref(proof),'source_report_preserved':source_report_before,'science_payload_IO':False})
+cp=load(H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_157.json')
+accepted=[load(p) for p in cp['accepted_decisions']]
+ids={z.get('physical_case_id',z['case_id']) for z in accepted}
+scopes={z['physical_condition_sha256'] for z in accepted}
+for n in [939,972,971]:
+    for p in root(n).glob('*request*.json'):
+        q=load(p)
+        if q.get('physical_case_id'):
+            ids.add(q['physical_case_id'])
+        if q.get('physical_condition_sha256'):
+            scopes.add(q['physical_condition_sha256'])
+for nn in [983,988,1006,1028]:
+ for p in (root(nn)/'requests').glob('*.json'):
+    pending=load(p);ids.add(pending['physical_case_id']);scopes.add(pending['physical_condition_sha256'])
+base=load(root(974)/'enabled-typed-request.json')
+fair=root(928)/'fair_CPU_dispatch.py'
+assert sha(fair)=='e2796fb88cc989278bcc4d194493f11e5ded7e6d2fb79ef37349d7ae7d8d679f'
+converter=runpy.run_path(str(L/'scripts/ds_data02_direct_convert.py'))
+controller=O/'batch-typed-controller.py'
+controller.write_text("""from pathlib import Path
+import json,runpy,time,hashlib
+O=Path(__file__).parent
+c=json.loads((O/'controller-config.json').read_text())
+assert hashlib.sha256(Path(c['fair_dispatch']['path']).read_bytes()).hexdigest()==c['fair_dispatch']['sha256']
+dispatch=runpy.run_path(c['fair_dispatch']['path'])['dispatch']
+results=[]
+for qp in c['requests']:
+    assert hashlib.sha256(Path(qp).read_bytes()).hexdigest()==c['request_sha256'][qp]
+    q=json.loads(Path(qp).read_text())
+    r=dispatch(qp,serial_conversion=True)
+    rp=Path(q['attempt_root'])/'execution-receipt.json'
+    a=json.loads(rp.read_text()) if rp.exists() else {}
+    tp=Path(q['attempt_root'])/'conversion-report.json'
+    t=json.loads(tp.read_text()) if tp.exists() else {}
+    passed=(r.returncode==0 and a.get('status')=='completed' and a.get('returncode')==0
+        and t.get('conversion_status')=='completed' and t.get('frames')==801
+        and t.get('particles')==194427 and t.get('solver_dimension',{}).get('solver_dimension')==3
+        and t.get('partvtk_validation',{}).get('all_passed') is True
+        and t.get('hash_scopes',{}).get('physical_condition_sha256')==q['expected_converter_scope_sha256'])
+    z={'tag':q['tag'],'case_id':q['case_id'],'physical_case_id':q['physical_case_id'],
+       'request':qp,'actual_receipt':str(rp),'actual_conversion_report':str(tp),
+       'status':a.get('status'),'returncode':a.get('returncode'),'launcher_returncode':r.returncode,
+       'actual_full801_typed_pass':passed,'stdout_tail':r.stdout[-1800:],
+       'stderr_tail':r.stderr[-1800:],'case_credit':0}
+    results.append(z)
+    progress={'results':results,'not_submitted':len(c['requests'])-len(results),'case_credit':0}
+    (O/'actual-progress.json').write_text(json.dumps(progress,indent=2)+'\\n')
+    print(json.dumps(z),flush=True)
+    if not passed:
+        (O/'controller-result.json').write_text(json.dumps({'status':'stopped_for_primary_failure_classification',
+            'failed_tag':q['tag'],'not_submitted':progress['not_submitted'],
+            'returncode':r.returncode or 1,'case_credit':0},indent=2)+'\\n')
+        raise SystemExit(r.returncode or 1)
+    time.sleep(4)
+(O/'controller-result.json').write_text(json.dumps({'status':'completed','returncode':0,
+    'actual_completed_conversions':len(results),'case_credit':0},indent=2)+'\\n')
+""")
+(O/'requests').mkdir(exist_ok=True)
+assert not list((O/'requests').glob('*.json'))
+enabled=[]
+rows=[]
+for source in requests:
+    q=load(source)
+    assert sha(q['actual_native_dependency']['receipt'])==q['actual_native_dependency']['receipt_sha256'];assert sha(q['actual_native_dependency']['request'])==q['actual_native_dependency']['request_sha256']
+    assert q['physical_case_id'] not in ids and q['physical_condition_sha256'] not in scopes
+    ids.add(q['physical_case_id']);scopes.add(q['physical_condition_sha256'])
+    n=load(q['actual_native_dependency']['receipt'])
+    assert n['status']=='completed' and n['returncode']==0
+    assert n['request']['case_id']==q['case_id'] and n['request']['physical_case_id']==q['physical_case_id']
+    assert n['request']['physical_condition_sha256']==q['physical_condition_sha256']
+    assert n['request']['gencase_receipt']==q['gencase_receipt']
+    assert n['request']['gencase_receipt_sha256']==sha(q['gencase_receipt'])
+    assert n['input_hashes_at_launch'][q['generated_xml']]==n['input_hashes_after_run'][q['generated_xml']]==q['generated_xml_sha256']
+    assert str(Path(q['generated_xml']).with_suffix('')) in n['command']
+    if n['request'].get('generated_xml'):
+        assert n['request']['generated_xml']==q['generated_xml']
+    qa_receipt=load(q['actual_initial_qa_receipt'])
+    assert (qa_receipt['status'],qa_receipt['returncode'])==('completed',0)
+    dr=Path(q['native_solver_data_root'])
+    frames=sorted(p.name for p in dr.iterdir() if re.fullmatch(r'Part_[0-9]+\.bi4',p.name))
+    assert frames==[f'Part_{i:04d}.bi4' for i in range(801)]
+    owner=load(q['owner_metadata'])
+    assert owner['physical_case_id']==q['physical_case_id']
+    prospective_scope=converter['_physical_condition_scope'](owner)
+    legacy=converter['canonical_hash'](prospective_scope)
+    assert q['source_h5_legacy_scope']['schema']=='ds02.direct-convert.legacy-owner-scope.v0'
+    assert prospective_scope==q['source_h5_legacy_scope']['scope_fields']
+    assert legacy==q['source_h5_legacy_scope']['sha256']==q['root_prospective_legacy_scope_sha256']==q['source_h5_legacy_scope_sha256']
+    assert q['source_plan_physical_condition_sha256']==sha(q['source_definition'])
+    source_scope_verification={'source_request':ref(source),'actual_complete_converter_metadata_scope_fields':prospective_scope,'actual_expected_converter_scope_sha256':legacy,'original_source_complete_scope_unchanged':True,'independent_adoption_review':ref(proof),'metadata_scope_not_future_payload_digest':True,'main_scientific_payload_IO':False}
+    put(O/(q['tag']+'-source173-complete-scope-verification.json'),source_scope_verification)
+    # A historical source artifact digest is preserved by role; the new converter's
+    # expected metadata scope is derived independently from its exact current owner.
+    cmd=q['command'].copy()
+    assert sha(cmd[1])=='37fe7eaff4405e9ba6d9b7f666a53d7c02ee65fc6f30992fc1a8fdb0d8a61b11'
+    md={};directories=[];payload_attestations=[]
+    for p,digest in q['input_sha256'].items():
+        path=Path(p)
+        assert path.is_absolute() and path.exists()
+        if path.is_dir():
+            assert digest is None and q['input_sha256_categories'][p]=='producer_directory'
+            directories.append({'path':p,'runtime_hash':None,'binding':'Actual per-case native receipt and solver data root; scientific producer validates and hashes raw saved states.'})
+        else:
+            assert digest is not None
+            if path.suffix.lower() in v['SAFE']:
+                assert sha(path)==digest
+            else:
+                if path.suffix.lower() in v['SCI']:
+                    if p==q['generated_bi4']:
+                        assert digest==load(q['prepared_input_report'])['bi4_sha256']
+                    else:
+                        assert n['input_hashes_at_launch'].get(str(path.resolve()))==digest
+                        assert n['input_hashes_after_run'].get(str(path.resolve()))==digest
+                    payload_attestations.append({'path':p,'sha256_producer_attested':digest,'main_read_or_hash':False})
+                else:
+                    assert q['input_sha256_categories'][p]=='registered_binary_attestation'
+                    assert hashlib.sha256(path.resolve().read_bytes()).hexdigest()==digest
+                    tool=next(z for z in q['registered_tool_attestations'].values() if z['path']==p)
+                    producer=load(tool['source_receipt']);assert sha(tool['source_receipt'])==tool['source_receipt_sha256']
+                    assert (producer['status'],producer['returncode'])==('completed',0)
+                    resolved=tool['resolved_receipt_path'];assert tool['sha256']==digest==producer['input_hashes_at_launch'][resolved]==producer['input_hashes_after_run'][resolved]
+            md[p]=digest
+    # Tools used by the converter are grounded in actual974, not the stale
+    # informational decoder contract in the immutable source173 package.
+    r974q=load(root(974)/'enabled-typed-request.json');r974=load(Path(r974q['attempt_root'])/'execution-receipt.json')
+    tools=[]
+    for flag in ['--decoder','--partvtk']:
+        pp=Path(cmd[cmd.index(flag)+1]);actual=hashlib.sha256(pp.resolve().read_bytes()).hexdigest();resolved=str(pp.resolve())
+        assert r974['input_hashes_at_launch'][resolved]==r974['input_hashes_after_run'][resolved]==actual
+        md[str(pp)]=actual;tools.append({'path':str(pp),'sha256':actual,'actual_receipt':str(Path(r974q['attempt_root'])/'execution-receipt.json')})
+    for p in [controller,fair,source,O/'actual-source173-independent-validator.json',L/'scripts/ds_data02_strict_dispatch_v1.py',L/'scripts/ds_data02_runtime_v2.py',root(142)/'launch.py',root(142)/'root_home_floor_inventory_policy.py',root(64)/'resource-window-approval.json']:
+        md[str(p)]=sha(p)
+    q['root_actual_converter_tool_bindings_from974']=tools
+    q['root_source173_complete_prospective_scope_verification']=source_scope_verification
+    aid='root-stage1-f5-'+q['tag'].lower()+'-actual-native0-full801-typed157-home4gib-root1045'
+    ar=D/'families/F5'/q['case_id']/aid
+    assert not ar.exists()
+    staging='/tmp/ds02-nvme-typed-cache-root1045-'+q['tag'].lower()
+    assert not Path(staging).exists()
+    cmd[cmd.index('--staging-root')+1]=staging
+    current=f"F5/{q['case_id']}/{aid}"
+    cmd[cmd.index('--current-attempt-id')+1]=current
+    q.update({k:base[k] for k in ['root_dataset_inventory_profile','root_inventory_policy_sha256',
+        'root_actual_launch_source','root_actual_launch_source_sha256','environment_policy']})
+    q.update(attempt_id=aid,attempt_root=str(ar),current_attempt_id=current,command=cmd,
+        input_files=sorted(md),input_sha256=md,worktree_root=str(R),
+        disabled=False,source_only=False,launch=True,launch_allowed=True,execution_allowed=True,
+        conversion_allowed=True,arrays_allowed=True,root_review_required=False,
+        root_source_request=ref(source),root_source_provenance_directories=directories,
+        expected_converter_scope_sha256=legacy,
+        root_prospective_legacy_scope_sha256=legacy,
+        root_converter_scope_is_prospective_owner_metadata_hash_not_future_H5_digest=True,
+        estimated_storage_bytes=4*1024**3,cpu_threads=2,cpu_task_kind='conversion',case_credit=0,
+        input_sha256_categories={p:q['input_sha256_categories'].get(p,'root_metadata_current_hash') for p in md},
+        input_sha256_provenance={p:q['input_sha256_provenance'].get(p,'Primary registered immutable metadata/source SHA') for p in md})
+    qp=O/'requests'/(q['tag']+'-enabled-typed-request.json')
+    put(qp,q);enabled.append(str(qp))
+    rows.append({'tag':q['tag'],'physical_case_id':q['physical_case_id'],
+        'source_canonical_scope':q['physical_condition_sha256'],
+        'source_plan_scope':q['source_plan_physical_condition_sha256'],
+        'prospective_unchanged_converter_scope':legacy,
+        'source_complete_prospective_converter_metadata_scope_preserved':q['source_h5_legacy_scope'],'independent_complete_scope_verification':source_scope_verification,
+        'scope_roles_separate':True,'native_receipt':ref(q['actual_native_dependency']['receipt']),
+        'initial_QA_receipt':ref(q['actual_initial_qa_receipt']),
+        'native_full801_filename_count':801,'producer_attestations':payload_attestations,
+        'directories_preserved_as_provenance_not_runtime_input_files':directories,
+        'enabled_request':ref(qp),'future_output_hashes':q['future_output_hashes']})
+assert len(enabled)==6
+assert all(all(v is None for v in load(p)['future_output_hashes'].values()) for p in enabled)
+put(O/'controller-config.json',{'requests':enabled,'request_sha256':{p:sha(p) for p in enabled},
+    'fair_dispatch':ref(fair),'effective_shared_serial_conversion_concurrency':1,
+    'cooperative_yield_between_admitted_jobs_seconds':4,'case_credit':0})
+put(O/'source173-adoption-and-primary-six-case-metadata-review.json',{
+    'source_commit':commit,'adopted_files':adopted,'cases':rows,
+    'registered_tool_current_binary_and_actual_producer_receipt_attestations_match':True,
+    'all6_actual1017_native0_initial_QA0_GenCase0_full801':True,
+    'accepted240_actual98398810061028_existing_typed_requests_excluded':True,
+    'source_package_validator_report_not_overwritten':source_report_before,
+    'runtime_files_only_guard':'Source directory references retained separately as provenance; enabled strict runtime input_files contain actual immutable files only. Runtime source and all checks unchanged.',
+    'science_payload_IO_by_primary':False,'future_scientific_product_hashes_null':True,
+    'numeric_precision_negatives_preserved':True,'q_n_granted':False,'q_e_granted':False,
+    'case_credit':0,'Home_floor_GiB':500,'per_output_cap_GiB':4})
+(O/'preparation-source.py').write_bytes(Path(__file__).read_bytes())
+paths=[str(Path(z['path']).relative_to(R)) for z in adopted]+[str(p.relative_to(R)) for p in O.rglob('*') if p.is_file()]
+subprocess.run(['git','add','--',*paths],cwd=R,check=True)
+subprocess.run(['git','commit','-q','-m','ds02: register six distinct full801 F5 native cases for capped typed157 conversion','--',*paths],cwd=R,check=True)
+print({'root':str(O),'enabled_cases':6,'source_files':len(adopted),
+    'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()})
