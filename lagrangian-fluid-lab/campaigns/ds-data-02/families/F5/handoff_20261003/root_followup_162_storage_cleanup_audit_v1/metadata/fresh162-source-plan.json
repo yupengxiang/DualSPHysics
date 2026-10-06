@@ -1,0 +1,29 @@
+{
+  "schema": "ds02.f5.storage-audit-source-plan.v1",
+  "fresh_id": "162",
+  "family": "F5",
+  "objective": "metadata-only audit of failed or incomplete intermediate results for parent-controlled bounded cleanup",
+  "execution_allowed": false,
+  "delete_allowed": false,
+  "shared_ledger_write_allowed": false,
+  "science_payload_read_or_hash_allowed": false,
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "max",
+  "data_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5",
+  "resource_ledger": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+  "audit_script": "scripts/audit_fresh162.py",
+  "report": "metadata/fresh162-audit-report.json",
+  "protection_policy": {
+    "completed_or_unknown_receipts": "protect",
+    "accepted199_and_accepted_decisions": "protect",
+    "native0_stock_and_current_queue_dependencies": "protect",
+    "numeric_precision_negative": "retain_as_negative_evidence",
+    "new_cleanup_requires_parent_freeze_and_dependency_recheck": true
+  },
+  "cleanup_policy": {
+    "candidate_action": "review_only",
+    "preserve_receipt_log_runout_and_provenance": true,
+    "no_auto_unlink": true,
+    "no_auto_rmtree": true
+  }
+}
