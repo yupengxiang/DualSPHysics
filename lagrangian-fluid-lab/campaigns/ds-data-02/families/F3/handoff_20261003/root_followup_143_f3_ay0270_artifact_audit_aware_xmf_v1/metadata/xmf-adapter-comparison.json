@@ -1,0 +1,93 @@
+{
+  "adapter_worker": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_143_f3_ay0270_artifact_audit_aware_xmf_v1/scripts/ay0270_artifact_audit_xmf_adapter.py",
+    "schema": "ds02.f3.artifact-audit-aware-xmf-adapter.v1",
+    "segments": {
+      "audit_aware_manifest": "319-367",
+      "metadata_only_cli": "369-390",
+      "receipt_role_preflight": "115-245",
+      "verified_upstream_writer_import": "247-257",
+      "xmf_temporal_grid_reuse": "260-318"
+    },
+    "sha256": "66004d8119bf9a008c095a1b8bc6571eab242dbd4a09fbcd0e81479d89265ce1",
+    "upstream_reuse": "The adapter verifies the immutable upstream export_xmf.py SHA, imports its FIELDS/item/sha functions, and uses the same field list, HyperSlab layout, time loop, N3 geometry, source-H5 reference and read-only post-write check."
+  },
+  "case_id": "F3_STAGE1_DP006_P1000_AY0270",
+  "comparison_basis": {
+    "new_adapter_is_additive": true,
+    "original_worker_is_immutable": true,
+    "receipt_semantics_changed": true,
+    "scientific_logic_changed": false,
+    "scope_semantics_made_explicit": true
+  },
+  "family_id": "F3",
+  "fresh_id": "fresh143",
+  "interface_delta": [
+    {
+      "new": "binding.original_conversion_receipt is required to remain status running with no returncode field; binding.artifact_audit_receipt must be completed/0; binding.native_receipt must independently be completed/0.",
+      "old": "binding.typed_receipt and binding.native_receipt must each be completed/0 (old lines 58-60)."
+    },
+    {
+      "new": "physical_condition_sha256/canonical_source_physical_condition_sha256 retain native canonical scope; converter_physical_condition_sha256/actual_converter_scope_sha256 retain legacy-owner-scope.v0. The H5 attribute and conversion report are checked against the legacy field, with no scope collapse.",
+      "old": "binding.physical_condition_sha256 is compared directly to conversion_report.hash_scopes.physical_condition_sha256 (old lines 67-70)."
+    },
+    {
+      "new": "the new manifest carries receipt_roles.original_conversion_receipt, artifact_audit_receipt, native_receipt, and conversion_report; it never presents the audit receipt as a typed receipt.",
+      "old": "the old manifest carries a typed receipt role."
+    },
+    {
+      "new": "artifact_audit_report must prove completed/0, 836 frames, 179208 particles, N3, finite typed fields, zero UID lifecycle missing and verified H5 SHA before XMF build.",
+      "old": "the old worker has no audit evidence role."
+    },
+    {
+      "new": "execution reads the same immutable H5 path only inside Root CPU registration; source preflight never opens it and checks the Root1166/producer attested SHA before build.",
+      "old": "execution reads the H5 as the typed source."
+    }
+  ],
+  "physical_case_id": "F3_TWOAXIS_PITCH1000_AY0270_STAGE1_FIRST24_NEW",
+  "schema": "ds02.f3.artifact-audit-aware-xmf-adapter-comparison.v1",
+  "science_path_reuse": {
+    "audit_verified_h5_sha256": "6faac15de658d415b2663099ce26c1d6c10a0e24dce4a45530b4e61ffa9cdad3",
+    "dimension": 3,
+    "expected_frames": 836,
+    "expected_particles": 179208,
+    "no_copy_or_rewrite": true,
+    "original_time_window_s": [
+      0.0,
+      8.35
+    ],
+    "original_xmf_fields_preserved": true,
+    "producer_h5_sha256_attested": "6faac15de658d415b2663099ce26c1d6c10a0e24dce4a45530b4e61ffa9cdad3",
+    "source_agent_did_not_compute_h5_sha256": true,
+    "trajectory_h5_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_DP006_P1000_AY0270/root-stage1-f3-ay0270-full836-typed-nvme-154/trajectory.h5"
+  },
+  "source_boundary": {
+    "jobs_started": false,
+    "shared_state_modified": false,
+    "source_agent_hashed_scientific_payloads": false,
+    "source_agent_read_scientific_payloads": false
+  },
+  "upstream_worker": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_104_f3_next20_typed_xmf_render_source_v1/workers/export_xmf.py",
+    "schema": "fresh104 export_xmf.py",
+    "segments": {
+      "field_contract_and_dataitem_writer": {
+        "lines": "15-46",
+        "role": "FIELDS, sha, and XDMF HyperSlab/DataItem emission"
+      },
+      "manifest_output": {
+        "lines": "107-125",
+        "role": "temporal manifest and read-only viewing metadata"
+      },
+      "receipt_report_and_h5_validation": {
+        "lines": "58-75",
+        "role": "completed receipt checks, metadata closure, report scope, H5 immutability"
+      },
+      "xmf_temporal_grid": {
+        "lines": "76-105",
+        "role": "time/geometry/field loop and XMF XML construction"
+      }
+    },
+    "sha256": "da50e26d5322b1b6f1539bca3109dfc115164427b37e1b2f86f56b153f56b0b0"
+  }
+}
