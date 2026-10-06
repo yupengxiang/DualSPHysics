@@ -1,0 +1,27 @@
+{
+  "schema": "ds02.f5.fresh154.metadata-wait-retirement.v1",
+  "source_only": true,
+  "controller_owner": "root",
+  "retire_scope": "only a fresh154 local disabled metadata wait controller that was never registered as a runtime attempt",
+  "retire_only_if": [
+    "its request remains disabled and execution_allowed is false",
+    "a read-only ledger snapshot contains no reservations[].id equal to its attempt_id",
+    "a read-only ledger snapshot contains no attempts row for its attempt_id with status reserved or running",
+    "no live child PID or controller receipt reports running/reserved",
+    "no completed receipt or downstream binding refers to it"
+  ],
+  "do_not_retire": [
+    "any registered, reserved, running, failed, or completed Root142 attempt",
+    "any existing request, receipt, typed H5, conversion report, XMF, bed report, or render output",
+    "any shared ledger row, shared lock, controller, or old storage reservation"
+  ],
+  "read_only_review": {
+    "ledger": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+    "ledger_lock": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.lock",
+    "review_must_use_root142": true,
+    "source_package_is_immutable_after_commit": true
+  },
+  "successor_rule": "If retirement criteria pass, Root may create one new attempt id and one new reservation; downstream bindings must use the new id and actual producer receipts. No completed conversion is repeated.",
+  "source_preparation_did_not_retire_anything": true,
+  "future_receipt_sha256": null
+}
