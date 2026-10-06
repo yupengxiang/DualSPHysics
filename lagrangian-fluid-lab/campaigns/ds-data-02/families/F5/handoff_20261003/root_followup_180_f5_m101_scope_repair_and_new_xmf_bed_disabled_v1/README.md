@@ -1,0 +1,7 @@
+# F5 fresh180 — M101 producer-scope repair and five disabled original138 bed handoffs
+
+This F5-only source package supersedes only the affected M101 binding from fresh179 and adds five independently bound, disabled original138 full801 bed successors: M090_T080, M090_T100, M100_T080 from XMF1059; M098_T095 from XMF1088; and M110_T080 from XMF1089. The four unaffected fresh179 cases and its M090_T095 render gate remain byte-preserved in fresh179.
+
+M101 scope repair: the fresh179 value `37c47df9bf900444e6d0dafcb41af77a8a0d9ff9e777fbf8c3cd056512642235` is retained only as a historical/planned scope negative. The actual typed1028 report and XMF1074 both declare `80039c17cc7a088b7bc0fdc5c7a74d9051aa72763652261e2823635fcd5ad93d`, which is the fresh180 binding value. Every new case independently binds its own typed report physical scope and XMF `source_h5_physical_condition_sha256`; any producer historical legacy scope remains recorded separately and is never substituted for the actual binding.
+
+All six bed requests stay disabled. The adapter only rebinds original138's module-global CASE_ID; its numeric kernel, 3-D/801-frame contract, Mk50/native-mkbound40 mapping, UID/finite checks, and 0.02/0.04 m bins remain unchanged. Future bed receipts/reports are null, no visual/Q-N/case credit is granted, and the exact-DP precision and A/B penetration negatives remain retained. Source validation uses metadata only and may execute original138's pre-array metadata gate; it never opens or hashes H5/BI4/CSV/DAT/VTK payloads or launches work.
