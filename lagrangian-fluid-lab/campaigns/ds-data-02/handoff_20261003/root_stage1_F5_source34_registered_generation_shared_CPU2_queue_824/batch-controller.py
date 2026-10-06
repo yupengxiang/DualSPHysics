@@ -1,0 +1,8 @@
+from pathlib import Path
+import fcntl,json,time,subprocess,datetime
+O=Path(__file__).parent;R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');L=R/'lagrangian-fluid-lab';H=L/'campaigns/ds-data-02/handoff_20261003';D=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02');load=lambda p:json.loads(Path(p).read_text());qp=O/'registered-source-generation-request.json';q=load(qp)
+with (D/'runtime/stage1-fullnative-conversion-dispatch.lock').open('a') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX);print(json.dumps({'state':'acquired shared CPU2 lock','at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()}),flush=True)
+ while sum(x.get('cpu_threads',0) for x in load(D/'runtime/resource-ledger.json')['reservations'])+2>64:time.sleep(3)
+ p=subprocess.run([str(L/'.venv/bin/python'),str(H/'root_stage1_home_floor_inventory_dispatch_142/launch.py'),str(qp)],cwd=L,capture_output=True,text=True)
+ap=Path(q['attempt_root']);rp=ap/'execution-receipt.json';cp=ap/'source-generation-report.json';r=load(rp) if rp.exists() else {};c=load(cp) if cp.exists() else {};passed=(r.get('status'),r.get('returncode'))==('completed',0) and p.returncode==0 and c.get('status')=='completed' and c.get('candidate_count')==34 and len(c.get('cases',[]))==34;out={'request':str(qp),'actual_receipt':str(rp),'actual_source_generation_report':str(cp),'status':r.get('status'),'returncode':r.get('returncode'),'launcher_returncode':p.returncode,'actual34_motion_generation_pass':passed,'independent_case_count_increment':0,'launcher_error':p.stderr[-1500:]};(O/'controller-result.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out),flush=True);raise SystemExit(0 if passed else 1)
