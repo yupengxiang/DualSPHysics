@@ -18,6 +18,7 @@ import tempfile
 import types
 from pathlib import Path
 
+
 INTEGRATION_SCRIPTS = Path(
     '/home/jade/.codex/worktrees/ds-data-02-integration/'
     'DualSPHysics/lagrangian-fluid-lab/scripts'
@@ -25,6 +26,7 @@ INTEGRATION_SCRIPTS = Path(
 PACKAGE_SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(INTEGRATION_SCRIPTS))
 sys.path.insert(0, str(PACKAGE_SCRIPTS))
+from home_publish_math import HomePublishGuardError
 
 # Import the real wrapper with a fake direct-converter module.  The fake is only
 # a producer for this toy; the wrapper implementation itself is not replaced.
@@ -156,7 +158,17 @@ def run_tests():
             root = Path(td)
             staging = Path(sd)
             merged, output, report_path = prepare_case(root, staging, 'success-attempt')
+            assert merged.staging_root == staging
+            assert merged.output == output
+            assert merged.report == report_path
+            assert merged.home_publish_cap_bytes == 4 * 1024**3
+            copy_calls = []
+            def counting_verified_copy(source, target, expected):
+                copy_calls.append((Path(source), Path(target), expected))
+                return original_verified_copy(source, target, expected)
+            wrapper.verified_copy = counting_verified_copy
             report = wrapper.run(merged, staging, 24 * 1024**3)
+            assert len(copy_calls) == 1
             assert output.read_bytes() == TOY_BYTES
             assert report_path.exists()
             published_bytes = (json.dumps(report, indent=2, sort_keys=True) + '\n').encode('utf-8')
@@ -165,6 +177,19 @@ def run_tests():
             assert report['storage_protocol']['verified_published_output_sha256'] == hashlib.sha256(TOY_BYTES).hexdigest()
             assert not output.with_suffix(output.suffix + '.partial').exists()
             assert not report_path.with_suffix(report_path.suffix + '.partial').exists()
+            wrapper.verified_copy = original_verified_copy
+
+            # The real run path also rejects a toy publication over a smaller
+            # cap; the reviewed production cap remains exactly 4 GiB above.
+            merged, output, report_path = prepare_case(root, staging, 'cap-refusal')
+            merged.home_publish_cap_bytes = 16
+            try:
+                wrapper.run(merged, staging, 24 * 1024**3)
+            except HomePublishGuardError as exc:
+                assert 'cap exceeded' in str(exc)
+            else:
+                raise AssertionError('real run cap refusal did not trigger')
+            assert_no_publication(output, report_path)
 
             # RuntimeError after verified_copy must clean the Home partial.
             merged, output, report_path = prepare_case(root, staging, 'exception-after-copy')
