@@ -1,0 +1,36 @@
+from pathlib import Path
+import json,hashlib,subprocess,datetime,xml.etree.ElementTree as ET
+R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');H=R/'lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003';W=Path('/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics');O=H/'root_stage1_F7_two_P5_delegated139_actual_pipeline_integration_830';O.mkdir(exist_ok=True)
+def load(p):return json.loads(Path(p).read_text())
+def sha(p):
+ p=Path(p);assert p.suffix in {'.json','.md','.py','.xml','.xmf','.png'};return hashlib.sha256(p.read_bytes()).hexdigest()
+def ref(p):return {'path':str(p),'sha256':sha(p)}
+def put(p,d):Path(p).write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+def root(n):return next(H.glob(f'root*_{n}'))
+assert not (O/'actual-integration-review.json').exists();prior=load(H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_105.json')['accepted_decisions'];assert len(prior)==142;ids={load(p).get('physical_case_id',load(p)['case_id']) for p in prior};hashes={load(p)['physical_condition_sha256'] for p in prior};rows={r['case_id']:r for r in load(root(792)/'actual-frontier-correction.json')['F7_actual48_complete_pipeline_cases']};decisions=[];adoptions=[]
+for n,short in [(139,'e380f84ca9d656887896e6cb59a0f87c77d0c610')]:
+ commit=subprocess.run(['git','rev-parse',short],cwd=W,capture_output=True,text=True,check=True).stdout.strip();src=next((W/'lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003').glob(f'root_followup_{n}_*'));rel=src.relative_to(W);names=subprocess.run(['git','ls-tree','-r','--name-only',commit,'--',str(rel)],cwd=W,capture_output=True,text=True,check=True).stdout.splitlines();assert names;adopted=[]
+ for name in names:
+  p=W/name;assert p.suffix in {'.json','.py','.md'};blob=subprocess.run(['git','show',f'{commit}:{name}'],cwd=W,capture_output=True,check=True).stdout;assert p.read_bytes()==blob;dst=R/name;dst.parent.mkdir(parents=True,exist_ok=True)
+  if dst.exists():assert dst.read_bytes()==blob
+  else:dst.write_bytes(blob)
+  adopted.append(ref(dst))
+ adoptions.append({'source_commit':commit,'source_adopted_byte_exact':True,'adopted_files':adopted});P=R/rel;sp=next((P/'metadata').glob('*visual-review.json'));d=load(sp);assert d['model_profile']=='gpt-5.6-luna/max'
+ for inp in d['external_metadata_inputs']:assert sha(inp['path'])==inp['sha256']
+ for c in d['cases']:
+  cid=c['case_id'];f=rows[cid];ev={};assert cid not in ids
+  for k,v in f['actual_completed_receipts'].items():
+   assert sha(v['path'])==v['sha256'];r=load(v['path']);assert (r['status'],r['returncode'])==('completed',0);ev[k]=ref(v['path'])
+  for k in ['typed_report','xmf_manifest','render_report']:
+   assert sha(f[k]['path'])==f[k]['sha256'];ev[k]=ref(f[k]['path'])
+  t=load(f['typed_report']['path']);m=load(f['xmf_manifest']['path']);a=load(f['render_report']['path']);sc=c['scope_separation'];digest=sc['canonical_physical_binding_sha256'];assert digest not in hashes and digest==t['hash_scopes']['physical_condition_sha256']==m['canonical_physical_binding_sha256']==m['physical_condition_sha256'];assert sha(m['actual_provenance_owner'])==sc['canonical_owner_sha256']==m['actual_provenance_owner_sha256'];assert sha(sc['legacy_source_owner'])==sc['legacy_source_owner_sha256'];assert sc['source_plan_condition_sha256']==m['source_plan_condition_sha256']
+  assert t['conversion_status']=='completed' and t['frames']==601 and t['particles']==70179 and t['solver_dimension']['solver_dimension']==3 and t['partvtk_validation']['all_passed'];assert t['time_evidence']['first_s']==0 and t['time_evidence']['last_s']>=12 and t['time_evidence']['strictly_increasing'];assert m['frames']==601 and m['particles']==70179 and m['source_h5_sha256']==t['output_sha256'];xf=m['xdmf'];assert sha(xf)==m['xdmf_sha256'];grids=ET.parse(xf).getroot().findall('.//Grid[@GridType="Uniform"]');assert len(grids)==601 and all(g.find('Geometry/DataItem').get('Dimensions')==g.find('Attribute[@Name="velocity"]/DataItem').get('Dimensions')=='70179 3' for g in grids)
+  qa=load(m['initial_qa_report']);assert sha(m['initial_qa_report'])==m['initial_qa_report_sha256'];q=next(x for x in qa['cases'] if x['case_id']==cid);assert q['passed'] and q['native_particles']==70179 and {k:v['count'] for k,v in q['checks']['native_type_mk_blocks'].items()}=={'fixed':27495,'moving':1984,'fluid':40700} and all(q['checks'][k] for k in ['actual_3d','all_13_fields_finite','no_initial_overlap','uid_exact_sorted_unique','xml_contract'])
+  assert a['frames']==a['source_frames']==601 and a['all_frames_rendered'] and a['actual_times_preserved_exactly'] and a['native_identity_axis_preserved'] and a['nonfinite_active_states']==0 and a['manifest_sha256']==sha(f['xmf_manifest']['path']) and a['xdmf']==xf and a['xdmf_sha256_before']==a['xdmf_sha256_after']==sha(xf) and a['source_h5_sha256']==t['output_sha256'];fs=a['frame_diagnostics'];assert len(fs)==601 and all(x['active']==70179 and x['missing']==0 and x['finite_positions_active'] and x['identity_axis_preserved'] and all(v['finite_active'] and v['nonfinite_active']==0 for v in x['finite_fields'].values()) for x in fs)
+  vs=c['visual_scope'];assert vs['reviewed_all_contact_sheets'] and vs['reviewed_event_keyframes'];contacts=vs['all_26_contact_sheets'];keys=vs['ten_event_keyframes'];assert len(contacts)==26 and len(keys)==10
+  for v in contacts+keys:assert Path(v['path']).suffix=='.png' and sha(v['path'])==v['sha256']
+  out={'schema':'ds02.stage1.delegated-visual-metadata-integration.v1','at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'status':'visual-approved-by-delegated-agent','family_id':'F7','case_id':cid,'physical_case_id':cid,'physical_condition_sha256':digest,'source_review_commit':commit,'source_review':ref(sp),'visual_reviewer':'/root/f5_bed_recovery','main_personally_viewed_pngs':False,'agent_personally_viewed_all_contacts_and_keys':True,'agent_observations':vs['source_agent_screening'],'scope_separation':sc,'actual_completed_metadata_evidence':ev,'verified_PNG_hashes':{'contact_sheets':contacts,'key_frames':keys},'actual_frames':601,'actual_particles':70179,'actual_fluid_particles':40700,'actual_last_time_s':t['time_evidence']['last_s'],'maximum_missing_particles':0,'six_segment_control_metadata':c['six_segment_motion_metadata'],'native_control_interpolation':'piecewise linear; analytic quintic reference is not a native C2 claim','scientific_payload_not_read_or_hashed_by_main':True,'producer_h5_hash_verified_from_metadata_only':True,'precision_status':'视觉检查通过、数值精度未验收','q_n':'not_granted','q_e':'not_assessed','independent_case_increment':1,'previous_count':142+len(decisions),'resulting_count':143+len(decisions)}
+  dp=O/(cid+'-delegated-visual-decision.json');put(dp,out);decisions.append(str(dp));ids.add(cid);hashes.add(digest)
+put(O/'actual-integration-review.json',{'source_adoptions':adoptions,'previous_count':142,'resulting_count':142+len(decisions),'independent_case_increment':len(decisions),'decisions':decisions,'science_payload_not_read_or_hashed':True});print(json.dumps({'accepted':142+len(decisions),'new_cases':len(decisions)}))
+
+(O/'adoption-source.py').write_bytes(Path(__file__).read_bytes())

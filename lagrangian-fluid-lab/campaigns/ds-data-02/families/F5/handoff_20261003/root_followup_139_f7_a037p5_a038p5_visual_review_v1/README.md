@@ -1,0 +1,9 @@
+# fresh139 F7 A037P5/A038P5 visual review handoff (F5-owned metadata)
+
+This F5 worktree package records a read-only source-agent visual screen of the actual Root413 render products for `F7_OBSTACLE_QUINTIC_B08_A037P5` and `F7_OBSTACLE_QUINTIC_B08_A038P5`. It records every 601 saved frame, all 26 contact sheets, and ten event keyframes per case, with producer paths and PNG SHA-256 values. The Root413 controller metadata reports 24 requested, 24 finished, 24 completed with return code 0, no held work, and a parallel cap of 2.
+
+The screen found the fluid bounded in the tank with coherent moving-obstacle motion and local deformation/splash or wake structures. It found no obvious explosive dispersion, broad wall escape, severe visible overlap, or premature termination in the saved 2D views. This is a source-agent screen of saved renders. Root visual adoption and the particle-level physics audit remain required; this package grants no case credit.
+
+The actual producer metadata records 601 frames, preserved simulation times, a native identity axis, zero missing active states, zero nonfinite active states, and 3-D counts 70179 total = 27495 fixed + 1984 moving + 40700 fluid for both cases. The two conditions are 37.5° and 38.5° within the shared two-cycle 0..8 s forcing and 8..12 s neutral tail. Native sampling remains piecewise-linear and marked `not C2`. Canonical physical binding, source-plan condition, legacy source owner, and producer conversion scope are kept distinct; no equality or cross-resolution claim is made.
+
+No BI4, H5, CSV, DAT, or VTK science payload was opened, copied, decoded, or hashed during source preparation. Producer-attested payload hashes remain opaque metadata. `precision_status=not_accepted`, `q_n=not_granted`, `production_approval=none`, and `independent_case_count_increment=0` are preserved. This package does not modify F7 or integration sources and does not authorize jobs.
