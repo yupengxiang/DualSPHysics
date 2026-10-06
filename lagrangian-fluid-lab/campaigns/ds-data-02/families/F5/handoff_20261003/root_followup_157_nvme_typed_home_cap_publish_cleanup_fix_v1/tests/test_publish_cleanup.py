@@ -151,12 +151,19 @@ def run_tests():
     original_disk_usage = wrapper.shutil.disk_usage
     original_verified_copy = wrapper.verified_copy
     original_replace = wrapper.os.replace
+    original_same_device = wrapper._same_device
     wrapper._home_free = lambda _path: 2 * 1024**40
     wrapper.shutil.disk_usage = lambda _path: FAKE_NVME_USAGE
     try:
-        with tempfile.TemporaryDirectory(prefix='fresh157-publish-', dir='/tmp') as td, tempfile.TemporaryDirectory(prefix='fresh157-stage-', dir='/dev/shm') as sd:
+        with tempfile.TemporaryDirectory(prefix='fresh157-publish-', dir='/tmp') as td, tempfile.TemporaryDirectory(prefix='fresh157-stage-', dir='/tmp') as sd:
             root = Path(td)
             staging = Path(sd)
+            # Keep every toy artifact under /tmp while mocking only the
+            # separate-filesystem predicate required by the production guard.
+            wrapper._same_device = lambda a, b: (
+                False if Path(a).resolve() == staging.resolve() or Path(b).resolve() == staging.resolve()
+                else original_same_device(a, b)
+            )
             merged, output, report_path = prepare_case(root, staging, 'success-attempt')
             assert merged.staging_root == staging
             assert merged.output == output
@@ -229,6 +236,7 @@ def run_tests():
         wrapper.shutil.disk_usage = original_disk_usage
         wrapper.verified_copy = original_verified_copy
         wrapper.os.replace = original_replace
+        wrapper._same_device = original_same_device
     print('fresh157 real-wrapper publish and cleanup toy tests passed')
 
 
