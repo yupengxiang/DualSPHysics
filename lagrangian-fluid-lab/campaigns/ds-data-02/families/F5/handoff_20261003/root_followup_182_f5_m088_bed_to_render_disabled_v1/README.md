@@ -1,0 +1,7 @@
+# F5 fresh182 — actual1058 M088 bed to disabled render handoff
+
+This source-only package binds the immutable Root1058 full801 original138 bed reports for M088_T085 and M088_T095 to disabled original116/023/944 N3 render requests. The bed identity is read from each report's nested `bound_actual_inputs.case_id`; no mutable `actual-progress.json` is used. Both reports contain all 801 frame records, native axis 194427, fluid denominator 31658, native Mk50/source mkbound40, UID and finite diagnostics, exact-footprint diagnostics, and one/two-DP diagnostic bins. The actual report status remains `completed_worker_output_pending_root_review`; zero bins and returncode 0 are not physical or visual acceptance.
+
+Both future renderer requests require 801 native states, 34 contact sheets (ceil(801/24)), nine keyframes, N3, unchanged native time/UID/type/Mk fields, CPU24 with environment threads2, Home 2 GiB publish cap, NVMe 24 GiB staging/100 GiB floor, and shared renderer cap2. Every request is disabled, has future render hashes null, and grants no Q-N, visual acceptance, or case credit. The live Root1082 wrapper with its historical 35-contact expectation is not referenced or changed.
+
+Canonical owner, Source_Def/source-plan role, typed/XMF legacy scope, and producer bed scope are kept as separate provenance roles. H5 is producer-attested only; this source preparation reads and hashes metadata JSON/XML/Python only. Historical A/B penetration and exact-DP precision negatives remain retained.
