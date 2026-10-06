@@ -1,0 +1,86 @@
+{
+  "schema": "ds02.f5.c082s1.fresh124.initial-mk-keyframe-scatter-source-plan.v1",
+  "package": "root_followup_124_stage1_f5_c082s1_typed590_initial_mk_keyframe_scatter_disabled_v1",
+  "purpose": "Read-only native keyframe scatter audit for Root598 typed590 A080/A120 using the producer initial_mk particle-axis field.",
+  "worker": "initial_mk_keyframe_scatter_audit.py",
+  "focus_frames": [
+    0,
+    97,
+    153,
+    219,
+    400,
+    718,
+    800
+  ],
+  "runtime_reads": {
+    "trajectory_h5": "producer-attested input; only registered Root142 worker opens it",
+    "datasets": [
+      "time",
+      "position",
+      "velocity",
+      "valid",
+      "particle_id",
+      "type",
+      "initial_mk"
+    ],
+    "identity": "UID/type/valid are checked from original saved rows; no generated particles",
+    "time": "exact H5 time dataset values are reported for each selected frame",
+    "initial_mk": "one-dimensional producer field on the fixed particle_id axis; native Mk50 marker only, never treated as time-varying"
+  },
+  "plot_outputs": {
+    "per_case_per_frame": [
+      "all-domain-xz.png",
+      "shoreline-local-xz.png",
+      "shoreline-local-yz.png"
+    ],
+    "coordinates": "native metres",
+    "velocity": "native velocity magnitude m/s with fixed display scale 0.0..0.6",
+    "focus_frames": [
+      0,
+      97,
+      153,
+      219,
+      400,
+      718,
+      800
+    ],
+    "initial_overlay": "original frame-0 fluid positions only; display comparison, not a free-surface reconstruction"
+  },
+  "source_policies": {
+    "source_agent_no_h5_open_or_hash": true,
+    "worker_read_only": true,
+    "worker_no_h5_hash": true,
+    "no_solver": true,
+    "no_converter": true,
+    "no_dat_csv_bi4_vtk": true,
+    "no_precision_or_runup_acceptance": true,
+    "case_increment": 0
+  },
+  "report_contract": {
+    "actual_time_step_index_and_h5_time": true,
+    "uid_type_valid_finite": true,
+    "native_mk50_counts": "initial_mk fixed marker mask intersected with each frame valid mask; no temporal Mk claim",
+    "plots": [
+      "all-domain-xz",
+      "shoreline-local-xz",
+      "shoreline-local-yz"
+    ],
+    "fluid_velocity_color_scale_mps": [
+      0.0,
+      0.6
+    ],
+    "original_rows_only": true,
+    "no_interpolation_resampling_array_edit": true
+  },
+  "marker_contract": {
+    "field": "initial_mk",
+    "shape": [
+      194427
+    ],
+    "dtype": "int16",
+    "native_bed_marker_mk": 50,
+    "source_mkbound": 40,
+    "time_varying": false,
+    "manifest_has_no_mk_dataset": true
+  }
+}
