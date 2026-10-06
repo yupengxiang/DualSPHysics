@@ -1,0 +1,9 @@
+# F5 fresh165 native-ready typed157 disabled package
+
+This source-only package prepares at most twelve independent F5 typed157 conversions from real upstream products that are already completed/0 full801 native runs and have actual initial-placement/Mk50 QA basic-pass reports. It contains no BI4, DAT, H5, CSV, VTK, solver output, or other scientific payload. The source agent did not read or hash those payloads.
+
+Selected cases: M095_T090, M095_T100, M105_T080, M105_T090, M105_T100, M115_T080, M115_T090, M086_T095, M088_T085, M088_T095, M090_T085, M090_T095. The seven mother cases use the corrected prepared-input-report path derived from each actual GenCase receipt output root; stale copied fresh138 report paths are not reused. The five NEXT34 cases use their own Root848/849/850 GenCase, QA, and native receipts. All twelve have actual counts 194427 total / 158559 fixed / 4210 moving / 31658 fluid / 0 floating, 3-D, 801 saved states, native Mk50 mapped from source mkbound40. Initial QA basic placement is recorded as pass excluding the retained numerical-precision negative.
+
+Each request is disabled and has a distinct Root-assigned attempt identity, CPU2, one-at-a-time conversion lock, private NVMe staging limit 24 GiB with 100 GiB free floor, and a hard 4 GiB Home publish cap with 500 GiB free floor and 2 GiB headroom. The exact fresh157 worker SHA is 37fe7eaff4405e9ba6d9b7f666a53d7c02ee65fc6f30992fc1a8fdb0d8a61b11. Future typed/report/XMF/bed/render hashes are null. Canonical physical condition, source-plan, and legacy H5 scope are separate; NEXT34 has no typed legacy H5 producer yet, so its legacy hash remains null.
+
+No scientific job was launched and no shared ledger/registry was modified. Root may review `metadata/fresh165-validator-report.json`, then materialize one disabled request at a time through Root142 after confirming live reservation identity.
