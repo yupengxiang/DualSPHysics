@@ -1,0 +1,79 @@
+{
+  "current_observation_is_not_a_terminal_result": true,
+  "future_science_hashes": null,
+  "lock_reconciliation": {
+    "aggregate_reserved_cpu_core_seconds": 691200,
+    "charge_status": "interrupted_unfinalized",
+    "child_returncode": null,
+    "do_not_charge_unobserved_audit_before_registration": true,
+    "do_not_reset_budget_or_deadline": true,
+    "exact_reservation_ids": [
+      "F4/F4_DROP_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p40000/root-stage1-f4-f4_drop_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p40000-full1201-render-fresh100-root571-cpu-env-repair-root638",
+      "F4/F4_DROP_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p60000/root-stage1-f4-f4_drop_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p60000-full1201-render-fresh100-root571-cpu-env-repair-root638"
+    ],
+    "ledger_lock": "runtime/resource-ledger.lock via ds_data02_runtime_v2.ledger_locked",
+    "os_exit_zero": false,
+    "per_case_reserved_cpu_core_seconds": 345600
+  },
+  "old_receipts": "immutable_unknown_until_root_owned_reconciliation",
+  "recovery_steps": [
+    "Allow the two current pvpython process trees to terminate naturally; do not signal, kill, adopt, reparent, or restart them.",
+    "After termination, take two fresh process census samples under the runtime ledger lock. Require all recorded launcher and renderer PIDs to be absent; preserve unknown historical start ticks where unavailable.",
+    "Under the same lock, locate only the two exact Root638 reservation IDs. Remove those reservations and append charges with status interrupted_unfinalized, child_returncode null, os_exit_zero false, and the full reserved 345600 CPU core-seconds per case (691200 total).",
+    "Write one immutable reconciliation sidecar per case. Never rewrite the old execution-receipt.json and never translate the observed exit143/launcher loss into renderer completed/0.",
+    "Only after the sidecars exist, enable the independent CPU2 audit request. Its runner-owned execution-receipt.json is the only new terminal receipt; the worker checks JSON report fields and PNG/contact filename/stat completeness without opening payload bytes.",
+    "Bind the two recovery audit results to the existing 22 Root638 completed/0 normal cases. Keep visual review, Q-N, production acceptance, and numerical precision pending."
+  ],
+  "resource_profile": {
+    "cpu_task_kind": "audit",
+    "global_cpu_guard": 64,
+    "home_floor_bytes": 536870912000,
+    "new_audit_cpu_threads": 2,
+    "new_audit_estimated_storage_bytes": 268435456,
+    "new_audit_max_wall_seconds": 1800,
+    "root142_policy_profile": "root_home_floor_no_legacy_dataset_walk_v1"
+  },
+  "schema": "ds02.f4.root638.orphan-recovery-plan.v1",
+  "source_agent_modified_shared_ledger": false,
+  "source_agent_started_or_modified_jobs": false,
+  "source_commit_required": true,
+  "status": "disabled_source_contract",
+  "successor_gate": {
+    "case_increment": 0,
+    "contact_sheets": 51,
+    "full_render_frames": 1201,
+    "normal_root638_completed0_case_count": 22,
+    "q_n": "not_assessed",
+    "recovery_audit_case_count": 2,
+    "required_normal_cases": [
+      "F4_DROP_gap0p18000_xoff0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p18000_xoff0p08000_yoff0p04000_uz0p60000",
+      "F4_DROP_gap0p18000_xoff0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p18000_xoff0p08000_yoffm0p04000_uz0p60000",
+      "F4_DROP_gap0p18000_xoffm0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p18000_xoffm0p08000_yoff0p04000_uz0p60000",
+      "F4_DROP_gap0p18000_xoffm0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p18000_xoffm0p08000_yoffm0p04000_uz0p60000",
+      "F4_DROP_gap0p22000_xoff0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p22000_xoff0p08000_yoff0p04000_uz0p60000",
+      "F4_DROP_gap0p22000_xoff0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p22000_xoff0p08000_yoffm0p04000_uz0p60000",
+      "F4_DROP_gap0p22000_xoffm0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p22000_xoffm0p08000_yoff0p04000_uz0p60000",
+      "F4_DROP_gap0p22000_xoffm0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p22000_xoffm0p08000_yoffm0p04000_uz0p60000",
+      "F4_DROP_gap0p24000_xoff0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p24000_xoff0p08000_yoff0p04000_uz0p60000",
+      "F4_DROP_gap0p24000_xoff0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p24000_xoff0p08000_yoffm0p04000_uz0p60000",
+      "F4_DROP_gap0p24000_xoffm0p08000_yoff0p04000_uz0p40000",
+      "F4_DROP_gap0p24000_xoffm0p08000_yoff0p04000_uz0p60000"
+    ],
+    "required_per_case_audit_pass": true,
+    "required_recovery_cases": [
+      "F4_DROP_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p40000",
+      "F4_DROP_gap0p24000_xoffm0p08000_yoffm0p04000_uz0p60000"
+    ],
+    "visual_review": "pending root inspection"
+  }
+}
