@@ -1,0 +1,129 @@
+{
+  "attempt_id": null,
+  "attempt_id_policy": "Root assigns one fresh attempt only after a live reservation exactly matches reservations[].id; never reuse completed, failed, or fresh155 attempts",
+  "case_id": "F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1",
+  "command_template": [
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_157_nvme_typed_home_cap_publish_cleanup_fix_v1/scripts/nvme_convert_home_capped_v2.py",
+    "--staging-root",
+    "/tmp/ds02-nvme-conversion",
+    "--staging-limit-bytes",
+    "25769803776",
+    "--nvme-free-reserve-bytes",
+    "107374182400",
+    "--home-publish-cap-bytes",
+    "4294967296",
+    "--home-floor-bytes",
+    "536870912000",
+    "--home-publish-headroom-bytes",
+    "2147483648",
+    "--resource-ledger",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+    "--resource-ledger-lock",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.lock",
+    "--current-attempt-id",
+    "<ROOT_ASSIGNED_ATTEMPT_ID>",
+    "--",
+    "<producer-attested direct-converter arguments bound at registration>"
+  ],
+  "conversion_contract": {
+    "decoder_and_eos": "unchanged producer/direct-converter contract",
+    "direct_converter": "unchanged ds_data02_direct_convert.convert_direct",
+    "full_native_timeline": "unchanged producer-supplied frame sequence",
+    "native_axis_or_counts": "future producer metadata only; no guessed values",
+    "partvtk_validation": "required; unchanged official three-frame selection",
+    "payload_hash_semantics": "unchanged direct report attestation and verified_copy; fresh157 source tests use toy bytes only"
+  },
+  "cpu_task_kind": "conversion",
+  "cpu_threads": 2,
+  "disabled": true,
+  "downstream": {
+    "case_credit": 0,
+    "completed_outputs_reused_without_rerun": true,
+    "independent_case_count_increment": 0,
+    "new_attempt_binding_required": true,
+    "production_approval": "none",
+    "q_n_granted": false,
+    "xmf_bed_render_requests": "separately disabled until this successor has actual completed/0 producer receipt"
+  },
+  "estimated_storage_bytes": 34359738368,
+  "execution_allowed": false,
+  "family_id": "F5",
+  "future_output_hashes": {
+    "conversion_report_sha256": null,
+    "typed_h5_sha256": null,
+    "typed_receipt_sha256": null
+  },
+  "historical_evidence": {
+    "fresh155_bytes_preserved": true,
+    "fresh156_lock_audit_preserved": true,
+    "historical_precision_negative_retained": true,
+    "old_requests_receipts_completed_outputs_unchanged": true
+  },
+  "home_publish_guard": {
+    "atomic_publish": "verified_copy to Home .partial, fsync, os.replace; final JSON .partial, fsync, os.replace",
+    "cleanup_on_system_exit": true,
+    "current_attempt_id_must_match_one_reservation_id": true,
+    "home_floor_bytes": 536870912000,
+    "home_publish_headroom_bytes": 2147483648,
+    "home_root": "/home/jade",
+    "ledger_json_read_only": true,
+    "ledger_lock": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.lock",
+    "other_ledger_reservations_included": true,
+    "publish_cap_bytes": 4294967296,
+    "publish_cap_policy": "hard rejection before any Home output; no cap relaxation",
+    "report_path_bound_to_home_filesystem": true,
+    "schema": "ds02.nvme.home-publish-cap.v1"
+  },
+  "kind": "cpu",
+  "launch_owner": "root",
+  "max_wall_seconds": 5400,
+  "package_id": "F5_fresh157_nvme_typed_home_cap_publish_cleanup_fix",
+  "parent_fresh155": {
+    "bytes_are_preserved": true,
+    "commit": "2776ccd2",
+    "manifest_sha256": "c18908aed03a53e60b9d3a46e9c8b15b6cad885842a650704dfd6f59e2958bf9",
+    "package_path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_155_nvme_typed_home_cap_cli_fix_v1"
+  },
+  "parent_fresh156": {
+    "bytes_are_preserved": true,
+    "commit": "1def68ac123af641445f84c99435e27c88ac4458",
+    "package_path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_156_conversion_lock_wait_chain_audit_v1"
+  },
+  "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M085_T100",
+  "private_nvme_staging": {
+    "decoder_scratch_private": true,
+    "free_reserve_bytes": 107374182400,
+    "partvtk_frame_peak_checks": true,
+    "partvtk_validation_csv_private": true,
+    "per_frame_decoder_floor_and_peak_checks": true,
+    "separate_filesystem_required": true,
+    "staging_limit_bytes": 25769803776,
+    "staging_root": "/tmp/ds02-nvme-conversion",
+    "temporary_h5_private": true
+  },
+  "publish_cleanup_fix": {
+    "exact_report_serialization_helper": "_report_payload and _report_bytes are defined locally and shared by NVMe preview and Home publication",
+    "partial_cleanup": "Home H5.partial and report.partial are removed on exception/SystemExit; moved output is removed when final report is absent",
+    "real_wrapper_run_toy_tested": true,
+    "system_exit_cleanup": "outer except BaseException plus publication_started set before first os.replace",
+    "undefined_report_bytes_fixed": true,
+    "verified_copy_kept_before_report_publish": true
+  },
+  "reservation_semantics": {
+    "case_credit": 0,
+    "estimate_is_not_reduced_from_observed_compression": true,
+    "estimate_is_unchanged_from_root854": true,
+    "max_concurrency": 1,
+    "shared_conversion_lock": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/stage1-fullnative-conversion-dispatch.lock"
+  },
+  "schema": "ds02.runner-request.v2.disabled-source-template",
+  "source_inputs": {
+    "all_hashes_are_non_science_source_or_metadata": true,
+    "producer_attestation_required_before_enable": true,
+    "provenance_file": "metadata/fresh157-source-provenance.json",
+    "science_input_files": null,
+    "science_input_sha256": null
+  },
+  "source_only": true
+}
