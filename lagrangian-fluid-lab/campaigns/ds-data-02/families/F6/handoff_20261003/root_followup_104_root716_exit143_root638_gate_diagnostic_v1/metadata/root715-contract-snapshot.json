@@ -1,0 +1,50 @@
+{
+  "observed_at_utc": "2026-10-06T01:09:59.274043+00:00",
+  "root715": {
+    "actual_renderer_requests_created": 0,
+    "case_increment": 0,
+    "declared_plan_count": 24,
+    "materialized_plan_count": 24,
+    "output_child_contract": "{attempt_root}/render",
+    "required_shared_runner_fields_complete_before_launch": true,
+    "review_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_f4_actual669_full1201_renderer023_complete_runtime_contract_715/complete-runtime-and-output-contract-render-enable-review.json",
+    "review_sha256": "340644aa8d1af60327b0b3fdb71e33b02bad9508c6bdf509f1dbe1da7fa6831c",
+    "safe_to_start_root716_from_current_evidence": false,
+    "wait_actual638all24_globalrenderdrain": true
+  },
+  "root716_source_facts": {
+    "await_root637_render": {
+      "fragment": "upstream_render=await_controller(637,24)",
+      "line": 15
+    },
+    "await_root670_xmf": {
+      "fragment": "await_controller(670,24,'actual_XMF_N3_pass_count')",
+      "line": 15
+    },
+    "poll_missing_controller_result": {
+      "fragment": "while not cp.exists():time.sleep(10)",
+      "line": 11
+    },
+    "render_output_child": {
+      "fragment": "cmd[cmd.index('--output-dir')+1]='{attempt_root}/render'",
+      "line": 29
+    },
+    "renderer_parallel_cap": {
+      "fragment": "ThreadPoolExecutor(max_workers=2)",
+      "line": 39
+    },
+    "require_each_root638_completed_zero": {
+      "fragment": "assert (r['status'],r['returncode'])==('completed',0)",
+      "line": 18
+    },
+    "require_root638_request_count": {
+      "fragment": "assert len(prior)==24",
+      "line": 16
+    },
+    "writes_result_only_after_queue": {
+      "fragment": "put(Path(__file__).parent/'controller-result.json',summary)",
+      "line": 47
+    }
+  },
+  "schema": "ds02.f6.fresh104.root715-contract-snapshot.v1"
+}
