@@ -1,0 +1,93 @@
+{
+  "package_audit": {
+    "disabled_request_count": 24,
+    "findings": [
+      {
+        "evidence": {
+          "copy_cleanup_catches": "Exception, not BaseException",
+          "copy_cleanup_except_line": 557,
+          "handler_restore_line": 677,
+          "publish_call_line": 696
+        },
+        "id": "F111-SIG-PUBLISH",
+        "impact": "SIGTERM/SIGINT after renderer exit but during report rewrite or temporary Home copy is outside the installed handlers; a temporary publish directory can remain.",
+        "repair": "Keep own-process handlers through publication or make the publication transaction catch BaseException and remove its own temporary directory before re-raising.",
+        "severity": "advisory-repair-required-for-unattended-execute",
+        "status": "open"
+      },
+      {
+        "evidence": {
+          "json_prefix_absence_line": 475,
+          "pvsm_rebind_line": 462,
+          "report_output_check_line": 482
+        },
+        "id": "F111-PATH-SCOPE",
+        "impact": "The source checks the exact stage_render string and three named output fields; it does not reject a different private stage-root/NVMe path and uses raw prefix matching for final output paths.",
+        "repair": "Recursively inspect all serialized PVSM/JSON path values, reject every private stage/NVMe root, and use resolved path-component containment rather than startswith.",
+        "severity": "advisory-repair-required-for-unattended-execute",
+        "status": "open"
+      },
+      {
+        "evidence": {
+          "atomic_rename_line": 556,
+          "pre_publish_floor_line": 543
+        },
+        "id": "F111-FLOOR-AFTER-RENAME",
+        "impact": "The final Home-floor check occurs before copying and os.replace; an external Home writer can change free space during the copy.",
+        "repair": "Recheck and record Home free space after the atomic rename while the ledger lock is held, with an explicit own-output rollback policy if the floor is lost.",
+        "severity": "advisory",
+        "status": "open"
+      }
+    ],
+    "fresh110_manifest_files_checked": 32,
+    "fresh110_manifest_package_id": "F3_fresh110_F6_root722_nvme_render_successor",
+    "scientific_payloads_opened_or_hashed": false,
+    "source_contract_checks": {
+      "atomic_publish": 556,
+      "home_floor_check": 543,
+      "live_ledger_lock": 492,
+      "live_ledger_reader": 206,
+      "own_reservation_match": 229,
+      "owned_group_kill": 585,
+      "owned_group_term": 578,
+      "pvsm_rewrite": 695,
+      "receipt_cap_check": 538,
+      "renderer_new_session": 648,
+      "report_path_check": 494,
+      "report_rewrite": 694,
+      "stage_cap_check": 541,
+      "stage_cleanup": 605
+    }
+  },
+  "root920_observation": {
+    "controller_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_F6_actual722_full241_independent_Renderer023_CPU24_16GiB_Home_admission_920/batch-controller.py",
+    "controller_result_exists": false,
+    "controller_sha256_from_launch_record": "64099a3c42463a896ca1ee936091e985f8910e3c47efdce245b0a133cd4ce517",
+    "controller_stdout_tail": "{\"cross_family_gate_removed\": true, \"Home_reservation_preserved16GiB\": true, \"actualF6_722_all24_XMF\": true, \"launch\": \"first1 then shared2 CPU24/env2\"}\n",
+    "ledger_limits": {
+      "home_min_free_bytes": 536870912000,
+      "home_path": "/home/jade",
+      "storage_policy": "home_free_floor"
+    },
+    "ledger_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+    "ledger_reservation_count": 0,
+    "pid": 3946798,
+    "process": {
+      "children": [
+        "3951400"
+      ],
+      "pid": 3946798,
+      "present": true,
+      "state": "S"
+    },
+    "recorded_start_ticks": "206541429",
+    "render_receipts_in_controller_dir": 0,
+    "reservation_match": "not_provable_at_capture_zero_active_rows",
+    "shared_state_mutated_by_audit": false
+  },
+  "schema": "ds02.stage1.f3.fresh111.fresh110-runtime-publication-audit.v1",
+  "science_payloads_opened_or_hashed": false,
+  "source_commit": "878f1526d6bdefebbe2ff1c8621ba1ec01ab4232",
+  "source_package": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_110_f3_f6_nvme_renderer_successor_v1",
+  "status": "source_pass_runtime_wait"
+}
