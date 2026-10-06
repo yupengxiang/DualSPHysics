@@ -1,0 +1,11 @@
+# F5 fresh188: M094_T085 Root1147 full801 visual review
+
+This source package records the delegated visual review of the real completed/0 Root1147 render for `F5_COMPACT_RUNUP_RECOVERY_C082S1_M094_T085` (`F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M094_T085_NEXT34`). The producer receipt closes with 801 native saved states, 194427 particles in 3-D, and the render output contains 34 chronological contact sheets plus the nine original keyframes 0, 100, 200, 300, 400, 500, 600, 700, and 800.
+
+I personally reviewed all 34 contact sheets and all nine keyframes. The sequence is coherent and shows a weak, non-breaking shoreline/free-surface disturbance with return. It has no obvious blank or truncated output, global explosion, broad spray cloud, or severe visible bed-through. Sparse downstream shoreline points are recorded as a limitation. This is a standalone first-stage visual approval with those limits; it does not claim a large runup/inundation event, strict container retention, sub-DP penetration absence, numerical precision, Q-N, or case credit.
+
+The underlying full801 bed report is retained as a diagnostic. Its zero `>1DP`/`>2DP` bins do not prove that sub-DP depth is zero. The report retains all 801-frame UID, finite, footprint, and time metadata; this package does not reinterpret the bins as an acceptance threshold. Historical Candidate A/B dynamic failures and the exact-DP lattice negative (observed residual about 5e-6 cells versus 1e-6) remain preserved.
+
+Canonical physical owner/source-plan (`0fe5ab93059403dff5361e4cdbba4bb685f82f32220e093f547e9f256f5d81c2`), source definition (`c6ba1b8c7f2c452ca307a6cd2fa4cb1117e8570641e1a2efd76651b444f9df83`), and the actual converter/H5 legacy scope (`ef5ac47341c2486a44da7d5eadea1f3e0bb6f57c5394a1286a2f3c378b3a2342`, `legacy-owner-scope.v0`) are recorded as separate roles. The source agent read only JSON/XML metadata and producer-rendered PNG derivatives, did not read or hash H5/BI4/CSV/DAT/VTK payloads, did not launch a job, and wrote no global credit.
+
+The PNGs remain in the producer DATA render directory and are referenced by absolute path; they are not copied into this worktree. `scripts/validate_fresh188.py` checks the external metadata/PNG evidence and this package manifest without opening science payloads.
