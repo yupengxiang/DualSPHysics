@@ -15,7 +15,7 @@ for a,t in specs:
   if e.get('key')=='TimeMax':e.set('value','16')
   if e.get('key')=='TimeOut':e.set('value','0.02')
  for e in root.findall('.//_computetime')+root.findall('.//_outputtime'):e.set('end','16')
- xp=src/(cid+'_Def.xml');tree.write(xp,encoding='utf-8',xml_declaration=True)
+ xp=src/(cid+'_Def.xml');tree.write(xp,encoding='utf-8',xml_declaration=True);xp.write_text('\n'.join(line.rstrip() for line in xp.read_text().splitlines())+'\n')
  # Count/model state expectations are prospective; no native count claim before each actual GenCase.
  params=copy.deepcopy(base['parameters']);params['piston_motion'].update(amplitude_scale=a/100,time_scale=t/100,duration_s=duration,asset_relative_name='assets/'+motion)
  physical={'schema':'ds02.f5.stage1.c082s1.physical-condition.next34.v1','family_id':'F5','mechanism_id':base['mechanism_id'],'geometry_family_id':base['geometry_family_id'],'geometry':basis['geometry'],'parameters':params,'initial_state_policy':base['initial_state_policy'],'gravity_m_s2':base['gravity_m_s2'],'density_kg_m3':base['density_kg_m3'],'prescribed_control':{'base_motion_sha256_producer_attested':base['base_motion_sha256'],'amplitude_scale':a/100,'time_scale':t/100,'rows':641,'source_window_s':[0,16],'scaled_window_s':[0,duration],'interpolation':'native piecewise linear','transform':'t_scaled=t*time_scale; x_scaled=x*amplitude_scale; no clipping or source interpolation'},'observation_window_s':[0,16]};dg=digest(physical)
