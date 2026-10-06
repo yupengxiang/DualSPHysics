@@ -1,0 +1,37 @@
+{
+  "endpoint_attempts": {
+    "M085_T080": "root-stage1-f5-c082s1-m085_t080-full801-native-root023-render-130-root783-cpu-slot-repair-root786",
+    "M115_T100": "root-stage1-f5-c082s1-m115_t100-full801-native-root023-render-130-root783"
+  },
+  "endpoint_review_order": [
+    "When either endpoint has a real receipt with status completed and returncode 0, inspect that endpoint independently; do not wait for the other.",
+    "Enumerate exactly the producer render output for that attempt; require all 34 contact images and the key/original PNG set before review.",
+    "Use view_image on every actual contact PNG and every key/original PNG. Record actual paths, SHA256, and a concise visual decision in a follow-up metadata sidecar.",
+    "Do not treat a zero return code, a bed report, or an old Root783 failure as visual acceptance.",
+    "Only after both endpoint reviews are accepted may the remaining ten fresh131 requests leave WAIT."
+  ],
+  "expected_render_contract": {
+    "contacts": 34,
+    "frames": 801,
+    "future_contact_png_sha256": null,
+    "future_key_png_sha256": null,
+    "future_visual_decision": null,
+    "time_window_s": [
+      0.0,
+      16.0
+    ]
+  },
+  "gate": {
+    "M085_T080": "WAIT_ROOT786_NEW_RECEIPT",
+    "M115_T100": "WAIT_ROOT783_COMPLETED_RECEIPT",
+    "production_full801_authorized": false,
+    "remaining10_release_enabled": false,
+    "status": "WAIT"
+  },
+  "jobs_started_by_source_agent": false,
+  "old_attempt_excluded": "root-stage1-f5-c082s1-m085_t080-full801-native-root023-render-130-root783",
+  "schema": "ds02.f5.c082s1.fresh132.endpoint-visual-review-plan.v1",
+  "shared_state_modified_by_source_agent": false,
+  "source_agent_did_not_read_or_hash_science_payloads": true,
+  "source_only": true
+}
