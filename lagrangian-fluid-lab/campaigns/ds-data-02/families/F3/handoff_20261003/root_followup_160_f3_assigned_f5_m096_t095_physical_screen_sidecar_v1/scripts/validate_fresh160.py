@@ -29,6 +29,10 @@ def main():
   p=Path(x['path'])
   if p.suffix.lower()!='.png' or not p.exists() or p.stat().st_size!=x['bytes'] or sha(p)!=x['sha256'] or not x['viewed'] or x['view_method']!='view_image': raise AssertionError(f'PNG {p}')
  if d['role_corrections_from_fresh159']['actual_qi_proof_sha256']['fresh159_value']=='a970931f677c9cfcf967483dfa3f5ab8fc9e756fba997621dbfed307f351d05f': raise AssertionError('placeholder correction lost')
+ roles=d['role_corrections_from_fresh159']['source_def_vs_generated_xml']
+ gen=Path(roles['generated_xml_path']); src=Path(roles['true_source_def_path'])
+ if not gen.exists() or gen.suffix.lower()!='.xml' or sha(gen)!=roles['generated_xml_sha256']: raise AssertionError('generated XML role path/hash')
+ if not src.exists() or src.suffix.lower()!='.xml' or sha(src)!=roles['true_source_def_sha256']: raise AssertionError('true SourceDef role path/hash')
  for s in walk(d):
   if any(s.lower().endswith(x) for x in FORBIDDEN): raise AssertionError(f'payload path {s}')
  if any(d['non_claims'].values()):

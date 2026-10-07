@@ -9,7 +9,7 @@ Bindings:
 - fresh159 decision SHA: `ae41e66aa5281a8a13b61056d7b8792e77fd8c0c9afaee15a2a69418890551b4`
 - fresh159 PNG evidence SHA: `40250ee3e7d859bbe4bbc020bc04b45f8899238ce5e5a277107b1dbdd7675993`; all 43 PNG entries and their existing SHA values are copied into the sidecar binding.
 - Root1257 QI SHA: `a970931f677c9cfcf967483dfa3f5ab8fc9e756fba997621dbfed307f351d05f`
-- true SourceDef SHA: `d62c70fc8ec9c01200e6983fbbaa8924b791c6a5cb40ec0161f5488d36888c59`
-- generated/prepared XML alias SHA: `6c3faf946ae6a58a8b1c50b15f7ec4289e27dbbedcae2a4565a0dda6f75d3c79`
+- true SourceDef: `/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_F5_next34_distinct_inside_visual_range_source_preparation_823/candidates/M096_T095/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M096_T095_NEXT34_Def.xml`, SHA `d62c70fc8ec9c01200e6983fbbaa8924b791c6a5cb40ec0161f5488d36888c59`
+- generated/prepared XML alias: `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M096_T095_NEXT34/root-stage1-f5-next34-m096_t095-own824-genuine-gencase-root848/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M096_T095_NEXT34.xml`, SHA `6c3faf946ae6a58a8b1c50b15f7ec4289e27dbbedcae2a4565a0dda6f75d3c79`
 
 No scientific payload was opened or hashed, no job was started, and no shared state was changed. Main/root retains final adoption and credit ownership.
