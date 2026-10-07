@@ -1,3 +1,12 @@
+<!-- checkpoint016 2026-10-07T22:20:22.796360+00:00 -->
+最新恢复入口为 `checkpoints/CHECKPOINT_016_INTEGRATED.json`。完整目标 active，未完成。独立科学字段快照246/336；F3/F5两实际父进程仍运行，F7等待真正父进程释放。
+
+历史118原因索引forwardv3已实际闭合不可变输入；F4 same/coarse/half各9原生帧观测与端帧独立解码完成，full2401无损归档完成；F6刚体CSV旋转约定仍UNKNOWN，不能消费旧quaternion作为已验证姿态。F2fine完整4秒实际801帧/20.23GB，175位置排除对应0.519%初质量，超过0.3%未知宽度，影响待定位。
+
+Nativev4原始401帧重建→全帧typed对照→标签已实际启动，占用额外重I/O槽；v24 metadata probe修正root重复解释器argv后actual002因C49迁移目标被自身来源URI误判而失败；v23/C47与v24/C48/C49原失败保留，consumer继续forwardv25。以收据和PID/start_ticks为准，不从prepared/emptyreservation推断完成。
+
+三个既有代理继续完整内部raw包、参考研究和遗漏影响/有界staticMK；未启动static59批或F7。原预算/期限/Home≥500GiB不重置，不运行模型、不公开发布。以下为历史记录。
+
 <!-- checkpoint015 2026-10-07T21:46:02.186482+00:00 -->
 最新恢复入口为 `checkpoints/CHECKPOINT_015_INTEGRATED.json`。完整目标 active，未完成。独立科学字段快照233/336（F1/F2/F4/F6各48，F3=21、F5=20）；F3/F5父进程的PID/start_ticks已核验，F7等待真实科学槽释放。
 
