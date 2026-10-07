@@ -197,8 +197,12 @@ def run(manifest_path: Path, output_root: Path) -> dict[str, Any]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     source = manifest["source_binding"]
     frames = manifest["frames"]
-    if output_root.exists() and any(output_root.iterdir()):
-        raise FileExistsError(f"refuse to overwrite nonempty output root {output_root}")
+    # The shared runtime may place its running receipt/stdout in the attempt
+    # root before invoking this worker. Preserve those guard files while
+    # refusing to reuse the archive or terminal sidecar from an older attempt.
+    if output_root.exists() and ((output_root / "compressed").exists() or
+                                 (output_root / "lossless-roundtrip-v1.json").exists()):
+        raise FileExistsError(f"refuse to overwrite prior lossless output {output_root}")
     output_root.mkdir(parents=True, exist_ok=True)
     raw_root = Path(source["raw_root"])
     actual = exact_frames()
