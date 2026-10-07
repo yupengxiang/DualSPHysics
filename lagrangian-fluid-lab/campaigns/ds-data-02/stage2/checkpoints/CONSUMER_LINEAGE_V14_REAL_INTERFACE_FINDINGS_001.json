@@ -1,0 +1,48 @@
+{
+  "schema": "ds02.stage2.lineage-v14-real-interface-findings.v1",
+  "observed_at_utc": "2026-10-07T20:52:34.902204+00:00",
+  "status": "THREE_INTERFACE_DEFECTS_REPRODUCED",
+  "worker_sha256": "a2374f45c78d1a965ddcc4107e74888b1e1ce9c6647dc0887ba85268698993ef",
+  "current_catalog_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+  "actual_F5_solver_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-full801-native-release-131-root808/execution-receipt.json",
+    "sha256": "fa9fe0438996874a7db1c0bcdb8261d6ea8ce51a37d6f5f109c25c22481ac5e5"
+  },
+  "actual_F5_gencase_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-genuine-gencase-118-root640/execution-receipt.json",
+    "sha256": "e17d8f9da8d0439f61f69e9a4ddd7c04253f69fe4009427d275d5985cbbbd41a"
+  },
+  "findings": [
+    {
+      "id": "C35",
+      "defect": "Exact receipt command output directory differs from attempt output_root; v14 misses existing actual Run.out. No arbitrary fallback is required.",
+      "actual_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-full801-native-release-131-root808/solver_output/Run.out",
+      "actual_sha256": "02c72d6910d25c18e45918ffeb48e01ee7c8c9ff2fa6a6b5e38e20af4d16eefd",
+      "v14_result": {
+        "status": "MISSING_AT_DECLARED_OUTPUT_ROOT",
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-full801-native-release-131-root808/Run.out",
+        "searched_glob": false
+      }
+    },
+    {
+      "id": "C36",
+      "defect": "Manufactured missing finish map on actual GenCase receipt still reports input_definition_hash_support_complete=true.",
+      "receipt_test_mutation": "In-memory only: remove input_hashes_after_run and set running. Original consumed receipt untouched.",
+      "v14_complete": true,
+      "finish_assets": []
+    },
+    {
+      "id": "C37",
+      "defect": "Same continuous physical evidence with different opaque owner canonical hashes gets different physical group keys; opaque provenance hash semantics not audited.",
+      "test_scope": "Pure helper manufactured provenance hashes; does not prove any particular real case pair belongs together.",
+      "physical_key_a": "9cca27af98f4acac8270518b753bfd37604ca5dade4af1488bb7c79e7bc8d6c8",
+      "physical_key_b": "311fdd04a56dde3a00daa5efb7baa478e247f045af1e770fb0d1257c4d1dffe1"
+    }
+  ],
+  "H5_read": false,
+  "QI": "UNKNOWN",
+  "QN": "UNKNOWN",
+  "QE": "UNKNOWN",
+  "split_safe": false,
+  "next_action": "Forward consumer version requested; v14 source audit bytes preserved."
+}
