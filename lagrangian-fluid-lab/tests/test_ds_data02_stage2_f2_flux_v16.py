@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 import math
+import json
 
 import pytest
 
@@ -51,7 +52,9 @@ def _v15_result() -> dict:
 
 
 def test_total_interval_includes_known_subtotal_and_unknown_endpoint_mass() -> None:
-    corrected = v16.correct_event_summary(_summary(1.0), unknown_endpoint_mass_kg=3.0)
+    corrected = v16.correct_event_summary(
+        _summary(1.0), unknown_endpoint_mass_kg=3.0,
+        endpoint_scope=v16.F2_ENDPOINT_SCOPE)
     assert corrected["net_flux_known_endpoint_subtotal_kg"] == 1.0
     assert corrected["net_flux_unknown_endpoint_contribution_interval_kg"] == [0.0, 3.0]
     assert corrected["net_flux_total_interval_kg"] == [1.0, 4.0]
@@ -65,6 +68,7 @@ def test_real_v15_numbers_preserve_signed_known_endpoint_subtotal() -> None:
     corrected = v16.correct_event_summary(
         _summary(13.57200064463541),
         unknown_endpoint_mass_kg=0.003000000142492354,
+        endpoint_scope=v16.F2_ENDPOINT_SCOPE,
     )
     assert corrected["net_flux_total_interval_kg"][0] == 13.57200064463541
     assert math.isclose(
@@ -80,19 +84,27 @@ def test_real_v15_numbers_preserve_signed_known_endpoint_subtotal() -> None:
 
 
 def test_negative_known_endpoint_subtotal_is_not_clipped_to_zero() -> None:
-    corrected = v16.correct_event_summary(_summary(-1.0), unknown_endpoint_mass_kg=2.0)
+    corrected = v16.correct_event_summary(
+        _summary(-1.0), unknown_endpoint_mass_kg=2.0,
+        endpoint_scope=v16.F2_ENDPOINT_SCOPE)
     assert corrected["net_flux_total_interval_kg"] == [-1.0, 1.0]
 
 
 def test_unknown_endpoint_mass_must_be_finite_nonnegative() -> None:
     with pytest.raises(v16.FluxV16BindingError, match="nonnegative"):
-        v16.correct_event_summary(_summary(1.0), unknown_endpoint_mass_kg=-1.0)
+        v16.correct_event_summary(
+            _summary(1.0), unknown_endpoint_mass_kg=-1.0,
+            endpoint_scope=v16.F2_ENDPOINT_SCOPE)
     with pytest.raises(v16.FluxV16BindingError, match="finite"):
-        v16.correct_event_summary(_summary(1.0), unknown_endpoint_mass_kg=float("nan"))
+        v16.correct_event_summary(
+            _summary(1.0), unknown_endpoint_mass_kg=float("nan"),
+            endpoint_scope=v16.F2_ENDPOINT_SCOPE)
 
 
 def test_forward_view_removes_historical_motion_conflict_and_keeps_unknown_quality() -> None:
-    view = v16.forward_result(_v15_result(), unknown_endpoint_mass_kg=3.0)
+    view = v16.forward_result(
+        _v15_result(), unknown_endpoint_mass_kg=3.0,
+        endpoint_scope=v16.F2_ENDPOINT_SCOPE)
     assert view["schema"] == v16.RESULT_SCHEMA
     assert "case_name_angle_conflict" not in view["moving_source_motion_binding"]
     assert "case_name_angle_conflict" not in view["nested"]
@@ -113,4 +125,18 @@ def test_forward_view_removes_historical_motion_conflict_and_keeps_unknown_quali
 
 def test_forward_view_rejects_non_v15_result() -> None:
     with pytest.raises(v16.FluxV16BindingError, match="v15 replay result"):
-        v16.forward_result({"schema": v16.RESULT_SCHEMA}, unknown_endpoint_mass_kg=0.0)
+        v16.forward_result(
+            {"schema": v16.RESULT_SCHEMA}, unknown_endpoint_mass_kg=0.0,
+            endpoint_scope=v16.F2_ENDPOINT_SCOPE)
+
+
+def test_unknown_interval_requires_explicit_supported_scope() -> None:
+    with pytest.raises(v16.FluxV16BindingError, match="strict F2"):
+        v16.correct_event_summary(_summary(1.0), unknown_endpoint_mass_kg=3.0, endpoint_scope=None)
+
+
+def test_build_sidecar_rejects_same_schema_from_unbound_report(tmp_path: Path) -> None:
+    report = tmp_path / "wrong-v15-report.json"
+    report.write_text(json.dumps({"schema": v16.V15_RESULT_SCHEMA}))
+    with pytest.raises(v16.FluxV16BindingError, match="report SHA"):
+        v16.build_sidecar(report)

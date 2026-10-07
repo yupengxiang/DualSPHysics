@@ -25,6 +25,17 @@ REQUEST_SCHEMA = "ds02.stage2.f2-s1-flux-forward-request.v16"
 RESULT_SCHEMA = "ds02.stage2.f2-s1-replay-result.v16"
 SIDECAR_SCHEMA = "ds02.stage2.f2-s1-flux-forward-sidecar.v16"
 V15_RESULT_SCHEMA = "ds02.stage2.f2-s1-replay-result.v15"
+EXPECTED_F2_V15_REPORT_SHA256 = (
+    "962325067fc40166895cd26dd2db3cc538f86576807ef3f779101cd134e6374d"
+)
+F2_ENDPOINT_SCOPE = "F2_S1_INITIAL_OUTSIDE_HALFSPACE_LATER_MISSING_ENDPOINTS_ONLY"
+EXPECTED_F2_SOURCE_BINDING = {
+    "current_catalog_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+    "trajectory_h5_producer_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "initial_csv": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e",
+    "generated_xml": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
+    "motion_dat": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+}
 
 
 class FluxV16BindingError(ValueError):
@@ -93,7 +104,10 @@ def _motion_binding_v16(result: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
-def correct_event_summary(event_summary: Mapping[str, Any], *, unknown_endpoint_mass_kg: float) -> dict[str, Any]:
+def correct_event_summary(
+    event_summary: Mapping[str, Any], *, unknown_endpoint_mass_kg: float,
+    endpoint_scope: str | None,
+) -> dict[str, Any]:
     """Correct endpoint net-flux interval naming without bounding hidden gross flux.
 
     ``known_endpoint_subtotal`` is the signed sum from particles whose final
@@ -103,6 +117,10 @@ def correct_event_summary(event_summary: Mapping[str, Any], *, unknown_endpoint_
     gross-flux interval: hidden recrossings between saved frames can make
     gross flux arbitrarily larger than the saved crossing subtotal.
     """
+    if endpoint_scope != F2_ENDPOINT_SCOPE:
+        raise FluxV16BindingError(
+            "unknown endpoint interval requires the strict F2 initial-outside source scope"
+        )
     if not isinstance(event_summary, Mapping):
         raise FluxV16BindingError("event_summary must be an object")
     known = _finite(event_summary.get("net_flux_known_endpoint_subtotal_kg"),
@@ -126,6 +144,7 @@ def correct_event_summary(event_summary: Mapping[str, Any], *, unknown_endpoint_
     corrected["gross_flux_mass_kg"] = None
     corrected["gross_flux_status"] = "UNKNOWN_HIDDEN_WITHIN_SAVED_BRACKET_RECROSSINGS"
     corrected["flux_accounting_scope"] = {
+        "scope_id": endpoint_scope,
         "known_endpoint_subtotal": "signed observed endpoint membership subtotal",
         "unknown_endpoint_contribution": "[0, missing/unknown endpoint mass]",
         "total_net_interval": "known subtotal plus unknown endpoint contribution",
@@ -134,7 +153,10 @@ def correct_event_summary(event_summary: Mapping[str, Any], *, unknown_endpoint_
     return corrected
 
 
-def forward_result(result: Mapping[str, Any], *, unknown_endpoint_mass_kg: float) -> dict[str, Any]:
+def forward_result(
+    result: Mapping[str, Any], *, unknown_endpoint_mass_kg: float,
+    endpoint_scope: str | None,
+) -> dict[str, Any]:
     """Return an in-memory v16 view while preserving source identity and UNKNOWN quality."""
     if not isinstance(result, Mapping) or result.get("schema") != V15_RESULT_SCHEMA:
         raise FluxV16BindingError("a v15 replay result is required")
@@ -144,7 +166,8 @@ def forward_result(result: Mapping[str, Any], *, unknown_endpoint_mass_kg: float
     view = _drop_key(copy.deepcopy(dict(result)), "case_name_angle_conflict")
     view["schema"] = RESULT_SCHEMA
     view["event_summary"] = correct_event_summary(
-        event_summary, unknown_endpoint_mass_kg=unknown_endpoint_mass_kg)
+        event_summary, unknown_endpoint_mass_kg=unknown_endpoint_mass_kg,
+        endpoint_scope=endpoint_scope)
     view["moving_source_motion_binding"] = _motion_binding_v16(view)
     view["replay_implementation"] = "v16_flux_forward_sidecar_over_immutable_v15_result"
     view["forward_correction"] = {
@@ -170,6 +193,11 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
     report = json.loads(report_path.read_text())
     if report.get("schema") != V15_RESULT_SCHEMA:
         raise FluxV16BindingError("report is not the expected v15 replay result")
+    report_sha256 = sha256(report_path)
+    if report_sha256 != EXPECTED_F2_V15_REPORT_SHA256:
+        raise FluxV16BindingError(
+            "report SHA is not the frozen F2 v15 source; endpoint bounds are unsupported"
+        )
     denominator = report.get("initial_mass_denominator")
     if not isinstance(denominator, Mapping):
         raise FluxV16BindingError("initial_mass_denominator is required")
@@ -182,8 +210,38 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
     source_binding = report.get("source_binding")
     if not isinstance(source_binding, Mapping):
         raise FluxV16BindingError("source_binding is required")
+    source_files = source_binding.get("source_files")
+    if not isinstance(source_files, Mapping):
+        raise FluxV16BindingError("source_binding.source_files is required")
+    for source_role, expected_sha256 in EXPECTED_F2_SOURCE_BINDING.items():
+        if source_files.get(source_role) != expected_sha256:
+            raise FluxV16BindingError(
+                f"source binding {source_role} is not the frozen F2 endpoint contract"
+            )
+    case_identity = report.get("case_identity")
+    if not isinstance(case_identity, Mapping) or case_identity.get("family_id") != "F2":
+        raise FluxV16BindingError("the strict endpoint scope is only supported for F2")
+    cohort = report.get("cohort")
+    if not isinstance(cohort, Mapping) or cohort.get("selected_count") != 21114:
+        raise FluxV16BindingError("the strict endpoint scope requires the complete 21114-particle cohort")
     event_summary = report.get("event_summary")
-    corrected = correct_event_summary(event_summary, unknown_endpoint_mass_kg=later_missing)
+    if not isinstance(event_summary, Mapping):
+        raise FluxV16BindingError("event_summary is required")
+    event_surface = event_summary.get("event_surface")
+    if (not isinstance(event_surface, Mapping) or
+            event_surface.get("positive_side") != "x_ge_origin_plane" or
+            event_surface.get("origin_m") != [0.56, -0.16, 0.0]):
+        raise FluxV16BindingError("the strict endpoint scope requires the frozen F2 x halfspace")
+    receiver_mass = event_summary.get("receiver_final_destination_mass_kg")
+    if (not isinstance(receiver_mass, Mapping) or
+            not math.isclose(_finite(receiver_mass.get("unknown"), "unknown receiver mass"), later_missing,
+                             rel_tol=0.0, abs_tol=1e-15)):
+        raise FluxV16BindingError(
+            "later-missing mass does not match the v15 unknown final-endpoint aggregate"
+        )
+    corrected = correct_event_summary(
+        event_summary, unknown_endpoint_mass_kg=later_missing,
+        endpoint_scope=F2_ENDPOINT_SCOPE)
     motion = _motion_binding_v16(report)
     sidecar: dict[str, Any] = {
         "schema": SIDECAR_SCHEMA,
@@ -206,6 +264,15 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
             "later_missing_unique_count": 3,
             "unknown_endpoint_contribution_source": "v15.initial_mass_denominator.later_missing_mass_kg",
             "denominator_unchanged": True,
+            "endpoint_scope": F2_ENDPOINT_SCOPE,
+            "initial_membership_evidence": {
+                "source_report_sha256": EXPECTED_F2_V15_REPORT_SHA256,
+                "source_initial_csv_sha256": EXPECTED_F2_SOURCE_BINDING["initial_csv"],
+                "initial_source_max_x_m": 0.38,
+                "halfspace_boundary_x_m": 0.56,
+                "all_selected_initial_points_outside": True,
+                "unknown_scope": "three later-missing IDs only; no initially-inside mass or revived endpoint inferred",
+            },
         },
         "motion_binding": motion,
         "event_summary_correction": {
@@ -215,6 +282,7 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
             "gross_flux_mass_kg": None,
             "gross_flux_status": corrected["gross_flux_status"],
             "status": corrected["net_flux_total_interval_status"],
+            "endpoint_scope": F2_ENDPOINT_SCOPE,
             "observed_gross_flux_mass_kg": corrected.get("observed_gross_flux_mass_kg"),
             "legacy_fields_removed": [
                 "net_flux_interval_kg", "net_flux_mass_kg", "net_flux_unknown_interval_kg",
