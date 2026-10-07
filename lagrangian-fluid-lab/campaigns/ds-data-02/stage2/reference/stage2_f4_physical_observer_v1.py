@@ -322,6 +322,20 @@ def decode_frame(frame_path: Path, decoder: Path, scratch_root: Path, frame: int
             detail = getattr(exc, "stderr", "") or ""
             raise UnsupportedSemantics(f"official BI4 decoder failed for frame {frame}: {detail[-1000:]}") from exc
         decoder_xml, data_root = _decoder_particle_paths(prefix)
+        decoder_metadata = {**decoder_xml["metadata"], **decoder_xml["info"]}
+        dynamic_semantics: dict[str, Any] = {}
+        for key in ("Npiece", "Piece", "NpDynamic", "ReuseIds", "PeriMode"):
+            value = decoder_metadata.get(key)
+            dynamic_semantics[key] = value if value is not None else "UNKNOWN_NOT_EXPOSED_BY_DECODER"
+        for key, expected in (("Npiece", 1), ("Piece", 0), ("NpDynamic", 0), ("ReuseIds", 0), ("PeriMode", 0)):
+            value = decoder_metadata.get(key)
+            if value is None:
+                continue
+            try:
+                if int(value) != expected:
+                    raise UnsupportedSemantics(f"unsupported multi-piece/dynamic decoder field {key}={value}")
+            except (TypeError, ValueError) as exc:
+                raise UnsupportedSemantics(f"non-numeric decoder semantic field {key}={value!r}") from exc
         ids_path = data_root / "Idp.bin"
         posd_path = data_root / "Posd.bin"
         pos_path = data_root / "Pos.bin"
@@ -387,6 +401,7 @@ def decode_frame(frame_path: Path, decoder: Path, scratch_root: Path, frame: int
             "density": density,
             "metadata": decoder_xml["metadata"],
             "info": decoder_xml["info"],
+            "dynamic_semantics": dynamic_semantics,
             "position_dtype": str(position_dtype),
         }
 
