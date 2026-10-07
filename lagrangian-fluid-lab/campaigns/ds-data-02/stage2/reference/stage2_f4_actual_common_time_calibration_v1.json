@@ -1,0 +1,1841 @@
+{
+  "schema": "ds02.stage2.f4-actual-common-time-calibration.v1",
+  "status": "ACTUAL_SELECTED_OBSERVER_COMMON_TIME_AUDIT",
+  "preparation_source_commit": "7cd298b4539e600419d1e37682855c009588a7f9",
+  "sentinel_id": "F4-S1",
+  "family_id": "F4",
+  "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+  "scope": {
+    "native_or_h5_read_by_this_worker": false,
+    "input_scope": "four completed selected-observer JSON sidecars only",
+    "full_native_tree_scanned": false,
+    "output_qualification": "UNKNOWN_SELECTED_OBSERVER_ONLY",
+    "field_interpolation_by_worker": false,
+    "weighted_operator": "groups.fluid.weighted_centroid_m / weighted_velocity_m_per_s and kinetic_energy_j; float32 mean fields retained only as diagnostic"
+  },
+  "common_query_registration": {
+    "query_times_s": [
+      0.0,
+      0.3,
+      0.6,
+      0.9,
+      1.2
+    ],
+    "late_query_times_s": [
+      0.9,
+      1.2
+    ],
+    "time_policy": "actual selected timestamps; exact/bracketed status recorded per run; no frame-index pairing or extrapolation",
+    "bracketed_values": "provisional linear values are emitted for audit visibility but comparison remains UNKNOWN until independent interpolation/output calibration",
+    "endpoint_rule": "query 1.2 requires a saved time at or beyond 1.2; each actual endpoint and shortfall is retained"
+  },
+  "frozen_error_budget": {
+    "position_relative_to_L": 0.02,
+    "event_position_relative_to_L": 0.05,
+    "velocity_and_ke_nonzero_reference": 0.05,
+    "regional_mass_fraction_of_whole_initial_fluid_mass": 0.03,
+    "event_time_fraction_of_characteristic_time": 0.01,
+    "time_error_fraction_of_total_window": 0.25,
+    "output_error_fraction_of_total_window": 0.25
+  },
+  "manufactured_calibration": {
+    "selftest": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_physical_observer_compare_selftest_v1.json",
+      "bytes": 1802,
+      "mtime_ns": 1791411966736277391,
+      "sha256": "8b4c20bb2d7c0a112c4f6c96db20af70b7c0b5f929a95ee974a131fdb83f4f9d"
+    },
+    "selftest_status": "PASS_ALL_MANUFACTURED_BOUNDARIES",
+    "calibration_interpretation": "manufactured boundary behavior is PASS; it does not calibrate real field interpolation error"
+  },
+  "runs": {
+    "dp0_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAME_CFL_SELECTED_PHYSICAL_OBSERVER_V2/f4-s1-dp0-same-cfl-selected-observer-primary-001/observer/f4_s1_dp0_selected_physical_observer.json",
+        "bytes": 197083,
+        "mtime_ns": 1791410714091916474,
+        "sha256": "a37c843b0aefdb9e8aa0dbf252861c4032a4820414fe92af7298d2549f4eac2b"
+      },
+      "source_scope": {
+        "selected_frames_only": true,
+        "selected_frame_count": 9,
+        "runparts_frame_count": 2401,
+        "full_native_tree_scanned": false,
+        "full_native_tree_sha256": "NOT_COMPUTED_BY_WORKER",
+        "hdf5_read": false,
+        "typed_conversion": "NOT_PERFORMED",
+        "particle_field_interpolation": "NOT_PERFORMED",
+        "scientific_qualification": {
+          "QI": "UNKNOWN",
+          "QN": "UNKNOWN",
+          "QE": "UNKNOWN"
+        }
+      },
+      "source_runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 483428,
+        "mtime_ns": 1791408798882963696,
+        "sha256": "781e0bc39c2c218550ddb73f8cd197f25c1408be6fd06ea297571499a972bfc3"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_dp0_savedt_pair_inputs_v1/same_cfl/F4_DROP_CENTERED_REFERENCE_001_DP010_same_cfl_savedt.xml",
+        "bytes": 5819,
+        "mtime_ns": 1791408391553746463,
+        "sha256": "b51f0b85f3777a38eea322064fd0121609051db308a2f74e6efcea46c566e010"
+      },
+      "decoder": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+        "bytes": 324368,
+        "mtime_ns": 1788971845790968404,
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+      },
+      "selected_frames": [
+        0,
+        599,
+        600,
+        1199,
+        1200,
+        1799,
+        1800,
+        2399,
+        2400
+      ],
+      "selected_count": 9,
+      "full_runparts_frame_count": 2401,
+      "actual_selected_window_s": [
+        0.0,
+        1.200084396929538
+      ],
+      "actual_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "position_dtype": "float32",
+      "mass_semantics": {
+        "fluid": "native per-particle mass summed within fluid ranges; this is a discrete sample observable",
+        "continuum": "UNKNOWN_NOT_DERIVED_FROM_PARTICLE_SUM",
+        "rigid_body": "UNKNOWN_NOT_INFERRED_FROM_PARTICLE_SUM",
+        "xml_rigid_declarations": []
+      }
+    },
+    "dp0_half_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_HALF_CFL_SELECTED_PHYSICAL_OBSERVER_FORWARD_V1/f4-s1-half-cfl-selected-observer-primary-001/observer/f4_s1_selected_physical_observer.json",
+        "bytes": 196971,
+        "mtime_ns": 1791411262155858236,
+        "sha256": "2c396109d4266eba6aaf381b4489ef2912cc0c7ba75cacbf488d5da2d69bd84b"
+      },
+      "source_scope": {
+        "selected_frames_only": true,
+        "selected_frame_count": 9,
+        "runparts_frame_count": 2401,
+        "full_native_tree_scanned": false,
+        "full_native_tree_sha256": "NOT_COMPUTED_BY_WORKER",
+        "hdf5_read": false,
+        "typed_conversion": "NOT_PERFORMED",
+        "particle_field_interpolation": "NOT_PERFORMED",
+        "scientific_qualification": {
+          "QI": "UNKNOWN",
+          "QN": "UNKNOWN",
+          "QE": "UNKNOWN"
+        }
+      },
+      "source_runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_HALF_CFL_DENSE_T1P2/f4-s1-dp0-savedt-half_cfl-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 484658,
+        "mtime_ns": 1791409280552019654,
+        "sha256": "030c93be8f204496ef1d7ce05f917f1cac6ce1f820fd773481ef353506baf5c6"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_dp0_savedt_pair_inputs_v1/half_cfl/F4_DROP_CENTERED_REFERENCE_001_DP010_half_cfl_savedt.xml",
+        "bytes": 5803,
+        "mtime_ns": 1791408394688655835,
+        "sha256": "99a74fd12a88bb10b42d0ca2382f7a453fe61a21a59c8e854fb20eb764b2cb65"
+      },
+      "decoder": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+        "bytes": 324368,
+        "mtime_ns": 1788971845790968404,
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+      },
+      "selected_frames": [
+        0,
+        599,
+        600,
+        1199,
+        1200,
+        1799,
+        1800,
+        2399,
+        2400
+      ],
+      "selected_count": 9,
+      "full_runparts_frame_count": 2401,
+      "actual_selected_window_s": [
+        0.0,
+        1.200023593498368
+      ],
+      "actual_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "position_dtype": "float32",
+      "mass_semantics": {
+        "fluid": "native per-particle mass summed within fluid ranges; this is a discrete sample observable",
+        "continuum": "UNKNOWN_NOT_DERIVED_FROM_PARTICLE_SUM",
+        "rigid_body": "UNKNOWN_NOT_INFERRED_FROM_PARTICLE_SUM",
+        "xml_rigid_declarations": []
+      }
+    },
+    "coarse_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_COARSE_SELECTED_PHYSICAL_OBSERVER_FORWARD_V1/f4-s1-coarse-selected-observer-primary-001/observer/f4_s1_selected_physical_observer.json",
+        "bytes": 198274,
+        "mtime_ns": 1791411215853212274,
+        "sha256": "20d6cf8aa7e71e0b9a08897e577e04790c268ae89cddae1cb9142eea3a51ffe8"
+      },
+      "source_scope": {
+        "selected_frames_only": true,
+        "selected_frame_count": 9,
+        "runparts_frame_count": 2401,
+        "full_native_tree_scanned": false,
+        "full_native_tree_sha256": "NOT_COMPUTED_BY_WORKER",
+        "hdf5_read": false,
+        "typed_conversion": "NOT_PERFORMED",
+        "particle_field_interpolation": "NOT_PERFORMED",
+        "scientific_qualification": {
+          "QI": "UNKNOWN",
+          "QN": "UNKNOWN",
+          "QE": "UNKNOWN"
+        }
+      },
+      "source_runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FULL_WINDOW_CANARY_COARSE_DP01230_T1P2/f4-s1-full-window-coarse-dp01230-v4-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 480658,
+        "mtime_ns": 1791407240730011995,
+        "sha256": "3433ddac4b3c56710fb0fc012b1b1fe4ced650bcfaf7e301308d203657fc1cf3"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_MASSFIT_V3_COARSE_DP0p012300/f4_s1_massfit_v3_coarse_dp0p012300-001/generated.xml",
+        "bytes": 5488,
+        "mtime_ns": 1791404695047273095,
+        "sha256": "590fd1c6acf84554b957b56545c66935ff1a44e86cc2569d07b1379d95a42e7a"
+      },
+      "decoder": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+        "bytes": 324368,
+        "mtime_ns": 1788971845790968404,
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+      },
+      "selected_frames": [
+        0,
+        599,
+        600,
+        1199,
+        1200,
+        1799,
+        1800,
+        2399,
+        2400
+      ],
+      "selected_count": 9,
+      "full_runparts_frame_count": 2401,
+      "actual_selected_window_s": [
+        0.0,
+        1.200061449336894
+      ],
+      "actual_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "position_dtype": "float32",
+      "mass_semantics": {
+        "fluid": "native per-particle mass summed within fluid ranges; this is a discrete sample observable",
+        "continuum": "UNKNOWN_NOT_DERIVED_FROM_PARTICLE_SUM",
+        "rigid_body": "UNKNOWN_NOT_INFERRED_FROM_PARTICLE_SUM",
+        "xml_rigid_declarations": []
+      }
+    },
+    "fine_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FINE_DP008_SELECTED_PHYSICAL_OBSERVER_V3/f4-s1-fine-dp008-selected-observer-v3-primary-001/observer/f4_s1_fine_dp0008_selected_physical_observer_v3.json",
+        "bytes": 197841,
+        "mtime_ns": 1791416807494097828,
+        "sha256": "3fc0d912051985ec11b6210f70a83b94c3cdbfaa7869fe4c3bf4e1ed39fe0f50"
+      },
+      "source_scope": {
+        "selected_frames_only": true,
+        "selected_frame_count": 9,
+        "runparts_frame_count": 2401,
+        "full_native_tree_scanned": false,
+        "full_native_tree_sha256": "NOT_COMPUTED_BY_WORKER",
+        "hdf5_read": false,
+        "typed_conversion": "NOT_PERFORMED",
+        "particle_field_interpolation": "NOT_PERFORMED",
+        "scientific_qualification": {
+          "QI": "UNKNOWN",
+          "QN": "UNKNOWN",
+          "QE": "UNKNOWN"
+        }
+      },
+      "source_runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FINE_DP008_FULL_WINDOW_T1P2/f4-s1-fine-dp008-full-window-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 500949,
+        "mtime_ns": 1791415059946890422,
+        "sha256": "a91724a1b7c13b304941b84e3f8a998045828c721f2e7425c9008582a4c322aa"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_SPATIAL_V1_FINE_DP0p008000/f4_s1_spatial_v1_fine_dp0p008000-001/generated.xml",
+        "bytes": 5486,
+        "mtime_ns": 1791399991598480155,
+        "sha256": "da557bf40db8cfbcaa04dd2e17a8e92fa76fe63a2315a9f2fefe6cfa948d12b2"
+      },
+      "decoder": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+        "bytes": 324368,
+        "mtime_ns": 1788971845790968404,
+        "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+      },
+      "selected_frames": [
+        0,
+        599,
+        600,
+        1199,
+        1200,
+        1799,
+        1800,
+        2399,
+        2400
+      ],
+      "selected_count": 9,
+      "full_runparts_frame_count": 2401,
+      "actual_selected_window_s": [
+        0.0,
+        1.200001418842329
+      ],
+      "actual_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "position_dtype": "float32",
+      "mass_semantics": {
+        "fluid": "native per-particle mass summed within fluid ranges; this is a discrete sample observable",
+        "continuum": "UNKNOWN_NOT_DERIVED_FROM_PARTICLE_SUM",
+        "rigid_body": "UNKNOWN_NOT_INFERRED_FROM_PARTICLE_SUM",
+        "xml_rigid_declarations": []
+      }
+    }
+  },
+  "actual_query_brackets": {
+    "dp0_same_cfl": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.3,
+        "status": "BRACKETED",
+        "lower_frame": 1,
+        "upper_frame": 2,
+        "lower_time_s": 0.2995946272865089,
+        "upper_time_s": 0.3001266998008897,
+        "bracket_width_s": 0.0005320725143808103,
+        "interpolation_fraction": 0.7618749372214041
+      },
+      {
+        "query_time_s": 0.6,
+        "status": "BRACKETED",
+        "lower_frame": 3,
+        "upper_frame": 4,
+        "lower_time_s": 0.5995935716812165,
+        "upper_time_s": 0.6000438695672594,
+        "bracket_width_s": 0.0004502978860428941,
+        "interpolation_fraction": 0.9025765640497435
+      },
+      {
+        "query_time_s": 0.9,
+        "status": "BRACKETED",
+        "lower_frame": 5,
+        "upper_frame": 6,
+        "lower_time_s": 0.8995356181838214,
+        "upper_time_s": 0.9000884463332933,
+        "bracket_width_s": 0.0005528281494718845,
+        "interpolation_fraction": 0.8400111619175069
+      },
+      {
+        "query_time_s": 1.2,
+        "status": "BRACKETED",
+        "lower_frame": 7,
+        "upper_frame": 8,
+        "lower_time_s": 1.199524906399148,
+        "upper_time_s": 1.200084396929538,
+        "bracket_width_s": 0.000559490530390061,
+        "interpolation_fraction": 0.8491539624821521
+      }
+    ],
+    "dp0_half_cfl": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.3,
+        "status": "BRACKETED",
+        "lower_frame": 1,
+        "upper_frame": 2,
+        "lower_time_s": 0.2995478175348424,
+        "upper_time_s": 0.3000640699578069,
+        "bracket_width_s": 0.0005162524229644916,
+        "interpolation_fraction": 0.8758941266774527
+      },
+      {
+        "query_time_s": 0.6,
+        "status": "BRACKETED",
+        "lower_frame": 3,
+        "upper_frame": 4,
+        "lower_time_s": 0.5995244846483188,
+        "upper_time_s": 0.600005945050412,
+        "bracket_width_s": 0.0004814604020932922,
+        "interpolation_fraction": 0.9876520470090111
+      },
+      {
+        "query_time_s": 0.9,
+        "status": "BRACKETED",
+        "lower_frame": 5,
+        "upper_frame": 6,
+        "lower_time_s": 0.8995472020528581,
+        "upper_time_s": 0.9000288918637117,
+        "bracket_width_s": 0.00048168981085361384,
+        "interpolation_fraction": 0.9400197740108127
+      },
+      {
+        "query_time_s": 1.2,
+        "status": "BRACKETED",
+        "lower_frame": 7,
+        "upper_frame": 8,
+        "lower_time_s": 1.199535277197562,
+        "upper_time_s": 1.200023593498368,
+        "bracket_width_s": 0.0004883163008060354,
+        "interpolation_fraction": 0.951683983661474
+      }
+    ],
+    "coarse_same_cfl": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.3,
+        "status": "BRACKETED",
+        "lower_frame": 1,
+        "upper_frame": 2,
+        "lower_time_s": 0.2996220590263239,
+        "upper_time_s": 0.300107326283481,
+        "bracket_width_s": 0.00048526725715714036,
+        "interpolation_fraction": 0.7788305683144814
+      },
+      {
+        "query_time_s": 0.6,
+        "status": "BRACKETED",
+        "lower_frame": 3,
+        "upper_frame": 4,
+        "lower_time_s": 0.5995615430184287,
+        "upper_time_s": 0.6000789754266348,
+        "bracket_width_s": 0.0005174324082061199,
+        "interpolation_fraction": 0.8473705446695566
+      },
+      {
+        "query_time_s": 0.9,
+        "status": "BRACKETED",
+        "lower_frame": 5,
+        "upper_frame": 6,
+        "lower_time_s": 0.8996153496335391,
+        "upper_time_s": 0.9001233188990734,
+        "bracket_width_s": 0.0005079692655343138,
+        "interpolation_fraction": 0.7572315739543017
+      },
+      {
+        "query_time_s": 1.2,
+        "status": "BRACKETED",
+        "lower_frame": 7,
+        "upper_frame": 8,
+        "lower_time_s": 1.199567457782889,
+        "upper_time_s": 1.200061449336894,
+        "bracket_width_s": 0.00049399155400498,
+        "interpolation_fraction": 0.8756065029942103
+      }
+    ],
+    "fine_same_cfl": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.3,
+        "status": "BRACKETED",
+        "lower_frame": 1,
+        "upper_frame": 2,
+        "lower_time_s": 0.2995211848068263,
+        "upper_time_s": 0.3000152247727574,
+        "bracket_width_s": 0.000494039965931059,
+        "interpolation_fraction": 0.9691831151176168
+      },
+      {
+        "query_time_s": 0.6,
+        "status": "BRACKETED",
+        "lower_frame": 3,
+        "upper_frame": 4,
+        "lower_time_s": 0.5995765669814735,
+        "upper_time_s": 0.6000013264170263,
+        "bracket_width_s": 0.0004247594355527573,
+        "interpolation_fraction": 0.9968772511796001
+      },
+      {
+        "query_time_s": 0.9,
+        "status": "BRACKETED",
+        "lower_frame": 5,
+        "upper_frame": 6,
+        "lower_time_s": 0.8995933560296794,
+        "upper_time_s": 0.900026458419266,
+        "bracket_width_s": 0.00043310238958660374,
+        "interpolation_fraction": 0.9389095514083475
+      },
+      {
+        "query_time_s": 1.2,
+        "status": "BRACKETED",
+        "lower_frame": 7,
+        "upper_frame": 8,
+        "lower_time_s": 1.199569446986076,
+        "upper_time_s": 1.200001418842329,
+        "bracket_width_s": 0.0004319718562528774,
+        "interpolation_fraction": 0.9967154287752279
+      }
+    ]
+  },
+  "comparisons": {
+    "dp0_half_cfl": {
+      "against": "dp0_same_cfl",
+      "queries": [
+        {
+          "query_time_s": 0.0,
+          "reference_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "variant_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "comparison": {
+            "status": "COMPUTED_STRUCTURAL_ONLY",
+            "reference_value_status": "EXACT_VALUE",
+            "variant_value_status": "EXACT_VALUE",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.0,
+                "sample_mass_relative_fraction": 0.0,
+                "weighted_centroid_delta_m": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "weighted_centroid_l2_m": 0.0,
+                "weighted_velocity_delta_m_per_s": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0,
+                "kinetic_energy_delta_j": 0.0,
+                "kinetic_energy_relative_fraction": 0.0
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "kinetic_energy_delta_j": 0.0
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "kinetic_energy_delta_j": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.3,
+          "reference_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2995946272865089,
+            "upper_time_s": 0.3001266998008897,
+            "bracket_width_s": 0.0005320725143808103,
+            "interpolation_fraction": 0.7618749372214041
+          },
+          "variant_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2995478175348424,
+            "upper_time_s": 0.3000640699578069,
+            "bracket_width_s": 0.0005162524229644916,
+            "interpolation_fraction": 0.8758941266774527
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.0,
+                "sample_mass_relative_fraction": 0.0,
+                "weighted_centroid_delta_m": [
+                  -1.4488929434008924e-07,
+                  -3.137195348654198e-05,
+                  1.637603279204536e-05
+                ],
+                "weighted_centroid_l2_m": 3.538919197262793e-05,
+                "weighted_velocity_delta_m_per_s": [
+                  0.00015250719361007033,
+                  -0.0004875506823091881,
+                  0.00028497626830538414
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0005849577637917431,
+                "kinetic_energy_delta_j": 0.031293997126548234,
+                "kinetic_energy_relative_fraction": 0.0031303142318049666
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    -3.418153841083793e-07,
+                    -3.8855838264489906e-05,
+                    1.906684752780996e-05
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.00016625787974208946,
+                    -0.0005822734710248419,
+                    0.00042417969512839604
+                  ],
+                  "kinetic_energy_delta_j": 0.02057712887394203
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    1.6555777641036329e-06,
+                    3.7052135918175244e-05,
+                    -8.225701933983753e-06
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    2.6786634689035483e-05,
+                    0.00037848624308906703,
+                    -0.0009877407769360858
+                  ],
+                  "kinetic_energy_delta_j": 0.010716868252607314
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.6,
+          "reference_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995935716812165,
+            "upper_time_s": 0.6000438695672594,
+            "bracket_width_s": 0.0004502978860428941,
+            "interpolation_fraction": 0.9025765640497435
+          },
+          "variant_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995244846483188,
+            "upper_time_s": 0.600005945050412,
+            "bracket_width_s": 0.0004814604020932922,
+            "interpolation_fraction": 0.9876520470090111
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.0,
+                "sample_mass_relative_fraction": 0.0,
+                "weighted_centroid_delta_m": [
+                  2.45823560091063e-05,
+                  4.052244160937524e-05,
+                  0.00011142104370941153
+                ],
+                "weighted_centroid_l2_m": 0.00012108265557972481,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.00017701296112479677,
+                  0.001796200149175524,
+                  -0.001880693340856894
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0026066599330652643,
+                "kinetic_energy_delta_j": 0.02698121149440036,
+                "kinetic_energy_relative_fraction": 0.009338740320617246
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    2.162245516068584e-05,
+                    3.7817939065043493e-06,
+                    0.0001514173733107027
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.00021198563100471857,
+                    0.0021914454492924923,
+                    -0.0009647499646005912
+                  ],
+                  "kinetic_energy_delta_j": 0.023008147375657373
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    5.16443065980976e-05,
+                    0.00037643693490171937,
+                    -0.000254259684075428
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.00014273716349063811,
+                    -0.0018174711661796128,
+                    -0.010255032780915052
+                  ],
+                  "kinetic_energy_delta_j": 0.003973064118742764
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.9,
+          "reference_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8995356181838214,
+            "upper_time_s": 0.9000884463332933,
+            "bracket_width_s": 0.0005528281494718845,
+            "interpolation_fraction": 0.8400111619175069
+          },
+          "variant_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8995472020528581,
+            "upper_time_s": 0.9000288918637117,
+            "bracket_width_s": 0.00048168981085361384,
+            "interpolation_fraction": 0.9400197740108127
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.0,
+                "sample_mass_relative_fraction": 0.0,
+                "weighted_centroid_delta_m": [
+                  -6.24861238038843e-05,
+                  0.00011025152633928337,
+                  -5.548584861292394e-07
+                ],
+                "weighted_centroid_l2_m": 0.00012672893353972358,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.00014616651646914662,
+                  -0.0024723134516833507,
+                  -0.0015056139404181212
+                ],
+                "weighted_velocity_l2_m_per_s": 0.002898373990963304,
+                "kinetic_energy_delta_j": -0.1348492569245101,
+                "kinetic_energy_relative_fraction": -0.0327007442399935
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    -7.27820406014601e-05,
+                    7.0218913021447e-05,
+                    -6.675463009445104e-05
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.00020356565944911354,
+                    -0.002037979465829745,
+                    -0.0018960733967517546
+                  ],
+                  "kinetic_energy_delta_j": -0.1029857186449572
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    3.164797260801766e-05,
+                    0.0004762639909516031,
+                    0.0006047001962226628
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0003786256479199248,
+                    -0.006443367036632237,
+                    0.0020643010889198343
+                  ],
+                  "kinetic_energy_delta_j": -0.03186353827955285
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 1.2,
+          "reference_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199524906399148,
+            "upper_time_s": 1.200084396929538,
+            "bracket_width_s": 0.000559490530390061,
+            "interpolation_fraction": 0.8491539624821521
+          },
+          "variant_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199535277197562,
+            "upper_time_s": 1.200023593498368,
+            "bracket_width_s": 0.0004883163008060354,
+            "interpolation_fraction": 0.951683983661474
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.0,
+                "sample_mass_relative_fraction": 0.0,
+                "weighted_centroid_delta_m": [
+                  -8.037677618333294e-05,
+                  -0.0004567136030075858,
+                  -5.4675594826109064e-05
+                ],
+                "weighted_centroid_l2_m": 0.00046694449562168,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.00012778100056884747,
+                  0.0015667254240287396,
+                  -0.00019669558676380788
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0015841861292969234,
+                "kinetic_energy_delta_j": -0.048581980430601135,
+                "kinetic_energy_relative_fraction": -0.0436141797641452
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    -9.834446839285249e-05,
+                    -0.00043542153473399847,
+                    -0.0001433693052420998
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.00012709868508589206,
+                    0.00041822944011986763,
+                    -4.426476419306172e-05
+                  ],
+                  "kinetic_energy_delta_j": -0.034351949407813054
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.0,
+                  "sample_mass_relative_fraction": 0.0,
+                  "weighted_centroid_delta_m": [
+                    8.389926682317306e-05,
+                    -0.0006513839414961364,
+                    0.0007562383289817787
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.0001340193135557395,
+                    0.012067260134052684,
+                    -0.0015903488216943429
+                  ],
+                  "kinetic_energy_delta_j": -0.014230031022787915
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "coarse_same_cfl": {
+      "against": "dp0_same_cfl",
+      "queries": [
+        {
+          "query_time_s": 0.0,
+          "reference_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "variant_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "comparison": {
+            "status": "COMPUTED_STRUCTURAL_ONLY",
+            "reference_value_status": "EXACT_VALUE",
+            "variant_value_status": "EXACT_VALUE",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.1482314079999938,
+                "sample_mass_relative_fraction": 0.0025093345070421485,
+                "weighted_centroid_delta_m": [
+                  0.0015500001438452093,
+                  -0.0036867622606349404,
+                  -0.00032151833349849945
+                ],
+                "weighted_centroid_l2_m": 0.00401224257132316,
+                "weighted_velocity_delta_m_per_s": [
+                  0.0,
+                  0.0,
+                  -0.0046257939795658065
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0046257939795658065,
+                "kinetic_energy_delta_j": 0.07031194299999999,
+                "kinetic_energy_relative_fraction": 0.09658233928571427
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -0.414264136000007,
+                  "sample_mass_relative_fraction": -0.0077799003906251305,
+                  "weighted_centroid_delta_m": [
+                    0.0015500002257036183,
+                    -0.004349997517888504,
+                    -0.004299997638630371
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "kinetic_energy_delta_j": 0.0
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.5624955439999999,
+                  "sample_mass_relative_fraction": 0.09658233928571427,
+                  "weighted_centroid_delta_m": [
+                    0.0015499995096693864,
+                    0.001800002100375675,
+                    0.000849998423017917
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    -1.7763568394002505e-14
+                  ],
+                  "kinetic_energy_delta_j": 0.07031194299999999
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.3,
+          "reference_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2995946272865089,
+            "upper_time_s": 0.3001266998008897,
+            "bracket_width_s": 0.0005320725143808103,
+            "interpolation_fraction": 0.7618749372214041
+          },
+          "variant_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2996220590263239,
+            "upper_time_s": 0.300107326283481,
+            "bracket_width_s": 0.00048526725715714036,
+            "interpolation_fraction": 0.7788305683144814
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.1482314079999938,
+                "sample_mass_relative_fraction": 0.0025093345070421485,
+                "weighted_centroid_delta_m": [
+                  0.0002033903511546864,
+                  -0.0029628484673079325,
+                  0.005949455424266031
+                ],
+                "weighted_centroid_l2_m": 0.006649500621888856,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.007359335064221533,
+                  -0.007647203176817462,
+                  -0.01874528131974651
+                ],
+                "weighted_velocity_l2_m_per_s": 0.021541241857688825,
+                "kinetic_energy_delta_j": -0.06149020937498051,
+                "kinetic_energy_relative_fraction": -0.00615081789471615
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -0.414264136000007,
+                  "sample_mass_relative_fraction": -0.0077799003906251305,
+                  "weighted_centroid_delta_m": [
+                    6.670791673279997e-05,
+                    -0.00342971976902981,
+                    0.00565250713410452
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.0080561318571212,
+                    -0.0076200821543917045,
+                    -0.014027198871700952
+                  ],
+                  "kinetic_energy_delta_j": 0.016597096469959993
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.5624955439999999,
+                  "sample_mass_relative_fraction": 0.09658233928571427,
+                  "weighted_centroid_delta_m": [
+                    0.0014530412246760438,
+                    0.001265108714303187,
+                    0.006561315766287046
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.0009893958549421346,
+                    -0.00732448487243848,
+                    -0.027366535439749096
+                  ],
+                  "kinetic_energy_delta_j": -0.07808730584494117
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.6,
+          "reference_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995935716812165,
+            "upper_time_s": 0.6000438695672594,
+            "bracket_width_s": 0.0004502978860428941,
+            "interpolation_fraction": 0.9025765640497435
+          },
+          "variant_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995615430184287,
+            "upper_time_s": 0.6000789754266348,
+            "bracket_width_s": 0.0005174324082061199,
+            "interpolation_fraction": 0.8473705446695566
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.1482314079999938,
+                "sample_mass_relative_fraction": 0.0025093345070421485,
+                "weighted_centroid_delta_m": [
+                  -0.0027378333882280836,
+                  -0.005060082271433702,
+                  0.008031007398158138
+                ],
+                "weighted_centroid_l2_m": 0.009879131747509236,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.011605079429580384,
+                  -0.009271180882985092,
+                  -0.0320712779048606
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0353440168908784,
+                "kinetic_energy_delta_j": -1.4659314206129002,
+                "kinetic_energy_relative_fraction": -0.5073883679307211
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -0.414264136000007,
+                  "sample_mass_relative_fraction": -0.0077799003906251305,
+                  "weighted_centroid_delta_m": [
+                    -0.002843118110969267,
+                    -0.0054511422025153855,
+                    0.0077375795580980344
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.010378487901784547,
+                    -0.008907313819643749,
+                    -0.026133412289323428
+                  ],
+                  "kinetic_energy_delta_j": -1.057674379432435
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.5624955439999999,
+                  "sample_mass_relative_fraction": 0.09658233928571427,
+                  "weighted_centroid_delta_m": [
+                    -0.0017752781498460157,
+                    -0.0016843574925522742,
+                    0.009036669414852469
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.02281174780231045,
+                    -0.011424366156233122,
+                    -0.11203419277566273
+                  ],
+                  "kinetic_energy_delta_j": -0.40825704118046524
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.9,
+          "reference_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8995356181838214,
+            "upper_time_s": 0.9000884463332933,
+            "bracket_width_s": 0.0005528281494718845,
+            "interpolation_fraction": 0.8400111619175069
+          },
+          "variant_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8996153496335391,
+            "upper_time_s": 0.9001233188990734,
+            "bracket_width_s": 0.0005079692655343138,
+            "interpolation_fraction": 0.7572315739543017
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.1482314079999938,
+                "sample_mass_relative_fraction": 0.0025093345070421485,
+                "weighted_centroid_delta_m": [
+                  -0.005890702820091298,
+                  -0.0020359875238374348,
+                  0.008025924583486457
+                ],
+                "weighted_centroid_l2_m": 0.010161746421342422,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.007707982360690639,
+                  -0.0010102104629782192,
+                  -0.004213135906874034
+                ],
+                "weighted_velocity_l2_m_per_s": 0.00884217345577545,
+                "kinetic_energy_delta_j": -0.7351583624346039,
+                "kinetic_energy_relative_fraction": -0.178274809473547
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -0.414264136000007,
+                  "sample_mass_relative_fraction": -0.0077799003906251305,
+                  "weighted_centroid_delta_m": [
+                    -0.005631776135813671,
+                    -0.0026855015192571996,
+                    0.007805619967257399
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.007626216592089739,
+                    0.0025198559548207516,
+                    -0.00550810495020373
+                  ],
+                  "kinetic_energy_delta_j": -0.649204618651559
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.5624955439999999,
+                  "sample_mass_relative_fraction": 0.09658233928571427,
+                  "weighted_centroid_delta_m": [
+                    -0.008258061635815106,
+                    0.00417168110832819,
+                    0.006313040754205912
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.008438893185192309,
+                    -0.032494808392853375,
+                    -0.009150737395646924
+                  ],
+                  "kinetic_energy_delta_j": -0.08595374378304527
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 1.2,
+          "reference_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199524906399148,
+            "upper_time_s": 1.200084396929538,
+            "bracket_width_s": 0.000559490530390061,
+            "interpolation_fraction": 0.8491539624821521
+          },
+          "variant_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199567457782889,
+            "upper_time_s": 1.200061449336894,
+            "bracket_width_s": 0.00049399155400498,
+            "interpolation_fraction": 0.8756065029942103
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": 0.1482314079999938,
+                "sample_mass_relative_fraction": 0.0025093345070421485,
+                "weighted_centroid_delta_m": [
+                  -0.007351630440173396,
+                  -0.0043466250947286345,
+                  0.006092439313618317
+                ],
+                "weighted_centroid_l2_m": 0.010490826308405398,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.002899115646632107,
+                  -0.007424974534808096,
+                  -0.010929556543623084
+                ],
+                "weighted_velocity_l2_m_per_s": 0.01352739164123483,
+                "kinetic_energy_delta_j": 0.38094466403572325,
+                "kinetic_energy_relative_fraction": 0.3419907733316822
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -0.414264136000007,
+                  "sample_mass_relative_fraction": -0.0077799003906251305,
+                  "weighted_centroid_delta_m": [
+                    -0.007090225516860671,
+                    -0.004441037445353346,
+                    0.005900477232184467
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.002432991341657556,
+                    -0.009226103099010917,
+                    -0.007601357141593247
+                  ],
+                  "kinetic_energy_delta_j": 0.3463580199600458
+                },
+                "1": {
+                  "sample_mass_delta_kg": 0.5624955439999999,
+                  "sample_mass_relative_fraction": 0.09658233928571427,
+                  "weighted_centroid_delta_m": [
+                    -0.009739352446838323,
+                    -0.003478696577109419,
+                    0.0031223432886943736
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.007122539437774283,
+                    0.00795172338200884,
+                    -0.026211694969916433
+                  ],
+                  "kinetic_energy_delta_j": 0.034586644075677686
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fine_same_cfl": {
+      "against": "dp0_same_cfl",
+      "queries": [
+        {
+          "query_time_s": 0.0,
+          "reference_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "variant_bracket": {
+            "query_time_s": 0.0,
+            "status": "EXACT",
+            "lower_frame": 0,
+            "upper_frame": 0,
+            "lower_time_s": 0.0,
+            "upper_time_s": 0.0,
+            "bracket_width_s": 0.0
+          },
+          "comparison": {
+            "status": "COMPUTED_STRUCTURAL_ONLY",
+            "reference_value_status": "EXACT_VALUE",
+            "variant_value_status": "EXACT_VALUE",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": -0.2534400000000048,
+                "sample_mass_relative_fraction": -0.00429035752979423,
+                "weighted_centroid_delta_m": [
+                  0.0010000000717778068,
+                  0.00100000102674358,
+                  -0.00024767573049519487
+                ],
+                "weighted_centroid_l2_m": 0.0014357386477072214,
+                "weighted_velocity_delta_m_per_s": [
+                  0.0,
+                  0.0,
+                  0.0019420142022139389
+                ],
+                "weighted_velocity_l2_m_per_s": 0.0019420142022139389,
+                "kinetic_energy_delta_j": -0.03168000000000004,
+                "kinetic_energy_relative_fraction": -0.04351648351648357
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -7.105427357601002e-15,
+                  "sample_mass_relative_fraction": -1.334402673828313e-16,
+                  "weighted_centroid_delta_m": [
+                    0.0009999999775779367,
+                    0.0010000010021028738,
+                    0.0009999999776807156
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "kinetic_energy_delta_j": 0.0
+                },
+                "1": {
+                  "sample_mass_delta_kg": -0.25344000000000033,
+                  "sample_mass_relative_fraction": -0.04351648351648357,
+                  "weighted_centroid_delta_m": [
+                    0.001000000951963842,
+                    0.001000001281494578,
+                    0.002999997564715584
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    0.0,
+                    0.0,
+                    9.475753515175711e-14
+                  ],
+                  "kinetic_energy_delta_j": -0.03168000000000004
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.3,
+          "reference_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2995946272865089,
+            "upper_time_s": 0.3001266998008897,
+            "bracket_width_s": 0.0005320725143808103,
+            "interpolation_fraction": 0.7618749372214041
+          },
+          "variant_bracket": {
+            "query_time_s": 0.3,
+            "status": "BRACKETED",
+            "lower_frame": 1,
+            "upper_frame": 2,
+            "lower_time_s": 0.2995211848068263,
+            "upper_time_s": 0.3000152247727574,
+            "bracket_width_s": 0.000494039965931059,
+            "interpolation_fraction": 0.9691831151176168
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": -0.2534400000000048,
+                "sample_mass_relative_fraction": -0.00429035752979423,
+                "weighted_centroid_delta_m": [
+                  -0.0013425841202426847,
+                  -0.010755606912809024,
+                  -0.011770314560318865
+                ],
+                "weighted_centroid_l2_m": 0.016000809886741588,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.01424355606892497,
+                  -0.048076705138501354,
+                  0.00012375282482655903
+                ],
+                "weighted_velocity_l2_m_per_s": 0.05014243493513916,
+                "kinetic_energy_delta_j": 0.8952234795308716,
+                "kinetic_energy_relative_fraction": 0.08954850948855284
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -7.105427357601002e-15,
+                  "sample_mass_relative_fraction": -1.334402673828313e-16,
+                  "weighted_centroid_delta_m": [
+                    -0.0015783201974997052,
+                    -0.01142578298885702,
+                    -0.011539595757084409
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.015585325287244819,
+                    -0.04835771929078542,
+                    0.003602594686871158
+                  ],
+                  "kinetic_energy_delta_j": 0.4911795838150894
+                },
+                "1": {
+                  "sample_mass_delta_kg": -0.25344000000000033,
+                  "sample_mass_relative_fraction": -0.04351648351648357,
+                  "weighted_centroid_delta_m": [
+                    0.0008539283172063206,
+                    -0.004524315322651962,
+                    -0.013093848672182745
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.0017072947707487747,
+                    -0.045652074040398886,
+                    -0.04766748535945323
+                  ],
+                  "kinetic_energy_delta_j": 0.4040438957157806
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.6,
+          "reference_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995935716812165,
+            "upper_time_s": 0.6000438695672594,
+            "bracket_width_s": 0.0004502978860428941,
+            "interpolation_fraction": 0.9025765640497435
+          },
+          "variant_bracket": {
+            "query_time_s": 0.6,
+            "status": "BRACKETED",
+            "lower_frame": 3,
+            "upper_frame": 4,
+            "lower_time_s": 0.5995765669814735,
+            "upper_time_s": 0.6000013264170263,
+            "bracket_width_s": 0.0004247594355527573,
+            "interpolation_fraction": 0.9968772511796001
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": -0.2534400000000048,
+                "sample_mass_relative_fraction": -0.00429035752979423,
+                "weighted_centroid_delta_m": [
+                  -0.006392356193308579,
+                  -0.012038431376559272,
+                  -0.012019416480720871
+                ],
+                "weighted_centroid_l2_m": 0.018172848435159573,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.019208787165170816,
+                  0.0542310234098734,
+                  -0.007429309278224827
+                ],
+                "weighted_velocity_l2_m_per_s": 0.05801013739675666,
+                "kinetic_energy_delta_j": 1.0837530742787802,
+                "kinetic_energy_relative_fraction": 0.3751087505637253
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -7.105427357601002e-15,
+                  "sample_mass_relative_fraction": -1.334402673828313e-16,
+                  "weighted_centroid_delta_m": [
+                    -0.006579528598659956,
+                    -0.011885786162808498,
+                    -0.011625584694998053
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.017114610531421756,
+                    0.05740553310820482,
+                    -0.010131705996014097
+                  ],
+                  "kinetic_energy_delta_j": 0.7316092170386026
+                },
+                "1": {
+                  "sample_mass_delta_kg": -0.25344000000000033,
+                  "sample_mass_relative_fraction": -0.04351648351648357,
+                  "weighted_centroid_delta_m": [
+                    -0.004646980188498073,
+                    -0.01356475046984909,
+                    -0.015104298684052803
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.038720199551429635,
+                    0.02347676164857235,
+                    0.0331457879534649
+                  ],
+                  "kinetic_energy_delta_j": 0.3521438572401776
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 0.9,
+          "reference_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8995356181838214,
+            "upper_time_s": 0.9000884463332933,
+            "bracket_width_s": 0.0005528281494718845,
+            "interpolation_fraction": 0.8400111619175069
+          },
+          "variant_bracket": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 5,
+            "upper_frame": 6,
+            "lower_time_s": 0.8995933560296794,
+            "upper_time_s": 0.900026458419266,
+            "bracket_width_s": 0.00043310238958660374,
+            "interpolation_fraction": 0.9389095514083475
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": -0.2534400000000048,
+                "sample_mass_relative_fraction": -0.00429035752979423,
+                "weighted_centroid_delta_m": [
+                  -0.012312697973453357,
+                  -0.0034378696914142692,
+                  -0.01311260149919638
+                ],
+                "weighted_centroid_l2_m": 0.018312886104526353,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.016170585828193355,
+                  -0.03626057603542853,
+                  -0.009661522448459789
+                ],
+                "weighted_velocity_l2_m_per_s": 0.04086150066346259,
+                "kinetic_energy_delta_j": 0.6380164851841146,
+                "kinetic_energy_relative_fraction": 0.15471804872150674
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -7.105427357601002e-15,
+                  "sample_mass_relative_fraction": -1.334402673828313e-16,
+                  "weighted_centroid_delta_m": [
+                    -0.011935744912974111,
+                    -0.004707890692301514,
+                    -0.012857508432798592
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.016211330205468773,
+                    -0.0348923663282811,
+                    -0.011165406779246163
+                  ],
+                  "kinetic_energy_delta_j": 0.48183415176100874
+                },
+                "1": {
+                  "sample_mass_delta_kg": -0.25344000000000033,
+                  "sample_mass_relative_fraction": -0.04351648351648357,
+                  "weighted_centroid_delta_m": [
+                    -0.01580820703422514,
+                    0.008303143363295018,
+                    -0.013860888041387229
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.015755070949470536,
+                    -0.04824846347417034,
+                    0.012195591438943332
+                  ],
+                  "kinetic_energy_delta_j": 0.1561823334231066
+                }
+              }
+            }
+          }
+        },
+        {
+          "query_time_s": 1.2,
+          "reference_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199524906399148,
+            "upper_time_s": 1.200084396929538,
+            "bracket_width_s": 0.000559490530390061,
+            "interpolation_fraction": 0.8491539624821521
+          },
+          "variant_bracket": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 7,
+            "upper_frame": 8,
+            "lower_time_s": 1.199569446986076,
+            "upper_time_s": 1.200001418842329,
+            "bracket_width_s": 0.0004319718562528774,
+            "interpolation_fraction": 0.9967154287752279
+          },
+          "comparison": {
+            "status": "UNKNOWN_UNCALIBRATED_BRACKET",
+            "reference_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "variant_value_status": "BRACKETED_VALUE_UNCALIBRATED",
+            "provisional_weighted_observable_delta": {
+              "fluid": {
+                "sample_mass_delta_kg": -0.2534400000000048,
+                "sample_mass_relative_fraction": -0.00429035752979423,
+                "weighted_centroid_delta_m": [
+                  -0.015053840182607803,
+                  -0.013602134637390129,
+                  -0.012144658064579261
+                ],
+                "weighted_centroid_l2_m": 0.023645906420408917,
+                "weighted_velocity_delta_m_per_s": [
+                  -0.004444443207033076,
+                  -0.011115843593633167,
+                  0.010763960693727034
+                ],
+                "weighted_velocity_l2_m_per_s": 0.016099003200035662,
+                "kinetic_energy_delta_j": -0.17927438552179908,
+                "kinetic_energy_relative_fraction": -0.16094249777288602
+              },
+              "by_mk": {
+                "0": {
+                  "sample_mass_delta_kg": -7.105427357601002e-15,
+                  "sample_mass_relative_fraction": -1.334402673828313e-16,
+                  "weighted_centroid_delta_m": [
+                    -0.014609605766597755,
+                    -0.013436931830169557,
+                    -0.012186020135752013
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.0020643765028153594,
+                    -0.009119768454581019,
+                    0.011799724992464183
+                  ],
+                  "kinetic_energy_delta_j": -0.19643545455244693
+                },
+                "1": {
+                  "sample_mass_delta_kg": -0.25344000000000033,
+                  "sample_mass_relative_fraction": -0.04351648351648357,
+                  "weighted_centroid_delta_m": [
+                    -0.019192546107791864,
+                    -0.015222812607582126,
+                    -0.009570259441854273
+                  ],
+                  "weighted_velocity_delta_m_per_s": [
+                    -0.027019490546498333,
+                    -0.030423742166668346,
+                    -0.004993399829387207
+                  ],
+                  "kinetic_energy_delta_j": 0.017161069030647985
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "late_common_time_summary": {
+    "queries": [
+      0.9,
+      1.2
+    ],
+    "all_variants_have_saved_time_at_or_beyond_1p2": true,
+    "comparison_status": "UNKNOWN_UNCALIBRATED_BRACKETS",
+    "output_resolution_status": "UNKNOWN_SELECTED_9_FRAMES_FROM_2401_FRAME_RUNS",
+    "note": "The late values are useful source-bound diagnostics; they do not grant QI/QN/QE or prove dense-output convergence."
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
