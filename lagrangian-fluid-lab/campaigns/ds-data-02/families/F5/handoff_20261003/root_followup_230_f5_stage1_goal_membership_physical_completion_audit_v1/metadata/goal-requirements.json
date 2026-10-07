@@ -1,0 +1,53 @@
+{
+  "schema": "ds02.f5.fresh230.goal-requirements.v1",
+  "source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_ZH.md",
+    "sha256": "b10fbda1db702b6f212f18f24faae32cd6a3e86b73fa669aa11940fb7683ad82",
+    "baseline_commit": "0081645116664386f76f2bfa2ef428bcd74e846e",
+    "line_ranges": {
+      "stage1_pipeline_and_case_requirements": "2-3",
+      "stage2_precision_boundary_and_disclosures": "3",
+      "resources_and_deadline": "3-5"
+    }
+  },
+  "requirements": [
+    {
+      "id": "stage1_pipeline",
+      "text": "Complete the generation-to-ParaView-to-visual-acceptance pipeline for seven 3D Lagrangian families.",
+      "audit_rule": "Require producer-linked native, typed, XMF/XML, render and visual metadata for every counted product; reports and previews alone are insufficient."
+    },
+    {
+      "id": "physical_case_shape",
+      "text": "Every case has a real 3D mechanism, a full primary-event time domain, traceable particle identity/state, required geometry and motion/rigid state, a directly openable dynamic file, event previews, and parameter/input provenance.",
+      "audit_rule": "Check source indexes for N3/time/UID/state/geometry/motion or rigid joins, XMF/XML references, preview references, and provenance joins. Treat this as metadata evidence, not a numerical or physical certification."
+    },
+    {
+      "id": "visual_exclusion",
+      "text": "Exclude obvious bad initial states, severe wall crossing, explosion, nonfinite state, unexplained large particle loss, and early termination.",
+      "audit_rule": "Keep producer omission/loss metadata and early-termination status visible. Unknown loss cause is a disclosed limitation and cannot be rewritten as zero loss."
+    },
+    {
+      "id": "membership",
+      "text": "Use independent physical cases in 8/24/48 batches, with 8 and 24 actual subsets of the final 48 and no resolution replica, rerun, time-slice, or derived-view duplicate.",
+      "audit_rule": "Validate each family list for exact lengths, uniqueness, and subset relations, then check the seven final rosters for cross-family duplicate physical IDs."
+    },
+    {
+      "id": "stage1_label",
+      "text": "Stage 1 is labelled visual check passed, numerical precision not accepted; Q-N and Q-E are not granted.",
+      "audit_rule": "The audit must preserve precision-status labels, Q-N/Q-E false state, and Stage 2 precision/transport/event-label/external-validation gaps."
+    },
+    {
+      "id": "resource_window",
+      "text": "Cumulative limits remain 512 GPU hours, 3840 CPU core hours, 1024 qualification attempts, 720 production attempts, Home >=500 GiB, and the original deadline.",
+      "audit_rule": "Record the checkpoint resource snapshot without resetting or changing it."
+    }
+  ],
+  "stage2_gaps_explicit": [
+    "spatial convergence and integration/save-frequency error budgets",
+    "long-term per-particle trajectory consistency",
+    "exact transport and event labels",
+    "parameter-range qualification",
+    "external experimental validation",
+    "Q-N numerical reference and Q-E external validation"
+  ]
+}
