@@ -1,0 +1,1 @@
+F2固定8⊂24⊂48，42视觉通过与6待审图。每例实际401帧；baseline421566粒子，其余41例418104。源目录四条所谓render receipt实为旧申请JSON；原字节不修改，新增sidecar绑定本例同一动画实际completed0 executionreceipt，核对XML/manifest/H5生产者运行前后元数据证明。714contact/160源key与378实际发布导航key核对；源14例未枚举key仍保留。P03原typed收据running、返回码缺失，不改判，保留已有完整401产物恢复审计。41例native与XMF角色差异、baseline native条件字段缺失原样保留；本次未读科学payload，新增案例和精度信用均0。
