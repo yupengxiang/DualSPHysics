@@ -126,6 +126,7 @@ def vector_diff(a: Any, b: Any) -> dict[str, Any]:
 def compare_group(a: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {
         "count": scalar_diff(a.get("count"), b.get("count")),
+        "particle_mass_kg": scalar_diff(a.get("particle_mass_kg"), b.get("particle_mass_kg")),
         "sample_mass_kg": scalar_diff(a.get("sample_mass_kg"), b.get("sample_mass_kg")),
         "centroid_m": vector_diff(a.get("centroid_m"), b.get("centroid_m")),
         "mean_velocity_m_per_s": vector_diff(a.get("mean_velocity_m_per_s"), b.get("mean_velocity_m_per_s")),
