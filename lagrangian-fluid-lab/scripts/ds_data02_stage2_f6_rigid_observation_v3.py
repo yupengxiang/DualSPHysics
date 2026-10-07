@@ -193,6 +193,36 @@ def so3_error_deg(first: Any, second: Any) -> float:
     return math.degrees(math.acos(cosine))
 
 
+def rotation_log_vector(matrix: Any) -> np.ndarray:
+    """Return the principal rotation vector (radians) for a proper matrix."""
+    value = validate_rotation(matrix)
+    cosine = float((np.trace(value) - 1.0) / 2.0)
+    theta = math.acos(max(-1.0, min(1.0, cosine)))
+    if theta <= 1.0e-10:
+        return np.asarray([
+            (value[2, 1] - value[1, 2]) / 2.0,
+            (value[0, 2] - value[2, 0]) / 2.0,
+            (value[1, 0] - value[0, 1]) / 2.0,
+        ], dtype=np.float64)
+    if math.pi - theta <= 1.0e-7:
+        # At pi the skew denominator is singular.  Select the eigenvector
+        # with eigenvalue one and make its sign deterministic.
+        values, vectors = np.linalg.eig(value)
+        index = int(np.argmin(np.abs(values.real - 1.0) + np.abs(values.imag)))
+        axis = np.asarray(vectors[:, index].real, dtype=np.float64)
+        axis /= np.linalg.norm(axis)
+        first_nonzero = int(np.argmax(np.abs(axis) > 1.0e-10))
+        if axis[first_nonzero] < 0.0:
+            axis *= -1.0
+        return axis * theta
+    axis = np.asarray([
+        value[2, 1] - value[1, 2],
+        value[0, 2] - value[2, 0],
+        value[1, 0] - value[0, 1],
+    ], dtype=np.float64) / (2.0 * math.sin(theta))
+    return axis * theta
+
+
 def weighted_kabsch(initial: Any, current: Any, weights: Any) -> dict[str, Any]:
     """Fit row-vector initial positions to current positions with proper SO(3)."""
     x = np.asarray(initial, dtype=np.float64)
@@ -423,8 +453,10 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
         raise ObservationError("observer_semantics is not an object")
     initial = frames["frames"][0]
     records: list[dict[str, Any]] = []
+    fit_matrices: list[np.ndarray] = []
     for frame, observed in zip(frames["frames"], observer["rows"]):
         fit = weighted_kabsch(initial["positions_m"], frame["positions_m"], initial["masses_kg"])
+        fit_matrices.append(fit["rotation_world_from_initial"])
         records.append({
             "part": frame["part"],
             "time_s": frame["time_s"],
@@ -445,6 +477,45 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
             "observer_center_frame": semantics.get("center_frame", "UNKNOWN"),
             "observer_angular_velocity_frame": semantics.get("angular_velocity_frame", "UNKNOWN"),
         })
+    center_frame = str(semantics.get("center_frame", "UNKNOWN")).strip().lower()
+    center_semantics = str(semantics.get("center_semantics", "UNKNOWN")).strip().lower()
+    omega_frame = str(semantics.get("angular_velocity_frame", "UNKNOWN")).strip().lower()
+    center_residuals: list[float] = []
+    omega_residuals: list[float] = []
+    initial_observer_center = np.asarray(observer["rows"][0]["center_m"], dtype=np.float64)
+    initial_sample_centroid = np.asarray(records[0]["sample_centroid_initial_m"], dtype=np.float64)
+    for index, (record, observed) in enumerate(zip(records, observer["rows"])):
+        rotation = fit_matrices[index]
+        if center_frame == "world" and center_semantics in {"physical_com", "physical com", "physical-com"}:
+            observer_center = np.asarray(observed["center_m"], dtype=np.float64)
+            predicted_sample = observer_center + rotation @ (initial_sample_centroid - initial_observer_center)
+            center_residual = float(np.linalg.norm(np.asarray(record["sample_centroid_current_m"]) - predicted_sample))
+            record["predicted_sample_centroid_from_observer_m"] = predicted_sample.tolist()
+            record["sample_centroid_vs_observer_com_residual_m"] = center_residual
+            center_residuals.append(center_residual)
+        else:
+            record["sample_centroid_vs_observer_com_residual_m"] = None
+        if index == 0:
+            record["derived_angular_velocity_world_rad_s"] = None
+            record["observer_angular_velocity_residual_rad_s"] = None
+            continue
+        dt = records[index]["time_s"] - records[index - 1]["time_s"]
+        relative = rotation @ fit_matrices[index - 1].T
+        derived_world = rotation_log_vector(relative) / dt
+        record["derived_angular_velocity_world_rad_s"] = derived_world.tolist()
+        observed_omega = np.asarray(observed["angular_velocity_rad_s"], dtype=np.float64)
+        if omega_frame == "world":
+            derived_observer_frame = derived_world
+        elif omega_frame == "body":
+            derived_observer_frame = rotation.T @ derived_world
+        else:
+            derived_observer_frame = None
+        if derived_observer_frame is None:
+            record["observer_angular_velocity_residual_rad_s"] = None
+        else:
+            omega_residual = float(np.linalg.norm(derived_observer_frame - observed_omega))
+            record["observer_angular_velocity_residual_rad_s"] = omega_residual
+            omega_residuals.append(omega_residual)
     checks = {
         "solver_completed_code0": True,
         "snapshot_frame_identity_constant": True,
@@ -490,6 +561,22 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
             "initial_reference_part": initial["part"],
         },
         "rigid_fit": {"frames": records, "residual_units": "m"},
+        "rigidity_observation": {
+            "center_comparison": {
+                "status": "computed" if center_residuals else "UNKNOWN_FRAME_OR_CENTER_SEMANTICS",
+                "center_frame": semantics.get("center_frame", "UNKNOWN"),
+                "center_semantics": semantics.get("center_semantics", "UNKNOWN"),
+                "sample_centroid_is_not_physical_com": True,
+                "max_sample_centroid_vs_observer_com_residual_m": max(center_residuals) if center_residuals else None,
+            },
+            "angular_velocity_comparison": {
+                "status": "computed" if omega_residuals else "UNKNOWN_FRAME_OR_NO_DERIVATIVE",
+                "observer_frame": semantics.get("angular_velocity_frame", "UNKNOWN"),
+                "units": "rad/s",
+                "max_residual_rad_s": max(omega_residuals) if omega_residuals else None,
+                "orientation_source": "direct particle Kabsch; no Euler order or quaternion provenance assumed",
+            },
+        },
         "observer_semantics": semantics,
         "checks": checks,
         "qualification": {
@@ -528,6 +615,7 @@ def self_test(output: Path) -> dict[str, Any]:
     noncommuting_error = so3_error_deg(true_rotation, noncommuting_wrong)
     cross_pi_error = so3_error_deg(axis_rotation("z", math.radians(179.0)), axis_rotation("z", math.radians(-181.0)))
     degree_radian_error = so3_error_deg(axis_rotation("x", math.radians(90.0)), axis_rotation("x", 90.0))
+    log_vector = rotation_log_vector(axis_rotation("z", math.radians(31.0)))
     reflection = np.diag([1.0, 1.0, -1.0])
     collinear = np.asarray([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype=np.float64)
     valid_frame = {"part": 0, "time_s": 0.0, "valid": True, "particles": [
@@ -560,6 +648,7 @@ def self_test(output: Path) -> dict[str, Any]:
         "noncommuting_order_is_detectably_different": noncommuting_error > SO3_MAX_LIMIT_DEG,
         "cross_pi_direct_so3_is_zero": cross_pi_error <= 1.0e-8,
         "degrees_are_not_silently_radians": degree_radian_error > SO3_MAX_LIMIT_DEG,
+        "rotation_log_uses_active_world_convention": bool(np.linalg.norm(log_vector - np.asarray([0.0, 0.0, math.radians(31.0)])) <= 1.0e-8),
         "identity_join_allows_row_reordering": identity_reorder_passed,
         "all_negative_tests_raise": all(item["passed"] for item in failure_tests),
     }
@@ -575,6 +664,7 @@ def self_test(output: Path) -> dict[str, Any]:
             "noncommuting_order_error_deg": noncommuting_error,
             "cross_pi_error_deg": cross_pi_error,
             "degrees_radians_error_deg": degree_radian_error,
+            "rotation_log_vector_rad": log_vector.tolist(),
         },
         "negative_tests": failure_tests,
         "checks": checks,
