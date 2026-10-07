@@ -256,3 +256,13 @@ def test_v11_manual_evaluator_binds_shape_time_source_and_frozen_thresholds():
     bad["mass_weighted_com_m"] = np.zeros((3, 3)).tolist()
     with pytest.raises(ReplayV11BindingError, match="shape"):
         evaluate_manual_predictions(result, bad, profile)
+    bad_profile = dict(profile)
+    bad_profile["thresholds"] = dict(profile["thresholds"], event_time_fraction=float("inf"))
+    bad_profile["sha256"] = hashlib.sha256(json.dumps({k: v for k, v in bad_profile.items() if k != "sha256"}, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    with pytest.raises(ReplayV11BindingError, match="threshold"):
+        validate_observer_profile(bad_profile)
+    bad_profile = dict(profile)
+    bad_profile["thresholds"] = dict(profile["thresholds"], mass_fraction=0.9)
+    bad_profile["sha256"] = hashlib.sha256(json.dumps({k: v for k, v in bad_profile.items() if k != "sha256"}, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    with pytest.raises(ReplayV11BindingError, match="threshold"):
+        validate_observer_profile(bad_profile)

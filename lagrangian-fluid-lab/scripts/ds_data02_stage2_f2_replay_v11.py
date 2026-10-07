@@ -422,6 +422,10 @@ def validate_observer_profile(profile: Mapping[str, Any], *, request: Mapping[st
         value = _finite(thresholds.get(key), f"observer_profile.thresholds.{key}")
         if value <= 0 or value > 1:
             raise ReplayV11BindingError("observer profile threshold is outside (0,1]")
+    frozen_thresholds = {"position_relative": 0.02, "mass_fraction": 0.03, "event_time_fraction": 0.01}
+    if any(not math.isclose(float(thresholds[key]), expected, rel_tol=0.0, abs_tol=1e-15)
+           for key, expected in frozen_thresholds.items()):
+        raise ReplayV11BindingError("observer profile threshold differs from the frozen preregistered profile")
     budgets = profile.get("budgets")
     if not isinstance(budgets, Mapping):
         raise ReplayV11BindingError("observer profile budgets are required")
@@ -429,6 +433,9 @@ def validate_observer_profile(profile: Mapping[str, Any], *, request: Mapping[st
         value = _finite(budgets.get(key), f"observer_profile.budgets.{key}")
         if value <= 0 or value > 1:
             raise ReplayV11BindingError("observer profile budget fraction is outside (0,1]")
+    if any(not math.isclose(float(budgets[key]), 0.25, rel_tol=0.0, abs_tol=1e-15)
+           for key in ("time_fraction", "output_fraction")):
+        raise ReplayV11BindingError("observer profile budget differs from the frozen preregistered profile")
     names = profile.get("observable_names")
     expected_names = ["mass_weighted_com_m", "mass_weighted_mean_velocity_m_s",
                       "mass_weighted_kinetic_energy_J", "mass_quantile_front_m",
