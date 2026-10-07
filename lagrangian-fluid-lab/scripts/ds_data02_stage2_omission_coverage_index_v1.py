@@ -331,6 +331,11 @@ def native_evidence(current: dict[str, Any], scan_path: Path,
                                              expected_sha256=receipt_obj.get("sha256"),
                                              label="native decoder receipt"),
         "native_tool": native_decode.get("tool"),
+        "native_evidence_bindings": {
+            "decoder": evidence_ref_map(native_decode, "native_decode"),
+            "source_provenance": evidence_ref_map(
+                sidecar.get("source_provenance", {}), "source_provenance"),
+        },
         "native_binary": native_decode.get("binary"),
         "native_output_root": native_decode.get("output_root"),
         "joined_count": len(typed_ids),
@@ -352,6 +357,18 @@ def native_evidence(current: dict[str, Any], scan_path: Path,
 def sidecar_ref_for_scan(scan_path: Path) -> str:
     """Hash a scan JSON without opening the HDF5 named inside it."""
     return sha256(scan_path)
+
+
+def evidence_ref_map(mapping: dict[str, Any], label: str) -> dict[str, Any]:
+    """Recompute hashes for path/hash evidence embedded in a sidecar."""
+    result: dict[str, Any] = {}
+    for key, value in mapping.items():
+        if not isinstance(value, dict) or "path" not in value:
+            continue
+        result[key] = file_ref(
+            value["path"], expected_sha256=value.get("sha256"),
+            label=f"{label}.{key}")
+    return result
 
 
 def impact_inventory(data_root: Path) -> dict[str, list[dict[str, Any]]]:
@@ -417,6 +434,7 @@ def zero_native_evidence(current: dict[str, Any], scan_path: Path,
     return {
         "status": "NO_NATIVE_EXCLUSION_OBSERVED",
         "evidence": file_ref(path, label="F4 no-native sidecar"),
+        "evidence_bindings": evidence_ref_map(evidence, "F4 no-native evidence"),
         "scan_path": str(scan_path),
         "scan_sha256": sha256(scan_path),
         "conversion_report": file_ref(current["conversion_report"]["path"],
