@@ -1,0 +1,21 @@
+{
+  "source": "source/lagrangian-fluid-lab/scripts/ds_data02_batch_runner.py",
+  "source_sha256": "dbc00fe37bb50a90e91ccdf7fe59971d453d2a59d842a29f076f6a16154f0843",
+  "results": [
+    {
+      "test": "small_receipt",
+      "child_output_bytes_approx": 32,
+      "outcome": "completed",
+      "returncode": 0,
+      "scope": "draft batch module executed with a fake CPU worker; no GPU, no CFD, no data/ledger/server access"
+    },
+    {
+      "test": "large_receipt",
+      "child_output_bytes_approx": 1048576,
+      "outcome": "timeout_pipe_backpressure",
+      "returncode": -15,
+      "scope": "draft batch module executed with a fake CPU worker; no GPU, no CFD, no data/ledger/server access"
+    }
+  ],
+  "interpretation": "Waiting for poll before draining a PIPE can deadlock large JSON receipts. No claim this draft caused any stage1 execution failure."
+}

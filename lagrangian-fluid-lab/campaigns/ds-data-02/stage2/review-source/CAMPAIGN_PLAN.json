@@ -1,0 +1,144 @@
+{
+  "schema": "ds02.stage2.review_plan.v1",
+  "created_date": "2026-10-07",
+  "status": "proposed_for_owner_adoption_not_executed",
+  "stage1_science_commit": "fab8dd3b3ac28ef5e21efea9cc3f04afa7f116ee",
+  "review_branch_head": "c30f8348d66debc83c581fed964aa3a2868dc2f2",
+  "scope": {
+    "learning_training": false,
+    "learning_inference": false,
+    "model_checkpoint_replay": false,
+    "public_release": false,
+    "hidden_test_generation": false,
+    "modify_stage1_bytes": false,
+    "rewrite_historical_receipts": false,
+    "local_scientific_replay": true,
+    "model_free_evaluation": true
+  },
+  "parent_budget_snapshot": {
+    "gpu_hours_total": 512,
+    "gpu_hours_used": 134.38619469133243,
+    "cpu_core_hours_total": 3840,
+    "cpu_core_hours_used": 689.6787202083322,
+    "qualification_attempts_total": 1024,
+    "qualification_attempts_used": 624,
+    "production_attempts_total": 720,
+    "production_attempts_used": 23,
+    "home_min_free_gib": 500,
+    "home_free_gib_observed": 778.4609680175781,
+    "deadline_utc": "2026-10-14T07:23:48Z",
+    "actual_approval_required": true,
+    "no_reset": true
+  },
+  "stage2_soft_budget": {
+    "gpu_hours": 140,
+    "cpu_core_hours": 800,
+    "qualification_attempts": 96,
+    "independent_material_configs": 6,
+    "counter_warning": "shared soft partition within real parent remaining; not additional authorization"
+  },
+  "qualification_attempt_buckets": {
+    "spatial_new": 28,
+    "temporal_and_cadence": 14,
+    "replay_input_controls": 7,
+    "omission_diagnostics": 9,
+    "external_anchors": 7,
+    "mechanism_probes": 14,
+    "reserve_repairs_internal_points": 17
+  },
+  "selection": {
+    "sentinels": 14,
+    "spatial_cells": 42,
+    "potential_reused_cells": 14,
+    "all_stage1_cases": 336,
+    "all_stage1_cases_new_QN": 0,
+    "current_numbers_are_not_production_promise": true
+  },
+  "execution": {
+    "active_family_owners": 7,
+    "recommended_active_agents_max": 12,
+    "initial_concurrent_heavy_solver_jobs": 4,
+    "conditional_max_heavy_solver_jobs": 7,
+    "max_solver_jobs_per_gpu": 1,
+    "initial_concurrent_conversion_jobs": 2,
+    "conditional_max_conversion_jobs": 4,
+    "gpu_pool": "actual owner approved UUID allowlist, realtime external-process protected",
+    "canonical_runner_required": true,
+    "log_pipe_guard_required": true,
+    "state2_manifest_source_required": true
+  },
+  "tasks": [
+    {
+      "id": "S0",
+      "requires": [],
+      "title": "freeze and raw/typed provenance replay",
+      "can_parallel": [
+        "S1"
+      ]
+    },
+    {
+      "id": "S1",
+      "requires": [],
+      "title": "integration-safe runtime and consumers"
+    },
+    {
+      "id": "S2",
+      "requires": [
+        "S0"
+      ],
+      "title": "native omission diagnosis on F2/F4/F6"
+    },
+    {
+      "id": "S3",
+      "requires": [
+        "S0",
+        "S1"
+      ],
+      "title": "14-sentinel reference study",
+      "per_family_gate": true,
+      "not_requires_all_S2": true
+    },
+    {
+      "id": "S4",
+      "requires": [
+        "S0",
+        "S1"
+      ],
+      "title": "label implementation and scoped validity",
+      "acceptance_requires_relevant_S3": true
+    },
+    {
+      "id": "S5",
+      "requires": [
+        "S0",
+        "S1"
+      ],
+      "title": "bounded external anchor/coverage probes",
+      "per_family_conditions": true
+    },
+    {
+      "id": "S6",
+      "requires": [
+        "S0",
+        "S1"
+      ],
+      "title": "scoped dataset packaging and model-free splits",
+      "may_deliver_scoped_subsets_without_all_family_pass": true
+    }
+  ],
+  "stop_conditions": [
+    "real parent deadline/resources/storage risk",
+    "requested stage2 evidence product complete",
+    "all applicable bounded research branches terminal with evidence and no authorized information-gaining ready task",
+    "documented external dependency preventing all remaining ready work"
+  ],
+  "non_stop_conditions": [
+    "checkpoint pushed",
+    "one canary failed",
+    "one QN observation failed",
+    "model unavailable",
+    "independent tracer unavailable",
+    "another family not qualified"
+  ],
+  "metadata_tests_are_not_CFD_acceptance": true
+}

@@ -1,0 +1,93 @@
+{
+  "scope": "facts on uploaded metadata/code vs inferences separated; no CFD or raw science replay",
+  "findings": [
+    {
+      "priority": "S1",
+      "evidence_type": "已知范围限制",
+      "title": "数值参考仍未验收，不是视觉阶段未完成",
+      "evidence": "STAGE1_SUMMARY_ZH.md §1; FAMILY_SUMMARIES.json; CASES_336.json /cases/*/Q_N",
+      "impact": "所有新增QN/QE为0；Visual与Q-I/物理精度分层，Stage1不追溯改判",
+      "next_evidence": "14哨点原生读回和时空/任务参考研究"
+    },
+    {
+      "priority": "S1",
+      "evidence_type": "事实+待定位原因",
+      "title": "118个案例有流体遗漏记录",
+      "evidence": "FAMILY_SUMMARIES.json /fluid_omissions/F2,F4,F6; evidence/E00007",
+      "impact": "48+22+48=118；原因为unknown；小比例不证明守恒；producer生命期不是独立raw核验",
+      "next_evidence": "原生退出/域/转换逐ID对账及配对影响实验"
+    },
+    {
+      "priority": "S1",
+      "evidence_type": "源码实际复现",
+      "title": "batch草稿存在PIPE回压死锁条件",
+      "evidence": "source/lagrangian-fluid-lab/scripts/ds_data02_batch_runner.py:37-53",
+      "impact": "fake CPU worker小回执成功，1MiB回执3s超时；没有证据该draft导致旧运行失败",
+      "next_evidence": "实际入口文件日志/持续排空、取消/租约/收据集成测试"
+    },
+    {
+      "priority": "S1",
+      "evidence_type": "静态事实/未来风险",
+      "title": "batch调用旧runtime而非strict入口",
+      "evidence": "source/lagrangian-fluid-lab/scripts/ds_data02_batch_runner.py:14-16,36; ds_data02_strict_dispatch_v1.py:16-39",
+      "impact": "直接旧入口不包含同一注册expected hash guard；不能拿18资源测试背书整个draft",
+      "next_evidence": "只允许绑定strict或等价集成验证入口；input mutation反例"
+    },
+    {
+      "priority": "S1",
+      "evidence_type": "事实",
+      "title": "不同背景/参数的数值设置和元数据覆盖不一",
+      "evidence": "NUMERICAL_RECIPE_INDEX.json /cases/*/XML_candidates; CASES_336.json /cases/*/known_numeric_physical_parameters",
+      "impact": "F1背景同时改变dp/time；F2一基线缺条件、其余液深固定；F5两time_scale未知；缺省Boundary不补0",
+      "next_evidence": "按实际XML/CLI/控制分配方；新等价对照，不从名字/当前脚本补值"
+    },
+    {
+      "priority": "S2",
+      "evidence_type": "事实",
+      "title": "物理输入不重复不等于机制全面或统计iid",
+      "evidence": "CASES_336.json; FAMILY_SUMMARIES.json; audit/CATALOG_RECIPE_AUDIT.json",
+      "impact": "F7仅单轴；F3单控制模板；F5非越堤；F6非波激励。7896比较只证明已知字段不同",
+      "next_evidence": "前向有效输入去重与coverage设计；少量反转/拓扑等关键补例"
+    },
+    {
+      "priority": "S2",
+      "evidence_type": "静态事实/未来风险",
+      "title": "stage8脚本依赖旧名称/最新glob与任意日志fallback",
+      "evidence": "source/lagrangian-fluid-lab/scripts/ds_data02_f3_stage8_labels.py:23-35,49-55; ds_data02_f3_stage8_audit.py:39-72",
+      "impact": "这些是被报告保留的draft，不推断已污染当前336；直接拿来做第二阶段会错配来源或标签配置",
+      "next_evidence": "当前CASES与immutable recipe/array/geometry manifest绑定并用真实新schema测试"
+    },
+    {
+      "priority": "S2",
+      "evidence_type": "已披露事实",
+      "title": "旧receipt缺项与恢复不能互相回填",
+      "evidence": "STAGE1_SUMMARY_ZH.md §5; NUMERICAL_RECIPE_INDEX.json /original_native_status",
+      "impact": "4份F3原native记录running；F6基线刚体字段不完整；有恢复不等于原字段曾存在",
+      "next_evidence": "逐case质量向量/恢复谱系；producer vs replay事实分列"
+    },
+    {
+      "priority": "S2",
+      "evidence_type": "访问限制",
+      "title": "科学数组没有随包传输",
+      "evidence": "README.md; PACKAGE_MANIFEST.json /scientific_payload_files=0",
+      "impact": "不能独立确认全部有限性、科学时程和全部动画；多层哈希不能代替字节重放",
+      "next_evidence": "每族完整短窗口+最小原生锚点；本地一次全库流式核对"
+    },
+    {
+      "priority": "S2",
+      "evidence_type": "资源事实",
+      "title": "磁盘余量可能先于GPU耗尽",
+      "evidence": "RESOURCE_STATUS.json /current_home_free_gib,/limits/home_min_free_bytes",
+      "impact": "当前778.46GiB空闲，但必须保留500GiB，实际可新增约278.46GiB，不是~778GiB",
+      "next_evidence": "按raw/typed/temp峰值全局预约；不自动删Stage1主产物"
+    },
+    {
+      "priority": "S3",
+      "evidence_type": "实际传输复核",
+      "title": "收到的ZIP缺正常末尾目录",
+      "evidence": "audit/ARCHIVE_RECOVERY_SUMMARY.json",
+      "impact": "原copy普通ZipFile无法开；CRC完整local files恢复，5944manifest文件全部哈希通过。不能归因源作者",
+      "next_evidence": "重新正规分块封装传输，不据此否定已恢复元数据"
+    }
+  ]
+}
