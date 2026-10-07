@@ -289,6 +289,15 @@ def parsed_without_savedt(text: str, *, restore_cfl: list[str] | None = None) ->
             raise ValueError("CFL count changed while proving overlay")
         for node, value in zip(nodes, restore_cfl):
             node.set("value", value)
+    # Inserting a child necessarily changes indentation whitespace tails of
+    # neighboring elements.  Remove whitespace-only text/tails before the
+    # semantic comparison so the proof covers element/attribute meaning while
+    # the separate text-edit list records the actual insertion/replacements.
+    for node in root.iter():
+        if node.text is not None and not node.text.strip():
+            node.text = None
+        if node.tail is not None and not node.tail.strip():
+            node.tail = None
     return ET.tostring(root, encoding="utf-8")
 
 
