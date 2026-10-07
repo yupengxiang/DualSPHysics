@@ -299,7 +299,10 @@ def resolve_dependencies(
             if not path.is_file() or path.name != relative.name:
                 continue
             digest = g_hashes.get(str(path))
-            if digest and digest == sha256_file(path) and s_hashes.get(str(path)) == digest:
+            # The GenCase and solver receipts may copy the same asset into
+            # different producer directories.  Match the immutable digest,
+            # not the historical pathname.
+            if digest and digest == sha256_file(path) and digest in set(s_hashes.values()):
                 matches.append(path)
         matches = list(dict.fromkeys(matches))
         if len(matches) != 1:
