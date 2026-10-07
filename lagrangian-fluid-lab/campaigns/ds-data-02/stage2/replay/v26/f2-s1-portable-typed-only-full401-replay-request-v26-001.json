@@ -1,0 +1,919 @@
+{
+  "access_audit": {
+    "original_source_path": "reject",
+    "os_trace": "parent must retain openat trace covering h5py/native HDF5 C opens",
+    "python_hook": "v25 sys.addaudithook records/rejects Python open and os.open original paths",
+    "trace_output": "{attempt_root}/typed-replay-v26/os-trace/openat.log",
+    "unexpected_data_path": "reject"
+  },
+  "attempt_id": "portable-typed-only-full401-v26-001",
+  "case_identity": {
+    "current_case_index": 78,
+    "family_id": "F2",
+    "manifest_case_id": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010",
+    "manifest_physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+    "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+    "runtime_case_alias": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010"
+  },
+  "cfd_invoked": false,
+  "cohort": {
+    "expected_initial_fluid_count": 21114,
+    "identity_key": "(Zone,Idp)",
+    "initial_mk_codes": [
+      1,
+      2,
+      3
+    ],
+    "initial_type_code": 3,
+    "max_particles": null,
+    "nominal_box_selection": "DIAGNOSTIC_ONLY; does not filter GenCase lattice endpoints",
+    "selection": "initial_csv_type_mk_identity_set",
+    "small_cohort": "none; exact 21114 Type3/MK1-3 identities from source-bound initial.csv",
+    "source_csv_semantics": {
+      "coordinate_storage_dtype": "float32",
+      "data_row_count": 418104,
+      "fluid_identity_count": 21114,
+      "fluid_identity_set_sha256": "bc7c25286faeb5c9bbc9f27c176671c027bbc0650b9051f9d08241b4f3397d70",
+      "fluid_mass_sum_kg": 21.114000000000008,
+      "fluid_mk_codes": [
+        1,
+        2,
+        3
+      ],
+      "fluid_mk_counts": {
+        "1": 7038,
+        "2": 7038,
+        "3": 7038
+      },
+      "fluid_position_max_m": [
+        0.38,
+        0.11,
+        0.95999998
+      ],
+      "fluid_position_min_m": [
+        0.050000001,
+        -0.11,
+        0.69999999
+      ],
+      "fluid_type_code": 3,
+      "mk_counts": {
+        "1": 7038,
+        "17": 24150,
+        "18": 69405,
+        "19": 303435,
+        "2": 7038,
+        "3": 7038
+      },
+      "native_float32_position_max_m": [
+        0.3799999952316284,
+        0.10999999940395355,
+        0.9599999785423279
+      ],
+      "native_float32_position_min_m": [
+        0.05000000074505806,
+        -0.10999999940395355,
+        0.699999988079071
+      ],
+      "nominal_box_diagnostic": {
+        "decimal_float64_decoded_count": 19734,
+        "decimal_float64_decoded_outside_count": 1380,
+        "high_m": [
+          0.375,
+          0.11,
+          0.964
+        ],
+        "inclusive": true,
+        "low_m": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "native_float32_count": 20493,
+        "native_float32_outside_count": 621,
+        "selection_use": "DIAGNOSTIC_ONLY; never filters the source identity cohort"
+      },
+      "parser_schema": "dual_sphysics_partvtk_initial_csv.v1",
+      "summary_fluid_count": 21114,
+      "summary_particle_count": 418104,
+      "summary_time_step_s": 0.0,
+      "type_counts": {
+        "0": 372840,
+        "1": 24150,
+        "3": 21114
+      }
+    },
+    "source_definition": "initial.csv frame0 identity set; Type=3 and Mk in {1,2,3}; (Zone,Idp) hash; nominal box is diagnostic only",
+    "source_identity_set_sha256": "bc7c25286faeb5c9bbc9f27c176671c027bbc0650b9051f9d08241b4f3397d70",
+    "source_low_m": [
+      0.05,
+      -0.11,
+      0.7
+    ],
+    "source_size_m": [
+      0.325,
+      0.22,
+      0.264
+    ],
+    "walls_excluded_by": "initial_type_code_and_initial_mk_codes"
+  },
+  "command": [
+    "/usr/bin/strace",
+    "-f",
+    "-yy",
+    "-e",
+    "trace=open,openat,openat2,creat",
+    "-o",
+    "{attempt_root}/typed-replay-v26/os-trace/openat.log",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v25.py",
+    "--profile",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-profile-v26-001.json",
+    "--request",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/request/f2-s1-replay-request-v15-001.json",
+    "--path-map",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-overlay-v26-001.json",
+    "--io-slot-approved",
+    "--output",
+    "{attempt_root}/typed-replay-v26/f2-s1-typed-only-full401-result-v26.json"
+  ],
+  "current_binding": {
+    "actual_time_window_s": [
+      0.0,
+      4.000007783879406
+    ],
+    "binding_status": "EXACT_CURRENT_ROW",
+    "case_index": 78,
+    "frames": 401,
+    "identity_key": "(Zone,Idp)",
+    "particles": 418104,
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
+    "sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b"
+  },
+  "cwd": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay",
+  "execution_closure": {
+    "all_actionable_overlay_roles": 33,
+    "consumer_chain": "copied v25 runner -> copied v25 portable verifier -> copied v15 -> copied v14",
+    "immutable_v22_h5_target": true,
+    "model_or_cfd": false,
+    "raw_bi4_read": false,
+    "raw_converter_imported": false,
+    "v15_transitive_modules": [
+      "replay_module_v15",
+      "replay_module_v14",
+      "replay_runner_v25",
+      "portable_v25_worker"
+    ],
+    "v25_metadata_preflight": "consumed immutable output; status complete",
+    "v26_metadata_probe": "actual copied-runtime subprocess; no HDF5 content read",
+    "v26_profile_overlay": "new immutable metadata sidecars; no HDF5 copy or read"
+  },
+  "family_id": "F2",
+  "input_bindings": [
+    {
+      "bytes": 25210,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791411889390538366,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v25/f2-s1-portable-metadata-probe-request-v25-001-root-canonical.json",
+      "role": "v25_metadata_request",
+      "sha256": "b34634e2065cafe5a54fb4d8b6aa9341f687535c381af9b06eef79a678214675",
+      "verified_sha256": "b34634e2065cafe5a54fb4d8b6aa9341f687535c381af9b06eef79a678214675"
+    },
+    {
+      "bytes": 141815,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791413610616225011,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-metadata-preflight-v26-probe-001.json",
+      "role": "v26_metadata_probe_report",
+      "sha256": "8b941d7489a74e5991a002820d05e1fdae76b402337fc41d1253803e3c49f0b0",
+      "verified_sha256": "8b941d7489a74e5991a002820d05e1fdae76b402337fc41d1253803e3c49f0b0"
+    },
+    {
+      "bytes": 48100,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791413639020375820,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-overlay-v26-001.json",
+      "role": "v26_overlay_sidecar",
+      "sha256": "72dda787e3f943df89ff84ae89377dc4b67e4712752aa210ba4178c0c4e0d28f",
+      "verified_sha256": "72dda787e3f943df89ff84ae89377dc4b67e4712752aa210ba4178c0c4e0d28f"
+    },
+    {
+      "bytes": 28453,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791413639018375879,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-profile-v26-001.json",
+      "role": "v26_profile_sidecar",
+      "sha256": "d78edad01ec5fbe87e991dd7aeeaa1305f9d4cf386c58bca6d2cf9eb835000df",
+      "verified_sha256": "d78edad01ec5fbe87e991dd7aeeaa1305f9d4cf386c58bca6d2cf9eb835000df"
+    },
+    {
+      "bytes": 43416,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791413636105462954,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_typed_replay_request_v26.py",
+      "role": "v26_request_builder",
+      "sha256": "d854fe5eca3cbca73a0f68fab5d1e99706c365ef74a12e194a48c2796c133ab9",
+      "verified_sha256": "d854fe5eca3cbca73a0f68fab5d1e99706c365ef74a12e194a48c2796c133ab9"
+    },
+    {
+      "bytes": 2416,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379219752829,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/dependencies/READER_DEPENDENCY_LICENSE_INDEX_v13.json",
+      "role": "relocated_source:dependency_license_index",
+      "sha256": "2dd9f75ce84090291111db47ffe5e597d39c1623eb5ec5164fc21f905d5f1b46",
+      "source_role": "dependency_license_index"
+    },
+    {
+      "bytes": 5376,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379224752670,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionData.h",
+      "role": "relocated_source:motion_engine_jmotion_data",
+      "sha256": "03feedf0fc20313381517d1accf1af9a543e074a7a6653c8f8fc078fae0219c3",
+      "source_role": "motion_engine_jmotion_data"
+    },
+    {
+      "bytes": 18447,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379227752575,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionMov.h",
+      "role": "relocated_source:motion_engine_jmotion_mov",
+      "sha256": "6c11cc0a4fd71c062fe26478d96e3a91b27c65e25a424470e021b83adc13f87a",
+      "source_role": "motion_engine_jmotion_mov"
+    },
+    {
+      "bytes": 39868,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379229752512,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionObj.cpp",
+      "role": "relocated_source:motion_engine_jmotion_obj",
+      "sha256": "06dafbfcb72028815b83af7c4d1ca7be0bfc99c953d1b93b88f2771968b956b1",
+      "source_role": "motion_engine_jmotion_obj"
+    },
+    {
+      "bytes": 18022,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379206753241,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/portable/ds_data02_stage2_f2_portable_v16.py",
+      "role": "relocated_source:portable_v16_dependency",
+      "sha256": "08737b0e70370ea8cb8157e05203d4f17b453ff89dcbc0ba45487dede360ecac",
+      "source_role": "portable_v16_dependency"
+    },
+    {
+      "bytes": 48077,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379231752448,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/portable/ds_data02_stage2_f2_portable_v25.py",
+      "role": "relocated_source:portable_v25_worker",
+      "sha256": "5c1d0823e1dcc031db15e7479351efc04745f9e222623fa62407218c978d7807",
+      "source_role": "portable_v25_worker"
+    },
+    {
+      "bytes": 4125,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379209753146,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v15.py",
+      "role": "relocated_source:replay_runner_v15",
+      "sha256": "eed1f1dc88285bf31951eb36faa6e433a33cead2d506a8a50a24738b0353c30c",
+      "source_role": "replay_runner_v15"
+    },
+    {
+      "bytes": 18904,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379233752385,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v25.py",
+      "role": "relocated_source:replay_runner_v25",
+      "sha256": "90e34edb13280c84765c6439e2e112099bd08b0a2ab4a8ce1daff86c34cf927f",
+      "source_role": "replay_runner_v25"
+    },
+    {
+      "bytes": 180237,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379214752987,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_v14.py",
+      "role": "relocated_source:replay_module_v14",
+      "sha256": "0ebe9ff848c6d2aeea5939c307b877775ba6268b8a6d316e5426bee4f645715a",
+      "source_role": "replay_module_v14"
+    },
+    {
+      "bytes": 24864,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379211753082,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_v15.py",
+      "role": "relocated_source:replay_module_v15",
+      "sha256": "e769ca85d2af81ad886d9e6035a98469729f33dce6a9ba8dd350319d4da9276e",
+      "source_role": "replay_module_v15"
+    },
+    {
+      "bytes": 4555,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379217752892,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/test_ds_data02_stage2_f2_replay_v15.py",
+      "role": "relocated_source:replay_contract_tests_v15",
+      "sha256": "6345dbf79d887ecf425fe41d969af849e9ab7c0046cf63d697321e97dde333e7",
+      "source_role": "replay_contract_tests_v15"
+    },
+    {
+      "bytes": 61568,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791412379222752734,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/request/f2-s1-replay-request-v15-001.json",
+      "role": "relocated_source:v15_replay_request",
+      "roles": [
+        "relocated_source:v15_replay_request",
+        "v15_consumer_request"
+      ],
+      "sha256": "64102bc7334e3e5affb84811e36b542594ab2cafcf6d197499866087649c3b2e",
+      "source_role": "v15_replay_request"
+    },
+    {
+      "bytes": 27527,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791412379237752258,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/f2-s1-portable-source-profile-v25-metadata.json",
+      "role": "v25_metadata_profile",
+      "sha256": "6d5419a649b3f9fc973fdda22f0eb6bad04c2ae075a87449af84cb046cfd3565"
+    },
+    {
+      "bytes": 146596,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791412386689516024,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-preflight-v25.json",
+      "role": "v25_metadata_preflight",
+      "sha256": "db103a5bb13e5f5e701f6a3b05f7983e7dc5c63e6f9e5dc0dcca50faaaa6d369"
+    },
+    {
+      "bytes": 84555,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791412386720515042,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-probe-receipt-v25.json",
+      "role": "v25_metadata_receipt",
+      "sha256": "c4f0c68477b1fc02fb62596a07fec82bde35939f2a3c2745c6e76c49de446995",
+      "verified_sha256": "c4f0c68477b1fc02fb62596a07fec82bde35939f2a3c2745c6e76c49de446995"
+    },
+    {
+      "bytes": 47090,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791412379465745027,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/replay-input-v25-metadata.json",
+      "role": "v25_metadata_overlay",
+      "sha256": "0b4156747cbcfae5a69ff7ace47bb997533cd8e62544b88e0c36eec00481e474"
+    },
+    {
+      "bytes": 62365663,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656266139378,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/completed_v15_report_json/v15-full401-report.json",
+      "role": "relocated_source:completed_v15_report_json",
+      "sha256": "962325067fc40166895cd26dd2db3cc538f86576807ef3f779101cd134e6374d",
+      "source_role": "completed_v15_report_json"
+    },
+    {
+      "bytes": 255758,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656326137640,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/conversion_report/conversion-report.json",
+      "role": "relocated_source:conversion_report",
+      "sha256": "ee623240d88fbcf4dfc0b251b6200474dd025988b99c8faef9bd8431afd85a67",
+      "source_role": "conversion_report"
+    },
+    {
+      "bytes": 2576906,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656317137901,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/current_catalog/CURRENT336.json",
+      "role": "relocated_source:current_catalog",
+      "sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+      "source_role": "current_catalog"
+    },
+    {
+      "bytes": 96466,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656409135236,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/gencase_receipt/execution-receipt.json",
+      "role": "relocated_source:gencase_receipt",
+      "sha256": "485d259026080a8541fa2657ecdb1f57482562c0f14c7f831a5573f99fcde74f",
+      "source_role": "gencase_receipt"
+    },
+    {
+      "bytes": 7738,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656325137669,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/generated_xml/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+      "role": "relocated_source:generated_xml",
+      "sha256": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
+      "source_role": "generated_xml"
+    },
+    {
+      "bytes": 59656846,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656361136627,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_csv/initial.csv",
+      "role": "relocated_source:initial_csv",
+      "sha256": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e",
+      "source_role": "initial_csv"
+    },
+    {
+      "bytes": 6611,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656327137611,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_qa/actual-initial-qa.json",
+      "role": "relocated_source:initial_qa",
+      "sha256": "e72062c6d48f2e197b8fb2cb841e10393571b8f807695ef547213dd949037340",
+      "source_role": "initial_qa"
+    },
+    {
+      "bytes": 1463,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656327137611,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_stats/initial_stats.csv",
+      "role": "relocated_source:initial_stats",
+      "sha256": "e4994b56aba4daf534fae20891afa7d8ea51f46685704d499e6f259cf56d754c",
+      "source_role": "initial_stats"
+    },
+    {
+      "bytes": 20792,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656320137814,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/manifest/manifest.json",
+      "role": "relocated_source:manifest",
+      "sha256": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055",
+      "source_role": "manifest"
+    },
+    {
+      "bytes": 13424,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656325137669,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/motion_dat/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+      "role": "relocated_source:motion_dat",
+      "sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+      "source_role": "motion_dat"
+    },
+    {
+      "bytes": 1371,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656410135208,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_partout/PartOut_000.obi4",
+      "role": "relocated_source:native_partout",
+      "sha256": "7b55c47d4744cfe780ec40327845938d0ec19eee0cb5c93c5f26b442132799ce",
+      "source_role": "native_partout"
+    },
+    {
+      "bytes": 5447,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656410135208,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_reconciliation/native-reconciliation.json",
+      "role": "relocated_source:native_reconciliation",
+      "sha256": "d8b4fcf0bd2f3e45a252b58db9a442f0095b94e8a512c6c77aab25cd8b8a2cc9",
+      "source_role": "native_reconciliation"
+    },
+    {
+      "bytes": 12081,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656410135208,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_reconciliation_receipt/execution-receipt.json",
+      "role": "relocated_source:native_reconciliation_receipt",
+      "sha256": "73aebbbe73aee676eaba573b91a181aae1ee74e4d8a7c771524c4519fac66a7b",
+      "source_role": "native_reconciliation_receipt"
+    },
+    {
+      "bytes": 88358,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656409135236,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_runparts/RunPARTs.csv",
+      "role": "relocated_source:native_runparts",
+      "sha256": "e2bde91995d98a336d4d22113ab92ed5c750c450555274c03575321c12d95cd5",
+      "source_role": "native_runparts"
+    },
+    {
+      "bytes": 9678,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656409135236,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/owner_metadata/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json",
+      "role": "relocated_source:owner_metadata",
+      "sha256": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3",
+      "source_role": "owner_metadata"
+    },
+    {
+      "bytes": 290259,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656326137640,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/scientific_scan_sidecar/scientific-scan.json",
+      "role": "relocated_source:scientific_scan_sidecar",
+      "sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59",
+      "source_role": "scientific_scan_sidecar"
+    },
+    {
+      "bytes": 125353,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656409135236,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/solver_receipt/execution-receipt.json",
+      "role": "relocated_source:solver_receipt",
+      "sha256": "e59d876df8718e17c6cc57c17a822b77d467f423e4b900df7bb10c127a6e5dc6",
+      "source_role": "solver_receipt"
+    },
+    {
+      "bytes": 9050,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656410135208,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/source_metadata/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.metadata.json",
+      "role": "relocated_source:source_metadata",
+      "sha256": "7f5091c496833616c9e6827a00d53fb478d39c92c9ae535e66cec56e9baebf29",
+      "source_role": "source_metadata"
+    },
+    {
+      "bytes": 5713,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656316137930,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/v16_flux_forward_sidecar/f2-s1-flux-forward-sidecar-v16-001.json",
+      "role": "relocated_source:v16_flux_forward_sidecar",
+      "sha256": "0e1f823daf3c528c820e668902466a4bab7784fb8fef1eef9c3012959c575f33",
+      "source_role": "v16_flux_forward_sidecar"
+    },
+    {
+      "bytes": 3104762,
+      "hash_mode": "INHERITED_V25_OVERLAY_CONTENT_SHA; PARENT_REVERIFY_BEFORE_RUN",
+      "mtime_ns": 1791409656322137756,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/xmf/case.xmf",
+      "role": "relocated_source:xmf",
+      "sha256": "7f2a0e3e227e7008e840f044a653938642f06bec3df28d24ac113918d0dec776",
+      "source_role": "xmf"
+    },
+    {
+      "bytes": 1191110523,
+      "content_hash_source": "INHERITED_V22_FULLCOPY_RECEIPT; PARENT_MUST_REVERIFY",
+      "hash_mode": "parent_full_sha_before_native_C_open",
+      "mtime_ns": 1791409657113114848,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/trajectory/trajectory.h5",
+      "producer_mtime_is_provenance_only": true,
+      "role": "trajectory_h5",
+      "sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d"
+    },
+    {
+      "bytes": 8787,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791409658050087712,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/copy-result-v22.json",
+      "role": "v22_copy_result",
+      "sha256": "04ab9099a038d86edb012c538c8731ffbeb72e84c0ebe67cdaaca1d9ed4b18fb",
+      "verified_sha256": "04ab9099a038d86edb012c538c8731ffbeb72e84c0ebe67cdaaca1d9ed4b18fb"
+    },
+    {
+      "bytes": 22266,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791409656233140333,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/f2-s1-portable-source-profile-v22-001.json",
+      "role": "v22_profile",
+      "sha256": "776710757565965c021547661ced8cf534861f0d4231e1238000053d34dcd278",
+      "verified_sha256": "776710757565965c021547661ced8cf534861f0d4231e1238000053d34dcd278"
+    },
+    {
+      "bytes": 48329,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1791409659095057449,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/replay-input-v22.json",
+      "role": "v22_replay_input",
+      "sha256": "490899143fba9688a19407a5aa8007349f393dc4c921116dfc19bb836467b7bb",
+      "verified_sha256": "490899143fba9688a19407a5aa8007349f393dc4c921116dfc19bb836467b7bb"
+    },
+    {
+      "bytes": 5941864,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1788171497000000000,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "role": "python_interpreter",
+      "sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+      "verified_sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
+    },
+    {
+      "bytes": 1972848,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1645004241000000000,
+      "path": "/usr/bin/strace",
+      "role": "os_strace",
+      "sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d",
+      "verified_sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d"
+    }
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v25/f2-s1-portable-metadata-probe-request-v25-001-root-canonical.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-metadata-preflight-v26-probe-001.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-overlay-v26-001.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-profile-v26-001.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_typed_replay_request_v26.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/dependencies/READER_DEPENDENCY_LICENSE_INDEX_v13.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionData.h",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionMov.h",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/engine/JMotionObj.cpp",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/portable/ds_data02_stage2_f2_portable_v16.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/portable/ds_data02_stage2_f2_portable_v25.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v15.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v25.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_v14.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_v15.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/test_ds_data02_stage2_f2_replay_v15.py",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/request/f2-s1-replay-request-v15-001.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/f2-s1-portable-source-profile-v25-metadata.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-preflight-v25.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-probe-receipt-v25.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/replay-input-v25-metadata.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/completed_v15_report_json/v15-full401-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/conversion_report/conversion-report.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/current_catalog/CURRENT336.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/gencase_receipt/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/generated_xml/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_csv/initial.csv",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_qa/actual-initial-qa.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/initial_stats/initial_stats.csv",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/manifest/manifest.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/motion_dat/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_partout/PartOut_000.obi4",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_reconciliation/native-reconciliation.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_reconciliation_receipt/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/native_runparts/RunPARTs.csv",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/owner_metadata/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/scientific_scan_sidecar/scientific-scan.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/solver_receipt/execution-receipt.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/source_metadata/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.metadata.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/v16_flux_forward_sidecar/f2-s1-flux-forward-sidecar-v16-001.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/sources/xmf/case.xmf",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/trajectory/trajectory.h5",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/copy-result-v22.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/f2-s1-portable-source-profile-v22-001.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/replay-input-v22.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/usr/bin/strace"
+  ],
+  "limitations": [
+    "metadata evidence and v22 HDF5 content SHA are inherited; v26 builder does not hash or open H5",
+    "parent guard must full-hash the relocated H5 target before any h5py/native C open",
+    "OS strace receipt is required because Python audit cannot guarantee native HDF5 C-open visibility",
+    "typed-only replay does not reconstruct native raw BI4 and does not provide raw-to-label completeness",
+    "v15 labels/observers remain development outputs; QI/QN/QE and scientific qualification UNKNOWN",
+    "no receiver or material qualification is granted by a successful replay"
+  ],
+  "model_invoked": false,
+  "observer_profile": {
+    "case_identity": {
+      "current_case_index": 78,
+      "family_id": "F2",
+      "manifest_case_id": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010",
+      "manifest_physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "runtime_case_alias": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010"
+    },
+    "current_binding_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+    "event_time_scale_s": 4.0,
+    "event_time_scale_source": "SHA-bound XML begin/mvrotfile table coverage 0..4 s; rotation_duration_s=0.9 is a separate producer parameter and is not substituted for timeline coverage",
+    "frozen_before_reference": true,
+    "kinetic_energy_scale_J": 0.20691720982803966,
+    "mass_denominator_kg": 21.114001002861187,
+    "mass_quantiles": [
+      0.5,
+      0.75,
+      0.9,
+      1.0
+    ],
+    "motion_control_end_angle_deg": -105.0,
+    "motion_control_semantics": "metadata-bound rotation_duration_s=0.9; static hold 0..0.5 s; rotation stop=1.4 s; final angle=-105 deg; XML/motion table coverage=0..4 s; post-finish pose hold is explicit native completion semantics",
+    "moving_frame_semantics": {
+      "position": "body via bound pose R.T@(x_world-axis_p1)",
+      "velocity": "world inertial; no relative velocity claim"
+    },
+    "normalized_bin_edges": [
+      -2.0,
+      -1.0,
+      0.0,
+      1.0,
+      2.0
+    ],
+    "observable_names": [
+      "mass_weighted_com_m",
+      "mass_weighted_mean_velocity_m_s",
+      "mass_weighted_kinetic_energy_J",
+      "mass_quantile_front_m",
+      "mass_distribution_fraction",
+      "event_status",
+      "event_time_s"
+    ],
+    "position_scale_m": 0.56,
+    "profile_id": "f2-s1-full401-observer-preregistered-v15",
+    "query_frame_indices": [
+      0,
+      100,
+      200,
+      300,
+      400
+    ],
+    "query_times_s": [
+      0.0,
+      1.000017427937967,
+      2.000005841044807,
+      3.000041385356404,
+      4.000007783879406
+    ],
+    "schema": "ds02.stage2.f2-s1-observer-profile.v14",
+    "scientific_error_budget": {
+      "output_sampling_fraction": 0.25,
+      "time_integration_fraction": 0.25
+    },
+    "scientific_status": "DEVELOPMENT_PREREGISTERED_UNKNOWN",
+    "scope": "development preregistration; runtime seconds and output bytes are diagnostics, not scientific error gates",
+    "sha256": "de4f7ed699149424506216b30a2784750d54d6cc359fbfe9b9da3d299d7e5507",
+    "source_file_sha256": {
+      "conversion_report": "ee623240d88fbcf4dfc0b251b6200474dd025988b99c8faef9bd8431afd85a67",
+      "current_catalog": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+      "gencase_receipt": "485d259026080a8541fa2657ecdb1f57482562c0f14c7f831a5573f99fcde74f",
+      "generated_xml": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
+      "initial_csv": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e",
+      "initial_qa": "e72062c6d48f2e197b8fb2cb841e10393571b8f807695ef547213dd949037340",
+      "initial_stats": "e4994b56aba4daf534fae20891afa7d8ea51f46685704d499e6f259cf56d754c",
+      "manifest": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055",
+      "motion_dat": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+      "native_partout": "7b55c47d4744cfe780ec40327845938d0ec19eee0cb5c93c5f26b442132799ce",
+      "native_reconciliation": "d8b4fcf0bd2f3e45a252b58db9a442f0095b94e8a512c6c77aab25cd8b8a2cc9",
+      "native_reconciliation_receipt": "73aebbbe73aee676eaba573b91a181aae1ee74e4d8a7c771524c4519fac66a7b",
+      "native_runparts": "e2bde91995d98a336d4d22113ab92ed5c750c450555274c03575321c12d95cd5",
+      "owner_metadata": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3",
+      "scientific_scan_sidecar": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59",
+      "solver_receipt": "e59d876df8718e17c6cc57c17a822b77d467f423e4b900df7bb10c127a6e5dc6",
+      "source_metadata": "7f5091c496833616c9e6827a00d53fb478d39c92c9ae535e66cec56e9baebf29",
+      "xmf": "7f2a0e3e227e7008e840f044a653938642f06bec3df28d24ac113918d0dec776"
+    },
+    "thresholds": {
+      "event_time_fraction": 0.01,
+      "kinetic_energy_relative": 0.03,
+      "mass_fraction": 0.03,
+      "mass_front_relative": 0.02,
+      "position_relative": 0.02,
+      "velocity_relative": 0.03
+    },
+    "tolerance_basis": "QUALITY_LABEL_SPLIT_ZH adopted proposal after calibration; fixed before any new reference result; not industry standard",
+    "trajectory_producer_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "velocity_scale_m_s": 0.14
+  },
+  "orchestration_schema": "ds02.stage2.f2-s1-typed-only-full401-replay.v26",
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "relocation": {
+    "hdf5_sha_scope": "V22 full-copy receipt inherited; parent guard must rehash target",
+    "original_path_fallback": "FORBIDDEN",
+    "original_uris_are_provenance_only": true,
+    "path_overlay": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-overlay-v26-001.json",
+    "small_source_sha_scope": "V25 overlay receipt; parent guard rechecks all target bytes",
+    "target_stat_may_differ_from_producer": true,
+    "upstream_v25_path_overlay": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/replay-input-v25-metadata.json"
+  },
+  "request_id": "f2-s1-portable-typed-only-full401-v26-001",
+  "resource_request": {
+    "cpu_cores": 1,
+    "estimated_peak_memory_bytes": 1954047113,
+    "estimated_storage_bytes": 1200000000,
+    "guard_enforcement": "CPU/wall/storage/source checks; RSS observational only",
+    "hdf5_copy": false,
+    "hdf5_dataset_read": "full bound 401-frame window through exact 21114 fluid identity spans",
+    "max_rss_mib_estimate": 2304,
+    "max_wall_seconds": 5400,
+    "new_hdf5_storage_bytes": 0,
+    "rss_limit_enforced": false
+  },
+  "role": "DEVELOPMENT",
+  "runtime": {
+    "native_hdf5_c_open_audit": "OS strace open/openat/openat2/creat required",
+    "original_path_fallback": "FORBIDDEN",
+    "python": {
+      "bytes": 5941864,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1788171497000000000,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "role": "python_interpreter",
+      "sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+      "verified_sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
+    },
+    "pythonpath": "",
+    "runner": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/replay/ds_data02_stage2_f2_replay_runner_v25.py",
+      "sha256": "90e34edb13280c84765c6439e2e112099bd08b0a2ab4a8ce1daff86c34cf927f"
+    },
+    "strace": {
+      "bytes": 1972848,
+      "hash_mode": "sha256_content",
+      "mtime_ns": 1645004241000000000,
+      "path": "/usr/bin/strace",
+      "role": "os_strace",
+      "sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d",
+      "verified_sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d"
+    }
+  },
+  "schema": "ds02.request.v1",
+  "sha256": "557221b7aca645b34cc3eac37949a768b7a51decc9435c518f158370a85bc987",
+  "source_identity": {
+    "immutable_v22": {
+      "copy_result": {
+        "bytes": 8787,
+        "hash_mode": "sha256_content",
+        "mtime_ns": 1791409658050087712,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/copy-result-v22.json",
+        "role": "v22_copy_result",
+        "sha256": "04ab9099a038d86edb012c538c8731ffbeb72e84c0ebe67cdaaca1d9ed4b18fb",
+        "verified_sha256": "04ab9099a038d86edb012c538c8731ffbeb72e84c0ebe67cdaaca1d9ed4b18fb"
+      },
+      "profile": {
+        "bytes": 22266,
+        "hash_mode": "sha256_content",
+        "mtime_ns": 1791409656233140333,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/f2-s1-portable-source-profile-v22-001.json",
+        "role": "v22_profile",
+        "sha256": "776710757565965c021547661ced8cf534861f0d4231e1238000053d34dcd278",
+        "verified_sha256": "776710757565965c021547661ced8cf534861f0d4231e1238000053d34dcd278"
+      },
+      "replay_input": {
+        "bytes": 48329,
+        "hash_mode": "sha256_content",
+        "mtime_ns": 1791409659095057449,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/replay-input-v22.json",
+        "role": "v22_replay_input",
+        "sha256": "490899143fba9688a19407a5aa8007349f393dc4c921116dfc19bb836467b7bb",
+        "verified_sha256": "490899143fba9688a19407a5aa8007349f393dc4c921116dfc19bb836467b7bb"
+      }
+    },
+    "v15_request": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/bundle-v25-runtime/runtime/request/f2-s1-replay-request-v15-001.json",
+      "sha256": "64102bc7334e3e5affb84811e36b542594ab2cafcf6d197499866087649c3b2e"
+    },
+    "v25_metadata_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-probe-receipt-v25.json",
+      "sha256": "c4f0c68477b1fc02fb62596a07fec82bde35939f2a3c2745c6e76c49de446995",
+      "status": "METADATA_PREFLIGHT_COMPLETE"
+    },
+    "v25_overlay": {
+      "file_sha256": "0b4156747cbcfae5a69ff7ace47bb997533cd8e62544b88e0c36eec00481e474",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/replay-input-v25-metadata.json",
+      "profile_canonical_sha256": "5186fc8ea688eda2abf11d43d032d22940d1d0a176fad13c8484b33c303fd889"
+    },
+    "v25_preflight": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/metadata-preflight-v25.json",
+      "sha256": "db103a5bb13e5f5e701f6a3b05f7983e7dc5c63e6f9e5dc0dcca50faaaa6d369",
+      "status": "VALIDATED_PENDING_IO_SLOT"
+    },
+    "v25_profile": {
+      "canonical_sha256": "5186fc8ea688eda2abf11d43d032d22940d1d0a176fad13c8484b33c303fd889",
+      "file_sha256": "6d5419a649b3f9fc973fdda22f0eb6bad04c2ae075a87449af84cb046cfd3565",
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_METADATA_PROBE_V25/f2-s1-portable-metadata-probe-v25-primary-001/orchestration-v25-001-metadata/f2-s1-portable-source-profile-v25-metadata.json"
+    },
+    "v26_metadata_probe": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-metadata-preflight-v26-probe-001.json",
+      "sha256": "8b941d7489a74e5991a002820d05e1fdae76b402337fc41d1253803e3c49f0b0",
+      "status": "VALIDATED_PENDING_IO_SLOT"
+    },
+    "v26_overlay": {
+      "canonical_sha256": "34085832a3268e738648bd262560992735b430e0c5362e0ac97dfd9ab464f8b9",
+      "file_sha256": "72dda787e3f943df89ff84ae89377dc4b67e4712752aa210ba4178c0c4e0d28f",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-overlay-v26-001.json"
+    },
+    "v26_profile": {
+      "canonical_sha256": "fdb68b9cf76359576b9a4a17c1f2ba52f5afb7291c54904fd0e950398433a6fd",
+      "file_sha256": "d78edad01ec5fbe87e991dd7aeeaa1305f9d4cf386c58bca6d2cf9eb835000df",
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v26/f2-s1-typed-only-full401-profile-v26-001.json"
+    }
+  },
+  "status": "READY_FOR_PARENT_IO_SLOT",
+  "trajectory_h5": {
+    "bytes": 1191110523,
+    "content_hash_source": "INHERITED_IMMUTABLE_V22_FULLCOPY_RECEIPT",
+    "content_hash_verified_by_v26_builder": false,
+    "content_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "copy_performed_by_v26": false,
+    "dataset_read_by_v26_builder": false,
+    "parent_must_rehash_before_native_C_open": true,
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_PORTABLE_TYPED_REPLAY_V22/f2-s1-portable-typed-replay-v22-primary-001/orchestration-v22/bundle-v22/trajectory/trajectory.h5",
+    "producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "producer_path_is_provenance_only": true,
+    "relocated_mtime_ns": 1791409657113114848
+  },
+  "typed_replay_scope": {
+    "frames": 401,
+    "input": "relocated v22 HDF5 typed arrays through v25/v15 reader",
+    "labels_and_observers": "v15 typed-array operators only; DEVELOPMENT; QI/QN/QE UNKNOWN",
+    "logical_fluid_cohort": 21114,
+    "native_partout_is_provenance_only": true,
+    "raw_to_label_complete": false,
+    "raw_to_typed_reconstruction_invoked": false,
+    "scientific_qualification": "UNKNOWN",
+    "source_particle_shape": [
+      401,
+      418104
+    ],
+    "status": "TYPED_ONLY_FULL401_PENDING_PARENT_IO"
+  },
+  "window": {
+    "expected_first_s": 0.0,
+    "expected_last_s": 4.000007783879406,
+    "frame_start": 0,
+    "frame_stop": 400,
+    "query_count": 401
+  }
+}
