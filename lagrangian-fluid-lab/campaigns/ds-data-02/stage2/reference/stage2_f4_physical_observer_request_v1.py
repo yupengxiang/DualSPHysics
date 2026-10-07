@@ -167,12 +167,19 @@ def canonical_geometry_and_motion(path: Path) -> dict[str, Any]:
     root = ET.parse(path).getroot()
     geometry = root.find(".//geometry/commands")
     motion = root.find(".//casedef/motion")
-    if geometry is None or motion is None:
-        raise ValueError(f"source XML lacks geometry commands or casedef motion: {path}")
-    motion_copy = ET.fromstring(ET.tostring(motion, encoding="unicode"))
-    for node in motion_copy.iter():
-        if node.tag.rsplit("}", 1)[-1].lower() == "file":
-            node.attrib.pop("name", None)
+    if geometry is None:
+        raise ValueError(f"source XML lacks geometry commands: {path}")
+    if motion is None:
+        # F4-S1 is a fixed-boundary/drop source with no motion node.  Preserve
+        # that fact explicitly; an absent motion declaration is not equivalent
+        # to an invented empty control file.
+        motion_text = "ABSENT_IN_SOURCE_XML"
+    else:
+        motion_copy = ET.fromstring(ET.tostring(motion, encoding="unicode"))
+        for node in motion_copy.iter():
+            if node.tag.rsplit("}", 1)[-1].lower() == "file":
+                node.attrib.pop("name", None)
+        motion_text = ET.tostring(motion_copy, encoding="unicode")
     physical_parameters = {}
     for key in ("gravity", "rhop0", "gamma", "coefsound", "cflnumber"):
         node = root.find(f".//constantsdef/{key}")
@@ -185,7 +192,7 @@ def canonical_geometry_and_motion(path: Path) -> dict[str, Any]:
             physical_parameters[f"parameter:{key}"] = node.get("value")
     return {
         "geometry_commands": ET.tostring(geometry, encoding="unicode"),
-        "motion_without_file_name": ET.tostring(motion_copy, encoding="unicode"),
+        "motion_without_file_name": motion_text,
         "physical_parameters": physical_parameters,
     }
 
