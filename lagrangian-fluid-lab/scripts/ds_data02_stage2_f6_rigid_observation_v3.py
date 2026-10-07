@@ -516,6 +516,9 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
             omega_residual = float(np.linalg.norm(derived_observer_frame - observed_omega))
             record["observer_angular_velocity_residual_rad_s"] = omega_residual
             omega_residuals.append(omega_residual)
+    initial_reference_error_deg = so3_error_deg(fit_matrices[0], np.eye(3))
+    if initial_reference_error_deg > 1.0e-4:
+        raise ObservationError("initial particle frame did not define the identity reference pose")
     checks = {
         "solver_completed_code0": True,
         "snapshot_frame_identity_constant": True,
@@ -524,6 +527,7 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
         "support_sample_mass_matches_declared": abs(actual_sample_mass - declared_sample_mass) <= MASS_TOL_KG,
         "body_mass_separate_from_support_mass": abs(body_mass - declared_sample_mass) > MASS_TOL_KG,
         "proper_rotation_all_frames": all(abs(float(row["determinant"]) - 1.0) <= 1.0e-8 for row in records),
+        "initial_reference_pose_identity": initial_reference_error_deg <= 1.0e-4,
     }
     result = {
         "schema": SCHEMA,
@@ -559,6 +563,7 @@ def audit(manifest_path: Path, output: Path) -> dict[str, Any]:
             "zone_idp_order": [list(identity) for identity in frames["identities"]],
             "identity_set_constant": True,
             "initial_reference_part": initial["part"],
+            "initial_reference_pose_error_deg": initial_reference_error_deg,
         },
         "rigid_fit": {"frames": records, "residual_units": "m"},
         "rigidity_observation": {
