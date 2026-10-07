@@ -291,6 +291,7 @@ def build() -> tuple[Path, Path]:
         "receipt_total_particles": receipt.get("total_particles"),
         "receipt_fluid_particles": receipt.get("fluid_particles"),
     }
+    candidate["mass_audit"] = mass_audit
     audit = {
         "schema": SCHEMA,
         "status": "PASS_TERMINAL_GENCASERECEIPT_AUDITED_SCIENTIFIC_UNKNOWN",
