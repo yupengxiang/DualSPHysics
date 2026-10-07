@@ -60,7 +60,9 @@ def sha256_file(path: Path) -> str:
 
 
 def record(path: Path) -> dict[str, Any]:
-    if not path.is_file() or path.is_symlink():
+    # The interpreter is a stable venv symlink; the guard hashes its resolved
+    # target just as it hashes any executable input.
+    if not path.is_file():
         raise FileNotFoundError(path)
     stat = path.stat()
     return {"path": str(path.resolve()), "bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns,
