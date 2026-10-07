@@ -420,7 +420,7 @@ def validate_replay_request(request: Mapping[str, Any], *, verify_sources: bool 
     required_roles = {
         "current_catalog", "manifest", "xmf", "generated_xml", "motion_dat",
         "conversion_report", "scientific_scan_sidecar", "initial_qa",
-        "gencase_receipt", "solver_receipt", "owner_metadata",
+        "initial_stats", "initial_csv", "gencase_receipt", "solver_receipt", "owner_metadata",
         "native_runparts", "native_partout", "native_reconciliation",
         "native_reconciliation_receipt",
     }
