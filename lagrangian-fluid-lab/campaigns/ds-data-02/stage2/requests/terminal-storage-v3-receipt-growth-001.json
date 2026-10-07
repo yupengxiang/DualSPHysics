@@ -1,0 +1,41 @@
+{
+  "family_id": "infra",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 1,
+  "max_wall_seconds": 180,
+  "estimated_storage_bytes": 10485760,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "case_id": "STAGE2_TERMINAL_STORAGE_INDEPENDENT_REVIEW",
+  "attempt_id": "v3-receipt-growth-001",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-c",
+    "import sys,json,pathlib,hashlib,subprocess,datetime\nscripts=pathlib.Path(sys.argv[1]);out=pathlib.Path(sys.argv[2]);real=json.loads(pathlib.Path(sys.argv[3]).read_text());root=out.parent/'isolated-terminal-fixture';(root/'runtime').mkdir(parents=True)\nledger={'schema':real['schema'],'campaign_id':'INDEPENDENT_TEST_FIXTURE_ONLY','deadline_utc':real['deadline_utc'],'limits':dict(real['limits']),'attempts':[],'reservations':[],'charges':[]}\nledger['limits']['home_min_free_bytes']=1;ledger['limits']['storage_policy']='home_free_floor';(root/'runtime/resource-ledger.json').write_text(json.dumps(ledger))\ninputs=[scripts/name for name in ['ds_data02_stage2_dispatch_v3.py','ds_data02_strict_dispatch_v3.py','ds_data02_runtime_v3.py','ds_data02_runtime_v2.py']]+[pathlib.Path(sys.executable).resolve()]\ndef digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()\ndef trial(name,reservation):\n req={'family_id':'infra','case_id':'terminal-receipt-fixture','attempt_id':name,'kind':'cpu','cpu_task_kind':'tests','cpu_threads':1,'max_wall_seconds':20,'estimated_storage_bytes':reservation,'cwd':str(out.parent),'worktree_root':str(scripts.parents[1]),'command':[sys.executable,'-c','from pathlib import Path;import sys;Path(sys.argv[1],\"payload.bin\").write_bytes(b\"x\"*32)','{attempt_root}'],'input_files':list(map(str,inputs)),'input_sha256':{str(p):digest(p) for p in inputs}}\n qp=out.parent/(name+'.json');qp.write_text(json.dumps(req));p=subprocess.run([sys.executable,str(scripts/'ds_data02_stage2_dispatch_v3.py'),'run','--request',str(qp),'--data-root',str(root)],capture_output=True,text=True)\n ar=root/'families/infra/terminal-receipt-fixture'/name;rp=ar/'execution-receipt.json';r=json.loads(rp.read_text());actual=sum(p.stat().st_size for p in ar.rglob('*') if p.is_file());return {'reservation':reservation,'returncode':p.returncode,'status':r['status'],'receipt_reported_bytes':r['bytes'],'actual_final_tree_bytes':actual,'terminal_storage_guard':r['terminal_storage_guard'],'receipt_path':str(rp),'receipt_sha256':digest(rp),'stdout':p.stdout,'stderr':p.stderr}\na=trial('a000',65536);assert a['status']=='completed' and a['actual_final_tree_bytes']>a['receipt_reported_bytes']\nthreshold=(a['receipt_reported_bytes']+a['actual_final_tree_bytes'])//2;b=trial('b000',threshold)\nassert b['status']=='completed' and b['terminal_storage_guard']['status']=='passed' and b['receipt_reported_bytes']<threshold<b['actual_final_tree_bytes'],b\nx={'schema':'ds02.stage2.v3-independent-terminal-receipt-growth.v1','status':'ACTUAL_FINAL_RECEIPT_GROWTH_BREACH_REPRODUCED','calibration':a,'edge_counterexample':b,'fixture_isolated_from_actual_campaign_ledger':True,'parent_real_budget_is_outer_guard_only':True,'model_invoked':False,'trajectory_hdf5_read':False,'scientific_credit':'NONE; runtime accounting counterexample only'}\nout.write_text(json.dumps(x,indent=2)+'\\n');print('v3 completed despite actual final tree exceeding reservation; terminal receipt growth verified')\n",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts",
+    "{attempt_root}/v3-receipt-growth.json",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v3.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v3.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v3.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python"
+  ],
+  "input_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py": "78e2e5691039e306998387c318de9c1fd111e36ad81d892109f5ec112e43ab72",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v3.py": "04e028ad7d1ab8157132adddda4c79f4ac7109bbf8c94362607b2fe3e87b7b3b",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v3.py": "f401736fb2c05d656ae9ee9b4c14d053ccb9aae6cf47fefd5726aba3d70f63af",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v3.py": "94fc1f751e53ddc7cbdd66123c2d7c020d7051365d4b2ee9e7d053ccbc61b1b4",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
+  },
+  "scope": "Independent tiny isolated accounting fixture under actual parent guard; prove terminal receipt growth actual-byte edge; never modifies actual ledger quotas or campaign arrays."
+}
