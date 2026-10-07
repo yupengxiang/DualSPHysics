@@ -19,7 +19,7 @@ INDEX_PATH = HERE / "requests/f6-final48-fulltime-floatinginfo-disabled-request-
 TEMPLATE_PATH = HERE / "requests/fulltime-floatinginfo-request.template.json"
 CONTRACT_PATH = HERE / "metadata/official-floatinginfo-contract.json"
 WORKER_PATH = HERE / "workers/run_fulltime_floatinginfo_fresh168.py"
-WORKER_SHA = "4c406c2a4cea9a6eff9a2b15ccfdb9083d3b5599c1cc64534fc73fd9364e4296"
+WORKER_SHA = "8433709919f4bbc45eb1d302246a58062bdcd7dbdd02c2ab5f2acb7d861438f8"
 INVENTORY_WORKER_PATH = HERE / "workers/run_partfloatinfo_inventory_fresh168.py"
 INVENTORY_WORKER_SHA = "3b053331308c080a35a96994c367ec49329d875ad3d6948accce1140f41f13d2"
 RUNNER_SHA = "708c4c83d22257f7b59bad93cd19915fb66a199a2a5b1291d6ada71bb467ea76"
@@ -73,6 +73,10 @@ def validate_template(template: dict[str, Any]) -> None:
     require(template.get("output", {}).get("report_sha256") is None, "template report hash must be null")
     require(template.get("output", {}).get("output_sha256") is None, "template output hash must be null")
     require(template.get("native", {}).get("rigid_state_input", {}).get("source_stat_bytes") is None, "template stat must be a placeholder")
+    template_time = template.get("time_contract", {})
+    require(template_time.get("native_times_s") is None and template_time.get("native_time_tolerance_s") == 1e-6 and template_time.get("native_times_required_before_export") is True, "template native-time gate changed")
+    template_part = template.get("official_export", {}).get("part_contract", {})
+    require(template_part.get("pilot_required") is True and template_part.get("mode") is None and template_part.get("expected_values") is None, "template part pilot gate changed")
     inventory = template.get("native", {}).get("rigid_state_input", {}).get("inventory_binding", {})
     require(inventory.get("required_before_official_export") is True, "template inventory gate missing")
     require(inventory.get("inventory_request_id") == "fresh168-partfloatinfo-inventory-v1", "template inventory request id changed")
@@ -235,7 +239,10 @@ def validate() -> dict[str, Any]:
         time_contract = request.get("time_contract")
         require(isinstance(time_contract, dict), f"{prefix} time contract missing")
         require(time_contract.get("expected_start_s") == 0.0 and time_contract.get("expected_end_s") == 12.0 and time_contract.get("nominal_tout_s") == 0.05, f"{prefix} time window changed")
-        require(time_contract.get("native_times_s") is None and time_contract.get("no_resampling") is True, f"{prefix} native-time policy changed")
+        require(time_contract.get("native_times_s") is None and time_contract.get("native_time_tolerance_s") == 1e-6 and time_contract.get("native_times_required_before_export") is True and time_contract.get("no_resampling") is True, f"{prefix} native-time policy changed")
+        part_contract = official.get("part_contract")
+        require(isinstance(part_contract, dict), f"{prefix} part-column contract missing")
+        require(part_contract.get("pilot_required") is True and part_contract.get("mode") is None and part_contract.get("expected_values") is None, f"{prefix} part-column pilot gate changed")
 
         worker = request.get("worker")
         require(isinstance(worker, dict), f"{prefix} worker binding missing")
@@ -256,6 +263,8 @@ def validate() -> dict[str, Any]:
     require(contract.get("documented_dirdata_input") == "PartFloatInfo.ibi4", "official dirdata contract must name PartFloatInfo.ibi4")
     require(contract.get("documented_fields_units", {}).get("fomega") == "rad/s", "angular-velocity units missing")
     require(contract.get("documented_fields_units", {}).get("roll") == "deg", "Euler-angle units missing")
+    require(contract.get("part_column", {}).get("header") == "part" and contract.get("part_column", {}).get("source_policy") == "pilot_required_before_full_export", "part-column pilot contract missing")
+    require(contract.get("native_time_policy", {}).get("required_values") == 241 and contract.get("native_time_policy", {}).get("tolerance_s") == 1e-6, "native-time policy missing")
     require("pitch-sign" in contract.get("version_note", ""), "v5.4 pitch-sign note missing")
 
     forbidden_suffixes = {".h5", ".bi4", ".csv", ".dat", ".vtk", ".vtu", ".pvtu", ".xmf"}

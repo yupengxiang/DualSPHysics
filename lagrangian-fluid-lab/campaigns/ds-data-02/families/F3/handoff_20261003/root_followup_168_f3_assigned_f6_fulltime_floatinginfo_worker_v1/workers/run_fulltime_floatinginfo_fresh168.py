@@ -130,6 +130,47 @@ def _trim_trailing_empty(row: Sequence[str]) -> list[str]:
     return values
 
 
+def _validate_part_contract(parts: Sequence[int], contract: Mapping[str, Any]) -> dict[str, Any]:
+    """Validate the opaque ``part`` column only after a registered pilot.
+
+    FloatingInfo's official header names the column ``part`` but does not
+    document whether a consumer should treat it as a marker or a frame index.
+    The source package therefore leaves this binding null.  Root must bind a
+    pilot-derived mode and values before a full export is allowed.
+    """
+    if not isinstance(contract, Mapping):
+        raise WorkerError("part-column pilot contract is missing")
+    if contract.get("pilot_required") is not True:
+        raise WorkerError("part-column semantics must remain pilot-gated")
+    mode = contract.get("mode")
+    expected = contract.get("expected_values")
+    if mode not in {"constant_marker", "frame_index"}:
+        raise WorkerError("part-column pilot mode must be constant_marker or frame_index")
+    if not isinstance(expected, list) or not expected:
+        raise WorkerError("part-column pilot expected_values are missing")
+    try:
+        expected_ints = [int(value) for value in expected]
+    except (TypeError, ValueError) as exc:
+        raise WorkerError("part-column pilot expected_values must be integers") from exc
+    if any(value != int(value) for value in expected):
+        raise WorkerError("part-column pilot expected_values must be exact integers")
+    if mode == "constant_marker":
+        if len(expected_ints) != 1 or any(value != expected_ints[0] for value in parts):
+            raise WorkerError(f"part column is not the pilot-bound constant marker: observed={sorted(set(parts))!r}")
+    else:
+        if len(expected_ints) != len(parts) or list(parts) != expected_ints or len(set(parts)) != len(parts):
+            raise WorkerError("part column does not match the pilot-bound unique frame-index sequence")
+    return {
+        "pilot_required": True,
+        "mode": mode,
+        "expected_values": expected_ints,
+        "observed_values": list(parts),
+        "unique_observed_values": sorted(set(parts)),
+        "frame_identity_from_part": mode == "frame_index",
+        "no_part_value_inferred": False,
+    }
+
+
 def _parse_part(raw: str, label: str) -> int:
     value = _finite(raw, label)
     if value != int(value):
@@ -195,6 +236,9 @@ def _parse_full_csv(path: Path, expected: Mapping[str, Any]) -> dict[str, Any]:
     if any(right <= left for left, right in zip(times, times[1:])):
         raise WorkerError("official FloatingInfo times are not strictly increasing")
 
+    part_contract = expected.get("part_contract")
+    part_validation = _validate_part_contract(parts, part_contract)
+
     expected_start = float(expected.get("expected_start_s", 0.0))
     expected_end = float(expected.get("expected_end_s", 12.0))
     terminal_tolerance = float(expected.get("terminal_tolerance_s", 0.2))
@@ -209,24 +253,33 @@ def _parse_full_csv(path: Path, expected: Mapping[str, Any]) -> dict[str, Any]:
     native_times = expected.get("native_times_s")
     native_comparison: dict[str, Any]
     if native_times is None:
-        native_comparison = {
-            "provided": False,
-            "status": "not_supplied_by_source_template",
-            "source": expected.get("native_time_source"),
-            "official_times_retained": True,
-        }
+        if expected.get("require_native_times", True):
+            raise WorkerError("241 native_times_s values are required before full-time export")
+        native_comparison = {"provided": False, "status": "not_supplied_by_source_template", "source": expected.get("native_time_source"), "official_times_retained": True}
     else:
         if not isinstance(native_times, list) or len(native_times) != len(times):
             raise WorkerError("native_times_s must be a list with one entry per official row")
         parsed_native = [_finite(x, f"native_times_s[{i}]") for i, x in enumerate(native_times)]
+        if any(value < 0 for value in parsed_native):
+            raise WorkerError("native_times_s must be nonnegative")
+        if any(right <= left for left, right in zip(parsed_native, parsed_native[1:])):
+            raise WorkerError("native_times_s must be strictly increasing")
         native_delta = [actual - native for actual, native in zip(times, parsed_native)]
+        native_tolerance = float(expected.get("native_time_tolerance_s", 1e-6))
+        if not math.isfinite(native_tolerance) or native_tolerance < 0:
+            raise WorkerError("native_time_tolerance_s must be finite and nonnegative")
+        max_abs_delta = max(abs(x) for x in native_delta)
+        if max_abs_delta > native_tolerance:
+            raise WorkerError(f"official/native time mismatch exceeds tolerance: {max_abs_delta} > {native_tolerance}")
         native_comparison = {
             "provided": True,
             "status": "compared_by_frame_index_without_resampling",
             "native_time_source": expected.get("native_time_source"),
             "native_times_s": parsed_native,
             "official_minus_native_s": native_delta,
-            "max_abs_delta_s": max(abs(x) for x in native_delta),
+            "max_abs_delta_s": max_abs_delta,
+            "tolerance_s": native_tolerance,
+            "within_tolerance": True,
         }
     return {
         "csv_path": str(path),
@@ -234,7 +287,8 @@ def _parse_full_csv(path: Path, expected: Mapping[str, Any]) -> dict[str, Any]:
         "header_columns": headers,
         "header_indices": indices,
         "rows_examined": len(rows),
-        "frame_indices": list(range(expected_first, expected_last + 1)),
+        "row_ordinals": list(range(expected_first, expected_last + 1)),
+        "frame_index_source": "official -first/-last request and CSV row order; the opaque part column is not used as a frame index unless the pilot binds frame_index mode",
         "part_values_observed": sorted(set(parts)),
         "part_row_count": len(parts),
         "official_times_s": times,
@@ -253,11 +307,10 @@ def _parse_full_csv(path: Path, expected: Mapping[str, Any]) -> dict[str, Any]:
         "rigid_fields_finite_rows": rigid_finite_rows,
         "required_rigid_field_count": len(_REQUIRED_FIELDS),
         "native_time_comparison": native_comparison,
-        "marker_contract": {
+        "part_column_contract": {
             "official_only_mk": expected.get("only_mk"),
             "part_column_required": True,
-            "observed_part_values": sorted(set(parts)),
-            "no_part_value_inferred": True,
+            **part_validation,
         },
     }
 
@@ -387,6 +440,24 @@ def _validate_request(request: Mapping[str, Any]) -> dict[str, Any]:
         raise WorkerError("full-time frame contract must be 0..240 (241 rows)")
     if int(official.get("first", -1)) != 0 or int(official.get("last", -1)) != 240 or int(official.get("only_mk", -1)) != 60:
         raise WorkerError("official command marker/frame contract is not 0..240/-onlymk:60")
+    time_contract = _require_dict(request.get("time_contract"), "time_contract")
+    native_times = time_contract.get("native_times_s")
+    if not isinstance(native_times, list) or len(native_times) != 241:
+        raise WorkerError("enabled request must bind exactly 241 native_times_s values")
+    native_tolerance = float(time_contract.get("native_time_tolerance_s", -1.0))
+    if not math.isfinite(native_tolerance) or native_tolerance < 0:
+        raise WorkerError("native_time_tolerance_s must be finite and nonnegative")
+    parsed_native_times = [_finite(value, f"time_contract.native_times_s[{index}]") for index, value in enumerate(native_times)]
+    if any(value < 0 for value in parsed_native_times) or any(right <= left for left, right in zip(parsed_native_times, parsed_native_times[1:])):
+        raise WorkerError("enabled native_times_s must be nonnegative and strictly increasing")
+    part_contract = _require_dict(official.get("part_contract"), "official_export.part_contract")
+    expected_part_values = part_contract.get("expected_values")
+    if part_contract.get("mode") not in {"constant_marker", "frame_index"} or not isinstance(expected_part_values, list) or not expected_part_values:
+        raise WorkerError("enabled request must bind part-column pilot semantics")
+    if part_contract.get("mode") == "constant_marker" and len(expected_part_values) != 1:
+        raise WorkerError("constant-marker pilot must bind one expected value")
+    if part_contract.get("mode") == "frame_index" and len(expected_part_values) != 241:
+        raise WorkerError("frame-index pilot must bind 241 expected values")
     output = _require_dict(request.get("output"), "output")
     output_dir = _absolute(output.get("directory"), "output.directory")
     if output_dir == native_root or native_root in output_dir.parents:
@@ -479,6 +550,9 @@ def execute(request_path: Path, report_override: Path | None = None) -> int:
             "nominal_tout_s": request["time_contract"]["nominal_tout_s"],
             "native_times_s": request["time_contract"].get("native_times_s"),
             "native_time_source": request["time_contract"].get("native_time_source"),
+            "native_time_tolerance_s": request["time_contract"].get("native_time_tolerance_s"),
+            "require_native_times": True,
+            "part_contract": request["official_export"].get("part_contract"),
         })
         report = {
             **base, "status": "completed", "returncode": 0, "case": parts["case"],

@@ -25,13 +25,22 @@ degree convention and the documented post-v5.0.204 pitch-sign note; it does
 not convert Euler angles or infer marker values from a case alias.
 
 `workers/run_fulltime_floatinginfo_fresh168.py` is fail-closed.  Root must
-make an enabled copy with a private output directory and a completed,
-hash-closed inventory report before it can run.  The parser requires exactly
-241 rows, strictly increasing time, start/end coverage for 0..12 seconds with
-the declared tolerance, finite values, and the complete unit-bearing groups:
-time, linear velocity, angular velocity, center, translation pose, and Euler
-pose.  Nominal 0.05-second times are retained alongside the official times;
-the worker reports differences and never resamples or claims exact equality.
+make an enabled copy with a private output directory, a completed,
+hash-closed inventory report, 241 native producer times, and a pilot-bound
+`part`-column contract before it can run.  The official header calls this
+column `part` but does not document it as a frame index.  The source package
+therefore leaves its marker-vs-frame mode and expected values null; a
+registered pilot must bind either the observed constant marker or the exact
+frame-index sequence.  The worker rejects any wrong or duplicated sequence
+under that binding and never infers frame identity from the case alias.
+
+The parser requires exactly 241 rows, strictly increasing time, start/end
+coverage for 0..12 seconds with the declared tolerance, finite values, and the
+complete unit-bearing groups: time, linear velocity, angular velocity, center,
+translation pose, and Euler pose.  It compares official times with the 241
+Root-bound native producer times using a finite, nonnegative `1e-6` second
+tolerance, rejects any excess, retains both time vectors, and never resamples
+or claims exact equality.
 
 ## Two-stage Root handoff
 
@@ -41,8 +50,11 @@ the worker reports differences and never resamples or claims exact equality.
    before/after stat, and writes one completed inventory report containing
    their actual SHA-256 values.  The source request keeps its report and
    entry hashes null.
-2. Freeze that report and bind its absolute report path, report SHA, and
-   matching per-case entry SHA into an enabled copy of each request in
+2. Use the Root-owned metadata preflight to bind 241 native producer times for
+   each case and run one registered pilot to establish the official `part`
+   semantics.  Freeze those facts, then bind the absolute inventory report
+   path/SHA, matching per-case entry SHA, native-time vector, `1e-6` tolerance,
+   and pilot part contract into an enabled copy of each request in
    `requests/f6-final48-fulltime-floatinginfo-disabled-request-index.json`.
    Set `disabled=false`, `source_only=false`, and `execution_allowed=true`
    only in the Root-owned copy.  Keep the native receipt and all canonical,

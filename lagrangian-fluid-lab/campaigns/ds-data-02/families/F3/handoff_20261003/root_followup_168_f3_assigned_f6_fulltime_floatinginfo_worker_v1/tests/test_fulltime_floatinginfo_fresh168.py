@@ -67,8 +67,11 @@ EXPECTED = {
     "expected_end_s": 12.0,
     "terminal_tolerance_s": 0.2,
     "nominal_tout_s": 0.05,
-    "native_times_s": None,
+    "native_time_tolerance_s": 1e-6,
+    "native_times_s": [index * 0.05 for index in range(241)],
     "native_time_source": "toy",
+    "require_native_times": True,
+    "part_contract": {"pilot_required": True, "mode": "constant_marker", "expected_values": [60]},
 }
 
 
@@ -83,10 +86,19 @@ class FulltimeFloatingInfoToyTests(unittest.TestCase):
                 writer.writerows(_rows())
             parsed = WORKER._parse_full_csv(path, EXPECTED)
             self.assertEqual(parsed["rows_examined"], 241)
-            self.assertEqual(parsed["frame_indices"], list(range(241)))
+            self.assertEqual(parsed["row_ordinals"], list(range(241)))
             self.assertEqual(parsed["part_values_observed"], [60])
             self.assertTrue(parsed["strictly_increasing_time"])
             self.assertAlmostEqual(parsed["last_time_s"], 12.0)
+
+    def test_native_time_shift_beyond_six_decimal_tolerance_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "native-time-shift.csv"
+            rows = _rows()
+            rows[80][1] = f"{80 * 0.05 + 2e-6:.12g}"
+            _write_csv(path, rows)
+            with self.assertRaises(WORKER.WorkerError):
+                WORKER._parse_full_csv(path, EXPECTED)
 
     def test_truncated_output_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -121,6 +133,28 @@ class FulltimeFloatingInfoToyTests(unittest.TestCase):
             _write_csv(path, _rows(), headers)
             with self.assertRaises(WORKER.WorkerError):
                 WORKER._parse_full_csv(path, EXPECTED)
+
+    def test_wrong_part_marker_is_rejected_after_pilot_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "wrong-part.csv"
+            rows = _rows()
+            rows[0][0] = "61"
+            _write_csv(path, rows)
+            with self.assertRaises(WORKER.WorkerError):
+                WORKER._parse_full_csv(path, EXPECTED)
+
+    def test_duplicate_frame_part_is_rejected_when_pilot_binds_frame_indices(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "duplicate-frame-part.csv"
+            rows = _rows()
+            for index, row in enumerate(rows):
+                row[0] = str(index)
+            rows[100][0] = "99"
+            expected = dict(EXPECTED)
+            expected["part_contract"] = {"pilot_required": True, "mode": "frame_index", "expected_values": list(range(241))}
+            _write_csv(path, rows)
+            with self.assertRaises(WORKER.WorkerError):
+                WORKER._parse_full_csv(path, expected)
 
 
 if __name__ == "__main__":
