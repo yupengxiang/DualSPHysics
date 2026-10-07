@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.stage2.F2-control-semantics-correction.v1",
+  "at_utc": "2026-10-07T19:45:53.153942+00:00",
+  "source_metadata": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_FIRST48_REMAINING24_SOURCE_ROOT801/root-stage1-f2-first48-remaining24-registered-source-generation-root801/source/source/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.metadata.json",
+    "sha256": "7f5091c496833616c9e6827a00d53fb478d39c92c9ae535e66cec56e9baebf29",
+    "historical_solver_launch_end_binding_verified": true
+  },
+  "historical_solver_receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-full401-native-source801-qa809-root812/execution-receipt.json",
+    "sha256": "e59d876df8718e17c6cc57c17a822b77d467f423e4b900df7bb10c127a6e5dc6"
+  },
+  "motion": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_COARSE_PHASE_PROBE_DP01258/f2_s1_coarse_phase_probe_dp01258-001/F2_S1_COARSE_PHASE_PROBE_DP01258_motion.dat",
+    "sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+    "table_coverage_s": [
+      0.0,
+      4.0
+    ],
+    "start_angle_deg": 0.0,
+    "end_angle_deg": -105.0
+  },
+  "correct_semantics": {
+    "ROT090_suffix": "rotation_duration_s=0.90, not rotation angle90deg",
+    "rotation_duration_s": 0.9,
+    "initial_static_hold_end_s": 0.5,
+    "rotation_stop_s": 1.4,
+    "rotation_final_angle_deg": -105,
+    "motion_file_and_XMLduration_coverage_s": 4.0,
+    "simulation_nominal_window_s": [
+      0,
+      4
+    ],
+    "rotation_curve_support_and_rotation_duration_are_distinct": true
+  },
+  "retracted_interpretation": "Root earlier treated ROT090 as nominal90deg and incorrectly called actual-105 a naming conflict. Source producer metadata and actual curve are consistent.",
+  "affected_consumed_artifacts": [
+    "requests/f2-s1-full-cfd-canary-v1/f2_s1_full_cfd_canary_dp01258_t4_primary_001.json",
+    "checkpoints/F2_S1_COARSE_FULL_CFD_VERIFICATION_001.json",
+    "checkpoints/CHECKPOINT_010_INTEGRATED.json",
+    "consumer-v14 moving_source_motion_binding.case_name_angle_conflict string"
+  ],
+  "preservation_policy": "Existing requests/receipts/proofs/code remain byte-immutable. This sidecar supersedes only the erroneous angle-name interpretation. Newv15 correctly binds0.9s/-105deg/4s table fields.",
+  "simulation_validity": "Coarse canary matched actual source motion bytes and continuous geometry, so this semantic correction does not require CFD rerun or alter source data. Scientific qualification remainsUNKNOWN.",
+  "goal_complete": false
+}

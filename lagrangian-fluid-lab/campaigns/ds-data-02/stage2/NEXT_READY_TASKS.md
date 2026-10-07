@@ -1,3 +1,5 @@
+最新语义纠正：`checkpoints/F2_CONTROL_SEMANTICS_CORRECTION_001.json` 核对历史solver绑定metadata，ROT090代表0.90秒转动时长，末角-105°；源控制一致，先前“角度命名冲突”解释撤回。实际转动0.5..1.4秒，与motion表/XML覆盖0..4秒分别记录。旧代码/收据/检查点保留，新v15使用正确语义；coarse已匹配真实曲线，无须重跑CFD。
+
 ## 2026-10-07T19:43:16.132667+00:00：真实完整CFD产物、首帧cohort与完整回放接口修复
 
 恢复入口为 `checkpoints/CHECKPOINT_010_INTEGRATED.json`，目标active、未完成。独立字段审计快照139例（F2=48、F4=48、F6=41、F1=2），实际F1/F6两单worker继续，以PID/start_ticks与新收据为准。F4剩余24已completed，释放槽已由F1接续；F3/F5/F7仍在就绪队列。
