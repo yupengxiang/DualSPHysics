@@ -30,6 +30,7 @@ from typing import Any
 
 
 REPO = Path(__file__).resolve().parents[5]
+PARENT_REPO = Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics")
 DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
 SOURCE_ROOT = DATA_ROOT / "families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001"
 RAW_ROOT = SOURCE_ROOT / "solver_output/data"
@@ -256,10 +257,10 @@ def build_request(request_dir: Path, manifest_path: Path) -> dict[str, Any]:
     # binds the exact stat manifest, receipt and first/last content anchors;
     # the worker then proves every intermediate frame before archiving it.
     guarded = [
-        REPO / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py",
-        REPO / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py",
-        REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v4.py",
-        REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+        PARENT_REPO / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py",
+        PARENT_REPO / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py",
+        PARENT_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v4.py",
+        PARENT_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
         Path(__file__).resolve(), manifest_path.resolve(), RECEIPT, RUNPARTS, RUNOUT,
         Path(manifest["source_binding"]["expected_first_frame"]["path"]),
         Path(manifest["source_binding"]["expected_last_frame"]["path"]),
