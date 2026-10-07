@@ -1,3 +1,13 @@
+## 2026-10-07 17:58 UTC：v4 集成与真实缺失证据
+
+`checkpoints/INTEGRATION_RESULT_002.json` 记录实际输入哈希及收据。active consumer 为 `scripts/ds_data02_stage2_consumers_v4.py`；主分支 guarded 17 项测试通过，制造轨迹 operator replay 通过。该容差仅用于制造轨迹，不授予真实数据科学资格，也不能排除原生保存帧之间未解析的重复穿越。旧 v1/v2/v3 与全部历史报告保留。
+
+真实 full-timeline field audit 截至本次快照共 80 个不同案例（F2=43、F4=24、F6=13）；后续动态进度以具体执行收据为准。F2 science-002 和 F6 science-001 的 detached batch parents 仍存活；F4 science-001 的历史 running 标记是已明确无进程的 stale 状态，不用于重启已完成项。F2 释放一个 I/O slot 后调度 F4 未完成 24 项，scan-F4-168 使用恢复 request 002。
+
+F6-240/241 已完成 native exclusions 对齐：3+4 个 position 排除。数值排除类别已建立，物理去向/动力学影响未知；必须结合实际 MapRealPos、底壁几何和原生状态诊断。rigid-body massbody 与 SPH support weight 分开，禁止粒子总质量代替刚体物理质量。
+
+三个执行分支持续进行：reference 做 14 初始帧实际核查及 F2-S1 三网格/time/output 复用与缺口准备；forensics 做 16 个 native 诊断和 provenance 反例、扩展已完成 scans；consumers 做 source-bound 真实单案例 replay 与全 336 的物理条件/几何控制谱系审计。具体读取真实时序由主进程安排 I/O；无模型、无 hidden test、无公开发布。目标未完成。
+
 # 第二阶段恢复入口
 
 当前目标仍在执行，完成条件未满足。先读 `checkpoints/CHECKPOINT_004_INTEGRATED.json`、`checkpoints/INTEGRATION_RESULT_001.json` 和 `checkpoints/CONSUMER_V3_VERIFICATION_001.json`，再检查真实进程和共享ledger。不要只根据running状态文件重启任务。
