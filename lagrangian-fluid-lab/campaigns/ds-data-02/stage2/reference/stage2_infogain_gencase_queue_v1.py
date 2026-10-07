@@ -77,8 +77,9 @@ def replace_definition_dp(text: str, dp: str) -> tuple[str, str, str]:
     old_tag = tag
     new_tag = tag[:attr.start()] + f'dp="{dp}"' + tag[attr.end():]
     replacement = text[:start] + new_tag + text[end + 1:]
-    normalized_old = text[:start] + tag[:attr.start()] + 'dp="<DP>"' + tag[attr.end():] + text[end + 1:]
-    normalized_new = text[:start] + new_tag[:attr.start()] + 'dp="<DP>"' + new_tag[attr.end():] + text[end + 1:]
+    normalizer = re.compile(r'dp="[^"]+"')
+    normalized_old = text[:start] + normalizer.sub('dp="<DP>"', tag) + text[end + 1:]
+    normalized_new = text[:start] + normalizer.sub('dp="<DP>"', new_tag) + text[end + 1:]
     return replacement, normalized_old, normalized_new
 
 
@@ -171,9 +172,8 @@ def make_candidate(spec: dict[str, object]) -> tuple[dict[str, object], Path]:
         mismatches = {key for key in set(existing_hashes) | set(expected_hashes) if existing_hashes.get(key) != expected_hashes.get(key)}
         builder_path = str(Path(__file__).resolve())
         if mismatches == {builder_path} and existing.get("command") == request.get("command"):
-            existing_hashes[builder_path] = expected_hashes[builder_path]
-            atomic_json(request_path, existing, replace=True)
-            return existing, request_path
+            atomic_json(request_path, request, replace=True)
+            return request, request_path
         if mismatches or existing.get("command") != request.get("command"):
             raise ValueError(f"existing request differs from deterministic candidate: {request_path}")
         return existing, request_path
