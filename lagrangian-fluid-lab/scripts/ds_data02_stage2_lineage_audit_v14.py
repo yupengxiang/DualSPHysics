@@ -772,6 +772,19 @@ def _family_card(family: str, cases: list[dict[str, Any]], *, audit_name: str,
     solver_status = Counter(str(case["execution"].get("solver_status")) for case in cases)
     gencase_support = Counter(bool(case["execution"]["gencase"].get("input_definition_hash_support_complete")) for case in cases)
     solver_xml_status = Counter(case["execution"]["generated_xml_hash_support"]["status"] for case in cases)
+    incomplete_solver_finish = [
+        {
+            "case_index": case["case_index"],
+            "physical_case_id": case.get("physical_case_id"),
+            "solver_status": case["execution"].get("solver_status"),
+            "hash_status": case["execution"]["generated_xml_hash_support"].get("status"),
+            "launch_hash_supported": case["execution"]["generated_xml_hash_support"].get("launch_hash_supported"),
+            "finish_hash_supported": case["execution"]["generated_xml_hash_support"].get("finish_hash_supported"),
+            "receipt_path": case["execution"].get("solver_receipt_path"),
+        }
+        for case in cases
+        if case["execution"]["generated_xml_hash_support"].get("status") != "COMPLETE_LAUNCH_AND_FINISH_HASH_SUPPORT"
+    ]
     for case in cases:
         selected = case["control"]["asset"].get("selected") or {}
         if selected.get("content_sha256"):
@@ -800,6 +813,7 @@ def _family_card(family: str, cases: list[dict[str, Any]], *, audit_name: str,
             "asset_coverage_status_counts": dict(sorted(coverage.items())),
             "solver_status_counts": dict(sorted(solver_status.items())),
             "solver_generated_xml_hash_status_counts": dict(sorted(solver_xml_status.items())),
+            "incomplete_solver_finish_cases": incomplete_solver_finish,
             "gencase_definition_input_support_counts": {str(key): value for key, value in sorted(gencase_support.items())},
             "run_out_exact_declared_root_counts": dict(sorted(runout.items())),
             "run_out_discovery": "only output_root/Run.out was checked; no glob/latest lookup",
@@ -809,7 +823,13 @@ def _family_card(family: str, cases: list[dict[str, Any]], *, audit_name: str,
             "completed_gencase_receipts": sum(case["execution"]["gencase"].get("receipt_status") == "completed" for case in cases),
             "source_receipt_paths_retained_per_case": True,
             "trajectory_h5_content_read_by_audit": False,
-            "known_full_replay_anchor": "F2 v15 full401 report is separately source-bound; no qualification transfer to this card",
+            "known_full_replay_anchor": {
+                "scope": "F2-S1 full 401-frame development replay only",
+                "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CONSUMER_V15_FULL401_REPLAY/v15-full401-root-001/v15-full401-report.json",
+                "sha256": "962325067fc40166895cd26dd2db3cc538f86576807ef3f779101cd134e6374d",
+                "source_binding": "CURRENT/HDF5/initial CSV/XML/motion hashes are recorded in the report",
+                "qualification_transfer": "NONE; QI/QN/QE remain UNKNOWN",
+            },
         },
         "observations_and_units": task.get("observables", []),
         "missing_failure_and_unknown": [
