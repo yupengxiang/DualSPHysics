@@ -319,6 +319,10 @@ def _solver_sources(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, An
     if not gencase_receipt:
         raise EvidenceError("solver request lacks candidate GenCase receipt")
     gencase_receipt_path = require_file(gencase_receipt, "candidate GenCase receipt")
+    solver_inputs = request.get("input_sha256", {})
+    generated_bi4_sha256 = solver_inputs.get(str(generated_bi4))
+    if not generated_bi4_sha256:
+        raise EvidenceError("solver receipt lacks generated BI4 digest")
     xml = parse_generated_xml(prefix)
     return {
         "solver_receipt_path": receipt_path,
@@ -327,6 +331,7 @@ def _solver_sources(receipt_path: Path, receipt: dict[str, Any]) -> dict[str, An
         "solver_command": command,
         "generated_xml": prefix,
         "generated_bi4": generated_bi4,
+        "generated_bi4_sha256": generated_bi4_sha256,
         "run_out": run_out,
         "runparts": runparts,
         "raw_partout": raw_partout,
@@ -448,7 +453,25 @@ def _validate_decoder(*, decoder_path: Path, source: dict[str, Any]) -> tuple[di
     if decoder.get("status") != "completed" or decoder.get("returncode") != 0:
         raise EvidenceError("PartVTKOut receipt is not completed")
     output_root = require_dir(decoder.get("output_root", ""), "PartVTKOut output root")
+    if output_root != decoder_path.parent:
+        raise EvidenceError("PartVTKOut receipt output_root is inconsistent")
     request = decoder.get("request", {})
+    if request.get("family_id") != "F2" or request.get("case_id") != "F2_S1_FINE_NATIVE_IMPACT_AUDIT_V1":
+        raise EvidenceError("PartVTKOut receipt request case identity differs")
+    if request.get("physical_case_id") != PHYSICAL_CASE_ID:
+        raise EvidenceError("PartVTKOut receipt request physical identity differs")
+    if request.get("source_solver_receipt") != str(source["solver_receipt_path"]):
+        raise EvidenceError("PartVTKOut request source solver receipt is not exact")
+    source_bindings = {
+        "source_raw_partout": source["raw_partout"],
+        "source_runparts": source["runparts"],
+        "source_run_out": source["run_out"],
+        "source_generated_xml": source["generated_xml"],
+        "source_gencase_receipt": source["gencase_receipt"],
+    }
+    for field, path in source_bindings.items():
+        if request.get(field) != str(path):
+            raise EvidenceError(f"PartVTKOut request {field} is not exact")
     request_command = request.get("command", [])
     command = decoder.get("command", [])
     if expanded_command(request_command, output_root) != command:
@@ -462,10 +485,20 @@ def _validate_decoder(*, decoder_path: Path, source: dict[str, Any]) -> tuple[di
     raw_dir = source["raw_partout"].parent
     if Path(command_value(command, "-dirdata")).resolve() != raw_dir.resolve():
         raise EvidenceError("PartVTKOut -dirdata is not the solver raw data root")
+    expected_request_command = [
+        str(Path(command[0]).resolve()), "-dirdata", str(raw_dir.resolve()),
+        "-savecsv", "{attempt_root}/PartOut.csv",
+        "-saveresume", "{attempt_root}/resume.csv", "-createdirs:1", "-csvsep:1",
+    ]
+    if [str(Path(value).resolve()) if index == 0 else value
+        for index, value in enumerate(request_command)] != expected_request_command:
+        raise EvidenceError("PartVTKOut request command is not the registered native decoder")
     partout_csv = require_file(command_value(command, "-savecsv"), "decoded PartOut.csv")
     resume = require_file(command_value(command, "-saveresume"), "PartVTKOut resume CSV")
     if partout_csv.parent != output_root or resume.parent != output_root:
         raise EvidenceError("decoder outputs are outside the guarded output root")
+    if not isinstance(decoder.get("bytes"), int) or decoder["bytes"] < 0:
+        raise EvidenceError("PartVTKOut receipt lacks a valid reported output byte count")
     files = [Path(value).resolve() for value in request.get("input_files", [])]
     declared = request.get("input_sha256", {})
     if not files or set(declared) != {str(path) for path in files}:
@@ -562,7 +595,7 @@ def audit(*, solver_receipt_path: Path, decoder_receipt_path: Path,
             "generated_xml": binding(source["generated_xml"]),
             "generated_bi4": {
                 "path": str(source["generated_bi4"]),
-                "sha256_from_solver_receipt": solver_receipt.get("request", {}).get("input_sha256", {}).get(str(source["generated_bi4"])),
+                "sha256_from_solver_receipt": source["generated_bi4_sha256"],
                 "hash_policy": "reused completed solver input digest; no duplicate large-file read in this audit",
             },
             "gencase_receipt": binding(source["gencase_receipt"]),
@@ -572,6 +605,13 @@ def audit(*, solver_receipt_path: Path, decoder_receipt_path: Path,
             "decoder_receipt": binding(decoder_receipt_path),
             "decoded_partout_csv": binding(partout_csv),
             "decoder_resume_csv": binding(resume),
+            "decoder_output_scope": {
+                "output_root": str(Path(decoder["output_root"]).resolve()),
+                "receipt_reported_bytes": decoder["bytes"],
+                "csv_and_resume_are_direct_children": True,
+                "csv_hash_is_bound_here": True,
+                "receipt_byte_semantics": "runner-reported terminal output bytes; receipt and stdout are separately bound",
+            },
         },
         "native_decode": {
             "tool": "official PartVTKOut",
