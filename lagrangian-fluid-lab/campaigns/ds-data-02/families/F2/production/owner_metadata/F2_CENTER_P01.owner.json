@@ -1,0 +1,159 @@
+{
+  "assigned_gpu": 2,
+  "case_id": "F2_CENTER_P01",
+  "containment_compliance": {
+    "catch_basin_floor": [
+      -1.2,
+      2.8,
+      -1.0,
+      1.0,
+      -0.2
+    ],
+    "compliant": true,
+    "containment_lip_walls_height_m": 0.15,
+    "expected_N_out": 0,
+    "simulation_domain_max": [
+      2.8,
+      1.0,
+      2.2
+    ],
+    "simulation_domain_min": [
+      -1.2,
+      -1.0,
+      -0.5
+    ]
+  },
+  "continuum_mass_consistency": {
+    "consistent": true,
+    "continuous_fluid_mass_kg": 18.876,
+    "continuous_fluid_volume_m3": 0.018876,
+    "lattice_fluid_mass_kg": 24.752000000000002,
+    "lattice_fluid_volume_m3": 0.024752000000000003,
+    "relative_mass_error": 0.3112947658402204,
+    "relative_mass_error_percent": 31.129476584022044
+  },
+  "dp_m": 0.02,
+  "excluded_particles": 0,
+  "family_id": "F2",
+  "fixed_particles": 93961,
+  "fluid_particles": 3094,
+  "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_CENTER_P01/F2_CENTER_P01_GENCASE_01/execution-receipt.json",
+  "gencase_receipt_sha256": "af86cba1b13377f35c80bd701e608bd4ce0a547b4f5b28a6e8ba852a24c4479c",
+  "holdout": null,
+  "mechanism_id": "center_catch",
+  "moving_particles": 6940,
+  "paired_background_id": "F2_PAIR_01",
+  "permitted_gpus": [
+    2,
+    5,
+    6,
+    7
+  ],
+  "physical_binding": {
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+    "controls": {
+      "boundary": "finite DBC rotating cup, receiver, and remediated catch basin",
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.03
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        4.0
+      ],
+      "right_censor_policy": "finite 4s run retains initial fluid denominator",
+      "sequence": [
+        "static_hold",
+        "cosine_rotation_tilt",
+        "catch_spill_residence"
+      ],
+      "time_end_s": 4.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F2",
+    "geometry": {
+      "catch_basin": {
+        "label": "remediated bounded catch basin with lip walls",
+        "low_m": [
+          -1.2,
+          -1.0,
+          -0.2
+        ],
+        "size_m": [
+          4.0,
+          2.0,
+          0.15
+        ]
+      },
+      "cup": {
+        "label": "finite rotating cup body",
+        "low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size_m": [
+          0.425,
+          0.3,
+          0.45
+        ]
+      },
+      "receiver": {
+        "label": "fixed catch receiver",
+        "low_m": [
+          0.45,
+          -0.3,
+          0.0
+        ],
+        "size_m": [
+          1.1,
+          0.6,
+          0.45
+        ]
+      }
+    },
+    "geometry_family_id": "F2_GEOM_CUP_RECEIVER_CENTER_V1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "mass_policy": "native per-particle mass from BI4 header",
+      "source_regions": [
+        "source_layer_0_bottom",
+        "source_layer_1_middle",
+        "source_layer_2_top"
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "mechanism_id": "center_catch",
+    "parameters": {
+      "containment_contract": "N_out = 0 verified in preflight",
+      "drive_mechanism": "center_catch",
+      "fill_ratio": 0.8,
+      "mouth_geometry": "open_rim",
+      "rotation_duration_s": 0.65
+    },
+    "physical_case_id": "F2_CENTER_P01",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "F2_CENTER_P01",
+  "resolution": "medium",
+  "solver_dimension": 3,
+  "split": "train",
+  "target_role": "train",
+  "total_particles": 103995,
+  "wall_particles": 100901,
+  "written_at_utc": "2026-10-02T06:26:24.990796+00:00"
+}

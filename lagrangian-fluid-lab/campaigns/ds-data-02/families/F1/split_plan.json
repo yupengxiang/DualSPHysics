@@ -1,12 +1,60 @@
 {
-  "assigned": false,
+  "assigned": true,
   "family_id": "F1",
   "grouping_key": "physical_case_id/lineage_group_id",
-  "holdouts": {
-    "control": "reserve one integration/save control group; controls never count as physical cases",
-    "geometry": "reserve obstacle-width/offset and lower-channel-width/length combinations for geometry holdout"
-  },
-  "leakage_rule": "resolution views, restarts, windows, and format copies stay in the same physical group",
+  "leakage_rule": "resolution views, restarts, windows, and format copies stay in the same physical group; paired eccentric and dual channel cases retain identical split to eliminate cross-mechanism leakage",
+  "production_case_count": 48,
+  "production_cases_per_mechanism": 24,
+  "reference_case_count": 6,
   "schema": "ds-data-02.f1.split-plan.v1",
-  "status": "planned_no_cases_assigned"
+  "split_counts": {
+    "test": 16,
+    "train": 16,
+    "validation": 16
+  },
+  "split_counts_per_mechanism": {
+    "asymmetric_dual_channel": {
+      "test": 8,
+      "train": 8,
+      "validation": 8
+    },
+    "eccentric_obstacle": {
+      "test": 8,
+      "train": 8,
+      "validation": 8
+    }
+  },
+  "stages": {
+    "stage24": {
+      "cumulative_case_count": 24,
+      "incremental_case_count": 16,
+      "selection": "physical parent pairs 5..12 (cumulative pairs 1..12)",
+      "split_counts": {
+        "test": 8,
+        "train": 8,
+        "validation": 8
+      }
+    },
+    "stage48": {
+      "cumulative_case_count": 48,
+      "incremental_case_count": 24,
+      "selection": "physical parent pairs 13..24 (cumulative pairs 1..24)",
+      "split_counts": {
+        "test": 16,
+        "train": 16,
+        "validation": 16
+      }
+    },
+    "stage8": {
+      "cumulative_case_count": 8,
+      "incremental_case_count": 8,
+      "selection": "physical parent pairs 1..4 (4 eccentric + 4 dual)",
+      "split_counts": {
+        "test": 2,
+        "train": 4,
+        "validation": 2
+      }
+    }
+  },
+  "status": "assigned_stages_8_24_48"
 }

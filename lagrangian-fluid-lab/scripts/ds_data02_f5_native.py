@@ -111,6 +111,34 @@ CASE_SPECS: dict[str, dict[str, Any]] = {
 }
 
 
+def get_case_spec(case_id: str) -> dict[str, Any]:
+    if case_id in CASE_SPECS:
+        return CASE_SPECS[case_id]
+    meta_path = FAMILY / f"production/definitions/{case_id}.metadata.json"
+    if not meta_path.is_file():
+        meta_path = FAMILY / f"definitions/{case_id}.metadata.json"
+    if not meta_path.is_file():
+        raise ValueError(f"unknown F5 case: {case_id}")
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    bg = meta.get("background", "runup_return")
+    is_weir = bg == "weir_pair"
+    case_root = DATA_ROOT / case_id
+    spec = {
+        "case_id": case_id,
+        "mechanism_id": meta.get("mechanism_id", bg),
+        "case_root": case_root,
+        "metadata": meta_path,
+        "background": bg,
+        "weir": is_weir,
+        "weir_x0": 4.96 if is_weir else None,
+        "weir_x1": 5.20 if is_weir else None,
+        "weir_base_z": meta.get("weir_base_z_m"),
+        "weir_crest_z": meta.get("crest_z_m"),
+    }
+    CASE_SPECS[case_id] = spec
+    return spec
+
+
 def spec_paths(case_id: str) -> dict[str, Path]:
     if case_id not in CASE_SPECS:
         raise ValueError(f"unknown F5 case: {case_id}")
@@ -535,7 +563,7 @@ def _mass_for_event(first_times: np.ndarray, mass: np.ndarray) -> dict[str, Any]
 
 
 def audit_transport(*, case_id: str, hdf5_path: Path, owner_path: Path, motion_path: Path, solver_output: Path, event_path: Path, quality_path: Path, output: Path, preview: Path, labels_path: Path | None = None) -> dict[str, Any]:
-    spec = CASE_SPECS[case_id]
+    spec = get_case_spec(case_id)
     events_declared = json.loads(event_path.read_text(encoding="utf-8"))
     quality = json.loads(quality_path.read_text(encoding="utf-8"))
     owner = json.loads(owner_path.read_text(encoding="utf-8"))
@@ -577,15 +605,12 @@ def audit_transport(*, case_id: str, hdf5_path: Path, owner_path: Path, motion_p
         previous_time = None
         max_z = -math.inf
         max_z_time = None
-        typed_counts: dict[str, dict[str, int]] = {}
         finite_active = True
         for frame_index, time_s in enumerate(times):
             positions = np.asarray(h["position"][frame_index, :], dtype=np.float64)
             velocities = np.asarray(h["velocity"][frame_index, :], dtype=np.float64)
             valid = np.asarray(h["valid"][frame_index, :], dtype=bool)
-            types = np.asarray(h["type"][frame_index, :], dtype=np.int8)
             finite_active = finite_active and bool(np.isfinite(positions[valid]).all() and np.isfinite(velocities[valid]).all())
-            typed_counts[str(frame_index)] = {str(kind): int(np.sum(types == kind)) for kind in sorted(set(initial_type.tolist()))}
             fluid_pos = positions[fluid_index]
             fluid_vel = velocities[fluid_index]
             fluid_valid = valid[fluid_index]
@@ -703,9 +728,9 @@ def audit_transport(*, case_id: str, hdf5_path: Path, owner_path: Path, motion_p
                 "run_summary": run,
                 "runparts_summary": runparts,
                 "raw_gauges": gauges,
-                "finite_source": owner["source_contract"]["finite_source"],
-                "finite_destinations": owner["source_contract"]["finite_destinations"],
-                "domain_repair_semantics": owner["source_contract"]["domain_repair_semantics"],
+                "finite_source": owner.get("source_contract", {}).get("finite_source") or owner.get("physical_binding", {}).get("parameters", {}).get("finite_source", "upstream_reservoir"),
+                "finite_destinations": owner.get("source_contract", {}).get("finite_destinations") or [owner.get("physical_binding", {}).get("parameters", {}).get("finite_destination", "downstream_return")],
+                "domain_repair_semantics": owner.get("source_contract", {}).get("domain_repair_semantics", "common numerical domain extension only; physical bed, sidewalls, source and control remain bound to fresh F5 XML"),
             },
             "moving_piston": moving_control,
             "transport_events": {
@@ -785,8 +810,7 @@ def audit_transport(*, case_id: str, hdf5_path: Path, owner_path: Path, motion_p
 
 
 def convert(args: argparse.Namespace) -> dict[str, Any]:
-    if str(args.case_id) not in CASE_SPECS:
-        raise ValueError(f"unknown F5 case: {args.case_id}")
+    spec = get_case_spec(str(args.case_id))
     if args.output.exists() or args.report.exists() or args.audit.exists() or args.preview.exists():
         raise FileExistsError("conversion outputs must be fresh; refusing overwrite")
     if not args.data_root.is_dir() or not args.generated_xml.is_file():

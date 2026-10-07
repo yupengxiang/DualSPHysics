@@ -1,0 +1,237 @@
+{
+  "attempt_id": null,
+  "background": "asymmetric_dual_channel",
+  "case_id": "F1_DUAL_P04_FINE",
+  "control_family_id": "F1_CONTROL_ASYMMETRIC_DUAL_CHANNEL_V1",
+  "definition_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/production/definitions/F1_DUAL_P04_FINE_Def.xml",
+  "definition_sha256": "5976ed2a71192aa1dad2a90bbbf727f6c325348ee0c05bd56699e0c798bd5bd2",
+  "dp_m": 0.008,
+  "error_budget": {
+    "applicability": {
+      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+      "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget."
+    },
+    "event_time_error_absolute_seconds_at_nominal_H0": 0.004735619898238375,
+    "event_time_error_fraction_of_characteristic_time": 0.02,
+    "event_time_scale": {
+      "characteristic_time_s": 0.23678099491191873,
+      "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+      "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+      "event_control_time_out_s": 0.001,
+      "event_control_within_save_budget": true,
+      "event_control_worst_case_snapshot_quantization_s": 0.0005,
+      "nominal_H0_m": 0.55,
+      "reference_matrix_time_out_s": 0.01,
+      "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+      "save_quantization_budget_s": 0.0009471239796476751,
+      "starting_absolute_budget_s": 0.004735619898238375
+    },
+    "integration_fraction_of_total_error_budget_max": 0.2,
+    "macro_observable_relative_error": 0.05,
+    "save_fraction_of_total_error_budget_max": 0.2,
+    "status": "starting_engineering_budget_pending_reference_matrix"
+  },
+  "event_window": {
+    "characteristic_length_m": 0.55,
+    "characteristic_time_s": 0.23678099491191873,
+    "characteristic_velocity_m_s": 2.3228215600859228,
+    "complete_event_window_s": 6.0,
+    "phase_basis": "front travel and remerge milestones are conservative registration targets; acceptance requires observed native data, not these estimates.",
+    "phase_targets_s": {
+      "downstream_remerge": 1.6,
+      "first_separator_interaction": 0.65,
+      "release": 0.0,
+      "return_flow_observable": 3.5,
+      "window_end": 6.0
+    },
+    "save_interval_s": 0.01
+  },
+  "family_id": "F1",
+  "feature_samples": 7.5,
+  "feature_scale_m": 0.06,
+  "generation_status": "definition_only_not_gencase_run",
+  "geometry": {
+    "channel_width_lower_m": 0.34,
+    "channel_width_ratio_lower_to_upper": 0.5666666666666669,
+    "channel_width_upper_m": 0.5999999999999999,
+    "fillbox_overrun_m": 0.17200000000000049,
+    "fillbox_seed_x_m": 2.62,
+    "fillbox_start_margin_m": 0.10800000000000048,
+    "finite_wall_faces": [
+      "bottom",
+      "left",
+      "right",
+      "front",
+      "back",
+      "separator_top",
+      "separator_sides"
+    ],
+    "initial_depth_m": 0.49500000000000005,
+    "initial_fluid_volume_m3": 0.5940000000000001,
+    "open_top": true,
+    "reservoir_length_m": 1.2,
+    "reservoir_start_x_m": 2.0200000000000005,
+    "separator_end_x_m": 1.97,
+    "separator_height_m": 0.7,
+    "separator_length_m": 0.95,
+    "separator_start_x_m": 1.02,
+    "separator_thickness_m": 0.06,
+    "separator_y_m": 0.34,
+    "tank_height_m": 1.0,
+    "tank_length_m": 3.22,
+    "tank_width_m": 1.0
+  },
+  "geometry_family_id": "F1_GEOM_ASYMMETRIC_DUAL_CHANNEL_V1",
+  "lineage_group_id": "F1_asymmetric_dual_channel_v1",
+  "mechanism_id": "asymmetric_dual_channel",
+  "metadata_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/production/definitions/F1_DUAL_P04_FINE.metadata.json",
+  "observables": {
+    "finite_downstream_plane": {
+      "axis": "x",
+      "crossings": "signed_net_and_separate_recrossings",
+      "placement_rule": "after_remerge_zone_before_downstream_wall"
+    },
+    "native_labels": [
+      "source_label",
+      "destination_time_series",
+      "first_passage_interval",
+      "residence_time",
+      "final_category",
+      "failure_reason",
+      "unknown_mass"
+    ],
+    "primary": [
+      "free_surface_front_quantiles_x_y_z",
+      "fluid_center_of_mass_xyz",
+      "split_fraction_time_series",
+      "downstream_finite_plane_first_arrival_and_net_mass",
+      "three_dimensional_mass_and_kinetic_energy_distribution"
+    ],
+    "secondary": [
+      "velocity_quantiles",
+      "return_flow_fraction",
+      "initial_mass_and_volume_error"
+    ],
+    "split_regions": [
+      "lower_channel",
+      "upper_channel"
+    ],
+    "time_window_required": "release, first interaction, bypass/split, downstream arrival, remerge, and at least one observable return-flow event"
+  },
+  "paired_background_id": "F1_PAIR_04",
+  "parameter_values": {
+    "h_ratio": 0.9,
+    "lower_channel_width_m": 0.34,
+    "reservoir_length_m": 1.2,
+    "separator_length_m": 0.95,
+    "separator_thickness_m": 0.06
+  },
+  "physical_case_id": "F1_DUAL_P04",
+  "production_status": "not_produced",
+  "qualification_status": "unqualified_until_native_reference_evidence",
+  "recipe_id": "F1_MDBC_DUAL_CHANNEL_V1",
+  "resolution": "fine",
+  "resolution_role": "planned_production_resolution",
+  "schema": "ds-data-02.f1.generator.v1",
+  "solver_parameters": {
+    "Boundary": 2,
+    "CoefDtMin": 0.05,
+    "DensityDT": 3,
+    "DensityDTvalue": 0.1,
+    "DtAllParticles": 0,
+    "DtFixed": 0,
+    "DtIni": 0,
+    "DtMin": 0,
+    "FtPause": 0,
+    "Kernel": 2,
+    "MinFluidStop": 0,
+    "NoPenetration": 0,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 0,
+    "Shifting": 0,
+    "SlipMode": 1,
+    "StepAlgorithm": 2,
+    "TimeMax": "6",
+    "TimeOut": "0.01",
+    "VerletSteps": 40,
+    "Visco": 0.01,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1,
+    "WrnPartsOut": 1
+  },
+  "source_mother": {
+    "actual_successful_run": {
+      "boundary": "mDBC",
+      "complete_event_evidence": false,
+      "coordinate_components": 3,
+      "dp_m": 0.02,
+      "finite_wall_faces": [
+        "bottom",
+        "left",
+        "right",
+        "front",
+        "back"
+      ],
+      "fixed_particles": 93042,
+      "fluid_particles": 79380,
+      "frame_count": 7,
+      "initial_flow_direction": "-x",
+      "initial_fluid_extent_m": [
+        1.18,
+        0.96,
+        0.52
+      ],
+      "initial_particle_bounds_m": [
+        [
+          2.02,
+          0.02,
+          0.02
+        ],
+        [
+          3.2,
+          0.98,
+          0.54
+        ]
+      ],
+      "initial_particle_extent_m": [
+        1.18,
+        0.96,
+        0.52
+      ],
+      "initial_particle_stats_csv": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/attempt-001/csv/Particles_stats.csv",
+      "nominal_initial_fluid_fill_box_extent_m": [
+        1.228,
+        1.0,
+        0.55
+      ],
+      "open_top": true,
+      "solver_dimension": "3D",
+      "tank_extent_m": [
+        3.22,
+        1.0,
+        1.0
+      ],
+      "time_max_s": 0.6,
+      "time_out_s": 0.1,
+      "total_particles": 172422
+    },
+    "gencase_log": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/gencase.stdout.log",
+    "gencase_log_sha256": "bef4000f341407365da84da1f6d73fa5a4b34d30a1131d25916635dcbe83a15e",
+    "mother_id": "official_v54_asymmetric_dual_channel",
+    "official_source_parameters": {
+      "complete_event_window_role": "source_recipe_upper_bound",
+      "time_max_s": 6.0,
+      "time_out_s": 0.01
+    },
+    "particle_stats_csv_sha256": "66b0e57de7f2660d4c1017abe0a5aeba1c21f23713ddd83d4e4afda9077dfde7",
+    "solver_log": "campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/solver.stdout.log",
+    "solver_log_sha256": "97f85f05c1a0c8a24a7ca26b9bd4193c4c1e56207dcb27a21ad97e044db2c208",
+    "source": "mdbc/04_Dambreak",
+    "source_case": "CaseDamBreak3D",
+    "source_definition": "vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "source_definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7"
+  },
+  "view_id": "native_full_state"
+}

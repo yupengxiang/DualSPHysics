@@ -62,7 +62,7 @@ class RuntimeTests(unittest.TestCase):
         devices = [dict(index=i, uuid=f'uuid{i}', total_mib=49000, used_mib=15) for i in range(8)]
         snapshot = dict(devices=devices, processes=[dict(uuid='uuid4', pid=99)])
         chosen = runtime.choose_gpu(snapshot, {'uuid5'}, 1000)
-        self.assertEqual(chosen['uuid'], 'uuid6')
+        self.assertEqual(chosen['uuid'], 'uuid2')
         with self.assertRaisesRegex(RuntimeError, 'no eligible'):
             runtime.choose_gpu(snapshot, {f'uuid{i}' for i in range(1, 8)}, 1000)
 

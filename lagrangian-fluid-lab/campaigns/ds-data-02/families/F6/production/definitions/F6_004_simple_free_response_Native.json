@@ -1,0 +1,72 @@
+{
+  "case_id": "F6_004_simple_free_response",
+  "contact_policy": {
+    "RigidAlgorithm": 1,
+    "chrono": false,
+    "contact_solver": false,
+    "wall_contact": "not a mechanism; body placed clear of finite walls"
+  },
+  "coordinate_frame_id": "tank_attached_inertial",
+  "family_id": "F6",
+  "fluid_ledger": {
+    "density_kg_m3": 1000.0,
+    "fluidtype": 3,
+    "mass_per_particle_from_generated_xml": true
+  },
+  "mechanism_id": "simple_free_response",
+  "rigid_body": {
+    "body_type": "native_rigid_free_body",
+    "density_ratio_to_water": 0.42,
+    "floatingtype": 2,
+    "initial_pose": {
+      "center_m": [
+        2.0,
+        1.0,
+        0.72
+      ],
+      "orientation_euler_deg": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "mass_kg": 40.32,
+    "required_state_fields": [
+      "pose",
+      "orientation",
+      "linear_velocity",
+      "angular_velocity",
+      "mass",
+      "inertia",
+      "force",
+      "torque"
+    ],
+    "state_sources": [
+      "generated_execution_particles.floating",
+      "FloatingInfo",
+      "ComputeForces"
+    ],
+    "volume_m3": 0.096
+  },
+  "schema": "ds-data-02.f6.native_input.v1",
+  "solver_dimension": 3,
+  "solver_parameters": {
+    "DensityDT": 2,
+    "DensityDTvalue": 0.1,
+    "DtFixed": 0.0,
+    "FtPause": 0.0,
+    "Kernel": 2,
+    "PartsOutMax": 1.0,
+    "RhopOutMax": 1300.0,
+    "RhopOutMin": 700.0,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 1,
+    "Shifting": 0,
+    "StepAlgorithm": 2,
+    "TimeMax": 12.0,
+    "TimeOut": 0.05,
+    "Visco": 1e-06,
+    "ViscoTreatment": 2
+  },
+  "source_template": "vendor/official/DualSPHysics_v5.4/examples/main/11_Floating/CaseFloating_Def.xml"
+}

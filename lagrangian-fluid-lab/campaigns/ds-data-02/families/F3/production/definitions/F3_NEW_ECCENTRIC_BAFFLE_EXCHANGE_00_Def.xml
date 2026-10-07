@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- DS-DATA-02 F3 Stage 8 Production: eccentric_baffle_exchange weak-drive containment -->
+<!-- Physical case: F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_00; dp=0.008m; X=0.018m; Y=0.012m; phi=1.0472rad -->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" />
+      <rhop0 value="1000" />
+      <rhopgradient value="2" />
+      <hswl value="0" auto="true" />
+      <gamma value="7" />
+      <speedsystem value="0" auto="true" />
+      <coefsound value="30" />
+      <speedsound value="0" auto="true" />
+      <coefh value="0.91924" />
+      <cflnumber value="0.2" />
+    </constantsdef>
+    <mkconfig boundcount="240" fluidcount="9" />
+    <geometry>
+      <definition dp="0.0080" units_comment="metres (m)">
+        <pointref x="0.004" y="0.004" z="0.004" />
+        <pointmin x="-0.6" y="-0.25" z="-0.1" />
+        <pointmax x="0.6" y="0.25" z="0.7" />
+      </definition>
+      <commands>
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <setnormalinvert invert="true" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>all^top</boxfill>
+            <point x="-0.45" y="-0.1" z="0" />
+            <size x="0.9" y="0.2" z="0.508" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <setnormalinvert invert="false" />
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>bottom | top | left | right | front | back</boxfill>
+            <point x="-0.012" y="-0.092" z="0" />
+            <size x="0.024" y="0.087" z="0.30" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <drawbox>
+            <boxfill>bottom | top | left | right | front | back</boxfill>
+            <point x="-0.012" y="0.045" z="0" />
+            <size x="0.024" y="0.047" z="0.30" />
+            <layers vdp="-0.5" />
+          </drawbox>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <runlist name="GeometryForNormals" />
+          <setshapemode>dp | bound</setshapemode>
+          <setdrawmode mode="full" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="-0.45" y="-0.1" z="0" />
+            <size x="0.9" y="0.2" z="0.508" />
+            <layers vdp="0,1,2,3" />
+          </drawbox>
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>bottom | top | left | right | front | back</boxfill>
+            <point x="-0.012" y="-0.092" z="0" />
+            <size x="0.024" y="0.087" z="0.30" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <setmkbound mk="1" />
+          <drawbox>
+            <boxfill>bottom | top | left | right | front | back</boxfill>
+            <point x="-0.012" y="0.045" z="0" />
+            <size x="0.024" y="0.047" z="0.30" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+          <setmkfluid mk="0" />
+          <fillbox x="-0.3" y="0.02" z="0.05">
+            <modefill>void</modefill>
+            <point x="-0.45" y="-0.092" z="0" />
+            <size x="0.9" y="0.184" z="0.14" />
+          </fillbox>
+          <shapeout file="" />
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <distanceh v="3.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+    <motion>
+      <objreal ref="0">
+        <begin mov="1" start="0" finish="10.0" />
+        <mvfile id="1" duration="10.0">
+          <file name="F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_00_Motion.txt" fields="4" fieldtime="0" fieldx="1" fieldy="2" fieldz="3" />
+        </mvfile>
+      </objreal>
+    </motion>
+  </casedef>
+  <execution>
+    <parameters>
+      <parameter key="SavePosDouble" value="2" />
+      <parameter key="Boundary" value="2" />
+      <parameter key="SlipMode" value="2" />
+      <parameter key="NoPenetration" value="1" />
+      <parameter key="StepAlgorithm" value="2" />
+      <parameter key="VerletSteps" value="40" />
+      <parameter key="Kernel" value="2" />
+      <parameter key="ViscoTreatment" value="1" />
+      <parameter key="Visco" value="0.05" />
+      <parameter key="ViscoBoundFactor" value="1" />
+      <parameter key="DensityDT" value="3" />
+      <parameter key="DensityDTvalue" value="0.1" />
+      <parameter key="Shifting" value="0" />
+      <parameter key="ShiftCoef" value="-2" />
+      <parameter key="ShiftTFS" value="0" />
+      <parameter key="RigidAlgorithm" value="1" />
+      <parameter key="FtPause" value="0.0" />
+      <parameter key="CoefDtMin" value="0.05" />
+      <parameter key="DtIni" value="0" />
+      <parameter key="DtMin" value="0" />
+      <parameter key="DtFixed" value="0" />
+      <parameter key="DtAllParticles" value="0" />
+      <parameter key="TimeMax" value="10.0" />
+      <parameter key="TimeOut" value="0.0025" />
+      <parameter key="PartsOutMax" value="1" />
+      <parameter key="RhopOutMin" value="700" />
+      <parameter key="RhopOutMax" value="1300" />
+      <parameter key="MinFluidStop" value="0" />
+      <simulationdomain>
+        <posmin x="default-150%" y="default-150%" z="default-150%" />
+        <posmax x="default+150%" y="default+150%" z="default+150%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

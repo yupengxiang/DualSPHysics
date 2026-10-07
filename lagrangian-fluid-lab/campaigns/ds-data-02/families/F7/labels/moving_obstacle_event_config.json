@@ -1,0 +1,78 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "physical_mechanism": "moving_obstacle_exchange",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "left_chamber",
+      "bounds": [
+        [-0.60, -0.04],
+        [-0.40, 0.40],
+        [0.0, 0.60]
+      ]
+    },
+    {
+      "id": "right_chamber",
+      "bounds": [
+        [-0.04, 0.60],
+        [-0.40, 0.40],
+        [0.0, 0.60]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "left_chamber",
+      "bounds": [
+        [-0.60, -0.04],
+        [-0.40, 0.40],
+        [0.0, 0.60]
+      ]
+    },
+    {
+      "id": "right_chamber",
+      "bounds": [
+        [-0.04, 0.60],
+        [-0.40, 0.40],
+        [0.0, 0.60]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "obstacle_subdomain_crossing",
+      "axis": 0,
+      "value": -0.04,
+      "aperture_bounds": [
+        [-0.35, 0.35],
+        [0.0, 0.55]
+      ]
+    },
+    {
+      "id": "lateral_slosh_exchange",
+      "axis": 1,
+      "value": 0.0,
+      "aperture_bounds": [
+        [-0.55, 0.55],
+        [0.0, 0.55]
+      ]
+    },
+    {
+      "id": "top_open_exit",
+      "axis": 2,
+      "value": 0.60,
+      "aperture_bounds": [
+        [-0.60, 0.60],
+        [-0.40, 0.40]
+      ]
+    }
+  ],
+  "interpretation": "3D sloshing and exchange in rectangular tank driven by rotating obstacle paddle at x=-0.04; partitioned into left chamber (x < -0.04) and right chamber (x >= -0.04)",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times and cyclic recrossings",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

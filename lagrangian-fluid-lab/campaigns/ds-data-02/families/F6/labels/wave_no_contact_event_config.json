@@ -1,0 +1,78 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "world_tank_and_tank_attached_observations",
+  "physical_mechanism": "wave_no_contact",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "upstream_paddle_zone",
+      "bounds": [
+        [0.0, 2.5],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "downstream_zone",
+      "bounds": [
+        [2.5, 5.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "upstream_paddle_zone",
+      "bounds": [
+        [0.0, 2.5],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "downstream_zone",
+      "bounds": [
+        [2.5, 5.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "body_midplane_passage",
+      "axis": 0,
+      "value": 2.5,
+      "aperture_bounds": [
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "transverse_exchange",
+      "axis": 1,
+      "value": 1.0,
+      "aperture_bounds": [
+        [0.0, 5.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "top_open_exit",
+      "axis": 2,
+      "value": 1.4,
+      "aperture_bounds": [
+        [0.0, 5.0],
+        [0.0, 2.0]
+      ]
+    }
+  ],
+  "interpretation": "3D regular wave excitation of floating body in 5.0m x 2.0m x 1.4m wave flume; partition at x=2.5m (upstream/downstream around floating body) and y=1.0m (transverse); open top monitored at z=1.4m",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "physical_mechanism": "dual_axis_phase",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "left_half",
+      "bounds": [
+        [-0.50, 0.0],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "right_half",
+      "bounds": [
+        [0.0, 0.50],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "left_chamber",
+      "bounds": [
+        [-0.50, 0.0],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "right_chamber",
+      "bounds": [
+        [0.0, 0.50],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "left_right_exchange",
+      "axis": 0,
+      "value": 0.0,
+      "aperture_bounds": [
+        [-0.09, 0.09],
+        [-0.05, 0.55]
+      ]
+    },
+    {
+      "id": "front_back_exchange",
+      "axis": 1,
+      "value": 0.0,
+      "aperture_bounds": [
+        [-0.45, 0.45],
+        [-0.05, 0.55]
+      ]
+    },
+    {
+      "id": "top_open_exit",
+      "axis": 2,
+      "value": 0.51,
+      "aperture_bounds": [
+        [-0.45, 0.45],
+        [-0.09, 0.09]
+      ]
+    }
+  ],
+  "interpretation": "3D sloshing in rectangular cell under dual-axis acceleration; partition at x=0 (left/right) and y=0 (front/back); open top containment monitored at z=0.51",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

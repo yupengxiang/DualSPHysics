@@ -61,31 +61,72 @@
   },
   "family_id": "F2",
   "grouping_key": "paired_background_id/physical_case_id/lineage_group_id",
-  "nested_progression": {
-    "nested8": {
-      "parent_group_numbers": [1, 2, 3, 4],
-      "physical_case_count": 8,
-      "resolution_views_per_case": 3
-    },
-    "nested24": {
-      "parent_group_numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-      "physical_case_count": 24,
-      "resolution_views_per_case": 3
-    },
-    "nested48": {
-      "parent_group_numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
-      "physical_case_count": 48,
-      "resolution_views_per_case": 3
-    }
-  },
-  "range_design_artifact": "split_range_design.json",
-  "resolution_counting_rule": "coarse, medium and fine are numerical views of one physical_case_id and never add physical cases",
   "hidden_test_claim": "none; this is a public development/test candidate split",
   "holdouts": {
     "geometry_control": "short_spout geometry family and offset control combinations; requires a fresh 2x3 reference before qualification",
     "parameter": "fill_ratio, rotation_duration_s and receiver_x_m combinations outside train support but inside the frozen numerical recipe range"
   },
   "leakage_rule": "all resolutions, restarts, windows, labels, previews and HDF5 copies stay with their physical case and paired background",
+  "nested_progression": {
+    "nested24": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "physical_case_count": 24,
+      "resolution_views_per_case": 3
+    },
+    "nested48": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "physical_case_count": 48,
+      "resolution_views_per_case": 3
+    },
+    "nested8": {
+      "parent_group_numbers": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "physical_case_count": 8,
+      "resolution_views_per_case": 3
+    }
+  },
   "pair_groups": {
     "F2_PAIR_01": [
       "F2_CENTER_P01",
@@ -184,6 +225,8 @@
       "F2_OFFSET_P24"
     ]
   },
+  "range_design_artifact": "split_range_design.json",
+  "resolution_counting_rule": "coarse, medium and fine are numerical views of one physical_case_id and never add physical cases",
   "schema": "ds-data-02.f2.split-plan.v1",
   "split_counts": {
     "geometry_control_ood": 6,
@@ -192,5 +235,55 @@
     "train": 24,
     "validation": 6
   },
-  "status": "planned_no_cases_assigned_to_native_outputs"
+  "stages": {
+    "stage8": {
+      "allocated_gpus": [
+        2,
+        5,
+        6,
+        7
+      ],
+      "case_ids": [
+        "F2_CENTER_P01",
+        "F2_OFFSET_P01",
+        "F2_CENTER_P02",
+        "F2_OFFSET_P02",
+        "F2_CENTER_P03",
+        "F2_OFFSET_P03",
+        "F2_CENTER_P04",
+        "F2_OFFSET_P04"
+      ],
+      "containment_contract": "remediated catch basin [-1.20, 2.80] x [-1.00, 1.00] x [-0.50, 2.20], N_out = 0",
+      "cumulative_case_count": 8,
+      "gpu_allocation_map": {
+        "F2_CENTER_P01": 2,
+        "F2_CENTER_P02": 6,
+        "F2_CENTER_P03": 2,
+        "F2_CENTER_P04": 6,
+        "F2_OFFSET_P01": 5,
+        "F2_OFFSET_P02": 7,
+        "F2_OFFSET_P03": 5,
+        "F2_OFFSET_P04": 7
+      },
+      "incremental_case_count": 8,
+      "mechanisms": {
+        "center_catch": [
+          "F2_CENTER_P01",
+          "F2_CENTER_P02",
+          "F2_CENTER_P03",
+          "F2_CENTER_P04"
+        ],
+        "offset_spill": [
+          "F2_OFFSET_P01",
+          "F2_OFFSET_P02",
+          "F2_OFFSET_P03",
+          "F2_OFFSET_P04"
+        ]
+      },
+      "split_counts": {
+        "train": 8
+      }
+    }
+  },
+  "status": "stage8_production_gencase_preflight_passed_solvers_prepared"
 }

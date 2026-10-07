@@ -1,0 +1,141 @@
+{
+  "background": "runup_return",
+  "case_id": "F5_RUNUP_02",
+  "family_id": "F5",
+  "mechanism_id": "runup_return",
+  "physical_binding": {
+    "control_family_id": "F5_CTRL_OFFICIAL_PISTON_V1",
+    "controls": {
+      "boundary": "finite DBC floor, finite sidewalls, finite prescribed piston, no periodic y",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.01
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        16.0
+      ],
+      "right_censor_policy": "unseen events at 16 s remain censored and retain initial-mass denominator",
+      "sequence": [
+        "toe_first_arrival",
+        "runup_or_crest_first_passage",
+        "return_crossing",
+        "terminal_destination"
+      ],
+      "time_end_s": 16.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F5",
+    "geometry": {
+      "continuous_bed": {
+        "label": "closed continuous bed STL bounding box",
+        "low_m": [
+          -1.1,
+          -0.72,
+          -0.25
+        ],
+        "size_m": [
+          11.95,
+          1.44,
+          1.09
+        ]
+      },
+      "finite_tank": {
+        "label": "finite solver tank envelope",
+        "low_m": [
+          -1.1,
+          -0.8,
+          -0.25
+        ],
+        "size_m": [
+          11.9,
+          1.6,
+          1.45
+        ]
+      },
+      "initial_fluid": {
+        "label": "initial continuous fluid box",
+        "low_m": [
+          -0.9,
+          -0.7,
+          0.02
+        ],
+        "size_m": [
+          4.2,
+          1.4,
+          0.34
+        ]
+      },
+      "return_region": {
+        "label": "finite downstream return destination",
+        "low_m": [
+          7.15,
+          -0.72,
+          0.08
+        ],
+        "size_m": [
+          3.7,
+          1.44,
+          0.4
+        ]
+      }
+    },
+    "geometry_family_id": "F5_GEOM_SLOPE_BERM_RETURN_V1",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "continuum_mass_by_source_kg": [
+        1999.2
+      ],
+      "initial_mass_total_kg": 1999.2,
+      "mass_policy": "native header MassFluid times native fluid cohort; no rescaling",
+      "source_labels": [
+        "upstream_reservoir"
+      ],
+      "source_regions": [
+        "initial_fluid"
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "lineage_group_id": "lineage_physical_F5_c61851d8493cdd58",
+    "mass_policy": "native per-particle mass from BI4 header; type-aware ledger",
+    "mechanism_id": "runup_return",
+    "open_inlet": false,
+    "paired_background_id": "F5_PAIR_02",
+    "parameters": {
+      "coordinate_components": 3,
+      "finite_destination": "downstream return region and lateral notch for weir_pair",
+      "finite_source": "upstream_reservoir",
+      "initial_depth_m": 0.34,
+      "slope_ratio": 0.28
+    },
+    "periodic_boundary": false,
+    "physical_case_id": "physical_F5_c61851d8493cdd58",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "physical_F5_c61851d8493cdd58",
+  "product_boundary": "Stage 8 production full native state",
+  "resolution": "medium",
+  "schema": "ds-data-02.f5.native-owner-metadata.v1",
+  "source_gencase_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_RUNUP_02/F5_RUNUP_02_GENCASE_03/execution-receipt.json",
+    "sha256": "e1d399d2f6a5b1c5f5f8b5e84a3c02cd0eb9ae6eafc7aa8d264d33369b73622b"
+  },
+  "source_solver_binding": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_RUNUP_02/F5_RUNUP_02_QUALIFICATION_004/execution-receipt.json",
+    "sha256": "b67c710d6e5918e5e3b376976dd0315f8b0f20823d662592f563d68bc0edce4e"
+  }
+}

@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- DS-DATA-02 F3 Stage 8 Production: dual_axis_phase weak-drive containment -->
+<!-- Physical case: F3_NEW_DUAL_AXIS_PHASE_00; dp=0.0075m; ax<=0.06g; ay<=0.04g -->
+<case>
+  <casedef>
+    <constantsdef>
+      <gravity x="0" y="0" z="-9.81" comment="Gravitational acceleration" units_comment="m/s^2" />
+      <rhop0 value="1000" comment="Reference density of the fluid" units_comment="kg/m^3" />
+      <rhopgradient value="2" comment="Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)" />
+      <hswl value="0" auto="true" comment="Maximum still water level to calculate speedofsound using coefsound" units_comment="metres (m)" />
+      <gamma value="7" comment="Polytropic constant for water used in the state equation" />
+      <speedsystem value="0" auto="true" comment="Maximum system speed (by default the dam-break propagation is used)" />
+      <coefsound value="30" comment="Coefficient to multiply speedsystem" />
+      <speedsound value="0" auto="true" comment="Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)" />
+      <coefh value="0.91924" comment="Coefficient to calculate the smoothing length (h=coefh*sqrt(3*dp^2) in 3D)" />
+      <cflnumber value="0.05" comment="Coefficient to multiply dt" />
+    </constantsdef>
+    <mkconfig boundcount="240" fluidcount="9" />
+    <geometry>
+      <definition dp="0.0075" units_comment="metres (m)">
+        <pointref x="0.00375" y="0.00375" z="0.00375" />
+        <pointmin x="-1" y="-.2" z="-1" />
+        <pointmax x="1" y=".2" z="1" />
+      </definition>
+      <commands>
+        <list name="GeometryForNormals">
+          <setactive drawpoints="0" drawshapes="1" />
+          <setshapemode>actual | bound</setshapemode>
+          <setnormalinvert invert="true" />
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>all^top</boxfill>
+            <point x="-0.45" y="-0.09" z="0" />
+            <size x="0.9" y="0.18" z="0.51" />
+            <layers vdp="0" />
+          </drawbox>
+          <shapeout file="hdp" />
+          <resetdraw />
+        </list>
+        <mainlist>
+          <runlist name="GeometryForNormals" />
+          <setdrawmode mode="full" />
+          <setmkfluid mk="0" />
+          <drawbox>
+            <boxfill>solid</boxfill>
+            <point x="-0.44625" y="-0.08625" z="0.00375" />
+            <size x="0.8925" y="0.1725" z="0.0825" />
+          </drawbox>
+          <setmkbound mk="0" />
+          <drawbox>
+            <boxfill>all^top</boxfill>
+            <point x="-0.45375" y="-0.09375" z="-0.00375" />
+            <size x="0.9075" y="0.1875" z="0.51375" />
+            <layers vdp="0,1,2" />
+          </drawbox>
+        </mainlist>
+      </commands>
+    </geometry>
+    <normals active="true">
+      <norgeometry>
+        <geometryfile file="[CaseName]_hdp_Actual.vtk" />
+        <distanceh v="3.0" />
+        <svshapes v="true" />
+      </norgeometry>
+    </normals>
+  </casedef>
+  <execution>
+    <special>
+      <accinputs>
+        <accinput mkfluid="0">
+          <acccentre x="0.45" y="0" z="0" comment="Center of acceleration" units_comment="metres (m)" />
+          <globalgravity value="0" comment="Global gravity enabled (1) or disabled (0)" />
+          <acctimesfile value="F3_NEW_DUAL_AXIS_PHASE_00_Control.csv" comment="File with linear and angular acceleration data" />
+        </accinput>
+      </accinputs>
+    </special>
+    <parameters>
+      <parameter key="SavePosDouble" value="2" comment="Saves particle position using double precision (default=0)" />
+      <parameter key="StepAlgorithm" value="2" comment="Step Algorithm 1:Verlet, 2:Symplectic (default=1)" />
+      <parameter key="VerletSteps" value="40" comment="Verlet only: Number of steps to apply Euler timestepping (default=40)" />
+      <parameter key="Kernel" value="2" comment="Interaction Kernel 1:Cubic Spline, 2:Wendland (default=2)" />
+      <parameter key="ViscoTreatment" value="1" comment="Viscosity formulation 1:Artificial, 2:Laminar+SPS, 3:Laminar (default=1)" />
+      <parameter key="Visco" value="0.05" comment="Viscosity value" />
+      <parameter key="ViscoBoundFactor" value="1" comment="Multiply viscosity value with boundary (default=1)" />
+      <parameter key="DensityDT" value="3" comment="Density Diffusion Term 0:None, 1:Molteni, 2:Fourtakas, 3:Fourtakas(full)" />
+      <parameter key="DensityDTvalue" value="0.1" comment="DDT value (default=0.1)" />
+      <parameter key="Shifting" value="0" comment="Shifting mode" />
+      <parameter key="ShiftCoef" value="-2" comment="Coefficient for shifting computation" />
+      <parameter key="ShiftTFS" value="0" comment="Threshold to detect free surface" />
+      <parameter key="RigidAlgorithm" value="1" comment="Rigid Algorithm" />
+      <parameter key="FtPause" value="0.0" comment="Time to freeze the floatings at simulation start" units_comment="seconds" />
+      <parameter key="CoefDtMin" value="0.05" comment="Coefficient to calculate minimum time step" />
+      <parameter key="DtIni" value="0" comment="Initial time step" units_comment="seconds" />
+      <parameter key="DtMin" value="0" comment="Minimum time step" units_comment="seconds" />
+      <parameter key="DtFixed" value="0" comment="Fixed Dt value" units_comment="seconds" />
+      <parameter key="DtFixedFile" value="NONE" comment="Dt values loaded from file" />
+      <parameter key="DtAllParticles" value="0" comment="Velocity of particles used to calculate DT" />
+      <parameter key="TimeMax" value="10.0" comment="Time of simulation" units_comment="seconds" />
+      <parameter key="TimeOut" value="0.0025" comment="Time out data" units_comment="seconds" />
+      <parameter key="PartsOutMax" value="1" comment="Excluded particle fraction allowed" units_comment="decimal" />
+      <parameter key="RhopOutMin" value="700" comment="Minimum rhop valid" units_comment="kg/m^3" />
+      <parameter key="RhopOutMax" value="1300" comment="Maximum rhop valid" units_comment="kg/m^3" />
+      <simulationdomain comment="Defines domain of simulation">
+        <posmin x="default-150%" y="default-150%" z="default-150%" />
+        <posmax x="default+150%" y="default+150%" z="default+150%" />
+      </simulationdomain>
+    </parameters>
+  </execution>
+</case>

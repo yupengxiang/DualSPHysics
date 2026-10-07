@@ -1,0 +1,94 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "physical_mechanism": "offset_spill",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "source_layer_bottom",
+      "bounds": [
+        [0.0, 0.45],
+        [-0.20, 0.20],
+        [0.65, 0.80]
+      ]
+    },
+    {
+      "id": "source_layer_middle",
+      "bounds": [
+        [0.0, 0.45],
+        [-0.20, 0.20],
+        [0.80, 0.92]
+      ]
+    },
+    {
+      "id": "source_layer_top",
+      "bounds": [
+        [0.0, 0.45],
+        [-0.20, 0.20],
+        [0.92, 1.10]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "cup_retained",
+      "bounds": [
+        [-0.05, 0.45],
+        [-0.20, 0.20],
+        [0.60, 1.15]
+      ]
+    },
+    {
+      "id": "receiver_captured",
+      "bounds": [
+        [0.45, 1.55],
+        [-0.08, 0.52],
+        [0.0, 0.45]
+      ]
+    },
+    {
+      "id": "catch_basin_tray",
+      "bounds": [
+        [-1.20, 2.80],
+        [-1.00, 1.00],
+        [-0.25, 0.0]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "cup_mouth_departure",
+      "axis": 0,
+      "value": 0.425,
+      "aperture_bounds": [
+        [-0.20, 0.20],
+        [0.65, 1.15]
+      ]
+    },
+    {
+      "id": "receiver_rim_entry",
+      "axis": 2,
+      "value": 0.45,
+      "aperture_bounds": [
+        [0.45, 1.55],
+        [-0.08, 0.52]
+      ]
+    },
+    {
+      "id": "basin_floor_arrival",
+      "axis": 2,
+      "value": 0.0,
+      "aperture_bounds": [
+        [-1.20, 2.80],
+        [-1.00, 1.00]
+      ]
+    }
+  ],
+  "interpretation": "3D offset rotating cup discharge into offset receiver and remediated catch basin; partitioned into bottom/middle/top source layers; tracked for receiver capture vs basin spill",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

@@ -138,7 +138,7 @@ def inventory():
 
 def choose_gpu(snapshot, leased_uuids, peak_mib):
     busy = {row['uuid'] for row in snapshot['processes']}
-    preference = [4, 5, 6, 7, 1, 2, 3]  # GPU0 retains its historical protection.
+    preference = [2, 5, 6, 7]  # GPUs 1, 3, 4 strictly preserved for user wx; GPU 0 historically preserved.
     for index in preference:
         for device in snapshot['devices']:
             if device['index'] != index or device['uuid'] in leased_uuids | busy:

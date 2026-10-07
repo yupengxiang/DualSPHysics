@@ -1,0 +1,103 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "physical_mechanism": "eccentric_baffle_exchange",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "left_chamber",
+      "bounds": [
+        [-0.50, -0.012],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "baffle_channel",
+      "bounds": [
+        [-0.012, 0.012],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "right_chamber",
+      "bounds": [
+        [0.012, 0.50],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "left_chamber",
+      "bounds": [
+        [-0.50, -0.012],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "baffle_channel",
+      "bounds": [
+        [-0.012, 0.012],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    },
+    {
+      "id": "right_chamber",
+      "bounds": [
+        [0.012, 0.50],
+        [-0.15, 0.15],
+        [-0.05, 0.60]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "baffle_channel_entry",
+      "axis": 0,
+      "value": -0.012,
+      "aperture_bounds": [
+        [-0.005, 0.045],
+        [0.0, 0.30]
+      ]
+    },
+    {
+      "id": "baffle_channel_exit",
+      "axis": 0,
+      "value": 0.012,
+      "aperture_bounds": [
+        [-0.005, 0.045],
+        [0.0, 0.30]
+      ]
+    },
+    {
+      "id": "crest_overtop",
+      "axis": 0,
+      "value": 0.0,
+      "aperture_bounds": [
+        [-0.092, 0.092],
+        [0.30, 0.55]
+      ]
+    },
+    {
+      "id": "top_open_exit",
+      "axis": 2,
+      "value": 0.508,
+      "aperture_bounds": [
+        [-0.45, 0.45],
+        [-0.10, 0.10]
+      ]
+    }
+  ],
+  "interpretation": "3D sloshing in rectangular cell with eccentric vertical baffle partition; aperture slit at y in [-0.005, 0.045], z in [0, 0.30]; crest overtop at z in [0.30, 0.508]; open top containment monitored at z=0.508",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

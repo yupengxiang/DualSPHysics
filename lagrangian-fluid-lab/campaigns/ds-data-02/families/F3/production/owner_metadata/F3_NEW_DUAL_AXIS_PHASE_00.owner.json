@@ -1,0 +1,100 @@
+{
+  "assigned_gpu": 2,
+  "case_id": "F3_NEW_DUAL_AXIS_PHASE_00",
+  "containment_compliance": {
+    "ax_bound_g": 0.06,
+    "ax_max_g": 0.06,
+    "ay_bound_g": 0.04,
+    "ay_max_g": 0.04,
+    "compliant": true
+  },
+  "dp_m": 0.0075,
+  "family_id": "F3",
+  "fluid_particles": 34560,
+  "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_NEW_DUAL_AXIS_PHASE_00/F3_NEW_DUAL_AXIS_PHASE_00_GENCASE_01/execution-receipt.json",
+  "gencase_receipt_sha256": "e3d51fe1967af1dcc2df22fac8519df41dcdc3fff8af0262d176af1c8c523cca",
+  "mechanism_id": "dual_axis_phase",
+  "paired_background_id": "dual_axis_phase_paired_background_00",
+  "permitted_gpus": [
+    2,
+    5,
+    6,
+    7
+  ],
+  "physical_binding": {
+    "control_family_id": "F3_CTRL_DUAL_AXIS_PHASE",
+    "controls": {
+      "boundary": "finite DBC tank, moving baffle/sway, no periodic boundaries",
+      "density_dt": 2,
+      "density_dt_value": 0.1,
+      "kernel": 2,
+      "step_algorithm": 2,
+      "viscosity": 0.01
+    },
+    "density_kg_m3": 1000.0,
+    "event_window": {
+      "expected_first_contact_range_s": [
+        0.0,
+        10.0
+      ],
+      "right_censor_policy": "finite 10s run retains initial fluid denominator",
+      "sequence": [
+        "sloshing_initiation",
+        "baffle_interaction",
+        "stationary_settling"
+      ],
+      "time_end_s": 10.0,
+      "time_start_s": 0.0
+    },
+    "family_id": "F3",
+    "geometry": {
+      "tank": {
+        "label": "finite tank domain",
+        "low_m": [
+          -0.5,
+          -0.5,
+          -0.5
+        ],
+        "size_m": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    "geometry_family_id": "F3_CELL3_PLAIN",
+    "gravity_m_s2": [
+      0.0,
+      0.0,
+      -9.81
+    ],
+    "initial_state": {
+      "mass_policy": "native per-particle mass from BI4 header",
+      "source_regions": [
+        "fluid_block"
+      ],
+      "velocities_m_per_s": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "mechanism_id": "dual_axis_phase",
+    "parameters": {
+      "containment_bounds": "ax <= 0.06g, ay <= 0.04g",
+      "drive_mechanism": "dual_axis_phase"
+    },
+    "physical_case_id": "physical_F3_6c89b777037882a2",
+    "schema": "ds-data-02.physical-binding.v1"
+  },
+  "physical_case_id": "physical_F3_6c89b777037882a2",
+  "resolution": "medium",
+  "solver_dimension": 3,
+  "split": "train",
+  "target_role": "train",
+  "total_particles": 108000,
+  "wall_particles": 73440,
+  "written_at_utc": "2026-10-02T05:41:42.217901+00:00"
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+  "physical_mechanism": "pump_recirculation",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "intake_zone",
+      "bounds": [
+        [-0.35, 0.25],
+        [-0.55, -0.30],
+        [-1.05, 0.0]
+      ]
+    },
+    {
+      "id": "recirculation_zone",
+      "bounds": [
+        [-0.35, 0.25],
+        [-0.30, 0.35],
+        [-1.05, 0.0]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "intake_chamber",
+      "bounds": [
+        [-0.35, 0.25],
+        [-0.55, -0.30],
+        [-1.05, -0.45]
+      ]
+    },
+    {
+      "id": "recirculation_chamber",
+      "bounds": [
+        [-0.35, 0.25],
+        [-0.30, 0.35],
+        [-1.05, -0.45]
+      ]
+    },
+    {
+      "id": "discharge_channel",
+      "bounds": [
+        [-0.35, 0.25],
+        [-0.55, 0.35],
+        [-0.45, 0.05]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "impeller_entry_crossing",
+      "axis": 1,
+      "value": -0.30,
+      "aperture_bounds": [
+        [-0.25, 0.20],
+        [-0.95, -0.45]
+      ]
+    },
+    {
+      "id": "discharge_plane_crossing",
+      "axis": 2,
+      "value": -0.45,
+      "aperture_bounds": [
+        [-0.25, 0.20],
+        [-0.45, 0.25]
+      ]
+    },
+    {
+      "id": "impeller_shaft_crossing",
+      "axis": 0,
+      "value": -0.0576,
+      "aperture_bounds": [
+        [-0.45, 0.25],
+        [-0.95, -0.45]
+      ]
+    }
+  ],
+  "interpretation": "3D closed recirculation driven by rotating impeller in pump casing; partitioned into intake chamber, recirculation loop, and discharge channel",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times and cyclic recrossings",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

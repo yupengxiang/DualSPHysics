@@ -452,7 +452,7 @@ def _dual_xml(case: Mapping[str, Any]) -> str:
             <layers vdp="0,-1,-2" />
           </drawbox>
           <setmkfluid mk="0" />
-          <fillbox x="2.1" y="0.1" z="0.2">
+          <fillbox x="{_q(g.get("fillbox_seed_x_m", 2.1))}" y="0.1" z="0.2">
             <modefill>void</modefill>
             <point x="{_q(g["reservoir_start_x_m"] - g["fillbox_start_margin_m"])}" y="0" z="0" />
             <!-- Bracket the separator end and finite right wall.  The v5.4
@@ -600,9 +600,9 @@ def _case_geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]
         reservoir_length = float(values.get("reservoir_length_m", 1.12))
         h_ratio = float(values.get("h_ratio", 1.0))
         initial_depth = 0.55 * h_ratio
-        separator_start = 1.25
-        separator_end = separator_start + separator_length
         reservoir_start = tank_l - reservoir_length
+        separator_start = round(min(1.25, reservoir_start - separator_length - 0.05), 3)
+        separator_end = separator_start + separator_length
         if not (0.20 <= lower <= 0.60):
             raise ValueError("lower channel width is outside the resolvable design range")
         if not (0.04 <= thickness <= 0.10):
@@ -637,8 +637,9 @@ def _case_geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]
             # fillbox across both the separator end and the finite right
             # wall.  GenCase's void flood otherwise returns code 0 while
             # emitting no fluid particles.
-            "fillbox_start_margin_m": 0.108,
-            "fillbox_overrun_m": 0.172,
+            "fillbox_start_margin_m": max(0.108, (reservoir_start - separator_end) + 0.058),
+            "fillbox_overrun_m": max(0.172, (reservoir_start - separator_end) + 0.058 + 0.064),
+            "fillbox_seed_x_m": round((reservoir_start + tank_l) / 2.0, 3),
             "initial_fluid_volume_m3": reservoir_length * tank_w * initial_depth,
             "finite_wall_faces": list(MOTHERS[background].wall_faces) + ["separator_top", "separator_sides"],
             "open_top": True,

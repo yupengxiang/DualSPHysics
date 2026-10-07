@@ -1,0 +1,78 @@
+{
+  "schema": "ds-data-02.static-event-config.v1",
+  "frame_kind": "fixed_solver_frame",
+  "coordinate_frame": "tank_attached_inertial",
+  "physical_mechanism": "simple_free_response",
+  "source_assignment": "initial_regions",
+  "source_regions": [
+    {
+      "id": "west_half",
+      "bounds": [
+        [0.0, 2.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "east_half",
+      "bounds": [
+        [2.0, 4.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "west_half",
+      "bounds": [
+        [0.0, 2.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "east_half",
+      "bounds": [
+        [2.0, 4.0],
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "midplane_exchange",
+      "axis": 0,
+      "value": 2.0,
+      "aperture_bounds": [
+        [0.0, 2.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "transverse_exchange",
+      "axis": 1,
+      "value": 1.0,
+      "aperture_bounds": [
+        [0.0, 4.0],
+        [0.0, 1.4]
+      ]
+    },
+    {
+      "id": "top_open_exit",
+      "axis": 2,
+      "value": 1.4,
+      "aperture_bounds": [
+        [0.0, 4.0],
+        [0.0, 2.0]
+      ]
+    }
+  ],
+  "interpretation": "3D floating body hydrostatic settling in 4.0m x 2.0m x 1.4m tank; partition at midplane x=2.0m (west/east) and y=1.0m (transverse); open top monitored at z=1.4m",
+  "limitations": [
+    "finite-aperture linear chord crossings identify first passage times",
+    "saved-frame interval linear chord intersection without artificial interpolation",
+    "zero model weights or learned surrogates"
+  ]
+}

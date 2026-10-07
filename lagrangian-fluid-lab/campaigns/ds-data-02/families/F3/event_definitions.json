@@ -32,9 +32,13 @@
   "finite_surfaces": [
     {
       "applies_to": [
-        "dual_axis_phase",
-        "eccentric_baffle_exchange"
+        "dual_axis_phase"
       ],
+      "aperture_bounds": [
+        [-0.09, 0.09],
+        [-0.05, 0.55]
+      ],
+      "axis": 0,
       "event_id": "left_right_exchange",
       "normal_in_tank_frame": [
         1.0,
@@ -42,12 +46,18 @@
         0.0
       ],
       "signed_direction": "left_to_right positive, right_to_left negative",
-      "surface": "x=0; y in [-0.09,0.09], z in [0,0.51], excluding solid baffle faces"
+      "surface": "x=0; y in [-0.09,0.09], z in [0,0.51]",
+      "value": 0.0
     },
     {
       "applies_to": [
         "dual_axis_phase"
       ],
+      "aperture_bounds": [
+        [-0.45, 0.45],
+        [-0.05, 0.55]
+      ],
+      "axis": 1,
       "event_id": "front_back_exchange",
       "normal_in_tank_frame": [
         0.0,
@@ -55,12 +65,18 @@
         0.0
       ],
       "signed_direction": "front_to_back positive, back_to_front negative",
-      "surface": "y=0; x in [-0.45,0.45], z in [0,0.51], finite wetted opening only"
+      "surface": "y=0; x in [-0.45,0.45], z in [0,0.51]",
+      "value": 0.0
     },
     {
       "applies_to": [
         "eccentric_baffle_exchange"
       ],
+      "aperture_bounds": [
+        [-0.005, 0.045],
+        [0.0, 0.30]
+      ],
+      "axis": 0,
       "event_id": "baffle_channel_entry",
       "normal_in_tank_frame": [
         1.0,
@@ -68,12 +84,18 @@
         0.0
       ],
       "signed_direction": "source compartment toward channel positive",
-      "surface": "upstream face of each finite channel; aperture bounds are geometry assets, never an infinite plane"
+      "surface": "upstream face of eccentric channel slit x=-0.012, y in [-0.005, 0.045], z in [0, 0.30]",
+      "value": -0.012
     },
     {
       "applies_to": [
         "eccentric_baffle_exchange"
       ],
+      "aperture_bounds": [
+        [-0.005, 0.045],
+        [0.0, 0.30]
+      ],
+      "axis": 0,
       "event_id": "baffle_channel_exit",
       "normal_in_tank_frame": [
         1.0,
@@ -81,13 +103,38 @@
         0.0
       ],
       "signed_direction": "channel toward destination compartment positive",
-      "surface": "downstream face of each finite channel; channel index is part of event key"
+      "surface": "downstream face of eccentric channel slit x=0.012, y in [-0.005, 0.045], z in [0, 0.30]",
+      "value": 0.012
+    },
+    {
+      "applies_to": [
+        "eccentric_baffle_exchange"
+      ],
+      "aperture_bounds": [
+        [-0.092, 0.092],
+        [0.30, 0.55]
+      ],
+      "axis": 0,
+      "event_id": "crest_overtop",
+      "normal_in_tank_frame": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "signed_direction": "left_to_right positive, right_to_left negative",
+      "surface": "crest overtop above solid baffle x=0, y in [-0.092, 0.092], z in [0.30, 0.508]",
+      "value": 0.0
     },
     {
       "applies_to": [
         "dual_axis_phase",
         "eccentric_baffle_exchange"
       ],
+      "aperture_bounds": [
+        [-0.45, 0.45],
+        [-0.09, 0.09]
+      ],
+      "axis": 2,
       "event_id": "top_open_exit",
       "normal_in_tank_frame": [
         0.0,
@@ -95,7 +142,8 @@
         1.0
       ],
       "signed_direction": "outward positive",
-      "surface": "finite top rim z=0.51; report legal open exit separately from closed-wall violation"
+      "surface": "finite top rim z=0.508; report legal open exit separately from closed-wall violation",
+      "value": 0.508
     }
   ],
   "locator": {

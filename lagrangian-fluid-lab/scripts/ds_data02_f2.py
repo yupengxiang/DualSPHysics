@@ -84,8 +84,8 @@ BACKGROUND_SPECS: dict[str, dict[str, Any]] = {
         "source_case": "W06_standard_slow_center",
         "receiver_y_m": 0.0,
         "receiver_x_m": 0.45,
-        "tray_y_m": -0.60,
-        "tray_width_m": 1.30,
+        "tray_y_m": -1.00,
+        "tray_width_m": 2.00,
         "description": "Finite 3-D cup rotates about its Y axis over a centred catch vessel; final angle is held for return and retention.",
     },
     "offset_spill": {
@@ -97,8 +97,8 @@ BACKGROUND_SPECS: dict[str, dict[str, Any]] = {
         "source_case": "W06_standard_offset_partial",
         "receiver_y_m": 0.22,
         "receiver_x_m": 0.45,
-        "tray_y_m": -0.60,
-        "tray_width_m": 1.30,
+        "tray_y_m": -1.00,
+        "tray_width_m": 2.00,
         "description": "The cup and source layers match center_catch; the receiver is displaced in Y and a finite expanded tray records spill.",
     },
 }
@@ -346,8 +346,8 @@ def _definition_xml(case: Mapping[str, Any]) -> str:
     <mkconfig boundcount="220" fluidcount="16" />
     <geometry>
       <definition dp="{_q(dp)}">
-        <pointmin x="-0.80" y="-0.80" z="-0.45" />
-        <pointmax x="2.30" y="1.05" z="1.80" />
+        <pointmin x="-1.40" y="-1.20" z="-0.55" />
+        <pointmax x="3.00" y="1.20" z="2.25" />
       </definition>
       <commands>
         <mainlist>
@@ -369,9 +369,9 @@ def _definition_xml(case: Mapping[str, Any]) -> str:
           </drawbox>
           <setmkbound mk="2" />
           <drawbox>
-            <boxfill>bottom</boxfill>
-            <point x="-0.60" y="{_q(tray_y)}" z="-0.20" />
-            <size x="2.60" y="{_q(tray_width)}" z="0.10" />
+            <boxfill>bottom | left | right | front | back</boxfill>
+            <point x="-1.20" y="{_q(tray_y)}" z="-0.20" />
+            <size x="4.00" y="{_q(tray_width)}" z="0.15" />
             <layers vdp="0,1,2" />
           </drawbox>
           <setmkfluid mk="0" />
@@ -407,8 +407,8 @@ def _definition_xml(case: Mapping[str, Any]) -> str:
     <parameters>
 {p}
       <simulationdomain>
-        <posmin x="-0.70" y="-0.75" z="-0.40" />
-        <posmax x="2.20" y="1.00" z="1.80" />
+        <posmin x="-1.40" y="-1.20" z="-0.50" />
+        <posmax x="3.00" y="1.20" z="2.20" />
       </simulationdomain>
     </parameters>
   </execution>
@@ -568,7 +568,7 @@ def _geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("cup_width_m is outside the W06-derived range")
     fluid_height = 0.33 * h_ratio
     return {
-        "domain_extent_m": [3.10, 1.85, 2.25],
+        "domain_extent_m": [4.00, 2.00, 2.70],
         "cup_low_m": [0.0, -0.15, 0.65],
         "cup_size_m": [cup_width, 0.30, 0.45],
         "cup_width_m": cup_width,
@@ -576,15 +576,15 @@ def _geometry(background: str, values: Mapping[str, Any]) -> dict[str, Any]:
         "receiver_size_m": [1.10, 0.60, 0.45],
         "receiver_x_m": receiver_x,
         "receiver_y_m": receiver_y,
-        "tray_low_m": [-0.60, tray_y, -0.20],
-        "tray_size_m": [2.60, tray_width, 0.10],
+        "tray_low_m": [-1.20, tray_y, -0.20],
+        "tray_size_m": [4.00, tray_width, 0.15],
         "tray_y_m": tray_y,
         "tray_width_m": tray_width,
         "fluid_low_m": [0.05, -0.11, 0.70],
         "fluid_height_m": fluid_height,
         "fluid_volume_m3": (cup_width - 0.10) * 0.22 * fluid_height,
         "initial_layer_count": 3,
-        "finite_wall_faces": ["cup_bottom", "cup_left", "cup_right", "cup_front", "cup_back", "receiver_bottom", "receiver_left", "receiver_right", "receiver_front", "receiver_back", "tray_bottom"],
+        "finite_wall_faces": ["cup_bottom", "cup_left", "cup_right", "cup_front", "cup_back", "receiver_bottom", "receiver_left", "receiver_right", "receiver_front", "receiver_back", "tray_bottom", "tray_left", "tray_right", "tray_front", "tray_back"],
         "open_boundary_faces": ["world_top"],
         "motion_axis": "+Y from axisp1=(0,-1,0.65) to axisp2=(0,1,0.65); native mvrotfile sign retained",
     }
@@ -1364,11 +1364,15 @@ def write_runner_requests(family_dir: str | Path, *, launch_commit: str | None =
     history_path = family / "history_reuse_inventory.json"
     rows = matrix["matrix"]
     requests: dict[str, str] = {}
-    for background, filename, attempt_id, threads in (
-        ("center_catch", "gencase_center_request.json", "gencase-f2-center-coarse-v1", 4),
-        ("offset_spill", "gencase_offset_request.json", "gencase-f2-offset-coarse-v1", 4),
+    for background, resolution, filename, attempt_id, threads in (
+        ("center_catch", "coarse", "gencase_center_request.json", "gencase-f2-center-coarse-v1", 4),
+        ("center_catch", "medium", "gencase_center_medium_request.json", "gencase-f2-center-medium-v1", 4),
+        ("center_catch", "fine", "gencase_center_fine_request.json", "gencase-f2-center-fine-v1", 4),
+        ("offset_spill", "coarse", "gencase_offset_request.json", "gencase-f2-offset-coarse-v1", 4),
+        ("offset_spill", "medium", "gencase_offset_medium_request.json", "gencase-f2-offset-medium-v1", 4),
+        ("offset_spill", "fine", "gencase_offset_fine_request.json", "gencase-f2-offset-fine-v1", 4),
     ):
-        row = next(item for item in rows if item["background"] == background and item["resolution"] == "coarse")
+        row = next(item for item in rows if item["background"] == background and item["resolution"] == resolution)
         request = _gencase_request(family=family, row=row, history_path=history_path, attempt_id=attempt_id, threads=threads, storage=256 * 1024 * 1024)
         if launch_commit:
             request["launch_commit"] = launch_commit

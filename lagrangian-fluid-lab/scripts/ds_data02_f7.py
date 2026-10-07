@@ -1022,17 +1022,17 @@ def _solver_cost_estimate(total_particles: int, *, frames: int = 601) -> dict[st
 
 def emit_solver_requests(family_dir: Path, receipt_paths: Iterable[Path],
                          attempt_number: int = 1) -> list[Path]:
-    """Bind six qualification requests to actual reference GenCase outputs."""
+    """Bind qualification/solver requests to actual GenCase outputs."""
     family_dir = Path(family_dir).resolve()
     materialize(family_dir)
-    specs = {spec.case_id: spec for spec in reference_specs()}
+    specs = {spec.case_id: spec for spec in _all_specs()}
     requests: list[Path] = []
     for receipt_path in receipt_paths:
         receipt_path = Path(receipt_path).resolve()
         receipt = json.loads(receipt_path.read_text())
         case_id = receipt.get("request", {}).get("case_id")
         if case_id not in specs:
-            raise ValueError(f"solver request requires a reference receipt: {case_id}")
+            raise ValueError(f"solver request requires a valid case receipt: {case_id}")
         spec = specs[case_id]
         output = Path(receipt.get("output_root", "")).resolve()
         prefix = output / case_id
@@ -1040,10 +1040,14 @@ def emit_solver_requests(family_dir: Path, receipt_paths: Iterable[Path],
         xml = prefix.with_suffix(".xml")
         if not bi4.is_file() or not xml.is_file():
             raise FileNotFoundError(f"actual GenCase prefix is incomplete: {prefix}")
-        source_control = family_dir / "reference/controls" / f"{case_id}_motion.csv"
-        source_definition = family_dir / "reference/definitions" / f"{case_id}_Def.xml"
+        if spec.registry_kind == "legacy_view":
+            root = family_dir / "archive/legacy_views"
+        else:
+            root = family_dir / spec.registry_kind
+        source_control = root / "controls" / f"{case_id}_motion.csv"
+        source_definition = root / "definitions" / f"{case_id}_Def.xml"
         if not source_control.is_file() or not source_definition.is_file():
-            raise FileNotFoundError(f"reference input is missing for {case_id}")
+            raise FileNotFoundError(f"input is missing for {case_id}")
         control_copy = output / f"{case_id}_motion.csv"
         copy_if_needed(source_control, control_copy)
         stdout = output / "stdout.log"
@@ -1061,7 +1065,7 @@ def emit_solver_requests(family_dir: Path, receipt_paths: Iterable[Path],
             "schema": "ds02.runner-request.v2", "family_id": "F7", "case_id": case_id,
             "attempt_id": f"{case_id}_QUALIFICATION_{attempt_number:03d}",
             "physical_case_id": spec.physical_parent_id, "physical_parent_id": spec.physical_parent_id,
-            "registry_kind": "reference", "kind": "qualification",
+            "registry_kind": spec.registry_kind, "kind": "qualification",
             "command": [str(solver), str(prefix), "{attempt_root}/solver",
                          f"-tmax:{fmt(spec.time_max_s)}", f"-tout:{fmt(spec.time_out_s)}"],
             "cwd": str(output), "worktree_root": str(REPO),
@@ -1086,9 +1090,9 @@ def emit_solver_requests(family_dir: Path, receipt_paths: Iterable[Path],
                                 "source-zone exchange and residence", "first-passage and repeated-cycle crossing",
                                 "startup, stop/reverse and backflow", "typed identity mass ledger"],
                 "lifecycle_status": "finite_initial_fluid; solver must prove closed ledger or explicit open flux ledger",
-                "status": "candidate reference request; Q-I/Q-N pending solver evidence",
+                "status": f"candidate {spec.registry_kind} request; Q-I/Q-N pending solver evidence",
             },
-            "scientific_status": "raw 3-D reference candidate; no Q-I/Q-N/production claim",
+            "scientific_status": f"raw 3-D {spec.registry_kind} candidate; no Q-I/Q-N/production claim",
         }
         path = family_dir / "requests" / f"{case_id}-solver.json"
         write_json(path, request)
@@ -1097,7 +1101,7 @@ def emit_solver_requests(family_dir: Path, receipt_paths: Iterable[Path],
         "schema": "ds02.f7.solver-request-manifest.v1", "request_count": len(requests),
         "requests": [str(path.relative_to(family_dir)) for path in requests],
         "status": "ready_for_root_shared_runner; GPU/solver not started by this command",
-        "reference_matrix_rule": "same physical_parent_id across coarse/medium/fine; reference only",
+        "reference_matrix_rule": "qualification solver requests bound to actual GenCase receipts",
     })
     return requests
 

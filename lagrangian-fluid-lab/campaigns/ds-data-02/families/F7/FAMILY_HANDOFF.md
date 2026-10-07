@@ -10,4 +10,4 @@ Historical Pump evidence is diagnostic only: old D05 reported 12 missing identit
 
 Status: bounded GenCase evidence and six solver request plans only. No Q-I, Q-N or production claim is made. GPU/solver has not been started by this family.
 
-Generated at 2026-09-30T20:59:41.534453+00:00.
+Generated at 2026-10-01T08:23:36.711022+00:00.

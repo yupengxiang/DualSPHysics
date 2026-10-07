@@ -45,9 +45,9 @@ RESOLUTIONS: dict[str, float] = {"coarse": 0.04, "medium": 0.02, "fine": 0.01}
 # the historical domain minimum and makes low+dp/2 an exact lattice node.
 # Continuous wall/source coordinates remain those of the source XML.
 GRID_ORIGINS: dict[str, tuple[float, float, float]] = {
-    "coarse": (-0.8075, -0.82, -0.48),
-    "medium": (-0.8175, -0.81, -0.45),
-    "fine": (-0.8025, -0.805, -0.455),
+    "coarse": (-1.4075, -1.22, -0.56),
+    "medium": (-1.4175, -1.21, -0.55),
+    "fine": (-1.4025, -1.205, -0.555),
 }
 BACKGROUND_SOURCE = {
     "center_catch": SOURCE_ROOT / "F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml",
