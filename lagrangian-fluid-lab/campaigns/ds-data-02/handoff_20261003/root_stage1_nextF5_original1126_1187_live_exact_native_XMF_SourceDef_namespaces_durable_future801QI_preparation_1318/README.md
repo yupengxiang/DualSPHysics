@@ -1,0 +1,1 @@
+两个真实正在运行的原始 F5 全801渲染，预核各自 native / typed legacy / XMF / bed SourceDef 命名空间。1126 case_id含NEXT34后缀，native与XMF plan为canonical；1187 native plan实际缺失，XMF/bed plan为SourceDef FILE SHA。本包不声称渲染已完成或视觉通过，真实终结发布后执行准备好的独立QI入口，输出保留给Root1315/1316。不读取科学载荷、不启动新科学任务、不新增案例信用。
