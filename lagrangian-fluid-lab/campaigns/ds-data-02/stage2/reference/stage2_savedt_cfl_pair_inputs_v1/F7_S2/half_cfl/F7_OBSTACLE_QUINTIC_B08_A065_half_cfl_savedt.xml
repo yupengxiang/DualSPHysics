@@ -1,0 +1,157 @@
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="05-10-2026 00:51:28">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <rhopgradient value="2" />
+            <hswl value="0" auto="true" units_comment="m" />
+            <gamma value="7" />
+            <speedsystem value="0" auto="true" />
+            <coefsound value="30" />
+            <speedsound value="0" auto="true" />
+            <coefh value="0.91924" />
+            <cflnumber value="0.1" />
+        </constantsdef>
+        <mkconfig boundcount="240" fluidcount="9" />
+        <geometry>
+            <definition dp="0.02" units_comment="metres (m)">
+                <pointref x="0.00" y="0.00" z="0.00" />
+                <pointmin x="-0.68" y="-0.48" z="-0.08" />
+                <pointmax x="0.68" y="0.48" z="0.68" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>real | bound | dp</setshapemode>
+                    <setdrawmode mode="full" />
+                    <setmkbound mk="0" />
+                    <drawbox>
+                        <boxfill>bottom | left | right | front | back</boxfill>
+                        <point x="-0.6" y="-0.4" z="0" />
+                        <size x="1.2" y="0.8" z="0.6" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkbound mk="2" />
+                    <drawbox>
+                        <boxfill>all</boxfill>
+                        <point x="-0.07" y="-0.24" z="0.05" />
+                        <size x="0.06" y="0.48" z="0.48" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkfluid mk="1" />
+                    <drawbox cmt="Explicit native cell-center slab 0; declared physical wet region unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.54" y="-0.34" z="0.06" />
+                        <size x="0.460000001" y="0.680000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Explicit native cell-center slab 1; declared physical wet region unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="0.00" y="-0.34" z="0.06" />
+                        <size x="0.540000001" y="0.680000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Explicit native cell-center slab 2; declared physical wet region unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.06" y="-0.34" z="0.06" />
+                        <size x="0.040000001" y="0.080000001" z="0.420000001" />
+                    </drawbox>
+                    <drawbox cmt="Explicit native cell-center slab 3; declared physical wet region unchanged">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.06" y="0.26" z="0.06" />
+                        <size x="0.040000001" y="0.080000001" z="0.420000001" />
+                    </drawbox>
+                    <shapeout file="" />
+                </mainlist>
+            </commands>
+        </geometry>
+        <motion>
+            <objreal ref="2">
+                <begin mov="1" start="0" finish="12" />
+                <mvrotfile id="1" duration="12" anglesunits="degrees">
+                    <file name="motion_obstacle_quintic.dat" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotfile>
+            </objreal>
+        </motion>
+    </casedef>
+    <execution>
+        <parameters>
+            <parameter key="SavePosDouble" value="2" />
+            <parameter key="Boundary" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.05" />
+            <parameter key="DensityDT" value="3" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="12" units_comment="seconds" />
+            <parameter key="TimeOut" value="0.02" units_comment="seconds" />
+            <parameter key="PartsOutMax" value="1" comment="**DEPRECATED** " />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <parameter key="MinFluidStop" value="0" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="default - 150%" y="default - 150%" z="default - 150%" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="default + 150%" y="default + 150%" z="default + 150%" />
+            </simulationdomain>
+        </parameters>
+        <particles np="70179" nb="29479" nbf="27495" mkboundfirst="10" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="-0.64" y="-0.44" z="-0.04" />
+                    <posmax x="0.64" y="0.44" z="0.6" />
+                </positions>
+                <fixed count="27495" id="0-27494" mkcount="1" mkvalues="10" />
+                <moving count="1984" id="27495-29478" mkcount="1" mkvalues="12" />
+                <fluid count="40700" id="29479-70178" mkcount="1" mkvalues="2" />
+            </_summary>
+            <fixed mkbound="0" mk="10" begin="0" count="27495" />
+            <moving mkbound="2" mk="12" begin="27495" count="1984" refmotion="0" />
+            <fluid mkfluid="1" mk="2" begin="29479" count="40700" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.1" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.02" units_comment="metres (m)" />
+            <h value="0.031843407687" units_comment="metres (m)" />
+            <b value="554965.71429" units_comment="Pascal (Pa)" />
+            <massbound value="0.008" units_comment="kg" />
+            <massfluid value="0.008" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion>
+            <objreal ref="0">
+                <begin mov="1" start="0" finish="12" />
+                <mvrotfile id="1" duration="12" anglesunits="degrees">
+                    <file name="motion_obstacle_quintic.dat" />
+                    <axisp1 x="-0.04" y="0" z="0.05" />
+                    <axisp2 x="-0.04" y="0" z="1.05" />
+                </mvrotfile>
+            </objreal>
+        </motion>
+        <vtkout mkboundfirst="10" mkfluidfirst="1">
+            <vtkfile name="F7_OBSTACLE_QUINTIC_B08_A065__Dp.vtk" mk="10,12" mkbound="0,2" />
+            <vtkfile name="F7_OBSTACLE_QUINTIC_B08_A065__Actual.vtk" mk="10,12" mkbound="0,2" />
+        </vtkout>
+    <special>
+        <savedt active="true">
+            <start value="0" comment="per-step dt starts at initial time" />
+            <finish value="0" comment="official v5.4 zero means no finish limit" />
+            <interval value="0.01" comment="explicit positive interval" />
+            <fullinfo value="0" comment="compact statistics" />
+            <alldt value="1" comment="all final-step dt rows" />
+        </savedt>
+    </special>
+    </execution>
+</case>
