@@ -361,6 +361,12 @@ def run(profile: Mapping[str, Any], request: Mapping[str, Any], path_map: Mappin
         return result
     except ReplayV19AccessAuditViolation:
         raise
+    except ReplayV19BindingError as error:
+        # Preserve the Python-open log when metadata binding itself fails; a
+        # failed preflight is still useful evidence about which copied files
+        # were reached before the rejection.
+        error.audit = audit  # type: ignore[attr-defined]
+        raise
     finally:
         audit.deactivate()
 
@@ -388,8 +394,9 @@ def main() -> int:
     except (OSError, ReplayV19BindingError) as error:
         # Keep an immutable failure receipt for audit violations.  It is a new
         # destination and does not replace any prior v18/v19 result.
-        if isinstance(error, ReplayV19AccessAuditViolation):
-            failure = _failure_receipt(error, error.audit)
+        audit = getattr(error, "audit", None)
+        if audit is not None:
+            failure = _failure_receipt(error, audit)
             args.output.parent.mkdir(parents=True, exist_ok=True)
             with args.output.open("x", encoding="utf-8") as stream:
                 json.dump(failure, stream, indent=2, sort_keys=True, ensure_ascii=False)
