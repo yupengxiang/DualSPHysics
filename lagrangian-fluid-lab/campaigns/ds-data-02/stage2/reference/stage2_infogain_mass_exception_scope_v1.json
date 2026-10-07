@@ -1,0 +1,65 @@
+{
+  "schema": "ds02.stage2.infogain-mass-exception-scope.v1",
+  "status": "PRE_REGISTERED_MARGINAL_SCOPE_ONLY",
+  "policy_basis": {
+    "stage2_plan": {
+      "path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/review-source/STAGE2_PLAN_ZH.md",
+      "sha256": "441699535cb1670ca414be72a03047f534cea6970f5c48f7756194f249b14350",
+      "statement": "目标初始质量差≤1%、上限2%须在每族误差预算中预登记；不能事后改H5质量。"
+    },
+    "whole_initial_mass_gate": {
+      "target_abs_error_pct": 1.0,
+      "marginal_exception_interval_pct": "(1,2]",
+      "hard_fail_condition": ">2%",
+      "denominator": "frozen CURRENT discrete sample mass; continuum volume is not substituted",
+      "particle_mass_rescale": false,
+      "threshold_widening": false
+    },
+    "scope_boundary": "A marginal value may enter a separately named diagnostic or bounded review task only after the parent records why the whole-initial-mass impact is acceptable for that task. It does not grant matched-grid, QI, QN, QE, material, rigid-body, or observer credit."
+  },
+  "candidates": [
+    {
+      "sentinel_id": "F6-S1",
+      "family_id": "F6",
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025",
+      "candidate_label": "infogain_dp0p0215",
+      "candidate_dp_m": 0.0215,
+      "source_current_sample_mass_kg": 5120.0,
+      "candidate_sample_mass_kg": 5061.2963595,
+      "whole_initial_error_pct": -1.1465554785156406,
+      "status": "MARGINAL_1_TO_2PCT_REVIEW_ONLY",
+      "actual_audit_report": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_infogain_gencase_audit_v2.json",
+      "actual_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S1_SPATIAL_INFOGAIN_DP0p021500/f6-s1-spatial-infogain-dp0p021500-v4-primary-001/generated.xml",
+      "independent_rigid_contract": {
+        "massbody_kg": 128.0,
+        "center_m": [2.4, 1.2, 1.08],
+        "inertia_diag_kg_m2": [8.53333333333, 8.53333333333, 13.6533333333],
+        "sample_particle_count": 24642,
+        "source_sample_particle_count": 16384,
+        "interpretation": "XML body fields equal the source contract, while floating sample count/mass is a separate representation and remains a scientific matching unknown."
+      },
+      "allowed_use": ["bounded preparation diagnostic", "parent-reviewed marginal whole-initial-mass task with explicit impact budget"],
+      "forbidden_inference": ["matched reference", "automatic scientific PASS", "Σ floating sample mass = physical rigid body mass", "QI/QN/QE"]
+    },
+    {
+      "sentinel_id": "F7-S1",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+      "candidate_label": "infogain_dp0p0215",
+      "candidate_dp_m": 0.0215,
+      "source_current_sample_mass_kg": 325.6,
+      "candidate_sample_mass_kg": 320.810745,
+      "whole_initial_error_pct": -1.4709014127764204,
+      "status": "MARGINAL_1_TO_2PCT_REVIEW_ONLY",
+      "actual_audit_report": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_infogain_gencase_audit_v2.json",
+      "actual_generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_SPATIAL_INFOGAIN_DP0p021500/f7-s1-spatial-infogain-dp0p021500-v4-primary-001/generated.xml",
+      "motion_binding": {
+        "source_candidate_sha256": "2b607e700abaab4b687740b1a5a3535ce1cc3fee246cbd02d09ad596a722032f",
+        "status": "BYTE_IDENTICAL_SOURCE_BOUND"
+      },
+      "allowed_use": ["bounded preparation diagnostic", "parent-reviewed marginal whole-initial-mass task with explicit impact budget"],
+      "forbidden_inference": ["matched reference", "automatic scientific PASS", "QI/QN/QE"]
+    }
+  ],
+  "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+}

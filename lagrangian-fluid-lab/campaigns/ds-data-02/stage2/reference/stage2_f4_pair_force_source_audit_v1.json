@@ -1,0 +1,272 @@
+{
+  "schema": "ds02.stage2.f4-pair-force-source-audit.v1",
+  "status": "SOURCE_ALGEBRA_CONDITIONAL_ACTUAL_RESIDUAL_UNKNOWN",
+  "f4_xml_settings": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_dp0_savedt_pair_inputs_v1/same_cfl/F4_DROP_CENTERED_REFERENCE_001_DP010_same_cfl_savedt.xml",
+    "sha256": "b51f0b85f3777a38eea322064fd0121609051db308a2f74e6efcea46c566e010",
+    "parameters": {
+      "SavePosDouble": "0",
+      "StepAlgorithm": "1",
+      "VerletSteps": "40",
+      "Kernel": "2",
+      "ViscoTreatment": "1",
+      "Visco": "0.08",
+      "ViscoBoundFactor": "1",
+      "DensityDT": "2",
+      "DensityDTvalue": "0.1",
+      "Shifting": "0",
+      "RigidAlgorithm": "1",
+      "FtPause": "0",
+      "CoefDtMin": "0.05",
+      "DtIni": "0",
+      "DtMin": "0",
+      "DtFixed": "0",
+      "DtAllParticles": "0",
+      "TimeMax": "1.2",
+      "TimeOut": "0.001",
+      "MinFluidStop": "0",
+      "RhopOutMin": "700",
+      "RhopOutMax": "1300"
+    },
+    "constants": {
+      "dp": "0.01",
+      "h": "0.017320508076",
+      "massfluid": "0.001"
+    },
+    "expected_checks": {
+      "Kernel": true,
+      "ViscoTreatment": true,
+      "DensityDT": true,
+      "Shifting": true
+    }
+  },
+  "source": {
+    "configuration_mapping": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/src/source/JSph.cpp",
+      "bytes": 177192,
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7",
+      "line_anchors": {
+        "case 2:  TKernel=KERNEL_Wendland;": 632,
+        "case 1:  TVisco=VISCO_Artificial;": 687,
+        "case 2:  TDensity=DDT_DDT2;": 735,
+        "case 0:  shiftmode=SHIFT_None;": 747,
+        "CSP.kernelh       =KernelH;": 1509,
+        "CSP.massfluid     =MassFluid;": 1514
+      },
+      "source_presence": {
+        "case 2:  TKernel=KERNEL_Wendland;": true,
+        "case 1:  TVisco=VISCO_Artificial;": true,
+        "case 2:  TDensity=DDT_DDT2;": true,
+        "case 0:  shiftmode=SHIFT_None;": true,
+        "CSP.kernelh       =KernelH;": true,
+        "CSP.massfluid     =MassFluid;": true
+      }
+    },
+    "gpu_fluid_interaction": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/src/source/JSphGpu_ker.cu",
+      "bytes": 179426,
+      "sha256": "37a28cf2b19e55bc3c6784a0824319af09be9f7933a15ee7ec601b0b2d6aeb0e",
+      "line_anchors": {
+        "const float fac=cufsph::GetKernel_Fac<tker>(rr2);": 465,
+        "const float frx=fac*drx,fry=fac*dry,frz=fac*drz;": 466,
+        "const float prs=(pressp1+pressp2)/(velrhop1.w*velrhop2.w)": 594,
+        "const float p_vpm=-prs*(USE_FLOATING? ftmassp2: massp2);": 596,
+        "acep1.x+=p_vpm*frx;": 597,
+        "if((tdensity==DDT_DDT2": 668,
+        "if(shift && shiftposfsp1.x!=FLT_MAX)": 677,
+        "if(tvisco==VISCO_Artificial)": 734,
+        "const float pi_visc=(-visco*cbar*amubar/robar)*(USE_FLOATING? ftmassp2: massp2);": 738
+      },
+      "source_presence": {
+        "const float fac=cufsph::GetKernel_Fac<tker>(rr2);": true,
+        "const float frx=fac*drx,fry=fac*dry,frz=fac*drz;": true,
+        "const float prs=(pressp1+pressp2)/(velrhop1.w*velrhop2.w)": true,
+        "const float p_vpm=-prs*(USE_FLOATING? ftmassp2: massp2);": true,
+        "acep1.x+=p_vpm*frx;": true,
+        "if((tdensity==DDT_DDT2": true,
+        "if(shift && shiftposfsp1.x!=FLT_MAX)": true,
+        "if(tvisco==VISCO_Artificial)": true,
+        "const float pi_visc=(-visco*cbar*amubar/robar)*(USE_FLOATING? ftmassp2: massp2);": true
+      }
+    },
+    "wendland_gpu_kernel": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/src/source/FunSphKernel_iker.h",
+      "bytes": 10315,
+      "sha256": "3f28b6a843cd70f129e9c4134829a17407689f4147d71a1b5a9128649487e7a7",
+      "line_anchors": {
+        "return(bwenh*wqq1*wqq1*wqq1);": 122,
+        "fac=CTE.bwenh*wqq2*wqq1;": 135,
+        "return(GetKernelWendland_Fac(rr2,CTE.kernelh,CTE.bwenh));": 167
+      },
+      "source_presence": {
+        "return(bwenh*wqq1*wqq1*wqq1);": true,
+        "fac=CTE.bwenh*wqq2*wqq1;": true,
+        "return(GetKernelWendland_Fac(rr2,CTE.kernelh,CTE.bwenh));": true
+      }
+    },
+    "wendland_host_constants": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/src/source/FunSphKernel.h",
+      "bytes": 15068,
+      "sha256": "d769efded1874a0eb30d380d9ae367d16dc4536264cdcbdf75fb39d3cad598cc",
+      "line_anchors": {
+        "inline float GetKernelWendland_Factor(){ return(2.0f); }": 194,
+        "kc.bwenh=float(-2.08891/(h*h*h*h*h));": 206,
+        "return(kc.bwenh*wqq1*wqq1*wqq1);": 229
+      },
+      "source_presence": {
+        "inline float GetKernelWendland_Factor(){ return(2.0f); }": true,
+        "kc.bwenh=float(-2.08891/(h*h*h*h*h));": true,
+        "return(kc.bwenh*wqq1*wqq1*wqq1);": true
+      }
+    },
+    "gpu_constant_contract": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/src/source/JSphGpu_cte.h",
+      "bytes": 7748,
+      "sha256": "8a535319956ee29d5b446e0ec11676c2f0ea6f5e8edc4ab3008e19824a7e1c66",
+      "line_anchors": {
+        "float massf;": 29,
+        "float kernelh;": 30,
+        "float kernelsize2;": 31,
+        "inline void SetCtegMass(StCteInteraction& cte,float massb,float massf)": 68,
+        "cte.kernelh=kernelh;": 79
+      },
+      "source_presence": {
+        "float massf;": true,
+        "float kernelh;": true,
+        "float kernelsize2;": true,
+        "inline void SetCtegMass(StCteInteraction& cte,float massb,float massf)": true,
+        "cte.kernelh=kernelh;": true
+      }
+    }
+  },
+  "formula_scope": {
+    "pressure": "For fluid-fluid pair with a single run-wide h and symmetric Wendland gradient, source lines 592-598 use S=(p_i+p_j)/(rho_i rho_j), a_i=-S*m_j*gradW(r_i-r_j); reversed pair uses a_j=+S*m_i*gradW. Nonuniform p/rho remain in a symmetric coefficient.",
+    "artificial_viscosity": "For approaching fluid-fluid pair, source lines 731-740 use dot=(r_i-r_j)·(v_i-v_j), symmetric rhobar and amubar, then multiply each acceleration by the other particle mass. The same reversed-gradient argument gives pair momentum cancellation under the same h and symmetric iteration assumptions.",
+    "density_dt2": "Source lines 667-673 update deltap1 only; DDT2 is density diffusion and is not itself a pressure/viscosity momentum term.",
+    "shifting0": "The XML mapping selects SHIFT_None and the acceleration/position correction block is conditional on shift; this audit does not treat shifting as an active force.",
+    "boundary_and_external_terms": "The proof is fluid-fluid only and excludes boundaries, floating/DEM/Chrono, external acceleration and asymmetric neighbor participation. F4 precontact spatial gates are separate evidence."
+  },
+  "manufactured_pair_tests": {
+    "nonuniform_pressure_and_density": {
+      "inputs": {
+        "p_i": 123.0,
+        "p_j": 77.0,
+        "rho_i": 998.0,
+        "rho_j": 1042.0,
+        "m_i": 0.002,
+        "m_j": 0.003
+      },
+      "result": {
+        "gradient": [
+          -3709490.0083885114,
+          -0.0,
+          -0.0
+        ],
+        "pressure_coefficient": 0.000192323226106724,
+        "acceleration_i": [
+          2.1402632568718114,
+          0.0,
+          0.0
+        ],
+        "acceleration_j": [
+          -1.4268421712478743,
+          -0.0,
+          -0.0
+        ],
+        "momentum_residual": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "momentum_residual_norm": 0.0,
+        "unit_mass_shortcut_residual": [
+          -0.7134210856239369,
+          0.0,
+          0.0
+        ],
+        "unit_mass_shortcut_residual_norm": 0.7134210856239369
+      },
+      "status": "PASS_ALGEBRAIC_SYMMETRY_UNDER_NONUNIFORM_PRESSURE_RHO"
+    },
+    "nonunit_unequal_mass": {
+      "inputs": {
+        "m_i": 0.002,
+        "m_j": 0.003,
+        "unit_mass_shortcut": "same reference mass on both accelerations"
+      },
+      "exact_source_result": {
+        "gradient": [
+          -3709490.0083885114,
+          -0.0,
+          -0.0
+        ],
+        "pressure_coefficient": 0.000192323226106724,
+        "acceleration_i": [
+          2.1402632568718114,
+          0.0,
+          0.0
+        ],
+        "acceleration_j": [
+          -1.4268421712478743,
+          -0.0,
+          -0.0
+        ],
+        "momentum_residual": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "momentum_residual_norm": 0.0,
+        "unit_mass_shortcut_residual": [
+          -0.7134210856239369,
+          0.0,
+          0.0
+        ],
+        "unit_mass_shortcut_residual_norm": 0.7134210856239369
+      },
+      "status": "PASS_OTHER_PARTICLE_MASS_WEIGHTING; REJECT_UNIT_MASS_SHORTCUT"
+    },
+    "artificial_viscosity_nonuniform_state": {
+      "dot": -0.0016,
+      "rho_bar": 1020.0,
+      "pi_without_mass": 0.0011439757655910322,
+      "momentum_residual": [
+        6.938893903907228e-18,
+        0.0,
+        0.0
+      ],
+      "momentum_residual_norm": 6.938893903907228e-18,
+      "status": "PASS_MASS_WEIGHTED_ARTIFICIAL_VISCOSITY_PAIR"
+    },
+    "asymmetric_h": {
+      "h_i_m": 0.017320508076,
+      "h_j_m": 0.013,
+      "gradient_i": [
+        -3709490.0083885114,
+        -0.0,
+        -0.0
+      ],
+      "gradient_j_reversed_pair_magnitude": [
+        -13633612.85004246,
+        -0.0,
+        -0.0
+      ],
+      "momentum_residual": [
+        -0.0114518359271179,
+        0.0,
+        0.0
+      ],
+      "momentum_residual_norm": 0.0114518359271179,
+      "status": "REJECT_ASYMMETRIC_H_OUTSIDE_SINGLE_CTE_KERNEL_CONTRACT"
+    }
+  },
+  "interpretation": {
+    "source_supported_premise": "CONDITIONAL: equal run-wide h, constant fluid particle mass, symmetric pair participation, fluid-fluid only, and no active external/boundary term imply algebraic pair momentum cancellation for the shown pressure/artificial-viscosity terms.",
+    "actual_run_status": "UNKNOWN: selected native fields do not expose per-pair acceleration residual, and this source audit does not replace the bounded observer read.",
+    "no_scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
