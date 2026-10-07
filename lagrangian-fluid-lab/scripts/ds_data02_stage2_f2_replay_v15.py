@@ -64,9 +64,6 @@ def _as_v14_request(request: Mapping[str, Any]) -> dict[str, Any]:
     # adapter; the v15 request itself records the physical timing/angle
     # semantics without the old conflict claim.
     control = view.get("motion_control")
-    if isinstance(control, dict) and "case_name_angle_conflict" not in control:
-        control["case_name_angle_conflict"] = (
-            "legacy-v14-compatibility-only; use source metadata rotation duration/stop/angle")
     # v14 also called the four-second table coverage a motion duration.  Its
     # validator is immutable, so preserve that view while v15 exposes the
     # distinct rotation_duration_s and table_coverage_s fields.
@@ -196,6 +193,26 @@ def validate_motion_completion_contract(request: Mapping[str, Any]) -> dict[str,
             not math.isclose(hold_start, 0.5, rel_tol=0.0, abs_tol=1e-12) or
             not math.isclose(final_angle, -105.0, rel_tol=0.0, abs_tol=1e-12)):
         raise ReplayV15BindingError("source metadata rotation semantics differ")
+    expected_control = {
+        "rotation_duration_s": rotation_duration,
+        "rotation_hold_start_s": hold_start,
+        "rotation_stop_s": rotation_stop,
+        "table_coverage_s": [float(xml_semantics["begin_start_s"]), float(xml_semantics["finish_s"])],
+    }
+    for key, expected in expected_control.items():
+        actual = control.get(key)
+        if isinstance(expected, list):
+            if (not isinstance(actual, list) or len(actual) != len(expected) or
+                    any(not math.isclose(float(a), float(b), rel_tol=0.0, abs_tol=1e-12)
+                        for a, b in zip(actual, expected))):
+                raise ReplayV15BindingError(f"motion_control.{key} differs from source-bound metadata")
+        else:
+            try:
+                matches = math.isclose(float(actual), float(expected), rel_tol=0.0, abs_tol=1e-12)
+            except (TypeError, ValueError):
+                matches = False
+            if not matches:
+                raise ReplayV15BindingError(f"motion_control.{key} differs from source-bound metadata")
     receipt_support: dict[str, Any] = {}
     for role in ("gencase_receipt", "solver_receipt"):
         item = by_role.get(role)
