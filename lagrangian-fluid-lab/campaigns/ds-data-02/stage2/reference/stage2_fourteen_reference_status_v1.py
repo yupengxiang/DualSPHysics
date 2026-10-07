@@ -145,8 +145,9 @@ def compact_spatial(row: dict[str, Any]) -> dict[str, Any]:
 def request_status(pair_rows: list[dict[str, Any]], sentinel_id: str) -> dict[str, Any]:
     rows = [row for row in pair_rows if row.get("sentinel_id") == sentinel_id]
     result: dict[str, Any] = {}
-    for mode in ("original_same_cfl_dense", "original_half_cfl_dense"):
-        match = [row for row in rows if row.get("mode") == mode]
+    for mode, manifest_mode in (("original_same_cfl_dense", "same_cfl"),
+                                ("original_half_cfl_dense", "half_cfl")):
+        match = [row for row in rows if row.get("mode") == manifest_mode]
         if len(match) == 1:
             row = match[0]
             path = Path(row["request_path"])
