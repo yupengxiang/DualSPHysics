@@ -470,8 +470,15 @@ def test_v13_portable_relocation_hashes_small_sources_and_rejects_mutations(tmp_
         "producer_declared_sha256": "a" * 64,
         "hash_mode": "producer_attested_only_no_content_hash",
     }
+    request["portable_migration"] = {
+        "expected_trajectory_content_sha256": hashlib.sha256(original_h5.read_bytes()).hexdigest(),
+    }
     migrated = relocate_source_bound_request(request, {
         "motion_dat": str(moved), "trajectory_h5": str(relocated_h5)})
     assert migrated["trajectory_h5"]["path"] == str(relocated_h5.resolve())
     assert migrated["trajectory_h5"]["mtime_ns"] == relocated_h5.stat().st_mtime_ns
     assert migrated["relocation"]["trajectory_h5"]["producer_declared_sha256"] == "a" * 64
+    wrong_h5 = tmp_path / "relocated" / "same-size-wrong.h5"
+    altered_h5 = bytearray(original_h5.read_bytes()); altered_h5[0] ^= 1; wrong_h5.write_bytes(altered_h5)
+    with pytest.raises(ReplayV13BindingError, match="content SHA-256"):
+        relocate_source_bound_request(request, {"trajectory_h5": str(wrong_h5)})

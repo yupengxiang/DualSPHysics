@@ -3,7 +3,8 @@
 
 Small source files are copied and SHA-256 checked.  Copying trajectory HDF5
 is an explicit parent-guard action and requires both ``--copy-hdf5`` and
-``--io-slot-approved``; the default operation never touches HDF5 content.
+``--io-slot-approved``; a copied HDF5 is content-hashed against the bound
+portable migration digest before the path overlay is emitted.
 """
 from __future__ import annotations
 
@@ -55,20 +56,32 @@ def main() -> int:
                         "relocated_path": str(destination.resolve()),
                         "sha256": expected, "bytes": destination.stat().st_size})
     h5 = request.get("trajectory_h5")
-    h5_record: dict[str, Any] = {"status": "NOT_COPIED; parent HDF5 slot required"}
+    migration = request.get("portable_migration")
+    h5_record: dict[str, Any] = {"status": "NOT_COPIED; parent HDF5 slot required",
+                                 "content_hash_verified": False}
     if args.copy_hdf5:
+        if not isinstance(migration, dict) or not isinstance(migration.get("expected_trajectory_content_sha256"), str):
+            parser.error("request portable_migration content SHA is required before copying HDF5")
         original = Path(h5["path"])
         destination = args.bundle_root / "trajectory.h5"
         if original.stat().st_size != int(h5["bytes"]):
             parser.error("original HDF5 byte size differs from request")
+        expected_content = str(migration["expected_trajectory_content_sha256"])
+        if sha256(original) != expected_content:
+            parser.error("original HDF5 content SHA differs from migration contract")
         shutil.copyfile(original, destination)
         if destination.stat().st_size != int(h5["bytes"]):
             parser.error("copied HDF5 byte size differs")
+        actual_content = sha256(destination)
+        if actual_content != expected_content:
+            parser.error("copied HDF5 content SHA differs from migration contract")
         mapping["trajectory_h5"] = str(destination.resolve())
-        h5_record = {"status": "COPIED_PRODUCER_ATTESTED_NO_CONTENT_HASH",
+        h5_record = {"status": "COPIED_AND_CONTENT_HASH_VERIFIED",
                      "original_path": str(original), "relocated_path": str(destination.resolve()),
                      "bytes": destination.stat().st_size,
                      "producer_declared_sha256": h5["producer_declared_sha256"],
+                     "content_sha256": actual_content,
+                     "content_hash_verified": True,
                      "original_mtime_ns": original.stat().st_mtime_ns,
                      "relocated_mtime_ns": destination.stat().st_mtime_ns}
     path_map = {

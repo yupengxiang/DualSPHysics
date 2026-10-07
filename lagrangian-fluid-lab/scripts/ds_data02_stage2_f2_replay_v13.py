@@ -280,12 +280,10 @@ def relocate_source_bound_request(request: Mapping[str, Any],
     """Relocate a request after revalidating every portable source hash.
 
     Small source files are content-verified at their new paths.  Their old
-    absolute paths and mtimes are provenance, not identity.  The trajectory
-    HDF5 remains producer-attested in this package, so relocation verifies its
-    bytes and producer declaration, then records the new mtime explicitly;
-    the HDF5 is still not content-hashed by this helper.  A later strict
-    validator can therefore distinguish a normal local stat check from an
-    explicit, hash-backed migration.
+    absolute paths and mtimes are provenance, not identity.  A trajectory HDF5
+    relocation additionally requires the explicit portable migration digest
+    and hashes the copied bytes, so a same-size wrong-content copy is rejected
+    even when its mtime is valid.
     """
     if not isinstance(request, Mapping) or not isinstance(path_map, Mapping):
         raise ReplayV13BindingError("request and path_map must be mappings")
@@ -335,13 +333,25 @@ def relocate_source_bound_request(request: Mapping[str, Any],
                                 "trajectory_h5.producer_declared_sha256")
         if h5_binding.get("hash_mode") != "producer_attested_only_no_content_hash":
             raise ReplayV13BindingError("trajectory HDF5 relocation requires producer-attested-only hash mode")
+        migration_contract = relocated.get("portable_migration")
+        if not isinstance(migration_contract, Mapping):
+            raise ReplayV13BindingError("HDF5 relocation requires an explicit portable_migration contract")
+        expected_content = _require_sha(
+            migration_contract.get("expected_trajectory_content_sha256"),
+            "portable_migration.expected_trajectory_content_sha256")
+        actual_content = sha256(new_h5)
+        if actual_content != expected_content:
+            raise ReplayV13BindingError("relocated trajectory HDF5 content SHA-256 differs")
         old_stat = old_h5.stat() if old_h5.is_file() else None
         new_stat = new_h5.stat()
         h5_binding["path"] = str(new_h5.resolve())
         h5_binding["mtime_ns"] = new_stat.st_mtime_ns
+        h5_binding["content_sha256"] = actual_content
         relocation["trajectory_h5"] = {
             "original_path": str(old_h5), "relocated_path": str(new_h5.resolve()),
             "bytes": new_stat.st_size, "producer_declared_sha256": producer,
+            "content_sha256": actual_content,
+            "content_hash_verified": True,
             "original_mtime_ns": None if old_stat is None else old_stat.st_mtime_ns,
             "relocated_mtime_ns": new_stat.st_mtime_ns,
         }
