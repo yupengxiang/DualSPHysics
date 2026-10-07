@@ -30,12 +30,12 @@ EXPECTED_F2_V15_REPORT_SHA256 = (
 )
 F2_ENDPOINT_SCOPE = "F2_S1_INITIAL_OUTSIDE_HALFSPACE_LATER_MISSING_ENDPOINTS_ONLY"
 EXPECTED_F2_SOURCE_BINDING = {
-    "current_catalog_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
-    "trajectory_h5_producer_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "current_catalog": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
     "initial_csv": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e",
     "generated_xml": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
     "motion_dat": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
 }
+EXPECTED_F2_H5_SHA256 = "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d"
 
 
 class FluxV16BindingError(ValueError):
@@ -218,6 +218,8 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
             raise FluxV16BindingError(
                 f"source binding {source_role} is not the frozen F2 endpoint contract"
             )
+    if source_binding.get("trajectory_h5_producer_sha256") != EXPECTED_F2_H5_SHA256:
+        raise FluxV16BindingError("source binding trajectory H5 is not the frozen F2 endpoint contract")
     case_identity = report.get("case_identity")
     if not isinstance(case_identity, Mapping) or case_identity.get("family_id") != "F2":
         raise FluxV16BindingError("the strict endpoint scope is only supported for F2")
