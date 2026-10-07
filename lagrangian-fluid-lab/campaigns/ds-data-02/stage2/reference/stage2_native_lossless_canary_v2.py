@@ -324,8 +324,8 @@ def build_request(output_dir: Path, manifest_path: Path) -> None:
             "scientific_qualification": "UNKNOWN",
         },
     }
-    atomic_json(output_dir / "stage2-native-lossless-canary-v1.json", request)
-    print(json.dumps({"status": "PASS", "request": str(output_dir / "stage2-native-lossless-canary-v1.json"), "inputs": len(unique), "source_bytes": manifest["source_total_bytes"]}, ensure_ascii=False))
+    atomic_json(output_dir / "stage2-native-lossless-canary-v2.json", request)
+    print(json.dumps({"status": "PASS", "request": str(output_dir / "stage2-native-lossless-canary-v2.json"), "inputs": len(unique), "source_bytes": manifest["source_total_bytes"]}, ensure_ascii=False))
 
 
 def main() -> int:
