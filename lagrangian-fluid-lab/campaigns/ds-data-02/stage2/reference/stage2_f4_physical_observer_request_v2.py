@@ -255,6 +255,23 @@ def path_list(base_request: dict[str, Any]) -> tuple[list[str], dict[str, str]]:
     return [str(path) for path in paths], hashes
 
 
+def inherited_source_bi4_record(path: Path, input_hashes: dict[str, str]) -> dict[str, Any]:
+    """Carry forward the already verified GenCase BI4 digest without rereading it."""
+    resolved = str(path.resolve())
+    digest = input_hashes.get(resolved)
+    if not digest:
+        raise ValueError(f"source BI4 has no inherited content digest: {path}")
+    stat = path.stat()
+    return {
+        "path": resolved,
+        "bytes": stat.st_size,
+        "mtime_ns": stat.st_mtime_ns,
+        "sha256": digest,
+        "hash_source": "inherited_from_source_bound_savedt_request",
+        "payload_read_by_preparation": False,
+    }
+
+
 def build() -> tuple[dict[str, Any], dict[str, Any]]:
     base = load_json(PAIR_REQUEST)
     receipt = load_json(RECEIPT)
@@ -320,7 +337,7 @@ def build() -> tuple[dict[str, Any], dict[str, Any]]:
             "effective_solver_xml": record(OVERLAY_XML),
             "physical_source_xml": record(GENERATED_XML),
             "source_gencase_receipt": record(GENCASE_RECEIPT),
-            "source_gencase_bi4": record(GENERATED_BI4),
+            "source_gencase_bi4": inherited_source_bi4_record(GENERATED_BI4, input_hashes),
             "solver_receipt": record(RECEIPT),
             "runparts": record(RUNPARTS),
             "runout": record(RUNOUT),
