@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.batch-recovery.v1",
+  "observed_at_utc": "2026-10-07T17:34:59.444117+00:00",
+  "reason": "Tool handles missing; independent ps verified both batch parents and all stage2 dispatch/scan processes absent. F2 terminal interrupted; F4 batch stale running while active worker receipt terminal failed KeyboardInterrupt SIGTERM.",
+  "old_batches": [
+    {
+      "name": "stage2-F2-science-001",
+      "completed": 28,
+      "failed": 1,
+      "skipped": 18,
+      "status": "interrupted"
+    },
+    {
+      "name": "stage2-F4-science-001",
+      "completed": 24,
+      "worker_scan_F4_168_status": "failed interrupted by launcher signal 15",
+      "batch_status": "stale running; original bytes preserved"
+    }
+  ],
+  "ledger_reservations_after_shutdown": [],
+  "new_attempt_requests": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/science/F2/scan-F2-076-002.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/science/F4/scan-F4-168-002.json"
+  ],
+  "next_resource_schedule": [
+    "F2 remaining 19 requests at one worker",
+    "F6 original prepared 48 requests at one worker",
+    "F4 remaining 24 requests prepared; wait for either scientific I/O slot"
+  ],
+  "persistence_strategy": "Detach existing guarded batch runner into its own session with log files and recorded PID/start ticks. Runtime child remains bound to batch parent death. No solver/learning process.",
+  "restart_basis": "Actual parent/worker absence and terminal worker receipt, not observation timeout."
+}
