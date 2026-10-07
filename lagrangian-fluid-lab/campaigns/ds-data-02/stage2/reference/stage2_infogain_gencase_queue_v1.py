@@ -41,9 +41,9 @@ def record(path: Path) -> dict[str, object]:
     return {"path": str(path.resolve()), "bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns, "sha256": sha256(path)}
 
 
-def atomic_bytes(path: Path, data: bytes) -> None:
+def atomic_bytes(path: Path, data: bytes, *, replace: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
+    if path.exists() and not replace:
         raise FileExistsError(path)
     fd, name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     try:
@@ -57,8 +57,8 @@ def atomic_bytes(path: Path, data: bytes) -> None:
             os.unlink(name)
 
 
-def atomic_json(path: Path, value: object) -> None:
-    atomic_bytes(path, (json.dumps(value, indent=2, ensure_ascii=False) + chr(10)).encode("utf-8"))
+def atomic_json(path: Path, value: object, *, replace: bool = False) -> None:
+    atomic_bytes(path, (json.dumps(value, indent=2, ensure_ascii=False) + chr(10)).encode("utf-8"), replace=replace)
 
 
 def replace_definition_dp(text: str, dp: str) -> tuple[str, str, str]:
@@ -172,7 +172,7 @@ def make_candidate(spec: dict[str, object]) -> tuple[dict[str, object], Path]:
         builder_path = str(Path(__file__).resolve())
         if mismatches == {builder_path} and existing.get("command") == request.get("command"):
             existing_hashes[builder_path] = expected_hashes[builder_path]
-            atomic_json(request_path, existing)
+            atomic_json(request_path, existing, replace=True)
             return existing, request_path
         if mismatches or existing.get("command") != request.get("command"):
             raise ValueError(f"existing request differs from deterministic candidate: {request_path}")
