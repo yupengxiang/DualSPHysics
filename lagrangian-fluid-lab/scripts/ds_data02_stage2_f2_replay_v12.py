@@ -1451,12 +1451,13 @@ def flux(times: np.ndarray, distance: np.ndarray, valid: np.ndarray, masses: np.
         net_mass = float((int(end_inside) - int(start_inside)) * frozen_mass)
         net_status = "EXACT_ENDPOINT_MEMBERSHIP"
     elif frozen_mass is not None:
-        if first_known is not None:
-            start_inside = bool(distance[first_known] >= 0)
+        start_endpoint_known, end_endpoint_known = bool(known[0]), bool(known[-1])
+        if start_endpoint_known and not end_endpoint_known:
+            start_inside = bool(distance[0] >= 0)
             net_interval = [float(-frozen_mass if start_inside else 0.0),
                             float(0.0 if start_inside else frozen_mass)]
-        elif last_known is not None:
-            end_inside = bool(distance[last_known] >= 0)
+        elif not start_endpoint_known and end_endpoint_known:
+            end_inside = bool(distance[-1] >= 0)
             net_interval = [float(-frozen_mass if not end_inside else 0.0),
                             float(0.0 if not end_inside else frozen_mass)]
         else:
@@ -1916,6 +1917,11 @@ def manufactured_replay_calibration() -> dict[str, Any]:
                      np.array([1.0, np.nan, 1.0, np.nan, np.nan]), initial_mass=1.0)
     if multi_gap["net_flux_interval_kg"] != [0.0, 1.0] or multi_gap["unknown_flux_net_bound_kg"] != 1.0:
         raise ReplayV12BindingError("disconnected missing gaps were double-counted")
+    both_endpoint_missing = flux(
+        np.arange(5, dtype=float), np.array([np.nan, -.5, .5, -.5, np.nan]),
+        np.array([False, True, True, True, False]), np.ones(5), initial_mass=1.0)
+    if both_endpoint_missing["net_flux_interval_kg"] != [-1.0, 1.0]:
+        raise ReplayV12BindingError("unknown endpoint bounds were narrowed by a middle sample")
     receiver_geometry = {"volume_low_m": [0.0, 0.0, 0.0], "volume_size_m": [1.0, 1.0, 1.0]}
     receiver_times = np.arange(4, dtype=float)
     receiver_velocity = np.zeros((4, 3))
@@ -1968,6 +1974,7 @@ def manufactured_replay_calibration() -> dict[str, Any]:
         "first_arrival_time_s": 1.5, "residence_s": 1.5, "net_flux_mass_kg": 2.0,
         "hidden_gross_status": hidden_gross["gross_flux_status"],
         "multi_gap_net_interval_kg": multi_gap["net_flux_interval_kg"],
+        "both_endpoint_missing_net_interval_kg": both_endpoint_missing["net_flux_interval_kg"],
         "receiver_top_aperture_status": top_down["aperture_downward_first"]["status"],
         "receiver_side_entry_status": side_entry["first_entry_surface"],
         "receiver_outside_y_status": outside_y["status"],

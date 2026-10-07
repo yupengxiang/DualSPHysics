@@ -287,6 +287,10 @@ def test_v12_flux_hidden_gross_multi_gap_and_nonfinite_mass_are_conservative():
     assert unknown["unknown_flux_net_bound_kg"] == pytest.approx(1.0)
     assert unknown["observed_gross_flux_mass_kg"] == pytest.approx(0.0)
     assert len(unknown["unknown_flux_intervals"]) == 4
+    both_missing = flux(times, np.array([np.nan, -0.5, 0.5, -0.5, np.nan]),
+                        np.array([False, True, True, True, False]),
+                        np.ones(5), initial_mass=1.0)
+    assert both_missing["net_flux_interval_kg"] == pytest.approx([-1.0, 1.0])
 
 
 def _fixture_profile(result: dict) -> dict:
