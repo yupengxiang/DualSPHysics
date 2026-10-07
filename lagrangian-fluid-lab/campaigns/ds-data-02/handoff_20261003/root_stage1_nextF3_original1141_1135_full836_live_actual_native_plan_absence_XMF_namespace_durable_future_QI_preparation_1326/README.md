@@ -1,0 +1,1 @@
+两例原始F3 full836作业持续运行；已核对本例真实native/typed/XMF receipt、179208粒子与原生保存时间，并保留native两个plan字段真实缺失、XMF source_plan_condition字段独立命名空间。这里只保存未来ownQI可执行入口和当前live证据，future proof/SHA保持null；原始完成0且原子发布后再运行入口，随后子代理个人35contact+9key视觉检查。未重启/新增科学作业，不读科学载荷或私有PNG。
