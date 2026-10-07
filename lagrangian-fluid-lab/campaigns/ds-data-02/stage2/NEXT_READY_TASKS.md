@@ -1,3 +1,17 @@
+## 2026-10-07T19:00:11.963408+00:00：117例审计、真实来源修正与反例
+
+恢复入口为 `checkpoints/CHECKPOINT_008_INTEGRATED.json`；目标仍active、未完成。已验证117个distinct CURRENT完整保存时序审计：F2=48、F4=38、F6=31。F4/F6两个parent PID/start_ticks仍活，每batch一worker，两重I/O槽；其余四族队列在真实槽释放后执行。
+
+已核对F2-S1 exact native ledger，位置排除3-ID403829(frame154)、397194/404024(frame207)，与scan/native CSV/实际receipt hash一致。消费者旧“UNAVAILABLE_EXACT_CASE”声明是索引未定位，不能冒充原生证据不可得；v12应绑定账本，并保留未知物理去向/动力学影响。见 `F2_S1_NATIVE_LEDGER_VERIFICATION_001.json`。另新增071..075五例89个位置排除ID，见 `NATIVE_OMISSION_VERIFICATION_004.json`。
+
+五哨点15GenCase inputs/原树与集成树/实际receipt来源已核对，9档初始mass在1%内（包括5个原粒距档）、2档1-2%、4档>2%硬失败，不能认为五三档研究已通过。F3 v1两哨点错误共用forcing CSV；真实solver分别a4afb8a9...与9a776c1c...，新v2按各自exact solver input digest生成。初态几何生成成功不等于实际forcing匹配。见 `REFERENCE_PREPARATION_VERIFICATION_004/005.json`。
+
+v11开发代码与336 metadata枚举/七cards草稿已集成，但真实H5请求未放行。primary sharedguard实际复现：(1)多缺失段净通量界漏真值；(2)全current mass NaN时未知界错误为0；(3)速度/动能/前沿严重错误仍evaluator PASS。v11 probe还默认跳过实际source hash/stat交叉核对；time/output科学误差份额混为运行成本。新v12补反例、真实receiver3D/aperture任务、冻结物理尺度和实际迁移/runner入口。语义lineage closure仍待完成，不把cards草稿当最终交付。见 `CONSUMER_V11_INTEGRATION_REVIEW_001.json`。
+
+GenCase新F3S2 original001实际38,807,949B超过16MiB预约，binary返回0却guard failed；另11个v1与5个v2短任务也超预约但未被终态检查捕获。旧v2 runtime只有周期检查、没有terminal bound检查；历史bytes/receipts保留。forensics代理负责新入口forward-only修复及快速假worker反例；reference代理按实测全输出/复制forcing成本登记新attempt。现有F4/F6请求预约足够且继续，不重启/不改活代码。
+
+14实际参考研究、336原因/范围、真实标签及有效条件划分、七完整cards与可重放便携产品仍全部属于完成条件。禁止用单个checkpoint、通过制造反例或预检代替科学验收。以下为历史记录。
+
 ## 2026-10-07T18:45:22.237014+00:00：同步长期目标，109例审计与新初态证据
 
 当前目标入口为 `../GOAL_STAGE2_ZH.md`，同步应用中已登记的第二阶段目标；`../GOAL_ZH.md` 保留首阶段历史文本。审阅材料作为设计证据，不独立授予资源或执行权限。恢复先读 `checkpoints/CHECKPOINT_007_INTEGRATED.json`，再检查真实PID/start_ticks、批次收据和累计ledger。

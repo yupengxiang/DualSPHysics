@@ -1,0 +1,82 @@
+{
+  "schema": "ds02.stage2.consumer-integration-review.v1",
+  "observed_at_utc": "2026-10-07T18:54:14.510561+00:00",
+  "source_module": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v11.py",
+    "sha256": "3aeed9f929e700a73968846e9c3a7d71f32b7727d50d3e42b224223635e0c8a7"
+  },
+  "real_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v11/f2-s1-replay-request-v11-001.json",
+    "sha256": "ebb61ef2854bbf1ba27c5b1bff355adf099ee6eda6f0acbff25eb0d47a711d0e"
+  },
+  "actual_HDF5_dispatch": "NOT_STARTED; new version required",
+  "implementation_progress": {
+    "C14_initial_mass_denominator": "Corrected in actual request; source-bound negative test and actual H5 replay remain required.",
+    "C15_validmask": "Explicit valid mask and frozen initial weights now passed to mass observer.",
+    "C16_mass_weighted_residence": "Aggregate kg*s implemented; sampling-estimator versus rigorous uncertainty still needs study.",
+    "C18_region_semantics": "Halfspace relabeled diagnostic; actual receiver volume/aperture/material destination work remains."
+  },
+  "independent_actual_guard_counterexamples": {
+    "request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/consumer-v11-independent-counterexamples-001.json",
+      "sha256": "a38491450f2e96f597e8effb06e412abaa135bb63e999a0c84f9150d0a24f4b0"
+    },
+    "receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CONSUMER_V11_INDEPENDENT_REVIEW/v11-counterexamples-001/execution-receipt.json",
+      "sha256": "c10bac33a7d21d3ac2cf5555759354e800079e0da353bd1fc74cbc3b3b74534b"
+    },
+    "report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CONSUMER_V11_INDEPENDENT_REVIEW/v11-counterexamples-001/v11-counterexamples.json",
+      "sha256": "1feb341ccca55142b77ed226375fffab738e9d6711be53b5064c7a9e8987f302"
+    },
+    "actual_launch_commit": "0ba7f0aafa9a08636f45d9c53620c2db11cbe642",
+    "registered_inputs_unchanged": true,
+    "ledger_charge_and_reservation_release_verified": true,
+    "trajectory_hdf5_read": false
+  },
+  "new_findings": [
+    {
+      "id": "C19",
+      "issue": "Multi-gap observed net6kg with bound2kg excludes endpoint-identity true net0kg; all current masses NaN returns zero unknown despite frozen initial mass2kg. Gross recross mass cannot be bounded by one mass without trajectory evidence.",
+      "state": "REPRODUCED_ACTUAL_GUARD"
+    },
+    {
+      "id": "C20",
+      "issue": "evaluator PASS despite velocity1000m/s, KE/front errors >1e8: their metrics are omitted from pass checks; KE reference normalization is result-dependent.",
+      "state": "REPRODUCED_ACTUAL_GUARD"
+    },
+    {
+      "id": "C21",
+      "issue": "dt/output scientific error contribution fractions conflated with evaluation wall seconds/output bytes cost budgets.",
+      "state": "SOURCE_REVIEW; ADOPTED_REVIEW_CONTRACT_MISMATCH"
+    },
+    {
+      "id": "C22",
+      "issue": "probe defaults skip small-source hash/stat cross-check and producer metadata binding, despite claiming exact source binding.",
+      "state": "SOURCE_REVIEW; NOT_LAUNCHED"
+    },
+    {
+      "id": "C23",
+      "issue": "Static portable path_map metadata is not an actual relocation loader; current source crosscheck hard-compares preserved original absolute paths with relocated actual paths.",
+      "state": "SOURCE_REVIEW; MIGRATION_NOT_VERIFIED"
+    }
+  ],
+  "lineage_and_family_cards": {
+    "metadata_enumeration": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/lineage/v11/CURRENT336-lineage-audit-v11.json",
+      "sha256": "8654a626fce5d748c39dea6d2fc8bbffd78d47b1af0cbad1389098f60716d066"
+    },
+    "enumerated_cases": 336,
+    "families": 7,
+    "semantic_effective_condition_control_geometry_parameter_support_closure": "DEVELOPMENT_AUDIT_COMPLETE_FOR_CURRENT_METADATA_ENUMERATION; SEMANTIC_CLOSURE_PENDING",
+    "credit": "Development metadata drafts only; no completed leakage audit or finished family qualification cards."
+  },
+  "exact_F2_S1_native_ledger": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F2_S1_NATIVE_LEDGER_VERIFICATION_001.json",
+    "sha256": "3da25306fb63586445c19a8a93145a2cebfbb8f659d2f91494e319a3d2e65612"
+  },
+  "assigned_next": "stage2_data_consumers new v12; preserve v11 bytes; actual-source validation, geometry/uncertainty/evaluator/relocation proof and guard-ready full-window replay",
+  "QN": "UNKNOWN",
+  "QE": "UNKNOWN",
+  "goal_complete": false
+}
