@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -127,6 +128,29 @@ def _execution_closure() -> dict[str, Any]:
         path = script_dir / name
         local.append({"module": name, "path": str(path.resolve()),
                       "sha256": sha256(path) if path.is_file() else None})
+    # These are the four concrete parent guards.  Keep their paths and
+    # content identities in the closure; a prose label such as "stage2
+    # dispatch" is insufficient because the v4 dispatch/strict sources are
+    # the resources that actually gate a full replay.
+    guard_root = Path(os.environ.get(
+        "DS_DATA02_STAGE2_MAIN_ROOT",
+        "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+    )).expanduser().resolve()
+    guard_specs = {
+        "runtime_v2": "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+        "runtime_v1": "lagrangian-fluid-lab/scripts/ds_data02_runtime.py",
+        "stage2_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
+        "strict_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    }
+    guard_sources: dict[str, Any] = {}
+    for role, relative in guard_specs.items():
+        path = guard_root / relative
+        guard_sources[role] = {
+            "path": str(path),
+            "sha256": sha256(path) if path.is_file() else None,
+            "version": "parent_shared_v4_guard_source",
+            "status": "BOUND_CONTENT_SHA" if path.is_file() else "MISSING_PARENT_GUARD_SOURCE",
+        }
     return {
         "local_modules": local,
         "imports": {
@@ -145,12 +169,7 @@ def _execution_closure() -> dict[str, Any]:
             "version": sys.version,
             "executable_sha256": sha256(Path(sys.executable).resolve()),
         },
-        "shared_four_guard_sources": {
-            "runtime_v2": "main process binds ds_data02_runtime_v2.py",
-            "runtime_v1": "immutable historical runtime source",
-            "stage2_dispatch": "main process resource/parent dispatch",
-            "strict_dispatch": "main process input digest guard",
-        },
+        "shared_four_guard_sources": guard_sources,
     }
 
 

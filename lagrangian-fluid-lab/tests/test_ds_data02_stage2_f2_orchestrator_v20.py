@@ -48,8 +48,13 @@ def test_execution_closure_binds_v20_runner_and_four_guard_contract() -> None:
     assert "ds_data02_stage2_f2_portable_v20.py" in modules
     assert "ds_data02_stage2_f2_replay_runner_v20.py" in modules
     assert set(closure["shared_four_guard_sources"]) == {
-        "runtime_v2", "runtime_v1", "stage2_dispatch", "strict_dispatch",
+        "runtime_v2", "runtime_v1", "stage2_dispatch_v4", "strict_dispatch_v4",
     }
+    for binding in closure["shared_four_guard_sources"].values():
+        assert binding["path"].endswith(("ds_data02_runtime_v2.py", "ds_data02_runtime.py",
+                                         "ds_data02_stage2_dispatch.py",
+                                         "ds_data02_strict_dispatch_v1.py"))
+        assert len(binding["sha256"]) == 64
 
 
 def test_os_strace_requires_new_log_and_real_executable(tmp_path: Path) -> None:
