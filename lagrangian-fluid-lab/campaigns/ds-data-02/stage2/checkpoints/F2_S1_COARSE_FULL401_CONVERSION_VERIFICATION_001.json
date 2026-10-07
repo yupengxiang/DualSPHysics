@@ -1,0 +1,145 @@
+{
+  "schema": "ds02.stage2.f2-s1-coarse-full401-conversion-independent-verification.v1",
+  "observed_at_utc": "2026-10-07T20:09:35.125938+00:00",
+  "request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-full401-conversion-v4-primary-001.json",
+    "bytes": 38889,
+    "sha256": "0cda8b14c4176a61bf086b1228df88d5cf521ae2aed84fc70cc1c43fae34d82b"
+  },
+  "receipt": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4_TYPED_FULL401_V4/f2_s1_full_cfd_canary_dp01258_t4_typed_full401-v4-primary-001/execution-receipt.json",
+    "bytes": 62614,
+    "sha256": "51cf9c3dfa5ed0e737f5669ca4d112254ce9838163cc8223f6c952186146b18a"
+  },
+  "conversion_report": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4_TYPED_FULL401_V4/f2_s1_full_cfd_canary_dp01258_t4_typed_full401-v4-primary-001/typed/conversion-report.json",
+    "bytes": 290607,
+    "sha256": "8d0991dcf080de88ac928bbd903ecc9f6fc0b5bbd3edfa16373decd6f3402486"
+  },
+  "control_audit": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4_TYPED_FULL401_V4/f2_s1_full_cfd_canary_dp01258_t4_typed_full401-v4-primary-001/typed/conversion-control-audit.json",
+    "bytes": 82705,
+    "sha256": "566ea182a664a8118c893be766432670609ea497a81c14d2aa688566e2cadce2"
+  },
+  "typed_hdf5": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4_TYPED_FULL401_V4/f2_s1_full_cfd_canary_dp01258_t4_typed_full401-v4-primary-001/typed/trajectory.h5",
+    "bytes": 685291008,
+    "sha256": "1edd1cd8efee939263fba3b21dc9a8155a205e3b9519190956fd7ae58d6c4a69"
+  },
+  "actual_typed_header_and_initial_final_reduction": {
+    "frames": 401,
+    "total_particles": 264357,
+    "fluid_count": 10692,
+    "fluid_final_valid_count": 10681,
+    "time_window_s": [
+      0.0,
+      4.000064985853619
+    ],
+    "fluid_initial_mass_kg": 21.286333395168185,
+    "source_MK_counts": {
+      "1": 3402,
+      "2": 3402,
+      "3": 3888
+    },
+    "source_MK_initial_mass_kg": {
+      "1": 6.772924262098968,
+      "2": 6.772924262098968,
+      "3": 7.740484870970249
+    },
+    "uniform_fluid_particle_mass": true,
+    "source_raw_tree_attrs_match": true
+  },
+  "raw_content_independent_verification": {
+    "file_count": 405,
+    "Part_frame_count": 401,
+    "raw_total_bytes": 4665398391,
+    "tree_sha256": "0dbdeaf552ed8152c10fc13eecf17c3d2e9cada84ef5cc66ec5d24f401add20a",
+    "actual_current_tree_digest_matches_converter_prepost": true
+  },
+  "input_guard_prepost_current_hashes_equal": true,
+  "PartVTK_validation": {
+    "frames": [
+      0,
+      200,
+      400
+    ],
+    "all_passed": true,
+    "scope": "producer actual three anchors, not independent all-frame per-value comparison"
+  },
+  "terminal_tree_receipt_charge_bytes_equal": 685731976,
+  "reservation_released": true,
+  "elapsed_seconds": 81.10214246669784,
+  "cpu_core_seconds": 100.063397,
+  "source_MK_comparison": {
+    "original_typed_mass_each_MK_kg": 7.038000334287062,
+    "deviation_percent": {
+      "1": -3.7663549246612247,
+      "2": -3.7663549246612247,
+      "3": 9.981308657530029
+    },
+    "absolute_mass_difference_fraction_of_original_whole_fluid": {
+      "1": 0.012554516415537417,
+      "2": 0.012554516415537417,
+      "3": 0.03327102885843343
+    },
+    "total_mass_target_1percent_pass": true,
+    "material3_whole_cohort_error_exceeds_registered_0p03_total_goal": true
+  },
+  "findings": [
+    {
+      "id": "C28",
+      "severity": "material_initial_state_mismatch",
+      "reason": "Total initial mass passes1%, but MKfluid counts3402/3402/3888 yield unequal source masses vs original equal7038/MK. Top-source difference alone exceeds3% of whole initial fluid mass, before dynamics/integration/output error. Not admissible as material-matched reference without improved native lattice/dp or explicitly restricted non-material scope. No particle rescaling."
+    },
+    {
+      "id": "C29",
+      "severity": "inherited_effective_condition_semantics",
+      "path": "hash_scopes.physical_condition.event_window.sequence",
+      "reason": "Inherited owner phrase rotate through0.9 thenhold is ambiguous/wrong; actual initialhold0..0.5, rotation0.5..1.4, postrotationhold1.4..4. Forward condition sidecar required; typed H5/hash scopes immutable."
+    }
+  ],
+  "actual_control_audit": {
+    "effective_control": {
+      "rotation_duration_s": 0.9,
+      "rotation_final_angle_deg": -105.0,
+      "hold_window_s": [
+        1.4,
+        4.0
+      ],
+      "mvrotfile_xml_duration_s": 4.0,
+      "mvrotfile_duration_semantics": "table/control coverage window; not rotation transition duration",
+      "query_window_s": [
+        0.0,
+        4.0
+      ],
+      "initial_hold_window_s": [
+        0.0,
+        0.5
+      ],
+      "rotation_window_s": [
+        0.5,
+        1.4
+      ],
+      "table_window_s": [
+        0.0,
+        4.0
+      ]
+    },
+    "DTsMin_count": {
+      "min": 0.0,
+      "max": 0.0,
+      "unique": [
+        0.0
+      ]
+    },
+    "dt_sequence": "UNKNOWN_FULL_STEP_SEQUENCE",
+    "clamp_events": "UNKNOWN_INDIVIDUAL_EVENTS"
+  },
+  "scientific_quality": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "scope": "Actual complete conversion, current raw/output bytes and bounded typed initial/final structural reduction. Native11 fate/impact and grid/time/output task qualification pending.",
+  "goal_complete": false
+}
