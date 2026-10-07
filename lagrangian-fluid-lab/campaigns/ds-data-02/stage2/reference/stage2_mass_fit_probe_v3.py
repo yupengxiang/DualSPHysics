@@ -326,7 +326,7 @@ def request_for(item: dict[str, Any], manifest_path: Path, source_head: str) -> 
         GENCASE, CURRENT, REVIEW, QUALITY, manifest_path, definition,
         Path(source["source_definition"]["path"]),
     ]
-    paths.extend(Path(x["path"]) for x in source["relative_dependencies"])
+    paths.extend(Path(x["source"]["path"]) for x in source["relative_dependencies"])
     paths.extend(Path(x["path"]) for x in c["predecessor_artifacts"])
     unique: list[Path] = []
     seen: set[str] = set()
