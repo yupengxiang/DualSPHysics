@@ -1,0 +1,226 @@
+{
+  "schema": "ds02.stage2.f1-s2-bracket-calibration.v5",
+  "status": "PASS_MANUFACTURED_AND_SOURCE_TIME_AXIS_AUDIT",
+  "preparation_source_commit": "1d9db81691bc74f81edb6dda79ffcd37023ee9fe",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "scope": "F1-S2 source-time-axis and typed-observer contract; no H5 or field payload read",
+  "source_actual_time_axis": {
+    "runparts": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H340_DP020/root-stage1-dual-h340-physical-endpoint-full-native-gpu-lease-retry-034/solver_output/RunPARTs.csv",
+      "bytes": 84656,
+      "mtime_ns": 1791114395752726691,
+      "sha256": "893d68f594f2c0ad9ef13ef9f2b7daae354c15e218a6fd2dc575ac1e2ec25c8e"
+    },
+    "row_count": 401,
+    "first_time_s": 0.0,
+    "last_time_s": 4.000064410707409,
+    "min_saved_delta_s": 0.00984182999150729,
+    "max_saved_delta_s": 0.010166485280423965,
+    "queries": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_index": 0,
+        "upper_index": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 1.0,
+        "status": "BRACKETED",
+        "lower_index": 99,
+        "upper_index": 100,
+        "lower_time_s": 0.9901326023456599,
+        "upper_time_s": 1.000004139476947,
+        "bracket_width_s": 0.009871537131287078,
+        "interpolation_fraction": 0.9995806654128995
+      },
+      {
+        "query_time_s": 2.0,
+        "status": "BRACKETED",
+        "lower_index": 199,
+        "upper_index": 200,
+        "lower_time_s": 1.990026375936163,
+        "upper_time_s": 2.000176799431605,
+        "bracket_width_s": 0.010150423495442151,
+        "interpolation_fraction": 0.9825820635282382
+      },
+      {
+        "query_time_s": 3.0,
+        "status": "BRACKETED",
+        "lower_index": 299,
+        "upper_index": 300,
+        "lower_time_s": 2.990169858011064,
+        "upper_time_s": 3.000090054107636,
+        "bracket_width_s": 0.00992019609657202,
+        "interpolation_fraction": 0.9909221444052936
+      },
+      {
+        "query_time_s": 4.0,
+        "status": "BRACKETED",
+        "lower_index": 399,
+        "upper_index": 400,
+        "lower_time_s": 3.990056348101545,
+        "upper_time_s": 4.000064410707409,
+        "bracket_width_s": 0.010008062605863621,
+        "interpolation_fraction": 0.9935641182569288
+      }
+    ],
+    "field_values": "UNKNOWN; only RunPARTs timestamps were read"
+  },
+  "planned_common_queries_s": [
+    0.0,
+    1.0,
+    2.0,
+    3.0,
+    4.0
+  ],
+  "bracket_policy": {
+    "allowed": [
+      "EXACT",
+      "EXACT_OR_LEFT",
+      "BRACKETED"
+    ],
+    "bracketed_field_interpolation": "UNKNOWN_UNTIL_MANUFACTURED_ERROR_BOUND_AND_EQUAL_BRACKETS_ARE_PROVEN",
+    "outside_window": "REJECT; no extrapolation",
+    "nonfinite_or_nonmonotone_axis": "REJECT",
+    "frame_number_pairing": "FORBIDDEN"
+  },
+  "frozen_error_budget": {
+    "position_relative_to_L": 0.02,
+    "event_position_relative_to_L": 0.05,
+    "velocity_and_ke_nonzero_reference": 0.05,
+    "regional_mass_fraction_of_whole_initial_fluid_mass": 0.03,
+    "event_time_fraction_of_characteristic_time": 0.01,
+    "time_error_fraction_of_total_window": 0.25,
+    "output_error_fraction_of_total_window": 0.25,
+    "units_and_zero_reference": "finite, explicit scale required; zero reference is UNDEFINED"
+  },
+  "manufactured_calibration": {
+    "linear_bracket_exact_manufactured": {
+      "pass": true,
+      "bracket": {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_index": 0,
+        "upper_index": 1,
+        "lower_time_s": 0.0,
+        "upper_time_s": 1.0,
+        "bracket_width_s": 1.0,
+        "interpolation_fraction": 0.5
+      },
+      "interpolated": 1.0,
+      "expected": 1.0
+    },
+    "outside_window_rejected": {
+      "pass": true,
+      "result": {
+        "query_time_s": 2.1,
+        "status": "OUTSIDE_SAVED_WINDOW"
+      }
+    },
+    "nonfinite_query_rejected": {
+      "pass": true,
+      "result": {
+        "query_time_s": "NONFINITE",
+        "status": "REJECT_NONFINITE_QUERY"
+      }
+    },
+    "nonmonotone_axis_rejected": {
+      "pass": true,
+      "axis": [
+        0.0,
+        1.0,
+        0.5
+      ],
+      "reason": "strictly increasing saved-time axis is required"
+    },
+    "unequal_brackets_do_not_get_interpolated": {
+      "pass": true,
+      "comparison": "UNKNOWN_UNEQUAL_TIMESTAMP_BRACKETS"
+    },
+    "nonfinite_observable_rejected": {
+      "pass": true,
+      "comparison": "UNKNOWN_NONFINITE_OR_MISSING"
+    },
+    "zero_reference_scale_not_normalized": {
+      "pass": true,
+      "comparison": "UNDEFINED_ZERO_REFERENCE",
+      "rule": "relative error requires a nonzero finite reference scale"
+    }
+  },
+  "real_downsampling_closure": {
+    "source_current_output": {
+      "status": "ACTUAL_SOURCE_AXIS_ONLY",
+      "cadence_s": 0.01,
+      "frames": 401,
+      "window_s": [
+        0.0,
+        4.000064410707409
+      ]
+    },
+    "source_same_cfl_savedt_overlay": {
+      "status": "PREPARED_LAUNCH_DISABLED",
+      "request": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-savedt-cfl-pairs-v1/f1_s2_original_savedt_same_cfl.json"
+    },
+    "source_half_cfl_savedt_overlay": {
+      "status": "PREPARED_LAUNCH_DISABLED",
+      "request": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-savedt-cfl-pairs-v1/f1_s2_original_savedt_half_cfl.json"
+    },
+    "fine_dp017_same_cfl_savedt": {
+      "status": "PREPARED_LAUNCH_DISABLED",
+      "overlay": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_inputs_v5/F1_S2/dp0p017/same_cfl/F1_S2_INTERVAL_DP0p017_SAVEDT_SAME_CFL.xml",
+        "bytes": 8309,
+        "mtime_ns": 1791417258392604627,
+        "sha256": "a715d897c05da283f26e69c9fe82867b48e0bd898eaea049f00f4ae96bdef995"
+      }
+    },
+    "field_downsampling_error": "UNKNOWN until an actual dense source and selected field observations exist",
+    "closure_rule": "derive downsampled observations from actual timestamp brackets after raw retention; never infer from frame indices, never extrapolate, never replace raw source"
+  },
+  "grid_status": {
+    "current_dp020": {
+      "status": "ACTUAL_SOURCE_FULL_WINDOW",
+      "mass_target_kg": 340.0,
+      "solver_fields": "available only through parent consumer"
+    },
+    "fine_dp017": {
+      "status": "GENCASE_ACTUAL_SOLVER_PENDING",
+      "sample_mass_kg": 342.04306,
+      "whole_initial_error_pct": 0.6009,
+      "mass_gate": "TARGET_WITHIN_1PCT; scientific qualification UNKNOWN"
+    },
+    "coarse_dp0225": {
+      "status": "GENCASE_PENDING_PARENT_GUARD",
+      "spacing_from_current_fraction": 0.125,
+      "sample_mass_kg": "UNKNOWN_UNTIL_GENERATED_XML",
+      "mass_gate": "UNKNOWN"
+    },
+    "retained_failures": {
+      "dp025": {
+        "sample_mass_kg": 350.0,
+        "error_pct": 2.941176470588235,
+        "status": "HARD_FAIL_GT2PCT"
+      },
+      "dp0165": {
+        "sample_mass_kg": 328.82355,
+        "error_pct": -3.287,
+        "status": "HARD_FAIL"
+      },
+      "dp016": {
+        "sample_mass_kg": 335.978496,
+        "error_pct": -1.182795294117645,
+        "status": "MARGINAL_NOT_ACCEPTED"
+      }
+    }
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}

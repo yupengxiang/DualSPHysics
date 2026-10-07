@@ -1,0 +1,176 @@
+{
+  "schema": "ds02.stage2.f1-s2-reference-contract.v5",
+  "status": "PREPARED_LAUNCH_DISABLED",
+  "preparation_source_commit": "1d9db81691bc74f81edb6dda79ffcd37023ee9fe",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "study_design": {
+    "spatial_grids": [
+      {
+        "label": "current_dp020",
+        "dp_m": 0.02,
+        "role": "immutable CURRENT source",
+        "status": "ACTUAL_SOURCE"
+      },
+      {
+        "label": "coarse_dp0225",
+        "dp_m": 0.0225,
+        "role": "bounded coarse >=10% spacing",
+        "status": "GENCASE_PENDING"
+      },
+      {
+        "label": "fine_dp017",
+        "dp_m": 0.017,
+        "role": "target fine source-bound candidate",
+        "status": "GENCASE_ACTUAL_SOLVER_PENDING"
+      }
+    ],
+    "continuous_geometry": "exact source Def bytes except intentional definition dp attribute; no fill/geometry/motion/control edits",
+    "mass_policy": "whole-initial discrete sample mass target 1%; 2% hard upper; no particle-mass rescale; no threshold widening",
+    "time_design": "current dp0 same/half CFL dense SaveDt pair plus fine dp0.017 same-CFL dense SaveDt full window; coarse follows only after terminal GenCase mass/geometry audit",
+    "window_s": [
+      0.0,
+      4.000064410707409
+    ],
+    "output_cadence_s": 0.005,
+    "planned_query_times_s": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0
+    ]
+  },
+  "coarse_preflight": {
+    "candidate_def": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_inputs_v5/F1_S2/dp0p0225/F1_S2_SPATIAL_COARSE_DP0p022500_Def.xml",
+      "bytes": 5017,
+      "mtime_ns": 1791417256560655406,
+      "sha256": "a36f9edb38802b700aaecdc5784418686361640fa864877928eb1e168893d95d"
+    },
+    "definition_semantics": {
+      "source_def": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_sentinel_spatial_preflight_inputs_v1/F1_S2/original/F1_S2_SPATIAL_ORIGINAL_DP0p020000_Def.xml",
+        "bytes": 5015,
+        "mtime_ns": 1791398533336798788,
+        "sha256": "1d6f07986bf0eed22432515f811af12acd8b9ad0575bb2409be7d1f5f15861a8"
+      },
+      "derived_def": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_inputs_v5/F1_S2/dp0p0225/F1_S2_SPATIAL_COARSE_DP0p022500_Def.xml",
+        "bytes": 5017,
+        "mtime_ns": 1791417256560655406,
+        "sha256": "a36f9edb38802b700aaecdc5784418686361640fa864877928eb1e168893d95d"
+      },
+      "source_normalized_sha256": "342d092d4546f2039c67b36ba103fc18fd3a24b889e0040211c9168ef5e7edfb",
+      "derived_normalized_sha256": "342d092d4546f2039c67b36ba103fc18fd3a24b889e0040211c9168ef5e7edfb",
+      "continuous_definition_equal": true,
+      "intentional_change": "definition dp only; exact continuous geometry, fill, motion and execution controls are preserved"
+    },
+    "candidate_dp_m": 0.0225,
+    "baseline_dp_m": 0.02,
+    "spacing_separation_fraction": 0.125,
+    "minimum_required_separation_fraction": 0.1,
+    "expected_mass": "UNKNOWN_UNTIL_TERMINAL_GENERATED_XML",
+    "followup_solver": "forbidden until parent reviews generated XML/receipt and whole-initial/per-material mass/geometry"
+  },
+  "fine_solver_input": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_INTERVAL_DP0p017000/f1-s2-spatial-interval-dp0p017000-v2-primary-001/generated.xml",
+      "bytes": 7865,
+      "mtime_ns": 1791415082424297172,
+      "sha256": "e21ede50d7e34ac864f9ea5153fdcb3af1bdaa17aaaeb16891ed4f11fca7970f"
+    },
+    "generated_bi4": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_INTERVAL_DP0p017000/f1-s2-spatial-interval-dp0p017000-v2-primary-001/generated.bi4",
+      "bytes": 9636619,
+      "mtime_ns": 1791415082406297648
+    },
+    "gencase_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_INTERVAL_DP0p017000/f1-s2-spatial-interval-dp0p017000-v2-primary-001/execution-receipt.json",
+      "bytes": 21755,
+      "mtime_ns": 1791415083924257537,
+      "sha256": "fa7a151b38409a06185c87445f98ade014fb8a6fe9cc49a82c0abfb1f286084f"
+    },
+    "savedt_overlay_xml": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_inputs_v5/F1_S2/dp0p017/same_cfl/F1_S2_INTERVAL_DP0p017_SAVEDT_SAME_CFL.xml",
+      "bytes": 8309,
+      "mtime_ns": 1791417258392604627,
+      "sha256": "a715d897c05da283f26e69c9fe82867b48e0bd898eaea049f00f4ae96bdef995"
+    },
+    "savedt_overlay_bi4": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_inputs_v5/F1_S2/dp0p017/same_cfl/F1_S2_INTERVAL_DP0p017_SAVEDT_SAME_CFL.bi4",
+      "bytes": 9636619,
+      "mtime_ns": 1791415082406297648
+    },
+    "overlay_semantics": "same CFL; savedt only; all final-step dt rows; full physical window",
+    "candidate_mass_kg": 342.04306,
+    "candidate_whole_initial_error_pct": 0.6009,
+    "mass_status": "prepared target only; QI/QN/QE UNKNOWN"
+  },
+  "typed_operator": {
+    "reader": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_generic_typed_reader_v1.py",
+      "bytes": 16338,
+      "mtime_ns": 1791401393369464308,
+      "sha256": "915b9c0c5a437d51d03afe85ff8a8e21d03166b63b36e56d3892ee1af619002c"
+    },
+    "identity_key": "(particle_zone, particle_id)",
+    "required_static_fields": [
+      "particle_id",
+      "particle_zone",
+      "initial_type",
+      "initial_mk",
+      "initial_mass"
+    ],
+    "required_dynamic_fields": [
+      "time",
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "valid",
+      "type",
+      "mk"
+    ],
+    "query_operator": "read actual time axis; return EXACT/EXACT_OR_LEFT/BRACKETED with lower/upper timestamps; never use hardcoded frame indices",
+    "comparison_fields": [
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "valid",
+      "type",
+      "mk"
+    ],
+    "payload_hash": "parent conversion/consumer guard must bind actual trajectory output; preparation does not hash H5",
+    "field_comparison_status": "UNKNOWN_UNTIL_PARENT_TYPED_CONVERSION_AND_OBSERVER"
+  },
+  "calibration_report": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_reference_calibration_v5.json",
+    "sha256": "309a87a22f01f2c557f934fb1c4dd908a0276d59d330e0c798dc58a5082b3bc0"
+  },
+  "resource_guard": {
+    "runner": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py",
+    "strict_guard": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py",
+    "runtime": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v4.py",
+    "cpu_parent_binding": "required",
+    "gpu": "none in preparation",
+    "solver_launch": "forbidden",
+    "hdf5_read": "forbidden",
+    "launch_disabled": true,
+    "protected_external_gpu": {
+      "index": 6,
+      "uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+      "pid": 601689,
+      "action": "do_not_touch"
+    }
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
