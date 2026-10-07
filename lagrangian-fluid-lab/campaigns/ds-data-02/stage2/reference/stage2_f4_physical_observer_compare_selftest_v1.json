@@ -1,0 +1,62 @@
+{
+  "schema": "ds02.stage2.f4-physical-observer-compare-selftest.v1",
+  "status": "PASS_ALL_MANUFACTURED_BOUNDARIES",
+  "cases": {
+    "outside_window_rejected_without_extrapolation": {
+      "pass": true,
+      "status": "UNKNOWN_BRACKETED_OR_OUTSIDE_QUERY"
+    },
+    "unequal_timestamp_brackets_remain_unknown": {
+      "pass": true,
+      "status": "UNKNOWN_BRACKETED_OR_OUTSIDE_QUERY",
+      "reference_bracket": {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 0,
+        "upper_frame": 1,
+        "lower_time_s": 0.4,
+        "upper_time_s": 0.6,
+        "bracket_width_s": 0.19999999999999996
+      },
+      "variant_bracket": {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 0,
+        "upper_frame": 1,
+        "lower_time_s": 0.45,
+        "upper_time_s": 0.55,
+        "bracket_width_s": 0.10000000000000003
+      }
+    },
+    "nonunit_mass_and_zero_reference_are_not_silently_passed": {
+      "pass": true,
+      "particle_mass_delta": {
+        "status": "COMPUTED",
+        "a": 1.0,
+        "b": 0.5,
+        "delta_b_minus_a": -0.5,
+        "absolute_delta": 0.5,
+        "relative_error_fraction_vs_a": 0.5,
+        "relative_error_pct_vs_a": 50.0
+      },
+      "zero_ke_delta": {
+        "status": "COMPUTED",
+        "a": 0.0,
+        "b": 1.0,
+        "delta_b_minus_a": 1.0,
+        "absolute_delta": 1.0,
+        "relative_error_fraction_vs_a": "UNDEFINED_ZERO_REFERENCE",
+        "relative_error_pct_vs_a": "UNDEFINED_ZERO_REFERENCE"
+      }
+    },
+    "missing_material_region_is_unknown": {
+      "pass": true,
+      "status": "UNKNOWN_REGION_MISSING"
+    },
+    "nan_observable_is_unknown": {
+      "pass": true,
+      "status": "UNKNOWN_NONFINITE_OR_MISSING"
+    }
+  },
+  "uses_native_or_h5": false
+}
