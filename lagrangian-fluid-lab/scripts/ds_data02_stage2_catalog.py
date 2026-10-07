@@ -16,8 +16,20 @@ def sha256(path):
 def resolve_case(case, review):
     manifest_path = review / case['portable_manifest']
     manifest = json.loads(manifest_path.read_text())
+    alias_evidence = None
     if manifest['physical_case_id'] != case['physical_case_id']:
-        raise ValueError('Manifest physical case differs from catalog')
+        primary = Path(case['original_primary_product']['path'])
+        if sha256(primary) != case['original_primary_product']['sha256']:
+            raise ValueError('Original accepted alias evidence changed')
+        product = json.loads(primary.read_text())
+        for key in case['original_product_row_pointer'].strip('/').split('/'):
+            product = product[int(key)] if isinstance(product, list) else product[key]
+        alias_evidence = product.get('original_accepted_alias_provenance')
+        if (product.get('physical_case_id') != case['physical_case_id'] or
+                product.get('primary_manifest_physical_case_id') != manifest['physical_case_id'] or
+                not isinstance(alias_evidence, dict) or
+                alias_evidence.get('canonical_physical_case', {}).get('inventory_physical_case_id') != case['physical_case_id']):
+            raise ValueError('Manifest physical case lacks an explicit accepted alias mapping')
     xmf = Path(case['original_server_XMF']['path'])
     if sha256(xmf) != case['original_server_XMF']['sha256']:
         raise ValueError('Frozen XMF hash changed')
@@ -57,6 +69,7 @@ def resolve_case(case, review):
                                  recomputed_sha256=sha256(p) if p.is_file() else None)
     raw_root = source.get('data_root')
     return dict(family_id=case['family_id'], physical_case_id=case['physical_case_id'],
+                manifest_physical_case_id=manifest['physical_case_id'], accepted_alias_evidence=alias_evidence,
                 runtime_case_alias=case['runtime_case_alias'], frames=case['frames'],
                 particles=case['particles'], actual_time_window_s=case['actual_time_window_s'],
                 known_numeric_physical_parameters=case['known_numeric_physical_parameters'],
@@ -72,15 +85,33 @@ def resolve_case(case, review):
                 quality=dict(visual='STAGE1_PRESERVED', QI='NOT_ASSESSED', QN='NOT_ASSESSED', QE='NOT_ASSESSED'))
 
 
-def build(review):
+def build(review, prior_catalog=None):
     cases_path = review / 'CASES_336.json'
     cases = json.loads(cases_path.read_text())['cases']
     if len(cases) != 336 or len({r['physical_case_id'] for r in cases}) != 336:
         raise ValueError('Frozen physical catalog must contain 336 unique cases')
     rows = []
+    reusable = {}
+    if prior_catalog:
+        prior = json.loads(prior_catalog.read_text())
+        receipt = json.loads((prior_catalog.parent / 'execution-receipt.json').read_text())
+        if receipt.get('status') != 'completed' or receipt.get('returncode') != 0:
+            raise ValueError('Prior catalog execution is not completed')
+        if prior['source_catalog_sha256'] != sha256(cases_path):
+            raise ValueError('Prior catalog binds another source case list')
+        reusable = {r['physical_case_id']: r for r in prior['cases'] if 'trajectory' in r}
     for case in cases:
         try:
-            rows.append(resolve_case(case, review))
+            cached = reusable.get(case['physical_case_id'])
+            if cached:
+                p = Path(cached['trajectory']['path']); stat = p.stat()
+                if (stat.st_size, stat.st_mtime_ns) != (cached['trajectory']['bytes'], cached['trajectory']['mtime_ns']):
+                    raise ValueError('Cached trajectory stat changed; needs new audit')
+                if sha256(review / case['portable_manifest']) != cached['manifest']['recomputed_sha256']:
+                    raise ValueError('Cached manifest changed; needs new audit')
+                rows.append(cached)
+            else:
+                rows.append(resolve_case(case, review))
         except (OSError, ValueError, KeyError) as error:
             rows.append(dict(family_id=case['family_id'], physical_case_id=case['physical_case_id'],
                              scientific_scan_status='EVIDENCE_UNKNOWN', error=str(error)))
@@ -93,6 +124,8 @@ def build(review):
                 source_catalog_sha256=sha256(cases_path), cases=rows,
                 scope='Actual HDF5 headers, exact XMF bindings, and small source digests only; no full scientific scan or QN/QE.',
                 total_hdf5_bytes=sum(r.get('trajectory', {}).get('bytes', 0) for r in rows),
+                reused_header_evidence=dict(path=str(prior_catalog), recomputed_sha256=sha256(prior_catalog),
+                                            rows=len(reusable)) if prior_catalog else None,
                 unresolved=sum(r['scientific_scan_status'] == 'EVIDENCE_UNKNOWN' for r in rows))
 
 
@@ -100,8 +133,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--review', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--prior-catalog', type=Path)
     args = parser.parse_args()
-    result = build(args.review.resolve())
+    result = build(args.review.resolve(), args.prior_catalog)
     with args.output.open('x') as stream:
         json.dump(result, stream, indent=2, ensure_ascii=False, allow_nan=False)
         stream.write('\n')
