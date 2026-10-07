@@ -1,3 +1,13 @@
+## 2026-10-07T20:15:02.308464+00:00：191例独立审计、完整typed终态与净通量修正
+
+最新恢复入口为 `checkpoints/CHECKPOINT_012_INTEGRATED.json`，完整目标active、未完成。独立快照191例：F2/F4/F6各48、F1=42、F3=5；以proof008实际JSON计数为准，前一提交标题190是文字计数疏漏。F1/F3实际一worker继续，F5/F7各48新v4请求已准备但未启动，在真实科学槽释放后接续。
+
+v16 primary实际8测试PASS、正确总净通量区间[13.57200064463541,13.575000644777901]kg，原full401报告保持SHA/字节；只修正exactF2诊断半空间端点总量，gross/hiddenrecross未知。coarse401帧typed转换实际completed，H5685291008B，264357粒子/10692初始fluid/10681末帧fluid；完整405raw文件currentdigest与producer pre/post一致，终态tree/receipt/charge685731976B一致，预约释放。
+
+C28：该coarse各材料初质量偏差−3.766%/−3.766%/+9.981%，总初质量1%通过掩盖第三材料占wholefluid差>.03；不能作为materialmatched reference。C29：原H5 inheritedcondition文字保留，forward控制/条件摘要待闭合。9项v2GenCase独立核对6totalmasspass/3hard；新per-source3%诊断不能替代已冻结wholeinitialtaskbudget。新queryv1预审发现nestedtime_values_s/未绑定H5content门禁，未启动，交新v2制造H5实际接口验证后再primary读取。
+
+336/118/14实际参考终态/有效物理划分/七cards/无模型evaluator/完整内部可迁移重放均仍是必要完成条件，既有预算/期限不重置。以下历史检查点保留。
+
 ## 2026-10-07T20:07:49.304400+00:00：173例独立审计、完整回放与新转换启动
 
 恢复入口为 `checkpoints/CHECKPOINT_011_INTEGRATED.json`，完整目标active、未完成。独立快照173例（F2/F4/F6各48、F1=29），字段/身份/来源完整性信用，不代表动力学或QN/QE。F6真实48/48 completed且父进程退出，F3已接续新v4一worker；F1继续，以实际PID/start_ticks及收据为准。
