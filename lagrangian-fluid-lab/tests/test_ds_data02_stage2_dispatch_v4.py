@@ -61,7 +61,9 @@ def receipt(root, case, name):
 
 def test_v4_counts_final_receipt_and_catches_v3_boundary(setup, tmp_path):
     root, request = setup
-    estimate = 7_000
+    # The v3 running receipt is below this value in both clean and dirty
+    # worktree states, while its final receipt can push the directory over it.
+    estimate = 6_200
     path3 = request('v3-boundary', guard_v3, payload=32, estimated=estimate)
     batch_v3.base.RUNTIME_SCRIPT = batch_v3.DISPATCH
     assert batch_v3.run_batch([path3], max_concurrency=1, data_root=root,
