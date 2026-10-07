@@ -149,6 +149,9 @@ def make_candidate(spec: dict[str, object]) -> tuple[dict[str, object], Path]:
         "source_binding": {
             "schema": "ds02.stage2.infogain-gencase-binding.v1", "sentinel_id": spec["sentinel_id"], "family_id": spec["family_id"], "physical_case_id": spec["physical_case_id"],
             "grid_role": spec["grid_role"], "candidate_dp_m": float(spec["dp"]),
+            "baseline_spacing_dp_m": 0.020,
+            "spacing_separation_fraction": (0.020 - float(spec["dp"])) / 0.020,
+            "spacing_relation": spec["spacing_relation"],
             "continuous_source_xml": [record(Path(str(path))) for path in spec["source_xmls"]],
             "current_source_def": record(Path(str(spec["current_source_def"]))), "base_preflight_def": record(base_def), "candidate_def": record(candidate_def),
             "definition_semantics": definition_meta, "motion_dependency": motion_meta or {"status": "NONE"},
@@ -209,7 +212,7 @@ def build() -> Path:
     for spec in specs:
         request, path = make_candidate(spec)
         request_paths.append(str(path))
-        entries.append({"sentinel_id": spec["sentinel_id"], "case_id": spec["case_id"], "request": str(path), "candidate_def": request["source_binding"]["candidate_def"], "source_identity": request["source_binding"]["continuous_source_xml"], "dp_m": spec["dp"], "status": "PREPARED_LAUNCH_DISABLED", "mass_status": "UNKNOWN_UNTIL_TERMINAL_GENERATED_XML", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}})
+        entries.append({"sentinel_id": spec["sentinel_id"], "case_id": spec["case_id"], "request": str(path), "candidate_def": request["source_binding"]["candidate_def"], "source_identity": request["source_binding"]["continuous_source_xml"], "dp_m": spec["dp"], "spacing_separation_fraction": request["source_binding"]["spacing_separation_fraction"], "spacing_relation": spec["spacing_relation"], "status": "PREPARED_LAUNCH_DISABLED", "mass_status": "UNKNOWN_UNTIL_TERMINAL_GENERATED_XML", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}})
     queue = {"schema": "ds02.stage2.infogain-gencase-queue.v2", "status": "PREPARED_LAUNCH_DISABLED", "source_scope": "F1-S2 exact CURRENT identity; three interval candidates only; no family extrapolation", "candidate_count": len(entries), "candidates": entries, "request_paths": request_paths, "guard": {"runner": str(DISPATCH), "strict_guard": str(STRICT), "runtime": str(RUNTIME), "cpu_parent_binding": "required", "gpu": "none", "solver_launch": "forbidden", "hdf5_read": "forbidden"}, "mass_gate": {"whole_initial_target_pct": 1.0, "explicit_exception_upper_pct": 2.0, "above_upper": "HARD_FAIL", "particle_mass_rescale": False, "threshold_widening": False}, "notes": ["Candidates change only dp in new Def inputs; generated XML mass/count/phase remains UNKNOWN until parent runs GenCase.", "The 1-2% interval is a pre-registered marginal review exception only; it does not grant matched/scientific status.", "No CFD request is implied. Any follow-up must retain continuous geometry/control and independently audit mass, material blocks and phase."]}
     atomic_json(QUEUE_PATH, queue, replace=True)
     return QUEUE_PATH
