@@ -6,33 +6,28 @@
     "--request",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
     "--output",
-    "{attempt_root}/v13-runner-report.json"
+    "{attempt_root}/v13-initial-frame-report.json",
+    "--initial-frame-only"
   ],
   "full_timeline": {
     "frame_count": 401,
     "frame_start": 0,
-    "frame_stop": 400,
+    "frame_stop": 0,
     "identity_key": "(Zone,Idp)",
     "observables": [
-      "receiver_volume_first_arrival",
-      "receiver_final_destination",
-      "top_aperture_downward_crossing",
-      "world_halfspace_diagnostic",
-      "mass_distribution",
-      "mass_weighted_com",
-      "mass_weighted_velocity",
-      "mass_weighted_kinetic_energy",
-      "mass_quantile_front",
-      "residence_mass_time",
-      "gross_flux_unknown_net_endpoint_intervals"
+      "frame_zero_identity_count",
+      "frame_zero_type_mk_counts",
+      "frame_zero_position_minmax",
+      "nominal_box_diagnostic"
     ],
     "selected_fluid_count": 21114
   },
   "guard_contract": {
+    "full_timeline_not_read": true,
     "no_model_or_cfd": true,
-    "pre_read": "strict SHA/stat validation, no HDF5 dataset open",
+    "pre_read": "strict SHA/stat and CSV semantic validation before opening HDF5",
     "qualification": "all UNKNOWN; development only",
-    "read_flag": "--io-slot-approved required for full 401-frame HDF5 read"
+    "read_flag": "--io-slot-approved plus --initial-frame-only"
   },
   "input_files": [
     {
@@ -128,7 +123,7 @@
     {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v13.py",
       "role": "replay_module_source",
-      "sha256": "6cdfb79ff748d96c6aa05954cf1de7a5d27fe6b9574af33c2830aa6fe5e69276"
+      "sha256": "1a06df87a53717f0b013c6ff9dc3916471ded84709e5fe2489582f07c670b886"
     },
     {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_probe_v13.py",
@@ -138,12 +133,12 @@
     {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_prepare_bundle_v13.py",
       "role": "prepare_bundle_source",
-      "sha256": "d67e4673d51394997b6b347ccf111e4f63a28855a58027a04a875bad5f8e2ff4"
+      "sha256": "f1765f80cbdd84ce0bb1d2906df524d3f2a258770f5429ac6846a7ad2f88dfa3"
     },
     {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_stage2_f2_replay_v13.py",
       "role": "test_source",
-      "sha256": "770173fdadba5cedd2ba71878e96440ac71102319f525b95e9cc370d8fa2b9b9"
+      "sha256": "ef1d6aba7b6c25e27294424d9778ea0d21139ac384bd843aaf6c11b2d1f604b8"
     },
     {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
@@ -171,11 +166,11 @@
   "input_sha256": {
     "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_140_f2_actual_native_typed157_home4gib_v1/owners/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json": "33f0126a22f2f63de264b0a6775ee68ea633220d89377cec3f8f14327566956f",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_prepare_bundle_v13.py": "d67e4673d51394997b6b347ccf111e4f63a28855a58027a04a875bad5f8e2ff4",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_prepare_bundle_v13.py": "f1765f80cbdd84ce0bb1d2906df524d3f2a258770f5429ac6846a7ad2f88dfa3",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_probe_v13.py": "fe0624db9dc7c3214b4d8c0270d28663ceaa7475490a7a2a325bf1bd00fc7bc5",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_runner_v13.py": "4c4524ffdb7799e76a8cebb743d58a00e9cb71007321b76c96f50a79c5bec1fc",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v13.py": "6cdfb79ff748d96c6aa05954cf1de7a5d27fe6b9574af33c2830aa6fe5e69276",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_stage2_f2_replay_v13.py": "770173fdadba5cedd2ba71878e96440ac71102319f525b95e9cc370d8fa2b9b9",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v13.py": "1a06df87a53717f0b013c6ff9dc3916471ded84709e5fe2489582f07c670b886",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/tests/test_ds_data02_stage2_f2_replay_v13.py": "ef1d6aba7b6c25e27294424d9778ea0d21139ac384bd843aaf6c11b2d1f604b8",
     "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/review_20261007/evidence/E01395/manifest.json": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055",
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/execution-receipt.json": "485d259026080a8541fa2657ecdb1f57482562c0f14c7f831a5573f99fcde74f",
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/prepared/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
@@ -195,12 +190,6 @@
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
   },
-  "memory_observation": {
-    "enforcement": "none; shared guard has no RSS/RLIMIT_AS enforcement",
-    "estimate_bytes": 1073741824,
-    "measurement": "worker resource.getrusage(RUSAGE_SELF) max RSS, observational",
-    "selection_read_strategy": "contiguous HDF5 spans for all selected 21114 particles; no prefix or subsampling"
-  },
   "model_invoked": false,
   "portable_relocation": "prepare_bundle_v13.py then runner --path-map; source identity remains original role/SHA while paths overlay",
   "producer_attested_inputs": {
@@ -219,18 +208,51 @@
     "QI": "UNKNOWN",
     "QN": "UNKNOWN"
   },
-  "request_id": "f2-s1-full401-replay-runner-v13-001",
+  "read_scope": {
+    "cohort_identity_sha256": "bc7c25286faeb5c9bbc9f27c176671c027bbc0650b9051f9d08241b4f3397d70",
+    "expected_hdf5_shape": {
+      "initial_mass": [
+        418104
+      ],
+      "initial_mk": [
+        418104
+      ],
+      "initial_type": [
+        418104
+      ],
+      "particle_id": [
+        418104
+      ],
+      "particle_zone": [
+        418104
+      ],
+      "position": [
+        401,
+        418104,
+        3
+      ],
+      "time": [
+        401
+      ]
+    },
+    "frame_start": 0,
+    "frame_stop": 0,
+    "nominal_box_is_diagnostic_only": true,
+    "purpose": "verify exact CURRENT frame-zero Type3/MK1-3 identity cohort and measured bounds"
+  },
+  "request_id": "f2-s1-initial-frame-cohort-v13-001",
   "resource_request": {
     "cpu_threads": 1,
-    "estimated_peak_memory_mib": 1024,
-    "estimated_storage_bytes": 400000000,
+    "estimated_peak_memory_mib": 256,
+    "estimated_storage_bytes": 25000000,
     "hdf5_read": true,
-    "io_policy": "do not pass --io-slot-approved until parent grants one scientific HDF5 slot",
-    "max_wall_seconds": 3600,
+    "io_policy": "parent stage2guard single-frame slot only; no full timeline read",
+    "max_wall_seconds": 300,
+    "read_scope": "frame 0 position + initial type/MK/Zone/Idp/mass only",
     "requires_parent_stage2guard": true
   },
   "role": "DEVELOPMENT",
-  "schema": "ds02.stage2.f2-s1-replay-runner-request.v13",
+  "schema": "ds02.stage2.f2-s1-initial-frame-request.v13",
   "small_source_roles": [
     "current_catalog",
     "manifest",
@@ -252,7 +274,7 @@
   ],
   "source_request": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
   "source_request_sha256": "33f0126a22f2f63de264b0a6775ee68ea633220d89377cec3f8f14327566956f",
-  "status": "READY_FOR_PARENT_STAGE2GUARD",
+  "status": "READY_FOR_PARENT_STAGE2GUARD_INITIAL_FRAME",
   "trajectory_h5": {
     "bytes": 1191110523,
     "hash_mode": "producer_attested_only_no_content_hash",
@@ -260,6 +282,38 @@
     "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual812-full401-typed157-home4gib-source140-root1013/trajectory.h5",
     "producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
     "read_status": "PENDING_PRIMARY_IO_SLOT"
+  },
+  "verification": {
+    "hdf5_content_hash": false,
+    "hdf5_frames_to_read": 1,
+    "small_source_roles": [
+      "current_catalog",
+      "manifest",
+      "xmf",
+      "generated_xml",
+      "motion_dat",
+      "conversion_report",
+      "scientific_scan_sidecar",
+      "initial_qa",
+      "initial_stats",
+      "initial_csv",
+      "gencase_receipt",
+      "solver_receipt",
+      "owner_metadata",
+      "native_runparts",
+      "native_partout",
+      "native_reconciliation",
+      "native_reconciliation_receipt",
+      "runner_source",
+      "replay_module_source",
+      "probe_source",
+      "prepare_bundle_source",
+      "test_source",
+      "replay_request",
+      "interpreter"
+    ],
+    "verify_hdf5_stat": true,
+    "verify_sources": true
   },
   "working_directory": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics"
 }

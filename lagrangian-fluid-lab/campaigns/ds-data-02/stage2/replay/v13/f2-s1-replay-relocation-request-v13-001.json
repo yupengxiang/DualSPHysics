@@ -1,39 +1,4 @@
 {
-  "cfd_invoked": false,
-  "command": [
-    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_runner_v13.py",
-    "--request",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
-    "--output",
-    "{attempt_root}/v13-runner-report.json"
-  ],
-  "full_timeline": {
-    "frame_count": 401,
-    "frame_start": 0,
-    "frame_stop": 400,
-    "identity_key": "(Zone,Idp)",
-    "observables": [
-      "receiver_volume_first_arrival",
-      "receiver_final_destination",
-      "top_aperture_downward_crossing",
-      "world_halfspace_diagnostic",
-      "mass_distribution",
-      "mass_weighted_com",
-      "mass_weighted_velocity",
-      "mass_weighted_kinetic_energy",
-      "mass_quantile_front",
-      "residence_mass_time",
-      "gross_flux_unknown_net_endpoint_intervals"
-    ],
-    "selected_fluid_count": 21114
-  },
-  "guard_contract": {
-    "no_model_or_cfd": true,
-    "pre_read": "strict SHA/stat validation, no HDF5 dataset open",
-    "qualification": "all UNKNOWN; development only",
-    "read_flag": "--io-slot-approved required for full 401-frame HDF5 read"
-  },
   "input_files": [
     {
       "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
@@ -195,14 +160,17 @@
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
   },
-  "memory_observation": {
-    "enforcement": "none; shared guard has no RSS/RLIMIT_AS enforcement",
-    "estimate_bytes": 1073741824,
-    "measurement": "worker resource.getrusage(RUSAGE_SELF) max RSS, observational",
-    "selection_read_strategy": "contiguous HDF5 spans for all selected 21114 particles; no prefix or subsampling"
-  },
   "model_invoked": false,
-  "portable_relocation": "prepare_bundle_v13.py then runner --path-map; source identity remains original role/SHA while paths overlay",
+  "prepare_command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_prepare_bundle_v13.py",
+    "--request",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
+    "--bundle-root",
+    "{bundle_root}",
+    "--output-path-map",
+    "{bundle_root}/path-map.json"
+  ],
   "producer_attested_inputs": {
     "trajectory_h5": {
       "bytes": 1191110523,
@@ -219,47 +187,157 @@
     "QI": "UNKNOWN",
     "QN": "UNKNOWN"
   },
-  "request_id": "f2-s1-full401-replay-runner-v13-001",
+  "request_id": "f2-s1-portable-copy-relocation-v13-001",
   "resource_request": {
     "cpu_threads": 1,
-    "estimated_peak_memory_mib": 1024,
-    "estimated_storage_bytes": 400000000,
-    "hdf5_read": true,
-    "io_policy": "do not pass --io-slot-approved until parent grants one scientific HDF5 slot",
-    "max_wall_seconds": 3600,
+    "estimated_storage_bytes": 1300000000,
+    "hdf5_content_hash_bytes": 1191110523,
+    "hdf5_copy_bytes": 1191110523,
+    "hdf5_copy_requires_slot": true,
+    "hdf5_read": false,
+    "max_wall_seconds": 900,
     "requires_parent_stage2guard": true
   },
   "role": "DEVELOPMENT",
-  "schema": "ds02.stage2.f2-s1-replay-runner-request.v13",
-  "small_source_roles": [
-    "current_catalog",
-    "manifest",
-    "xmf",
-    "generated_xml",
-    "motion_dat",
-    "conversion_report",
-    "scientific_scan_sidecar",
-    "initial_qa",
-    "initial_stats",
-    "initial_csv",
-    "gencase_receipt",
-    "solver_receipt",
-    "owner_metadata",
-    "native_runparts",
-    "native_partout",
-    "native_reconciliation",
-    "native_reconciliation_receipt"
+  "schema": "ds02.stage2.f2-s1-replay-relocation-request.v13",
+  "small_source_copy_plan": [
+    {
+      "destination": "{bundle_root}/sources/current_catalog/CURRENT336.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
+      "role": "current_catalog",
+      "sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b"
+    },
+    {
+      "destination": "{bundle_root}/sources/manifest/manifest.json",
+      "original_path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/review_20261007/evidence/E01395/manifest.json",
+      "role": "manifest",
+      "sha256": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055"
+    },
+    {
+      "destination": "{bundle_root}/sources/xmf/case.xmf",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-rx056-rot090-actual1013-full401-N3-xmf108-root1077/xdmf/case.xmf",
+      "role": "xmf",
+      "sha256": "7f2a0e3e227e7008e840f044a653938642f06bec3df28d24ac113918d0dec776"
+    },
+    {
+      "destination": "{bundle_root}/sources/generated_xml/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/prepared/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+      "role": "generated_xml",
+      "sha256": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e"
+    },
+    {
+      "destination": "{bundle_root}/sources/motion_dat/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/prepared/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+      "role": "motion_dat",
+      "sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b"
+    },
+    {
+      "destination": "{bundle_root}/sources/conversion_report/conversion-report.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual812-full401-typed157-home4gib-source140-root1013/conversion-report.json",
+      "role": "conversion_report",
+      "sha256": "ee623240d88fbcf4dfc0b251b6200474dd025988b99c8faef9bd8431afd85a67"
+    },
+    {
+      "destination": "{bundle_root}/sources/scientific_scan_sidecar/scientific-scan.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_SCIENCE/scan-F2-S1-001/scientific-scan.json",
+      "role": "scientific_scan_sidecar",
+      "sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59"
+    },
+    {
+      "destination": "{bundle_root}/sources/initial_qa/actual-initial-qa.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual804-initial-qa105-root809/actual-initial-qa.json",
+      "role": "initial_qa",
+      "sha256": "e72062c6d48f2e197b8fb2cb841e10393571b8f807695ef547213dd949037340"
+    },
+    {
+      "destination": "{bundle_root}/sources/initial_stats/initial_stats.csv",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual804-initial-qa105-root809/partvtk/initial_stats.csv",
+      "role": "initial_stats",
+      "sha256": "e4994b56aba4daf534fae20891afa7d8ea51f46685704d499e6f259cf56d754c"
+    },
+    {
+      "destination": "{bundle_root}/sources/initial_csv/initial.csv",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual804-initial-qa105-root809/partvtk/initial.csv",
+      "role": "initial_csv",
+      "sha256": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e"
+    },
+    {
+      "destination": "{bundle_root}/sources/gencase_receipt/execution-receipt.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/execution-receipt.json",
+      "role": "gencase_receipt",
+      "sha256": "485d259026080a8541fa2657ecdb1f57482562c0f14c7f831a5573f99fcde74f"
+    },
+    {
+      "destination": "{bundle_root}/sources/solver_receipt/execution-receipt.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-full401-native-source801-qa809-root812/execution-receipt.json",
+      "role": "solver_receipt",
+      "sha256": "e59d876df8718e17c6cc57c17a822b77d467f423e4b900df7bb10c127a6e5dc6"
+    },
+    {
+      "destination": "{bundle_root}/sources/owner_metadata/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json",
+      "original_path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_140_f2_actual_native_typed157_home4gib_v1/owners/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json",
+      "role": "owner_metadata",
+      "sha256": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3"
+    },
+    {
+      "destination": "{bundle_root}/sources/native_runparts/RunPARTs.csv",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-full401-native-source801-qa809-root812/solver_output/RunPARTs.csv",
+      "role": "native_runparts",
+      "sha256": "e2bde91995d98a336d4d22113ab92ed5c750c450555274c03575321c12d95cd5"
+    },
+    {
+      "destination": "{bundle_root}/sources/native_partout/PartOut_000.obi4",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-full401-native-source801-qa809-root812/solver_output/data/PartOut_000.obi4",
+      "role": "native_partout",
+      "sha256": "7b55c47d4744cfe780ec40327845938d0ec19eee0cb5c93c5f26b442132799ce"
+    },
+    {
+      "destination": "{bundle_root}/sources/native_reconciliation/native-reconciliation.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_EXCLUSIONS/join-F2-S1-001/native-reconciliation.json",
+      "role": "native_reconciliation",
+      "sha256": "d8b4fcf0bd2f3e45a252b58db9a442f0095b94e8a512c6c77aab25cd8b8a2cc9"
+    },
+    {
+      "destination": "{bundle_root}/sources/native_reconciliation_receipt/execution-receipt.json",
+      "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_EXCLUSIONS/join-F2-S1-001/execution-receipt.json",
+      "role": "native_reconciliation_receipt",
+      "sha256": "73aebbbe73aee676eaba573b91a181aae1ee74e4d8a7c771524c4519fac66a7b"
+    }
   ],
-  "source_request": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
-  "source_request_sha256": "33f0126a22f2f63de264b0a6775ee68ea633220d89377cec3f8f14327566956f",
-  "status": "READY_FOR_PARENT_STAGE2GUARD",
-  "trajectory_h5": {
-    "bytes": 1191110523,
-    "hash_mode": "producer_attested_only_no_content_hash",
-    "mtime_ns": 1791313901943793470,
-    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual812-full401-typed157-home4gib-source140-root1013/trajectory.h5",
-    "producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
-    "read_status": "PENDING_PRIMARY_IO_SLOT"
+  "source_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
+    "sha256": "d90ce279fa27b8312653d8819d82c8c5298a6ad9e81524d4e9cd6d0777ca3d51"
   },
-  "working_directory": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics"
+  "status": "READY_FOR_PARENT_STAGE2GUARD_COPY",
+  "strict_runner_command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_runner_v13.py",
+    "--request",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
+    "--path-map",
+    "{bundle_root}/path-map.json",
+    "--output",
+    "{attempt_root}/relocated-runner-report.json"
+  ],
+  "success_criteria": [
+    "all small source SHA-256 values match at relocated paths",
+    "copied trajectory HDF5 SHA-256 equals f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "same-size wrong-content trajectory copy is rejected",
+    "new path/mtime are recorded separately from source provenance"
+  ],
+  "trajectory_h5_copy_plan": {
+    "bytes": 1191110523,
+    "content_hash": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "content_hash_required": true,
+    "content_hash_source": "parent-guard verified scientific scan full-H5 SHA",
+    "destination": "{bundle_root}/trajectory.h5",
+    "original_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual812-full401-typed157-home4gib-source140-root1013/trajectory.h5",
+    "producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "requires_flags": [
+      "--copy-hdf5",
+      "--io-slot-approved"
+    ],
+    "same_size_wrong_content": "reject",
+    "stat_only_status": "INSUFFICIENT_FOR_FULL_REPLAY"
+  }
 }

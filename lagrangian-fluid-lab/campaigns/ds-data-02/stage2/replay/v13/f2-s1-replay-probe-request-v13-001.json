@@ -2,38 +2,12 @@
   "cfd_invoked": false,
   "command": [
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_runner_v13.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_probe_v13.py",
     "--request",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
     "--output",
-    "{attempt_root}/v13-runner-report.json"
+    "{attempt_root}/v13-probe-report.json"
   ],
-  "full_timeline": {
-    "frame_count": 401,
-    "frame_start": 0,
-    "frame_stop": 400,
-    "identity_key": "(Zone,Idp)",
-    "observables": [
-      "receiver_volume_first_arrival",
-      "receiver_final_destination",
-      "top_aperture_downward_crossing",
-      "world_halfspace_diagnostic",
-      "mass_distribution",
-      "mass_weighted_com",
-      "mass_weighted_velocity",
-      "mass_weighted_kinetic_energy",
-      "mass_quantile_front",
-      "residence_mass_time",
-      "gross_flux_unknown_net_endpoint_intervals"
-    ],
-    "selected_fluid_count": 21114
-  },
-  "guard_contract": {
-    "no_model_or_cfd": true,
-    "pre_read": "strict SHA/stat validation, no HDF5 dataset open",
-    "qualification": "all UNKNOWN; development only",
-    "read_flag": "--io-slot-approved required for full 401-frame HDF5 read"
-  },
   "input_files": [
     {
       "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
@@ -195,14 +169,15 @@
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
   },
-  "memory_observation": {
-    "enforcement": "none; shared guard has no RSS/RLIMIT_AS enforcement",
-    "estimate_bytes": 1073741824,
-    "measurement": "worker resource.getrusage(RUSAGE_SELF) max RSS, observational",
-    "selection_read_strategy": "contiguous HDF5 spans for all selected 21114 particles; no prefix or subsampling"
-  },
   "model_invoked": false,
-  "portable_relocation": "prepare_bundle_v13.py then runner --path-map; source identity remains original role/SHA while paths overlay",
+  "negative_cases": [
+    "wrong case identity",
+    "wrong initial denominator (later missing incorrectly added)",
+    "wrong declared SHA",
+    "wrong-case path",
+    "same-size wrong content",
+    "wrong receiver geometry"
+  ],
   "producer_attested_inputs": {
     "trajectory_h5": {
       "bytes": 1191110523,
@@ -219,47 +194,43 @@
     "QI": "UNKNOWN",
     "QN": "UNKNOWN"
   },
-  "request_id": "f2-s1-full401-replay-runner-v13-001",
+  "request_id": "f2-s1-strict-source-probe-v13-001",
   "resource_request": {
     "cpu_threads": 1,
-    "estimated_peak_memory_mib": 1024,
-    "estimated_storage_bytes": 400000000,
-    "hdf5_read": true,
-    "io_policy": "do not pass --io-slot-approved until parent grants one scientific HDF5 slot",
-    "max_wall_seconds": 3600,
+    "estimated_storage_bytes": 2000000,
+    "hdf5_read": false,
+    "max_wall_seconds": 180,
     "requires_parent_stage2guard": true
   },
   "role": "DEVELOPMENT",
-  "schema": "ds02.stage2.f2-s1-replay-runner-request.v13",
-  "small_source_roles": [
-    "current_catalog",
-    "manifest",
-    "xmf",
-    "generated_xml",
-    "motion_dat",
-    "conversion_report",
-    "scientific_scan_sidecar",
-    "initial_qa",
-    "initial_stats",
-    "initial_csv",
-    "gencase_receipt",
-    "solver_receipt",
-    "owner_metadata",
-    "native_runparts",
-    "native_partout",
-    "native_reconciliation",
-    "native_reconciliation_receipt"
-  ],
+  "schema": "ds02.stage2.f2-s1-replay-probe-request.v13",
   "source_request": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v13/f2-s1-replay-request-v13-001.json",
   "source_request_sha256": "33f0126a22f2f63de264b0a6775ee68ea633220d89377cec3f8f14327566956f",
   "status": "READY_FOR_PARENT_STAGE2GUARD",
-  "trajectory_h5": {
-    "bytes": 1191110523,
-    "hash_mode": "producer_attested_only_no_content_hash",
-    "mtime_ns": 1791313901943793470,
-    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual812-full401-typed157-home4gib-source140-root1013/trajectory.h5",
-    "producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
-    "read_status": "PENDING_PRIMARY_IO_SLOT"
+  "verification": {
+    "hdf5_content_read": false,
+    "source_roles": [
+      "current_catalog",
+      "manifest",
+      "xmf",
+      "generated_xml",
+      "motion_dat",
+      "conversion_report",
+      "scientific_scan_sidecar",
+      "initial_qa",
+      "initial_stats",
+      "initial_csv",
+      "gencase_receipt",
+      "solver_receipt",
+      "owner_metadata",
+      "native_runparts",
+      "native_partout",
+      "native_reconciliation",
+      "native_reconciliation_receipt"
+    ],
+    "source_roles_count": 17,
+    "verify_hdf5_stat": true,
+    "verify_sources": true
   },
   "working_directory": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics"
 }
