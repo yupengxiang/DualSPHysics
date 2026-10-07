@@ -463,6 +463,24 @@ def _validate_and_load_typed(path: Path, request: Mapping[str, Any], converter_r
         selected_ids = selected_ids[selected_order]
         selected_zones = selected_zones[selected_order]
         selected_mks = selected_mks[selected_order]
+    raw_frames = raw_evidence.get("frames")
+    if not isinstance(raw_frames, list) or len(raw_frames) != frames:
+        raise NativeReconstructionError("raw decoder evidence does not cover every expected frame")
+    for frame_index, raw_frame in enumerate(raw_frames):
+        if not isinstance(raw_frame, Mapping) or raw_frame.get("frame") != frame_index:
+            raise NativeReconstructionError("raw decoder evidence frame order is not contiguous")
+        try:
+            raw_time = float(raw_frame["time_s"])
+            raw_id_shape = raw_frame["decoded_source_arrays"]["Idp"]["shape"]
+            raw_id_count = int(raw_id_shape[0])
+        except (KeyError, TypeError, ValueError, IndexError) as error:
+            raise NativeReconstructionError(f"raw decoder header/Idp evidence is incomplete at frame {frame_index}") from error
+        if not math.isclose(raw_time, float(expected_times[frame_index]), rel_tol=0.0, abs_tol=2e-8):
+            raise NativeReconstructionError(f"raw decoder TimeStep differs from frozen timeline at frame {frame_index}")
+        summary = converter_report.get("lifecycle", {}).get("frame_summary", [])
+        if isinstance(summary, list) and len(summary) == frames:
+            if raw_id_count != int(summary[frame_index].get("active_particles", -1)):
+                raise NativeReconstructionError(f"raw decoded Idp count differs from lifecycle at frame {frame_index}")
     # The HDF5 output is read only after conversion and only under the parent
     # I/O grant.  This validation is frame-by-frame/chunked; no full particle
     # wall/boundary arrays are materialized.

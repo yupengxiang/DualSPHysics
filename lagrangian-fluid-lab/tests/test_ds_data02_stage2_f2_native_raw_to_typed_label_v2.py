@@ -81,14 +81,18 @@ def _write_fixture(path: Path, *, finite_inactive: bool = False) -> dict:
         h5.create_dataset("initial_type", data=np.array([0, 3, 3, 3], dtype="i1"))
         h5.create_dataset("initial_mk", data=np.array([0, 1, 2, 3], dtype="i2"))
         h5.create_dataset("initial_mass", data=np.array([0.002, 0.001, 0.001, 0.001], dtype="f4"))
-    return request, report
+    raw_evidence = {"frames": [
+        {"frame": 0, "time_s": 0.0, "decoded_source_arrays": {"Idp": {"shape": [4]}}},
+        {"frame": 1, "time_s": 4.0001, "decoded_source_arrays": {"Idp": {"shape": [3]}}},
+    ]}
+    return request, report, raw_evidence
 
 
 def test_typed_validation_binds_identity_mass_time_and_lifecycle(tmp_path: Path) -> None:
     h5_path = tmp_path / "typed.h5"
-    request, converter_report = _write_fixture(h5_path)
+    request, converter_report, raw_evidence = _write_fixture(h5_path)
     trajectory, validation = worker._validate_and_load_typed(
-        h5_path, request, converter_report, {"frames": [{}, {}]})
+        h5_path, request, converter_report, raw_evidence)
     assert validation["status"] == "PASS_TYPED_IDENTITY_LIFECYCLE_DEVELOPMENT"
     assert validation["fluid_cohort"]["count"] == 3
     assert validation["fluid_cohort"]["mass_sum_kg"] == pytest.approx(0.003)
@@ -99,17 +103,17 @@ def test_typed_validation_binds_identity_mass_time_and_lifecycle(tmp_path: Path)
 
 def test_finite_inactive_coordinates_are_rejected(tmp_path: Path) -> None:
     h5_path = tmp_path / "typed.h5"
-    request, converter_report = _write_fixture(h5_path, finite_inactive=True)
+    request, converter_report, raw_evidence = _write_fixture(h5_path, finite_inactive=True)
     with pytest.raises(worker.NativeReconstructionError, match="inactive position"):
-        worker._validate_and_load_typed(h5_path, request, converter_report, {"frames": [{}, {}]})
+        worker._validate_and_load_typed(h5_path, request, converter_report, raw_evidence)
 
 
 def test_identity_hash_mismatch_is_rejected(tmp_path: Path) -> None:
     h5_path = tmp_path / "typed.h5"
-    request, converter_report = _write_fixture(h5_path)
+    request, converter_report, raw_evidence = _write_fixture(h5_path)
     request["cohort"]["source_identity_set_sha256"] = "b" * 64
     with pytest.raises(worker.NativeReconstructionError, match="identity axis"):
-        worker._validate_and_load_typed(h5_path, request, converter_report, {"frames": [{}, {}]})
+        worker._validate_and_load_typed(h5_path, request, converter_report, raw_evidence)
 
 
 def test_spans_preserve_noncontiguous_identity_order() -> None:
