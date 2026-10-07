@@ -1,0 +1,236 @@
+{
+  "schema": "ds-data-02.stage2.f2-s1.effective-condition-canonical.v1",
+  "status": "CANONICAL_PHYSICAL_CONDITION_BINDING",
+  "canonical_payload": {
+    "physical_identity": {
+      "family_id": "F2",
+      "sentinel_id": "F2-S1",
+      "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "mechanism_id": "offset_spill",
+      "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+      "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1"
+    },
+    "geometry": {
+      "cup": {
+        "low_m": [
+          0.0,
+          -0.15,
+          0.65
+        ],
+        "size_m": [
+          0.425,
+          0.3,
+          0.45
+        ],
+        "label": "moving cup"
+      },
+      "receiver": {
+        "low_m": [
+          0.56,
+          -0.16,
+          0.0
+        ],
+        "size_m": [
+          1.1,
+          0.6,
+          0.45
+        ],
+        "label": "fixed receiver"
+      },
+      "tray": {
+        "low_m": [
+          -1.2,
+          -1.0,
+          -0.2
+        ],
+        "size_m": [
+          4.0,
+          2.0,
+          0.15
+        ],
+        "label": "fixed spill tray"
+      },
+      "fluid_layer_0": {
+        "low_m": [
+          0.05,
+          -0.11,
+          0.7
+        ],
+        "size_m": [
+          0.325,
+          0.22,
+          0.088
+        ],
+        "mkfluid": 0,
+        "label": "fluid source layer 0"
+      },
+      "fluid_layer_1": {
+        "low_m": [
+          0.05,
+          -0.11,
+          0.788
+        ],
+        "size_m": [
+          0.325,
+          0.22,
+          0.088
+        ],
+        "mkfluid": 1,
+        "label": "fluid source layer 1"
+      },
+      "fluid_layer_2": {
+        "low_m": [
+          0.05,
+          -0.11,
+          0.876
+        ],
+        "size_m": [
+          0.325,
+          0.22,
+          0.088
+        ],
+        "mkfluid": 2,
+        "label": "fluid source layer 2"
+      }
+    },
+    "initial_state": {
+      "source_regions": [
+        "fluid_layer_0",
+        "fluid_layer_1",
+        "fluid_layer_2"
+      ],
+      "source_labels": [
+        "fluid source layer 0",
+        "fluid source layer 1",
+        "fluid source layer 2"
+      ],
+      "velocities_m_per_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "continuum_mass_by_source_kg": {
+        "fluid": 21.114
+      },
+      "source_mass_by_mkfluid_kg": {
+        "0": 7.038,
+        "1": 7.038,
+        "2": 7.038
+      },
+      "initial_mass_total_kg": 21.114,
+      "mass_semantics": "continuum target/source mass for physical-condition split; candidate particle mass is numerical and excluded"
+    },
+    "equation_and_environment_controls": {
+      "controls": {
+        "step_algorithm": 2,
+        "kernel": 2,
+        "viscosity": 0.03,
+        "density_dt": 3,
+        "density_dt_value": 0.1,
+        "boundary": 1
+      },
+      "gravity_m_s2": [
+        0.0,
+        0.0,
+        -9.81
+      ],
+      "density_kg_m3": 1000.0
+    },
+    "physical_parameters": {
+      "fill_ratio": 0.8,
+      "fluid_height_m": 0.264,
+      "receiver_x_m": 0.56,
+      "receiver_y_m": 0.14,
+      "rotation_duration_s": 0.9,
+      "rotation_final_angle_deg": -105.0,
+      "rotation_axis_origin_m": [
+        0.0,
+        -1.0,
+        0.65
+      ],
+      "rotation_axis_endpoint_m": [
+        0.0,
+        1.0,
+        0.65
+      ],
+      "motion_interpolation": "piecewise linear native mvrotfile"
+    },
+    "motion_control": {
+      "label": "ROT090",
+      "label_is_not_angle_deg": true,
+      "motion_sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+      "table_window_s": [
+        0.0,
+        4.0
+      ],
+      "initial_hold_window_s": [
+        0.0,
+        0.5
+      ],
+      "rotation_window_s": [
+        0.5,
+        1.4
+      ],
+      "rotation_duration_s": 0.9,
+      "rotation_final_angle_deg": -105.0,
+      "post_rotation_hold_window_s": [
+        1.4,
+        4.0
+      ],
+      "xml_mvrotfile_duration_s": 4.0,
+      "sequence": "initial hold 0..0.5 s; rotate 0.5..1.4 s; hold 1.4..4.0 s"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 4.0,
+      "right_censor_policy": "retain complete 0..4 s physical window; no extrapolation"
+    }
+  },
+  "canonical_payload_sha256": "3360b5bebb60830e20bc2d9de02f165c8f28df150d058edb3af22fceb635ce40",
+  "identity_scope": {
+    "included": [
+      "family/sentinel/physical/mechanism/geometry/control identity",
+      "continuous geometry and initial source regions",
+      "continuum source mass target and equation/environment controls",
+      "motion file digest and explicit initial/rotation/post-rotation windows",
+      "physical event window 0..4 s"
+    ],
+    "excluded_numerical_variations": [
+      "dp_m",
+      "h_m",
+      "massfluid_kg",
+      "particle_count",
+      "particle_lattice_phase",
+      "CFL",
+      "DtMin",
+      "DtFixed",
+      "TimeOut",
+      "saved-output cadence",
+      "typed/native particle identifiers"
+    ],
+    "split_key": "same canonical physical-condition hash; numerical/control/output differences remain separate study dimensions"
+  },
+  "provenance": {
+    "source_control_semantics": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/f2_s1_full_cfd_canary_control_semantics_v3.json",
+      "sha256": "7269a1e204937bf148991c4e6510779d47aa58854f2c7b7bcdc91bc2428a8173"
+    },
+    "source_generated_xml_anchor": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/prepared/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+      "bytes": 7738,
+      "mtime_ns": 1791262608319919955,
+      "sha256": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e"
+    },
+    "motion_input": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_COARSE_PHASE_PROBE_DP01258/f2_s1_coarse_phase_probe_dp01258-001/F2_S1_COARSE_PHASE_PROBE_DP01258_motion.dat",
+      "bytes": 13424,
+      "mtime_ns": 1791398039513390632,
+      "sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b"
+    },
+    "quality_label_split": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/review-source/QUALITY_LABEL_SPLIT_ZH.md",
+      "sha256": "7e6acd9e706c80030a1d4703fb50ac78e880bf39108e0d061f67bfb5b27d03e0"
+    },
+    "event_window_correction": "effective initial hold 0..0.5, rotation 0.5..1.4, post-rotation hold 1.4..4.0; historical report bytes remain unchanged"
+  }
+}
