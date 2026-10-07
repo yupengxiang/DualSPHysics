@@ -232,7 +232,8 @@ class CurrentCase:
                     if manifest_payload.get("physical_case_id") != expected_manifest_id:
                         raise BindingError(
                             f"{self.physical_case_id}: manifest identity differs from its CURRENT binding")
-                    if manifest_payload.get("family_id") != self.family_id:
+                    if (manifest_payload.get("family_id") is not None
+                            and manifest_payload.get("family_id") != self.family_id):
                         raise BindingError(f"{self.physical_case_id}: manifest family differs from CURRENT")
                     manifest_identity = {
                         "schema": manifest_schema,
@@ -1007,7 +1008,8 @@ def _lineage_evidence(case: CurrentCase) -> dict[str, Any]:
         if expected and actual != expected:
             raise BindingError(f"{case.physical_case_id}: manifest hash differs while building split")
         payload = read_json(manifest_path)
-        if not isinstance(payload, Mapping) or payload.get("family_id") != family:
+        if (not isinstance(payload, Mapping)
+                or (payload.get("family_id") is not None and payload.get("family_id") != family)):
             raise BindingError(f"{case.physical_case_id}: manifest lineage payload is invalid")
         for name in ("physical_condition_sha256", "canonical_physical_condition_sha256",
                      "source_plan_physical_condition_sha256", "classified_physical_condition_sha256"):
