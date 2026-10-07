@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.full-window-postrun-plan.v1",
+  "status": "PREPARED_DEFERRED_UNTIL_PRIMARY_CANARY_TERMINAL_RECEIPTS",
+  "binding_manifest": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_full_window_canary_binding_v1.json",
+  "source_role": "complete native Part_*.bi4 remains immutable primary source",
+  "tasks": [
+    {
+      "task": "single_stream_observer_pass",
+      "input": "{canary_attempt_root}/solver_output/data/Part_*.bi4",
+      "output": "{canary_attempt_root}/observer/stream-observables.jsonl",
+      "contract": "one sequential pass; pre-registered observables; no array deletion",
+      "status": "DEFERRED"
+    },
+    {
+      "task": "typed_query_anchor_replay",
+      "input": "complete native Part_*.bi4 at registered physical query times",
+      "output": "{canary_attempt_root}/typed/query-anchors/",
+      "contract": "actual-time bracket metadata and all selected fields; full native remains accessible",
+      "status": "DEFERRED"
+    },
+    {
+      "task": "full_window_lossless_roundtrip_canary",
+      "input": "complete native Part_*.bi4",
+      "output": "{canary_attempt_root}/archive/full-window-lossless/",
+      "contract": "include every frame, byte-for-byte decompression SHA, complete decoder access, compressed bytes and CPU time",
+      "ratio": "UNKNOWN_UNTIL_MEASURED",
+      "status": "DEFERRED"
+    }
+  ],
+  "no_solver_launch": true,
+  "no_h5_read": true
+}
