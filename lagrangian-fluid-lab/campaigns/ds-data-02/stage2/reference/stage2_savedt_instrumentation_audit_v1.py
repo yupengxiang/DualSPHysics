@@ -23,7 +23,10 @@ from typing import Any
 
 SCHEMA = "ds02.stage2.savedt-instrumentation-audit.v1"
 REPO = Path(__file__).resolve().parents[5]
-OFFICIAL = REPO / "lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4"
+# The official v5.4 tree is shared from the project checkout rather than
+# copied into each preparation worktree.  Keep the path explicit and bind its
+# hashes in the resulting audit.
+OFFICIAL = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4")
 DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
 F4_ATTEMPT = DATA_ROOT / (
     "families/F4/F4_S1_FULL_WINDOW_CANARY_COARSE_DP01230_T1P2/"
