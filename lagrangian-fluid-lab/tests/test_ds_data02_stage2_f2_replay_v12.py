@@ -404,3 +404,19 @@ def test_v12_portable_relocation_hashes_small_sources_and_rejects_mutations(tmp_
         relocate_source_bound_request(request, {"motion_dat": str(bad)})
     with pytest.raises(ReplayV12BindingError, match="missing"):
         relocate_source_bound_request(request, {"motion_dat": str(tmp_path / "MOTION.DAT")})
+    original_h5 = tmp_path / "original.h5"
+    relocated_h5 = tmp_path / "relocated" / "trajectory.h5"
+    original_h5.write_bytes(b"portable-hdf5-producer-attested-bytes")
+    relocated_h5.write_bytes(original_h5.read_bytes())
+    os.utime(original_h5, ns=(original_h5.stat().st_atime_ns, original_h5.stat().st_mtime_ns - 123456789))
+    request["trajectory_h5"] = {
+        "path": str(original_h5), "bytes": original_h5.stat().st_size,
+        "mtime_ns": original_h5.stat().st_mtime_ns,
+        "producer_declared_sha256": "a" * 64,
+        "hash_mode": "producer_attested_only_no_content_hash",
+    }
+    migrated = relocate_source_bound_request(request, {
+        "motion_dat": str(moved), "trajectory_h5": str(relocated_h5)})
+    assert migrated["trajectory_h5"]["path"] == str(relocated_h5.resolve())
+    assert migrated["trajectory_h5"]["mtime_ns"] == relocated_h5.stat().st_mtime_ns
+    assert migrated["relocation"]["trajectory_h5"]["producer_declared_sha256"] == "a" * 64
