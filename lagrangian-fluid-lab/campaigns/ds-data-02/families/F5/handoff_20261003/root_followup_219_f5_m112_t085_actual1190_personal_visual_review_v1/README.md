@@ -1,0 +1,11 @@
+# F5 Root1190 M112/T085 personal visual review
+
+This source-only handoff records the F5-assigned personal review of the completed, atomically published full801 render for `F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M112_T085_NEXT34` (`F5_COMPACT_RUNUP_RECOVERY_C082S1_M112_T085`). Root1190 is the actual render producer. The main QI proof is referenced below; this package adds only the delegated visual review and metadata closure.
+
+I viewed all 34 published contact sheets and all 9 published keyframes (`0, 100, 200, 300, 400, 500, 600, 700, 800`) with `view_image`. The sequence is continuous and stable: the blue fluid wedge/shoreline remains coherent, with small local surface and shoreline evolution around the orange piston. I saw no gross explosion, abrupt termination, crop, broad visible escape, or clear severe visible bed penetration. The response is weak/localized, so these views do not establish a large runup or inundation event.
+
+The main QI records 801 frames, 194427 particles (`fixed=158559`, `moving=4210`, `floating=0`, `fluid=31658`), three-dimensional finite active identities, exact saved times through 16.00004580463777 s, and the all801 bed footprint diagnostics. One-DP/two-DP bins remain diagnostics only; they do not certify strict containment or sub-DP absence. The original exact-lattice precision negative remains retained (`max residual=5.000000015797923e-06` cells against the `1e-06` threshold), so numerical precision is not accepted. Historical A/B negatives remain retained.
+
+The native physical-plan scope is canonical `896b3f27d96c56d6cebf978b0eb835a2ccb2ada1b09995a0b157320e1edb27ee`. The XMF physical-plan scope is the registered bed SourceDef role `4a8aaff4383ee7596c7d50e1f0b991674d10fd63a3445b3b62d2acc450c85701`. The typed legacy scope is `4bd1f1eddd55a7ee52ba0ebc314405777d09a09557b209a0385d4222d550f3b7`. Native and XMF condition-plan fields are absent; roles are recorded separately and no equality is claimed.
+
+Run `python3 scripts/validate_fresh219.py` for read-only validation. Only published PNG derivatives were opened; raw H5/BI4/CSV/DAT/VTK payloads were not read, copied, or hashed. No scientific job or shared-state write was performed. Reviewer model: GPT-5.6 Luna/max; no recursive delegation. Fresh218 and all producer bytes remain untouched.
