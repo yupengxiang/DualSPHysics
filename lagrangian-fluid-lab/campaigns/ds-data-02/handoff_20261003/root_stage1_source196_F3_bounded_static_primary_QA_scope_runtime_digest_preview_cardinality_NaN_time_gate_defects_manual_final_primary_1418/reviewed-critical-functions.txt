@@ -1,0 +1,326 @@
+LINES 1831-1906
+def _f3_receipt_certificate(ref: Any, expected_case_id: str | None = None,
+                            expected_physical_id: str | None = None,
+                            role: str = "execution_receipt",
+                            allow_case_aliases: set[str] | None = None) -> dict[str, Any]:
+    out: dict[str, Any] = {"role": role, "path": ref.get("path") if isinstance(ref, dict) else None}
+    obj, reason = _f3_ref_obj(ref, role)
+    if obj is None:
+        out.update({"verified": False, "terminal_completed_returncode_zero": False, "reasons": [reason]})
+        return out
+    request = obj.get("request") if isinstance(obj.get("request"), dict) else {}
+    schema = obj.get("schema")
+    case_id = obj.get("case_id") if isinstance(obj.get("case_id"), str) else request.get("case_id")
+    physical_id = obj.get("physical_case_id") if isinstance(obj.get("physical_case_id"), str) else request.get("physical_case_id")
+    aliases = set(allow_case_aliases or ())
+    case_ok = expected_case_id is None or case_id == expected_case_id or case_id in aliases
+    physical_ok = expected_physical_id is None or physical_id is None or physical_id == expected_physical_id
+    top_request_schema = isinstance(schema, str) and "runner-request" in schema.lower()
+    request_schema = request.get("schema")
+    request_only_schema = isinstance(request_schema, str) and "runner-request" in request_schema.lower() and schema != "ds02.execution-receipt.v1"
+    status_ok = obj.get("status") == "completed" and "returncode" in obj and obj.get("returncode") == 0
+    input_files = request.get("input_files", obj.get("input_files"))
+    input_sha = request.get("input_sha256", obj.get("input_sha256"))
+    launch_hashes = obj.get("input_hashes_at_launch")
+    after_hashes = obj.get("input_hashes_after_run")
+    input_closure = isinstance(input_files, list) and bool(input_files) and isinstance(input_sha, dict) and set(input_files) == set(input_sha)
+    launch_digest = isinstance(launch_hashes, dict) and bool(launch_hashes) and isinstance(obj.get("request_sha256"), str)
+    after_digest = isinstance(after_hashes, dict) and bool(after_hashes)
+    worktree = request.get("worktree_root", obj.get("worktree_root"))
+    cwd = request.get("cwd", obj.get("cwd"))
+    output_root = obj.get("output_root") or request.get("attempt_root") or request.get("output_root")
+    runtime_ok = isinstance(worktree, str) and bool(worktree) and isinstance(cwd, str) and bool(cwd)
+    output_ok = isinstance(output_root, str) and bool(output_root)
+    reasons: list[str] = []
+    if schema not in EXECUTION_RECEIPT_SCHEMAS or top_request_schema or request_only_schema:
+        reasons.append("top_level_is_not_execution_receipt")
+    if not status_ok:
+        reasons.append("status_or_returncode_not_completed_zero")
+    if not case_ok:
+        reasons.append("case_binding_mismatch")
+    if not physical_ok:
+        reasons.append("physical_binding_mismatch")
+    if not (input_closure or launch_digest):
+        reasons.append("producer_input_launch_digest_closure_missing")
+    # A completed producer must expose both launch and post-run input digest
+    # snapshots.  Together with request_sha256 and output_root this binds the
+    # selected receipt to the producer's input/output lifecycle without
+    # opening or hashing any scientific payload.
+    if status_ok and (not launch_digest or not after_digest):
+        reasons.append("producer_input_output_launch_digest_join_missing")
+    if not runtime_ok:
+        reasons.append("worktree_or_cwd_missing")
+    if not output_ok:
+        reasons.append("output_root_missing")
+    out.update({
+        "schema": schema,
+        "request_schema": request_schema,
+        "status": obj.get("status"),
+        "returncode_field_present": "returncode" in obj,
+        "returncode": obj.get("returncode"),
+        "case_id": case_id,
+        "physical_case_id": physical_id,
+        "expected_case_id": expected_case_id,
+        "expected_physical_case_id": expected_physical_id,
+        "case_binding_matches": case_ok,
+        "physical_case_binding_matches": physical_ok,
+        "input_files_sha256_keyset_matches": input_closure,
+        "input_hashes_at_launch_present": bool(launch_hashes),
+        "input_hashes_after_run_present": after_digest,
+        "producer_input_output_launch_digest_join": bool(launch_digest and after_digest and output_ok),
+        "runtime_worktree_and_cwd_present": runtime_ok,
+        "output_root_present": output_ok,
+        "terminal_completed_returncode_zero": not reasons,
+        "verified": not reasons,
+        "reasons": reasons,
+    })
+    return out
+
+LINES 2086-2138
+def _f3_xml_certificate(xml_ref: Any, expected_times: list[float] | None,
+                        expected_case_id: str | None) -> dict[str, Any]:
+    out = {"path": xml_ref.get("path") if isinstance(xml_ref, dict) else None}
+    if not isinstance(xml_ref, dict) or not isinstance(xml_ref.get("path"), str):
+        return {**out, "verified": False, "reasons": ["missing_xml_ref"]}
+    path = Path(xml_ref["path"])
+    if path.suffix.lower() not in {".xml", ".xmf"} or path.suffix.lower() in FORBIDDEN or not path.is_file():
+        return {**out, "verified": False, "reasons": ["xml_suffix_or_path_invalid"]}
+    reasons: list[str] = []
+    try:
+        root = ET.parse(path).getroot()
+    except Exception as exc:
+        return {**out, "verified": False, "reasons": [f"xml_parse_error:{exc}"]}
+    if root.tag.rsplit("}", 1)[-1] != "Xdmf":
+        reasons.append("xml_root_not_Xdmf")
+    grids = [g for g in root.iter() if g.tag.rsplit("}", 1)[-1] == "Grid" and g.attrib.get("GridType") == "Uniform"]
+    times: list[float] = []
+    for i, grid in enumerate(grids):
+        time_node = next((x for x in list(grid) if x.tag.rsplit("}", 1)[-1] == "Time"), None)
+        try:
+            times.append(float(time_node.attrib["Value"]))  # type: ignore[union-attr]
+        except Exception:
+            reasons.append(f"xml_frame_{i}_time_invalid")
+        top = next((x for x in list(grid) if x.tag.rsplit("}", 1)[-1] == "Topology"), None)
+        if top is None or top.attrib.get("NumberOfElements") != str(EXPECTED_PARTICLES):
+            reasons.append(f"xml_frame_{i}_topology_not_179208")
+        geo = next((x for x in list(grid) if x.tag.rsplit("}", 1)[-1] == "Geometry"), None)
+        geo_data = next((x for x in list(geo) if x.tag.rsplit("}", 1)[-1] == "DataItem"), None) if geo is not None else None
+        if geo is None or geo.attrib.get("GeometryType") != "XYZ" or geo_data is None or geo_data.attrib.get("Dimensions") != f"{EXPECTED_PARTICLES} 3":
+            reasons.append(f"xml_frame_{i}_geometry_not_N3")
+        velocity = next((x for x in list(grid) if x.tag.rsplit("}", 1)[-1] == "Attribute" and x.attrib.get("Name", "").lower() == "velocity"), None)
+        vel_data = next((x for x in list(velocity) if x.tag.rsplit("}", 1)[-1] == "DataItem"), None) if velocity is not None else None
+        if velocity is None or velocity.attrib.get("AttributeType") != "Vector" or vel_data is None or vel_data.attrib.get("Dimensions") != f"{EXPECTED_PARTICLES} 3":
+            reasons.append(f"xml_frame_{i}_velocity_not_N3")
+    if len(grids) != EXPECTED_FRAMES:
+        reasons.append("xml_frame_count_not_836")
+    if len(times) != EXPECTED_FRAMES:
+        reasons.append("xml_time_count_not_836")
+    if len(times) == EXPECTED_FRAMES and any(times[i] >= times[i + 1] for i in range(EXPECTED_FRAMES - 1)):
+        reasons.append("xml_times_not_strictly_increasing")
+    if expected_times is None or len(expected_times) != EXPECTED_FRAMES:
+        reasons.append("xml_render_time_join_missing")
+    elif len(times) == EXPECTED_FRAMES and any(abs(a - b) > 1e-9 for a, b in zip(times, expected_times)):
+        reasons.append("xml_times_do_not_match_render_report")
+    return {
+        **out,
+        "frame_count": len(grids),
+        "time_count": len(times),
+        "first_time_s": times[0] if times else None,
+        "last_time_s": times[-1] if times else None,
+        "verified": not reasons,
+        "reasons": sorted(set(reasons)),
+    }
+
+LINES 2289-2480
+def _f3_qa_certificate(qa_refs: list[dict[str, Any]], expected_case_id: str | None,
+                       expected_physical_id: str | None) -> dict[str, Any]:
+    receipts: list[dict[str, Any]] = []
+    reports: list[dict[str, Any]] = []
+    aliases = {expected_case_id, expected_physical_id} - {None}
+    for ref in qa_refs or []:
+        if not isinstance(ref, dict) or not isinstance(ref.get("path"), str):
+            continue
+        path = str(ref["path"])
+        if "independent-QI" in path or "_QI_" in path or "full-QI" in path:
+            continue
+        obj, _ = _f3_ref_obj(ref, "initial_qa_ref")
+        if obj is None:
+            continue
+        if obj.get("schema") == "ds02.execution-receipt.v1" or "returncode" in obj and "status" in obj:
+            receipt = _f3_receipt_certificate(ref, None, None, "initial_qa_execution_receipt", aliases)
+            req = obj.get("request") if isinstance(obj.get("request"), dict) else {}
+            receipt["direct_qa_request_contract"] = {
+                "input_files_present": isinstance(req.get("input_files"), list) and bool(req.get("input_files")),
+                "audit_or_qa_task_kind": req.get("cpu_task_kind", req.get("kind")) in {"audit", "qa", "initial_qa"},
+            }
+            if not receipt["direct_qa_request_contract"]["input_files_present"]:
+                receipt["verified"] = False
+                receipt.setdefault("reasons", []).append("initial_qa_input_files_missing")
+            if not receipt["direct_qa_request_contract"]["audit_or_qa_task_kind"]:
+                receipt["verified"] = False
+                receipt.setdefault("reasons", []).append("initial_qa_task_kind_not_audit")
+            receipts.append(receipt)
+        if obj.get("schema") == "ds02.f3.adaptive-spatial-native-initial-qa.v1":
+            cases = obj.get("cases")
+            passed_rows = [x for x in cases if isinstance(x, dict) and x.get("passed") is True] if isinstance(cases, list) else []
+            matching = [x for x in passed_rows if x.get("actual_3d") is True and x.get("native_particles") == EXPECTED_PARTICLES and x.get("native_fluid") == 67500 and x.get("native_fixed") == 111708]
+            if not matching:
+                reports.append({"path": path, "verified": False, "binding_mode": "parent", "reasons": ["parent_initial_qa_counts_or_3d_missing"]})
+            else:
+                reports.append({"path": path, "verified": True, "binding_mode": "parent", "passed_case_count": len(matching), "input_binding_present": True})
+        else:
+            checks = obj.get("checks")
+            direct = any(key in obj for key in ("prepared_evidence", "gencase_receipt", "partvtk", "xml_contract", "input_binding", "cases"))
+            passed = (
+                (obj.get("pass") is True or obj.get("passed") is True or obj.get("all_checks_pass") is True or obj.get("status") in {"pass", "passed"})
+                and isinstance(checks, dict) and bool(checks) and all(value is True for value in checks.values())
+                and direct
+            )
+            if passed:
+                reports.append({"path": path, "verified": True, "binding_mode": "direct", "input_binding_present": True})
+    receipt_ok = any(x.get("verified") for x in receipts)
+    report_ok = any(x.get("verified") for x in reports)
+    reasons = []
+    if not receipt_ok:
+        reasons.append("genuine_initial_qa_receipt_not_terminal")
+    if not report_ok:
+        reasons.append("genuine_initial_qa_report_pass_and_binding_missing")
+    return {"verified": receipt_ok and report_ok, "receipts": receipts, "reports": reports, "reasons": reasons}
+
+
+def _f3_xmf_execution_certificate(manifest_ref: Any, expected_case_id: str | None,
+                                  expected_physical_id: str | None, aliases: set[str]) -> dict[str, Any]:
+    if not isinstance(manifest_ref, dict) or not isinstance(manifest_ref.get("path"), str):
+        return {"verified": False, "reasons": ["manifest_path_missing"]}
+    manifest_path = Path(manifest_ref["path"])
+    attempt_root = manifest_path.parent.parent if manifest_path.parent.name == "xdmf" else manifest_path.parent
+    receipt_path = attempt_root / "execution-receipt.json"
+    cert = _f3_receipt_certificate({"path": str(receipt_path), "role": "xmf_execution_receipt"}, expected_case_id, expected_physical_id, "xmf_execution_receipt", aliases)
+    obj, reason = _f3_ref_obj({"path": str(receipt_path)}, "xmf_execution_receipt")
+    reasons = list(cert.get("reasons") or [])
+    binding = False
+    if obj is not None:
+        request = obj.get("request") if isinstance(obj.get("request"), dict) else {}
+        output_root = obj.get("output_root") or request.get("attempt_root")
+        binding = isinstance(output_root, str) and Path(output_root).resolve() == attempt_root.resolve() and manifest_path.resolve() == (attempt_root / "xdmf" / "manifest.json").resolve()
+        if not binding:
+            reasons.append("xmf_receipt_output_root_manifest_binding_mismatch")
+        if request.get("input_files") is None or request.get("input_sha256") is None or set(request.get("input_files", [])) != set((request.get("input_sha256") or {}).keys()):
+            reasons.append("xmf_receipt_input_closure_missing")
+    else:
+        reasons.append(reason or "xmf_execution_receipt_missing")
+    return {
+        "path": str(receipt_path),
+        "receipt": cert,
+        "input_binding_matches_manifest": binding,
+        "verified": cert.get("verified") is True and binding and not reasons,
+        "reasons": sorted(set(reasons)),
+    }
+
+
+def _f3_fulltime_runtime_gate(visual: dict[str, Any], expected_case_id: str | None,
+                              expected_physical_id: str | None) -> dict[str, Any]:
+    aliases = _f3_aliases(visual, expected_physical_id)
+    report = _f3_report_certificate(visual.get("actual_render_report"), expected_case_id)
+    manifest = _f3_manifest_certificate(visual.get("actual_xmf_manifest"), expected_case_id, expected_physical_id)
+    xml = _f3_xml_certificate(visual.get("actual_xmf_xml"), report.get("actual_times"), expected_case_id)
+    render = _f3_receipt_certificate(visual.get("actual_render_receipt"), expected_case_id, expected_physical_id, "render_execution_receipt", aliases)
+    xmf = _f3_xmf_execution_certificate(visual.get("actual_xmf_manifest"), expected_case_id, expected_physical_id, aliases)
+    typed = _f3_typed_certificate(visual.get("typed_refs") or [], expected_case_id, expected_physical_id, report.get("actual_times"))
+    native = _f3_native_certificate(visual.get("native_refs") or [], expected_case_id, expected_physical_id, aliases)
+    qa = _f3_qa_certificate(visual.get("initial_qa_or_audit_refs") or [], expected_case_id, expected_physical_id)
+    gencase = _f3_gencase_certificate(visual, typed, expected_case_id, expected_physical_id)
+    reasons: list[str] = []
+    for name, probe in (("render_report", report), ("manifest", manifest), ("xml", xml), ("render_receipt", render), ("xmf_execution_receipt", xmf), ("typed", typed), ("native", native), ("initial_qa", qa), ("gencase", gencase)):
+        if probe.get("verified", probe.get("fulltime_metadata_certificate_verified")) is not True:
+            reasons.append(f"{name}_gate_failed")
+    # Exact producer joins.
+    manifest_obj, _ = _f3_ref_obj(visual.get("actual_xmf_manifest"), "manifest_join")
+    report_obj, _ = _f3_ref_obj(visual.get("actual_render_report"), "report_join")
+    xml_path = Path(visual["actual_xmf_xml"]["path"]).resolve() if isinstance(visual.get("actual_xmf_xml"), dict) else None
+    manifest_path = Path(visual["actual_xmf_manifest"]["path"]).resolve() if isinstance(visual.get("actual_xmf_manifest"), dict) else None
+    if isinstance(report_obj, dict) and manifest_path is not None:
+        if Path(str(report_obj.get("input_manifest", ""))).resolve() != manifest_path:
+            reasons.append("render_report_input_manifest_join_failed")
+        if xml_path is not None and Path(str(report_obj.get("xdmf", ""))).resolve() != xml_path:
+            reasons.append("render_report_xdmf_join_failed")
+    if isinstance(manifest_obj, dict) and xml_path is not None and isinstance(manifest_obj.get("xdmf"), str):
+        if Path(manifest_obj["xdmf"]).resolve() != xml_path:
+            reasons.append("manifest_xdmf_join_failed")
+    # A source field can be absent; preserve its presence mask rather than
+    # filling it from a canonical or legacy namespace.
+    field_masks = manifest.get("field_presence_masks", {})
+    owner_present = bool(visual.get("owner_or_source_refs"))
+    if not owner_present:
+        reasons.append("owner_or_source_provenance_missing")
+    runtime_unknown_refs = []
+    for ref in (visual.get("native_refs") or []) + (visual.get("typed_refs") or []):
+        obj, _ = _f3_ref_obj(ref, "runtime_unknown_scan")
+        if isinstance(obj, dict) and obj.get("status") == "running" and "returncode" not in obj:
+            runtime_unknown_refs.append({"path": ref.get("path"), "status": "running", "returncode_field_present": False})
+    return {
+        "field_metadata_fulltime_certificate_verified": not reasons,
+        "runtime_known_vs_original_unknown": {
+            "original_runtime_unknown_refs": runtime_unknown_refs,
+            "unknown_receipts_are_not_rewritten": True,
+            "p03_or_f3_recovery_not_special_cased_by_id": True,
+        },
+        "reasons": sorted(set(reasons)),
+        "manifest": manifest,
+        "render_report": report,
+        "xmf_xml": xml,
+        "render_receipt": render,
+        "xmf_execution_receipt": xmf,
+        "typed": typed,
+        "native": native,
+        "initial_qa": qa,
+        "gencase": gencase,
+        "role_scope_presence_masks": field_masks,
+        "owner_or_source_refs_present": owner_present,
+        "selected_primary_roles_are_not_reference_presence_only": True,
+    }
+
+
+def _f3_primary_completeness(visual: dict[str, Any], expected_case_id: str | None = None,
+                             expected_physical_id: str | None = None) -> dict[str, Any]:
+    reasons: list[str] = []
+    checks: dict[str, bool] = {}
+    for key in ("actual_xmf_manifest", "actual_render_report", "actual_render_receipt", "actual_xmf_xml"):
+        ok, why = _ref_is_complete(visual.get(key), json_only=key != "actual_xmf_xml")
+        checks[key] = ok
+        if not ok:
+            reasons.append(f"{key}:{why}")
+    for group in ("native_refs", "typed_refs", "gencase_or_definition_refs", "initial_qa_or_audit_refs", "owner_or_source_refs"):
+        values = visual.get(group)
+        checks[group] = isinstance(values, list) and bool(values)
+        if not checks[group]:
+            reasons.append(f"{group}:empty")
+        else:
+            for i, ref in enumerate(values):
+                good, why = _ref_is_complete(ref, json_only=Path(ref.get("path", "")).suffix.lower() == ".json")
+                if not good:
+                    reasons.append(f"{group}[{i}]:{why}")
+    contacts = visual.get("contact_png_refs")
+    keys = visual.get("key_png_refs")
+    checks["contact_png_refs"] = isinstance(contacts, list) and bool(contacts)
+    checks["key_png_refs"] = isinstance(keys, list) and bool(keys)
+    if not checks["contact_png_refs"]:
+        reasons.append("contact_png_refs:empty")
+    for i, ref in enumerate((contacts or []) + (keys or [])):
+        good, why = _ref_is_complete(ref)
+        if not good:
+            reasons.append(f"png_ref[{i}]:{why}")
+    runtime = _f3_fulltime_runtime_gate(visual, expected_case_id, expected_physical_id)
+    if runtime.get("field_metadata_fulltime_certificate_verified") is not True:
+        reasons.extend(f"runtime:{x}" for x in runtime.get("reasons", []))
+    return {
+        "complete_for_final_primary_delivery": not reasons,
+        "checks": checks,
+        "reasons": sorted(set(reasons)),
+        "key_png_paths_enumerated": checks["key_png_refs"],
+        "key_png_absence_is_not_inferred_as_missing_render": not checks["key_png_refs"],
+        "field_metadata_fulltime_certificate_verified": runtime.get("field_metadata_fulltime_certificate_verified") is True,
+        "runtime_known_vs_original_unknown": runtime.get("runtime_known_vs_original_unknown"),
+        "runtime_gate": runtime,
+        "selected_primary_roles_are_not_reference_presence_only": True,
+    }
