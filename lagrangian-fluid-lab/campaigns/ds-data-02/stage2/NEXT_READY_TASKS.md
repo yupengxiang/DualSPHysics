@@ -1,3 +1,15 @@
+## 2026-10-07T18:25:55.953841+00:00：观测接口集成、初始质量失配与精确边界证据
+
+`checkpoints/CHECKPOINT_006_INTEGRATED.json` 是最新协调入口。独立核对了 101 个 CURRENT 全保存时序字段审计（F2=48、F4=31、F6=22）；F4/F6 两个 batch parent PID/start_ticks 仍存活，进度继续以实时收据为准。F1/F3/F5/F7 准备队列在真实 I/O 槽位释放后启动。
+
+v5–v8 的 4 个实际 guard 输入字节在来源树与集成树完全一致，primary guarded 13 项测试通过。该信用只覆盖开发接口、制造观测和迁移检查，真实粒子分布/冻结物理尺度/标签与数值资格仍待完成。见 `CONSUMER_V8_DELIVERY_VERIFICATION_001.json` 和 `INTEGRATION_RESULT_004.json`。
+
+F2-S1 新 coarse dp=.0125 的实际 GenCase 初始流体质量 22.04296875kg，比 dp0=21.114kg 高约4.40%，超过初始质量2%上界，不进入匹配三网格研究；fine dp=.008 为+0.4213%。已委派质量匹配替代梯度与相位检查，禁止回填质量或改变连续物理问题。实际XML motion持续4s，ROT090为90度角度；旧 observer .9s 控制持续时间不受来源支持，须新版本冻结配置。
+
+F2-055 Idp418100 原生 Posd y=-1.2000000971163445m，低于binary下界-1.2m约9.71e-8m，CSV的-1.2掩盖越界。已独立核对原生小文件字节和输入hash，详见 `NATIVE_BOUNDARY_VERIFICATION_001.json`；物理去向/动力学影响保持UNKNOWN。16例v2诊断和10项测试见 `INTEGRATION_RESULT_003.json`，全已完成案例原因台账继续扩展。
+
+目标保持active；336审计、14参考研究、真实标签/划分、七份cards与便携内部包全部仍属于完成条件。下面是带时间戳的历史记录，不能替代本次实时状态。
+
 ## 2026-10-07T18:06:02.800417+00:00：F2 完整审计终态，F4 恢复已实际启动
 
 `checkpoints/CHECKPOINT_005_INTEGRATED.json` 为最新协调入口。F2 全 48 个 distinct CURRENT 案例完成完整保存时序字段审计；此快照所有家族合计 89 个。F4 剩余 24 项的 `stage2-F4-science-002` 已实际启动，parent PID 1085950；F6 的 `stage2-F6-science-001` parent PID 1060071 仍存活。每队列 1 worker、共 2 个科学 I/O slots，guard/input digest/resource accounting 保持生效。具体进度以实时 receipt 为准，不从旧 stale running 状态推断。
