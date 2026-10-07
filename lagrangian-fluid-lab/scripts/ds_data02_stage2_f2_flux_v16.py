@@ -227,7 +227,7 @@ def build_sidecar(report_path: Path | str, output_path: Path | str | None = None
             "unknown_flux_intervals_count": len(corrected.get("unknown_flux_intervals", [])),
         },
         "semantic_correction": {
-            "deprecated_case_name_angle_conflict_removed": True,
+            "deprecated_motion_label_conflict_field_removed": True,
             "duration_semantics": "rotation_duration_s=0.9; rotation_stop_s=1.4; XML/motion table coverage=0..4 s",
             "completion_semantics": "after finish=4, explicit last-pose hold with zero angular velocity",
             "no_hdf5_read": True,
