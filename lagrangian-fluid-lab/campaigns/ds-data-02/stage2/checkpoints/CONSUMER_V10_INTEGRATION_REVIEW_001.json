@@ -1,0 +1,53 @@
+{
+  "schema": "ds02.stage2.consumer-integration-review.v1",
+  "observed_at_utc": "2026-10-07T18:42:05.624040+00:00",
+  "source_module": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v10.py",
+    "sha256": "f58530b828e1247c72e09ad67524eab356972661bdc0c5c2e2fa536128f206ad"
+  },
+  "request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v10/f2-s1-replay-request-v10-001.json",
+    "sha256": "fac0d75a9da8233b20b3cae72f897f0a584a14f61c57b529c791c08dbb2fa802"
+  },
+  "scientific_scan": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_SCIENCE/scan-F2-S1-001/scientific-scan.json",
+    "sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59"
+  },
+  "actual_replay_dispatch": "HELD_FOR_NEW_VERSION",
+  "initial_mass_evidence": {
+    "typed_initial_mass_kg": 21.114001002861187,
+    "initially_absent_count": 0,
+    "later_unique_missing": 3,
+    "requested_denominator_kg": 21.11700100300368,
+    "requested_initial_missing_mass_kg": 0.003000000142492354,
+    "finding": "Later missing mass already included in initial cohort; adding it creates denominator mass."
+  },
+  "open_findings": [
+    {
+      "id": "C14",
+      "issue": "Actual request treats three later exclusions as initial missing mass; v11 must source-bind and reject this."
+    },
+    {
+      "id": "C15",
+      "issue": "mass_observation call omits valid mask; inactive finite placeholders contribute to COM/distribution."
+    },
+    {
+      "id": "C16",
+      "issue": "Aggregate residence uses particle seconds rather than initial-mass weighted kg*s."
+    },
+    {
+      "id": "C17",
+      "issue": "Repeated missing intervals add same particle to net-flux unknown mass multiple times; distinguish net endpoint and gross recross uncertainty."
+    },
+    {
+      "id": "C18",
+      "issue": "Receiver front halfspace is an observation plane and cannot be labeled closed receiver arrival."
+    }
+  ],
+  "implementation_progress": "Normalized mass velocity includes denominator and explicit world-frame metadata; real-data credit awaits corrected bound v11 replay.",
+  "assigned_agent": "/root/stage2_data_consumers",
+  "old_bytes_preserved": true,
+  "QN": "UNKNOWN",
+  "QE": "UNKNOWN",
+  "goal_complete": false
+}

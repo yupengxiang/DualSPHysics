@@ -1,6 +1,6 @@
 # DS-DATA-02 activity boundaries
 
-The user adopted the dataset-only goal in `lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_ZH.md`. Preserve baseline and historical evidence; do not execute fluid learning models or legacy learning tests.
+The active adopted dataset-only Stage2 goal is synchronized in `lagrangian-fluid-lab/campaigns/ds-data-02/GOAL_STAGE2_ZH.md`; `GOAL_ZH.md` preserves the historical Stage1 goal. Preserve baseline and historical evidence; do not execute fluid learning models or legacy learning tests.
 
 All delegated agents must use `gpt-5.6-luna` with reasoning effort `max`. Do not silently substitute models or recursively delegate. The primary agent owns global campaign state, shared interfaces, integration, and resource scheduling.
 
