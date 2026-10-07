@@ -35,6 +35,7 @@ REQUEST_SCHEMA = v16.REQUEST_SCHEMA
 H5_SUFFIXES = {".h5", ".hdf5"}
 PROFILE_SCHEMAS = {PROFILE_SCHEMA, v16.PROFILE_SCHEMA}
 SAFE_ROLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
+HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 RESERVED_ROLES = {".", ".."}
 
 
@@ -386,7 +387,9 @@ def _original_path_strings(value: Any, exact: Mapping[str, str], suffix: Mapping
 
 
 def relocate_request_for_consumer(request: Mapping[str, Any], profile: Mapping[str, Any],
-                                  path_map: Mapping[str, Any]) -> dict[str, Any]:
+                                  path_map: Mapping[str, Any], *,
+                                  overlay_receipt: Mapping[str, Any] | None = None,
+                                  io_slot_approved: bool = False) -> dict[str, Any]:
     """Rebind every actionable v15 path, including nested motion engine paths.
 
     The inherited v14 mapper only rewrites ``source_files`` and the HDF5
@@ -463,7 +466,36 @@ def relocate_request_for_consumer(request: Mapping[str, Any], profile: Mapping[s
     expected_content = _require_sha(
         migration.get("expected_trajectory_content_sha256"),
         "portable_migration.expected_trajectory_content_sha256")
-    actual_content = sha256(h5_target)
+    # A full overlay receipt is produced by ``prepare_replay`` after the
+    # parent-approved copy worker has hashed the target.  Metadata preflight
+    # consumes that receipt and only stats the target.  If no such receipt is
+    # available, content hashing is allowed only for the explicit full replay
+    # slot; metadata validation must fail closed without opening HDF5 bytes.
+    receipt_hash: str | None = None
+    if isinstance(overlay_receipt, Mapping):
+        records = overlay_receipt.get("source_records", [])
+        if isinstance(records, list):
+            for record in records:
+                if not isinstance(record, Mapping) or record.get("role") != "trajectory_h5":
+                    continue
+                if record.get("content_hash_verified") is True:
+                    candidate = record.get("content_sha256")
+                    if isinstance(candidate, str) and HASH_RE.fullmatch(candidate):
+                        receipt_hash = candidate
+                        break
+        if receipt_hash is None and overlay_receipt.get("full_replay_content_hash_verified") is True:
+            candidate = overlay_receipt.get("trajectory_h5_content_sha256")
+            if isinstance(candidate, str) and HASH_RE.fullmatch(candidate):
+                receipt_hash = candidate
+    if receipt_hash is not None:
+        actual_content = receipt_hash
+        content_hash_source = "FULL_OVERLAY_RECEIPT"
+    elif io_slot_approved:
+        actual_content = sha256(h5_target)
+        content_hash_source = "PARENT_APPROVED_CURRENT_TARGET_FULL_HASH"
+    else:
+        raise PortableV20BindingError(
+            "metadata relocation requires a full overlay content-SHA receipt; HDF5 content was not read")
     if actual_content != expected_content:
         raise PortableV20BindingError("relocated trajectory HDF5 content SHA-256 differs")
     old_h5 = Path(str(request.get("trajectory_h5", {}).get("path", ""))).expanduser()
@@ -487,6 +519,7 @@ def relocate_request_for_consumer(request: Mapping[str, Any], profile: Mapping[s
         "original_mtime_ns": None if old_stat is None else old_stat.st_mtime_ns,
         "relocated_mtime_ns": new_stat.st_mtime_ns,
         "producer_mtime_is_provenance_only": True,
+        "content_hash_source": content_hash_source,
     }
     return bound
 

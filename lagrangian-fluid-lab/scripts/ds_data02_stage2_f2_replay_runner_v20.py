@@ -90,6 +90,11 @@ def _path_map(path: Path) -> dict[str, str]:
     return result
 
 
+def _overlay_receipt(path: Path) -> Mapping[str, Any]:
+    """Load the complete overlay receipt, including verified content SHA."""
+    return _load_json(path)
+
+
 def _path_from_audit_args(event: str, args: tuple[Any, ...]) -> str | None:
     if event not in {"open", "os.open"} or not args:
         return None
@@ -302,7 +307,8 @@ def _failure_receipt(error: Exception, audit: AccessAudit | None) -> dict[str, A
 
 def run(profile: Mapping[str, Any], request: Mapping[str, Any], path_map: Mapping[str, str], *,
         io_slot_approved: bool = False, initial_frame_only: bool = False,
-        audit_allowed_paths: Sequence[str] = ()) -> dict[str, Any]:
+        audit_allowed_paths: Sequence[str] = (),
+        overlay_receipt: Mapping[str, Any] | None = None) -> dict[str, Any]:
     # Metadata/profile/path-map reads happen before the hook.  Every consumer
     # import and every subsequent Python-level source open is audited.
     audit = AccessAudit(profile, request, path_map, audit_allowed_paths)
@@ -311,7 +317,9 @@ def run(profile: Mapping[str, Any], request: Mapping[str, Any], path_map: Mappin
         portable = _load_portable()
         try:
             portable.verify_relocated_profile(profile, path_map, full_replay=io_slot_approved)
-            bound_request = portable.relocate_request_for_consumer(request, profile, path_map)
+            bound_request = portable.relocate_request_for_consumer(
+                request, profile, path_map, overlay_receipt=overlay_receipt,
+                io_slot_approved=io_slot_approved)
         except (OSError, portable.PortableV20BindingError) as error:
             raise ReplayV20BindingError(str(error)) from error
         replay = _load_replay()
@@ -384,11 +392,13 @@ def main() -> int:
         parser.error(f"refusing to overwrite existing replay output: {args.output}")
     profile = _load_json(args.profile)
     request = _load_json(args.request)
+    overlay_receipt = _overlay_receipt(args.path_map)
     path_map = _path_map(args.path_map)
     try:
         result = run(profile, request, path_map,
                      io_slot_approved=args.io_slot_approved,
                      initial_frame_only=args.initial_frame_only,
+                     overlay_receipt=overlay_receipt,
                      audit_allowed_paths=(str(args.output), str(args.profile),
                                           str(args.request), str(args.path_map)))
     except (OSError, ReplayV20BindingError) as error:

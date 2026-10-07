@@ -201,7 +201,13 @@ def _engine_fixture(tmp_path: Path) -> tuple[dict, dict[str, str], dict]:
 
 def test_nested_motion_engine_paths_are_rebound_before_v15_preflight(tmp_path: Path) -> None:
     profile, path_map, request = _engine_fixture(tmp_path)
-    bound = v20.relocate_request_for_consumer(request, profile, path_map)
+    target_h5 = Path(path_map["trajectory_h5"])
+    overlay = {"source_records": [{
+        "role": "trajectory_h5", "content_hash_verified": True,
+        "content_sha256": _sha(target_h5),
+    }]}
+    bound = v20.relocate_request_for_consumer(request, profile, path_map,
+                                              overlay_receipt=overlay)
     for role, item in bound["motion_engine_sources"].items():
         assert item["path"] == path_map[role]
     for role, item in bound["source_code_binding"]["official_motion_engine"].items():
@@ -278,7 +284,13 @@ def test_full_hash_migration_binds_target_mtime_and_preserves_producer_stat(tmp_
         "producer_declared_sha256": _sha(source_h5),
         "hash_mode": "producer_attested_only_no_content_hash",
     }
-    bound = v20.relocate_request_for_consumer(request, profile, path_map)
+    target_h5 = Path(path_map["trajectory_h5"])
+    overlay = {"source_records": [{
+        "role": "trajectory_h5", "content_hash_verified": True,
+        "content_sha256": _sha(target_h5),
+    }]}
+    bound = v20.relocate_request_for_consumer(request, profile, path_map,
+                                              overlay_receipt=overlay)
     assert bound["trajectory_h5"]["path"] == str(target_h5.resolve())
     assert bound["trajectory_h5"]["mtime_ns"] == target_h5.stat().st_mtime_ns
     assert bound["trajectory_h5"]["mtime_ns"] != request["trajectory_h5"]["mtime_ns"]
@@ -308,4 +320,11 @@ def test_full_hash_migration_rejects_same_size_wrong_content_even_with_new_stat(
         "hash_mode": "producer_attested_only_no_content_hash",
     }
     with pytest.raises(v20.PortableV20BindingError, match="content SHA-256 differs"):
+        v20.relocate_request_for_consumer(request, profile, path_map,
+                                          io_slot_approved=True)
+
+
+def test_metadata_migration_requires_preverified_overlay_receipt_without_h5_read(tmp_path: Path) -> None:
+    profile, path_map, request = _engine_fixture(tmp_path)
+    with pytest.raises(v20.PortableV20BindingError, match="full overlay content-SHA receipt"):
         v20.relocate_request_for_consumer(request, profile, path_map)
