@@ -19,6 +19,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import resource
 from typing import Any, Mapping, Sequence
 import xml.etree.ElementTree as ET
 
@@ -45,6 +46,30 @@ def _identity_set_sha256(zones: Any, ids: Any) -> str:
         raise ReplayV13BindingError("identity arrays have inconsistent lengths")
     order = np.lexsort((i, z))
     return hashlib.sha256(np.stack([z[order], i[order]], axis=1).tobytes()).hexdigest()
+
+
+def _max_rss_bytes() -> int | None:
+    """Return an observational Linux max-RSS reading; no guard enforcement."""
+    try:
+        value = int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    except (AttributeError, OSError):
+        return None
+    # Linux reports KiB; macOS reports bytes.  The worker runs on Linux, but
+    # keep the platform distinction explicit for a portable replay bundle.
+    return value * 1024 if __import__("sys").platform != "darwin" else value
+
+
+def _contiguous_selection_spans(indices: np.ndarray) -> list[tuple[int, int, int, int]]:
+    """Map sorted selected HDF5 indices to half-open source/local spans."""
+    values = np.asarray(indices, dtype=np.int64).reshape(-1)
+    if len(values) == 0:
+        return []
+    starts = [0]
+    starts.extend(int(i) for i in np.flatnonzero(np.diff(values) != 1) + 1)
+    spans: list[tuple[int, int, int, int]] = []
+    for local_start, local_stop in zip(starts, starts[1:] + [len(values)]):
+        spans.append((local_start, local_stop, int(values[local_start]), int(values[local_stop - 1]) + 1))
+    return spans
 
 
 def read_initial_csv_semantics(path: Path | str, *, cohort: Mapping[str, Any] | None = None) -> dict[str, Any]:
@@ -956,6 +981,10 @@ def evaluate_receiver_manual_predictions(result: Mapping[str, Any], predictions:
     source = result.get("source_binding")
     if not isinstance(source, Mapping) or predictions.get("source_binding") != source:
         raise ReplayV13BindingError("receiver predictions must bind exact replay source hashes")
+    if (source.get("current_catalog_sha256") != frozen.get("current_binding_sha256") or
+            source.get("trajectory_h5_producer_sha256") != frozen.get("trajectory_producer_sha256") or
+            source.get("source_files") != frozen.get("source_file_sha256")):
+        raise ReplayV13BindingError("receiver result source binding differs from frozen profile")
     if predictions.get("observer_profile_sha256") != frozen["sha256"]:
         raise ReplayV13BindingError("receiver predictions use a different frozen observer profile")
     expected_labels = result.get("labels")
@@ -973,15 +1002,15 @@ def evaluate_receiver_manual_predictions(result: Mapping[str, Any], predictions:
         receiver_labels.append(value)
     def _statuses(name: str, expected: list[str]) -> list[str]:
         value = predictions.get(name)
-        if not isinstance(value, list) or value != expected:
-            raise ReplayV13BindingError(f"receiver prediction {name} shape/value differs")
-        return value
+        if not isinstance(value, list) or len(value) != len(expected):
+            raise ReplayV13BindingError(f"receiver prediction {name} shape differs")
+        return [str(item) for item in value]
     expected_volume_status = [str(item.get("status")) for item in receiver_labels]
     expected_aperture_status = [str(item.get("aperture_first_arrival_status")) for item in receiver_labels]
     expected_destination = [str(item.get("final_destination_status")) for item in receiver_labels]
-    _statuses("receiver_event_status", expected_volume_status)
-    _statuses("aperture_event_status", expected_aperture_status)
-    _statuses("final_destination_status", expected_destination)
+    predicted_volume_status = _statuses("receiver_event_status", expected_volume_status)
+    predicted_aperture_status = _statuses("aperture_event_status", expected_aperture_status)
+    predicted_destination = _statuses("final_destination_status", expected_destination)
     times = _float_array(predictions.get("receiver_event_time_s"), "predictions.receiver_event_time_s").reshape(-1)
     aperture_times = _float_array(predictions.get("aperture_event_time_s"), "predictions.aperture_event_time_s").reshape(-1)
     if times.shape != (len(receiver_labels),) or aperture_times.shape != times.shape:
@@ -1017,12 +1046,15 @@ def evaluate_receiver_manual_predictions(result: Mapping[str, Any], predictions:
     ]) / float(expected_mass.sum())
     mass_error = float(np.max(np.abs(predicted_mass - expected_mass_fraction)))
     event_error_fraction = max(event_errors, default=0.0) / float(frozen["event_time_scale_s"])
+    volume_accuracy = float(np.mean([a == b for a, b in zip(predicted_volume_status, expected_volume_status)]))
+    aperture_accuracy = float(np.mean([a == b for a, b in zip(predicted_aperture_status, expected_aperture_status)]))
+    destination_accuracy = float(np.mean([a == b for a, b in zip(predicted_destination, expected_destination)]))
     thresholds = frozen["thresholds"]
     checks = {
         "receiver_identity_order": True,
-        "receiver_event_status": True,
-        "aperture_event_status": True,
-        "final_destination_status": True,
+        "receiver_event_status": volume_accuracy == 1.0,
+        "aperture_event_status": aperture_accuracy == 1.0,
+        "final_destination_status": destination_accuracy == 1.0,
         "receiver_event_time": event_error_fraction <= float(thresholds["event_time_fraction"]),
         "destination_mass_fraction": mass_error <= float(thresholds["mass_fraction"]),
     }
@@ -1031,6 +1063,9 @@ def evaluate_receiver_manual_predictions(result: Mapping[str, Any], predictions:
             "model_invoked": False, "checks": checks,
             "metrics": {"receiver_event_time_max_fraction_error": event_error_fraction,
                         "destination_mass_fraction_max_error": mass_error,
+                        "receiver_event_status_accuracy": volume_accuracy,
+                        "aperture_event_status_accuracy": aperture_accuracy,
+                        "final_destination_accuracy": destination_accuracy,
                         "receiver_count": len(receiver_labels)},
             "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
 
@@ -2113,6 +2148,11 @@ def read_hdf5_initial_frame(request: Mapping[str, Any], *, io_slot_approved: boo
         "selected_position_max_m": selected_position.max(axis=0).tolist(),
         "source_csv_semantics": dict(bound["cohort"]["source_csv_semantics"]),
         "initial_mass_denominator": dict(bound["initial_mass_denominator"]),
+        "resource_observation": {
+            "max_rss_bytes": _max_rss_bytes(),
+            "measurement": "worker resource.getrusage(RUSAGE_SELF); observational only",
+            "guard_enforcement": "CPU/wall/storage/source checks only; no RSS/RLIMIT_AS enforcement",
+        },
         "binding_status": "EXACT_CURRENT_SOURCE_BOUND_PENDING_SCIENTIFIC_QUALIFICATION",
     }
 
@@ -2164,16 +2204,28 @@ def read_hdf5_window(request: Mapping[str, Any], *, io_slot_approved: bool = Fal
             "particle_id": full_id[selected],
             "initial_mass": full_mass[selected],
         }
+        spans = _contiguous_selection_spans(selected)
         for local, frame in enumerate(range(start, stop + 1)):
-            trajectory["position"][local, ...] = source["position"][frame, selected, :]
-            trajectory["velocity"][local, ...] = source["velocity"][frame, selected, :]
-            trajectory["mass"][local, ...] = source["mass"][frame, selected]
-            trajectory["valid"][local, ...] = source["valid"][frame, selected]
+            for local_start, local_stop, source_start, source_stop in spans:
+                source_slice = slice(source_start, source_stop)
+                local_slice = slice(local_start, local_stop)
+                trajectory["position"][local, local_slice, :] = source["position"][frame, source_slice, :]
+                trajectory["velocity"][local, local_slice, :] = source["velocity"][frame, source_slice, :]
+                trajectory["mass"][local, local_slice] = source["mass"][frame, source_slice]
+                trajectory["valid"][local, local_slice] = source["valid"][frame, source_slice]
     local_request = json.loads(json.dumps(bound))
     local_request["window"]["frame_start"] = 0
     local_request["window"]["frame_stop"] = stop - start
     local_request["window"]["expected_times_s"] = np.asarray(trajectory["time"], dtype=float).tolist()
-    return replay_trajectory(trajectory, local_request)
+    result = replay_trajectory(trajectory, local_request)
+    result["resource_observation"] = {
+        "max_rss_bytes": _max_rss_bytes(),
+        "memory_estimate_bytes": estimate,
+        "measurement": "worker resource.getrusage(RUSAGE_SELF); observational only",
+        "guard_enforcement": "CPU/wall/storage/source checks only; no RSS/RLIMIT_AS enforcement",
+        "selection_read_strategy": "contiguous HDF5 spans; no prefix truncation or particle subsampling",
+    }
+    return result
 
 
 def manufactured_replay_calibration() -> dict[str, Any]:
