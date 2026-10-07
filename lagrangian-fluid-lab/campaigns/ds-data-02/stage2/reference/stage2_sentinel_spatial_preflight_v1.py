@@ -103,7 +103,7 @@ def load_inputs() -> tuple[dict[str, Any], dict[str, Any]]:
         raise FileNotFoundError(REVIEW_PATH)
     current = json.loads(CURRENT_PATH.read_text(encoding="utf-8"))
     review = json.loads(REVIEW_PATH.read_text(encoding="utf-8"))
-    if current.get("schema") != "ds-data-02.current336.v1":
+    if current.get("schema") != "ds02.stage2.current336.v1":
         raise ValueError(f"unexpected CURRENT schema: {current.get('schema')}")
     if not isinstance(current.get("cases"), list):
         raise ValueError("CURRENT cases must be a list")
