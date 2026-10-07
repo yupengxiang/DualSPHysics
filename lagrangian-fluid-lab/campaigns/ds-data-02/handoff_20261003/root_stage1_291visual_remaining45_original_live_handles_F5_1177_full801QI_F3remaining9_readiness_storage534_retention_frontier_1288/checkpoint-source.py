@@ -1,0 +1,42 @@
+from pathlib import Path
+import json,hashlib,datetime,subprocess,copy,collections,os
+R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');L=R/'lagrangian-fluid-lab';H=L/'campaigns/ds-data-02/handoff_20261003';D=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02');root=lambda n:next(H.glob(f'root*_{n}'));load=lambda p:json.loads(Path(p).read_text())
+def sha(p):
+ p=Path(p);assert p.suffix in {'.json','.py'};return hashlib.sha256(p.read_bytes()).hexdigest()
+def ref(p):return {'path':str(p),'sha256':sha(p)}
+def put(p,x):p.write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n')
+cpfile=H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_233.json';cp=load(cpfile);assert cp['checkpoint']==233 and cp['stage1_visual_accepted_complete_independent_cases']==len(cp['accepted_decisions'])==291;ip=root(1285)/'full336-current291-actual-final48-delivery-progress-index.json';idx=load(ip);pending=[r for r in idx['cases'] if not r.get('accepted_decision')];assert len(pending)==45;now=datetime.datetime.now(datetime.timezone.utc);observations=[];pv=[];published=[]
+for r in pending:
+ e=r['latest_registered_render_request'];assert sha(e['path'])==e['sha256'];q=load(e['path']);assert q['case_id']==r['case_id'];d=Path(e['path']).parent
+ if d.name=='requests':d=d.parent
+ lp=d/'controller-launch-process.json';ob={'case_id':r['case_id'],'physical_case_id':r['physical_case_id'],'original_request':e,'observed_at_utc':now.isoformat(),'source_controller_root':str(d),'live':False,'launch_record_present':lp.exists()}
+ if lp.exists():
+  a=load(lp);pid=a['pid'];ticks=a.get('proc_start_ticks',a.get('start_ticks',a.get('recorded_start_ticks')));ob.update(launch_record=ref(lp),pid=pid,expected_start_ticks=ticks);p=Path('/proc')/str(pid)
+  try:
+   raw=(p/'stat').read_text();actual=raw[raw.rfind(')')+2:].split()[19];state=raw[raw.rfind(')')+2:].split()[0];cmd=(p/'cmdline').read_bytes().replace(b'\0',b' ').decode(errors='replace');ob.update(actual_start_ticks=actual,state=state,command_matches=str(d) in cmd);ob['live']=str(ticks)==actual and state!='Z' and ob['command_matches']
+  except OSError as ex:ob['proc_observation_error']=str(ex)
+ cr=d/'controller-result.json';ob['controller_terminal_result_present']=cr.exists()
+ if cr.exists():
+  a=load(cr);ob['controller_result']=ref(cr);ob['controller_terminal_status']=a.get('status');ob['controller_terminal_returncode']=a.get('returncode')
+  if a.get('actual_receipt'):
+   rp=Path(a['actual_receipt']);rec=load(rp);ob['execution_receipt']=ref(rp);ob['execution_status']=rec.get('status');ob['execution_returncode']=rec.get('returncode');pp=rp.parent/'render/render-publish-receipt.json'
+   if pp.exists():
+    p=load(pp);ob['publish_receipt']=ref(pp);ob['published']=p['status']=='published_after_atomic_rename';published.append({'case_id':r['case_id'],'physical_case_id':r['physical_case_id'],'execution_receipt':ref(rp),'publish_receipt':ref(pp),'status':'completed0-published-personal-visual-pending'})
+ observations.append(ob)
+for p in Path('/proc').iterdir():
+ if not p.name.isdigit():continue
+ try:
+  args=[x.decode(errors='replace') for x in (p/'cmdline').read_bytes().split(b'\0')];
+  if not args or not args[0].endswith('/pvpython-real') or '--output-dir' not in args:continue
+  raw=(p/'stat').read_text();out=Path(args[args.index('--output-dir')+1]);pv.append({'pid':int(p.name),'start_ticks':raw[raw.rfind(')')+2:].split()[19],'command':args,'private_output_dir':str(out),'private_frame_png_filename_count':len(list((out/'frames').glob('*.png'))),'private_PNG_contents_read_or_hashed':False})
+ except OSError:continue
+qi=root(1282)/'actual1177-full801-independent-QI-UID-N3-bed-scope-previsual-proof.json';q=load(qi);assert q['all801_geometry_velocity_N3_times_UID_finite_verified'];f3=root(1287)/'remaining9-F3-full836-own-metadata-readiness-adoption.json';storage=root(1286)/'current-storage-cleanup-verification.json';assert load(f3)['native_completed0']==9
+for k,p in [('runtime_v2_sha256',L/'scripts/ds_data02_runtime_v2.py'),('strict_dispatch_sha256',L/'scripts/ds_data02_strict_dispatch_v1.py'),('Root142_launch_sha256',root(142)/'launch.py')]:assert sha(p)==cp['unmodified_guards'][k]
+raw=(D/'runtime/resource-ledger.json').read_bytes();ld=json.loads(raw);counts=collections.Counter(x['kind'] for x in ld['attempts']);gpu=sum(x.get('gpu_seconds',0) for x in ld['charges'])/3600;cpu=sum(x.get('cpu_core_seconds',0) for x in ld['charges'])/3600;sf=os.statvfs('/home/jade');free=sf.f_bavail*sf.f_frsize/2**30;assert free>=500 and gpu<=512 and cpu<=3840 and counts['qualification']<=1024 and counts['production']<=720 and now<datetime.datetime.fromisoformat(cp['deadline_utc'])
+O=H/'root_stage1_291visual_remaining45_original_live_handles_F5_1177_full801QI_F3remaining9_readiness_storage534_retention_frontier_1288';nextcp=H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_234.json';assert not list(H.glob('root*_1288')) and not nextcp.exists();O.mkdir();proof=O/'remaining45-original-current-process-and-completed1177-frontier.json';put(proof,{'schema':'ds02.main.remaining45-original-render-frontier.v1','at_utc':now.isoformat(),'accepted':291,'pending':45,'own_full801_QI1177':ref(qi),'F3_remaining9_own_readiness':ref(f3),'storage_current_cleanup_reverification':ref(storage),'original_controller_observations':observations,'current_pvpython_real_handles':pv,'actual_completed0_published_personal_visual_pending':published,'case_credit':0,'scientific_payload_IO':False,'render_jobs_launched_or_restarted':0});snapshot=O/'ledger-immutable-snapshot.json';snapshot.write_bytes(raw)
+new=copy.deepcopy(cp);new.update(checkpoint=234,at_utc=now.isoformat(),predecessor=str(cpfile),predecessor_sha256=sha(cpfile),new_accepted_decisions=[],home_free_gib=free,ledger_sha256_at_checkpoint=hashlib.sha256(raw).hexdigest(),ledger_immutable_snapshot=ref(snapshot),active_reservations=ld['reservations'],attempt_counts=dict(counts),gpu_hours_charged=gpu,cpu_core_hours_charged=cpu,previous_goal_turn_classification='PROGRESS: source202 accepted291/F5=22; own1177 full801QI1282 complete; source166 remaining9F3 full836 metadata readiness adopted1287, original unknown154 and plan discrepancies retained. Current45 original controller handles/published frontier reverified; no simulation reruns.',authorized_work_state='Active291/336,45 pending; F1/F4/F7 final48 each, F2/F3=39,F5=22,F6=47. Original1177 completed personalfresh181;1127 live fresh203;1099 F2 live; F6 rigid-motion coverage fresh167.')
+new['actual_progress']['remaining45_current_frontier_1288']=ref(proof);new['actual_progress']['actual1177_full801_QI1282']=ref(qi);new['actual_progress']['remaining9_F3_source166_own_readiness1287']=ref(f3);new['actual_progress']['current_cleanup534GiB_reverification1286']=ref(storage);new['source_agents'].update(f5_bed_recovery='fresh202 accepted F5=22; fresh203 original1127 M090T080 personal43PNG after publication',f6_endpoint_initial_qa='fresh181 actualF5 M114T095 original1177 published/full801QI1282, personal43PNG in progress; then actualF2 1099 planned',production_recovery='fresh166 adopted full836 remaining9F3 readiness; fresh167 existing fullF6 rigid-motion coverage audit in progress');put(nextcp,new)
+idx.update(previous_index_preserved=ref(ip),source_authoritative_checkpoint=ref(nextcp),at_utc=now.isoformat(),new_case_credit=0,actual_unaccepted_completed0_published_physical_cases=published,current_remaining45_original_frontier=ref(proof))
+for r in idx['cases']:
+ if r['physical_case_id']==q['physical_case_id']:r.update(status='completed0-published-personal-visual-pending',actual_full801_QI=ref(qi))
+assert len(idx['cases'])==336 and sum(bool(r.get('accepted_decision')) for r in idx['cases'])==291;put(O/'full336-current291-actual-final48-delivery-progress-index.json',idx);(O/'checkpoint-source.py').write_bytes(Path(__file__).read_bytes());paths=[str(p.relative_to(R)) for p in O.iterdir()]+[str(nextcp.relative_to(R))];subprocess.run(['git','add','--',*paths],cwd=R,check=True);subprocess.run(['git','commit','-q','-m','ds02: checkpoint291 actual completed1177 and remaining45 original render frontier','--',*paths],cwd=R,check=True);print({'checkpoint':234,'accepted':291,'live_remaining_controller_cases':sum(o['live'] for o in observations),'published_pending':len(published),'PV':[(p['pid'],p['private_frame_png_filename_count']) for p in pv],'gpu_h':gpu,'cpu_core_h':cpu,'Home_free_GiB':free,'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()})
