@@ -1,0 +1,262 @@
+{
+  "actual_counts": null,
+  "actual_mass_kg": null,
+  "case_id": "F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010",
+  "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+  "count_contract": {
+    "consistency_checks": [
+      "total_particles == fixed_particles + moving_particles + fluid_particles from the same actual generated output",
+      "solver_dimension == 3 and XML data2d == false",
+      "fluid_particles > 0 and all reported counts are positive where applicable"
+    ],
+    "count_source": "Root actual GenCase execution-receipt.json plus generated XML/prepared-input-report.json; no source-side expected count",
+    "expected_counts": {
+      "fixed_particles": null,
+      "fluid_particles": null,
+      "moving_particles": null,
+      "total_particles": null
+    },
+    "mass_policy": "Root reads actual native mass and reports continuum difference without rescale; this package asserts no mass",
+    "measurements_required": [
+      "actual GenCase terminal status and returncode",
+      "actual generated XML <execution><parameters><particles> summary",
+      "actual prepared-input-report particle totals and 3-D flag",
+      "Root actual frame-zero PartVTK/QA report counts, UID/type/Mk/zone and finite checks"
+    ],
+    "no_forced_count": true,
+    "no_mother_count_substitution": true
+  },
+  "definition_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_095_f2_stage1_first8_offset_lattice_v1/source/F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010_Def.xml",
+  "definition_sha256": "d5d3d6aef7cdb2eff14e8fdad40d45bfc7d92ed2d4bac379623f31a1a1c23bd8",
+  "family_id": "F2",
+  "future_receipt_hashes": {
+    "gencase": null,
+    "initial_qa": null,
+    "native_solver": null
+  },
+  "generation_status": "source_fixture_only_not_gencase_run",
+  "geometry": {
+    "cup_low_m": [
+      0.0,
+      -0.15,
+      0.65
+    ],
+    "cup_size_m": [
+      0.425,
+      0.3,
+      0.45
+    ],
+    "data2d": false,
+    "dimension": 3,
+    "dp_m": 0.01,
+    "fluid_low_m": [
+      0.05,
+      -0.11,
+      0.7
+    ],
+    "fluid_source_size_m": [
+      0.325,
+      0.22,
+      0.264
+    ],
+    "receiver_low_m": [
+      0.55,
+      -0.16,
+      0.0
+    ],
+    "receiver_size_m": [
+      1.1,
+      0.6,
+      0.45
+    ],
+    "receiver_x_grid_index_dp010": 55,
+    "receiver_x_lattice_contract": {
+      "alignment": "receiver_low_x / dp is an integer for every new source condition",
+      "closed_reviewed_range_m": [
+        0.45,
+        0.65
+      ],
+      "grid_spacing_m": 0.01
+    },
+    "source_layer_count": 3,
+    "source_mk_values": [
+      0,
+      1,
+      2
+    ],
+    "tray_low_m": [
+      -1.2,
+      -1.0,
+      -0.2
+    ],
+    "tray_size_m": [
+      4.0,
+      2.0,
+      0.15
+    ]
+  },
+  "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+  "independent_case_count_increment": 1,
+  "initial_native_qa_contract": {
+    "checks": [
+      "actual GenCase receipt completed with returncode 0 and solver dimension 3",
+      "actual generated XML contract matches dp=.01, TimeMax=4, TimeOut=.01, data2d=false",
+      "official PartVTK frame-zero report has finite Pos/Vel/Rhop/Mass and unique Idp",
+      "actual Type=3 fluid count is positive; Mk and zone fields are reported",
+      "actual source geometry/domain and non-overlap checks are performed from the Root worker report"
+    ],
+    "future_csv_sha256": null,
+    "future_report_sha256": null,
+    "status": "prospective_disabled_until_actual_gencase_receipt",
+    "worker": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_095_f2_stage1_first8_offset_lattice_v1/workers/f2_stage1_initial_qa_worker.py"
+  },
+  "lineage_group_id": "F2_STAGE1_FIRST8_OFFSET_LATTICE_MINIMAL_VARIATION_V1",
+  "mechanism_id": "offset_spill",
+  "metadata_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_095_f2_stage1_first8_offset_lattice_v1/source/F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010.metadata.json",
+  "metadata_sha256": "22f1728dedefab4ae2b1ae7cf5a5059b17e66e3c65df297cd1971dcb266e8370",
+  "mother_support": {
+    "case_id": "F2_RV4EQ_MATCHED_OFFSET_V1_COARSE_DP010_SPATIAL_REFERENCE_SAVE010",
+    "new_parameter_diff_from_p01_template": {
+      "receiver_x_m": {
+        "from": 0.45,
+        "to": 0.55
+      }
+    },
+    "physical_condition_sha256": "327899e38bbad63951206d5b2fd3ef354c049a32f6671af1af7913a48b77c7ef",
+    "role": "read-only support only; mother is not reused or recounted"
+  },
+  "motion": {
+    "file_name": "F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+    "final_angle_deg": -105.0,
+    "format": "#Time;Degrees",
+    "rotation_duration_s": 0.65,
+    "rotation_stop_s": 1.15,
+    "sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70",
+    "source_bytes_equal_to_reviewed_p01": true,
+    "static_hold_start_s": 0.5,
+    "time_end_s": 4.0,
+    "time_start_s": 0.0
+  },
+  "motion_path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_095_f2_stage1_first8_offset_lattice_v1/source/F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010_motion.dat",
+  "numerical_recipe": {
+    "dp_m": 0.01,
+    "expected_saved_frames": 401,
+    "native_forcing_file_format": "#Time;Degrees",
+    "recipe_role": "Stage1 full-window native visual candidate; no precision/Q-N claim",
+    "solver_dimension": 3,
+    "time_max_s": 4.0,
+    "time_out_s": 0.01
+  },
+  "numerical_recipe_sha256": "712110a4ec7c71f901dddd680f1bf5d3bfa4166d2d81c2b05770757976995698",
+  "p07_status": "not_used; pre-registered P07 has no native109 output and is not reclassified here",
+  "parameter_values": {
+    "fill_ratio": 0.8,
+    "mouth_geometry": "open_rim",
+    "receiver_x_m": 0.55,
+    "receiver_y_m": 0.14,
+    "rotation_duration_s": 0.65
+  },
+  "physical_case_id": "F2_STAGE1_FIRST8_OFFSET_OPEN_RIM_RX055_RY014_FILL080",
+  "physical_condition": {
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+    "cup_low_m": [
+      0.0,
+      -0.15,
+      0.65
+    ],
+    "cup_size_m": [
+      0.425,
+      0.3,
+      0.45
+    ],
+    "family_id": "F2",
+    "fill_ratio": 0.8,
+    "fluid_low_m": [
+      0.05,
+      -0.11,
+      0.7
+    ],
+    "fluid_source_size_m": [
+      0.325,
+      0.22,
+      0.264
+    ],
+    "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+    "initial_velocity_m_per_s": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "mechanism_id": "offset_spill",
+    "motion_file_sha256": "ff966330e01e565987ebf182a7dfd7401d76577ae1c266894fc7db4aa34c5b70",
+    "mouth_geometry": "open_rim",
+    "native_forcing": "official mvrotfile; static 0.5 s, cosine ramp, final -105 degrees, post-stop hold",
+    "receiver_low_m": [
+      0.55,
+      -0.16,
+      0.0
+    ],
+    "receiver_size_m": [
+      1.1,
+      0.6,
+      0.45
+    ],
+    "receiver_x_m": 0.55,
+    "receiver_y_m": 0.14,
+    "rotation_duration_s": 0.65,
+    "rotation_final_angle_deg": -105.0,
+    "rotation_hold_start_s": 0.5,
+    "source_layer_count": 3,
+    "source_mk_values": [
+      0,
+      1,
+      2
+    ],
+    "tray_low_m": [
+      -1.2,
+      -1.0,
+      -0.2
+    ],
+    "tray_size_m": [
+      4.0,
+      2.0,
+      0.15
+    ]
+  },
+  "physical_condition_sha256": "b5c1cb3f840bf73e0dc59d046ca52b7255f7250b35217a83d90f0f7925bc016e",
+  "production_claim": "none",
+  "production_status": "prospective_pending_root_actual_gencase_qa_native_visual",
+  "qualification_claim": "none",
+  "schema": "ds02.f2.stage1.first8.prospective-source.v1",
+  "scope_id": "F2_STAGE1_FIRST8_OFFSET_LATTICE_V1",
+  "source_batch_generator": "ds_data02_f2.v1 offset_spill; source template only",
+  "source_batch_template": "F2_STAGE1_OFFSET_P01_DP010_SPATIAL_REFERENCE_SAVE010",
+  "source_only": true,
+  "stripped_mother_diff": {
+    "all_other_source_bytes_equal_after_normalization": true,
+    "baseline": {
+      "bytes": 4269,
+      "exists": true,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_090_f2_stage1_production_endpoints_v1/source/F2_STAGE1_OFFSET_P01_DP010_SPATIAL_REFERENCE_SAVE010_Def.xml",
+      "sha256": "bd4b9ef2291b58388bebe3a6bb986e3319c58c35559afc580b1b89a554487cd8"
+    },
+    "changed_lines": [
+      "-            <point x=\"0.45\" y=\"-0.16\" z=\"0\" />",
+      "+            <point x=\"0.55\" y=\"-0.16\" z=\"0\" />"
+    ],
+    "changed_xml_element": "/case/casedef/geometry/commands/mainlist/drawbox[2]/point@x",
+    "derived": {
+      "bytes": 4319,
+      "exists": true,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/handoff_20261003/root_followup_095_f2_stage1_first8_offset_lattice_v1/source/F2_STAGE1_FIRST8_OFFSET_RX055_DP010_SPATIAL_REFERENCE_SAVE010_Def.xml",
+      "sha256": "d5d3d6aef7cdb2eff14e8fdad40d45bfc7d92ed2d4bac379623f31a1a1c23bd8"
+    },
+    "from_receiver_x_m": 0.45,
+    "normalization": [
+      "case comment removed from comparison because it carries identity only",
+      "motion filename normalized because it is a renamed copy of the same forcing bytes"
+    ],
+    "parameter_change_only": true,
+    "to_receiver_x_m": 0.55
+  }
+}

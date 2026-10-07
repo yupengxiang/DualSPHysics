@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<case app="GenCase v5.4.354.01 (07-04-2025)" date="06-10-2026 15:10:10">
+    <casedef>
+        <constantsdef>
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <hswl auto="true" units_comment="metres (m)" value="0" />
+            <gamma value="7" />
+            <speedsystem auto="true" value="0" />
+            <coefsound value="20" />
+            <speedsound auto="true" value="0" />
+            <coefh value="1.0" />
+            <cflnumber value="0.2" />
+            <rhopgradient value="2" />
+        </constantsdef>
+        <mkconfig boundcount="240" fluidcount="9" />
+        <geometry>
+            <definition dp="0.02" units_comment="metres (m)">
+                <pointref x="0.010" y="0.000" z="0.010" />
+                <pointmin x="-0.30" y="-0.25" z="-0.25" />
+                <pointmax x="5.00" y="0.25" z="0.90" />
+            </definition>
+            <commands>
+                <mainlist>
+                    <setshapemode>dp | actual | bound</setshapemode>
+                    <setdrawmode mode="full" cmt="c082_closed_analytic_extruded_thick_bed" />
+                    <setmkbound mk="40" cmt="source_mkbound_40_maps_to_native_mk50_bed" />
+                    <drawextrude closed="true" cmt="closed_xz_slope_profile_extruded_across_y">
+                        <extrude x="0" y="0.44" z="0" />
+                        <point x="-0.20" y="-0.22" z="0.00" />
+                        <point x="2.00" y="-0.22" z="0.00" />
+                        <point x="3.00" y="-0.22" z="0.28" />
+                        <point x="3.60" y="-0.22" z="0.448" />
+                        <point x="3.90" y="-0.22" z="0.448" />
+                        <point x="4.40" y="-0.22" z="0.05" />
+                        <point x="4.80" y="-0.22" z="0.05" />
+                        <point x="4.80" y="-0.22" z="-0.15" />
+                        <point x="4.40" y="-0.22" z="-0.15" />
+                        <point x="3.90" y="-0.22" z="0.248" />
+                        <point x="3.60" y="-0.22" z="0.248" />
+                        <point x="3.00" y="-0.22" z="0.08" />
+                        <point x="2.00" y="-0.22" z="-0.20" />
+                        <point x="-0.20" y="-0.22" z="-0.20" />
+                        <layers vdp="0,-1,-2,-3,-4" />
+                    </drawextrude>
+                    <setdrawmode mode="solid" cmt="c082_restore_solid_before_tank_and_piston" />
+                    <setmkbound mk="0" />
+                    <drawbox cmt="tank_floor_existing_control">
+                        <boxfill>bottom</boxfill>
+                        <point x="-0.20" y="-0.18" z="-0.15" />
+                        <size x="5.00" y="0.36" z="0.15" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkbound mk="30" />
+                    <drawbox cmt="finite_sidewall_left_existing_control">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.20" y="-0.18" z="-0.15" />
+                        <size x="5.00" y="0.03" z="0.95" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <drawbox cmt="finite_sidewall_right_existing_control">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.20" y="0.15" z="-0.15" />
+                        <size x="5.00" y="0.03" z="0.95" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <setmkbound mk="10" />
+                    <drawbox cmt="prescribed_piston_existing_motion_ref_10">
+                        <boxfill>solid</boxfill>
+                        <point x="-0.04" y="-0.15" z="0.00" />
+                        <size x="0.04" y="0.30" z="0.75" />
+                        <layers vdp="0,1,2" />
+                    </drawbox>
+                    <shapeout file="analytic_thick_bed_and_tank" reset="true" />
+                    <setmkfluid mk="0" />
+                    <clipplane cmt="unchanged_profile_separator_for_initial_fluid">
+                        <point x="2.00" y="0.00" z="0.00" />
+                        <vector x="0.28" y="0.00" z="-1.00" />
+                    </clipplane>
+                    <drawbox cmt="c082s1_initial_fluid_equilibrium_cell_centres_solid_recovery">
+                        <boxfill>solid</boxfill>
+                        <point x="0.010" y="-0.140" z="0.010" />
+                        <size x="3.42" y="0.280" z="0.380" />
+                    </drawbox>
+                    <clipreset />
+                </mainlist>
+            </commands>
+        </geometry>
+        <motion>
+            <objreal ref="10">
+                <begin mov="1" start="0.00" finish="15.2" />
+                <mvpredef id="1" duration="15.2">
+                    <file name="assets/f5_c082s1_motion_m114_t095.dat" fields="2" fieldtime="0" fieldx="1" />
+                </mvpredef>
+            </objreal>
+        </motion>
+    </casedef>
+    <execution>
+        <special>
+            <gauges>
+                <default>
+                    <savevtkpart value="true" />
+                    <_computedt value="0.02" />
+                    <_computetime start="0" end="16" />
+                    <output value="true" />
+                    <_outputdt value="0.02" />
+                    <_outputtime start="0" end="16" />
+                </default>
+                <swl name="WG1">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="0.59999999999999998" y="0" z="0" />
+                    <point1 x="0.59999999999999998" y="0" z="0" />
+                    <point2 x="0.59999999999999998" y="0" z="0.69999999999999996" />
+                </swl>
+                <swl name="WG2">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="1.3999999999999999" y="0" z="0" />
+                    <point1 x="1.3999999999999999" y="0" z="0" />
+                    <point2 x="1.3999999999999999" y="0" z="0.69999999999999996" />
+                </swl>
+                <swl name="RunupToe">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="2" y="0" z="0" />
+                    <point1 x="2" y="0" z="0" />
+                    <point2 x="2" y="0" z="0.69999999999999996" />
+                </swl>
+                <swl name="WG3">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="2.6000000000000001" y="0" z="0.16800000000000001" />
+                    <point1 x="2.6000000000000001" y="0" z="0.16800000000000001" />
+                    <point2 x="2.6000000000000001" y="0" z="0.69999999999999996" />
+                </swl>
+                <swl name="WG4">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="3.2000000000000002" y="0" z="0.33600000000000002" />
+                    <point1 x="3.2000000000000002" y="0" z="0.33600000000000002" />
+                    <point2 x="3.2000000000000002" y="0" z="0.69999999999999996" />
+                </swl>
+                <swl name="Crest">
+                    <pointdp coefdp="0.5" />
+                    <point0 x="3.75" y="0" z="0.44800000000000001" />
+                    <point1 x="3.75" y="0" z="0.44800000000000001" />
+                    <point2 x="3.75" y="0" z="0.69999999999999996" />
+                </swl>
+            </gauges>
+        </special>
+        <parameters>
+            <parameter key="SavePosDouble" value="1" />
+            <parameter key="StepAlgorithm" value="2" />
+            <parameter key="VerletSteps" value="40" />
+            <parameter key="Kernel" value="2" />
+            <parameter key="ViscoTreatment" value="1" />
+            <parameter key="Visco" value="0.01" />
+            <parameter key="ViscoBoundFactor" value="1" />
+            <parameter key="DensityDT" value="2" />
+            <parameter key="DensityDTvalue" value="0.1" />
+            <parameter key="Shifting" value="0" />
+            <parameter key="RigidAlgorithm" value="1" />
+            <parameter key="FtPause" value="0.0" />
+            <parameter key="CoefDtMin" value="0.05" />
+            <parameter key="DtIni" value="0" />
+            <parameter key="DtMin" value="0" />
+            <parameter key="DtFixed" value="0" />
+            <parameter key="DtAllParticles" value="0" />
+            <parameter key="TimeMax" value="16" />
+            <parameter key="TimeOut" value="0.02" />
+            <parameter key="RhopOutMin" value="700" />
+            <parameter key="RhopOutMax" value="1300" />
+            <parameter key="Boundary" value="1" />
+            <parameter key="MinFluidStop" value="0" />
+            <simulationdomain comment="Defines domain of simulation (default=Uses minimum and maximum position of the generated particles)">
+                <posmin x="-0.30" y="-0.25" z="-0.25" comment="e.g.: x=0.5, y=default-1, z=default-10%" />
+                <posmax x="5.00" y="0.25" z="0.90" />
+            </simulationdomain>
+        </parameters>
+        <particles np="194427" nb="162769" nbf="158559" mkboundfirst="10" mkfluidfirst="1">
+            <_summary>
+                <positions units_comment="metres (m)">
+                    <posmin x="-0.25" y="-0.22" z="-0.21" />
+                    <posmax x="4.83" y="0.22" z="0.83" />
+                </positions>
+                <fixed count="158559" id="0-158558" mkcount="3" mkvalues="10,40,50" />
+                <moving count="4210" id="158559-162768" mkcount="1" mkvalues="20" />
+                <fluid count="31658" id="162769-194426" mkcount="1" mkvalues="1" />
+            </_summary>
+            <fixed mkbound="0" mk="10" begin="0" count="10687" />
+            <fixed mkbound="30" mk="40" begin="10687" count="117387" />
+            <fixed mkbound="40" mk="50" begin="128074" count="30485" />
+            <moving mkbound="10" mk="20" begin="158559" count="4210" refmotion="0" />
+            <fluid mkfluid="0" mk="1" begin="162769" count="31658" />
+        </particles>
+        <constants>
+            <data2d value="false" />
+            <gravity x="0" y="0" z="-9.81" units_comment="m/s^2" />
+            <cflnumber value="0.2" />
+            <gamma value="7" />
+            <rhop0 value="1000" units_comment="kg/m^3" />
+            <dp value="0.02" units_comment="metres (m)" />
+            <h value="0.034641016151" units_comment="metres (m)" />
+            <b value="201805.71429" units_comment="Pascal (Pa)" />
+            <massbound value="0.008" units_comment="kg" />
+            <massfluid value="0.008" units_comment="kg" />
+        </constants>
+        <uservars>
+            <varnum name="VResId" value="0" />
+        </uservars>
+        <motion>
+            <objreal ref="0">
+                <begin mov="1" start="0" finish="15.2" />
+                <mvrectfile id="1" duration="15.2">
+                    <file name="assets/f5_c082s1_motion_m114_t095.dat" fields="2" fieldtime="0" fieldx="1" />
+                </mvrectfile>
+            </objreal>
+        </motion>
+        <vtkout mkboundfirst="10" mkfluidfirst="1">
+            <vtkfile name="F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M114_T095_NEXT34_analytic_thick_bed_and_tank_Dp.vtk" mk="10,20,40,50" mkbound="0,10,30,40" />
+            <vtkfile name="F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M114_T095_NEXT34_analytic_thick_bed_and_tank_Actual.vtk" mk="10,20,40,50" mkbound="0,10,30,40" />
+        </vtkout>
+    </execution>
+</case>

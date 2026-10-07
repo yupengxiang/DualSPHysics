@@ -1,0 +1,195 @@
+{
+  "schema": "ds02.execution-receipt.v1",
+  "request": {
+    "schema": "ds02.runner-request.v2",
+    "family_id": "F3",
+    "case_id": "F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY",
+    "attempt_id": "weak-dual-spatial-fixed-window-comparison-20261002-001",
+    "kind": "cpu",
+    "cpu_task_kind": "audit",
+    "cpu_threads": 4,
+    "max_wall_seconds": 2400,
+    "estimated_storage_bytes": 1073741824,
+    "cwd": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab",
+    "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics",
+    "command": [
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+      "compare",
+      "--baseline",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+      "--variant",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+      "--variant",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+      "--grid-step",
+      "0.0025",
+      "--output",
+      "{attempt_root}/fixed-window-comparison.json"
+    ],
+    "physical_case_id": "F3_DUAL_AXIS_WEAK_006G_004G",
+    "physical_binding_sha256": "fdb645e24952ed2f41225ca537d067d0233c9a94746fd4af0c390205736c9b10",
+    "fixed_window_s": [
+      0.0,
+      10.0
+    ],
+    "scope": "read-only fixed physical-window macro comparison across the actual coarse, medium, and fine weak-dual references; diagnostic only",
+    "qualification_claim": "none; Q-N and production remain unassessed",
+    "q_n_status": "not_assessed",
+    "budget_contract": {
+      "macro_relative": 0.05,
+      "event_time_relative": 0.02,
+      "save_or_integration_share": 0.2,
+      "status": "preregistered diagnostic thresholds only"
+    },
+    "hdf5_binding_policy": "trajectory HDF5 is read-only; output SHA values are pinned from completed direct-conversion reports and the runner request does not rehash multi-GB sources",
+    "expected_native": {
+      "frames_each": 4001,
+      "time_window_s": [
+        0.0,
+        10.0
+      ],
+      "initial_fluid_mass_kg": 14.58,
+      "fluid_particles": {
+        "coarse_dp_0p008181818": 26620,
+        "medium_dp_0p0075": 34560,
+        "fine_dp_0p006": 67500
+      },
+      "all_particles": {
+        "coarse_dp_0p008181818": 88528,
+        "medium_dp_0p0075": 108000,
+        "fine_dp_0p006": 179208
+      },
+      "solver_dimension": 3,
+      "parts_out": 0,
+      "control_family": "weak_dual_axis_0p06g_0p04g",
+      "control_sha256": "98cb5a00395301e4e5561d57b8d56189686f468a16f0b4420c6f96c3e4995e6b"
+    },
+    "source_hdf5_bindings": {
+      "medium_baseline": {
+        "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+        "trajectory_sha256": "c2cb2f701ef81a1a490764aa9057874c0d61f0d2447416cb4e1f7693daa76fd2",
+        "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+        "direct_report_sha256": "4c6f3553673c45f428c3fdd7777f9fc8fb575ae29df87f06d7daea7a825b8cd4",
+        "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+        "transport_labels_sha256": "1b4f9acdfaa386688db815c0de8e064c0b54aa216b072ef90b9efaa9de5dc1f3"
+      },
+      "coarse": {
+        "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+        "trajectory_sha256": "61d14a1a67ab040dfb6728a6b11a1721eb71f83da99468e31cbd8d987aeda2db",
+        "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json",
+        "direct_report_sha256": "bbf52efe7f59cf740380edf2039a35a0cffb33b29eed1f31bcfd2c18ce0306cf",
+        "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5",
+        "transport_labels_sha256": "56460108fd9b6a26f43fa54f76717958e741ba93bbc22d411ea80459119cb4f8"
+      },
+      "fine": {
+        "trajectory": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+        "trajectory_sha256": "8cf11a279aa4849939982c1b11a1a4260dff0224051795a38880d55dfc74e8be",
+        "direct_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json",
+        "direct_report_sha256": "de4a6ada6e67e8b17c17f5c8c36bfeb9bd984bc7e7049402a907c009d7b9a739",
+        "transport_labels": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5",
+        "transport_labels_sha256": "6bc29292b7cc705d3946d96ec3497a32572716dd769056dac60227d7f2a6b199"
+      }
+    },
+    "input_files": [
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json",
+      "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5"
+    ],
+    "source_solver_evidence": {
+      "coarse_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/qualification-weak-dual-coarse-reference-001/execution-receipt.json",
+      "coarse_solver_receipt_sha256": "aa27ca899e1aa5371b596a7466eabd9f569e614577dcf162ef15b6fea7603258",
+      "medium_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/qualification-weak-dual-scope-001/execution-receipt.json",
+      "fine_solver_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/qualification-weak-dual-fine-reference-001/execution-receipt.json",
+      "fine_solver_receipt_sha256": "3d63815b1f3d3d875095d48b16be95ebb09685516f3d1e2e09ba379a61740581",
+      "semantic_requirement": "actual Run.csv/RunPARTs/Run.out and native exclusion ledgers remain the authority for full time and save-frequency claims; this request only compares converted trajectories"
+    },
+    "comparison_semantics": {
+      "baseline": "medium dp=0.0075",
+      "variants": [
+        "coarse dp=0.008181818",
+        "fine dp=0.006"
+      ],
+      "operators": [
+        "active_mass_kg",
+        "com_x_m",
+        "com_y_m",
+        "com_z_m",
+        "kinetic_energy_j"
+      ],
+      "time_matching": "linear interpolation at fixed physical times 0,2.5,5,7.5,10 s; report source frame/time brackets",
+      "claim_boundary": "spatial diagnostic across three actual 3-D full-window references; no Q-N from this comparison"
+    }
+  },
+  "request_sha256": "19c506884a3692763244ac2103738aa5f5e546ab0f54de2754f192998ebcc431",
+  "input_hashes_at_launch": {
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py": "969d8f93c98b14ef9bc12cf8842a29d2dd91e8b55c0a9701d01b16d5a120b838",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json": "21a54faaab3a1f1a56138e2d73f62c90505e506e47e0bf6889fcb843f6e9a7b2",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json": "b95af89813286e9d81c2ec24c4b3194d7ada79c2cda0e111cac691a372bde812",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json": "4c6f3553673c45f428c3fdd7777f9fc8fb575ae29df87f06d7daea7a825b8cd4",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json": "bbf52efe7f59cf740380edf2039a35a0cffb33b29eed1f31bcfd2c18ce0306cf",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json": "de4a6ada6e67e8b17c17f5c8c36bfeb9bd984bc7e7049402a907c009d7b9a739",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5": "1b4f9acdfaa386688db815c0de8e064c0b54aa216b072ef90b9efaa9de5dc1f3",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5": "56460108fd9b6a26f43fa54f76717958e741ba93bbc22d411ea80459119cb4f8",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5": "6bc29292b7cc705d3946d96ec3497a32572716dd769056dac60227d7f2a6b199"
+  },
+  "runner_source": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+  "runner_sha256": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+  "runner_git_at_launch": {
+    "commit": "f111f3eb042bc8f6807dea27f21429515f082123",
+    "status": "M lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/case_registry.jsonl\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/split_plan.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/FAMILY_HANDOFF.md\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/case_registry.jsonl\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_COARSE/F2_COMM4_CENTER_V1_COARSE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_COARSE/F2_COMM4_CENTER_V1_COARSE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_FINE/F2_COMM4_CENTER_V1_FINE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_MEDIUM/F2_COMM4_CENTER_V1_MEDIUM.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_CENTER_V1_MEDIUM/F2_COMM4_CENTER_V1_MEDIUM_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_COARSE/F2_COMM4_OFFSET_V1_COARSE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_COARSE/F2_COMM4_OFFSET_V1_COARSE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_FINE/F2_COMM4_OFFSET_V1_FINE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_FINE/F2_COMM4_OFFSET_V1_FINE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_MEDIUM/F2_COMM4_OFFSET_V1_MEDIUM.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/definitions/F2_COMM4_OFFSET_V1_MEDIUM/F2_COMM4_OFFSET_V1_MEDIUM_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/manifest.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_COARSE_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_FINE_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_CENTER_V1_MEDIUM_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_COARSE_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_FINE_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/commensurate_cellcenter_v4/requests/F2_COMM4_OFFSET_V1_MEDIUM_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_COARSE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_COARSE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_FINE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_FINE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_CENTER_NOMINAL_MEDIUM_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_COARSE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_COARSE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_COARSE_HALF_NATIVE_DT_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_FINE.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_FINE_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM.metadata.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/F2_REF_OFFSET_NOMINAL_MEDIUM_Def.xml\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/definitions/reference_matrix.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/event_definitions.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/f2_commensurate_fallback.py\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/family_card.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_center_fine_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_center_medium_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_center_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_offset_fine_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_offset_medium_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/gencase_offset_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/runner_request.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/split_plan.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/case_registry.jsonl\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/event_definitions.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/split_plan.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/event_definitions.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/FAMILY_HANDOFF.md\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/family_card.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/gencase_evidence.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/labels/event_schema.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/reference_evidence.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/request_manifest.json\n M lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/solver_request_manifest.json\n M lagrangian-fluid-lab/scripts/ds_data02_f1.py\n M lagrangian-fluid-lab/scripts/ds_data02_f2.py\n M lagrangian-fluid-lab/scripts/ds_data02_f5_native.py\n M lagrangian-fluid-lab/scripts/ds_data02_f7.py\n M lagrangian-fluid-lab/scripts/ds_data02_runtime.py\n M lagrangian-fluid-lab/tests/test_ds_data02_runtime.py\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261002/finite_initialization_002/native_preflight_audit_001.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/production/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P01_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P01_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P01_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P02_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P02_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P02_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P03_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P03_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P03_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P04_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P04_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_DUAL_P04_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P01_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P01_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P01_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P02_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P02_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P02_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P03_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P03_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P03_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P04_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P04_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/requests/F1_ECC_P04_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/stage8_labels_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/F2_CONTAINMENT_REMEDIATION_PREFLIGHT_AUDIT.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/F2_CONTAINMENT_REMEDIATION_PREFLIGHT_AUDIT.md\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/labels/center_catch_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/labels/offset_spill_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/production/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/requests/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/stage8_conversion_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/stage8_evaluator_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/stage8_gencase_preflight_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F2/stage8_labels_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/labels/dual_axis_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/labels/eccentric_baffle_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/production/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_00-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_00-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_00-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_01-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_01-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_01-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_02-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_02-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_02-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_03-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_03-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_DUAL_AXIS_PHASE_03-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_00-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_00-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_00-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_01-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_01-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_01-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_02-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_02-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_02-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_03-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_03-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/requests/F3_NEW_ECCENTRIC_BAFFLE_EXCHANGE_03-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/stage8_gencase_preflight_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/stage8_labels_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/definitions/assets/f5_continuous_bed_profile_slope_0p220.stl\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/production/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/requests/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/stage8_labels_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/labels/simple_free_response_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/labels/wave_no_contact_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/production/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/requests/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/stage8_conversion_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/stage8_evaluator_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/stage8_labels_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/labels/moving_obstacle_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/labels/pump_recirculation_event_config.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/production/owner_metadata/\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P00_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P00_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P00_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P01_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P01_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P01_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P02_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P02_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P02_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P03_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P03_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_OBSTACLE_P03_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P00_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P00_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P00_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P01_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P01_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P01_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P02_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P02_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P02_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P03_FINE-conversion.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P03_FINE-gencase.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/requests/F7_PUMP_P03_FINE-solver.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/stage8_evaluator_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/stage8_integrity_audit_summary.json\n?? lagrangian-fluid-lab/campaigns/ds-data-02/families/F7/stage8_labels_summary.json\n?? lagrangian-fluid-lab/scripts/ds_data02_batch_runner.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f1_production.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f1_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f1_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f1_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f2_evaluator.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f2_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f2_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f2_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f2_stage8_production.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f3_evaluator.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f3_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f3_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f3_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f3_stage8_production.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f5_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f5_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f5_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f5_stage8_production.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f6_evaluator.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f6_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f6_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f6_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f6_stage8_production.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f7_evaluator.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f7_stage8_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f7_stage8_convert.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f7_stage8_evaluator_audit.py\n?? lagrangian-fluid-lab/scripts/ds_data02_f7_stage8_labels.py\n?? lagrangian-fluid-lab/scripts/f2_preflight_remediation_verify.py\n?? lagrangian-fluid-lab/tests/test_ds_data02_f2_evaluator.py\n?? lagrangian-fluid-lab/tests/test_ds_data02_f2_stage8.py\n?? lagrangian-fluid-lab/tests/test_ds_data02_f3_evaluator.py\n?? lagrangian-fluid-lab/tests/test_ds_data02_f6_stage8.py\n?? lagrangian-fluid-lab/tests/test_ds_data02_f7_evaluator.py",
+    "diff_sha256": "3ebff674f83a1070668250f6901734b029c6f0b66d9a7a0596689c72fc0590d0"
+  },
+  "git_at_launch": {
+    "commit": "7733bc5f26a6dc4c37fa870948491c8b638cd90b",
+    "status": "?? lagrangian-fluid-lab/.venv\n?? lagrangian-fluid-lab/vendor",
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "started_at_utc": "2026-10-02T11:59:41.813374+00:00",
+  "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY/weak-dual-spatial-fixed-window-comparison-20261002-001",
+  "numerical_reference_status": "not_assessed",
+  "production_product_acceptance": "not_assessed",
+  "command": [
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py",
+    "compare",
+    "--baseline",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/trajectory.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/trajectory.h5",
+    "--variant",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/trajectory.h5",
+    "--grid-step",
+    "0.0025",
+    "--output",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_SPATIAL_REFERENCE_STUDY/weak-dual-spatial-fixed-window-comparison-20261002-001/fixed-window-comparison.json"
+  ],
+  "binary_sha256": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae",
+  "pid": 3964067,
+  "returncode": -15,
+  "termination_reason": "reserved_wall_time_exceeded",
+  "status": "failed",
+  "finished_at_utc": "2026-10-02T12:39:42.005483+00:00",
+  "elapsed_seconds": 2400.1920640619937,
+  "cpu_core_seconds": 1170.604407,
+  "gpu_seconds": 0.0,
+  "bytes": 32530,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "input_hashes_after_run": {
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f3_time_study.py": "969d8f93c98b14ef9bc12cf8842a29d2dd91e8b55c0a9701d01b16d5a120b838",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/f3_weak_operators.v1.json": "21a54faaab3a1f1a56138e2d73f62c90505e506e47e0bf6889fcb843f6e9a7b2",
+    "/home/jade/.codex/worktrees/ds-data-02-infra/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261002/handoff.json": "b95af89813286e9d81c2ec24c4b3194d7ada79c2cda0e111cac691a372bde812",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-dual-direct-full-v2/direct-conversion-report.json": "4c6f3553673c45f428c3fdd7777f9fc8fb575ae29df87f06d7daea7a825b8cd4",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-direct-v1/direct-conversion-report.json": "bbf52efe7f59cf740380edf2039a35a0cffb33b29eed1f31bcfd2c18ce0306cf",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-direct-v1/direct-conversion-report.json": "de4a6ada6e67e8b17c17f5c8c36bfeb9bd984bc7e7049402a907c009d7b9a739",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_DUAL_AXIS_WEAK_006G_004G/f3-weak-full-transport-labels-v1/typed-transport-labels.h5": "1b4f9acdfaa386688db815c0de8e064c0b54aa216b072ef90b9efaa9de5dc1f3",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_COARSE/f3-weak-dual-coarse-labels-v1/typed-transport-labels.h5": "56460108fd9b6a26f43fa54f76717958e741ba93bbc22d411ea80459119cb4f8",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_WEAK_DUAL_REFERENCE_FINE/f3-weak-dual-fine-labels-v1/typed-transport-labels.h5": "6bc29292b7cc705d3946d96ec3497a32572716dd769056dac60227d7f2a6b199"
+  }
+}

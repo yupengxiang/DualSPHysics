@@ -1,0 +1,171 @@
+{
+  "schema": "ds02.f6.root-actual-rigid-state-audit.v2",
+  "case_id": "F6_ANGULAR_RELEASE_DP025",
+  "checks": {
+    "actual_all_required_receipts_completed": true,
+    "full241_saved_rigid_history_finite_and_monotone_through12": true,
+    "both_native_node_frames_finite_typed_exact_UIDs": true,
+    "native_and_rigid_rows_same_saved_times": true,
+    "initial_rigid_state_matches_declared": true,
+    "initial_native_nodes_verified": true,
+    "first_nonzero_native_velocity_matches_actual_rigid_state": true
+  },
+  "all_actual_checks_passed": true,
+  "actual_rigid_history": {
+    "frame_0": {
+      "time_s": 0.0,
+      "time_zero": true,
+      "observed_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "expected_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "center_distance_m": 0.0,
+      "center_matches_continuous": true,
+      "observed_linear_velocity_m_s": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "linear_velocity_is_zero": true,
+      "observed_angular_velocity_rad_s": [
+        0.079999998,
+        0.12,
+        0.059999999
+      ],
+      "expected_angular_velocity_rad_s": [
+        0.08,
+        0.12,
+        0.06
+      ],
+      "angular_velocity_distance_rad_s": 2.236067976322822e-09,
+      "angular_velocity_matches_declared": true,
+      "initial_displacements_zero": true,
+      "initial_euler_angles_zero": true
+    },
+    "frame_1": {
+      "time_s": 0.05006182597552,
+      "center_m": [
+        2.399999598933,
+        1.199999715488,
+        1.069048900012
+      ],
+      "linear_velocity_m_s": [
+        9.875399e-06,
+        -6.0101371e-05,
+        -0.39723656
+      ],
+      "angular_velocity_rad_s": [
+        0.029855592,
+        0.037821215,
+        0.059935287
+      ],
+      "omega_magnitude_rad_s": 0.07690279127261283,
+      "angular_motion_active": true
+    },
+    "trajectory_summary": {
+      "total_frames": 241,
+      "expected_frames": 241,
+      "final_time_s": 12.00012416636,
+      "full_12s_window_complete": true,
+      "all_motion_values_finite": true
+    },
+    "initial_rigid_state_verified": true
+  },
+  "actual_typed_nodes": {
+    "frame_0": {
+      "particle_count": 16384,
+      "expected_count": 16384,
+      "count_matches": true,
+      "centroid_m": [
+        2.399999996875001,
+        1.1999999996875133,
+        1.0799999862500198
+      ],
+      "expected_center_m": [
+        2.4,
+        1.2,
+        1.08
+      ],
+      "centroid_distance_m": 1.4104085348944263e-08,
+      "centroid_matches": true,
+      "max_velocity_m_s": 0.0,
+      "all_velocities_zero": true,
+      "observed_csv_mass_sum_kg": 256.0,
+      "expected_csv_mass_sum_kg": 256.0,
+      "mass_sum_matches_lattice_support": true
+    },
+    "frame_1": {
+      "particle_count": 16384,
+      "max_velocity_m_s": 0.42496147803209233,
+      "mean_velocity_m_s": 0.39775739264376697,
+      "velocities_are_nonzero": true,
+      "kinematic_consistency": {
+        "tested_particles": 16384,
+        "rigid_linear_velocity_m_s": [
+          9.875399e-06,
+          -6.0101371e-05,
+          -0.39723656
+        ],
+        "rigid_angular_velocity_rad_s": [
+          0.029855592,
+          0.037821215,
+          0.059935287
+        ],
+        "rigid_center_m": [
+          2.399999598933,
+          1.199999715488,
+          1.069048900012
+        ],
+        "rmse_m_s": 1.1830162934694893e-08,
+        "max_abs_diff_m_s": 3.265972893599098e-08,
+        "consistent_with_rigid_kinematics": true
+      }
+    },
+    "mass_semantics": {
+      "observed_native_csv_mass_sum_kg": 256.0,
+      "native_csv_matches_fluid_density_mass": true,
+      "native_csv_mass_interpretation": "Observed sum of PartVTK CSV Mass column equals fluid-density support particle weight: V_body * rho_0 = 0.256 m^3 * 1000 kg/m^3 = 256.0 kg. Preserved byte-for-byte; not falsified or normalized.",
+      "declared_physical_rigid_mass_kg": 128.0,
+      "declared_relative_density": 0.5,
+      "solver_fobj_massp_interaction_weight_kg": 0.015625,
+      "solver_interaction_weight_interpretation": "XML masspart=0.015625 kg loaded into fobj.massp (JSph.cpp:1138, JSphGpu.cpp:782) and used for fluid-boundary hydrodynamic interactions (JSphCpu.cpp:675,842).",
+      "derived_uniform_node_mass_kg": 0.0078125,
+      "derived_node_mass_interpretation": "Uniform-node diagnostic quadrature ratio Mbody/N = 128.0/16384 = 0.0078125 kg; hypothetical diagnostic, NOT observed CSV Mass and NOT solver fobj.massp interaction weight."
+    },
+    "velocity_propagation_proof": {
+      "gencase_particle_velocity": "0.0 m/s (GenCase stores body omega in XML particles block; particle velocities in BI4 are 0.0 m/s)",
+      "solver_initialization_sequence": "In DualSPHysics (JSphGpuSingle.cpp:974-981), InitRunGpu() initializes GPU memory and copies constants (InitFloatingsGpu copies massp, center, etc.) but does NOT invoke KerFtPartsUpdate before SaveData() writes Part_0000.bi4. Thus Part_0000 floating node velocities remain at the initial GenCase value (0.0 m/s). Simultaneously, the internal rigid body state fobj->fomega is initialized from angularvelini ([0.08, 0.12, 0.06] rad/s) at JSph.cpp:1162 and saved in PartFloatInfo.ibi4 at t=0 by JDsPartFloatSave.cpp:166.",
+      "runtime_velocity_propagation": "During simulation time-stepping, KerFtPartsUpdate (JSphGpu_ker.cu:2045-2065) updates particle velocities vr = v_lin + omega x (pos - fcenter). By Part_0001 (t=0.05s), floating particles exhibit non-zero velocities governed by rigid body kinematics.",
+      "observed_frame0_vel_is_zero": true
+    },
+    "floating_nodes_verified": true
+  },
+  "actual_generated_massbody_kg": 128.0,
+  "actual_generated_interaction_masspart_kg": 0.015625,
+  "derived_uniform_diagnostic_mass_kg": 0.0078125,
+  "generated_inertia_kg_m2": {
+    "x": 8.53333,
+    "y": 8.53333,
+    "z": 13.6533
+  },
+  "source_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_angular_actual_state_audit_023/dp025-config.json": "432eea6a7d9fb355cd7965738b059aa4b266b2bcc664d2258d01763f892e059f",
+    "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_f6_actual_rigid_state_audit_v1.py": "7a752c134253eb27e08c0c69295a3585174bcdf8ebb788757ef88aab360575a9",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/F6_ANGULAR_RELEASE_DP025.xml": "8bce31f6b479b1a6fb021524e5ae375de7ad929e4fb2876dd0caee23fa62fba8",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-floatinginfo-022/floating/FloatingInfo_mk60.csv": "dda9d305785212a843fef752b1b2e8c64c9d31fdda8cdba0ee1a301e3cd05cbe",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-partvtk-022/floating_parts/PartFloating_0000.csv": "df5363e3d49a7755de2b5fed77c29018beeb727b522eb85a819bb461887f772b",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-partvtk-022/floating_parts/PartFloating_0001.csv": "0ade9ca3ace78eb2e097a633974a14b8e7ebbab9286c72e07556fefb62fc12bf",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-floatinginfo-022/execution-receipt.json": "984c71a22da462adb465655d0976991c4e670b4e61943301d776bf5e1acccd41",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-partvtk-022/execution-receipt.json": "a96fc96607a99f03b2060ad6cc9dd9ce2e819d7a6c6c0552f0931e05a6ad7cae",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-full12-native-gpu-021/execution-receipt.json": "328470af63b3f0315501d745af77a5f9be1fcc1cf2113eb06029618a19ffb621",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_ANGULAR_RELEASE_DP025/root-angular-release-dp025-actual-gencase-preflight-017/execution-receipt.json": "229e5a0bfb82239ae84db0f3d428fbdbd6b7e2c120a6aa1e3acd3677195c2817"
+  },
+  "q_n_status": "not_assessed",
+  "qualification": "Actual rigid/native initialization semantics only; no convergence approval or transfer from historical zero-spin reference."
+}

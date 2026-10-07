@@ -1,9 +1,7 @@
 # DS-DATA-02 seven-family dataset construction
 
-The active user goal was adopted at 2026-09-30T07:23:48Z and expires at 2026-10-14T07:23:48Z. `CAMPAIGN_STATE.json` records actual adoption; `plan-source/` preserves the original proposal without rewriting it.
+Current stage1 result: **336 independent physical cases, 48 per family**, actual nested 8/24/48 sets, native 3D full-event dynamics, ParaView entrypoints, and preserved visual acceptance. Status: **视觉检查通过、数值精度未验收**. DS-DATA-02 Q-N/Q-E credit remains zero; precise transport labels, numerical domains, leakage-free splits and model-free evaluation remain stage2 work.
 
-Target: seven independently qualified three-dimensional family products, 48 independent physical cases per family (8/24/48 nested batches), native transport labels, legal development splits, model-free evaluator, real previews, and portable bundles. No fluid learning activity is permitted.
+Start with [the current stage1 report and external review materials](review_20261007/README.md). The authoritative scientific completion is checkpoint335 / commit `fab8dd3b3ac28ef5e21efea9cc3f04afa7f116ee`, and its root1464 final delivery index. Earlier plan-source, bootstrap and FAMILY_HANDOFF records are historical evidence and may still describe pending work; they are not the current product inventory.
 
-Stable external data/runtime root: `/home/jade/Projects/DualSPHysics-data/ds-data-02`. Historical source/data root: `/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab`. Raw results and leases are not stored in worktrees. Legacy evidence remains unchanged.
-
-Current scientific status: no new DS-DATA-02 qualified scope or production case. The bootstrap ledger conservatively charges one CPU core-hour for initial discovery; this is an accounting upper bound, not measured elapsed CPU usage. Subsequent heavy tasks require reservations and measured receipts.
+The adopted [GOAL_ZH.md](GOAL_ZH.md) preserves the latest user scope. Original adoption: 2026-09-30T07:23:48Z; original deadline: 2026-10-14T07:23:48Z. Resource caps are cumulative, not reset by reporting. Shared data/runtime root: `/home/jade/Projects/DualSPHysics-data/ds-data-02`. Native raw results are outside worktrees and outside the code-review upload package. No fluid learning activity is authorized by this campaign.

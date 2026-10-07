@@ -1,0 +1,167 @@
+{
+  "schema": "ds02.root.lower-head-fallback-owner.v1",
+  "family_id": "F1",
+  "case_id": "F1_STAGE1_DUAL_H260_DP020",
+  "physical_case_id": "F1_DUAL_HEAD_260_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "mechanism_id": "asymmetric_dual_channel",
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F1",
+    "physical_case_id": "F1_DUAL_HEAD_260_UNCHANGED_MOTHER_GEOMETRY_V1",
+    "mechanism_id": "asymmetric_dual_channel",
+    "geometry_family_id": "F1_GEOM_DUAL_THICK_DBC_LOWER_HEAD_V1",
+    "control_family_id": "F1_CONTROL_GRAVITY_RELEASE_LOWER_HEAD_V1",
+    "geometry": {
+      "tank": {
+        "low_m": [
+          0,
+          0,
+          0
+        ],
+        "size_m": [
+          3.2,
+          1,
+          0.8
+        ],
+        "label": "Finite five physical walls with open top; thick DBC numerical support"
+      },
+      "obstacle_or_divider": {
+        "low_m": [
+          1.2,
+          0.34,
+          0
+        ],
+        "size_m": [
+          0.8,
+          0.06,
+          0.7
+        ],
+        "label": "Static physical solid"
+      },
+      "fluid_reservoir": {
+        "low_m": [
+          2.2,
+          0,
+          0
+        ],
+        "size_m": [
+          1,
+          1,
+          0.26
+        ],
+        "mkfluid": 0,
+        "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+      }
+    },
+    "initial_state": {
+      "source_regions": {
+        "fluid": {
+          "low_m": [
+            2.2,
+            0,
+            0
+          ],
+          "size_m": [
+            1,
+            1,
+            0.26
+          ],
+          "mkfluid": 0,
+          "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1"
+        }
+      },
+      "velocities_m_per_s": {
+        "fluid": [
+          0,
+          0,
+          0
+        ]
+      },
+      "source_labels": {
+        "fluid": "Initial Type3/Mk1 cohort"
+      },
+      "continuum_mass_by_source_kg": {
+        "fluid": 260.0
+      },
+      "mass_policy": "Original unscaled binary native weights; continuum geometry mass is distinct from rounded official CSV and binary native inventory"
+    },
+    "controls": {
+      "boundary": 1,
+      "step_algorithm": 1,
+      "kernel": 1,
+      "viscosity": {
+        "treatment": 1,
+        "value": 0.1,
+        "boundary_factor": 1
+      },
+      "density_dt": 2,
+      "density_dt_value": 0.1
+    },
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "density_kg_m3": 1000,
+    "parameters": {
+      "fluid_depth_m": 0.26,
+      "physical_top_open": true,
+      "continuum_fluid_volume_m3": 0.26
+    },
+    "event_window": {
+      "time_start_s": 0,
+      "time_end_s": 4.0,
+      "sequence": [
+        "release",
+        "divider_encounter",
+        "asymmetric_channel_transport",
+        "downstream_return"
+      ],
+      "expected_first_contact_range_s": null,
+      "right_censor_policy": "Retain actual terminal categories and unknown native exclusion. Expected sequence requires actual arrays; no guaranteed event or path convergence."
+    },
+    "lineage_group_id": "F1_dual_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK",
+    "periodic_boundary": false,
+    "mass_policy": "native_massfluid_no_rescaling"
+  },
+  "physical_condition_sha256": "238906071b2bc9742a66966ea707ae2d0de0fd0029c204c29636f415bc4a551c",
+  "resolution": "dp020_stage1_prospective_interior",
+  "solver_parameters": {
+    "Boundary": "1",
+    "SavePosDouble": "1",
+    "StepAlgorithm": "1",
+    "VerletSteps": "40",
+    "Kernel": "1",
+    "ViscoTreatment": "1",
+    "Visco": "0.1",
+    "ViscoBoundFactor": "1",
+    "DensityDT": "2",
+    "DensityDTvalue": "0.1",
+    "Shifting": "0",
+    "RigidAlgorithm": "1",
+    "FtPause": "0",
+    "CoefDtMin": "0.05",
+    "DtIni": "0",
+    "DtMin": "0",
+    "DtFixed": "0",
+    "DtAllParticles": "0",
+    "TimeMax": "4.0",
+    "TimeOut": "0.01",
+    "MinFluidStop": "0",
+    "RhopOutMin": "700",
+    "RhopOutMax": "1300"
+  },
+  "source": {
+    "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020/root-stage1-dual-h260-actual-gencase-027/prepared/F1_STAGE1_DUAL_H260_DP020.xml",
+    "initial_BI4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020/root-stage1-dual-h260-actual-gencase-027/prepared/F1_STAGE1_DUAL_H260_DP020.bi4",
+    "actual_gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H260_DP020/root-stage1-dual-h260-actual-gencase-027/execution-receipt.json",
+    "actual_initial_qa": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_SIX_NEW_HEAD_ACTUAL_INITIAL_QA/root-stage1-six-new-head-actual-native-initial-qa-031/native-initial-qa.json",
+    "unchanged_mother_owner": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/dual_coarse/owner.json"
+  },
+  "claims": {
+    "visual_review": "pending actual full4s solver and full401 savedframe review",
+    "numerical_precision_status": "not_accepted",
+    "q_n": "not_granted",
+    "independent_case_count_increment": 0
+  }
+}
