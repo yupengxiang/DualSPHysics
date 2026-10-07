@@ -136,11 +136,15 @@ def _execution_closure() -> dict[str, Any]:
         "DS_DATA02_STAGE2_MAIN_ROOT",
         "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
     )).expanduser().resolve()
+    # Bind the concrete four files imported by the parent's v4 runner.  The
+    # similarly named v1/v2 dispatch files are historical dependencies and
+    # are retained separately in the inherited closure when present; they do
+    # not satisfy a v4 guard binding.
     guard_specs = {
         "runtime_v2": "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
-        "runtime_v1": "lagrangian-fluid-lab/scripts/ds_data02_runtime.py",
-        "stage2_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
-        "strict_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+        "runtime_v4": "lagrangian-fluid-lab/scripts/ds_data02_runtime_v4.py",
+        "stage2_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py",
+        "strict_dispatch_v4": "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py",
     }
     guard_sources: dict[str, Any] = {}
     for role, relative in guard_specs.items():
