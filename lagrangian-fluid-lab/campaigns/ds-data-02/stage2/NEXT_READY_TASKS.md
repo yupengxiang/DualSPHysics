@@ -1,3 +1,15 @@
+## 2026-10-07T20:07:49.304400+00:00：173例独立审计、完整回放与新转换启动
+
+恢复入口为 `checkpoints/CHECKPOINT_011_INTEGRATED.json`，完整目标active、未完成。独立快照173例（F2/F4/F6各48、F1=29），字段/身份/来源完整性信用，不代表动力学或QN/QE。F6真实48/48 completed且父进程退出，F3已接续新v4一worker；F1继续，以实际PID/start_ticks及收据为准。
+
+v15实际full401/21114回放completed、25测试PASS，冻结质量21.114001002861187kg，源H5pre/post SHA相同，finaltree/receipt/charge62410433B相同。结果C26净通量总区间漏已知13.572kg贡献，C27残留v14冲突字段；新forward sidecar待primary核对，原报告保留，任务产品仍未验收。ROT090=.9秒、实际rotation.5..1.4秒/table0..4秒为唯一正确解释。
+
+新增14实际native joins/typed mass screens共319position exclusion IDs独立核对；物理去向/动力学未知，perMK分母仍typed total按source count分配，uniform质量假设待来源闭合。12massfit实测3pass/5marginal/4hard，不放宽1%。这12旧v2终态实际目录比历史计费多51178B，均在预约内；旧证据不改，后续v4。
+
+coarse完整401帧转换经actual v4 importer/真实smallparse通过后启动PID1212281/start_ticks218667718，实际输出 `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4_TYPED_FULL401_V4/f2_s1_full_cfd_canary_dp01258_t4_typed_full401-v4-primary-001`；CPU2/wall7200/disk16GiB，共享v4，尚未授予科学资格。先检查实际terminal再登记common-query reader，不重复启动。
+
+继续336/118/14参考终态/有效条件划分/七cards/无模型evaluator/完整便携内部重放全部目标，原预算与期限不重置。以下历史记录保留。
+
 最新语义纠正：`checkpoints/F2_CONTROL_SEMANTICS_CORRECTION_001.json` 核对历史solver绑定metadata，ROT090代表0.90秒转动时长，末角-105°；源控制一致，先前“角度命名冲突”解释撤回。实际转动0.5..1.4秒，与motion表/XML覆盖0..4秒分别记录。旧代码/收据/检查点保留，新v15使用正确语义；coarse已匹配真实曲线，无须重跑CFD。
 
 ## 2026-10-07T19:43:16.132667+00:00：真实完整CFD产物、首帧cohort与完整回放接口修复
