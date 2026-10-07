@@ -188,14 +188,14 @@ def build() -> Path:
     source_receipt = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H340_DP020/root-stage1-dual-h340-actual-gencase-027/execution-receipt.json")
     specs = []
     for dp, relation in (("0.017", "15% finer than CURRENT dp=0.020"), ("0.0165", "17.5% finer than CURRENT dp=0.020"), ("0.016", "20% finer than CURRENT dp=0.020")):
-        token = dp.replace(".", "p")
+        token = f"{float(dp):.6f}".replace(".", "p")
         specs.append({
             "sentinel_id": "F1-S2", "family_id": "F1",
             "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
             "grid_role": "interval_information_gain_ge10pct_spacing",
-            "dp": dp, "case_id": f"F1_S2_SPATIAL_INTERVAL_DP{token}000",
-            "attempt_id": f"f1-s2-spatial-interval-dp{token}000-v2-root-001",
-            "output_root": f"/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_INTERVAL_DP{token}000/f1-s2-spatial-interval-dp{token}000-v2-root-001",
+            "dp": dp, "case_id": f"F1_S2_SPATIAL_INTERVAL_DP{token}",
+            "attempt_id": f"f1-s2-spatial-interval-dp{token}-v2-root-001",
+            "output_root": f"/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_INTERVAL_DP{token}/f1-s2-spatial-interval-dp{token}-v2-root-001",
             "base_def": str(f1_base), "current_source_def": str(source_def),
             "source_xmls": [str(source_xml)], "source_inputs": [str(source_receipt)],
             "base_request": str(REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-sentinel-spatial-preflight-v1/f1_s2_spatial_original_dp0p020000.json"),
