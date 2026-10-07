@@ -216,6 +216,7 @@ def request_for(candidate: dict[str, Any], aux: dict[str, Any], manifest_path: P
         PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py",
         PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py",
         PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v4.py",
+        PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
         REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_mass_fit_probe_v2.py",
         GENCASE, CURRENT_PATH, REVIEW_PATH, QUALITY_PATH, QUALITY_PATH.with_suffix(".json"), SPATIAL_MANIFEST_PATH, V1_MANIFEST_PATH, V1_RESULTS_PATH,
         Path(predecessor["request"]["path"]), Path(predecessor["receipt"]["path"]), Path(predecessor["generated_xml"]["path"]), Path(predecessor["generated_bi4"]["path"]),
