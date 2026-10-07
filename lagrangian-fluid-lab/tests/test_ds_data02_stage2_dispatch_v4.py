@@ -15,6 +15,10 @@ import ds_data02_stage2_dispatch_v3 as guard_v3
 import ds_data02_batch_runner_v4 as batch_v4
 import ds_data02_stage2_dispatch_v4 as guard_v4
 
+# Both batch wrappers share the consumed module object; leave collection-time
+# state on v3 so the existing v3 test module remains order-independent.
+batch_v3.base.RUNTIME_SCRIPT = batch_v3.DISPATCH
+
 
 def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
