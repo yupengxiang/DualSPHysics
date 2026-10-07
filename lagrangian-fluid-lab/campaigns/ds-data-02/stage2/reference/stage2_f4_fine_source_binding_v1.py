@@ -44,9 +44,6 @@ FINE_REQUEST_DIR = REQUEST_ROOT / "stage2-f4-fine-full-window-v1"
 AUDIT_PATH = REFERENCE / "stage2_f4_s1_fine_gencase_producer_audit_v1.json"
 REQUEST_PATH = FINE_REQUEST_DIR / "f4_s1_fine_dp0008_same_cfl_dense_t1p2.json"
 
-PHYSICAL_CASE_ID = "F4_DROP_gap0p22000_xoff0p00000_yoff0p50000_uz0p50000"
-# The review/current identity uses xoff0p00000_yoff0p00000; keep the exact
-# catalog identity below after the source row is checked by the parent.
 PHYSICAL_CASE_ID = "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000"
 ENDPOINT_S = 1.200084396929538
 
@@ -105,13 +102,15 @@ def xml_meta(path: Path) -> dict[str, object]:
     massfluid = float(mass_node.get("value"))
     for block in blocks:
         block["sample_mass_kg"] = block["count"] * massfluid
+    h_node = constants.find("h")
     return {
         "file": file_record(path),
         "dp_m": float(definition.get("dp")),
-        "h_m": float(constants.findtext("h", "nan")),
+        "h_m": float(h_node.get("value")) if h_node is not None and h_node.get("value") else None,
         "massfluid_kg": massfluid,
         "fluid_blocks": blocks,
         "fluid_particle_count": sum(int(x["count"]) for x in blocks),
+        "particle_count": int(particles.get("np")) if particles.get("np") else None,
         "sample_mass_kg": sum(float(x["sample_mass_kg"]) for x in blocks),
         "cfl": float(constants.find("cflnumber").get("value")) if constants.find("cflnumber") is not None else None,
         "parameters": {
@@ -187,7 +186,7 @@ def make_request(source: dict, candidate: dict) -> dict:
         "candidate_generated_xml_sha256": candidate["generated_xml"]["sha256"],
         "candidate_generated_bi4": str(CANDIDATE_BI4),
         "candidate_generated_bi4_sha256": candidate["generated_bi4"]["sha256"],
-        "expected_particles": candidate["generated_xml_meta"]["fluid_particle_count"],
+        "expected_particles": candidate["generated_xml_meta"]["particle_count"],
         "expected_fluid_particles": candidate["generated_xml_meta"]["fluid_particle_count"],
         "expected_native_frames": 2402,
         "expected_dimension": 3,
