@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 import sys
 
@@ -13,6 +15,10 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 import ds_data02_f5_bi4 as converter  # noqa: E402
 import ds_data02_stage2_f2_native_raw_to_typed_compare_v4 as worker  # noqa: E402
+
+
+def _sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _write_typed(path: Path, *, missing: bool = True, mutate_mass: bool = False) -> None:
@@ -113,6 +119,43 @@ def test_mass_semantics_never_infers_rigid_body_from_particle_sum() -> None:
     assert result["particle_mass"]["dataset"] == "mass"
     assert result["rigid_body"]["status"] == "UNKNOWN_NOT_INFERRED"
     assert result["rigid_body"]["massbody_kg"] is None
+
+
+def test_current_row_binds_reference_path_and_producer_sha_before_h5(tmp_path: Path) -> None:
+    reference = tmp_path / "producer.h5"
+    reference.write_bytes(b"producer bytes")
+    current = tmp_path / "CURRENT336.json"
+    current.write_text(json.dumps({"cases": [{} for _ in range(2)]}) + "\n")
+    catalog = json.loads(current.read_text())
+    catalog["cases"][1] = {
+        "family_id": "F2", "physical_case_id": "physical", "runtime_case_alias": "runtime",
+        "frames": 2, "particles": 3,
+        "trajectory": {"path": str(reference), "producer_declared_sha256": _sha(reference)},
+    }
+    current.write_text(json.dumps(catalog) + "\n")
+    base = {"current_binding": {"case_index": 1, "frames": 2, "particles": 3},
+            "source_files": [{"role": "current_catalog", "path": str(current),
+                              "sha256": _sha(current)}]}
+    binding = {"path": str(reference), "sha256": _sha(reference)}
+    result = worker._cross_check_current_reference(base, binding, expected_frames=2, expected_particles=3)
+    assert result["status"] == "EXACT_CURRENT_ROW_REFERENCE_BOUND"
+    assert result["physical_case_id"] == "physical"
+
+
+def test_current_row_wrong_reference_path_or_sha_is_rejected(tmp_path: Path) -> None:
+    reference = tmp_path / "producer.h5"
+    wrong = tmp_path / "wrong.h5"
+    reference.write_bytes(b"producer bytes")
+    wrong.write_bytes(b"wrong bytes!")
+    current = tmp_path / "CURRENT336.json"
+    current.write_text(json.dumps({"cases": [{}, {"frames": 2, "particles": 3,
+        "trajectory": {"path": str(reference), "producer_declared_sha256": _sha(reference)}}]}) + "\n")
+    base = {"current_binding": {"case_index": 1, "frames": 2, "particles": 3},
+            "source_files": [{"role": "current_catalog", "path": str(current),
+                              "sha256": _sha(current)}]}
+    with pytest.raises(worker.ReferenceCompareError, match="path differs"):
+        worker._cross_check_current_reference(base, {"path": str(wrong), "sha256": _sha(wrong)},
+                                              expected_frames=2, expected_particles=3)
 
 
 @pytest.mark.parametrize("value", [0, -1, 1.0, True, "1"])
