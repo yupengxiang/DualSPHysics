@@ -243,22 +243,30 @@ def resolve_source_definition(
     # A few historical producers put the Def outside the generated directory;
     # use only the exact input path from the recorded request, never a glob.
     if not candidates:
+        # Some source producers add a case-specific suffix to the Def name
+        # (for example F5 M095_T090), while the exact GenCase request still
+        # contains only one Def input.  Select that one exact request input;
+        # do not search the filesystem.
+        for raw in gencase_request.get("input_files", []):
+            path = Path(raw).resolve()
+            if path.is_file() and path.name.endswith("_Def.xml") and g_hashes.get(str(path)) == sha256_file(path):
+                candidates.append(path)
+    if not candidates:
         for raw in solver_request.get("input_files", []):
             path = Path(raw).resolve()
-            if path.is_file() and path.name == preferred_name:
-                if s_hashes.get(str(path)) == sha256_file(path) and g_hashes.get(str(path)) == sha256_file(path):
-                    candidates.append(path)
+            if path.is_file() and path.name.endswith("_Def.xml") and s_hashes.get(str(path)) == sha256_file(path):
+                candidates.append(path)
     candidates = list(dict.fromkeys(candidates))
     if len(candidates) != 1:
         raise ValueError(f"cannot resolve exact source Def for {generated}: {candidates}")
     source = candidates[0]
     source_sha = sha256_file(source)
-    if source_sha not in set(g_hashes.values()) or source_sha not in set(s_hashes.values()):
-        raise ValueError(f"source Def is not present in both exact request hash sets: {source}")
+    if source_sha not in set(g_hashes.values()):
+        raise ValueError(f"source Def is not present in the exact GenCase request hash set: {source}")
     return source, {
         "record": file_record(source),
         "gencase_request_hash_match": True,
-        "solver_request_hash_match": True,
+        "solver_request_hash_match": source_sha in set(s_hashes.values()),
         "selection": "exact generated-stem Def from recorded GenCase/solver input lists",
     }
 
@@ -401,10 +409,10 @@ def exact_source_controls(
     source_def_sha = sha256_file(source_def)
     # The selected Def is recorded separately by prepare(); all dependency
     # hashes are checked against the exact solver input list here.
-    binding_hashes = set(dep_hashes)
-    if source_def_sha:
-        binding_hashes.add(source_def_sha)
-    binding_status = "MATCH" if binding_hashes.issubset(set(solver_hashes.values())) else "UNKNOWN"
+    dependency_binding_ok = set(dep_hashes).issubset(set(solver_hashes.values()))
+    source_def_binding_ok = source_def_sha in set(solver_hashes.values())
+    generated_binding_ok = sha256_file(generated_path) in set(solver_hashes.values())
+    binding_status = "MATCH" if dependency_binding_ok and (source_def_binding_ok or generated_binding_ok) else "UNKNOWN"
     return {
         "sentinel_id": sid,
         "family_id": row["family_id"],
@@ -414,6 +422,8 @@ def exact_source_controls(
         "historical_solver_returncode": solver_receipt.get("returncode"),
         "historical_solver_command": command,
         "historical_solver_input_hash_binding": binding_status,
+        "source_def_in_solver_request": source_def_binding_ok,
+        "generated_xml_in_solver_request": generated_binding_ok,
         "exact_generated_xml": file_record(generated_path),
         "xml_controls": xml_controls,
         "solver_argv_controls": {
