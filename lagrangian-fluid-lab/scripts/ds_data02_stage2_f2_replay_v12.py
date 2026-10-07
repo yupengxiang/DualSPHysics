@@ -625,6 +625,14 @@ def validate_observer_profile(profile: Mapping[str, Any], *, request: Mapping[st
             raise ReplayV12BindingError("observer profile case identity differs from request")
         if not math.isclose(scale, float(request["observer"]["position_scale_m"]), rel_tol=0.0, abs_tol=1e-12):
             raise ReplayV12BindingError("observer profile scale differs from request observer")
+        for profile_key, observer_key in (
+                ("velocity_scale_m_s", "velocity_scale_m_s"),
+                ("kinetic_energy_scale_J", "kinetic_energy_scale_J"),
+                ("mass_denominator_kg", "mass_denominator_kg"),
+                ("event_time_scale_s", "event_time_scale_s")):
+            if not math.isclose(float(profile[profile_key]), float(request["observer"][observer_key]),
+                                rel_tol=0.0, abs_tol=1e-12):
+                raise ReplayV12BindingError(f"observer profile {profile_key} differs from request observer")
         request_times = np.asarray(request["window"]["expected_times_s"], dtype=float)
         if not np.allclose(times, request_times[np.asarray(indices, dtype=int)], rtol=0.0, atol=2e-8):
             raise ReplayV12BindingError("observer profile query times are not CURRENT saved times")

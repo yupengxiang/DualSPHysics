@@ -261,6 +261,10 @@ def test_v12_full_source_request_validates_without_hdf5_content_read():
     wrong["initial_mass_denominator"]["denominator_kg"] = 21.11700100300368
     with pytest.raises(ReplayV12BindingError, match="initially absent"):
         validate_replay_request(wrong)
+    wrong_scale = json.loads(path.read_text())
+    wrong_scale["observer"]["velocity_scale_m_s"] = 0.15
+    with pytest.raises(ReplayV12BindingError, match="velocity_scale"):
+        validate_replay_request(wrong_scale)
 
 
 def test_v12_flux_hidden_gross_multi_gap_and_nonfinite_mass_are_conservative():
