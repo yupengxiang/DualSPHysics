@@ -167,7 +167,8 @@ def _engine_fixture(tmp_path: Path) -> tuple[dict, dict[str, str], dict]:
     for role in ("motion_engine_jmotion_data", "motion_engine_jmotion_mov", "motion_engine_jmotion_obj"):
         original = tmp_path / f"{role}.h"
         original.write_text(role)
-        relocated = tmp_path / f"relocated-{role}.h"
+        relocated = tmp_path / "bundle" / "runtime" / "engine" / original.name
+        relocated.parent.mkdir(parents=True, exist_ok=True)
         relocated.write_text(role)
         profile.setdefault("supporting_sources", []).append({
             "role": role,

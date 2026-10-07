@@ -376,7 +376,11 @@ def _original_path_strings(value: Any, exact: Mapping[str, str], suffix: Mapping
     if not isinstance(value, str):
         return []
     normalized = value.replace("\\", "/")
-    if value in exact or any(normalized == source or normalized.endswith("/" + source) for source in suffix):
+    # Relocated targets are absolute paths too, so suffix matching is only
+    # valid for repository-relative provenance strings.  Exact matching still
+    # catches every original absolute URI.
+    if value in exact or (not Path(value).is_absolute() and
+                          any(normalized == source or normalized.endswith("/" + source) for source in suffix)):
         return [value]
     return []
 
