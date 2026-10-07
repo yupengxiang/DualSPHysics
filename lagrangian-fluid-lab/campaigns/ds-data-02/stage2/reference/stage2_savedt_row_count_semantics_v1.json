@@ -1,0 +1,208 @@
+{
+  "schema": "ds02.stage2.savedt-row-count-semantics.v1",
+  "status": "ACTUAL_SAME_PENDING_HALF_ROW_SEMANTICS",
+  "current_head": "8e7e45d72d60f0b8ddda10dd5e9b1dcea278917c",
+  "actual": {
+    "status": "ACTUAL_TEXT_RECEIPT_ANALYZED",
+    "request": {
+      "file": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f4-dp0-savedt-pair-v1/same_cfl.json",
+        "bytes": 16048,
+        "mtime_ns": 1791408393555688588,
+        "sha256": "9be2e56cbe65e48b91898e6e45ecc56afecb46f9fc6ab1ec63bf133d2d4e9b3f"
+      },
+      "case_id": "F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2",
+      "attempt_id": "f4-s1-dp0-savedt-same_cfl-dense-t1p2-root-001",
+      "command": [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+        "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_dp0_savedt_pair_inputs_v1/same_cfl/F4_DROP_CENTERED_REFERENCE_001_DP010_same_cfl_savedt",
+        "{attempt_root}/solver_output",
+        "-tmax:1.200084396929538",
+        "-tout:0.0005"
+      ],
+      "requested_window_s": [
+        0.0,
+        1.200084396929538
+      ],
+      "requested_save_interval_s": 0.0005
+    },
+    "receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/execution-receipt.json",
+      "bytes": 29095,
+      "mtime_ns": 1791408800839907061,
+      "sha256": "dfe05eac09665c0aa24702725e3bd87c1072f2c7e013c4ba1cd4442f88d5dff6"
+    },
+    "output_text": {
+      "DtAllInfo": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/solver_output/DtAllInfo.csv",
+        "bytes": 421487,
+        "mtime_ns": 1791408798882963696,
+        "sha256": "d5d3f35f284f96c0debfe5df67743c91ad144fce17a1844358ed57e56a0f5eff"
+      },
+      "RunPARTs": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 483428,
+        "mtime_ns": 1791408798882963696,
+        "sha256": "781e0bc39c2c218550ddb73f8cd197f25c1408be6fd06ea297571499a972bfc3"
+      },
+      "Run.out": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/solver_output/Run.out",
+        "bytes": 242890,
+        "mtime_ns": 1791408798883963667,
+        "sha256": "91d8e05b7eab2693a19ea170fb26fac2008c90e76258ef631d0c57f19cd66aea"
+      }
+    },
+    "backend_and_algorithm": {
+      "gpu_cli_present": true,
+      "step_algorithm": "Verlet",
+      "scope": "GPU single / Verlet row-count convention only; do not generalize to other backends"
+    },
+    "counts": {
+      "DtAllInfo_data_rows": 10035,
+      "RunPARTs_numeric_rows": 2401,
+      "RunPARTs_sum_Steps": 10036,
+      "RunPARTs_first_nonzero_part_Steps": 5,
+      "RunPARTs_last_time_s": 1.200084396929538,
+      "Run.out_reported_steps": 10036,
+      "Run.out_aggregate_clamp_count": 0,
+      "observed_RunPARTs_sum_minus_DtAll_rows": 1,
+      "gpu_verlet_offset_relation": "PASS",
+      "Run.out_to_DtAll_relation": "UNKNOWN_REPORTED_STEP_COUNTER_SEMANTICS"
+    },
+    "time_integrity": {
+      "DtAll_first_time_s": 0.0,
+      "DtAll_last_time_s": 1.199944148367,
+      "DtAll_last_time_plus_dtf_s": 1.2000843969293615,
+      "RunPARTs_final_time_s": 1.200084396929538,
+      "sum_Dtf_s": 1.200084396929528,
+      "sum_Dtf_minus_RunPARTs_endpoint_s": -9.992007221626409e-15,
+      "max_adjacent_continuity_error_s": 9.681144774731365e-13,
+      "endpoint_match_within_1e-10": true,
+      "sum_Dtf_match_within_1e-10": true
+    },
+    "semantic_explanation": {
+      "observed": "DtAllInfo rows equal RunPARTs Steps sum minus one for this GPU/Verlet run.",
+      "source_reason": "GPU single initializes PartNstep=-1 and RunPARTs writes Nstep-PartNstep; this creates a one-count PART accounting offset in the Steps column.",
+      "scope_limit": "This explains the observed text receipt relation; it does not prove one DtAllInfo row per Run.out reported step because Run.out reports 10036 while DtAllInfo has 10035.",
+      "dtall_semantics": "DtAllInfo stores AddValues at the current pre-increment TimeStep with final dt; last row plus Dtf reaches the final saved time.",
+      "clamp_semantics": "Run.out provides only aggregate clamp count; no per-row clamp location is inferred."
+    },
+    "source_proof": {
+      "gpu_initial_part_offset": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+        "bytes": 59520,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef",
+        "needle": "PartNstep=-1; Part++;",
+        "hits": [
+          {
+            "line": 987,
+            "text": "PartNstep=-1; Part++;"
+          }
+        ]
+      },
+      "gpu_final_step_increment": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+        "bytes": 59520,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef",
+        "needle": "Nstep++;",
+        "hits": [
+          {
+            "line": 1010,
+            "text": "Nstep++;"
+          }
+        ]
+      },
+      "runparts_steps_formula": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSph.cpp",
+        "bytes": 181114,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "8729eb29db778288b0495855a04fa0984000896546f484dcf96176ec48da5454",
+        "needle": "const int partnsteps=(Nstep-PartNstep);",
+        "hits": [
+          {
+            "line": 3001,
+            "text": "const int partnsteps=(Nstep-PartNstep);"
+          }
+        ]
+      },
+      "savedt_all_dt_append": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JDsSaveDt.cpp",
+        "bytes": 11220,
+        "mtime_ns": 1747898527000000000,
+        "sha256": "7c6ecba8ab96acbcc4f55ce2af62e91c00e1cadd8ef27b7d9d9fd6ec771049b2",
+        "needle": "AllDts[CountAllDts]=TDouble2(timestep,dtfinal);",
+        "hits": [
+          {
+            "line": 263,
+            "text": "AllDts[CountAllDts]=TDouble2(timestep,dtfinal);"
+          }
+        ]
+      },
+      "savedt_all_dt_count": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JDsSaveDt.cpp",
+        "bytes": 11220,
+        "mtime_ns": 1747898527000000000,
+        "sha256": "7c6ecba8ab96acbcc4f55ce2af62e91c00e1cadd8ef27b7d9d9fd6ec771049b2",
+        "needle": "CountAllDts++;",
+        "hits": [
+          {
+            "line": 264,
+            "text": "CountAllDts++;"
+          }
+        ]
+      },
+      "gpu_savedt_final_dt_call": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+        "bytes": 59520,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef",
+        "needle": "const double dt=DtVariable(true);",
+        "hits": [
+          {
+            "line": 766,
+            "text": "const double dt=DtVariable(true);      //-Calculate new dt."
+          }
+        ]
+      }
+    },
+    "solver_started_by_helper": false,
+    "hdf5_read_by_helper": false,
+    "native_payload_read_by_helper": false
+  },
+  "pending_half_pair": {
+    "status": "PENDING_GUARDED_RUN",
+    "request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f4-dp0-savedt-pair-v1/half_cfl.json",
+      "bytes": 16258,
+      "mtime_ns": 1791408396251610650,
+      "sha256": "c26ef21029b118595aaa3d784f1fa8966794e8f7f0864d39c62d513cbed4e4d0"
+    },
+    "case_id": "F4_S1_DP0_SAVEDT_HALF_CFL_DENSE_T1P2",
+    "attempt_id": "f4-s1-dp0-savedt-half_cfl-dense-t1p2-root-001",
+    "requested_window_s": [
+      0.0,
+      1.200084396929538
+    ],
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_dp0_savedt_pair_inputs_v1/half_cfl/F4_DROP_CENTERED_REFERENCE_001_DP010_half_cfl_savedt",
+      "{attempt_root}/solver_output",
+      "-tmax:1.200084396929538",
+      "-tout:0.0005"
+    ],
+    "launch_disabled": true,
+    "no_actual_rows_claimed": true
+  },
+  "scope": {
+    "reads_hdf5": false,
+    "reads_native_payloads": false,
+    "starts_solver": false,
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
