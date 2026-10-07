@@ -17,6 +17,7 @@ from ds_data02_stage2_f2_replay_v13 import (  # noqa: E402
     adapt_v4_first_passage,
     adapt_v4_saved_bracket_events,
     evaluate_manual_predictions,
+    evaluate_receiver_manual_predictions,
     event_label,
     flux,
     mass_observation,
@@ -441,6 +442,34 @@ def test_v13_scientific_error_shares_gate_science_not_runtime_or_output():
     scored = evaluate_manual_predictions(result, predictions, profile)
     assert scored["status"] == "FAIL"
     assert scored["checks"]["time_integration_budget"] is False
+
+
+def test_v13_receiver_evaluator_binds_ids_unknown_candidates_and_mass_weights():
+    result = replay_trajectory(_fixture_trajectory(), _fixture_request())
+    profile = _fixture_profile(result)
+    receiver = [item["receiver_volume_label"] for item in result["labels"]]
+    predictions = {
+        "observer_scope": "finite_receiver_volume_and_top_aperture_v13",
+        "source_binding": result["source_binding"],
+        "observer_profile_sha256": profile["sha256"],
+        "identity": [[item["zone"], item["idp"]] for item in result["labels"]],
+        "receiver_event_status": [item["status"] for item in receiver],
+        "aperture_event_status": [item["aperture_first_arrival_status"] for item in receiver],
+        "final_destination_status": [item["final_destination_status"] for item in receiver],
+        "receiver_event_time_s": [item["event_time_s"] if item["status"] == "observed" else float("nan") for item in receiver],
+        "aperture_event_time_s": [float("nan")] * len(receiver),
+        "destination_mass_fraction": [0.5, 0.2, 0.3],
+    }
+    scored = evaluate_receiver_manual_predictions(result, predictions, profile)
+    assert scored["status"] == "PASS"
+    bad = dict(predictions)
+    bad["identity"] = list(reversed(predictions["identity"]))
+    with pytest.raises(ReplayV13BindingError, match="identity/order"):
+        evaluate_receiver_manual_predictions(result, bad, profile)
+    bad = dict(predictions)
+    bad["aperture_event_time_s"] = [0.0] * len(receiver)
+    with pytest.raises(ReplayV13BindingError, match="unknown aperture"):
+        evaluate_receiver_manual_predictions(result, bad, profile)
 
 
 def test_v13_portable_relocation_hashes_small_sources_and_rejects_mutations(tmp_path):
