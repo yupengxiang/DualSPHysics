@@ -2131,6 +2131,17 @@ def read_hdf5_initial_frame(request: Mapping[str, Any], *, io_slot_approved: boo
         selected, summary = select_fluid_cohort(
             frame0, full_type, full_mk, full_zone, full_id, full_mass, bound["cohort"])
         selected_position = np.asarray(frame0[selected], dtype="float64")
+        selected_mass = float(np.asarray(full_mass[selected], dtype="float64").sum())
+        denominator = _finite(bound["initial_mass_denominator"]["denominator_kg"],
+                              "initial mass denominator")
+        if not math.isclose(selected_mass, denominator, rel_tol=0.0, abs_tol=5e-8):
+            raise ReplayV13BindingError("HDF5 frame-zero selected mass differs from frozen denominator")
+        h5_mk_counts = {str(mk): int(np.sum(np.asarray(full_mk[selected]) == mk)) for mk in (1, 2, 3)}
+        csv_bounds = bound["cohort"]["source_csv_semantics"]
+        csv_min = np.asarray(csv_bounds["fluid_position_min_m"], dtype=float)
+        csv_max = np.asarray(csv_bounds["fluid_position_max_m"], dtype=float)
+        h5_min = selected_position.min(axis=0)
+        h5_max = selected_position.max(axis=0)
         frame_time = float(source["time"][0])
     return {
         "schema": "ds02.stage2.f2-s1-initial-frame-result.v13",
@@ -2146,6 +2157,12 @@ def read_hdf5_initial_frame(request: Mapping[str, Any], *, io_slot_approved: boo
                    for key, value in summary.items() if key != "selected_indices"},
         "selected_position_min_m": selected_position.min(axis=0).tolist(),
         "selected_position_max_m": selected_position.max(axis=0).tolist(),
+        "h5_initial_mk_counts": h5_mk_counts,
+        "h5_selected_initial_mass_kg": selected_mass,
+        "source_csv_to_h5_bounds_delta_m": {
+            "min": (h5_min - csv_min).tolist(), "max": (h5_max - csv_max).tolist(),
+            "comparison": "reported only; identity/type/MK and frozen mass are the binding checks",
+        },
         "source_csv_semantics": dict(bound["cohort"]["source_csv_semantics"]),
         "initial_mass_denominator": dict(bound["initial_mass_denominator"]),
         "resource_observation": {
