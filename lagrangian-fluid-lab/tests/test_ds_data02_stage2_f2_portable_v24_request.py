@@ -25,7 +25,7 @@ def test_v24_request_binds_complete_relocated_runtime_closure() -> None:
     assert request["schema"] == "ds02.request.v1"
     assert request["orchestration_schema"].endswith(".v24")
     assert request["sha256"] == _canonical_sha(request)
-    assert request["launch_commit"] == "c96a9ba17"
+    assert request["launch_commit"] == "bfdac41a2"
     assert request["source_hashes_preverified_by_parent"] is True
     roles = set(request["source_bindings"])
     required = {
