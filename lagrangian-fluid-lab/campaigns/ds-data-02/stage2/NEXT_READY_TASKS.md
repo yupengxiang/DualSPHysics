@@ -1,3 +1,9 @@
+## 2026-10-07T18:06:02.800417+00:00：F2 完整审计终态，F4 恢复已实际启动
+
+`checkpoints/CHECKPOINT_005_INTEGRATED.json` 为最新协调入口。F2 全 48 个 distinct CURRENT 案例完成完整保存时序字段审计；此快照所有家族合计 89 个。F4 剩余 24 项的 `stage2-F4-science-002` 已实际启动，parent PID 1085950；F6 的 `stage2-F6-science-001` parent PID 1060071 仍存活。每队列 1 worker、共 2 个科学 I/O slots，guard/input digest/resource accounting 保持生效。具体进度以实时 receipt 为准，不从旧 stale running 状态推断。
+
+14 个哨点 frame0 的 conversion 一致性和 v4 的 17 个集成测试已实际通过。Reference/forensics/consumers 的下一版实现仍在委派执行，新 CFD 和真实全时序标签尚未启动；它们须先有实际连续物理条件匹配、观测校准、预登记容差/成本与输入绑定。目标保持 active、未完成。
+
 14 哨点初始帧核对的实际绑定详见 `checkpoints/SENTINEL_INITIAL_VERIFICATION_001.json`；只给 frame0 转换一致性信用。
 
 ## 2026-10-07 17:56 UTC：v4 集成与真实缺失证据
