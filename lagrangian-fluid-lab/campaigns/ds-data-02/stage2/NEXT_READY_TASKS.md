@@ -1,3 +1,9 @@
+## 2026-10-07T18:29:39.435605+00:00：v9 开发旁路保留，均速错误待新版本修复
+
+最新主分支已保留 v9 的源绑定 F2 宏与 F6 FloatingInfo 接口、质量分布/SO(3)制造证据；34个输入的原工作树/集成树 SHA 与实际guard launch/end一致。该接口仍不具备真实参考资格。主进程发现质量加权均速缺少总质量除法，以及位置body-frame/速度world-frame标识风险；详见 `checkpoints/CONSUMER_V9_INTEGRATION_REVIEW_001.json`。由消费者分支在新版本修复并补独立非单位质量、整体质量缩放与跨括号重复反例。不得将旧v9均速用于科学比较，也不得修改已消费字节。
+
+全局可恢复状态仍以 `checkpoints/CHECKPOINT_006_INTEGRATED.json` 和运行中的实际F4/F6 receipts为准；F2粗档mass不匹配、其余真实标签/14参考/泄漏审阅/七cards/便携包工作继续。
+
 ## 2026-10-07T18:25:55.953841+00:00：观测接口集成、初始质量失配与精确边界证据
 
 `checkpoints/CHECKPOINT_006_INTEGRATED.json` 是最新协调入口。独立核对了 101 个 CURRENT 全保存时序字段审计（F2=48、F4=31、F6=22）；F4/F6 两个 batch parent PID/start_ticks 仍存活，进度继续以实时收据为准。F1/F3/F5/F7 准备队列在真实 I/O 槽位释放后启动。
