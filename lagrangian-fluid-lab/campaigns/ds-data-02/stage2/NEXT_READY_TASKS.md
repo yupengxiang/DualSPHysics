@@ -1,14 +1,14 @@
-# Stage2 根进程检查点 017
+# 下一就绪任务：检查点018
 
-长期目标仍为 active，尚未完成。本检查点保留完整目标与资源边界。
+完整Stage2目标继续，未完成。所有执行沿用原父账、资源和期限。
 
-- 336 例字段审计已独立复核259例：F3=32、F5=35，另四族各48；F7未启动，须等真实扫描父进程退出。
-- F2 portable v25元数据入口实际通过，60输入pre/post/current SHA一致，OS trace无H5 open；完整typed401回放仍待执行，raw重建另计。
-- F2 native v4 raw→typed进程仍在运行，占用补充重I/O槽，partial H5不视为成功；session68908。
-- F4两组实际小JSON比较完成，t0为共同时间直接比较，晚期保留UNKNOWN_NO_INTERPOLATION。
-- F1-S2、F6-S1、F7-S1新档GenCase实际完成；质量、材料配比与刚体inertia/COM的连续匹配待实际审核。
-- 16个绑定来源的遗漏边界CPU请求串行运行，session68533；数值排除原因不代表物理去向或零动力学影响。
-
-准确路径、进程身份、资源累计和下一任务见CHECKPOINT_017_INTEGRATED.json。不得创建、缩窄或完成另一目标，不开展模型工作，不把计划或制造测试冒充实际验收。
-
-检查点016保留历史状态，最新事实以017及新的实际终态证据为准。
+1. FinishactualF6combinedv2pre/postH5hash/staticMK+directKabsch samehandles; rootverify terminal before releasing supplementalI/O.
+2. ThenF2fine .00855 sixface numerical-domainpair canonical25inputs; freshGPUUUIDinventory/sharedlease,parentbudget, norescale; independentlyobserve native175 change and task impact.
+3. Consumerforwardv18actualfull336metadata/cardguard fixC54; preservev17failures and336immutablev15 Run.out expectedSHA.
+4. Forensicsforwardv4finecause correctrequested-vs-nativeactualtime C55; preservev1-v3 receipts.
+5. ReferenceF1S2 .017massmatchingfinefullCFD andmatched>=10%coarse; F4finephysicalselectedobserver+calibratedspatial/time/outputcomparison and scopedanalyticanchor.
+6. ActualF2rawportable v3: copy/rehash445+roles, copiedruntime raw-to-typed-to-label, nooriginalfallback; then no-model loader/evaluator trial. Metadata bundle/readme alone not acceptance.
+7. Remaining six familyfullraw anchors->typed streams/labels, exactcontrol/rigidstate/source bindings.
+8. F3/F5sourceaudits continue oneworker each; start48F7 only after actualonebatchparent exits.
+9. F6/F7marginal1-2% grids diagnosticonly; actualsourceaudit matchedcoarse/fine withbodyI/COM/control. Allother14sentinels actualreference windows still required.
+10. Resourcepreservingfutureoutputstorage forwardplan ifneeded; no ledgerreset or oldfiledeletion.
