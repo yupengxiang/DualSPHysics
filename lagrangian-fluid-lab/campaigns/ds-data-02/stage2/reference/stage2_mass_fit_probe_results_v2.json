@@ -1,0 +1,3203 @@
+{
+  "schema": "ds02.stage2.mass-fit-probe-results.v2",
+  "status": "COMPLETED_GENCASE_V2_AUDIT_ONLY",
+  "quality_source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_reference_quality_cost_v2.json",
+    "bytes": 740320,
+    "mtime_ns": 1791401222554384348,
+    "sha256": "d45a9cb7e9e9dc7f0c4a1068b1e8056f2df8e4ad28d6ce6a9316c1854d9bd101"
+  },
+  "preparation_manifest": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_mass_fit_probe_inputs_v2/manifest.json",
+    "bytes": 84865,
+    "mtime_ns": 1791402978643789960,
+    "sha256": "c421e75f388ffda5e482a0a07ed78cd70cdbc6d4b7b7543dd0c6999c0c56214b"
+  },
+  "request_count": 9,
+  "gate_counts": {
+    "HARD_FAIL_GT2PCT": 3,
+    "PASS_TARGET_1PCT": 6
+  },
+  "per_source_material_gate_counts": {
+    "HARD_FAIL_PER_SOURCE_MATERIAL_GT3PCT": 3,
+    "PASS_PER_SOURCE_MATERIAL_3PCT": 6
+  },
+  "policy": {
+    "fluid_mass": "sum every generated XML fluid block with mkfluid/count times the common massfluid value",
+    "thresholds": {
+      "target_abs_pct": 1.0,
+      "marginal_upper_abs_pct": 2.0,
+      "hard_gt_abs_pct": 2.0
+    },
+    "floating": "sample masspart and rigid massbody/center/inertia are separate; physical body fields are compared to source XML with explicit tolerances and never substituted for fluid sample mass",
+    "control": "request/source identity and continuous geometry/control bindings are reported; GenCase-only preparation does not prove solver effective dt/output controls",
+    "per_source_material_mass": "each mkfluid source uses absolute sample-mass deviation <= 0.03 (3 percentage points) against exact source generated XML; total-mass acceptance cannot mask a source-level failure",
+    "scientific_status": "QI/QN/QE UNKNOWN; GenCase mass compatibility does not qualify geometry, dynamics, time, output, or observer agreement",
+    "solver_started": false,
+    "full_time_hdf5_read": false
+  },
+  "results": [
+    {
+      "case_id": "F4_S1_MASSFIT_V2_COARSE_DP0p012266",
+      "sentinel_id": "F4-S1",
+      "family_id": "F4",
+      "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+      "label": "coarse",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f4_s1_massfit_v2_coarse_dp0p012266.json",
+        "bytes": 20969,
+        "mtime_ns": 1791402979038778222,
+        "sha256": "38580aa1930b1cf4390c60d328105024165a4a55988cfd74463467ce0bc6505f",
+        "request_sha256_in_receipt": "38580aa1930b1cf4390c60d328105024165a4a55988cfd74463467ce0bc6505f",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_MASSFIT_V2_COARSE_DP0p012266/f4_s1_massfit_v2_coarse_dp0p012266-001/execution-receipt.json",
+        "bytes": 6045275,
+        "mtime_ns": 1791403021464517823,
+        "sha256": "ca1c5d62462800e09b72dd634694ec8949371e2ec1cb55ef3c698312d11e119d",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.2516453959979117,
+        "cpu_core_seconds": 13.543824,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_MASSFIT_V2_COARSE_DP0p012266/f4_s1_massfit_v2_coarse_dp0p012266-001",
+        "total_particles_from_receipt": 48792,
+        "fluid_particles_from_receipt": 32916
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_MASSFIT_V2_COARSE_DP0p012266/f4_s1_massfit_v2_coarse_dp0p012266-001/generated.xml",
+        "bytes": 5516,
+        "mtime_ns": 1791403021205525515,
+        "sha256": "2e44ee59628eaf1788271466ef01727a25f2bf296e23da46f95dbf97dc16d095"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_MASSFIT_V2_COARSE_DP0p012266/f4_s1_massfit_v2_coarse_dp0p012266-001/generated.bi4",
+        "bytes": 2148259,
+        "mtime_ns": 1791403021201525634,
+        "sha256": "736fa37b642bd87113b7e4d9508415056953bb42b18361c168fc0fe3b93379b5"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 29484
+          },
+          {
+            "mkfluid": "1",
+            "count": 3432
+          }
+        ],
+        "total_fluid_particles": 32916,
+        "massfluid_values": [
+          "0.0018456539399"
+        ],
+        "sample_mass_kg": 60.7515450857484,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0122663897011344"
+        ],
+        "h_values": [
+          "0.021246010188"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/F4_DROP_CENTERED_REFERENCE_001_DP010.xml",
+        "bytes": 5469,
+        "mtime_ns": 1790946720035489899,
+        "sha256": "39ead4fa268715af15bba6879537ad7cf2a564283049af921f4bb1a1ba31acd0"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 53248
+          },
+          {
+            "mkfluid": "1",
+            "count": 5824
+          }
+        ],
+        "total_fluid_particles": 59072,
+        "massfluid_values": [
+          "0.001"
+        ],
+        "sample_mass_kg": 59.072,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.01"
+        ],
+        "h_values": [
+          "0.017320508076"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "HARD_FAIL_PER_SOURCE_MATERIAL_GT3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.001,
+          "by_mkfluid": {
+            "0": {
+              "count": 53248,
+              "massfluid_kg": 0.001,
+              "sample_mass_kg": 53.248000000000005
+            },
+            "1": {
+              "count": 5824,
+              "massfluid_kg": 0.001,
+              "sample_mass_kg": 5.824
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0018456539399,
+          "by_mkfluid": {
+            "0": {
+              "count": 29484,
+              "massfluid_kg": 0.0018456539399,
+              "sample_mass_kg": 54.417260764011594
+            },
+            "1": {
+              "count": 3432,
+              "massfluid_kg": 0.0018456539399,
+              "sample_mass_kg": 6.334284321736799
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "0",
+            "source": {
+              "count": 53248,
+              "massfluid_kg": 0.001,
+              "sample_mass_kg": 53.248000000000005
+            },
+            "derived": {
+              "count": 29484,
+              "massfluid_kg": 0.0018456539399,
+              "sample_mass_kg": 54.417260764011594
+            },
+            "delta_kg": 1.1692607640115895,
+            "deviation_pct_vs_source_mk": 2.1958773362597457,
+            "absolute_delta_fraction_of_source_total": 0.019793823876144187,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          },
+          {
+            "mkfluid": "1",
+            "source": {
+              "count": 5824,
+              "massfluid_kg": 0.001,
+              "sample_mass_kg": 5.824
+            },
+            "derived": {
+              "count": 3432,
+              "massfluid_kg": 0.0018456539399,
+              "sample_mass_kg": 6.334284321736799
+            },
+            "delta_kg": 0.5102843217367994,
+            "deviation_pct_vs_source_mk": 8.761750029821417,
+            "absolute_delta_fraction_of_source_total": 0.008638345099823933,
+            "gate": "HARD_FAIL_MATERIAL_GT3PCT",
+            "status": "HARD_FAIL_MATERIAL_GT3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+        "candidate_physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "1.2",
+          "historical_solver_tout_s": "0.001",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.01",
+            "h_m": "0.017320508076",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "1.2",
+            "TimeOut": "0.001"
+          },
+          "argv_controls": {
+            "tmax_s": "1.2",
+            "tout_s": "0.001",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "1.2",
+          "historical_solver_tout_s": "0.001",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.01",
+            "h_m": "0.017320508076",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "1.2",
+            "TimeOut": "0.001"
+          },
+          "argv_controls": {
+            "tmax_s": "1.2",
+            "tout_s": "0.001",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "5afbc42af5109b781a410179c625e47c24d2c3149377bd149c4b81129780409a",
+          "derived_definition_normalized_hash": "5afbc42af5109b781a410179c625e47c24d2c3149377bd149c4b81129780409a",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 59.072,
+        "actual_generated_xml_sample_mass_kg": 60.7515450857484,
+        "deviation_pct_vs_source": 2.843216897596821,
+        "gate": "HARD_FAIL_GT2PCT",
+        "prior_candidate_deviation_pct": 3.8027481294014036,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 59.072,
+        "v1_actual_generated_xml_sample_mass_kg": 60.221641408994,
+        "v1_actual_deviation_pct": 1.9461697741637327,
+        "v1_actual_dp_m": 0.012345453913028924,
+        "predicted_dp_m": 0.012266389701134443,
+        "source_dp_m": 0.01,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "1.2",
+        "historical_solver_tout_s": "0.001",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.01",
+          "h_m": "0.017320508076",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "1.2",
+          "TimeOut": "0.001"
+        },
+        "argv_controls": {
+          "tmax_s": "1.2",
+          "tout_s": "0.001",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_HARD_FAIL_GT2PCT",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F5_S1_MASSFIT_V2_FINE_DP0p015548",
+      "sentinel_id": "F5-S1",
+      "family_id": "F5",
+      "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f5_s1_massfit_v2_fine_dp0p015548.json",
+        "bytes": 23262,
+        "mtime_ns": 1791402979383767971,
+        "sha256": "f4276ee379d7c3e54b2fc86966a257504aac1c5569defb52a24272f28cad53e9",
+        "request_sha256_in_receipt": "f4276ee379d7c3e54b2fc86966a257504aac1c5569defb52a24272f28cad53e9",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_MASSFIT_V2_FINE_DP0p015548/f5_s1_massfit_v2_fine_dp0p015548-001/execution-receipt.json",
+        "bytes": 42071540,
+        "mtime_ns": 1791403064408242691,
+        "sha256": "f69651ed12dc1207dd095da90c91b320ccc8ecbdf0c6643ba2c7a8c713e2b4a9",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.22864838736131787,
+        "cpu_core_seconds": 13.615165000000001,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_MASSFIT_V2_FINE_DP0p015548/f5_s1_massfit_v2_fine_dp0p015548-001",
+        "total_particles_from_receipt": 363641,
+        "fluid_particles_from_receipt": 67708
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_MASSFIT_V2_FINE_DP0p015548/f5_s1_massfit_v2_fine_dp0p015548-001/generated.xml",
+        "bytes": 12224,
+        "mtime_ns": 1791403064269246817,
+        "sha256": "5a29c6334abe37918c38f0f43b5bdebc8d8c681d2f94575fa7da8da0ab79ea95"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_MASSFIT_V2_FINE_DP0p015548/f5_s1_massfit_v2_fine_dp0p015548-001/generated.bi4",
+        "bytes": 16001615,
+        "mtime_ns": 1791403064239247708,
+        "sha256": "63761399f12632c8e59bae5a7e19f19a7755095cf608e21621d8c752a4360a19"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 67708
+          }
+        ],
+        "total_fluid_particles": 67708,
+        "massfluid_values": [
+          "0.0037584625659"
+        ],
+        "sample_mass_kg": 254.4779834119572,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0155478404873736"
+        ],
+        "h_values": [
+          "0.026929649672"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-genuine-gencase-118-root640/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1.xml",
+        "bytes": 12237,
+        "mtime_ns": 1791241016660706177,
+        "sha256": "48865e7efb6a9e9c4040a6489f3da3e7fce521308640e5e83a2a7867c0ec0c38"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 31658
+          }
+        ],
+        "total_fluid_particles": 31658,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 253.264,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.034641016151"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "0": {
+              "count": 31658,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 253.264
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0037584625659,
+          "by_mkfluid": {
+            "0": {
+              "count": 67708,
+              "massfluid_kg": 0.0037584625659,
+              "sample_mass_kg": 254.4779834119572
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "0",
+            "source": {
+              "count": 31658,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 253.264
+            },
+            "derived": {
+              "count": 67708,
+              "massfluid_kg": 0.0037584625659,
+              "sample_mass_kg": 254.4779834119572
+            },
+            "delta_kg": 1.2139834119572015,
+            "deviation_pct_vs_source_mk": 0.47933516487033356,
+            "absolute_delta_fraction_of_source_total": 0.004793351648703335,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+        "candidate_physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "16",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.034641016151",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "26",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "16",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "16",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.034641016151",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "26",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "16",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "88bdd91696cfc860775f5c82dc39c92c7b13b66c70b4f0d3e51f5aae0a71a93b",
+          "derived_definition_normalized_hash": "88bdd91696cfc860775f5c82dc39c92c7b13b66c70b4f0d3e51f5aae0a71a93b",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 253.264,
+        "actual_generated_xml_sample_mass_kg": 254.4779834119572,
+        "deviation_pct_vs_source": 0.47933516487033356,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": 7.169372670415042,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 253.264,
+        "v1_actual_generated_xml_sample_mass_kg": 257.5446259691825,
+        "v1_actual_deviation_pct": 1.6901833538057103,
+        "v1_actual_dp_m": 0.01563494723125247,
+        "predicted_dp_m": 0.015547840487373616,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "16",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.034641016151",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "26",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "16",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F5_S2_MASSFIT_V2_FINE_DP0p015548",
+      "sentinel_id": "F5-S2",
+      "family_id": "F5",
+      "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M115_T080",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f5_s2_massfit_v2_fine_dp0p015548.json",
+        "bytes": 23262,
+        "mtime_ns": 1791402979742757303,
+        "sha256": "c9b9c699e14ce1b2d981015f03b9dd2efe4f925129c51e0585e344a18ea48b20",
+        "request_sha256_in_receipt": "c9b9c699e14ce1b2d981015f03b9dd2efe4f925129c51e0585e344a18ea48b20",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S2_MASSFIT_V2_FINE_DP0p015548/f5_s2_massfit_v2_fine_dp0p015548-001/execution-receipt.json",
+        "bytes": 42071433,
+        "mtime_ns": 1791403167221192233,
+        "sha256": "9053410087b8463e8fb0d71cc897e1868decfe3ddafa60256bff77b3dec0e99e",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.2529066987335682,
+        "cpu_core_seconds": 13.472526999999998,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S2_MASSFIT_V2_FINE_DP0p015548/f5_s2_massfit_v2_fine_dp0p015548-001",
+        "total_particles_from_receipt": 363641,
+        "fluid_particles_from_receipt": 67708
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S2_MASSFIT_V2_FINE_DP0p015548/f5_s2_massfit_v2_fine_dp0p015548-001/generated.xml",
+        "bytes": 12224,
+        "mtime_ns": 1791403167043197511,
+        "sha256": "de172e1787f6ab5567ea717d31d16fdadbf9bc401c270853d212c3ba04cbd84f"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S2_MASSFIT_V2_FINE_DP0p015548/f5_s2_massfit_v2_fine_dp0p015548-001/generated.bi4",
+        "bytes": 16001615,
+        "mtime_ns": 1791403167014198371,
+        "sha256": "63761399f12632c8e59bae5a7e19f19a7755095cf608e21621d8c752a4360a19"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 67708
+          }
+        ],
+        "total_fluid_particles": 67708,
+        "massfluid_values": [
+          "0.0037584625659"
+        ],
+        "sample_mass_kg": 254.4779834119572,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0155478404873736"
+        ],
+        "h_values": [
+          "0.026929649672"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m115_t080-genuine-gencase-118-root640/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1.xml",
+        "bytes": 12237,
+        "mtime_ns": 1791241021761557556,
+        "sha256": "1e441adf431fae9abd3057298291dc262b1a67a406344f8ae9fbc0aec889aa6e"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 31658
+          }
+        ],
+        "total_fluid_particles": 31658,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 253.264,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.034641016151"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "0": {
+              "count": 31658,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 253.264
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0037584625659,
+          "by_mkfluid": {
+            "0": {
+              "count": 67708,
+              "massfluid_kg": 0.0037584625659,
+              "sample_mass_kg": 254.4779834119572
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "0",
+            "source": {
+              "count": 31658,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 253.264
+            },
+            "derived": {
+              "count": 67708,
+              "massfluid_kg": 0.0037584625659,
+              "sample_mass_kg": 254.4779834119572
+            },
+            "delta_kg": 1.2139834119572015,
+            "deviation_pct_vs_source_mk": 0.47933516487033356,
+            "absolute_delta_fraction_of_source_total": 0.004793351648703335,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M115_T080",
+        "candidate_physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M115_T080",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "16",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.034641016151",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "26",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "16",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "16",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.034641016151",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "26",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "16",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "2500e69de558ba64222e281dc00e2a6afa44e53356fb6f028e4ac3cad12e341d",
+          "derived_definition_normalized_hash": "2500e69de558ba64222e281dc00e2a6afa44e53356fb6f028e4ac3cad12e341d",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 253.264,
+        "actual_generated_xml_sample_mass_kg": 254.4779834119572,
+        "deviation_pct_vs_source": 0.47933516487033356,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": 7.169372670415042,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 253.264,
+        "v1_actual_generated_xml_sample_mass_kg": 257.5446259691825,
+        "v1_actual_deviation_pct": 1.6901833538057103,
+        "v1_actual_dp_m": 0.01563494723125247,
+        "predicted_dp_m": 0.015547840487373616,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "16",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.034641016151",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "26",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "16",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F6_S1_MASSFIT_V2_FINE_DP0p020357",
+      "sentinel_id": "F6-S1",
+      "family_id": "F6",
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f6_s1_massfit_v2_fine_dp0p020357.json",
+        "bytes": 21391,
+        "mtime_ns": 1791402980130745773,
+        "sha256": "65171428bec2f36922dc1d9576c973fbb15373099b3c5f5a3f52a2a4138b91f6",
+        "request_sha256_in_receipt": "65171428bec2f36922dc1d9576c973fbb15373099b3c5f5a3f52a2a4138b91f6",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S1_MASSFIT_V2_FINE_DP0p020357/f6_s1_massfit_v2_fine_dp0p020357-001/execution-receipt.json",
+        "bytes": 93670324,
+        "mtime_ns": 1791403208185977636,
+        "sha256": "ef574e277572346140e2c85cd8943677dfff96a1461c152da0cfc3e3ac60b010",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.3339824709109962,
+        "cpu_core_seconds": 13.366265,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S1_MASSFIT_V2_FINE_DP0p020357/f6_s1_massfit_v2_fine_dp0p020357-001",
+        "total_particles_from_receipt": 749124,
+        "fluid_particles_from_receipt": 606957
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S1_MASSFIT_V2_FINE_DP0p020357/f6_s1_massfit_v2_fine_dp0p020357-001/generated.xml",
+        "bytes": 7019,
+        "mtime_ns": 1791403208008982883,
+        "sha256": "b8265719e7ee04d93efa492dbec16c1679a7089c8e09efaf9807080f660a7cb7"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S1_MASSFIT_V2_FINE_DP0p020357/f6_s1_massfit_v2_fine_dp0p020357-001/generated.bi4",
+        "bytes": 32962867,
+        "mtime_ns": 1791403207945984750,
+        "sha256": "18779182a15aabb96f75773fff1a708518e1602b28de5a470077cee6d577308b"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 606957
+          }
+        ],
+        "total_fluid_particles": 606957,
+        "massfluid_values": [
+          "0.0084355234391"
+        ],
+        "sample_mass_kg": 5120.000000025819,
+        "floating_blocks": [
+          {
+            "mkbound": "UNKNOWN",
+            "count": 30420
+          },
+          {
+            "mkbound": "50",
+            "count": 30420
+          }
+        ],
+        "floating_masspart_values": [
+          "0.00843552"
+        ],
+        "rigid_body_massbody_values": [
+          "128",
+          "128"
+        ],
+        "rigid_body_inertia_values": {
+          "x": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "y": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "z": [
+            "13.6533333333",
+            "13.6533"
+          ]
+        },
+        "rigid_body_center_values": {
+          "x": [
+            "2.4",
+            "2.4"
+          ],
+          "y": [
+            "1.2",
+            "1.2"
+          ],
+          "z": [
+            "1.08",
+            "1.08"
+          ]
+        },
+        "dp_values": [
+          "0.0203565423079281"
+        ],
+        "h_values": [
+          "0.042310278653"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025/root-stage1-f6-omega-95p0-genuine-gencase-082/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025.xml",
+        "bytes": 6999,
+        "mtime_ns": 1791183106981325890,
+        "sha256": "a958fc3e1878aa3bcf48392f8c51a88c2169c9de0b3658bc2edd90fb2e8bb000"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 327680
+          }
+        ],
+        "total_fluid_particles": 327680,
+        "massfluid_values": [
+          "0.015625"
+        ],
+        "sample_mass_kg": 5120.0,
+        "floating_blocks": [
+          {
+            "mkbound": "UNKNOWN",
+            "count": 16384
+          },
+          {
+            "mkbound": "50",
+            "count": 16384
+          }
+        ],
+        "floating_masspart_values": [
+          "0.015625"
+        ],
+        "rigid_body_massbody_values": [
+          "128",
+          "128"
+        ],
+        "rigid_body_inertia_values": {
+          "x": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "y": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "z": [
+            "13.6533333333",
+            "13.6533"
+          ]
+        },
+        "rigid_body_center_values": {
+          "x": [
+            "2.4",
+            "2.4"
+          ],
+          "y": [
+            "1.2",
+            "1.2"
+          ],
+          "z": [
+            "1.08",
+            "1.08"
+          ]
+        },
+        "dp_values": [
+          "0.025"
+        ],
+        "h_values": [
+          "0.051961524227"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "PASS_PHYSICAL_BODY_FIELDS_WITHIN_TOLERANCE",
+        "fields": {
+          "massbody_kg": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              128.0
+            ],
+            "derived_values": [
+              128.0
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              2.4
+            ],
+            "derived_values": [
+              2.4
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              1.2
+            ],
+            "derived_values": [
+              1.2
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              1.08
+            ],
+            "derived_values": [
+              1.08
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "derived_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "derived_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              13.6533333333,
+              13.6533
+            ],
+            "derived_values": [
+              13.6533333333,
+              13.6533
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.015625,
+          "by_mkfluid": {
+            "0": {
+              "count": 327680,
+              "massfluid_kg": 0.015625,
+              "sample_mass_kg": 5120.0
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0084355234391,
+          "by_mkfluid": {
+            "0": {
+              "count": 606957,
+              "massfluid_kg": 0.0084355234391,
+              "sample_mass_kg": 5120.000000025819
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "0",
+            "source": {
+              "count": 327680,
+              "massfluid_kg": 0.015625,
+              "sample_mass_kg": 5120.0
+            },
+            "derived": {
+              "count": 606957,
+              "massfluid_kg": 0.0084355234391,
+              "sample_mass_kg": 5120.000000025819
+            },
+            "delta_kg": 2.5818735593929887e-08,
+            "deviation_pct_vs_source_mk": 5.042721795689431e-10,
+            "absolute_delta_fraction_of_source_total": 5.042721795689431e-12,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025",
+        "candidate_physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.05",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.025",
+            "h_m": "0.051961524227",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.05"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.05",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.05",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.025",
+            "h_m": "0.051961524227",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.05"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.05",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "ae25d5cdc6c9525316abba5f32f7b546193ad19167f98433e0cba35ad34ee6f9",
+          "derived_definition_normalized_hash": "ae25d5cdc6c9525316abba5f32f7b546193ad19167f98433e0cba35ad34ee6f9",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 5120.0,
+        "actual_generated_xml_sample_mass_kg": 5120.000000025819,
+        "deviation_pct_vs_source": 5.042721795689431e-10,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": -4.200156249999996,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 5120.0,
+        "v1_actual_generated_xml_sample_mass_kg": 5068.542713557713,
+        "v1_actual_deviation_pct": -1.0050251258259202,
+        "v1_actual_dp_m": 0.02028811643933519,
+        "predicted_dp_m": 0.020356542307928077,
+        "source_dp_m": 0.025,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.05",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.025",
+          "h_m": "0.051961524227",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.05"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.05",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F6_S2_MASSFIT_V2_FINE_DP0p020357",
+      "sentinel_id": "F6-S2",
+      "family_id": "F6",
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f6_s2_massfit_v2_fine_dp0p020357.json",
+        "bytes": 21243,
+        "mtime_ns": 1791402980570732699,
+        "sha256": "7261718f7023b38b8b85aabcd5cedd8344aa8830d7cf65ac55c2ab4f1359b1e3",
+        "request_sha256_in_receipt": "7261718f7023b38b8b85aabcd5cedd8344aa8830d7cf65ac55c2ab4f1359b1e3",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S2_MASSFIT_V2_FINE_DP0p020357/f6_s2_massfit_v2_fine_dp0p020357-001/execution-receipt.json",
+        "bytes": 93670206,
+        "mtime_ns": 1791403462728438703,
+        "sha256": "0e0fe343c7a9521ea250533d7393a46cbbaea20a619a2a283d3d350f33f7bf1d",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.31612228509038687,
+        "cpu_core_seconds": 13.717476,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S2_MASSFIT_V2_FINE_DP0p020357/f6_s2_massfit_v2_fine_dp0p020357-001",
+        "total_particles_from_receipt": 749124,
+        "fluid_particles_from_receipt": 606957
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S2_MASSFIT_V2_FINE_DP0p020357/f6_s2_massfit_v2_fine_dp0p020357-001/generated.xml",
+        "bytes": 7013,
+        "mtime_ns": 1791403462584442964,
+        "sha256": "2a02020e5dcb864f4cae3033dda4a42440039e8c91a0c07200b6d83413ac8013"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_S2_MASSFIT_V2_FINE_DP0p020357/f6_s2_massfit_v2_fine_dp0p020357-001/generated.bi4",
+        "bytes": 32962867,
+        "mtime_ns": 1791403462517444947,
+        "sha256": "18779182a15aabb96f75773fff1a708518e1602b28de5a470077cee6d577308b"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 606957
+          }
+        ],
+        "total_fluid_particles": 606957,
+        "massfluid_values": [
+          "0.0084355234391"
+        ],
+        "sample_mass_kg": 5120.000000025819,
+        "floating_blocks": [
+          {
+            "mkbound": "UNKNOWN",
+            "count": 30420
+          },
+          {
+            "mkbound": "50",
+            "count": 30420
+          }
+        ],
+        "floating_masspart_values": [
+          "0.00843552"
+        ],
+        "rigid_body_massbody_values": [
+          "128",
+          "128"
+        ],
+        "rigid_body_inertia_values": {
+          "x": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "y": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "z": [
+            "13.6533333333",
+            "13.6533"
+          ]
+        },
+        "rigid_body_center_values": {
+          "x": [
+            "2.4",
+            "2.4"
+          ],
+          "y": [
+            "1.2",
+            "1.2"
+          ],
+          "z": [
+            "1.08",
+            "1.08"
+          ]
+        },
+        "dp_values": [
+          "0.0203565423079281"
+        ],
+        "h_values": [
+          "0.042310278653"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025/root-stage1-f6-2p0-genuine-gencase-073/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025.xml",
+        "bytes": 6993,
+        "mtime_ns": 1791130573198065972,
+        "sha256": "89c594899f1aa88deaddf775ad084e7560d4291a074975e8a17be58055c8eb18"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "count": 327680
+          }
+        ],
+        "total_fluid_particles": 327680,
+        "massfluid_values": [
+          "0.015625"
+        ],
+        "sample_mass_kg": 5120.0,
+        "floating_blocks": [
+          {
+            "mkbound": "UNKNOWN",
+            "count": 16384
+          },
+          {
+            "mkbound": "50",
+            "count": 16384
+          }
+        ],
+        "floating_masspart_values": [
+          "0.015625"
+        ],
+        "rigid_body_massbody_values": [
+          "128",
+          "128"
+        ],
+        "rigid_body_inertia_values": {
+          "x": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "y": [
+            "8.53333333333",
+            "8.53333"
+          ],
+          "z": [
+            "13.6533333333",
+            "13.6533"
+          ]
+        },
+        "rigid_body_center_values": {
+          "x": [
+            "2.4",
+            "2.4"
+          ],
+          "y": [
+            "1.2",
+            "1.2"
+          ],
+          "z": [
+            "1.08",
+            "1.08"
+          ]
+        },
+        "dp_values": [
+          "0.025"
+        ],
+        "h_values": [
+          "0.051961524227"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "PASS_PHYSICAL_BODY_FIELDS_WITHIN_TOLERANCE",
+        "fields": {
+          "massbody_kg": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              128.0
+            ],
+            "derived_values": [
+              128.0
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              2.4
+            ],
+            "derived_values": [
+              2.4
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              1.2
+            ],
+            "derived_values": [
+              1.2
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              1.08
+            ],
+            "derived_values": [
+              1.08
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "derived_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "derived_values": [
+              8.53333333333,
+              8.53333
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "PASS_NUMERIC_WITHIN_TOLERANCE",
+            "source_values": [
+              13.6533333333,
+              13.6533
+            ],
+            "derived_values": [
+              13.6533333333,
+              13.6533
+            ],
+            "max_nearest_abs_difference": 0.0,
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.015625,
+          "by_mkfluid": {
+            "0": {
+              "count": 327680,
+              "massfluid_kg": 0.015625,
+              "sample_mass_kg": 5120.0
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0084355234391,
+          "by_mkfluid": {
+            "0": {
+              "count": 606957,
+              "massfluid_kg": 0.0084355234391,
+              "sample_mass_kg": 5120.000000025819
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "0",
+            "source": {
+              "count": 327680,
+              "massfluid_kg": 0.015625,
+              "sample_mass_kg": 5120.0
+            },
+            "derived": {
+              "count": 606957,
+              "massfluid_kg": 0.0084355234391,
+              "sample_mass_kg": 5120.000000025819
+            },
+            "delta_kg": 2.5818735593929887e-08,
+            "deviation_pct_vs_source_mk": 5.042721795689431e-10,
+            "absolute_delta_fraction_of_source_total": 5.042721795689431e-12,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025",
+        "candidate_physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.05",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.025",
+            "h_m": "0.051961524227",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.05"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.05",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.05",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.025",
+            "h_m": "0.051961524227",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.05"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.05",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "74cb923f9f4c787275329057c4f307a54bd597434aad98c9aaec23efdfb280ac",
+          "derived_definition_normalized_hash": "74cb923f9f4c787275329057c4f307a54bd597434aad98c9aaec23efdfb280ac",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 5120.0,
+        "actual_generated_xml_sample_mass_kg": 5120.000000025819,
+        "deviation_pct_vs_source": 5.042721795689431e-10,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": -4.200156249999996,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 5120.0,
+        "v1_actual_generated_xml_sample_mass_kg": 5068.542713557713,
+        "v1_actual_deviation_pct": -1.0050251258259202,
+        "v1_actual_dp_m": 0.02028811643933519,
+        "predicted_dp_m": 0.020356542307928077,
+        "source_dp_m": 0.025,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.05",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.025",
+          "h_m": "0.051961524227",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.05"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.05",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F7_S1_MASSFIT_V2_COARSE_DP0p023851",
+      "sentinel_id": "F7-S1",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+      "label": "coarse",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f7_s1_massfit_v2_coarse_dp0p023851.json",
+        "bytes": 23187,
+        "mtime_ns": 1791402981174714751,
+        "sha256": "460e5cbe860f160e8331721054a6f1d427c1a289a39549f90e7add6a9f8d61ce",
+        "request_sha256_in_receipt": "460e5cbe860f160e8331721054a6f1d427c1a289a39549f90e7add6a9f8d61ce",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_COARSE_DP0p023851/f7_s1_massfit_v2_coarse_dp0p023851-001/execution-receipt.json",
+        "bytes": 5804158,
+        "mtime_ns": 1791403521954686173,
+        "sha256": "0b9c7d0b85e2e2cc4c680499539ce5909105d624fe27d65640220088dd7e7b2c",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.2792561771348119,
+        "cpu_core_seconds": 12.222551999999999,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_COARSE_DP0p023851/f7_s1_massfit_v2_coarse_dp0p023851-001",
+        "total_particles_from_receipt": 44647,
+        "fluid_particles_from_receipt": 23778
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_COARSE_DP0p023851/f7_s1_massfit_v2_coarse_dp0p023851-001/generated.xml",
+        "bytes": 7561,
+        "mtime_ns": 1791403521649695196,
+        "sha256": "d136d501c53648c4cbe858db63455ede51611632bdb020b31df5537b4882f267"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_COARSE_DP0p023851/f7_s1_massfit_v2_coarse_dp0p023851-001/generated.bi4",
+        "bytes": 1965879,
+        "mtime_ns": 1791403521645695314,
+        "sha256": "4945ebda9b259baa0df843fa1bd2adf0849cf442ec1b655342c060c74a1de06d"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 23778
+          }
+        ],
+        "total_fluid_particles": 23778,
+        "massfluid_values": [
+          "0.013568362712"
+        ],
+        "sample_mass_kg": 322.628528565936,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0238511403637392"
+        ],
+        "h_values": [
+          "0.03797507932"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE.xml",
+        "bytes": 7573,
+        "mtime_ns": 1791099812313303629,
+        "sha256": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 40700
+          }
+        ],
+        "total_fluid_particles": 40700,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 325.6,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.031843407687"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "1": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.013568362712,
+          "by_mkfluid": {
+            "1": {
+              "count": 23778,
+              "massfluid_kg": 0.013568362712,
+              "sample_mass_kg": 322.628528565936
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "1",
+            "source": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            },
+            "derived": {
+              "count": 23778,
+              "massfluid_kg": 0.013568362712,
+              "sample_mass_kg": 322.628528565936
+            },
+            "delta_kg": -2.9714714340640285,
+            "deviation_pct_vs_source_mk": -0.9126140768009916,
+            "absolute_delta_fraction_of_source_total": 0.009126140768009916,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+        "candidate_physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "derived_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 325.6,
+        "actual_generated_xml_sample_mass_kg": 322.628528565936,
+        "deviation_pct_vs_source": -0.9126140768009916,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": 9.442183660933653,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 325.6,
+        "v1_actual_generated_xml_sample_mass_kg": 342.603841102008,
+        "v1_actual_deviation_pct": 5.222309920764122,
+        "v1_actual_dp_m": 0.024259308950218727,
+        "predicted_dp_m": 0.02385114036373918,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.031843407687",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F7_S1_MASSFIT_V2_FINE_DP0p016354",
+      "sentinel_id": "F7-S1",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f7_s1_massfit_v2_fine_dp0p016354.json",
+        "bytes": 23103,
+        "mtime_ns": 1791402981899693208,
+        "sha256": "f94b014668e0b211345189f3522ca41271e51c9ca425458a099fbf12f9c173ee",
+        "request_sha256_in_receipt": "f94b014668e0b211345189f3522ca41271e51c9ca425458a099fbf12f9c173ee",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_FINE_DP0p016354/f7_s1_massfit_v2_fine_dp0p016354-001/execution-receipt.json",
+        "bytes": 14567302,
+        "mtime_ns": 1791403576019086798,
+        "sha256": "6e58b1d0f1d4f4f77d748471f6055ea877914a88284bc927ead7c8aa97f0b396",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.261776152998209,
+        "cpu_core_seconds": 13.3206,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_FINE_DP0p016354/f7_s1_massfit_v2_fine_dp0p016354-001",
+        "total_particles_from_receipt": 116055,
+        "fluid_particles_from_receipt": 71682
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_FINE_DP0p016354/f7_s1_massfit_v2_fine_dp0p016354-001/generated.xml",
+        "bytes": 7566,
+        "mtime_ns": 1791403575779093897,
+        "sha256": "828e18b45b502324a14b78db4bb053545e8e84cb0e9985c274856b0114bbc8e0"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S1_MASSFIT_V2_FINE_DP0p016354/f7_s1_massfit_v2_fine_dp0p016354-001/generated.bi4",
+        "bytes": 5107831,
+        "mtime_ns": 1791403575769094193,
+        "sha256": "c8d2849de0ac3145b605565f46bf86318328e2a27e6a3c616e87a72a6463273b"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 71682
+          }
+        ],
+        "total_fluid_particles": 71682,
+        "massfluid_values": [
+          "0.0043740512366"
+        ],
+        "sample_mass_kg": 313.5407407419612,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0163541491918971"
+        ],
+        "h_values": [
+          "0.026038592005"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE.xml",
+        "bytes": 7573,
+        "mtime_ns": 1791099812313303629,
+        "sha256": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 40700
+          }
+        ],
+        "total_fluid_particles": 40700,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 325.6,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.031843407687"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "HARD_FAIL_PER_SOURCE_MATERIAL_GT3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "1": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0043740512366,
+          "by_mkfluid": {
+            "1": {
+              "count": 71682,
+              "massfluid_kg": 0.0043740512366,
+              "sample_mass_kg": 313.5407407419612
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "1",
+            "source": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            },
+            "derived": {
+              "count": 71682,
+              "massfluid_kg": 0.0043740512366,
+              "sample_mass_kg": 313.5407407419612
+            },
+            "delta_kg": -12.059259258038821,
+            "deviation_pct_vs_source_mk": -3.7037037033288764,
+            "absolute_delta_fraction_of_source_total": 0.03703703703328876,
+            "gate": "HARD_FAIL_MATERIAL_GT3PCT",
+            "status": "HARD_FAIL_MATERIAL_GT3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+        "candidate_physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "derived_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 325.6,
+        "actual_generated_xml_sample_mass_kg": 313.5407407419612,
+        "deviation_pct_vs_source": -3.7037037033288764,
+        "gate": "HARD_FAIL_GT2PCT",
+        "prior_candidate_deviation_pct": -3.4357936117936236,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 325.6,
+        "v1_actual_generated_xml_sample_mass_kg": 315.7506858969234,
+        "v1_actual_deviation_pct": -3.024973618881022,
+        "v1_actual_dp_m": 0.01618755501632345,
+        "predicted_dp_m": 0.016354149191897108,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.031843407687",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_HARD_FAIL_GT2PCT",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F7_S2_MASSFIT_V2_COARSE_DP0p023851",
+      "sentinel_id": "F7-S2",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+      "label": "coarse",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f7_s2_massfit_v2_coarse_dp0p023851.json",
+        "bytes": 22330,
+        "mtime_ns": 1791402982237683164,
+        "sha256": "008f102159c0581c82b8dbabd87cc429a6a46c05ec596885a151f703baecd3e1",
+        "request_sha256_in_receipt": "008f102159c0581c82b8dbabd87cc429a6a46c05ec596885a151f703baecd3e1",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_COARSE_DP0p023851/f7_s2_massfit_v2_coarse_dp0p023851-001/execution-receipt.json",
+        "bytes": 5802976,
+        "mtime_ns": 1791403631389449156,
+        "sha256": "4e6d3dc612809ab89aae0c9611a3d1fd365f058cb47e8c217729075a52b792b5",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.3111341679468751,
+        "cpu_core_seconds": 14.068399000000001,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_COARSE_DP0p023851/f7_s2_massfit_v2_coarse_dp0p023851-001",
+        "total_particles_from_receipt": 44647,
+        "fluid_particles_from_receipt": 23778
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_COARSE_DP0p023851/f7_s2_massfit_v2_coarse_dp0p023851-001/generated.xml",
+        "bytes": 7561,
+        "mtime_ns": 1791403631072458531,
+        "sha256": "e398edd17bf36302a9b2051ce647d59ae20c5de138c27cdf9f5a71d06134bac0"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_COARSE_DP0p023851/f7_s2_massfit_v2_coarse_dp0p023851-001/generated.bi4",
+        "bytes": 1965879,
+        "mtime_ns": 1791403631068458649,
+        "sha256": "4945ebda9b259baa0df843fa1bd2adf0849cf442ec1b655342c060c74a1de06d"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 23778
+          }
+        ],
+        "total_fluid_particles": 23778,
+        "massfluid_values": [
+          "0.013568362712"
+        ],
+        "sample_mass_kg": 322.628528565936,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0238511403637392"
+        ],
+        "h_values": [
+          "0.03797507932"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+        "bytes": 7537,
+        "mtime_ns": 1791132688263610471,
+        "sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 40700
+          }
+        ],
+        "total_fluid_particles": 40700,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 325.6,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.031843407687"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "PASS_PER_SOURCE_MATERIAL_3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "1": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.013568362712,
+          "by_mkfluid": {
+            "1": {
+              "count": 23778,
+              "massfluid_kg": 0.013568362712,
+              "sample_mass_kg": 322.628528565936
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "1",
+            "source": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            },
+            "derived": {
+              "count": 23778,
+              "massfluid_kg": 0.013568362712,
+              "sample_mass_kg": 322.628528565936
+            },
+            "delta_kg": -2.9714714340640285,
+            "deviation_pct_vs_source_mk": -0.9126140768009916,
+            "absolute_delta_fraction_of_source_total": 0.009126140768009916,
+            "gate": "PASS_MATERIAL_3PCT",
+            "status": "PASS_MATERIAL_3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+        "candidate_physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "derived_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 325.6,
+        "actual_generated_xml_sample_mass_kg": 322.628528565936,
+        "deviation_pct_vs_source": -0.9126140768009916,
+        "gate": "PASS_TARGET_1PCT",
+        "prior_candidate_deviation_pct": 9.442183660933653,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 325.6,
+        "v1_actual_generated_xml_sample_mass_kg": 342.603841102008,
+        "v1_actual_deviation_pct": 5.222309920764122,
+        "v1_actual_dp_m": 0.024259308950218727,
+        "predicted_dp_m": 0.02385114036373918,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.031843407687",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_AND_PER_SOURCE_TARGET",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    {
+      "case_id": "F7_S2_MASSFIT_V2_FINE_DP0p016354",
+      "sentinel_id": "F7-S2",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+      "label": "fine",
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-mass-fit-probe-v2/f7_s2_massfit_v2_fine_dp0p016354.json",
+        "bytes": 22246,
+        "mtime_ns": 1791402982572673210,
+        "sha256": "03c9e53947d61920ac8de8e2ffd017cd66a35022ade03e21982025ccc7e51586",
+        "request_sha256_in_receipt": "03c9e53947d61920ac8de8e2ffd017cd66a35022ade03e21982025ccc7e51586",
+        "request_sha256_matches_receipt": true
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_FINE_DP0p016354/f7_s2_massfit_v2_fine_dp0p016354-001/execution-receipt.json",
+        "bytes": 14566123,
+        "mtime_ns": 1791403663096511537,
+        "sha256": "e4f2d4a3f847ce4ed96fe4a3c8c458f6f6f0c866168c57d5edb94eadecfa28a9",
+        "status": "completed",
+        "returncode": 0,
+        "termination_reason": null,
+        "elapsed_seconds": 0.5994802871719003,
+        "cpu_core_seconds": 13.808875,
+        "gpu_seconds": 0.0,
+        "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_FINE_DP0p016354/f7_s2_massfit_v2_fine_dp0p016354-001",
+        "total_particles_from_receipt": 116055,
+        "fluid_particles_from_receipt": 71682
+      },
+      "generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_FINE_DP0p016354/f7_s2_massfit_v2_fine_dp0p016354-001/generated.xml",
+        "bytes": 7566,
+        "mtime_ns": 1791403662240536847,
+        "sha256": "652abb4a44adfe9a617aa96fae925ef719407e27d5fb4d2205a9e523e205dd7e"
+      },
+      "generated_bi4": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_S2_MASSFIT_V2_FINE_DP0p016354/f7_s2_massfit_v2_fine_dp0p016354-001/generated.bi4",
+        "bytes": 5107831,
+        "mtime_ns": 1791403662232537084,
+        "sha256": "c8d2849de0ac3145b605565f46bf86318328e2a27e6a3c616e87a72a6463273b"
+      },
+      "generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 71682
+          }
+        ],
+        "total_fluid_particles": 71682,
+        "massfluid_values": [
+          "0.0043740512366"
+        ],
+        "sample_mass_kg": 313.5407407419612,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.0163541491918971"
+        ],
+        "h_values": [
+          "0.026038592005"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "source_generated_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+        "bytes": 7537,
+        "mtime_ns": 1791132688263610471,
+        "sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f"
+      },
+      "source_generated_semantics": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "count": 40700
+          }
+        ],
+        "total_fluid_particles": 40700,
+        "massfluid_values": [
+          "0.008"
+        ],
+        "sample_mass_kg": 325.6,
+        "floating_blocks": [],
+        "floating_masspart_values": [],
+        "rigid_body_massbody_values": [],
+        "rigid_body_inertia_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "rigid_body_center_values": {
+          "x": [],
+          "y": [],
+          "z": []
+        },
+        "dp_values": [
+          "0.02"
+        ],
+        "h_values": [
+          "0.031843407687"
+        ],
+        "floating_mass_semantics": "floating particle masspart is separate from physical rigid massbody/inertia; no substitution"
+      },
+      "rigid_body_physical_comparison": {
+        "status": "UNKNOWN_PHYSICAL_BODY_FIELDS",
+        "fields": {
+          "massbody_kg": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_x_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_y_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "center_z_m": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-09
+          },
+          "inertia_x_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_y_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          },
+          "inertia_z_kg_m2": {
+            "status": "UNKNOWN_MISSING_NUMERIC_FIELD",
+            "source_values": [],
+            "derived_values": [],
+            "tolerance": 1e-05
+          }
+        },
+        "meaning": "physical massbody/center/inertia are compared independently from floating particle masspart and are never substituted for fluid sample mass"
+      },
+      "per_fluid_source_mass_comparison": {
+        "status": "HARD_FAIL_PER_SOURCE_MATERIAL_GT3PCT",
+        "gate_definition": "per-mkfluid absolute sample-mass deviation <= 0.03 (3 percentage points) against the exact source generated XML; this is a pre-registered material/source diagnostic and is independent of total-mass gate",
+        "source": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.008,
+          "by_mkfluid": {
+            "1": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            }
+          }
+        },
+        "derived": {
+          "status": "AVAILABLE",
+          "massfluid_kg": 0.0043740512366,
+          "by_mkfluid": {
+            "1": {
+              "count": 71682,
+              "massfluid_kg": 0.0043740512366,
+              "sample_mass_kg": 313.5407407419612
+            }
+          }
+        },
+        "rows": [
+          {
+            "mkfluid": "1",
+            "source": {
+              "count": 40700,
+              "massfluid_kg": 0.008,
+              "sample_mass_kg": 325.6
+            },
+            "derived": {
+              "count": 71682,
+              "massfluid_kg": 0.0043740512366,
+              "sample_mass_kg": 313.5407407419612
+            },
+            "delta_kg": -12.059259258038821,
+            "deviation_pct_vs_source_mk": -3.7037037033288764,
+            "absolute_delta_fraction_of_source_total": 0.03703703703328876,
+            "gate": "HARD_FAIL_MATERIAL_GT3PCT",
+            "status": "HARD_FAIL_MATERIAL_GT3PCT"
+          }
+        ]
+      },
+      "control_binding": {
+        "request_physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+        "candidate_physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+        "physical_identity_match": true,
+        "request_scope_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "candidate_historical_controls": {
+          "historical_solver_tmax_s": "12",
+          "historical_solver_tout_s": "0.02",
+          "xml_controls": {
+            "cflnumber": "0.2",
+            "dp_m": "0.02",
+            "h_m": "0.031843407687",
+            "DtIni": "0",
+            "DtMin": "0",
+            "DtFixed": "0",
+            "CoefDtMin": "0.05",
+            "TimeMax": "12",
+            "TimeOut": "0.02"
+          },
+          "argv_controls": {
+            "tmax_s": "12",
+            "tout_s": "0.02",
+            "other_flags": []
+          },
+          "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+        },
+        "continuous_geometry_control": {
+          "source_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "derived_definition_normalized_hash": "a9749e070f697ed4993b96acfdb20e256cc29258246c7a1ee68bf3a0dba3720c",
+          "draw_fill_domain_geometry_changed": false,
+          "motion_or_acceleration_changed": false,
+          "dependencies_byte_identical": true,
+          "intentional_changes": [
+            "dp",
+            "h/massfluid/count/lattice phase measured after GenCase"
+          ]
+        },
+        "source_producer_vs_current_head": "600e426cd91c53a5c5dc8470be56cd91158f4a31",
+        "solver_started": false,
+        "control_status": "SOURCE_BOUND_GENCASE_ONLY; solver effective dt/output controls not executed in this audit"
+      },
+      "mass_gate": {
+        "source_sample_mass_kg": 325.6,
+        "actual_generated_xml_sample_mass_kg": 313.5407407419612,
+        "deviation_pct_vs_source": -3.7037037033288764,
+        "gate": "HARD_FAIL_GT2PCT",
+        "prior_candidate_deviation_pct": -3.4357936117936236,
+        "meaning": "initial fluid particle mass diagnostic only; not QI/QN/QE or scientific qualification"
+      },
+      "prediction": {
+        "formula": "v1_actual_dp * (source_sample_mass_kg / v1_actual_generated_xml_sample_mass_kg)^(1/3)",
+        "source_sample_mass_kg": 325.6,
+        "v1_actual_generated_xml_sample_mass_kg": 315.7506858969234,
+        "v1_actual_deviation_pct": -3.024973618881022,
+        "v1_actual_dp_m": 0.01618755501632345,
+        "predicted_dp_m": 0.016354149191897108,
+        "source_dp_m": 0.02,
+        "actual_mass_gate": "UNKNOWN_UNTIL_GENERATED_XML"
+      },
+      "continuous_vs_intentional": {
+        "normalized_geometry_unchanged": true,
+        "dependencies_byte_identical": true,
+        "motion_or_acceleration_changed": false,
+        "intentional": [
+          "dp",
+          "h/massfluid/count/lattice phase measured by generated XML"
+        ]
+      },
+      "historical_controls": {
+        "historical_solver_tmax_s": "12",
+        "historical_solver_tout_s": "0.02",
+        "xml_controls": {
+          "cflnumber": "0.2",
+          "dp_m": "0.02",
+          "h_m": "0.031843407687",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "CoefDtMin": "0.05",
+          "TimeMax": "12",
+          "TimeOut": "0.02"
+        },
+        "argv_controls": {
+          "tmax_s": "12",
+          "tout_s": "0.02",
+          "other_flags": []
+        },
+        "status": "PASS_HISTORICAL_SOURCE_CONTROLS"
+      },
+      "status": "PASS_GENCASE_TOTAL_HARD_FAIL_GT2PCT",
+      "solver_started": false,
+      "full_time_hdf5_read": false,
+      "gpu_lease": "none",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  ]
+}
