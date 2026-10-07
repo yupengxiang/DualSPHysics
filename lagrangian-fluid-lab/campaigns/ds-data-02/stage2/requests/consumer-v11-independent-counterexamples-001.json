@@ -1,0 +1,37 @@
+{
+  "family_id": "infra",
+  "case_id": "STAGE2_CONSUMER_V11_INDEPENDENT_REVIEW",
+  "attempt_id": "v11-counterexamples-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 1,
+  "max_wall_seconds": 180,
+  "estimated_storage_bytes": 1048576,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-c",
+    "import sys,json,pathlib,numpy as np\nsys.path.insert(0,sys.argv[1])\nimport ds_data02_stage2_f2_replay_v11 as m\nrequest=json.loads(pathlib.Path(sys.argv[2]).read_text())\n# Closed halfspace net flux equals frozen mass times endpoint occupancy change.\nt=np.arange(11,dtype=float);d=np.array([-1,1,999,-1,1,999,-1,1,999,-1,-1.],dtype=float)\nv=np.ones(11,dtype=bool);v[[2,5,8]]=False\nf=m.flux(t,d,v,np.full(11,2.),initial_mass=2.)\nassert f['net_flux_mass_kg']==6. and f['unknown_flux_net_bound_kg']==2.\nassert abs(f['net_flux_mass_kg']-0.)>f['unknown_flux_net_bound_kg']\na=m.flux(np.array([0.,1.,2.]),np.array([np.nan]*3),np.zeros(3,dtype=bool),np.array([np.nan]*3),initial_mass=2.)\nassert a['unknown_flux_net_bound_kg']==0.\np=request['observer_profile']; frames=p['query_frame_indices']; n=len(frames);quants=p['mass_quantiles'];den=request['initial_mass_denominator']['denominator_kg']\nsource={'current_catalog_sha256':p['current_binding_sha256'],'trajectory_h5_producer_sha256':p['trajectory_producer_sha256'],'source_files':p['source_file_sha256'],'binding_status':'MANUFACTURED_OPERATOR_COUNTEREXAMPLE'}\nresult={'schema':m.RESULT_SCHEMA,'source_binding':source,'initial_mass_denominator':{'denominator_kg':den},'frame_observations':[{'frame':f,'mass_weighted_com_m':[0.,0.,0.],'mass_weighted_mean_velocity_m_s':[0.,0.,0.],'mass_weighted_kinetic_energy_J':1.,'mass_quantile_front_m':{str(q):0. for q in quants},'mass_distribution_kg':[den,0.,0.,0.]} for f in frames],'labels':[{'status':'observed','event_time_s':1.}]}\npred={'source_binding':source,'observer_profile_sha256':p['sha256'],'query_times_s':p['query_times_s'],'mass_weighted_com_m':np.zeros((n,3)).tolist(),'mass_weighted_mean_velocity_m_s':np.full((n,3),1000.).tolist(),'mass_weighted_kinetic_energy_J':np.full(n,1.e9).tolist(),'mass_quantile_front_m':np.full((n,len(quants)),1.e9).tolist(),'mass_distribution_fraction':np.tile([1.,0.,0.,0.],(n,1)).tolist(),'event_status':['observed'],'event_time_s':[1.],'evaluation_seconds':0.,'output_bytes':0}\ne=m.evaluate_manual_predictions(result,pred,p)\nassert e['status']=='PASS' and e['metrics']['velocity_absolute_max_error_m_s']==1000.\nassert e['metrics']['kinetic_energy_relative_max_error']>1.e8 and e['metrics']['mass_front_relative_max_error']>1.e8\nout={'schema':'ds02.stage2.v11-independent-counterexamples.v1','status':'EXPECTED_DEFECTS_REPRODUCED','trajectory_hdf5_read':False,'model_invoked':False,'multiple_disjoint_missing_intervals':{'v11_reported_observed_net_kg':f['net_flux_mass_kg'],'v11_reported_unknown_net_bound_kg':f['unknown_flux_net_bound_kg'],'endpoint_membership_true_net_kg':0.,'bound_contains_true_net':False},'all_mass_nan_with_frozen_initial_mass':{'initial_mass_kg':2.,'v11_reported_unknown_net_bound_kg':a['unknown_flux_net_bound_kg'],'unknown_endpoint_bound_can_be_zero':False},'wrong_velocity_KE_front_predictions':e,'gross_recross_counterexample':'An unknown saved bracket can contain arbitrarily many back-and-forth crossings; one frozen mass cannot bound gross crossing mass without additional trajectory regularity evidence.','scientific_qualification':'NONE; operator counterexamples only'}\npath=pathlib.Path(sys.argv[3]);path.parent.mkdir(parents=True,exist_ok=True)\nwith path.open('x') as h:json.dump(out,h,indent=2);h.write('\\n')\nprint('EXPECTED_DEFECTS_REPRODUCED: three independent v11 operator counterexamples')\n",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v11/f2-s1-replay-request-v11-001.json",
+    "{attempt_root}/v11-counterexamples.json"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v11.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v11/f2-s1-replay-request-v11-001.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python"
+  ],
+  "input_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py": "78e2e5691039e306998387c318de9c1fd111e36ad81d892109f5ec112e43ab72",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v11.py": "3aeed9f929e700a73968846e9c3a7d71f32b7727d50d3e42b224223635e0c8a7",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v11/f2-s1-replay-request-v11-001.json": "ebb61ef2854bbf1ba27c5b1bff355adf099ee6eda6f0acbff25eb0d47a711d0e",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
+  },
+  "scope": "Independent manufactured operator counterexamples; no HDF5/native science reads; reproduces v11 defects without changing consumed artifacts."
+}
