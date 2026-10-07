@@ -37,7 +37,7 @@ QUALITY_LABELS = Path(__file__).resolve().parents[1] / "review-source/QUALITY_LA
 PREFLIGHT_SCRIPT = Path(__file__).with_name("f2_s1_gencase_preflight_v1.py")
 PREFLIGHT_INPUT_ROOT = Path(__file__).with_name("f2_s1_preflight_inputs")
 PREFLIGHT_MANIFEST = PREFLIGHT_INPUT_ROOT / "manifest.json"
-PREFLIGHT_REQUEST_DIR = Path(__file__).resolve().parents[1] / "requests/f2-s1-gencase-preflight-v1"
+PREFLIGHT_REQUEST_DIR = Path(__file__).resolve().parents[1] / "requests/f2-s1-gencase-preflight-v3"
 INITIAL_OUTPUT = DATA_ROOT / "families/F2/F2_S1_INITIAL_FRAME_EQUIV_V2_3/initial-frame-equivalence-v2-3-001/initial-frame-check.json"
 INITIAL_RECEIPT = DATA_ROOT / "families/F2/F2_S1_INITIAL_FRAME_EQUIV_V2_3/initial-frame-equivalence-v2-3-001/execution-receipt.json"
 
@@ -631,9 +631,16 @@ def gap_requests(target: Mapping[str, Any], output_dir: Path) -> list[dict[str, 
         receipt_path = DATA_ROOT / "families/F2" / case_id / request["attempt_id"] / "execution-receipt.json"
         if receipt_path.is_file():
             receipt = file_record(receipt_path)
-            receipt["status"] = load_json(receipt_path).get("status", "UNKNOWN")
+            receipt_json = load_json(receipt_path)
+            receipt["status"] = receipt_json.get("status", "UNKNOWN")
+            output_root = receipt_path.parent
+            gencase_outputs = {
+                "generated_xml": file_record(output_root / "generated.xml") if (output_root / "generated.xml").is_file() else {"status": "UNKNOWN"},
+                "native_frame0": file_record(output_root / "generated.bi4") if (output_root / "generated.bi4").is_file() else {"status": "UNKNOWN"},
+            }
         else:
             receipt = {"status": "PENDING_GUARDED_RUN", "path": str(receipt_path)}
+            gencase_outputs = {"status": "PENDING_GUARDED_RUN"}
         item = {
             "schema": GAP_SCHEMA,
             "status": "READY_FOR_GUARDED_GENCASE_PREFLIGHT" if receipt.get("status") == "PENDING_GUARDED_RUN" else "GENCASE_PREFLIGHT_RECEIPT_AVAILABLE",
@@ -662,6 +669,7 @@ def gap_requests(target: Mapping[str, Any], output_dir: Path) -> list[dict[str, 
                 "motion": record["derived_inputs"]["motion"],
             },
             "execution_receipt": receipt,
+            "gencase_outputs": gencase_outputs,
             "required_followups_after_gencase": [
                 "bind actual generated XML/GenCase receipt and native Part_0000",
                 "bind typed conversion report with producer HDF5 SHA/stat without rehashing full HDF5 in this scope",
@@ -714,9 +722,11 @@ def build_matrix(current_path: Path, provenance_index_path: Path, initial_output
         "observer_results_admitted": False,
         "freeze_condition": "consumer calibration must complete and this budget must remain unchanged before any new solver result",
     }
+    gaps = gap_requests(target, gap_dir)
+    gencase_complete = all(item.get("execution_receipt", {}).get("status") == "completed" for item in gaps)
     matrix = {
         "schema": SCHEMA,
-        "status": "PREPARED_NO_NEW_SOLVER",
+        "status": "PREPARED_WITH_BOUNDED_GENCASE_PREFLIGHT" if gencase_complete else "PREPARED_AWAITING_GENCASE_PREFLIGHT",
         "family_id": "F2",
         "target": target,
         "second_sentinel": second_sentinel_scope(provenance_index_path),
@@ -732,10 +742,10 @@ def build_matrix(current_path: Path, provenance_index_path: Path, initial_output
             "dense_output_scope": "RV4EQ_DP005 mixed-configuration candidate; save cadence is diagnostic only. Required time/output pair is target dp=.01 at CFL=.2 and CFL=.1 with dense output",
             "fine_dp008_dense_candidate": "NOT_USED; wrong spatial recipe for target time/output separation",
         },
-        "gap_requests": gap_requests(target, gap_dir),
+        "gap_requests": gaps,
         "scope": {
             "solver_started": False,
-            "gencase_started": False,
+            "gencase_started": gencase_complete,
             "partvtk_started": False,
             "full_time_hdf5_read": False,
             "full_hdf5_rehash": False,
@@ -777,6 +787,14 @@ def request_inputs(current_path: Path, provenance_index_path: Path, initial_outp
     ]
     for path in sorted(PREFLIGHT_REQUEST_DIR.glob("*.json")):
         result.append(path)
+    preflight_manifest = load_json(PREFLIGHT_MANIFEST)
+    for record in preflight_manifest.get("cases", []):
+        request_path = PREFLIGHT_REQUEST_DIR / f"{record['case_id'].lower()}.json"
+        request = load_json(request_path)
+        attempt_root = DATA_ROOT / "families/F2" / record["case_id"] / request["attempt_id"]
+        for path in (attempt_root / "execution-receipt.json", attempt_root / "generated.xml", attempt_root / "generated.bi4"):
+            if path.is_file():
+                result.append(path)
     for spec in CANDIDATES:
         report = load_json(Path(spec["report"]))
         paths = resolve_case_paths(report, Path(spec["xml"]))
