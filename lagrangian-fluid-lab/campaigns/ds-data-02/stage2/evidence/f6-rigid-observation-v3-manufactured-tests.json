@@ -1,0 +1,62 @@
+{
+  "checks": {
+    "all_negative_tests_raise": true,
+    "cross_pi_direct_so3_is_zero": true,
+    "degrees_are_not_silently_radians": true,
+    "direct_kabsch_recovers_noncommuting_xyz": true,
+    "identity_join_allows_row_reordering": true,
+    "noncommuting_order_is_detectably_different": true
+  },
+  "convention": "direct active column-vector SO(3); Kabsch row positions use R.T; radians internally",
+  "dynamical_impact": "UNKNOWN",
+  "frozen_so3_tolerances_deg": {
+    "max": 5.0,
+    "rmse": 2.0
+  },
+  "metrics": {
+    "cross_pi_error_deg": 0.0,
+    "degrees_radians_error_deg": 26.620156177408887,
+    "direct_fit_residual_max_m": 4.685680459230494e-16,
+    "direct_kabsch_error_deg": 0.0,
+    "noncommuting_order_error_deg": 16.45033804678298
+  },
+  "negative_tests": [
+    {
+      "error": "rotation is not a proper rotation: det=-1.0",
+      "label": "proper_rotation_rejects_reflection",
+      "passed": true
+    },
+    {
+      "error": "Kabsch support geometry is rank-degenerate",
+      "label": "kabsch_rejects_rank_degenerate_support",
+      "passed": true
+    },
+    {
+      "error": "quaternion is non-unit: norm=2.0",
+      "label": "quaternion_rejects_nonunit_input",
+      "passed": true
+    },
+    {
+      "error": "frame 0 has duplicate identity (1, 10)",
+      "label": "identity_duplicate_rejected",
+      "passed": true
+    },
+    {
+      "error": "frame 0 lacks explicit valid=true",
+      "label": "frame_valid_flag_required",
+      "passed": true
+    },
+    {
+      "error": "manufactured frame times are not increasing",
+      "label": "identity_zone_idp_change_rejected",
+      "passed": true
+    }
+  ],
+  "physical_fate": "UNKNOWN",
+  "schema": "ds02.stage2.f6-rigid-observation-v3-manufactured-tests.v1",
+  "source_script": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f6_rigid_observation_v3.py",
+    "sha256": "6acae87bfa8ea9ffe824bbeaab6c5a343e83a72c6250f930b52ebbab7cd42579"
+  },
+  "status": "passed"
+}
