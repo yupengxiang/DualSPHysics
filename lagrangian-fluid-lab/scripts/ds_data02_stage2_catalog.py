@@ -84,6 +84,8 @@ def build(review):
         except (OSError, ValueError, KeyError) as error:
             rows.append(dict(family_id=case['family_id'], physical_case_id=case['physical_case_id'],
                              scientific_scan_status='EVIDENCE_UNKNOWN', error=str(error)))
+        if len(rows) % 24 == 0:
+            print(f'Catalog source bindings: {len(rows)}/336', flush=True)
     counts = Counter(r['family_id'] for r in rows)
     if counts != Counter({f'F{i}': 48 for i in range(1, 8)}):
         raise ValueError('Frozen family counts differ')
