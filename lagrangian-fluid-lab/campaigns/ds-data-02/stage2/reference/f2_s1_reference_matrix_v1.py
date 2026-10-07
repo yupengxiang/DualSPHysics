@@ -192,8 +192,10 @@ def physical_condition_xml(path: Path) -> dict[str, Any]:
             tag = command.tag.split("}")[-1]
             if tag == "setmkbound":
                 active_kind, active_mk = "bound", command.attrib.get("mk")
+                continue
             elif tag == "setmkfluid":
                 active_kind, active_mk = "fluid", command.attrib.get("mk")
+                continue
             elif tag != "drawbox":
                 continue
             boxfill = command.find("boxfill")
@@ -825,8 +827,8 @@ def emit_request(current_path: Path, provenance_index_path: Path, initial_output
     request = {
         "schema": REQUEST_SCHEMA,
         "family_id": "F2",
-        "case_id": "F2_S1_REFERENCE_MATRIX_V1",
-        "attempt_id": "f2-s1-reference-matrix-v1-001",
+        "case_id": "F2_S1_REFERENCE_MATRIX_V2",
+        "attempt_id": "f2-s1-reference-matrix-v2-001",
         "kind": "cpu",
         "cpu_task_kind": "audit",
         "cpu_threads": 2,
@@ -841,7 +843,7 @@ def emit_request(current_path: Path, provenance_index_path: Path, initial_output
             "--current", str(current_path.resolve()),
             "--provenance-index", str(provenance_index_path.resolve()),
             "--initial-output", str(initial_output_path.resolve()),
-            "--output", "{attempt_root}/f2-s1-reference-matrix-v1.json",
+            "--output", "{attempt_root}/f2-s1-reference-matrix-v2.json",
             "--gap-dir", "{attempt_root}/gap-requests",
         ],
         "input_files": [str(path) for path in inputs],
