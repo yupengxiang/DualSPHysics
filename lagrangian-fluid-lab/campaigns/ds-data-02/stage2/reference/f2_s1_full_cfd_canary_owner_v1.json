@@ -1,0 +1,100 @@
+{
+  "schema": "ds-data-02.stage2.f2-s1.canary-owner.v1",
+  "family_id": "F2",
+  "case_id": "F2_S1_FULL_CFD_CANARY_DP01258_T4",
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "resolution": "coarse_dp0p01258",
+  "mechanism_id": "offset_spill",
+  "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+  "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+  "gravity_m_s2": [0.0, 0.0, -9.81],
+  "density_kg_m3": 1000.0,
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F2",
+    "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+    "mechanism_id": "offset_spill",
+    "geometry_family_id": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+    "control_family_id": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+    "geometry": {
+      "cup": {"low_m": [0.0, -0.15, 0.65], "size_m": [0.425, 0.3, 0.45], "label": "moving cup"},
+      "receiver": {"low_m": [0.56, -0.16, 0.0], "size_m": [1.10, 0.60, 0.45], "label": "fixed receiver"},
+      "tray": {"low_m": [-1.20, -1.0, -0.20], "size_m": [4.0, 2.0, 0.15], "label": "fixed spill tray"},
+      "fluid_layer_0": {"low_m": [0.05, -0.11, 0.70], "size_m": [0.325, 0.22, 0.088], "mkfluid": 0, "label": "fluid source layer 0"},
+      "fluid_layer_1": {"low_m": [0.05, -0.11, 0.788], "size_m": [0.325, 0.22, 0.088], "mkfluid": 1, "label": "fluid source layer 1"},
+      "fluid_layer_2": {"low_m": [0.05, -0.11, 0.876], "size_m": [0.325, 0.22, 0.088], "mkfluid": 2, "label": "fluid source layer 2"}
+    },
+    "initial_state": {
+      "source_regions": ["fluid_layer_0", "fluid_layer_1", "fluid_layer_2"],
+      "source_labels": ["fluid source layer 0", "fluid source layer 1", "fluid source layer 2"],
+      "velocities_m_per_s": [0.0, 0.0, 0.0],
+      "continuum_mass_by_source_kg": {"fluid": 21.114},
+      "initial_mass_total_kg": 21.114,
+      "mass_policy": "continuous target is retained for audit; native candidate particle mass is never rescaled"
+    },
+    "controls": {
+      "step_algorithm": 2,
+      "kernel": 2,
+      "viscosity": 0.03,
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "boundary": 1
+    },
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "fill_ratio": 0.8,
+      "fluid_height_m": 0.264,
+      "receiver_x_m": 0.56,
+      "receiver_y_m": 0.14,
+      "rotation_duration_s": 0.9,
+      "rotation_final_angle_deg": -105.0,
+      "rotation_axis_origin_m": [0.0, -1.0, 0.65],
+      "rotation_axis_endpoint_m": [0.0, 1.0, 0.65],
+      "motion_interpolation": "piecewise linear native mvrotfile"
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 4.0,
+      "sequence": "rotate through 0.9 s, then retain the control-defined hold through 4 s",
+      "expected_first_contact_range_s": "UNKNOWN",
+      "right_censor_policy": "retain the complete 0..4 s physical window; do not extrapolate a missing terminal frame"
+    },
+    "mass_policy": "native fluid particle mass is a numerical quantity; body mass and inertia are not inferred from particle sums"
+  },
+  "numerical_recipe": {
+    "dp_m": 0.01258,
+    "h_m": 0.016354,
+    "cflnumber": 0.2,
+    "dt_min_s": 0.0,
+    "dt_fixed_s": 0.0,
+    "xml_timemax_s": 4.0,
+    "xml_timeout_s": 0.01,
+    "solver_cli_tmax_s": 4.0,
+    "solver_cli_tout_s": 0.01,
+    "actual_total_particles": 264357,
+    "actual_fluid_particles": 10692,
+    "intentional_resolution_fields": ["dp_m", "h_m", "massfluid_kg", "particle_count", "particle_lattice_phase"]
+  },
+  "mass_audit": {
+    "baseline_current_dp010_fluid_mass_kg": 21.114,
+    "candidate_generated_fluid_mass_kg": 21.286334054304,
+    "relative_difference": 0.008162075,
+    "gate": "PASS_TARGET_1PCT_DIAGNOSTIC",
+    "meaning": "initial fluid particle mass compatibility only; it does not grant QI/QN/QE or rigid-body correctness",
+    "source": "candidate generated.xml execution/particles fluid blocks summed with massfluid"
+  },
+  "motion_input": {
+    "relative_name": "F2_S1_COARSE_PHASE_PROBE_DP01258_motion.dat",
+    "sha256": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+    "rows": 751,
+    "time_window_s": [0.0, 4.0],
+    "angle_deg": [0.0, -105.0]
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reference_eligibility": "UNKNOWN until consumer calibration and full-window observations"
+  }
+}
