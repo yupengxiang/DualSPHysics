@@ -178,11 +178,21 @@ def request_for(record: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     motion = Path(record["derived_inputs"]["motion"]["path"]).resolve()
     request_path = output_dir / f"{record['case_id'].lower()}.json"
     estimate = int(record["estimated_native_output_bytes"])
+    input_files = [
+        root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
+        root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+        root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+        Path(__file__).resolve(),
+        GENCASE.resolve(),
+        definition,
+        motion,
+        (INPUT_ROOT / "manifest.json").resolve(),
+    ]
     return {
         "schema": REQUEST_SCHEMA,
         "family_id": "F2",
         "case_id": record["case_id"],
-        "attempt_id": f"{record['case_id'].lower()}-002",
+        "attempt_id": f"{record['case_id'].lower()}-003",
         "kind": "cpu",
         "cpu_task_kind": "gencase",
         "cpu_threads": 2,
@@ -191,16 +201,8 @@ def request_for(record: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "worktree_root": str(root),
         "cwd": str(definition.parent),
         "command": [str(GENCASE), str(definition.with_suffix("")), "{attempt_root}/generated", "-save:all"],
-        "input_files": [
-            str(root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py"),
-            str(root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py"),
-            str(root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"),
-            str(Path(__file__).resolve()),
-            str(GENCASE.resolve()),
-            str(definition),
-            str(motion),
-            str(INPUT_ROOT / "manifest.json"),
-        ],
+        "input_files": [str(path) for path in input_files],
+        "input_hashes": {str(path): sha256_file(path) for path in input_files},
         "resource_guard": {
             "owner": "stage2-reference-preparation",
             "runner": "ds_data02_stage2_dispatch.py",
