@@ -1,3 +1,5 @@
+新增实际旁路证据：`checkpoints/CONSUMER_V12_RECEIVER_VERIFICATION_001.json` 经primary sharedguard复现outside/outside线段穿过receiver仍被标为right_censored；C25由source review升级为实际制造接口反例。新v13修复中；不改变旧v12或checkpoint009字节。
+
 ## 2026-10-07T19:09:39.423706+00:00：122例审计与实际来源cohort反例
 
 最新协调入口为 `checkpoints/CHECKPOINT_009_INTEGRATED.json`，目标active、未完成。完整保存时序审计独立核对122例，F2=48、F4=41、F6=33；真实F4/F6仍各一worker，实时增量以收据与PID/start_ticks为准。其余家族在真正I/O槽释放后启动，不重复已完成任务。
