@@ -1,0 +1,161 @@
+{
+  "schema": "ds02.stage2.native-replay-request.v5",
+  "request_id": "native-replay-f2-s1-v5-001",
+  "role": "DEVELOPMENT",
+  "hidden_test": false,
+  "current_catalog": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
+    "portable_path": {
+      "root_alias": "DS_DATA_02",
+      "relative_path": "families/infra/STAGE2_CURRENT336_CATALOG/catalog-003/CURRENT336.json",
+      "portable": true
+    },
+    "sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+    "source_catalog_sha256": "7e50464f95aa1074e453beefae15b64ac3d90649bf079731bf8e376bff030c43",
+    "expected_rows": 336
+  },
+  "current_manifest_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "family_id": "F2",
+  "manifest": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/review_20261007/evidence/E01395/manifest.json",
+    "portable_path": {
+      "root_alias": "STAGE2_WORKTREE",
+      "relative_path": "lagrangian-fluid-lab/campaigns/ds-data-02/review_20261007/evidence/E01395/manifest.json",
+      "portable": true
+    },
+    "sha256": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055"
+  },
+  "scientific_scan": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_SCIENCE/scan-F2-S1-001/scientific-scan.json",
+    "portable_path": {
+      "root_alias": "DS_DATA_02",
+      "relative_path": "families/F2/STAGE2_F2_S1_SCIENCE/scan-F2-S1-001/scientific-scan.json",
+      "portable": true
+    },
+    "sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59",
+    "expected_status": "SCANNED",
+    "expected_scope": "full saved timeline sidecar; QI/QN/QE remain unknown"
+  },
+  "operator_binding": {
+    "module": "lagrangian-fluid-lab/scripts/ds_data02_stage2_consumers_v4.py",
+    "module_sha256": "8a9eaaf9c30dee8440e3649045dc7cb9085db0a45f1543766ec8d52f065408c4",
+    "label_schema": "ds02.stage2.observation-labels.v2",
+    "model_invoked": false,
+    "manufactured_tolerance_profile_sha256": "3496c6188bb6750880309923ad817d7881f4eff1047f8a560621e8ccfe5bd6d6",
+    "real_tolerance_status": "UNREGISTERED_PENDING_NATIVE_WINDOW_CALIBRATION"
+  },
+  "initial_frame": {
+    "frame_range": [0, 1],
+    "particle_stop": 16384,
+    "fields": [
+      "particle_id",
+      "particle_zone",
+      "initial_type",
+      "initial_mk",
+      "initial_mass",
+      "time",
+      "valid",
+      "type",
+      "position",
+      "velocity",
+      "mass"
+    ],
+    "read_status": "NOT_READ",
+    "approval": "PENDING_PARENT_STAGE2GUARD_IO_SLOT",
+    "scope": "bounded source/identity/units check only; no label materialization"
+  },
+  "observation_definition": {
+    "schema": "ds02.stage2.real-observation-definition.v1",
+    "status": "PRE_REGISTERED_DEVELOPMENT",
+    "initial_quality_denominator": "all CURRENT-bound initial_type==fluid identities, including initially invalid identities; use initial_mass only",
+    "identity_axis": "typed (Zone,Idp), fixed over saved frames; no arbitrary particle ordering or glob-derived cohort",
+    "missing_and_invalid": {
+      "valid_false": "missing/censored; retain its initial mass in the denominator",
+      "nonfinite_position_or_mass": "invalid_state; no zero imputation",
+      "active_nonfinite_velocity": "reject event speed observation; do not emit observed relative speed",
+      "birth_or_revival": "unknown/unsupported until explicit lineage is bound"
+    },
+    "time": "saved frame times from CURRENT trajectory; first passage is saved bracket plus linear signed-distance chord estimate",
+    "motion_surface": "signed distance to the surface pose at each endpoint; translating/rotating surface motion must be explicitly bound",
+    "event_semantics": [
+      "forward and backward crossings are separate",
+      "multiple crossings are retained per event axis",
+      "first passage is censored when no valid crossing is observed",
+      "first-passage state is one of observed, right_censored, failed_before_observation, initially_inside, ambiguous_multiple_crossing",
+      "each event retains typed (Zone,Idp), saved brackets, and hidden-recross status",
+      "hidden recrossings between saved frames remain unresolved",
+      "residence uses valid paired intervals and reports unresolved interval time"
+    ],
+    "manual_evaluator": {
+      "entrypoint": "evaluate_manual_predictions(reference, prediction)",
+      "scores": ["typed identity binding", "macro position/velocity/mass/net-flux errors", "event status", "event time", "saved bracket retention"],
+      "status": "IMPLEMENTED_DEVELOPMENT_ONLY"
+    },
+    "source_assignment": "initial native_mk or explicitly reviewed initial source geometry; no fixed legacy case list",
+    "real_surface_config": "PENDING_REFERENCE_SUBAGENT_AND_PARENT_REVIEW",
+    "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  },
+  "tolerance_calibration": {
+    "status": "PRE_REGISTERED_NO_REAL_NUMERIC_TOLERANCE",
+    "manufactured_reference": {
+      "operator_replay_receipt": "DS_DATA_02/families/infra/STAGE2_MODEL_FREE_EVALUATOR_V4/manufactured-replay-001/execution-receipt.json",
+      "profile_sha256": "3496c6188bb6750880309923ad817d7881f4eff1047f8a560621e8ccfe5bd6d6",
+      "use": "operator implementation check only; never transferred as scientific qualification"
+    },
+    "steps": [
+      "freeze this definition and source hashes before any native read",
+      "run the approved initial-frame identity/units/mass check on a bounded window",
+      "replay a parent-approved bounded native window with the same operator and record residuals plus censor/unknown counts",
+      "compare an independently bound source or reference only after source/control/geometry roles agree",
+      "register any native tolerance as a new immutable profile; do not widen it after observing results",
+      "keep QI/QN/QE UNKNOWN until the parent qualification review accepts all required evidence"
+    ],
+    "real_tolerance_profile_sha256": null
+  },
+  "qualification_boundary": {
+    "status": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "no_qualification_from": [
+      "metadata binding",
+      "scientific scan status",
+      "manufactured analytic replay",
+      "initial frame observation",
+      "native exclusion absence or zero exclusion count"
+    ],
+    "hidden_test": false,
+    "development_only": true
+  },
+  "lineage_policy": {
+    "audit_scope": "all 336 CURRENT rows and their bound manifest JSONs",
+    "unknown_policy": "same-family conservative group",
+    "cross_resolution_or_rerun": "connect only with declared canonical physical-condition evidence; XML/numerical hash alone is insufficient",
+    "split_safety": "PROVISIONAL_REVIEW_ONLY",
+    "control_and_geometry": "require explicit bound control_family/geometry evidence; absent fields remain UNKNOWN"
+  },
+  "native_exclusion": {
+    "expected_status": "UNAVAILABLE_EXACT_CASE",
+    "cross_case_fallback": false,
+    "note": "F2-S1 has native receipt and RunPARTs accounting, but no exact native-exclusion-ledger.json; F2H10V2 ledgers are intentionally not reused"
+  },
+  "read_scope": {
+    "now": [
+      "CURRENT336.json",
+      "CASES_336.json",
+      "selected manifest and small provenance JSONs",
+      "selected XML/control file and declared motion file",
+      "F2-S1 scientific scan JSON sidecar"
+    ],
+    "forbidden_now": ["trajectory.h5 frame reads", "full-time HDF5 labels", "solver execution", "model invocation"],
+    "later_request": "parent stage2guard-approved bounded frame window only"
+  },
+  "resource_plan": {
+    "metadata_probe_cpu": "1 core; expected <2 min",
+    "metadata_probe_storage": "<5 MiB generated bundle plus JSON inputs; no HDF5 copy",
+    "initial_frame_request_cpu": "1 core; bounded sample only after parent slot",
+    "initial_frame_request_estimated_bytes": 704520,
+    "full_timeline_status": "not requested"
+  }
+}
