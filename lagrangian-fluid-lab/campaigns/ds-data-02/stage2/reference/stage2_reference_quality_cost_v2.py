@@ -647,10 +647,13 @@ def build_output() -> dict[str, Any]:
         for field in ("raw_native_reserved_bytes", "typed_reserved_bytes", "archive_native_reserved_bytes", "temporary_peak_proxy_bytes", "persistent_total_reserved_bytes"):
             agg[field.replace("_bytes", "_gib")] = gib(agg[field])
     home = shutil.disk_usage("/home/jade")
+    audit_code = Path(__file__).resolve()
+    audit_commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, check=True, capture_output=True, text=True).stdout.strip()
     return {
         "schema": SCHEMA,
         "status": "PREPARED_DIAGNOSTIC_ONLY",
         "generated_at": "runtime_read_only_audit",
+        "audit_code": {**record(audit_code, digest=True), "git_commit": audit_commit},
         "source_inputs": {
             "current": record(CURRENT, digest=True),
             "review": record(REVIEW, digest=True),
