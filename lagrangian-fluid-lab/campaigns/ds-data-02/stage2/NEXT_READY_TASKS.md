@@ -1,3 +1,13 @@
+## 2026-10-07T19:09:39.423706+00:00：122例审计与实际来源cohort反例
+
+最新协调入口为 `checkpoints/CHECKPOINT_009_INTEGRATED.json`，目标active、未完成。完整保存时序审计独立核对122例，F2=48、F4=41、F6=33；真实F4/F6仍各一worker，实时增量以收据与PID/start_ticks为准。其余家族在真正I/O槽释放后启动，不重复已完成任务。
+
+v12源码/runner/probe/portable入口已集成，primary sharedguard实际17源hash/stat验证与12制造轨迹测试通过。但已绑定初始CSV转float32后，exact nominal source box仅选19734/21114 fluid，漏1380；MK1/2/3各7038，实际xmax=.379999995>nominal.375，zmin=.699999988<.7。v12实际cohort接口拒绝，完整H5未读、不授予资格。新v13须按真实初始ID/type/MK来源定义cohort，记录格点/浮点偏差，保留21.114001002861187kg原分母。见 `CONSUMER_V12_INTEGRATION_REVIEW_001.json`。
+
+有限receiver首次经过还需校准outside/outside线段穿过box与此前invalid帧后的首次事件未知语义；无模型evaluator需真实receiver/aperture、exact身份及质量权重，不把halfspace诊断当接收器任务完成。336来源XML枚举与七cards仍草稿，物理/控制/几何/支持/恢复语义闭合待完成。
+
+Forward-only v3 terminal guard已在forensics分支提交，尚待主进程核对实际目录字节含finalreceipt增长的边界证据；旧v2和活扫描继续。reference推进成本正确的新GenCase、质量匹配间距、其他8哨点来源准备与lossless成本canary。三个代理继续实现，主进程负责集成/方向/预算/独立验证。完整336审计、14科学参考终态、标签/划分及可重放内部产品仍为整体完成条件。以下为历史记录。
+
 ## 2026-10-07T19:00:11.963408+00:00：117例审计、真实来源修正与反例
 
 恢复入口为 `checkpoints/CHECKPOINT_008_INTEGRATED.json`；目标仍active、未完成。已验证117个distinct CURRENT完整保存时序审计：F2=48、F4=38、F6=31。F4/F6两个parent PID/start_ticks仍活，每batch一worker，两重I/O槽；其余四族队列在真实槽释放后执行。

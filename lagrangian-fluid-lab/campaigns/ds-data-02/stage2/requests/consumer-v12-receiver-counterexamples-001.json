@@ -1,0 +1,37 @@
+{
+  "family_id": "infra",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 1,
+  "max_wall_seconds": 180,
+  "estimated_storage_bytes": 1048576,
+  "cwd": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+  "case_id": "STAGE2_CONSUMER_V12_INDEPENDENT_REVIEW",
+  "attempt_id": "v12-receiver-counterexamples-001",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-c",
+    "import sys,json,pathlib,numpy as np\nsys.path.insert(0,sys.argv[1]);import ds_data02_stage2_f2_replay_v12 as m\nr=json.loads(pathlib.Path(sys.argv[2]).read_text());g=r['receiver_geometry'];x=g['volume_low_m'][0]+.2;y=g['volume_low_m'][1]+.2\nz=g['top_aperture_z_m'];points=np.array([[x,y,z+.15],[x,y,-.1]])\na=m.receiver_volume_event_label(np.array([0.,1.]),points,np.ones(2,dtype=bool),None,g)\nassert a['status']=='right_censored' and len(a['aperture_downward_events'])==1\npoints=np.array([[x,y,z+.15],[np.nan]*3,[x,y,z+.15],[x,y,z-.15]])\nb=m.receiver_volume_event_label(np.arange(4,dtype=float),points,np.array([1,0,1,1],dtype=bool),None,g)\nassert b['status']=='failed_before_observation' and b['aperture_downward_first'] is not None\nout={'schema':'ds02.stage2.consumer-v12-receiver-independent-counterexamples.v1','status':'MANUFACTURED_INTERFACE_COUNTEREXAMPLES_REPRODUCED','outside_outside_segment_through_receiver':{'result':a,'linear_interpolant_known_entry':True,'volume_event_missed':True},'prior_invalid_before_aperture_candidate':{'result':b,'physical_first_aperture_event':'UNKNOWN; invalid prior bracket may hide earlier event','later_candidate_only':True},'model_invoked':False,'trajectory_hdf5_read':False,'scientific_qualification':'NONE; manufactured-interface scope only'}\npath=pathlib.Path(sys.argv[3]);path.write_text(json.dumps(out,indent=2)+'\\n');print('v12 receiver outside/outside missed entry reproduced')\n",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v12/f2-s1-replay-request-v12-001.json",
+    "{attempt_root}/v12-receiver-counterexamples.json"
+  ],
+  "input_files": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v12.py",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v12/f2-s1-replay-request-v12-001.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python"
+  ],
+  "input_sha256": {
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch.py": "78e2e5691039e306998387c318de9c1fd111e36ad81d892109f5ec112e43ab72",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v1.py": "81bdd60e5de4fec362807043ab632864405f1667a0658560fb9349025aab75ec",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py": "5098262e26dc5560487760181466b0a93a0e66239e5e54047dce5e761ae67a60",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_replay_v12.py": "c2a042917b6b0f86ddf3073e6a7dd2b0d76eb797a628ba81f8671c0525fa55e8",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v12/f2-s1-replay-request-v12-001.json": "d90ce279fa27b8312653d8819d82c8c5298a6ad9e81524d4e9cd6d0777ca3d51",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python": "a2f33a6e006989270f4340528eb61f8f97366e00a5d1b602ac8672ea44fc56ae"
+  },
+  "scope": "Independent bounded manufactured receiver first-arrival counterexamples; no HDF5/CSV reads."
+}
