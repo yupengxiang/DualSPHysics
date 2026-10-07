@@ -214,6 +214,10 @@ def test_v12_receiver_volume_aperture_and_unknown_counterexamples():
     assert label["first_entry_surface"] == "top_aperture"
     assert label["aperture_downward_first"]["status"] == "OBSERVED_FINITE_TOP_APERTURE"
     assert label["final_destination_status"] == "inside_receiver_volume"
+    edge = receiver_volume_event_label(times, np.array([[0.0, 0.0, 1.2], [0.0, 0.0, 0.8], [0.0, 0.0, 0.4], [0.0, 0.0, 0.2]]),
+                                        np.ones(4, dtype=bool), velocity, geometry)
+    assert edge["first_entry_surface"] == "top_aperture"
+    assert edge["aperture_downward_first"]["x_y_m"] == pytest.approx([0.0, 0.0])
     side = receiver_volume_event_label(times, np.array([[-.2, .5, .5], [.2, .5, .5], [.8, .5, .5], [1.2, .5, .5]]),
                                         np.ones(4, dtype=bool), velocity, geometry)
     assert side["first_entry_surface"] == "side_or_bottom_boundary"
