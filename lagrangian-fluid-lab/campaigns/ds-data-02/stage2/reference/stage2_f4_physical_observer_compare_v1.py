@@ -57,8 +57,8 @@ def atomic_json(path: Path, value: object) -> None:
 def require_observer(value: dict[str, Any], label: str) -> None:
     if value.get("schema") != "ds02.stage2.f4-physical-observer.v1":
         raise ValueError(f"{label}: unsupported observer schema {value.get('schema')!r}")
-    if not value.get("observations"):
-        raise ValueError(f"{label}: no observations")
+    if not value.get("observations") and not value.get("time_window", {}).get("queries"):
+        raise ValueError(f"{label}: no observations or query brackets")
     if value.get("source_deleted") is True:
         raise ValueError(f"{label}: source_deleted=true")
 
