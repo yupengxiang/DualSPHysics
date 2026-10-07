@@ -197,7 +197,7 @@ def build() -> Path:
         request_paths.append(str(path))
         entries.append({"sentinel_id": spec["sentinel_id"], "case_id": spec["case_id"], "request": str(path), "candidate_def": request["source_binding"]["candidate_def"], "source_identity": request["source_binding"]["continuous_source_xml"], "dp_m": spec["dp"], "status": "PREPARED_LAUNCH_DISABLED", "mass_status": "UNKNOWN_UNTIL_TERMINAL_GENERATED_XML", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}})
     queue = {"schema": "ds02.stage2.infogain-gencase-queue.v1", "status": "PREPARED_LAUNCH_DISABLED", "source_scope": "F1-S2, F6-S1, F7-S1 exact CURRENT identities; no family extrapolation", "candidate_count": len(entries), "candidates": entries, "request_paths": request_paths, "guard": {"runner": str(DISPATCH), "strict_guard": str(STRICT), "runtime": str(RUNTIME), "cpu_parent_binding": "required", "gpu": "none", "solver_launch": "forbidden", "hdf5_read": "forbidden"}, "notes": ["Candidates change only dp in new Def inputs; generated XML mass/count/phase remains UNKNOWN until parent runs GenCase.", "No CFD request is implied. Any follow-up must retain continuous geometry/control and independently audit mass, floating body fields, and motion dependencies."]}
-    atomic_json(QUEUE_PATH, queue)
+    atomic_json(QUEUE_PATH, queue, replace=True)
     return QUEUE_PATH
 
 
