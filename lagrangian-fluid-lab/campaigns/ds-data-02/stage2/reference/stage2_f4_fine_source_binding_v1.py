@@ -132,7 +132,7 @@ def normalized_xml(path: Path) -> str:
         definition.attrib.pop("dp", None)
     constants = root.find(".//constants")
     if constants is not None:
-        for key in ("dp", "h", "massfluid", "massbound"):
+        for key in ("dp", "h", "b", "massfluid", "massbound"):
             node = constants.find(key)
             if node is not None:
                 constants.remove(node)
