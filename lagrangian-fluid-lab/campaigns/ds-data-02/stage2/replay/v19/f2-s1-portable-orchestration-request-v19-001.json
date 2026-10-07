@@ -1,5 +1,22 @@
 {
   "attempt_id": "portable-orchestration-v19-001",
+  "audit_scope": {
+    "allowed_python_paths": [
+      "relocated bundle",
+      "copied runtime",
+      "Python standard library",
+      "installed numpy/h5py and their runtime dependencies",
+      "declared output/metadata paths"
+    ],
+    "native_hdf5_c_open": "not guaranteed visible to sys.addaudithook; parent full replay must retain explicit H5 SHA/path binding and may use OS-level strace/openat evidence",
+    "python_audit_hook_events": [
+      "open",
+      "os.open"
+    ],
+    "python_original_path_policy": "record every observed open and reject exact resolved original source paths before consumer read",
+    "qualification": "UNKNOWN until independent parent guard/strace receipt",
+    "unexpected_data_paths": "record and reject"
+  },
   "case_id": "STAGE2_F2_S1_PORTABLE_ORCHESTRATION_V19",
   "command": [
     "/usr/bin/python3.10",
@@ -485,6 +502,13 @@
     "scope": "internal source-bound development only; no redistribution/public release"
   },
   "max_wall_seconds": 5400,
+  "metadata_negative_cases": [
+    "v12 request schema entering v15 validator is rejected",
+    "nested motion_engine/source_code_binding original path is rejected",
+    "same-size wrong HDF5 content is rejected by full SHA",
+    "missing/extra role overlay is rejected",
+    "Python open of exact original source path is recorded and rejected by v19 audit hook"
+  ],
   "model_invoked": false,
   "orchestration": {
     "copy_gate": "trajectory HDF5 copy/content hash/full replay require parent-approved single bounded I/O slot",
@@ -594,7 +618,7 @@
     "rss_enforcement": "not claimed; worker reports actual RSS if available; shared guard enforces declared CPU/wall/storage/source checks"
   },
   "schema": "ds02.request.v1",
-  "sha256": "dc81272a33fd44c626d441e37704c94fc0b601d835b5cbcf1a1f19a89f9db59b",
+  "sha256": "34eb769c5e61bdd960f0722a00f98475e8d8a4bd35b250f7a969082008c5ac40",
   "source_bindings": {
     "v15_replay_request": {
       "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/replay/v15/f2-s1-replay-request-v15-001.json",
