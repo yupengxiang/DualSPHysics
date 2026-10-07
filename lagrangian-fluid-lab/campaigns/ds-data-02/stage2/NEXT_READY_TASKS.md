@@ -1,3 +1,17 @@
+## 2026-10-07T19:43:16.132667+00:00：真实完整CFD产物、首帧cohort与完整回放接口修复
+
+恢复入口为 `checkpoints/CHECKPOINT_010_INTEGRATED.json`，目标active、未完成。独立字段审计快照139例（F2=48、F4=48、F6=41、F1=2），实际F1/F6两单worker继续，以PID/start_ticks与新收据为准。F4剩余24已completed，释放槽已由F1接续；F3/F5/F7仍在就绪队列。
+
+Forward-only共享v4终态存储检查已独立证实finalreceipt、实际目录与ledgercharge相等，边界超预约拒绝并释放；另3项实际lifecycle测试通过。旧v2/v3与消费过的代码/测试保留。新任务使用v4和实测充分预约。
+
+F4–F7新增24GenCase均终态完成，但仅12档初始质量在1%内（含8原档），12档超过2%硬失败，必须继续质量兼容粒距，不放宽阈值。28原生文件在14哨点上的gzip独立解压SHA/字节均匹配，259818202B→66595695B；只证明这28份无损，不代表整campaign存储上界。
+
+F2-S1新dp=.01258已真实完成完整401帧CFD，0..4.000064985853619秒，GPU64.816709秒，最终4665670874B，实际GPU2 UUIDlease、源pre/post哈希、finalbyte charge/release已核对。Fluid10692→10681，11位置排除；RunPARTs给每保存窗口dtmin/max与DTsMin=0，非完整逐step序列。待newowner绑定完整typed转换/审计，科学资格UNKNOWN。源案例名ROT090但实际历史solver启动/结束相同SHA的motion末角-105°；连续匹配使用实际控制，保留冲突。
+
+v13实际guard17源probe与真实H5首帧核对，全部21114fluid/21.114001002861187kg/MK各7038保留，nominalbox19734/1380仅诊断。v14已集成身份/质量关联连续residence与profile绑定evaluator，primary实际20测试PASS；真实full401请求失败，因为native末帧4.000007783879406略晚motion终点4秒。v15必须核对official movement finish后保持末端位姿的语义，保留全部401原时间戳，超出活动控制覆盖仍拒绝；禁止截帧、修改源或无条件外推。
+
+新增5native joins共92位置排除ID及MK/XMLmassscreen已核对，UNKNOWN物理去向/动力学不变；实际typed/perMK冻结分母与任务影响区间待enrichment。三个代理持续推进v15/336语义与portable、native全118、coarse完整typed/14最小study成本与hardmass/F5。整体336/14参考终态/任务标签/划分/七cards/无模型evaluator/内部可迁移重放产品均仍是完成条件。以下为历史记录。
+
 新增资源反例：`checkpoints/TERMINAL_STORAGE_V3_INDEPENDENT_VERIFICATION_001.json` 在真实父guard下、独立fixture中核对32B子worker与最终receipt增长；v3仍完成但最终目录超预约。新v4修复/实际精确字节证明待主进程集成，旧v2/v3不改。
 
 新增实际旁路证据：`checkpoints/CONSUMER_V12_RECEIVER_VERIFICATION_001.json` 经primary sharedguard复现outside/outside线段穿过receiver仍被标为right_censored；C25由source review升级为实际制造接口反例。新v13修复中；不改变旧v12或checkpoint009字节。
