@@ -104,7 +104,7 @@ def _role_case_coverage(audit: Mapping[str, Any], family: str,
     rows = audit.get("input_roles")
     if not isinstance(rows, list):
         raise LineageV16Error("v15 input_roles is required")
-    result: dict[str, int] = {}
+    covered: dict[str, set[int]] = {}
     for row in rows:
         if not isinstance(row, Mapping) or not isinstance(row.get("role"), str):
             continue
@@ -114,8 +114,8 @@ def _role_case_coverage(audit: Mapping[str, Any], family: str,
         overlap = family_indices.intersection(index for index in case_indices if isinstance(index, int))
         if overlap:
             role = str(row["role"])
-            result[role] = result.get(role, 0) + len(overlap)
-    return result
+            covered.setdefault(role, set()).update(overlap)
+    return {role: len(indices) for role, indices in covered.items()}
 
 
 def _card(v13: Mapping[str, Any], family: str, case_indices: list[int],
