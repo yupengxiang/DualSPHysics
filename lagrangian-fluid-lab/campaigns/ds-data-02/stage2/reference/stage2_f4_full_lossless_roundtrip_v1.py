@@ -94,7 +94,7 @@ def exact_frames() -> list[Path]:
     return frames
 
 
-def prepare() -> dict[str, Any]:
+def prepare(output_path: Path = MANIFEST) -> dict[str, Any]:
     frames = exact_frames()
     if not RECEIPT.is_file() or not RUNPARTS.is_file() or not RUNOUT.is_file():
         raise FileNotFoundError("F4 receipt/RunPARTs/Run.out source binding is incomplete")
@@ -144,7 +144,7 @@ def prepare() -> dict[str, Any]:
         "hdf5_read": False,
         "native_payload_read_by_prepare": False,
     }
-    atomic_json(MANIFEST, manifest)
+    atomic_json(output_path, manifest)
     return manifest
 
 
@@ -347,7 +347,7 @@ def main() -> int:
     parser.add_argument("--output-root", type=Path)
     args = parser.parse_args()
     if args.prepare:
-        result = prepare()
+        result = prepare(args.manifest)
         print(json.dumps({"status": result["status"], "manifest": str(args.manifest),
                           "frames": len(result["frames"]),
                           "raw_part_bytes": result["source_binding"]["expected_raw_part_bytes"],
