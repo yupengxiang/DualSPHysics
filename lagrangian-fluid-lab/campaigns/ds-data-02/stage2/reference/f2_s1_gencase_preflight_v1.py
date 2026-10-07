@@ -23,7 +23,7 @@ SCHEMA = "ds02.stage2.f2-s1.gencase-preflight.v1"
 REQUEST_SCHEMA = "ds02.request.v1"
 REPO = Path(__file__).resolve().parents[5]
 DATA_ROOT = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02")
-GENCASE = REPO / "lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+GENCASE = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64")
 TEMPLATE_DEF = Path(
     "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/"
     "F2_FIRST48_REMAINING24_SOURCE_ROOT801/"
@@ -182,7 +182,7 @@ def request_for(record: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         "schema": REQUEST_SCHEMA,
         "family_id": "F2",
         "case_id": record["case_id"],
-        "attempt_id": f"{record['case_id'].lower()}-001",
+        "attempt_id": f"{record['case_id'].lower()}-002",
         "kind": "cpu",
         "cpu_task_kind": "gencase",
         "cpu_threads": 2,
