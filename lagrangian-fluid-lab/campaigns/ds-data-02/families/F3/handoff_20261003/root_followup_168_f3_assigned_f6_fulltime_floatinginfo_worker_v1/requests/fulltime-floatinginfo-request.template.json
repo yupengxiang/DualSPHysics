@@ -1,0 +1,178 @@
+{
+  "schema": "ds02.f6.fulltime-floatinginfo-request.v1",
+  "package": "fresh168",
+  "disabled": true,
+  "source_only": true,
+  "execution_allowed": false,
+  "status": "source_only_disabled_waiting_root142",
+  "launch_owner": "root",
+  "cpu_task_kind": "audit",
+  "cpu_threads": 2,
+  "max_wall_seconds": 600,
+  "estimated_storage_bytes": 536870912,
+  "case": {
+    "family_id": "F6",
+    "assigned_family": "F3",
+    "case_id": "<CASE_ID>",
+    "physical_case_id": "<PHYSICAL_CASE_ID>",
+    "physical_condition_sha256": "<NATIVE_CONDITION_SHA256>",
+    "new_case_credit": 0
+  },
+  "source_roles": {
+    "source_plan_condition_sha256": "<ROLE_SHA256_OR_NULL>",
+    "source_definition_sha256": "<ROLE_SHA256_OR_NULL>",
+    "actual_converter_scope_sha256": "<ROLE_SHA256_OR_NULL>",
+    "accepted_top_condition_sha256": "<ROLE_SHA256_OR_NULL>",
+    "native_condition_sha256": "<ROLE_SHA256_OR_NULL>",
+    "native_condition_role": "<ROLE_SHA256_OR_NULL>"
+  },
+  "native": {
+    "data_root": "<NATIVE_DATA_ROOT>",
+    "case_id": "<CASE_ID>",
+    "physical_case_id": "<PHYSICAL_CASE_ID>",
+    "condition_sha256": "<NATIVE_CONDITION_SHA256>",
+    "receipt_path": "<NATIVE_RECEIPT_JSON>",
+    "receipt_sha256": "<NATIVE_RECEIPT_SHA256>",
+    "receipt_status": "completed",
+    "receipt_returncode": 0,
+    "rigid_state_input": {
+      "relative_path": "PartFloatInfo.ibi4",
+      "source_stat_bytes": null,
+      "source_stat_only": true,
+      "state0_audit_status": "<STATE0_AUDIT_STATUS>",
+      "state0_rows_examined": 2,
+      "state0_is_not_full_time": true,
+      "inventory_binding": {
+        "required_before_official_export": true,
+        "inventory_request_id": "fresh168-partfloatinfo-inventory-v1",
+        "report_path": "<INVENTORY_REPORT_JSON>",
+        "report_sha256": null,
+        "entry_source_sha256": null
+      }
+    }
+  },
+  "state0_evidence": {
+    "audit_json": {
+      "path": "<STATE0_AUDIT_JSON>",
+      "sha256": null
+    },
+    "status": "pass",
+    "claim_boundary": "Single-case FloatingInfo state-zero omega corroboration only; no visual/Q-N/precision/production result",
+    "rows_examined": 2,
+    "frame_limits": {
+      "first": 0,
+      "last": 1
+    },
+    "official_binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+    "native_receipt": {
+      "path": "<NATIVE_RECEIPT_JSON>",
+      "sha256": "<NATIVE_RECEIPT_SHA256>"
+    }
+  },
+  "native_embedded_rigid_state_locator": {
+    "relative_path": "PartFloatInfo.ibi4",
+    "source_stat_bytes": null,
+    "state0_audit_path": "<STATE0_AUDIT_JSON>",
+    "state0_rows_examined": 2,
+    "state0_is_not_full_time": true,
+    "full241_native_exists_by_metadata": true,
+    "absence_must_not_be_inferred_from_two_row_export": true
+  },
+  "official_export": {
+    "binary_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/FloatingInfo_linux64",
+    "binary_sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00",
+    "help_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/help/FloatingInfo_Help.out",
+    "help_sha256": "872778057e82400ccbb33fd1c79b99574c71c7d588bfcbc78add7d7e99217bba",
+    "first": 0,
+    "last": 240,
+    "only_mk": 60,
+    "save_motion": 1,
+    "csvsep": 0,
+    "createdirs": 1,
+    "delimiter": ";",
+    "output_filename": "FloatingInfo_mk60.csv",
+    "part_contract": {
+      "pilot_required": true,
+      "mode": null,
+      "expected_values": null,
+      "semantics": "bind from registered pilot"
+    }
+  },
+  "frame_contract": {
+    "first": 0,
+    "last": 240,
+    "expected_count": 241,
+    "must_parse_all_rows": true,
+    "bounded_prefix_rejected": true
+  },
+  "time_contract": {
+    "expected_start_s": 0.0,
+    "expected_end_s": 12.0,
+    "nominal_tout_s": 0.05,
+    "terminal_tolerance_s": 0.2,
+    "native_time_tolerance_s": 1e-06,
+    "native_time_source": "Root-registered native producer metadata; bind 241 values before export",
+    "native_times_s": null,
+    "official_times_retained": true,
+    "no_resampling": true,
+    "native_times_required_before_export": true
+  },
+  "field_contract": {
+    "required_units": {
+      "time": "s",
+      "linear_velocity": "m/s",
+      "angular_velocity": "rad/s",
+      "center": "m",
+      "translation_pose": "m",
+      "euler_pose": "deg"
+    },
+    "required_rigid_groups": [
+      "time_s",
+      "fvel_x/y/z",
+      "fomega_x/y/z",
+      "center_x/y/z",
+      "surge",
+      "sway",
+      "heave",
+      "roll",
+      "pitch",
+      "yaw"
+    ],
+    "part_column_required": true,
+    "marker_rule": "Pass -onlymk:60 to official tool and report observed part values; never infer a Part value from the case alias."
+  },
+  "worker": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_168_f3_assigned_f6_fulltime_floatinginfo_worker_v1/workers/run_fulltime_floatinginfo_fresh168.py",
+    "sha256": "8433709919f4bbc45eb1d302246a58062bdcd7dbdd02c2ab5f2acb7d861438f8",
+    "runner_path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003/root_stage1_home_floor_inventory_dispatch_142/launch.py",
+    "runner_sha256": "708c4c83d22257f7b59bad93cd19915fb66a199a2a5b1291d6ada71bb467ea76",
+    "interpreter": "Root142 registered CPU2 runtime",
+    "inventory_worker_path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_168_f3_assigned_f6_fulltime_floatinginfo_worker_v1/workers/run_partfloatinfo_inventory_fresh168.py",
+    "inventory_worker_sha256": "3b053331308c080a35a96994c367ec49329d875ad3d6948accce1140f41f13d2",
+    "inventory_request_path": "/home/jade/.codex/worktrees/ds-data-02-f3/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F3/handoff_20261003/root_followup_168_f3_assigned_f6_fulltime_floatinginfo_worker_v1/requests/partfloatinfo-inventory-disabled-request.json"
+  },
+  "output": {
+    "directory": "<ROOT_PRIVATE_OUTPUT_DIR>/<CASE_ID>",
+    "report_path": "<ROOT_PRIVATE_OUTPUT_DIR>/<CASE_ID>/floatinginfo-full241-report.json",
+    "csv_filename": "FloatingInfo_mk60.csv",
+    "receipt": null,
+    "report_sha256": null,
+    "output_sha256": null
+  },
+  "future_hashes_null": true,
+  "no_shared_registry_or_ledger_write_by_source": true,
+  "scientific_payload_read_by_source": false,
+  "requires_root_enabled_copy": true,
+  "template_placeholders": [
+    "CASE_ID",
+    "PHYSICAL_CASE_ID",
+    "NATIVE_CONDITION_SHA256",
+    "NATIVE_DATA_ROOT",
+    "NATIVE_RECEIPT_JSON",
+    "NATIVE_RECEIPT_SHA256",
+    "STATE0_AUDIT_JSON",
+    "ROOT_PRIVATE_OUTPUT_DIR",
+    "INVENTORY_REPORT_JSON",
+    "ROLE_SHA256_OR_NULL"
+  ]
+}
