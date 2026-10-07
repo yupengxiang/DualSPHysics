@@ -1,4 +1,6 @@
-## 2026-10-07 17:58 UTC：v4 集成与真实缺失证据
+14 哨点初始帧核对的实际绑定详见 `checkpoints/SENTINEL_INITIAL_VERIFICATION_001.json`；只给 frame0 转换一致性信用。
+
+## 2026-10-07 17:56 UTC：v4 集成与真实缺失证据
 
 `checkpoints/INTEGRATION_RESULT_002.json` 记录实际输入哈希及收据。active consumer 为 `scripts/ds_data02_stage2_consumers_v4.py`；主分支 guarded 17 项测试通过，制造轨迹 operator replay 通过。该容差仅用于制造轨迹，不授予真实数据科学资格，也不能排除原生保存帧之间未解析的重复穿越。旧 v1/v2/v3 与全部历史报告保留。
 
@@ -6,7 +8,7 @@
 
 F6-240/241 已完成 native exclusions 对齐：3+4 个 position 排除。数值排除类别已建立，物理去向/动力学影响未知；必须结合实际 MapRealPos、底壁几何和原生状态诊断。rigid-body massbody 与 SPH support weight 分开，禁止粒子总质量代替刚体物理质量。
 
-三个执行分支持续进行：reference 做 14 初始帧实际核查及 F2-S1 三网格/time/output 复用与缺口准备；forensics 做 16 个 native 诊断和 provenance 反例、扩展已完成 scans；consumers 做 source-bound 真实单案例 replay 与全 336 的物理条件/几何控制谱系审计。具体读取真实时序由主进程安排 I/O；无模型、无 hidden test、无公开发布。目标未完成。
+三个执行分支持续进行：reference 的 14 个初始帧 individual guard jobs 已全部完成、转换一致性 PASS（主进程已逐一核对收据）；继续 v2.3 provenance 反例及 F2-S1 三网格/time/output 复用与缺口准备；forensics 做 16 个 native 诊断和 provenance 反例、扩展已完成 scans；consumers 做 source-bound 真实单案例 replay 与全 336 的物理条件/几何控制谱系审计。具体读取真实时序由主进程安排 I/O；无模型、无 hidden test、无公开发布。目标未完成。
 
 # 第二阶段恢复入口
 
