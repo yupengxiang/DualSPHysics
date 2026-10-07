@@ -87,7 +87,11 @@ def derive_dp(source_def: Path, target: Path, dp: str) -> dict[str, object]:
     replacement, old_normal, new_normal = replace_definition_dp(text, dp)
     if replacement == text:
         raise ValueError(f"dp replacement did not change {source_def}")
-    atomic_bytes(target, replacement.encode("utf-8"))
+    if target.exists():
+        if target.read_text(encoding="utf-8") != replacement:
+            raise ValueError(f"existing derived Def differs from deterministic candidate: {target}")
+    else:
+        atomic_bytes(target, replacement.encode("utf-8"))
     return {
         "source_def": record(source_def),
         "derived_def": record(target),
@@ -99,7 +103,11 @@ def derive_dp(source_def: Path, target: Path, dp: str) -> dict[str, object]:
 
 
 def copy_motion(source: Path, target: Path) -> dict[str, object]:
-    atomic_bytes(target, source.read_bytes())
+    if target.exists():
+        if sha256(target) != sha256(source):
+            raise ValueError(f"existing motion dependency differs: {target}")
+    else:
+        atomic_bytes(target, source.read_bytes())
     return {"source": record(source), "copied_dependency": record(target), "bytes_identical": sha256(source) == sha256(target)}
 
 
@@ -107,8 +115,6 @@ def make_candidate(spec: dict[str, object]) -> tuple[dict[str, object], Path]:
     base_def = Path(str(spec["base_def"]))
     out_dir = INPUT_ROOT / str(spec["sentinel_id"]).replace("-", "_") / f"dp{str(spec['dp']).replace('.', 'p')}"
     candidate_def = out_dir / f"{spec['case_id']}_Def.xml"
-    if candidate_def.exists():
-        raise FileExistsError(candidate_def)
     definition_meta = derive_dp(base_def, candidate_def, str(spec["dp"]))
     motion_meta = None
     if spec.get("motion_source"):
@@ -158,6 +164,11 @@ def make_candidate(spec: dict[str, object]) -> tuple[dict[str, object], Path]:
         "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
     }
     request_path = REQUEST_ROOT / f"{str(spec['sentinel_id']).lower().replace('-', '_')}_dp{str(spec['dp']).replace('.', 'p')}.json"
+    if request_path.exists():
+        existing = json.loads(request_path.read_text(encoding="utf-8"))
+        if existing.get("input_hashes") != request.get("input_hashes") or existing.get("command") != request.get("command"):
+            raise ValueError(f"existing request differs from deterministic candidate: {request_path}")
+        return existing, request_path
     atomic_json(request_path, request)
     return request, request_path
 
