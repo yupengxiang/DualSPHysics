@@ -257,7 +257,9 @@ def half_cfl_text(source_text: str, source_values: list[str]) -> tuple[str, list
     parsed = [float(value) for value in source_values]
     if len(parsed) != 2 or abs(parsed[0] - parsed[1]) > 1e-12:
         raise ValueError(f"CURRENT CFL entries disagree: {source_values}")
-    half = format(parsed[0] / 2.0, ".17g")
+    # Keep the declared half-CFL easy to audit (0.1, 0.025, ...); the
+    # round-trip float is recorded separately in the request scope.
+    half = format(parsed[0] / 2.0, ".15g")
     pattern = re.compile(r'(<cflnumber\b[^>]*?\bvalue=")([^"]+)(")')
     changes: list[dict[str, str]] = []
 
