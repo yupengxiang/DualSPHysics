@@ -1,0 +1,56 @@
+{
+  "schema": "ds02.stage2.integration-review.v1",
+  "observed_at_utc": "2026-10-07T17:22:04.659644+00:00",
+  "role": "primary integration review",
+  "consumer_commit": "250fa6679",
+  "consumer_source": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_consumers.py",
+    "sha256": "c5cdfc83806e083a6bc2bb32ea9cd8e742963bf08b3c7aac24c81aa15f52ccaa"
+  },
+  "status": "CHANGES_REQUESTED_NOT_INTEGRATED",
+  "findings": [
+    {
+      "id": "C01",
+      "status": "FIX_REQUESTED",
+      "finding": "cumulative_crossings is overwritten for each particle chunk and reports only the last chunk",
+      "required_evidence": "Chunk sizes 1, 2, and all particles yield identical counts, mass flux, first passage and residence results."
+    },
+    {
+      "id": "C02",
+      "status": "FIX_REQUESTED",
+      "finding": "Grouping includes generated XML and numerical hashes; resolution variants may separate. Actual CURRENT headers do not carry the condition/control hashes read by this key.",
+      "required_evidence": "Physical-condition/common-lineage grouping across different dp/XML/restart/window variants; incomplete evidence is provisional and grouped conservatively."
+    },
+    {
+      "id": "C03",
+      "status": "FIX_REQUESTED",
+      "finding": "An ordinary explicitly populated manifest_physical_case_id equal to physical_case_id is rejected as malformed alias.",
+      "required_evidence": "Both ordinary explicit identities and the four accepted mismatches are supported, with separate scope evidence."
+    },
+    {
+      "id": "C04",
+      "status": "FIX_REQUESTED",
+      "finding": "Active nonfinite velocity can yield an observed crossing speed with NaN and no explicit speed-invalid state.",
+      "required_evidence": "Manufactured active-velocity counterexample and explicit invalid/unknown speed semantics."
+    },
+    {
+      "id": "C05",
+      "status": "FIX_REQUESTED",
+      "finding": "Default particle chunk reads full saved timeline and can allocate several GiB; integer validation permits float truncation.",
+      "required_evidence": "Explicit bounded memory strategy and integer parameter validation."
+    },
+    {
+      "id": "P01",
+      "status": "SNAPSHOT_RECOVERY_REQUESTED",
+      "finding": "current-probe-001 consumed a consumer source digest different from current module; current-probe-002 matches current source.",
+      "required_evidence": "Recover exact historical source or disclose unavailable snapshot; all future fixes use new versioned modules."
+    },
+    {
+      "id": "F01",
+      "status": "FIX_REQUESTED",
+      "finding": "Native reconciliation checks identities/times/counts but must additionally enforce conversion/scan/source/decoder path and digest correspondence.",
+      "required_evidence": "Reject swapped conversion/raw/RunPARTs/receipt provenance, retaining the exact first-gap state."
+    }
+  ],
+  "scientific_credit": "No QI dynamics, QN, QE or family-wide acceptance from interface probes/tests."
+}

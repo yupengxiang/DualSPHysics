@@ -1,6 +1,6 @@
 # 第二阶段恢复入口
 
-当前目标仍在执行，完成条件未满足。先读 `checkpoints/CHECKPOINT_001.json`，再检查真实进程和共享ledger。不要只根据running状态文件重启任务。
+当前目标仍在执行，完成条件未满足。先读 `checkpoints/CHECKPOINT_003_REVIEW.json` 和 `checkpoints/INTEGRATION_REVIEW_001.json`，再检查真实进程和共享ledger。不要只根据running状态文件重启任务。
 
 已验证的长任务：F2科学扫描批次，exec session 30970；F4科学扫描批次，exec session 20699。各自独立batch-receipt位于数据根runtime/batches/stage2-F2-science-001和stage2-F4-science-001。当前最多两个科学I/O批次、每批一个worker；由strict guard重新验证每例输入hash，父预算和500GiB空闲下限继续生效。
 
@@ -11,3 +11,7 @@ F2-S1的401帧已扫描，3个遗漏ID均与原生PartOut/RunPARTs精确对齐�
 14个哨点的实际XML、启动argv、原控制和native step日志已复核；初态等价、raw-vs-typed和时空精度研究尚未完成。37项运行器/科学读取/原生对账测试通过，不授予QN/QE。S1的标签与消费者收口仍需实际CURRENT接口集成。
 
 每个实际solver只通过共享runner启动，启动前核对GPU UUID授权与外部进程、空间预约和父累计预算。尚未启动新CFD或模型。checkpoint不代表目标达成。
+
+2026-10-07T17:22Z：原生遗漏解码v2批次14项全部成功；此前不支持参数的v1失败保留，两个批次的请求字节均与批次launch digest一致。14项尚需完成scan/native来源绑定与原因对账，不能据解码成功授予科学资格。F2/F4科学扫描分别完成20/17项，其它请求继续由现有活进程推进。
+
+消费者分支提交250fa6679已通过两次真实CURRENT探针，但集成审阅发现跨粒子分块累计穿越被覆盖、分辨率可能被划分到不同谱系组等问题，修复及反例交给原子代理，以新的不可变v2模块执行后再集成。probe001的源码digest与当前模块不一致，历史源码恢复状态待查；probe002绑定当前模块。不将接口成功与标签正确性等同。参考子代理当前收窄为F2-S1首帧原生/typed等价检查，之后再扩展到14哨点。
