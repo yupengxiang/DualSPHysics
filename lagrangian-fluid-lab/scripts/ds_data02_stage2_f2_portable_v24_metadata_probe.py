@@ -312,6 +312,7 @@ def _copy_inherited_support(profile_entry: Mapping[str, Any], old_path_map: Mapp
         raise MetadataProbeError(f"v22 inherited support SHA differs: {role}")
     return {
         "role": role,
+        "path": copied["path"],
         "original_path": str(profile_entry.get("original_path", "")),
         "content_sha256": copied["sha256"],
         "bytes": copied["bytes"],
