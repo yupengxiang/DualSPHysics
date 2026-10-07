@@ -105,8 +105,11 @@ def audit_case(row: dict[str, Any]) -> dict[str, Any]:
     expected_min = float(conversion["typed_identity"]["initial_mass_min_kg"])
     expected_max = float(conversion["typed_identity"]["initial_mass_max_kg"])
     expected_mass = conversion.get("hash_scopes", {}).get("numerical_parameters", {}).get("decoder_header_constants", {}).get("MassFluid")
-    if expected_mass is not None:
-        expected_mass = float(expected_mass)
+    # Header constants may be serialized as a short decimal (for example
+    # 0.001) while the H5 initial_mass dataset stores float32.  Compare at
+    # the native float32 value instead of treating the decimal spelling as an
+    # exact binary64 value.
+    expected_mass32 = None if expected_mass is None else float(np.float32(expected_mass))
 
     with h5py.File(h5_path, "r") as h5:
         required = ("particle_id", "particle_zone", "initial_type", "initial_mk", "initial_mass")
@@ -153,7 +156,9 @@ def audit_case(row: dict[str, Any]) -> dict[str, Any]:
             raise StaticAuditError(f"{physical_id} H5 fluid mass minimum differs from conversion")
         if not math.isclose(float(np.max(mass_values)), expected_max, rel_tol=0.0, abs_tol=1e-12):
             raise StaticAuditError(f"{physical_id} H5 fluid mass maximum differs from conversion")
-        if expected_mass is not None and not np.allclose(mass_values, expected_mass, rtol=0.0, atol=1e-12):
+        if expected_mass32 is not None and not np.array_equal(
+                masses[fluid].astype(np.float32),
+                np.full(mass_values.shape, np.float32(expected_mass32), dtype=np.float32)):
             raise StaticAuditError(f"{physical_id} H5 fluid mass differs from decoder MassFluid")
         per_mk = []
         for mk in sorted(set(int(value) for value in mks[fluid])):
