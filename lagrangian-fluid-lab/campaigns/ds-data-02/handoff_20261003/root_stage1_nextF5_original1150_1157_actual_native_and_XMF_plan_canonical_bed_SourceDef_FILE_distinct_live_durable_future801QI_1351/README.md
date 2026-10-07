@@ -1,0 +1,1 @@
+原始1150/1157同一渲染进程的801帧验收恢复入口；不重跑模拟。native source-plan字段实际存在状态与XMF physical-plan canonical以及bed SourceDef FILE哈希角色分开核查；QI1349/1350只有原进程completed0和实际发布后生成。保留534.4086GiB失败输出清理的当前复核记录，未删除被使用和诊断材料。
