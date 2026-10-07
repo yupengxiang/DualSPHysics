@@ -90,7 +90,7 @@ def generic_savedt_rows(binding: dict[str, Any]) -> dict[str, list[dict[str, Any
             "case_id": request.get("case_id"),
             "attempt_id": request.get("attempt_id"),
             "physical_window_s": request.get("physical_window_s"),
-            "requested_tmax_text": request.get("requested_tmax_text"),
+            "requested_tmax_text": request.get("requested_tmax_text", row.get("requested_tmax_text")),
             "requested_tout_s": request.get("save_interval_s", row.get("requested_tout_s")),
             "planned_frames": request.get("planned_frames", row.get("planned_frames")),
             "estimated_storage_bytes": request.get("estimated_storage_bytes"),
