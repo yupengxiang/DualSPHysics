@@ -187,6 +187,12 @@ def test_opaque_owner_hashes_are_provenance_only_for_continuous_physical_key() -
     assert first["physical_key_sha256"] == second["physical_key_sha256"]
     assert first_payload == second_payload == {"physical_evidence": physical}
 
+    owner_a = {"geometry": physical["geometry"], "physical_condition_sha256": "e" * 64}
+    owner_b = {"geometry": physical["geometry"], "physical_condition_sha256": "f" * 64}
+    evidence_a = audit._owner_physical_payload(owner_a, {}, xml)
+    evidence_b = audit._owner_physical_payload(owner_b, {}, xml)
+    assert evidence_a == evidence_b
+
 
 def test_raw_to_typed_to_label_plan_keeps_real_catalog_bindings_and_unknown_closure(tmp_path: Path) -> None:
     current = tmp_path / "CURRENT336.json"

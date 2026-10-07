@@ -111,7 +111,7 @@ def _scrub_physical(value: Any, *, key: str = "", drop_paths: bool = True) -> An
                 continue
             if drop_paths and (lower.endswith("_path") or lower in {"path", "raw_bi4_root", "output_root"}):
                 continue
-            if lower in {"sha256", "source_sha256", "declared_sha256", "recomputed_sha256"}:
+            if "sha256" in lower:
                 continue
             if _key_has_word(name, _NUMERICAL_WORDS):
                 # A physical duration/amplitude is meaningful, while a saved
@@ -162,7 +162,7 @@ def _owner_physical_payload(owner: Mapping[str, Any], case: Mapping[str, Any], x
         "continuum_geometry", "geometry", "initial_state", "parameters",
         "parameter_tuple", "source_parameter_tuple", "controls", "gravity_m_s2",
         "density_kg_m3", "mass_policy", "mechanism_id", "geometry_family_id",
-        "control_family_id", "physical_condition_sha256",
+        "control_family_id",
     ):
         if key in owner:
             candidates[key] = owner[key]
