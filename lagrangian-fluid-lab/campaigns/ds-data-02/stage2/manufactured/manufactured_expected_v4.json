@@ -1,0 +1,98 @@
+{
+  "schema": "ds02.stage2.manufactured-analytic-expectations.v1",
+  "case_id": "MANUFACTURED_ANALYTIC_REPLAY_V4",
+  "evaluation_domain": {
+    "kind": "MANUFACTURED_ANALYTIC_OPERATOR_REPLAY",
+    "status": "ELIGIBLE_OPERATOR_REPLAY_ONLY",
+    "scientific_qualification": "UNKNOWN",
+    "hidden_test": false,
+    "basis": "independent piecewise-linear analytic trajectory; no scientific calibration"
+  },
+  "tolerance_profile_sha256": "3496c6188bb6750880309923ad817d7881f4eff1047f8a560621e8ccfe5bd6d6",
+  "bindings": {
+    "catalog_sha256": "TO_BE_FILLED",
+    "source_catalog_sha256": "TO_BE_FILLED",
+    "source_hdf5_sha256": "TO_BE_FILLED",
+    "case_row_sha256": "TO_BE_FILLED"
+  },
+  "operator_config": {
+    "schema": "ds02.stage2.observation-config.v2",
+    "frame_kind": "fixed_solver_frame",
+    "coordinate_frame": "manufactured_replay_world",
+    "source_assignment": "initial_regions",
+    "source_regions": [
+      {"id": "left_source", "bounds": [[-2, 0], [0, 1], [0, 1]]}
+    ],
+    "destination_regions": [
+      {"id": "left", "bounds": [[-2, 0], [0, 1], [0, 1]]},
+      {"id": "right", "bounds": [[0, 2], [0, 1], [0, 1]]}
+    ],
+    "events": [
+      {
+        "id": "fixed_midplane",
+        "surface": {
+          "kind": "fixed_plane",
+          "point_m": [0, 0, 0],
+          "normal_m": [1, 0, 0],
+          "velocity_m_s": [0, 0, 0],
+          "aperture_axes": [1, 2],
+          "aperture_bounds": [[0, 1], [0, 1]],
+          "aperture_frame": "surface_local",
+          "reference_time_s": 0
+        }
+      }
+    ]
+  },
+  "particles": [
+    {"zone": 0, "idp": 100, "initial_mass_kg": 2.0, "initially_active": true},
+    {"zone": 0, "idp": 101, "initial_mass_kg": 3.0, "initially_active": true},
+    {"zone": 0, "idp": 102, "initial_mass_kg": 5.0, "initially_active": false},
+    {"zone": 0, "idp": 103, "initial_mass_kg": 7.0, "initially_active": true},
+    {"zone": 0, "idp": 104, "initial_mass_kg": 11.0, "initially_active": true}
+  ],
+  "quality_weights": {
+    "initial_fluid_mass_kg": 28.0,
+    "initially_observed_mass_kg": 23.0,
+    "initially_observed_mass_fraction": 0.8214285714285714,
+    "initially_inactive_mass_kg": 5.0,
+    "initial_source_unknown_mass_kg": 16.0
+  },
+  "datasets": {
+    "initial_fluid_mass_kg": [2.0, 3.0, 5.0, 7.0, 11.0],
+    "forward_backward_mass_kg": [
+      [[0.0, 0.0]],
+      [[2.0, 0.0]],
+      [[2.0, 2.0]],
+      [[4.0, 2.0]],
+      [[4.0, 2.0]]
+    ],
+    "cumulative_net_flux_kg": [[0.0], [2.0], [0.0], [2.0], [2.0]],
+    "cumulative_crossing_count": [[0], [1], [2], [3], [3]],
+    "crossing_count": [[3], [0], [0], [0], [0]],
+    "first_passage_interval": [[[0.0, 1.0]], [[null, null]], [[null, null]], [[null, null]], [[null, null]]],
+    "first_passage_chord_time": [[0.5], [null], [null], [null], [null]],
+    "first_passage_relative_normal_speed_m_s": [[2.0], [null], [null], [null], [null]],
+    "first_passage_censor": [[0], [1], [1], [1], [1]],
+    "residence_time_s": [[1.5, 2.5], [4.0, 0.0], [0.0, 0.0], [1.0, 0.0], [0.0, 0.0]],
+    "unresolved_interval_time_s": [0.0, 0.0, 4.0, 3.0, 0.0],
+    "missing_mass_kg": [5.0, 5.0, 12.0, 12.0, 12.0],
+    "invalid_state_mass_kg": [0.0, 0.0, 0.0, 0.0, 0.0],
+    "unknown_mass_kg": [11.0, 11.0, 11.0, 11.0, 11.0],
+    "source_final_mass_kg": [[5.0, 0.0, 11.0, 0.0, 0.0], [7.0, 0.0, 0.0, 3.0, 2.0]]
+  },
+  "aggregates": {
+    "event_forward_backward_mass_kg": [[4.0, 2.0]],
+    "final_net_flux_kg": [2.0],
+    "repeated_identity_count_by_event": [1],
+    "repeated_crossing_mass_kg_by_event": [2.0],
+    "first_passage_observed_mass_kg_by_event": [2.0],
+    "first_passage_censored_mass_kg_by_event": [26.0],
+    "mass_weighted_residence_kg_s": [22.0, 5.0]
+  },
+  "mass_semantics": {
+    "fluid_label_mass": "manufactured initial_mass_kg is an operator weight for initial_type==3",
+    "rigid_body_physical_mass": "UNKNOWN in this fluid-only fixture; no body mass inference is allowed",
+    "rigid_body_particle_support_weight": "NOT_APPLICABLE",
+    "scientific_qualification": "UNKNOWN"
+  }
+}
