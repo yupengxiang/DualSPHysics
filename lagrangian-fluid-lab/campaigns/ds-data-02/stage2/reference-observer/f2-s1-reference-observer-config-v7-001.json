@@ -1,0 +1,140 @@
+{
+  "config_id": "f2-s1-baseline4s-control0p9-reference-observer-v7-001",
+  "control_duration_s": 0.9,
+  "cross_grid_policy": {
+    "identity_binding": "source_region_and_mass_distribution",
+    "shared_queries": "required",
+    "three_grid_comparison": "macro and fixed-scale mass-distribution observables",
+    "typed_particle_id_usage": "same-resolution same-lineage diagnostics only; never cross-grid fitting"
+  },
+  "family_id": "F2",
+  "first_passage_adapter": {
+    "adapter_module": "scripts/ds_data02_stage2_observer_v6.py",
+    "binary_censor_limitation": "0=observed_saved_chord;1=not_observed_or_censored",
+    "status": "PARTIAL_UNTIL_AUXILIARY_INITIAL_INSIDE_FAILURE_EVIDENCE_BOUND",
+    "v4_source_schema": "ds02.stage2.observation-labels.v2"
+  },
+  "fixed_physical_scales": {
+    "feature_time_s": 4.000007783879406,
+    "mass_scale_m": 1.0,
+    "position_scale_m": 1.0,
+    "scale_status": "fixed before native reference read; not inferred from result"
+  },
+  "hidden_test": false,
+  "macro_observables": [
+    {
+      "name": "active_fluid_mass_kg",
+      "semantics": "active fluid mass; initial mass denominator retained",
+      "source_key": "active_fluid_mass_kg"
+    },
+    {
+      "name": "active_fluid_com_m",
+      "semantics": "mass-weighted active fluid COM",
+      "source_key": "active_fluid_com_m"
+    },
+    {
+      "name": "active_fluid_mean_velocity_m_s",
+      "semantics": "mass-weighted active fluid velocity",
+      "source_key": "active_fluid_mean_velocity_m_s"
+    },
+    {
+      "name": "active_fluid_kinetic_energy_J",
+      "semantics": "mass-weighted active fluid kinetic energy",
+      "source_key": "active_fluid_kinetic_energy_J"
+    }
+  ],
+  "manual_evaluator": {
+    "budget_fraction": 0.25,
+    "event_time_total_fraction": 0.01,
+    "identity_binding": "source_region_id",
+    "macro_total_tolerances": {
+      "kinetic_energy": 0.05,
+      "mass_fraction": 0.03,
+      "net_flux_fraction": 0.03,
+      "position": 0.02,
+      "velocity": 0.05
+    },
+    "query_times_binding": "frozen query_times_s in this config",
+    "schema": "ds02.stage2.manual-observation-evaluator.v1",
+    "threshold_status": "pre-registered; no post-result widening"
+  },
+  "mass_denominator": {
+    "initial_type": 3,
+    "missing_identity_bucket": "initial mass retained as unresolved missing mass; no zero imputation",
+    "nonfinite_or_invalid": "unknown/invalid bucket, never silently dropped",
+    "real_scan_missing_records": "missing_id_records from scan sidecar",
+    "weight": "initial_mass only"
+  },
+  "mass_distribution": {
+    "axis": "x",
+    "normalized_bin_edges": [
+      -2.0,
+      -1.0,
+      0.0,
+      1.0,
+      2.0
+    ],
+    "physical_scale_m": 1.0,
+    "status": "PENDING_PARTICLE_DISTRIBUTION_WINDOW_FOR_REAL_CASE",
+    "unknown_bucket": "missing_or_invalid_mass_kg"
+  },
+  "mass_quantiles": [
+    0.5,
+    0.75,
+    0.9,
+    1.0
+  ],
+  "model_invoked": false,
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "status": "UNKNOWN"
+  },
+  "query_policy": {
+    "extrapolation": "REJECT",
+    "interpolation": "linear within saved-frame bracket",
+    "shared_across_grid_variants": true,
+    "time_axis_binding": "scan.time_s and macros[*].time_s must agree",
+    "wrong_time_or_wrong_source_axis": "REJECT"
+  },
+  "query_times_s": [
+    0.0,
+    0.9,
+    2.0,
+    4.000007783879406
+  ],
+  "role": "DEVELOPMENT",
+  "schema": "ds02.stage2.reference-observer-config.v1",
+  "source_audit": {
+    "case_row_sha256": "b8f621b7449af6cffeda9da4695b15b7e435f71b8dad1622bb9c1db737ed8075",
+    "current_catalog_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+    "hash_scope": "metadata/producer binding only; HDF5 is not read by this observer probe",
+    "operator_generated_xml_sha256": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
+    "source_hdf5_producer_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d"
+  },
+  "source_binding": {
+    "read_scope": "completed scientific-scan JSON sidecar only; trajectory HDF5 is not read by this observer",
+    "scan_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_SCIENCE/scan-F2-S1-001/scientific-scan.json",
+    "scan_sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59",
+    "trajectory_producer_declared_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "trajectory_source_bytes": 1191110523,
+    "trajectory_source_mtime_ns": 1791313901943793470
+  },
+  "time_window_s": [
+    0.0,
+    4.000007783879406
+  ],
+  "tolerance_profile": {
+    "manufactured_absolute": 1e-12,
+    "mutable": false,
+    "output_budget_fraction": 0.25,
+    "schema": "ds02.stage2.reference-observer-tolerance.v1",
+    "scientific_feature_time_total_target": 0.01,
+    "scientific_mass_fraction_total_target": 0.03,
+    "scientific_position_total_target": 0.02,
+    "status": "PRE_REGISTERED_DEVELOPMENT_TARGET; NOT_INDUSTRY_STANDARD; NOT_QUALIFICATION",
+    "time_budget_fraction": 0.25
+  }
+}
