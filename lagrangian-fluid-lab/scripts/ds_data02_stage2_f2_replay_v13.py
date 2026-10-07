@@ -927,6 +927,104 @@ def evaluate_manual_predictions(result: Mapping[str, Any], predictions: Mapping[
             "metrics": metrics, "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
 
 
+def evaluate_receiver_manual_predictions(result: Mapping[str, Any], predictions: Mapping[str, Any],
+                                         profile: Mapping[str, Any]) -> dict[str, Any]:
+    """Score finite receiver/aperture predictions with exact identity order.
+
+    This is a separate development scope from the world-halfspace evaluator.
+    Candidate events after an invalid frame or with outside/outside saved
+    endpoints must remain explicitly UNKNOWN in the prediction and do not
+    receive first-arrival time credit.
+    """
+    frozen = validate_observer_profile(profile)
+    if not isinstance(result, Mapping) or result.get("schema") != RESULT_SCHEMA:
+        raise ReplayV13BindingError("result is not a v13 replay result")
+    if not isinstance(predictions, Mapping) or predictions.get("observer_scope") != "finite_receiver_volume_and_top_aperture_v13":
+        raise ReplayV13BindingError("receiver predictions must declare the finite receiver scope")
+    if predictions.get("event_time_tolerance_fraction") is not None or predictions.get("total_tolerance") is not None:
+        raise ReplayV13BindingError("receiver prediction tolerance overrides are forbidden")
+    source = result.get("source_binding")
+    if not isinstance(source, Mapping) or predictions.get("source_binding") != source:
+        raise ReplayV13BindingError("receiver predictions must bind exact replay source hashes")
+    if predictions.get("observer_profile_sha256") != frozen["sha256"]:
+        raise ReplayV13BindingError("receiver predictions use a different frozen observer profile")
+    expected_labels = result.get("labels")
+    if not isinstance(expected_labels, list) or not expected_labels:
+        raise ReplayV13BindingError("receiver replay labels are missing")
+    expected_identity = [[int(item.get("zone")), int(item.get("idp"))] for item in expected_labels]
+    identity = predictions.get("identity")
+    if identity != expected_identity:
+        raise ReplayV13BindingError("receiver prediction identity/order differs from replay cohort")
+    receiver_labels = []
+    for item in expected_labels:
+        value = item.get("receiver_volume_label")
+        if not isinstance(value, Mapping):
+            raise ReplayV13BindingError("receiver volume labels are missing from replay result")
+        receiver_labels.append(value)
+    def _statuses(name: str, expected: list[str]) -> list[str]:
+        value = predictions.get(name)
+        if not isinstance(value, list) or value != expected:
+            raise ReplayV13BindingError(f"receiver prediction {name} shape/value differs")
+        return value
+    expected_volume_status = [str(item.get("status")) for item in receiver_labels]
+    expected_aperture_status = [str(item.get("aperture_first_arrival_status")) for item in receiver_labels]
+    expected_destination = [str(item.get("final_destination_status")) for item in receiver_labels]
+    _statuses("receiver_event_status", expected_volume_status)
+    _statuses("aperture_event_status", expected_aperture_status)
+    _statuses("final_destination_status", expected_destination)
+    times = _float_array(predictions.get("receiver_event_time_s"), "predictions.receiver_event_time_s").reshape(-1)
+    aperture_times = _float_array(predictions.get("aperture_event_time_s"), "predictions.aperture_event_time_s").reshape(-1)
+    if times.shape != (len(receiver_labels),) or aperture_times.shape != times.shape:
+        raise ReplayV13BindingError("receiver event time arrays have the wrong shape")
+    event_errors: list[float] = []
+    for value, label in zip(times, receiver_labels):
+        if label.get("status") == "observed":
+            if not math.isfinite(float(value)):
+                raise ReplayV13BindingError("observed receiver event must have finite time")
+            event_errors.append(abs(float(value) - float(label["event_time_s"])))
+        elif math.isfinite(float(value)):
+            raise ReplayV13BindingError("non-observed receiver event must use NaN time")
+    for value, label in zip(aperture_times, receiver_labels):
+        first = label.get("aperture_downward_first")
+        confirmed = isinstance(first, Mapping) and first.get("first_arrival_status") == "OBSERVED_CONTINUOUS_SAVED_ENDPOINTS"
+        if confirmed:
+            if not math.isfinite(float(value)):
+                raise ReplayV13BindingError("confirmed aperture event must have finite time")
+            event_errors.append(abs(float(value) - float(first["time_s"])))
+        elif math.isfinite(float(value)):
+            raise ReplayV13BindingError("candidate/unknown aperture event must use NaN time")
+    expected_mass = np.asarray([float(item.get("initial_mass_kg")) for item in expected_labels], dtype=float)
+    if not np.isfinite(expected_mass).all() or np.any(expected_mass <= 0):
+        raise ReplayV13BindingError("receiver labels have invalid frozen initial masses")
+    predicted_mass = _float_array(predictions.get("destination_mass_fraction"),
+                                  "predictions.destination_mass_fraction").reshape(-1)
+    if predicted_mass.shape != (3,) or not np.isfinite(predicted_mass).all() or np.any(predicted_mass < 0):
+        raise ReplayV13BindingError("destination_mass_fraction must have finite shape (3,)")
+    expected_mass_fraction = np.array([
+        sum(m for m, item in zip(expected_mass, receiver_labels) if item.get("final_destination_status") == "inside_receiver_volume"),
+        sum(m for m, item in zip(expected_mass, receiver_labels) if item.get("final_destination_status") == "outside_receiver_volume"),
+        sum(m for m, item in zip(expected_mass, receiver_labels) if item.get("final_destination_status") == "unknown_final_destination"),
+    ]) / float(expected_mass.sum())
+    mass_error = float(np.max(np.abs(predicted_mass - expected_mass_fraction)))
+    event_error_fraction = max(event_errors, default=0.0) / float(frozen["event_time_scale_s"])
+    thresholds = frozen["thresholds"]
+    checks = {
+        "receiver_identity_order": True,
+        "receiver_event_status": True,
+        "aperture_event_status": True,
+        "final_destination_status": True,
+        "receiver_event_time": event_error_fraction <= float(thresholds["event_time_fraction"]),
+        "destination_mass_fraction": mass_error <= float(thresholds["mass_fraction"]),
+    }
+    return {"schema": EVALUATION_SCHEMA, "scope": "FINITE_RECEIVER_VOLUME_AND_TOP_APERTURE",
+            "status": "PASS" if all(checks.values()) else "FAIL", "development_only": True,
+            "model_invoked": False, "checks": checks,
+            "metrics": {"receiver_event_time_max_fraction_error": event_error_fraction,
+                        "destination_mass_fraction_max_error": mass_error,
+                        "receiver_count": len(receiver_labels)},
+            "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
+
+
 def normalized_mass_velocity(velocities: Any, masses: Any, *, valid: Any | None = None,
                              weight_masses: Any | None = None) -> tuple[np.ndarray | None, float | None, float, float]:
     """Return normalized mass velocity, KE, known and missing *fixed* mass.
