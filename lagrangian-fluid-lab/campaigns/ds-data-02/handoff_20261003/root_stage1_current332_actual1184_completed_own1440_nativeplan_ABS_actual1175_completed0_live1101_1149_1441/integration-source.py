@@ -1,0 +1,41 @@
+from pathlib import Path
+import json,hashlib,copy,datetime,os,subprocess,collections
+R=Path('/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics');H=R/'lagrangian-fluid-lab/campaigns/ds-data-02/handoff_20261003';D=Path('/home/jade/Projects/DualSPHysics-data/ds-data-02');root=lambda n:next(H.glob(f'root*_{n:03d}'))
+load=lambda p:json.loads(Path(p).read_text())
+def sha(p):
+ p=Path(p);assert p.suffix in {'.json','.xml','.xmf','.py','.md'};return hashlib.sha256(p.read_bytes()).hexdigest()
+ref=lambda p:{'path':str(p),'sha256':sha(p)}
+def put(p,j):
+ with Path(p).open('x') as f:json.dump(j,f,ensure_ascii=False,indent=2);f.write('\n')
+cpfile=H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_326.json';cp=load(cpfile);ip=root(1439)/'full336-current332-actual-final48-delivery-progress-index.json';idx=load(ip);assert idx['source_authoritative_checkpoint']==ref(cpfile)
+assert cp['stage1_visual_accepted_complete_independent_cases']==332 and len(cp['accepted_decisions'])==332
+qip=root(1440)/'actual1184-full801-independent-QI-UID-N3-bed-scope-previsual-proof.json';assert sha(qip)=='517321e9f5b62b619933c6b17566d2bd02e6626e823458e43ae51f764c5d0029';qi=load(qip)
+assert qi['native_plan_both_fields_actually_absent'] and qi['native_source_plan_JSON_input_both_actual_fields_absent'] and qi['source_plan_JSON_launch_after_bed_verified']
+assert qi['actual_source_plan_JSON_file']['sha256']=='d8106ffdb87479aca25300179c8d900b559588036e3a7f34bc0bbdc851e53a9c'
+er=qi['actual_completed_metadata_evidence'];assert all(sha(e['path'])==e['sha256'] for e in er.values());assert load(er['render_receipt']['path'])['status']=='completed' and load(er['render_receipt']['path'])['returncode']==0 and load(er['render_publish_receipt']['path'])['status']=='published_after_atomic_rename'
+observations=[]
+for original,pi,start in [(1101,202633,210026020),(1175,275817,210529531),(1149,253004,210338104)]:
+ F=root(original);reqp=next(F.glob('enabled-*request.json'));req=load(reqp);rp=Path(req['attempt_root'])/'execution-receipt.json';receipt=load(rp) if rp.exists() else None;p=Path('/proc')/str(pi);live=p.exists()
+ if live:
+  st=(p/'stat').read_text();fields=st[st.rindex(')')+2:].split();cmd=(p/'cmdline').read_bytes().replace(b'\0',b' ').decode();assert int(fields[19])==start and str(F) in cmd
+ else:assert receipt is not None and (receipt['status'],receipt['returncode'])==('completed',0) and (rp.parent/'render/render-publish-receipt.json').exists()
+ obs={'original':original,'physical_case_id':req['physical_case_id'],'registered_request':ref(reqp),'controller_pid':pi,'controller_start_ticks':start,'controller_live_and_cmdline_bound':live,'actual_receipt':ref(rp) if rp.exists() else None,'actual_status':receipt.get('status') if receipt else None,'actual_returncode_field_present':receipt is not None and 'returncode' in receipt,'actual_returncode':receipt.get('returncode') if receipt else None,'published_receipt_exists':(rp.parent/'render/render-publish-receipt.json').exists(),'children':[]}
+ for child in ((p/'task'/str(pi)/'children').read_text().split() if live else []):
+  q=Path('/proc')/child
+  try:
+   s=(q/'stat').read_text();fs=s[s.rindex(')')+2:].split();obs['children'].append({'pid':int(child),'start_ticks':int(fs[19]),'state':fs[0],'comm':(q/'comm').read_text().strip()})
+  except FileNotFoundError:pass
+ observations.append(obs)
+assert all((o['controller_live_and_cmdline_bound'] and o['actual_returncode'] is None and not o['published_receipt_exists']) or (not o['controller_live_and_cmdline_bound'] and o['actual_status']=='completed' and o['actual_returncode']==0 and o['published_receipt_exists']) for o in observations)
+for pi in [279453,784356]:assert not (Path('/proc')/str(pi)).exists()
+now=datetime.datetime.now(datetime.timezone.utc);raw=(D/'runtime/resource-ledger.json').read_bytes();ld=json.loads(raw);ct=collections.Counter(z['kind'] for z in ld['attempts']);gpu=sum(z.get('gpu_seconds',0) for z in ld['charges'])/3600;cpu=sum(z.get('cpu_core_seconds',0) for z in ld['charges'])/3600;st=os.statvfs('/home/jade');free=st.f_bavail*st.f_frsize/2**30
+assert free>=500 and gpu<=512 and cpu<=3840 and ct['qualification']<=1024 and ct['production']<=720 and now<datetime.datetime.fromisoformat(cp['deadline_utc'])
+O=H/'root_stage1_current332_actual1184_completed_own1440_nativeplan_ABS_actual1175_completed0_live1101_1149_1441';np=H/'ROOT_LIVE_RESUMPTION_CHECKPOINT_327.json';assert not O.exists() and not np.exists();O.mkdir()
+proof=O/'current332-actual1184-ownQI-and-live-registered-frontier-proof.json';put(proof,{'schema':'ds02.main.current332.actual1184.completed-and-live-frontier.v1','at_utc':now.isoformat(),'completed1184_full801_own_QI':ref(qip),'completed1184_atomic_published_but_unaccepted':True,'native_plan_fields_actually_absent_and_bed_JSON_distinct_from_next34_plan':True,'actual1184_personal_review_owner':'f6_endpoint_initial_qa/fresh204','original1184_controller_and_worker_handles_naturally_gone':True,'registered_current_live_or_naturally_completed_observations':observations,'F2source226_received_but_main_actual48_primary_audit_not_yet_complete':True,'main_scientific_payload_IO':False,'new_case_credit':0,'Q_N':0,'Q_E':0})
+snap=O/'ledger-immutable-snapshot.json';snap.write_bytes(raw);new=copy.deepcopy(cp);new.update(checkpoint=327,at_utc=now.isoformat(),predecessor=str(cpfile),predecessor_sha256=sha(cpfile),new_accepted_decisions=[],home_free_gib=free,ledger_sha256_at_checkpoint=hashlib.sha256(raw).hexdigest(),ledger_immutable_snapshot=ref(snap),active_reservations=ld['reservations'],attempt_counts=dict(ct),gpu_hours_charged=gpu,cpu_core_hours_charged=cpu,previous_goal_turn_classification='PROGRESS: F2last and F5actual1189 accepted331/332; F5actual45 primary/bed delivered; actual1184 natural0/pub/full801 own1440 with nativeplan/JSON-input true absences and distinct bedJSON; registered frontier directly observed;1175 naturally completed0/pub while checkpoint probe;1101 and1149 live.',authorized_work_state='Active332/336 remaining4. F5actual1184 fullQI1440 pending personal204; finalF3actual1101 live,1175 completed0/pub awaiting ownQI,1149 live; F2full48 source226 ready for main actual primary audit; global delivery193 in progress.')
+new['actual_progress']['current332_actual1184_ownQI_and_registered_live_frontier']=ref(proof);new['source_agents'].update(f6_endpoint_initial_qa='fresh203 metadata plus fresh204 actual1184 personal34+9 after own1440',f5_bed_recovery='fresh226 F2final48 source received awaiting main48 audit; fresh227 lastF3 actual1101 metadata prep',production_recovery='fresh193 global final delivery source-only handoff from actual family products')
+new['next_executable_tasks'].insert(0,'Main audit/adopt immutable F2fresh226 actual48 primary; after personal204 adopt actual1184; after natural1175/1101/1149 termination/pub execute percase fullQI then delegate personal review.')
+put(np,new);rr=next(r for r in idx['cases'] if r['physical_case_id']==qi['physical_case_id']);assert not rr.get('accepted_decision');rr.update(actual_completed0_published_QI=ref(qip),actual_full801_QI=ref(qip),personal_visual_status='pending fresh204 personal review',case_credit_already_in_authoritative_checkpoint=0)
+idx.update(at_utc=now.isoformat(),source_authoritative_checkpoint=ref(np),previous_index_preserved=ref(ip),new_case_credit=0);idx['current332_actual1184_ownQI_and_registered_live_frontier']=ref(proof);idx['actual_unaccepted_completed0_published_physical_cases']=[qi['physical_case_id']]
+put(O/'full336-current332-actual-final48-delivery-progress-index.json',idx);(O/'integration-source.py').write_bytes(Path(__file__).read_bytes());paths=[str(p.relative_to(R)) for p in O.iterdir()]+[str(np.relative_to(R))];subprocess.run(['git','add','--',*paths],cwd=R,check=True);subprocess.run(['git','commit','-q','-m','DS02: preserve actual1184 native plan absences and own801 integrity while lastF3 renders','--',*paths],cwd=R,check=True)
+print(json.dumps({'checkpoint':327,'accepted':332,'pending':4,'live_frontier':[{'original':o['original'],'status':o['actual_status'],'controller':o['controller_pid'],'live':o['controller_live_and_cmdline_bound']} for o in observations],'home_free_GiB':free,'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=R,text=True).strip()}))
