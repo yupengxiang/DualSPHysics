@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
+import json
 import sys
 
 import pytest
@@ -73,3 +75,16 @@ def test_typed_only_manifest_is_rejected() -> None:
     }
     with pytest.raises(bundle.RawToLabelBundleError, match="typed-only"):
         bundle.validate_manifest(value)
+
+
+def test_label_result_must_bind_v4_raw_tree(tmp_path: Path) -> None:
+    label_path = tmp_path / "labels-v15.json"
+    label_path.write_text(json.dumps({"reconstruction_binding": {
+        "raw_tree_sha256": "a" * 64,
+    }}))
+    label_sha = hashlib.sha256(label_path.read_bytes()).hexdigest()
+    labels = {"result": str(label_path), "result_sha256": label_sha}
+    with pytest.raises(bundle.RawToLabelBundleError, match="raw producer tree"):
+        bundle._label_bindings({}, labels, expected_raw_tree_sha="b" * 64)
+    bound = bundle._label_bindings({}, labels, expected_raw_tree_sha="a" * 64)
+    assert bound[0]["role"] == "v15_label_result"

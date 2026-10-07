@@ -232,10 +232,22 @@ def _artifact_binding(path_value: Any, expected_sha: Any, role: str, *, h5: bool
     }
 
 
-def _label_bindings(base_report: Mapping[str, Any], labels: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _label_bindings(base_report: Mapping[str, Any], labels: Mapping[str, Any], *,
+                    expected_raw_tree_sha: str | None = None) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
-    result.append(_artifact_binding(labels.get("result"), labels.get("result_sha256"),
-                                    "v15_label_result"))
+    v15 = _artifact_binding(labels.get("result"), labels.get("result_sha256"),
+                            "v15_label_result")
+    # A label JSON that happens to exist is not enough.  The v15 result must
+    # carry the reconstruction binding written by the raw worker, including
+    # the producer tree digest.  This prevents packaging a typed/H5 result
+    # produced from a different raw source under the current request.
+    if expected_raw_tree_sha is not None:
+        label_doc = _load(v15["original_path"])
+        reconstruction = label_doc.get("reconstruction_binding")
+        if (not isinstance(reconstruction, Mapping) or
+                reconstruction.get("raw_tree_sha256") != expected_raw_tree_sha):
+            raise RawToLabelBundleError("v15 label result is not bound to the v4 raw producer tree")
+    result.append(v15)
     forward = labels.get("v16_forward")
     if isinstance(forward, Mapping) and isinstance(forward.get("result"), str):
         result.append(_artifact_binding(forward.get("result"), forward.get("result_sha256"),
@@ -370,13 +382,25 @@ def build_bundle_manifest(request_path: Path | str, report_path: Path | str,
     typed_artifact = _artifact_binding(typed.get("path"), typed.get("sha256"), "typed_reconstruction_hdf5",
                                        h5=True, expected_bytes=typed.get("bytes"))
     labels = context["labels"]
-    label_artifacts = _label_bindings(base, labels)
+    raw_binding = request["root_canonical_wrapper"]["raw_producer_binding"]
+    expected_raw_tree = _require_sha(raw_binding.get("expected_raw_tree_sha256"), "raw tree SHA")
+    label_artifacts = _label_bindings(base, labels, expected_raw_tree_sha=expected_raw_tree)
     current = report.get("current_reference")
     if not isinstance(current, Mapping) or current.get("case_index") != 78:
         raise RawToLabelBundleError("v4 report is not bound to CURRENT case 78")
     reference = request.get("reference_typed_hdf5")
     if not isinstance(reference, Mapping):
         raise RawToLabelBundleError("reference HDF5 request binding is missing")
+    report_reference = report.get("reference_typed_hdf5")
+    if (not isinstance(report_reference, Mapping) or
+            report_reference.get("path") != reference.get("path") or
+            report_reference.get("sha256") != reference.get("sha256")):
+        raise RawToLabelBundleError("v4 report reference HDF5 binding differs from the request")
+    current_sources = [item for item in request.get("source_closure", {}).get("raw_v2_source_roles", [])
+                       if isinstance(item, Mapping) and item.get("role") == "v2:current_catalog"]
+    if (len(current_sources) != 1 or
+            current.get("catalog_sha256") != current_sources[0].get("sha256")):
+        raise RawToLabelBundleError("v4 report CURRENT catalog binding differs from the request")
     source_records = _source_records(request)
     # Raw frames are part of source_bindings even though the v4 request keeps
     # their individual content hashes pending until the parent worker report.
@@ -409,7 +433,6 @@ def build_bundle_manifest(request_path: Path | str, report_path: Path | str,
         if "bundle_relative_path" not in item:
             role = str(item["role"]).replace(":", "_")
             item["bundle_relative_path"] = f"sources/{role}/{Path(item['original_path']).name}"
-    raw_binding = request["root_canonical_wrapper"]["raw_producer_binding"]
     anchor = _anchor_bindings(anchor_file, current_case_index=78, family_id="F2")
     manifest: dict[str, Any] = {
         "schema": BUNDLE_SCHEMA,
