@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 PACKAGE = Path(__file__).resolve().parents[1]
@@ -45,6 +46,11 @@ def main() -> None:
     check(actual["counts"] == {"total": 418104, "fixed": 372840, "moving": 24150, "floating": 0, "fluid_initial": 21114, "fluid_terminal": 21079, "solver_dimension": 3, "data2d": False}, "actual counts mismatch")
     check(actual["animation_report"]["frames"] == 401 and actual["animation_report"]["source_frames"] == 401, "frame count mismatch")
     check(actual["publish"]["status"] == "published_after_atomic_rename", "publish not atomic/completed")
+    finished = datetime.fromisoformat(actual["receipt"]["finished_at_utc"])
+    reviewed_at = datetime.fromisoformat(visual["reviewed_at_utc"])
+    check(reviewed_at >= finished, "visual review timestamp precedes producer completion")
+    check(reviewed_at <= datetime.now(timezone.utc), "visual review timestamp is in the future")
+    check(visual["reviewer_model"] == "gpt-5.6-luna/max" and visual["recursive_delegation"] is False, "reviewer provenance mismatch")
     check(actual["actual_scope_roles"]["native_canonical"] == NATIVE, "native canonical scope mismatch")
     check(actual["actual_scope_roles"]["typed_converter_legacy"] == LEGACY, "typed legacy scope mismatch")
     check(actual["missing_fluid_metadata"] == {"first_missing_frame": 137, "frames_with_any_missing_particle": 264, "final_missing_particles": 35, "max_missing_per_frame": 35, "cumulative_particle_frame_omissions": 8392, "final_missing_fraction_initial_fluid": 0.0016576678980771053, "locations_states_causes": "unknown", "producer_attested_missing_id_sha256": "77346a6b93920a09238dc62bedfa2e7b411baf9ecff05a83d71daaaa3f882766", "no_state_reconstruction": True}, "omission evidence mismatch")
