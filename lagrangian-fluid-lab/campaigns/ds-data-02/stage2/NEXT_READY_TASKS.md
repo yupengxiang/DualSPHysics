@@ -1,3 +1,16 @@
+<!-- checkpoint015 2026-10-07T21:46:02.186482+00:00 -->
+最新恢复入口为 `checkpoints/CHECKPOINT_015_INTEGRATED.json`。完整目标 active，未完成。独立科学字段快照233/336（F1/F2/F4/F6各48，F3=21、F5=20）；F3/F5父进程的PID/start_ticks已核验，F7等待真实科学槽释放。
+
+历史118例原生原因精确覆盖完成（F2=48、F4=22、F6=48），质量与物理去向/动力学信用分开。C41旧index实际53，旧checkpoint014的70应为72；新union003最终118。C44索引使用了两个正在变化的F3/F5批次收据，须forward不可变快照，不能用旧hash声称长期可重放。旧报告保留。
+
+全336 effective lineage v15实际完成，286例GenCase输入与finish闭包完整，50未知；332例solver完整，4历史running缺finish。七cards仍PROVISIONAL_NOT_SPLIT_SAFE，科学资格未知。
+
+F4原dp0实际SaveDt同/半CFL都完成2401原生帧。半CFL出现1384次DtMin钳制（同CFL为0），实际时间步不能直接视为严格减半；两者报告steps比日志行数多1，源码约定待核。查询[0,1.2]覆盖，半CFL最终时刻早于原始终点；没有积分/输出误差或收敛信用。
+
+F2迁移v20实际C42失败保留；v21实际完整复制成功，metadata预审因C43 CURRENT生产者绑定与迁移目标关联未闭合而失败，401帧未读取。额外I/O槽已空闲，先等consumer forwardv22并跑真实copy+401+OStrace，再安排有界staticperMK、F4全窗losslessroundtrip或nativev2原生重建。Nativev2已集成且6项制造测试通过，完整源码闭包/逐帧对照准备中，未启动。
+
+三个既有代理继续：consumer做v22及rawv2，reference做实际14研究状态与真实SaveDt语义/observer准备，forensics做不可变118索引、boundedcase staticMK与刚体标签。原预算/期限/500GiB下限不重置，无模型、无公开发布。下方是历史记录。
+
 ## 2026-10-07T21:17:03.764431+00:00：224例独立审计、336来源索引与F4真实成本
 
 最新恢复入口为 `checkpoints/CHECKPOINT_014_INTEGRATED.json`，完整目标 active、未完成。独立字段快照224/336（F1/F2/F4/F6各48、F3=17、F5=15）；F3/F5两科学父进程已核对PID/start_ticks仍运行，F7等实际名额释放。
