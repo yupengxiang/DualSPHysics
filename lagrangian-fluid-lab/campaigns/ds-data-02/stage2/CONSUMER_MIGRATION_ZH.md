@@ -31,4 +31,8 @@
 
 真实 guard probe `scripts/ds_data02_stage2_current_probe.py` 仅读 4 个 accepted alias 加 F2/F3 各一例的 header、首帧和首身份。F2/F3 当前 manifest 均声明 `ds02.stage1.paraview-temporal-product.v1`，但 temporal contract/window 等内容不同，接口按 manifest payload 自身绑定，不把一个 family 的 schema 内容套到另一个 family。probe 不生成标签；执行收据位于共享数据根的 `families/infra/STAGE2_CURRENT_PROBE/current-probe-001/`，状态不代表任何 QN/QE 或精确资格。
 
+`*_v2.py` 保留 v1 收据对应的源码快照，并修复三类边界：同一 alias 判定要求 manifest ID 明确不同且存在 provenance/evidence，普通 manifest ID 相等的 canonical 行可通过；`cumulative_crossing_count` 先在每个粒子 chunk 形成时间历史后再跨 chunk 相加；label chunk 按时间长度自适应，工作数组估算上限为 256 MiB，且拒绝浮点 chunk 截断。v2 对 active、valid 身份的非有限 velocity 直接返回 unknown/error，避免把带 NaN 的 event speed 写成 observed。
+
+v2 的 prospective split 只使用 manifest/CURRENT 中的 physical-condition/common-lineage evidence 做连通分量，忽略 generated XML 与 numerical parameter hash。缺证据时整族闭合到 `PROVISIONAL_FAMILY_CLOSURE`，结果标 `split_safety=PROVISIONAL`，不宣称 split-safe；制造反例覆盖同一 physical condition 但 XML/数值 hash 不同仍同组。
+
 每个标签的 `q_i_status=UNKNOWN`、`q_n_status=NOT_ASSESSED`、`q_e_status=NOT_ASSESSED` 是接口默认值；标签数值存在不等于数值资格成立。
