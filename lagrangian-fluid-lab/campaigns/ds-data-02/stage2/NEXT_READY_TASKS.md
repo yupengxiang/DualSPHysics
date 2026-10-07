@@ -1,3 +1,5 @@
+新增资源反例：`checkpoints/TERMINAL_STORAGE_V3_INDEPENDENT_VERIFICATION_001.json` 在真实父guard下、独立fixture中核对32B子worker与最终receipt增长；v3仍完成但最终目录超预约。新v4修复/实际精确字节证明待主进程集成，旧v2/v3不改。
+
 新增实际旁路证据：`checkpoints/CONSUMER_V12_RECEIVER_VERIFICATION_001.json` 经primary sharedguard复现outside/outside线段穿过receiver仍被标为right_censored；C25由source review升级为实际制造接口反例。新v13修复中；不改变旧v12或checkpoint009字节。
 
 ## 2026-10-07T19:09:39.423706+00:00：122例审计与实际来源cohort反例
