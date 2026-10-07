@@ -1,0 +1,56 @@
+{
+  "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/STAGE2_F6_RIGID_OBSERVATION_SEMANTICS/f6-rigid-observation-semantics-v2-primary-001/execution-receipt.json",
+  "receipt_sha256": "8a1d49a4b72338f577d425a78878e1a480150abb6e68dc43d6a90d54aff4ba6e",
+  "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/STAGE2_F6_RIGID_OBSERVATION_SEMANTICS/f6-rigid-observation-semantics-v2-primary-001/f6-rigid-observation-semantics.json",
+  "report_sha256": "6df63bea83226a5f1668d42d6d3b74d558a53a64fdbaedcbc1fd25d0a886ba89",
+  "current_prepost_sha_input_count": 27,
+  "terminal_tree_receipt_charge_bytes": 48595,
+  "qualification": {
+    "QI_dynamics": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "schema": "ds02.stage2.rigid-semantics-independent-verification.v1",
+  "manufactured_checks": {
+    "degrees_are_converted_once": true,
+    "noncommuting_legacy_order_is_distinguishable": true,
+    "nonfinite_quaternion_is_rejected": true,
+    "nonunit_quaternion_is_rejected": true,
+    "official_matrix_and_quaternion_agree": true,
+    "official_matrix_matches_independent_golden": true,
+    "official_quaternion_matches_independent_golden": true,
+    "quaternion_sign_gauge_is_equal": true,
+    "radian_unit_is_rejected": true,
+    "wrong_quaternion_length_is_rejected": true
+  },
+  "floatinginfo_csv_semantics": {
+    "active_passive": "UNKNOWN",
+    "axis_labels": {
+      "pitch": "Y-axis",
+      "roll": "X-axis",
+      "status": "SOURCE_HELP_CLOSED",
+      "yaw": "Z-axis"
+    },
+    "legacy_v1_derived_quaternion": "retained as consumed provenance only; not promoted to official CSV convention",
+    "order": "UNKNOWN",
+    "pitch_sign": "Current help records a v5.0.204 sign change and CHANGES records a fixed sign; exact pre/post formula remains UNKNOWN from the available source bundle.",
+    "reason": "FloatingInfo producer source is absent; binary/help bind labels and units but do not establish the matrix extraction order or active/passive convention for the CSV fields.",
+    "units": {
+      "angular_velocity": "rad/s",
+      "euler": "degrees",
+      "status": "SOURCE_HELP_CLOSED"
+    }
+  },
+  "solver_rotation_semantics": {
+    "active_passive_status": "SOURCE_COMPATIBLE_WITH_ACTIVE_COLUMN_VECTOR_BODY_TO_WORLD_USE_BUT_NOT_NAMED",
+    "axis_order_status": "SOURCE_CLOSED_FOR_INTERNAL_SOLVER_MATRIX",
+    "column_vector_evidence": "JMatrix4::MulPoint and MulNormal compute r_i = row_i dot input; source uses I = R*I0*R^T",
+    "csv_mapping_status": "UNKNOWN",
+    "internal_angle_labels": "source StFloatingData angles comment: angle xz, angle yz, angle xy; source does not call these roll/pitch/yaw",
+    "internal_angles_units": "radians",
+    "matrix_formula": "FunctionsMath.h RotMatrix3x3 is algebraically Rx(angles.x) * Ry(angles.y) * Rz(angles.z)"
+  },
+  "legacy_derived_quaternion_use": "PROVENANCE_ONLY_UNQUALIFIED",
+  "scope": "Source/matrix/manufactured semantics; no new particle/CDF run",
+  "reason": "Available official solver matrix does not establish absent FloatingInfo extraction formula"
+}
