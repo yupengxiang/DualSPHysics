@@ -1,0 +1,163 @@
+{
+  "schema": "ds02.stage2.f3-s2.observer-calibration-contract.v1",
+  "status": "SOURCE_BOUND_SCALES_REGISTERED_EVENT_TIME_UNKNOWN",
+  "sentinel_id": "F3-S2",
+  "family_id": "F3",
+  "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
+  "source_inputs": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST48_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-first48-pitch-ay-source-preparation-065-root702-owner-repair1-root704/prepared/pitch120_ay0750/F3_STAGE1_DP006_P1200_AY0750.xml",
+      "bytes": 9358,
+      "mtime_ns": 1791246060348124508,
+      "sha256": "1162322010c42b9a084d76db0e20de571111cb009eb3afb699f2ee4c17d37406"
+    },
+    "acceleration_table": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST48_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-first48-pitch-ay-source-preparation-065-root702-owner-repair1-root704/prepared/pitch120_ay0750/CaseSloshingAccData.csv",
+      "bytes": 14377599,
+      "mtime_ns": 1791246061426098879,
+      "sha256": "9a776c1c02aeeb779902964953cd51b2af1f8ab41905398bb5125a44b93e6989"
+    },
+    "read_scope": "XML geometry/control and exact acceleration CSV only; no BI4/native Part/HDF5"
+  },
+  "source_geometry": {
+    "fluid_drawbox": {
+      "point_m": [
+        -0.447,
+        -0.087,
+        0.003
+      ],
+      "size_m": [
+        0.894,
+        0.174,
+        0.084
+      ],
+      "end_m": [
+        0.447,
+        0.087,
+        0.08700000000000001
+      ]
+    },
+    "fluid_union_bounds_m": {
+      "min": [
+        -0.447,
+        -0.087,
+        0.003
+      ],
+      "max": [
+        0.447,
+        0.087,
+        0.08700000000000001
+      ]
+    },
+    "fluid_extent_m": [
+      0.894,
+      0.174,
+      0.084
+    ],
+    "L_position_reference_scalar_m": 0.894,
+    "gravity_z_m_per_s2": -9.81,
+    "acceleration_center_m": [
+      0.45,
+      0.0,
+      0.0
+    ],
+    "acceleration_file_declared_in_xml": "CaseSloshingAccData.csv"
+  },
+  "source_particles": {
+    "fluid_particle_count": 67500,
+    "particle_mass_kg": 0.000216,
+    "fluid_sample_mass_kg": 14.58
+  },
+  "source_forcing": {
+    "header": [
+      "#Time",
+      "LinearAccX",
+      "LinearAccY",
+      "LinearAccZ",
+      "AngularAccX",
+      "AngularAccY",
+      "AngularAccZ"
+    ],
+    "rows": 167001,
+    "time_start_s": 0.0,
+    "time_end_s": 8.35,
+    "sample_dt_min_s": 4.999999999988347e-05,
+    "sample_dt_max_s": 5.000000000165983e-05,
+    "component_order": [
+      "LinearAccX",
+      "LinearAccY",
+      "LinearAccZ",
+      "AngularAccX",
+      "AngularAccY",
+      "AngularAccZ"
+    ],
+    "component_min": [
+      -0.8064,
+      -0.7499999993745479,
+      -9.81,
+      0.0,
+      -1.4097649272000001,
+      0.0
+    ],
+    "component_max": [
+      0.8303999999999999,
+      0.7499999996808917,
+      -9.786,
+      0.0,
+      1.4681167428,
+      0.0
+    ],
+    "integral_signed_velocity_proxy_m_per_s_or_rad_per_s": [
+      0.04104222179984756,
+      -0.031426189284350446,
+      -81.80466719996991,
+      0.0,
+      0.30776973484346526,
+      0.0
+    ],
+    "integral_abs_velocity_proxy_m_per_s_or_rad_per_s": [
+      4.270004114640127,
+      3.748893437802002,
+      81.80466719996991,
+      0.0,
+      6.6512969692606045,
+      0.0
+    ],
+    "semantics": "prescribed forcing-table statistics; initial field velocity is not inferred"
+  },
+  "reference_scales": {
+    "velocity_scale_m_per_s": 0.9077664897978995,
+    "velocity_scale_definition": "sqrt(abs(source gravity_z) * declared fluid depth); nonzero source-bound transport reference",
+    "kinetic_energy_scale_j": 6.0072516,
+    "kinetic_energy_scale_definition": "0.5 * exact source fluid sample mass * gravity transport speed^2",
+    "transport_time_scale_s": 0.9848347675832753,
+    "transport_time_definition": "declared fluid streamwise extent / gravity transport speed; candidate source timescale, not event T",
+    "forcing_integral_proxy_is_not_field_velocity": true
+  },
+  "event_time": {
+    "characteristic_time_s": null,
+    "status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+    "reason": "source provides acceleration-table coverage but no contact, peak, run-up, or other event landmark",
+    "control_table_coverage_s": [
+      0.0,
+      8.35
+    ],
+    "cannot_use_control_duration_as_event_T": true,
+    "consumer_requirement": "bind an event definition and source evidence before evaluating 1% event-time budget"
+  },
+  "frozen_error_budget": {
+    "position_fraction_of_L": 0.02,
+    "velocity_and_ke_fraction_of_registered_nonzero_scale": 0.05,
+    "event_time_fraction_of_characteristic_T": 0.01,
+    "time_and_output_each_max_fraction_of_task_budget": 0.25,
+    "event_time_evaluation_status": "BLOCKED_UNKNOWN_UNTIL_EVENT_REGISTRATION"
+  },
+  "comparison_gate": {
+    "field_differences_allowed": false,
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
