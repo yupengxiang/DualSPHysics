@@ -93,3 +93,25 @@ def test_receipt_hash_must_be_stable_at_launch_and_end(tmp_path: Path) -> None:
     }
     with pytest.raises(MODULE.IdentityAuditError, match="launch/end input hash"):
         MODULE.receipt_input(receipt, source, "fixture")
+
+
+def test_same_idp_time_from_a_different_run_is_rejected() -> None:
+    keys = (
+        "scan", "scan_receipt", "native_csv", "decoder_receipt", "runparts",
+        "conversion_report", "solver_receipt", "gencase_receipt", "xml", "partvtk_binary",
+    )
+    refs = {key: {"path": f"/evidence/{key}.json", "sha256": key * 64} for key in keys}
+    impact_sources = {key: dict(value) for key, value in refs.items()}
+    case = {"case_key": "F2/scan-F2-048-001"}
+    MODULE._match_impact_sources(
+        case,
+        refs,
+        {"evidence_bindings": {"full_probe_sources": impact_sources}},
+    )
+    refs["native_csv"] = {"path": "/other-run/PartOut.csv", "sha256": "native_csv" * 64}
+    with pytest.raises(MODULE.IdentityAuditError, match="native_csv path differs"):
+        MODULE._match_impact_sources(
+            case,
+            refs,
+            {"evidence_bindings": {"full_probe_sources": impact_sources}},
+        )
