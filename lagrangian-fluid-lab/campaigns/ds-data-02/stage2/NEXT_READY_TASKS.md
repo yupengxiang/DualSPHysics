@@ -221,3 +221,13 @@ Closed ledger: 137.8154839296 GPU h / 703.8407221411 CPU core h; zero reservatio
 - F1 root diagnostics show substantial asynchronous spatial COM differences at terminal time: dp010 vs dp0025 about0.201444m and dp005 vs dp0025 about0.103904m, compared with same-grid half-CFL about0.0002–0.00045m. These are diagnostics, not true-error bounds. Prioritize physical/control/boundary comparability and scoped spatial failure analysis; do not launch another finer grid blindly.
 
 Latest closed ledger: 137.8154839296 GPU h /703.8429295694 CPU core h;643 qualification,23 production,4406 CPU attempts;zero reservations. All previous hard bounds and goal scope remain unchanged and ACTIVE.
+
+2026-10-08 root062–069 actual forward（旧记录保留）：
+
+- root063/064：118例、1328个ID的原生身份/类型/MK/初始质量来源严格闭合；F2 1078 position、F4 51 density、F6 199 position。F1细档half19=position18+density1，same22=position18+density4。物理去向、合法flux、连续时间、动力学仍UNKNOWN；root069源身份开发子域已启动，尚待实际receipt与独立核验。
+- F2 root062 V4与root065 V6 GenCase及root067支持审计实际完成，但仍30969粒子、21.104506368kg相对owner18.876kg偏差+11.806%，3219点越界；V6 fluid VTK SHA与V4完全相同。预测27750未实现，根口头误报已立即纠正，所有proof采用实际失败。root067 worker全pre/post稳定，父v8未消费deferred字段，因此未给父全输入hash闭合信用；后续builder必须input_files声明实际源。禁止middle/fine CFD。
+- F2目录原CURRENT df7e与搬迁view aabfb经整份336 JSON独立比较，唯一差异/cases/78/trajectory/path；旧result/proof保留，EXACT_CURRENT旧措辞由forward sidecar更正，数组未重读，不给cold信用。
+- typed parent061真实KeyError失败与066 child CURRENT hash mismatch失败均保存；systemd0不是成功。分别追加8.19128/8.521504 CPU-sec实测差额，旧charge未改、无重复计费、预留释放。消费者继续真正child原/overlay语义与覆盖import/收尾的计费修复，完整cold raw-to-label分支仍待实际。
+- F1三跨网格derived观测来源SHA及质心/时间差独立重算，.005↔.0025最大.103903517m，.01↔.0025最大.201444474m，冻结.0134m；异步时刻和边界离散混合，邻网格不作真值、不盲更细。
+- F5 root068实际GenCase完成：67708fluid、mf=.0037584625659kg。只给源相对离散质量诊断；continuous owner/斜bed支持及控制审计继续，实际控制窗16s、XML TimeMax26s分开。
+- 完整目标ACTIVE，资源/期限不重置。截至root068独立核验137.8154839296GPUh、703.8534330422CPUcoreh。root061至068所有terminal服务均在实际费用核验后stop；无活跃CFD/大IO，root069小JSON子域消费运行，三既有代理继续参考、真实evaluator/cold、源身份子域分支。
