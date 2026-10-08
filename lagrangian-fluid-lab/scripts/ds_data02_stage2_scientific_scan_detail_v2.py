@@ -195,7 +195,7 @@ def _detail_card(*, entry: Mapping[str, Any], current: Mapping[str, Any], curren
     """Copy the observed JSON fields without interpreting them as physics."""
 
     return {
-        "schema": "ds02.stage2.scientific-scan-detail-card.v1",
+        "schema": "ds02.stage2.scientific-scan-detail-card.v2",
         "case_key": entry["case_key"],
         "family_id": entry["family_id"],
         "physical_case_id": entry["physical_case_id"],
