@@ -275,3 +275,8 @@ root091实际F5官方clip证据审计completed：绑定source/generatedXML、sup
 root090 F6实际source namespace mismatch失败已保留/收费/释放/stop，root092新request保留真实historicalreference source XML paths且全部显式SHA绑定，actualworker6/6完成；根独立核每row source/gencase receipt exactpath、source/generatedcasedef和execution parameters，六参数树相同，各哨点三档angular一致S1与S2不同。physicalbody128kg与SPH样本256/257.873535分开；fluid samples coarse5078.125/original5120/fine4904.952kg，finevsoriginal约-4.20%仅诊断且不准当masspass，真实continuousfluidowner仍需来源证明。coarse/fine native支持仍UNKNOWN。费用/释放closedserviceSTOPPED。
 
 消费分支：ROOT078 feeV2真实执行pre-charge失败KeyError cleanup_grace，原charge仍0，不宣称收费闭合；消费者修完整adapter。V42builder实际metadata失败immutable_base_v2_request小JSON时间戳变更，未复制/未reserv；原base请求保留，需小代码/JSON同SHA命名空间stat侧记forward，不允许raw/H5变更忽略。当前无大IO/CFD/GPU运行，三个既有代理继续实现；整体完整goalACTIVE，累计算账 703.8995935894417CPUcoreh（另ROOT078欠3.36552s）、137.8154839296GPUh，hardlimits/deadline不变。
+
+
+root078费用最终闭合：V4真实consumed request→P1 adapter只读预检通过后，原同ledger/同charge_id一次完整补计3.36552CPUsec、ext510946B/Home5047B/trace507707B；根独立核唯一charge和零保留reservation，原report/receipt/request SHA保持。见F2_TYPED_PARENT_V6_ACTUAL_TERMINAL_FEE_CLOSED_ROOT_VERIFICATION_078.json。V1/V2/V3失败均发生在charge前并保留，不反复收费；科学资格仍UNKNOWN。当前累计137.81548392959482GPUh/703.9005284561083CPUcoreh，零预留，hardlimit/deadline不重置。
+
+root093 F3真正source-matched ROOT086 V2 VTK支持检查请求已在集成树准备，父绑定20个small/static/control输入；VTK首次fullpre/post SHA仅由worker reserve后取得，v8忽略deferred字段，不声称父VTK完整hash。此前agent本地未预留VTK读仅NON_CREDIT/CPU UNKNOWN侧记，绝不替代真实受控执行。root094 F2 generated BI4 snapshot代码V1已集成但错误parent-deferred-hash布尔字段等待V2后才能启动；coarse solver canary代码集成，真实solver尚未启动。新root082 V43冷重放62角色请求已准备，待嵌套stat/codeclosure复核与真实执行。完整目标ACTIVE。
