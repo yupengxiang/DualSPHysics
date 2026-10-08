@@ -22,6 +22,7 @@ import importlib.util
 import json
 import math
 import os
+import subprocess
 import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -57,6 +58,13 @@ def sha256(path: Path) -> str:
         for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def git_head() -> str:
+    return subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=SCRIPT.parents[2], check=True,
+        capture_output=True, text=True,
+    ).stdout.strip()
 
 
 def require_file(value: str | Path, label: str) -> Path:
@@ -621,6 +629,7 @@ def prepare(decoder_receipt_path: Path, solver_receipt_path: Path, v1_script_pat
         "canonical_ready": True, "launch": True, "launch_allowed": True, "execution_allowed": True,
         "foreign_process_protection_required": True, "shared_lease_required": True,
         "solver_launch_forbidden": True, "trajectory_h5_read": False,
+        "launch_commit": git_head(),
         "physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN", "QN": "NOT_ASSESSED", "QE": "NOT_ASSESSED",
         "request_note": "Forward v4 CPU-only audit fixes C52 by exact V2 primary002 decoder identity mapping and C55 by separating requested endpoint, final saved RunPARTs endpoint, and conservative final DtMax integration-step bound; it consumes the completed 175-row CSV and does not rerun PartVTKOut, solver, H5, or trajectory data.",
     }
