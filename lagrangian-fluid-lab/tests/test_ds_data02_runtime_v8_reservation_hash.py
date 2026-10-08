@@ -43,7 +43,7 @@ def _ledger() -> dict:
     }
 
 
-def _request(tmp_path: Path, *, max_wall: float = 5.0) -> tuple[dict, Path, Path]:
+def _request(tmp_path: Path, *, max_wall: float = 20.0) -> tuple[dict, Path, Path]:
     data_root = tmp_path / "data-root"
     (data_root / "runtime").mkdir(parents=True)
     (data_root / "runtime" / "resource-ledger.json").write_text(json.dumps(_ledger()))
