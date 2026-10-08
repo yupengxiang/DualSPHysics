@@ -15,10 +15,41 @@ the parent guard and are only entered with ``--io-slot-approved``.
 """
 from __future__ import annotations
 
-# Keep this before the ordinary stdlib imports: the V4 parent already does
-# the same for its CPU/cgroup baseline, and the wall clock must cover Python
-# bootstrap as well as the V5/V4 closure import.
+# Keep these before the ordinary stdlib imports: the V4 parent already does
+# the same for its CPU/cgroup baseline, and V6 must carry that baseline across
+# the V5/V4 closure import instead of silently dropping wrapper bootstrap CPU.
 _SCRIPT_ENTRY_WALL = __import__("time").monotonic()
+
+
+def _raw_bootstrap_proc_ticks() -> int | None:
+    try:
+        with open("/proc/self/stat", "r", encoding="ascii") as stream:
+            text = stream.read()
+        tail = text[text.rfind(")") + 2:].split()
+        return int(tail[11]) + int(tail[12])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _raw_bootstrap_cgroup_seconds() -> float | None:
+    try:
+        with open("/proc/self/cgroup", "r", encoding="ascii") as stream:
+            relative = next((line[3:].strip() for line in stream
+                             if line.startswith("0::")), None)
+        if relative is None:
+            return None
+        with open("/sys/fs/cgroup" + relative + "/cpu.stat", "r", encoding="ascii") as stream:
+            for line in stream:
+                key, _, value = line.partition(" ")
+                if key == "usage_usec":
+                    return float(value.strip()) / 1_000_000.0
+    except (OSError, ValueError, StopIteration):
+        return None
+    return None
+
+
+_SCRIPT_ENTRY_PROC_TICKS = _raw_bootstrap_proc_ticks()
+_SCRIPT_ENTRY_CGROUP_SECONDS = _raw_bootstrap_cgroup_seconds()
 
 import argparse
 import importlib.util
@@ -100,6 +131,8 @@ def _run_fixed(path: Path | str, *, io_slot_approved: bool = False,
     # only prevents module-import time from disappearing from V4's remaining
     # wall budget and receipt.
     real_monotonic = V4.time.monotonic
+    old_bootstrap_ticks = getattr(V4, "_BOOTSTRAP_PROC_TICKS", None)
+    old_bootstrap_cgroup = getattr(V4, "_BOOTSTRAP_CGROUP_SECONDS", None)
     first_clock_read = True
 
     def _entry_anchored_monotonic() -> float:
@@ -111,12 +144,20 @@ def _run_fixed(path: Path | str, *, io_slot_approved: bool = False,
 
     V4._current_after_reservation = _current_after_reservation
     V4.time.monotonic = _entry_anchored_monotonic
+    # V4's own raw baseline is captured when V4 is imported, which is later
+    # than this wrapper's first executable line because V6 imports V5 first.
+    # Carry the early raw values into V4 for this invocation only; the module
+    # globals are restored below so no later run inherits stale process data.
+    V4._BOOTSTRAP_PROC_TICKS = _SCRIPT_ENTRY_PROC_TICKS
+    V4._BOOTSTRAP_CGROUP_SECONDS = _SCRIPT_ENTRY_CGROUP_SECONDS
     try:
         return V4._run_fixed(path, io_slot_approved=io_slot_approved,
                               parent_pid=parent_pid)
     finally:
         V4._current_after_reservation = old_callback
         V4.time.monotonic = real_monotonic
+        V4._BOOTSTRAP_PROC_TICKS = old_bootstrap_ticks
+        V4._BOOTSTRAP_CGROUP_SECONDS = old_bootstrap_cgroup
 
 
 def build_forward_request(*, base_request: Path | str, current_binding: Path | str,
@@ -160,6 +201,11 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
         "remaining_wall_includes_closure_import": True,
         "outer_runtime_max_must_cover_full_invocation": True,
         "cleanup_grace_is_separate_bounded_phase": True,
+    }
+    value["execution"]["cpu_baseline_capture"] = {
+        "phase": "FIRST_SCRIPT_EXECUTION_BEFORE_V5_V4_CLOSURE_IMPORT",
+        "carried_into_v4_bootstrap_snapshot": True,
+        "systemd_terminal_cpu_must_still_be_compared_after_run": True,
     }
     value["v6_current_forward"] = {
         "schema": FORWARD_SCHEMA,

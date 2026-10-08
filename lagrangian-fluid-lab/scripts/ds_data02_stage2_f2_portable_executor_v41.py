@@ -188,8 +188,15 @@ def build_forward(*, v38_request: Path | str, v39_contract: Path | str,
         })
     execution = dict(value.get("execution", {}))
     command = list(execution.get("command", []))
-    if len(command) >= 3:
-        command[2] = str(SCRIPT)
+    # V38's closed command is ``python -B -I <v38.py> ...``.  Replace the
+    # script operand, not the ``-I`` flag; the earlier positional shortcut
+    # produced ``python -B <v41.py> <v38.py> ...`` and would fail before the
+    # copied executor started.
+    script_indices = [index for index, item in enumerate(command)
+                      if isinstance(item, str) and item.endswith("ds_data02_stage2_f2_portable_executor_v38.py")]
+    if len(script_indices) != 1:
+        raise PortableV41Error("V38 execution command has no unique executor-v38 script operand")
+    command[script_indices[0]] = str(SCRIPT)
     execution.update({
         "command": command,
         "original_path_fallback": "FORBIDDEN",

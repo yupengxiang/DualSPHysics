@@ -38,6 +38,8 @@ def test_v6_builder_registers_actual_v2_callback_and_keeps_build_metadata_only(t
     assert Path(roles["typed_only_parent_v6_current_bound"]["path"]).resolve() == SCRIPT.resolve()
     assert value["v6_current_forward"]["corrected_callback"] == "V4.BASE.BASE._current_item"
     assert value["execution"]["current_adapter"]["source_callback_is_not_mocked"] is True
+    assert value["execution"]["wall_clock_capture"]["remaining_wall_includes_closure_import"] is True
+    assert value["execution"]["cpu_baseline_capture"]["carried_into_v4_bootstrap_snapshot"] is True
     assert value["sha256"] == V6.canonical_sha(value)
     assert result["hdf5_or_bi4_read"] is False
 
@@ -65,3 +67,4 @@ def test_v6_does_not_silently_fallback_to_v3_callback() -> None:
 def test_v6_wall_baseline_is_captured_before_v5_v4_closure_import() -> None:
     assert V6._BOOTSTRAP_WALL == V6._SCRIPT_ENTRY_WALL
     assert V6._BOOTSTRAP_WALL > 0.0
+    assert V6._SCRIPT_ENTRY_PROC_TICKS is None or isinstance(V6._SCRIPT_ENTRY_PROC_TICKS, int)
