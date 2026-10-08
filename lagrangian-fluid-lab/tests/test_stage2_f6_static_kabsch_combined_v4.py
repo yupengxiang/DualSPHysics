@@ -64,6 +64,40 @@ def main() -> int:
         assert manifest["hash_ownership"]["h5_content_hashed_during_prepare"] is False
         assert manifest["hash_ownership"]["owner"] == "single_combined_v4_attempt"
 
+        # A small manufactured completed receipt exercises the source/runner
+        # identity gate without opening either H5 or fabricating Kabsch data.
+        output_path = root / "output.json"
+        output = {
+            "schema": MODULE.V4_OUTPUT_SCHEMA,
+            "status": "completed",
+            "bundle": {"path": str(manifest_path.resolve()), "sha256": MODULE.sha256(manifest_path)},
+            "cases": [{
+                "physical_case_id": row["physical_case_id"],
+                "h5_read_ledger": {"opened_once": True},
+                "static": {"trajectory": {"frame_datasets_read": True}},
+                "kabsch": {"status": "completed", "frozen_contract": {"so3_error_tolerances_deg": {"rmse": 2.0, "max": 5.0}}},
+                "conversion_object_source": "loaded_from_exact_v4_report_binding_in_worker",
+            } for row in manifest["source_cases"]],
+        }
+        output_path.write_text(json.dumps(output), encoding="utf-8")
+        receipt_path = root / "receipt.json"
+        receipt = {
+            "schema": "ds02.execution-receipt.v1", "status": "completed", "returncode": 0,
+            "runner_source": request["runtime_binding"]["path"],
+            "runner_sha256": request["runtime_binding"]["sha256"],
+            "request": request,
+            "input_hashes_at_launch": request["input_sha256"],
+            "input_hashes_after_run": request["input_sha256"],
+        }
+        receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+        checked = MODULE.validate(manifest_path, output_path, receipt_path)
+        assert checked["status"] == "completed"
+        bad_receipt = copy.deepcopy(receipt)
+        bad_receipt["request"]["shared_runtime_version"] = "v4"
+        bad_receipt_path = root / "bad-receipt.json"
+        bad_receipt_path.write_text(json.dumps(bad_receipt), encoding="utf-8")
+        expect_rejected(lambda: MODULE.validate(manifest_path, output_path, bad_receipt_path), "wrong shared runtime version")
+
         row = manifest["source_cases"][0]
         unbound = copy.deepcopy(row)
         unbound["conversion"] = {"conversion_status": "completed"}

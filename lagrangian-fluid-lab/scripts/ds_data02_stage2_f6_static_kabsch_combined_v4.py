@@ -410,6 +410,7 @@ def prepare(v3_bundle_path: Path, v3_request_path: Path,
         "schema": V4_BUNDLE_SCHEMA,
         "status": "PREPARED_COMBINED_V4_H5_SOURCE_BOUND",
         "selected_case_ids": list(EXPECTED_IDS),
+        "consumed_v2_failure": v3_bundle.get("consumed_v2_failure"),
         "consumed_v3_source": {
             "bundle": binding(bundle_path, "consumed v3 bundle"),
             "request": binding(request_path, "consumed v3 request"),
@@ -597,6 +598,10 @@ def validate(manifest_path: Path, output_path: Path, receipt_path: Path) -> dict
     receipt_path, receipt = read_json(receipt_path, "F6 combined v4 execution receipt")
     if bundle.get("schema") != V4_BUNDLE_SCHEMA or result.get("schema") != V4_OUTPUT_SCHEMA:
         raise CombinedV4Error("v4 schema mismatch")
+    result_bundle = result.get("bundle", {})
+    if (str(Path(result_bundle.get("path", "")).resolve()) != str(manifest_path.resolve())
+            or result_bundle.get("sha256") != sha256(manifest_path)):
+        raise CombinedV4Error("v4 output is not bound to the exact prepared manifest")
     if result.get("status") != "completed" or receipt.get("schema") != "ds02.execution-receipt.v1" or receipt.get("status") != "completed" or receipt.get("returncode") != 0:
         raise CombinedV4Error("v4 output/receipt is not completed code 0")
     if receipt.get("request", {}).get("case_id") != REQUEST_CASE or receipt.get("request", {}).get("attempt_id") != REQUEST_ATTEMPT:
