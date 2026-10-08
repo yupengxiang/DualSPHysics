@@ -105,3 +105,11 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - 此产品是336暴露开发元数据库存及七个保存帧诊断family card，非完整336逐案科学资格目录；尚须接入既有336字段审计、118遗漏质量影响与原因语义及逐任务失败/删失/误差范围记录。F3原parent失败保留，只给已完成阶段恢复信用；portable完整链未完成，QN/QE/QI和真实物理划分/连续事件/恢复迁移仍UNKNOWN。
 - consumer v32/v33真实executor代码已接入，但root新测试8项6通过/2失败（root缺冻结v5未跟踪来源文件）；还发现私有audit参数list/dict不符和nested session清理缺口，v34修复及双FS实际父guard正在准备。未以任何预制request或测试通过声称8.64GB冷链已执行。
 - 所有root运行已终态/父预留释放；当前无CFD或大IO。继续等待reference守护support-v5/初态QA-v2源依据修复和consumer实际冷链守护入口，forensics继续资格/许可依赖与产品交付。完整goal继续active，边界/期限不重置。
+
+2026-10-08 root forward 031 F1 真正初态预检闭合：
+
+- F1 initial-native-QA-v2 实际完成并独立复核：dp005总1087099/流体321600、dp0025总7445049/流体2572800；两档流体sample mass均40.2kg、初始时刻0、速度及KE为0、位置/速度/密度有限且初始密度在冻结700–1300范围。两原生BI4的actual worker全内容pre/post SHA与完整stat、当前stat及GenCase收据/XML来源全部闭合。PeriMode96保留为source-default UNKNOWN，仅GenCase专用依据允许，无保存帧规则放宽。F1_TWO_OWNER_RUNGS_INITIAL_NATIVE_QA_V2_ACTUAL_INDEPENDENT_VERIFICATION_001.json。
+- root还直接比较两档小Def XML，除dp/pointref/fluid selector point/size四处表示差异，全部source/control/非流体几何语义相同；未二次读取原生BI4/VTK/H5。此为matched recipe初态/输入预条件，尚未获得真实轨迹数值误差或QN。
+- F1 support-v5实际完成并闭合解析前后VTK全内容SHA与完整stat：细档160×268×60、40.2kg、包络最大偏差1.192092902e-8m；F1_OWNER_DP0025_SUPPORT_V5_ACTUAL_INDEPENDENT_VERIFICATION_001.json。原limited-v4及QA-v1失败均保持不可变。下一实际分支是guarded matched CFD/观测量时间积分与输出校准，reference正在准备。
+- consumer c2458459e接入848a00ec9，v30/v31冻结path测试及v32/v33/v34/private-parent相关root19项测试通过；但代码复核发现parent-v1 preexec把child自身PID误当父PID、venv命令被resolve为系统Python、lead退出后helper残留及finalization失败费用遗漏风险，实际冷链尚不启动，须forward修复与真实active helper/deadline反例及OS-level文件跟踪闭合。测试通过不是这些缺陷不存在的证据。
+- 当前无未终态root运行、无CFD或大IO。七族bounded产品已有实际产物/独立proof；完整336资格目录、14参考研究终态、真实portable完整链及许可/依赖访问交付仍推进，完整goal保持active。
