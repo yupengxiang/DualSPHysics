@@ -248,3 +248,5 @@ F5修复V3实际完整解析ROOT068 XML/Fluid/Bound VTK；父和worker full inpu
 两次普通CPU实际费用2.238769/1.413992 CPUsec，61,079,088/110,119B；收据、ledger charge和预留释放独立闭合后服务已stop。线程环境现从systemd入口设定，防止import前BLAS无界线程。累计137.8154839296GPUh /703.8584178514CPUcoreh，零预留，资源与期限不重置。下一步：参考代理准备F2实际点位guarded snapshot/support和F5连续owner推导；forensics准备F3-S2既有三档初态审计；消费者修复完整typed parent actual接口并接入真正cold重放。当前无CFD/GPU/大I/O工作运行。
 
 root079追加：F3两个现有two-axis初态dp006/dp005来源metadata审计实际完成；根直接解析generated XML分别67500×.000216/116640×.000125均14.58kg，并核对源投影/forcing SHA。VTK仅stat，几何envelope来自既有QA，此次不给新的VTK SHA/三档支持信用；第三档来源投影未查。费用1.38815CPUsec/68714B和预留释放闭合后unit已stop。见F3_TWO_TIER_INITIAL_SOURCE_METADATA_ACTUAL_ROOT_VERIFICATION_079.json。forensics继续完整三档实际支持域，复用已有native QA须明确足够的源绑定；不把两个来源projection检查当原三档任务完成。整体goal仍ACTIVE。
+
+root079范围纠正：实际report target/reference physical_case_id均F3_TWOAXIS_AY0P50_PITCH_NOMINAL，与审阅S1绑定；request/worker名称S2不能授予S2信用。原报告/收据/费保持，见F3_ROOT079_ACTUAL_SENTINEL_SCOPE_CORRECTION_001.json。S2冻结F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT，必须单独绑定其forcing/source；相同XML bytes不等同控制谱系。forensics已交实际错配和后续要求。
