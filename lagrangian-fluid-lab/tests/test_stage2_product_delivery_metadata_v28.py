@@ -28,6 +28,8 @@ def _fixture_product(tmp_path: Path) -> tuple[Path, dict]:
             "task_eligibility": {"physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "QI": "UNKNOWN"},
             "access_policy": {"original_trajectory_h5_opened_by_assembler": False, "materialized_label_h5_opened_by_assembler": False, "part_bi4_opened_by_assembler": False, "solver_started": False, "model_invoked": False},
         }
+        if family == "F2":
+            cards[family]["raw_reconstruction"]["raw_index_parent_slot"] = {"status": "F2_NATIVE_V4_TERMINAL_VERIFIED; EXECUTABLE_PORTABLE_V4_FORWARD"}
         inventory.append({"current_index": index, "family_id": family, "physical_case_id": physical, "anchor_card": family})
     manifest = tmp_path / "final-family-product-manifest-v27.json"
     manifest.write_text(json.dumps({"schema": "ds02.stage2.final-family-product-manifest.v27", "status": "PREPARED_ACTUAL_V25_BOUND_SEVEN_FAMILY_PRODUCT_NO_PHYSICAL_QUALIFICATION"}), encoding="utf-8")

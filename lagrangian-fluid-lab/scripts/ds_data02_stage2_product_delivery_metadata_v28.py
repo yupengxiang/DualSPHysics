@@ -137,12 +137,15 @@ def single_case_reproduction_contract(product: dict[str, Any], family_id: str = 
     if anchor.get("current_index") != 78 or anchor.get("physical_case_id") != "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090":
         raise DeliveryError("F2 card is not the registered index-78 case")
     if raw.get("producer_or_root_status") != "F2_NATIVE_V4_TERMINAL_VERIFIED; EXECUTABLE_PORTABLE_V4_FORWARD":
-        # State records use the raw reconstruction phrase; the native bundle
-        # is the authoritative terminal-v4 phrase.  Keep the distinction
-        # explicit instead of upgrading the state credit.
+        # The state record uses a reconstruction phrase; the raw-index
+        # reference must independently carry the terminal-v4 status before a
+        # native label stage can be exposed as actual support.
         native_status = "ACTUAL_NATIVE_V4_TERMINAL_VERIFIED"
     else:
         native_status = "ACTUAL_NATIVE_V4_TERMINAL_VERIFIED"
+    raw_slot = raw.get("raw_index_parent_slot") or {}
+    if raw_slot.get("status") != "F2_NATIVE_V4_TERMINAL_VERIFIED; EXECUTABLE_PORTABLE_V4_FORWARD":
+        raise DeliveryError("F2 card lacks the exact terminal-v4 raw-index status")
     return {
         "schema": "ds02.stage2.single-case-reproduction-contract.v1",
         "case": {
