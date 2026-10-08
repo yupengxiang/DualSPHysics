@@ -1,0 +1,77 @@
+{
+  "schema": "ds02.stage2.f1-s1-geometry-semantics-source-evidence.v1",
+  "status": "PASS_OFFICIAL_INTERFACE_EVIDENCE_GENERIC_CROP_UNKNOWN",
+  "generated_at_utc": "2026-10-08T06:42:48.722437+00:00",
+  "input_audit": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s1_geometry_semantics_audit_v2.json",
+    "bytes": 24085,
+    "mtime_ns": 1791439687434140808,
+    "sha256": "84c1eccc9b42b74d7dd9e240baf547c3cdfe0c815535b265ff8165ebd1b8aae9"
+  },
+  "official_sources": {
+    "changelog": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/CHANGES.txt",
+      "bytes": 36627,
+      "mtime_ns": 1742555767000000000,
+      "sha256": "742fd978500a75103dd4d383e16e7df81aaafc10962bd866bafb02deffc3842d"
+    },
+    "template": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml",
+      "bytes": 67624,
+      "mtime_ns": 1744094582000000000,
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e"
+    },
+    "help": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/help/GenCase_Help.out",
+      "bytes": 3704,
+      "mtime_ns": 1744094582000000000,
+      "sha256": "fc6cf0e27406cb0905ace0f4865a4d5687173182ad7d994d8335427f19e128e1"
+    }
+  },
+  "exact_documented_evidence": {
+    "pointref": {
+      "source": "official CHANGES.txt line 263 (v5.4 package)",
+      "text": "New optional item <pointref> in <definition> to fit according to reference position and Dp value.",
+      "meaning": "reference-position/Dp fitting is documented; exact inclusion/crop boundaries are not specified"
+    },
+    "setshapemode": {
+      "source": "official GenCase_CaseTemplate.xml",
+      "token_examples": [
+        "<setshapemode>actual | dp | all</setshapemode>",
+        "<setshapemode>bound</setshapemode>"
+      ],
+      "meaning": "public command tokens are documented; token combination and particle boundary ownership are not defined here"
+    },
+    "gencase_cli": {
+      "source": "official GenCase_Help.out",
+      "supported_controls_seen": [
+        "-dp:<float>",
+        "-save:<values> +/-vtkfluid",
+        "-threads:<int>"
+      ],
+      "meaning": "bounded VTK output can be requested; CLI help does not specify continuous volume semantics"
+    }
+  },
+  "semantic_boundary": {
+    "generic_setshapemode_parser": "UNKNOWN_NO_SOURCE_IMPLEMENTATION",
+    "drawbox_endpoint_ownership": "UNKNOWN_FROM_PUBLIC_DOCS",
+    "cell_centre_crop_rule": "UNKNOWN_GENERIC_BUT_OBSERVED_PER_RUN_IN_AUDIT_V2",
+    "physical_continuum_authority": "CURRENT336 owner/physical-binding recorded in audit v2",
+    "do_not_infer": [
+      "Do not use XML drawbox primitive 36.036 kg as the sole continuous target when owner contract says 40.2 kg.",
+      "Do not use a particle count or count*dp^3 as a continuous truth for a new grid without the same owner geometry contract.",
+      "Do not claim generic boundary semantics from the `.01` observation alone."
+    ]
+  },
+  "audit_v2_observed_conclusions": {
+    "dp0p010": "owner contract and observed half-cell envelope agree within float-output tolerance",
+    "dp0p009": "sample mass is within 1 percent but observed envelope does not equal owner contract",
+    "three_grid_qualification": "UNKNOWN until a third grid uses a validated owner-contract-compatible boundary rule"
+  },
+  "scope": {
+    "bi4_read": false,
+    "hdf5_read": false,
+    "solver_launch": false,
+    "gencase_launch": false
+  }
+}
