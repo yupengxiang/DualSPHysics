@@ -1,0 +1,223 @@
+{
+  "schema": "ds02.stage2.f2-summary-bool-failure-root-verification.v1",
+  "time_utc": "2026-10-08T11:35:59.733548+00:00",
+  "status": "PASS_FAILURE_ACCOUNTING_COMPLETE_GENERATED_LABEL_FILE_PENDING_FORWARD_SUMMARY",
+  "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_TRAJECTORY_LABELS_V1/f2-s1-trajectory-labels-v1-primary-001-root-forward-001/execution-receipt.json",
+  "receipt_sha256": "bad932ba95c8803f3c96fc1a56b92ed1c3f27f5ef11564b27dcf45fac27f8ad8",
+  "git_at_launch": {
+    "commit": "e537893cd1d0ba2c9618db0998f61db1885390cd",
+    "status": "",
+    "diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "label_H5": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/STAGE2_F2_S1_TRAJECTORY_LABELS_V1/f2-s1-trajectory-labels-v1-primary-001-root-forward-001/f2-s1-trajectory-labels-v1.h5",
+  "label_H5_sha256": "142fde1455e8abb07891cd6c5bc7c751110669162a40a2629e8ed0814b6c454b",
+  "label_H5_bytes": 4077329,
+  "observed_attrs": {
+    "complete_type": "bool",
+    "complete_value": true,
+    "source_hdf5_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+    "schema": "ds-data-02.native-labels.v1",
+    "initial_fluid_mass_kg": 21.114001002861187,
+    "source_identity_count": 418104,
+    "frames": 401,
+    "time_end_s": 4.000007783879406,
+    "generated_source_config": {
+      "case_key": "F2/scan-F2-S1-001",
+      "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
+      "destination_regions": [
+        {
+          "boundary_rule": "lower-inclusive upper-exclusive",
+          "bounds": [
+            [
+              0.56,
+              1.66
+            ],
+            [
+              -0.16,
+              0.44
+            ],
+            [
+              0.0,
+              0.45
+            ]
+          ],
+          "geometry_source": "generated XML mkbound=1 drawbox; finite box diagnostic, not proof of wetted fluid volume",
+          "id": "receiver_box_mkbound1"
+        },
+        {
+          "boundary_rule": "lower-inclusive upper-exclusive",
+          "bounds": [
+            [
+              -1.2,
+              2.8
+            ],
+            [
+              -1.0,
+              1.0
+            ],
+            [
+              -0.2,
+              -0.05
+            ]
+          ],
+          "geometry_source": "generated XML mkbound=2 drawbox; finite box diagnostic, not proof of legal outflow",
+          "id": "spill_tray_mkbound2"
+        }
+      ],
+      "events": [
+        {
+          "aperture_bounds": [
+            [
+              -0.16,
+              0.44
+            ],
+            [
+              0.0,
+              0.45
+            ]
+          ],
+          "axis": 0,
+          "event_semantics": "finite-aperture saved-frame chord crossing; repeated crossings retained",
+          "forward_direction": "+x",
+          "geometry_source": "receiver mkbound=1 front x face",
+          "id": "receiver_aperture_entry_x056",
+          "operator_sign_semantics": "operator column0 is negative-to-positive along x; this is the configured entry direction",
+          "value": 0.56
+        },
+        {
+          "aperture_bounds": [
+            [
+              -1.2,
+              2.8
+            ],
+            [
+              -1.0,
+              1.0
+            ]
+          ],
+          "axis": 2,
+          "event_semantics": "backward column represents +z to -z entry; repeated crossings retained",
+          "forward_direction": "-z",
+          "geometry_source": "spill tray mkbound=2 upper z face",
+          "id": "tray_aperture_entry_zm005",
+          "operator_sign_semantics": "operator column1 is positive-to-negative along z; this is the configured entry direction",
+          "value": -0.05
+        }
+      ],
+      "expected_frames": 401,
+      "frame_kind": "fixed_solver_frame",
+      "gates": {
+        "semantics": "screening bounds only; no gate grants physical fate, dynamics, QN, or QE",
+        "task_mass_fraction_tolerance": 0.03,
+        "unknown_width_gate_fraction": 0.003
+      },
+      "lifecycle_model": "open",
+      "moving_source_semantics": {
+        "body_motion": "generated XML objreal ref=0 rotating about y-axis from (0,-1,0.65) to (0,1,0.65), degrees",
+        "finite_aperture": "receiver/tray apertures are fixed solver-frame geometry",
+        "source_frame": "fixed_solver_frame",
+        "source_labels": "native initial MK is fixed to typed identity; positions are not reclassified into a moving frame"
+      },
+      "output_semantics": {
+        "first_arrival": "observed saved-frame bracket [t_i,t_i+1] with linear-chord estimate; exact continuous time UNKNOWN",
+        "missing_identity": "open-lifecycle right censoring; physical fate and legal spill UNKNOWN",
+        "momentum": "not computed; no cross-time momentum sum is permitted",
+        "net_flux": "forward minus backward finite-aperture crossings; not a force or dynamics error",
+        "residence": "piecewise-linear chord occupancy in finite boxes; interpolation error unassessed"
+      },
+      "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "schema": "ds02.stage2.f2-s1-trajectory-label-config.v1",
+      "source_assignment": "native_initial_mk",
+      "source_mk_semantics": "typed initial (Zone,Idp) conversion blocks; legacy Zone is not an MK/material label",
+      "source_regions": [
+        {
+          "bounds": [
+            [
+              0.05,
+              0.375
+            ],
+            [
+              -0.11,
+              0.11
+            ],
+            [
+              0.7,
+              0.788
+            ]
+          ],
+          "geometry_source": "generated XML fluid mkfluid=0",
+          "id": "fluid_mk1",
+          "mkfluid": 0,
+          "native_mk": 1
+        },
+        {
+          "bounds": [
+            [
+              0.05,
+              0.375
+            ],
+            [
+              -0.11,
+              0.11
+            ],
+            [
+              0.788,
+              0.876
+            ]
+          ],
+          "geometry_source": "generated XML fluid mkfluid=1",
+          "id": "fluid_mk2",
+          "mkfluid": 1,
+          "native_mk": 2
+        },
+        {
+          "bounds": [
+            [
+              0.05,
+              0.375
+            ],
+            [
+              -0.11,
+              0.11
+            ],
+            [
+              0.876,
+              0.964
+            ]
+          ],
+          "geometry_source": "generated XML fluid mkfluid=2",
+          "id": "fluid_mk3",
+          "mkfluid": 2,
+          "native_mk": 3
+        }
+      ],
+      "time_window_s": [
+        0.0,
+        4.000007783879406
+      ],
+      "trajectory_hdf5_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d"
+    }
+  },
+  "parent_source_pre_post_hashes_equal": true,
+  "parent_source_hash_count": 19,
+  "same_parent_charge": {
+    "id": "F2/STAGE2_F2_S1_TRAJECTORY_LABELS_V1/f2-s1-trajectory-labels-v1-primary-001-root-forward-001",
+    "gpu_seconds": 0.0,
+    "cpu_core_seconds": 66.231059,
+    "new_storage_bytes": 4109938,
+    "status": "failed",
+    "finished_at_utc": "2026-10-08T11:32:09.552676+00:00"
+  },
+  "wall_seconds": 260.88645236101,
+  "root_original_trajectory_H5_opened": false,
+  "root_produced_label_H5_opened": true,
+  "failure_cause": "summarize compares HDF5 numpy.bool_ completion with Python True object identity; generated completion and bound source digest are valid",
+  "failure_receipt_preserved": true,
+  "scientific_label_acceptance": "PENDING_GUARDED_FORWARD_SUMMARY_AND_INDEPENDENT_MASS_EVENT_QUALITY",
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "goal_complete": false
+}
