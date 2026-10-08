@@ -185,7 +185,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "--expected-bytes", str(EXPECTED_BI4_BYTES),
             "--case-id", CASE_ID,
             "--physical-case-id", PHYSICAL_CASE_ID,
-            "--output", "{attempt_root}/generated_bi4_snapshot_v1.json",
+            "--output", "{attempt_root}/generated_bi4_snapshot_v2.json",
         ],
         "cwd": str(MAIN_REPO),
         "worktree_root": str(MAIN_REPO),
@@ -225,7 +225,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "scientific_identity": "F2-S1 owner-centered cell-selector coarse GenCase product; support/mass QA only, no solver qualification",
         },
         "output": {
-            "path": "{attempt_root}/generated_bi4_snapshot_v1.json",
+            "path": "{attempt_root}/generated_bi4_snapshot_v2.json",
             "atomic": True,
             "refuse_overwrite": True,
             "failure_report_is_immutable": True,
