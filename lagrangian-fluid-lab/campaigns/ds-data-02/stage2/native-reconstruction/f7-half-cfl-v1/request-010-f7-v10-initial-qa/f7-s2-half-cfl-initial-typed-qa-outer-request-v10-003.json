@@ -1,0 +1,420 @@
+{
+  "case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+  "cfd_invoked": false,
+  "execution": {
+    "cfd": false,
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-B",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f7_half_cfl_initial_qa_outer_v10.py",
+      "run",
+      "--request",
+      "<request>",
+      "--io-slot-approved",
+      "--output-dir",
+      "<attempt-root>/qa"
+    ],
+    "gpu": false,
+    "hdf5": false,
+    "inner_command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-B",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f7_half_cfl_initial_qa_v8.py",
+      "run",
+      "--request",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/f7-half-cfl-v1/request-007-f7-v8-initial-qa/f7-s2-half-cfl-initial-typed-qa-request-v8-001.json",
+      "--io-slot-approved",
+      "--output-dir",
+      "<runtime-output-dir>"
+    ],
+    "model_invoked": false,
+    "original_path_fallback": "FORBIDDEN",
+    "output_dir_template": "{attempt_root}/qa",
+    "output_filesystem": "home",
+    "parent_supervised": true,
+    "python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "requires_shared_four_guard": true,
+    "solver": false
+  },
+  "family_id": "F7",
+  "identity_gate": {
+    "baseline_expected": {
+      "blocks": {
+        "fixed": {
+          "begin": 0,
+          "count": 27495,
+          "mk": 10
+        },
+        "fluid": {
+          "begin": 29479,
+          "count": 40700,
+          "mk": 2
+        },
+        "moving": {
+          "begin": 27495,
+          "count": 1984,
+          "mk": 12
+        }
+      },
+      "cflnumber": 0.2,
+      "dp_m": 0.02,
+      "motion_duration_s": 12.0,
+      "nb": 29479,
+      "nbf": 27495,
+      "np": 70179
+    },
+    "checks": [
+      "decoder header CaseNp/Np/Nb/Nbf when present",
+      "Np",
+      "Nb",
+      "Nbf",
+      "dp",
+      "CFL",
+      "motion duration",
+      "fixed/moving/fluid begin/count/MK"
+    ],
+    "decoded_arrays_remain_authoritative": true,
+    "decoder_constant_keys": [
+      "Dp",
+      "Rhop0",
+      "Gamma",
+      "B",
+      "MassBound",
+      "MassFluid"
+    ],
+    "float_storage_tolerance": "binary32 round-trip plus two ulps only",
+    "half_expected": {
+      "blocks": {
+        "fixed": {
+          "begin": 0,
+          "count": 27495,
+          "mk": 10
+        },
+        "fluid": {
+          "begin": 29479,
+          "count": 40700,
+          "mk": 2
+        },
+        "moving": {
+          "begin": 27495,
+          "count": 1984,
+          "mk": 12
+        }
+      },
+      "cflnumber": 0.1,
+      "dp_m": 0.02,
+      "motion_duration_s": 12.0,
+      "nb": 29479,
+      "nbf": 27495,
+      "np": 70179
+    },
+    "header_missing_field_policy": "report_not_present; do not claim that field was verified",
+    "same_initial_identity_required": true,
+    "xml_constant_expected": {
+      "B": 554965.71429,
+      "Dp": 0.02,
+      "Gamma": 7.0,
+      "MassBound": 0.008,
+      "MassFluid": 0.008,
+      "Rhop0": 1000.0
+    }
+  },
+  "inner_request": {
+    "immutable": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/f7-half-cfl-v1/request-007-f7-v8-initial-qa/f7-s2-half-cfl-initial-typed-qa-request-v8-001.json",
+    "schema": "ds02.stage2.f7-half-cfl-initial-typed-qa-request.v8",
+    "sha256": "560d74ade1582aff4b5f229ba7b65a38108082ca16f746ee887c40e2a4ff4ed1"
+  },
+  "launch_allowed": false,
+  "limitations": [
+    "This outer request adds XML and post-decode header/constant identity checks but does not replace the v8 decoded-array comparison.",
+    "No GenCase, solver, CFD, GPU, or HDF5 execution is performed by build/preflight.",
+    "Both BI4 payloads are stat-only during build/preflight; their content is read only after the parent-approved CPU worker starts.",
+    "The baseline BI4 producer SHA is a known binding, while the half BI4 content hash remains unknown until the worker reads it.",
+    "The concrete output directory must be supplied by the parent under its Home attempt root; an NVMe or /var/tmp output is rejected.",
+    "The result remains DEVELOPMENT/UNKNOWN and requires a new solver request after QA and motion staging."
+  ],
+  "model_invoked": false,
+  "motion_stage": {
+    "copy_target_hash_required": true,
+    "solver_launch_allowed": false,
+    "source": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/motion_obstacle_quintic.dat",
+    "source_sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814",
+    "target_relative": "solver_input/motion_obstacle_quintic.dat"
+  },
+  "parent_accounting": {
+    "attempt_root_placeholder": "{attempt_root}",
+    "external_output_namespace": false,
+    "half_bi4_content_sha_deferred_to_worker": true,
+    "output_dir_template": "{attempt_root}/qa",
+    "output_filesystem": "home",
+    "output_must_be_fresh_child": true,
+    "same_parent_ledger": true,
+    "static_source_hashes_are_parent_guarded": true
+  },
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "request_id": "f7-s2-half-cfl-initial-typed-qa-outer-v10-003",
+  "resource_request": {
+    "cpu_threads": 1,
+    "max_rss_bytes": 536870912,
+    "max_wall_seconds": 900,
+    "new_storage_budget_bytes": 536870912,
+    "parent_guard_required": true,
+    "qualification": "DEVELOPMENT_UNKNOWN",
+    "source_read_scope": "two frame-0 BI4 files and decoder scratch; no H5/solver"
+  },
+  "role": "DEVELOPMENT",
+  "schema": "ds02.stage2.f7-half-cfl-initial-typed-qa-outer-request.v10",
+  "sha256": "5d306546af1e8c0d816790ab71ae0479e6e7012a52c2871cd682cda18eb54e99",
+  "source_bindings": [
+    {
+      "bytes": 11278,
+      "content_scope": "source_content",
+      "ctime_ns": 1791453553733512111,
+      "device": 2081,
+      "inode": 329400967,
+      "mode": 33204,
+      "mtime_ns": 1791453553733512111,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/f7-half-cfl-v1/request-007-f7-v8-initial-qa/f7-s2-half-cfl-initial-typed-qa-request-v8-001.json",
+      "role": "f7_initial_qa_request_v8",
+      "sha256": "0ac0d7e9e4d1f9a5cf65bbdc197de2040fd71ee5565e6a42e461b019b2efe855"
+    },
+    {
+      "bytes": 29936,
+      "content_scope": "source_content",
+      "ctime_ns": 1791458149814151188,
+      "device": 2081,
+      "inode": 329008390,
+      "mode": 33204,
+      "mtime_ns": 1791458149814151188,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f7_half_cfl_initial_qa_outer_v10.py",
+      "role": "f7_initial_qa_outer_v10",
+      "sha256": "af9bac5a75f18af236a3dc5004d045928ce5484b165f41fcfb0046a6b2f1000f"
+    },
+    {
+      "bytes": 29601,
+      "content_scope": "source_content",
+      "ctime_ns": 1791453543271183061,
+      "device": 2081,
+      "inode": 329008373,
+      "mode": 33204,
+      "mtime_ns": 1791453543271183061,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f7_half_cfl_initial_qa_v8.py",
+      "role": "f7_initial_qa_worker_v8",
+      "sha256": "a884be5ad5e9800d0cf5ada49d91d265f45af14251e0b25b4beea1c8c69df383"
+    },
+    {
+      "bytes": 356875,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791130672611293362,
+      "device": 2081,
+      "expected_sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814",
+      "inode": 324997123,
+      "mode": 33204,
+      "mtime_ns": 1791130672611293362,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_TARGET_ANGLE_ENDPOINTS/root-stage1-f7-target030-065-actual-motion-preparation-074/prepared/F7_OBSTACLE_QUINTIC_B08_A065/motion_obstacle_quintic.dat",
+      "role": "F7_motion_control",
+      "sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814"
+    },
+    {
+      "bytes": 3089306,
+      "content_scope": "metadata_only_stat_known_sha",
+      "content_verified": false,
+      "ctime_ns": 1791409148405845896,
+      "device": 2081,
+      "expected_sha256": "f905a45f615304877f2a753471639bf812021d1741df7fcd4b5dc536b258864a",
+      "inode": 324999604,
+      "mode": 33204,
+      "mtime_ns": 1791132688256610685,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.bi4",
+      "role": "baseline_generated_bi4",
+      "sha256": "f905a45f615304877f2a753471639bf812021d1741df7fcd4b5dc536b258864a"
+    },
+    {
+      "bytes": 7537,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791132688263610471,
+      "device": 2081,
+      "expected_sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f",
+      "inode": 324999608,
+      "mode": 33204,
+      "mtime_ns": 1791132688263610471,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+      "role": "baseline_generated_xml",
+      "sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f"
+    },
+    {
+      "bytes": 33830,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791446268815686512,
+      "device": 2081,
+      "expected_sha256": "75b40bd22ab3d60e3caed79df7c9f4f850d460f5c5088a7d07530b05233760ee",
+      "inode": 325850850,
+      "mode": 33204,
+      "mtime_ns": 1791446266839711666,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/f7-half-cfl-gencase-v8-001-root-001/execution-receipt.json",
+      "role": "half_gencase_receipt",
+      "sha256": "75b40bd22ab3d60e3caed79df7c9f4f850d460f5c5088a7d07530b05233760ee"
+    },
+    {
+      "bytes": 6500,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791446266729713063,
+      "device": 2081,
+      "expected_sha256": "2a860c7da4ecf3e55b23da29efe5c8153e94ab969aafb5d8871736ccee001e80",
+      "inode": 325850839,
+      "mode": 33204,
+      "mtime_ns": 1791446266729713063,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/f7-half-cfl-gencase-v8-001-root-001/stdout.log",
+      "role": "half_gencase_stdout",
+      "sha256": "2a860c7da4ecf3e55b23da29efe5c8153e94ab969aafb5d8871736ccee001e80"
+    },
+    {
+      "bytes": 3089317,
+      "content_scope": "metadata_only_stat_known_sha",
+      "content_verified": false,
+      "ctime_ns": 1791446266722713151,
+      "device": 2081,
+      "expected_sha256": null,
+      "inode": 325850845,
+      "mode": 33204,
+      "mtime_ns": 1791446266722713151,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/f7-half-cfl-gencase-v8-001-root-001/prepared/F7_OBSTACLE_QUINTIC_B08_A065_half_cfl01.bi4",
+      "role": "half_generated_bi4",
+      "sha256": null
+    },
+    {
+      "bytes": 7559,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791446266728713075,
+      "device": 2081,
+      "expected_sha256": "ad6c31d6c04204287b84aa1914adc1ec5f2ea9e67329ec702cb546a24587fc85",
+      "inode": 325850849,
+      "mode": 33204,
+      "mtime_ns": 1791446266728713075,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/f7-half-cfl-gencase-v8-001-root-001/prepared/F7_OBSTACLE_QUINTIC_B08_A065_half_cfl01.xml",
+      "role": "half_generated_xml",
+      "sha256": "ad6c31d6c04204287b84aa1914adc1ec5f2ea9e67329ec702cb546a24587fc85"
+    },
+    {
+      "bytes": 324368,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1788971845790968404,
+      "device": 2081,
+      "expected_sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "inode": 334898234,
+      "mode": 33277,
+      "mtime_ns": 1788971845790968404,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "role": "pinned_native_bi4_decoder",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    {
+      "bytes": 245936,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791448282062263579,
+      "device": 66306,
+      "expected_sha256": "832e71d8f914ebc96d741c6df28736fb3880952eea5d301d78c7222cfb43c27c",
+      "inode": 41026438,
+      "mode": 33204,
+      "mtime_ns": 1791448282062263579,
+      "path": "/var/tmp/ds02-stage2/F7/F7_S2_NVME_COUNTERPART_V5/f7-s2-a065-same-cfl-dense-savedt-v5-001/solver_output/RunPARTs.csv",
+      "role": "v5_same_cfl_RunPARTs",
+      "sha256": "832e71d8f914ebc96d741c6df28736fb3880952eea5d301d78c7222cfb43c27c"
+    },
+    {
+      "bytes": 44972,
+      "content_scope": "source_content",
+      "content_verified": false,
+      "ctime_ns": 1791448286802956597,
+      "device": 2081,
+      "expected_sha256": "99db999678d8de10790cee7462d3eed5657b85ced1f52bf561e95e3625e3fa0e",
+      "inode": 325850852,
+      "mode": 33204,
+      "mtime_ns": 1791448286802956597,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/f7-obstacle-quintic-b08-a065/f7-s2-a065-same-cfl-dense-savedt-v5-001/execution-receipt.json",
+      "role": "v5_same_cfl_receipt",
+      "sha256": "99db999678d8de10790cee7462d3eed5657b85ced1f52bf561e95e3625e3fa0e"
+    }
+  ],
+  "status": "READY_FOR_PARENT_CPU_GUARD",
+  "xml_semantics": {
+    "baseline": {
+      "blocks": {
+        "fixed": {
+          "begin": 0,
+          "count": 27495,
+          "mk": 10
+        },
+        "fluid": {
+          "begin": 29479,
+          "count": 40700,
+          "mk": 2
+        },
+        "moving": {
+          "begin": 27495,
+          "count": 1984,
+          "mk": 12
+        }
+      },
+      "cflnumber": 0.2,
+      "dp_m": 0.02,
+      "motion_duration_s": 12.0,
+      "nb": 29479,
+      "nbf": 27495,
+      "np": 70179,
+      "xml_constants": {
+        "B": 554965.71429,
+        "Dp": 0.02,
+        "Gamma": 7.0,
+        "MassBound": 0.008,
+        "MassFluid": 0.008,
+        "Rhop0": 1000.0
+      }
+    },
+    "half": {
+      "blocks": {
+        "fixed": {
+          "begin": 0,
+          "count": 27495,
+          "mk": 10
+        },
+        "fluid": {
+          "begin": 29479,
+          "count": 40700,
+          "mk": 2
+        },
+        "moving": {
+          "begin": 27495,
+          "count": 1984,
+          "mk": 12
+        }
+      },
+      "cflnumber": 0.1,
+      "dp_m": 0.02,
+      "motion_duration_s": 12.0,
+      "nb": 29479,
+      "nbf": 27495,
+      "np": 70179,
+      "xml_constants": {
+        "B": 554965.71429,
+        "Dp": 0.02,
+        "Gamma": 7.0,
+        "MassBound": 0.008,
+        "MassFluid": 0.008,
+        "Rhop0": 1000.0
+      }
+    }
+  }
+}

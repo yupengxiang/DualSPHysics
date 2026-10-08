@@ -43,6 +43,7 @@ def test_f7_outer_v10_metadata_only_bi4_and_home_attempt_output(tmp_path: Path, 
     assert result["execution"]["output_filesystem"] == "home"
     assert result["resource_request"]["max_rss_bytes"] == 512 * 1024**2
     assert all(path.suffix != ".bi4" for path in seen)
+    assert any(item["role"] == "f7_initial_qa_outer_v10" for item in result["source_bindings"])
     for item in result["source_bindings"]:
         if item["role"] in {"half_generated_bi4", "baseline_generated_bi4"}:
             assert item["content_scope"] == "metadata_only_stat_known_sha"
@@ -52,6 +53,7 @@ def test_f7_outer_v10_metadata_only_bi4_and_home_attempt_output(tmp_path: Path, 
     assert preflight["hdf5_opened"] is False
     assert preflight["raw_opened"] is False
     assert preflight["output_dir_template"] == "{attempt_root}/qa"
+    assert preflight["source_count"] == 13
 
 
 def test_f7_outer_v10_rejects_external_or_existing_home_output(tmp_path: Path):

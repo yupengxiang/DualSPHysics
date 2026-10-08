@@ -230,7 +230,8 @@ def _validate_inner(path: Path) -> tuple[dict[str, Any], dict[str, Any], list[di
 
 
 def build_request(*, inner_request: Path = V8_REQUEST, output: Path,
-                  output_dir_template: str = DEFAULT_OUTPUT_TEMPLATE) -> dict[str, Any]:
+                  output_dir_template: str = DEFAULT_OUTPUT_TEMPLATE,
+                  request_id: str = "f7-s2-half-cfl-initial-typed-qa-outer-v10-003") -> dict[str, Any]:
     inner_request = inner_request.expanduser().resolve()
     if not inner_request.is_file() or output.exists():
         raise OuterQAError("missing inner request or existing outer output")
@@ -240,17 +241,20 @@ def build_request(*, inner_request: Path = V8_REQUEST, output: Path,
     worker_stat = _snapshot(V8_SCRIPT)
     worker = {"role": "f7_initial_qa_worker_v8", "path": str(V8_SCRIPT.resolve()),
               **worker_stat, "sha256": sha256_file(V8_SCRIPT), "content_scope": "source_content"}
+    outer_stat = _snapshot(Path(__file__))
+    outer = {"role": "f7_initial_qa_outer_v10", "path": str(Path(__file__).resolve()),
+             **outer_stat, "sha256": sha256_file(Path(__file__)), "content_scope": "source_content"}
     inner_binding = {"role": "f7_initial_qa_request_v8", "path": str(inner_request),
                      **_snapshot(inner_request), "sha256": sha256_file(inner_request),
                      "content_scope": "source_content"}
     value: dict[str, Any] = {
-        "schema": SCHEMA, "request_id": "f7-s2-half-cfl-initial-typed-qa-outer-v10-001",
+        "schema": SCHEMA, "request_id": request_id,
         "status": "READY_FOR_PARENT_CPU_GUARD", "role": "DEVELOPMENT", "family_id": "F7",
         "case_id": inner.get("case_id"), "qualification": dict(UNKNOWN),
         "model_invoked": False, "cfd_invoked": False, "launch_allowed": False,
         "inner_request": {"path": str(inner_request), "sha256": inner["sha256"],
                           "schema": inner["schema"], "immutable": True},
-        "source_bindings": [inner_binding, worker, *inputs],
+        "source_bindings": [inner_binding, outer, worker, *inputs],
         "xml_semantics": xml_semantics,
         "identity_gate": {
             "checks": ["decoder header CaseNp/Np/Nb/Nbf when present", "Np", "Nb", "Nbf", "dp", "CFL", "motion duration",
@@ -460,7 +464,7 @@ def preflight(request_path: Path) -> dict[str, Any]:
         elif item.get("sha256") != sha256_file(path):
             raise OuterQAError(f"outer source SHA differs: {path}")
     return {"status": "READY_FOR_PARENT_CPU_SLOT", "inner_sha256": inner["sha256"],
-            "source_count": len(inputs) + 2, "xml_semantics": semantics,
+            "source_count": len(request.get("source_bindings", [])), "xml_semantics": semantics,
             "output_dir_template": request["execution"]["output_dir_template"],
             "raw_opened": False, "hdf5_opened": False, "model_invoked": False,
             "cfd_invoked": False, "qualification": dict(UNKNOWN)}
