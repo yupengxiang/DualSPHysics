@@ -17,3 +17,11 @@
 12. 六族finite-region/material/event canary代码与原请求已集成，四项来源/frame/raw-parent反例测试通过；root独立核验CURRENT、转换报告、生成XML、原生Run日志/收据与config来源，见SIX_FAMILY_LABEL_CANARY_ROOT_METADATA_VERIFICATION_001.json（仅小文件及H5 stat，未实际读取H5）。F3/F4/F5/F7与登记generic rawanchor对应，root requests/*-family-label-canary-v1-root-001.json已添加同父v8完整入口依赖、实际root launch commit绑定与新有限7200秒CPU预留范围；均尚未启动。F1 H110、F6 omega095原canary保持独立范围，需新增lower-head与DXYZ/YAW锚点对应请求，不能冒充锚点标签闭合。事件仅为saved-chord首个观测交点与线性估计，连续首次到达仍UNKNOWN；正/负坐标轴净通量不自动等于目的区域入口。
 
 三名既有代理继续各分支；root负责集成、独立核验、全局状态及同父资源排程。当前无活跃CFD；F3完整836帧原始锚点正在实际重建，临时typed文件已写出并进行收尾检查，仍占用父IO槽，尚未取得成功收据。随后依次推进F7选定帧观察器、half-CFL初态QA、F2轨迹标签及其余完整原始锚点。下一次运行须实时核对库存并原子预留。
+
+2026-10-08T11:12Z forward状态（上述旧版本记录保留历史）：
+
+- PORTABLE_REAL_CANCEL_AND_V28_ACTUAL_GRAPH_ROOT_VERIFICATION_001.json：真实V10创建预留、捕获取消、正CPU/字节费用、释放预留；V15/V14/strace/V10实际取消链通过。V21仅测试stop_group，full supervisor run尚未验证；tiny科学engine与部分V14闭合validator为fixture，不能代替真实8.64GB回放。确切consumer v28生产加载图独立PASS，root重定位test发现绝对冻结路径差异；cold IO终态收尾余量仍待forward。
+- F7 initial QA-v9尚未启动：prepare误读baseline BI4、NVMe输出不属于Home-only外层记账、CaseNp仅XML未核实native decoder header。等待添加式v10修复。旧v9不得用来直接启动half-CFL solver。
+- F1 lowerhead/F6 DXYZ-YAW标签已另建requests/f1-family-label-canary-v2-raw-anchor-root-001.json及f6同名请求，对应完整raw anchors，单CPU/OMP1、新有限7200s同父预留；父轻预检及CURRENT/原生父/来源小文件SHA核对PASS，H5未读取。旧H110/omega095请求保留。
+- ANCHOR_LABEL_AND_OWNER_SOURCE_REGISTRATION_ROOT_VERIFICATION_026.json：owner-scale-v2、source-support-v2实际builder重建及small source SHA闭合；root独立计算F6物理COM角点最大速度0.1813655976198352m/s。F2/F3保留连续owner与离散质量不同，禁止rescale。event-v2的有限孔径、MK映射、F3初始top坐标发现需forward修复，不能当已经可评估事件。
+- generic-v4原始重建优化已集成，但live parent/content attestation与current stat绑定不足，依赖generic-v3请求尚未集成，暂不执行。已运行F3-v2继续原预算和截止，不修改消费请求或将临时typed当成功。
