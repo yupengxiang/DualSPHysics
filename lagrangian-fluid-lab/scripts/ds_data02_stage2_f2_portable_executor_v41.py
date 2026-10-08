@@ -95,7 +95,7 @@ def write_new(path: Path | str, value: Mapping[str, Any]) -> Path:
 
 
 def _require_file(path: Path | str, role: str) -> Path:
-    target = Path(path).expanduser()
+    target = Path(path).expanduser().resolve()
     if not target.is_file():
         raise PortableV41Error(f"{role} is missing: {target}")
     return target
@@ -287,7 +287,7 @@ def build_parent(*, executor_request: Path | str, output: Path | str,
     request["executor_script"] = {"path": str(SCRIPT), "sha256": sha256_file(SCRIPT), "immutable": True}
     request["v41_forward"] = {
         "schema": FORWARD_SCHEMA,
-        "executor_request": {"path": str(Path(executor_request).expanduser()), "sha256": executor["sha256"]},
+        "executor_request": {"path": str(Path(executor_request).expanduser().resolve()), "sha256": executor["sha256"]},
         "source_contract": dict(contract_item),
         "same_parent_ledger": True, "new_ledger_owner": False,
         "allow_missing_parent": bool(allow_missing_parent),
