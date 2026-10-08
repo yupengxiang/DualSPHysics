@@ -1,0 +1,14 @@
+from pathlib import Path
+import json,hashlib,sys,datetime
+lab=Path.cwd();stage=lab/'campaigns/ds-data-02/stage2';src=stage/'native-reconstruction/f7-half-cfl-v7-root-prepared-001/f7-s2-half-cfl-deferred-request-v7-001.json';d=json.loads(src.read_text());sys.path.insert(0,str(lab/'scripts'));import ds_data02_stage2_external_solver_v6 as run
+sha=run.sha256_file
+assert d['sha256']==run.canonical_sha(d)
+proof=stage/'checkpoints/F7_INITIAL_QA_V12_ACTUAL_INDEPENDENT_VERIFICATION_001.json';v=json.loads(proof.read_text());assert v['status']=='PASS_ACTUAL_INITIAL_IDENTITY_ARRAYS_SOURCE_AND_ACCOUNTING'
+maps=d['input_sha256'];scopes=d['input_content_scope']
+for p in [src,proof,Path(d['qa_gate']['v8_report_path']),Path(v['receipt']),lab/'scripts/ds_data02_stage2_f7_half_cfl_request_v7.py']:
+ maps[str(p.resolve())]=sha(p);scopes[str(p.resolve())]='post_reservation_hash'
+binder=stage/'checkpoints/F7_HALF_CFL_V7_ROOT_BINDER_027.py';assert not binder.exists();binder.write_bytes(Path(__file__).read_bytes());maps[str(binder)]=sha(binder);scopes[str(binder)]='post_reservation_hash'
+d['input_files']=list(maps);d['worktree_root']=str(lab.parent);d['attempt_id']+='-root-forward-001';d['storage_scope']['output_root']=str(Path('/var/tmp/ds02-stage2/F7/F7_S2_HALF_CFL_SAVEDT_V7')/d['attempt_id']);lib=run.OFFICIAL_LIBRARY_ROOT;d['official_library_binding']={'root':str(lib),'files':[{'path':str(lib/name),'sha256':sha(lib/name)} for name in ['libdsphchrono.so','libChronoEngine.so']],'purpose':'exact official libraries prepended to LD_LIBRARY_PATH at actual child launch'}
+d['root_forward_provenance']={'source_request':str(src),'source_request_sha256':sha(src),'root_actual_initial_QA_proof':str(proof),'root_actual_initial_QA_proof_sha256':sha(proof),'completed_QA_receipt_and_inner_report_in_actionable_inputs':True,'source_BI4_content_not_opened_by_binder':True,'parent_authority':'existing DS-DATA-02 goal and original parent limits; no reset/extension','storage_policy':'home_free_floor; historical cumulative byte field is not new cap','guard':'v6 fresh inventory UUID lease and atomic same-parent two-filesystem reservation','scope':'preregistered half-CFL at dp .02 for same finite window and control; numerical reference qualification remains UNKNOWN'}
+d['sha256']=run.canonical_sha(d);checked=run._validate_request(d,verify_content=False);assert len(checked['files'])==len(maps);assert all(Path(q).suffix.lower() not in ['.h5','.hdf5'] for q in maps)
+out=stage/'native-reconstruction/f7-half-cfl-v7-root-prepared-001/f7-s2-half-cfl-solver-v6-root-forward-001.json';assert not out.exists();out.write_text(json.dumps(d,sort_keys=True,indent=2,ensure_ascii=False)+'\n');print(out);print({'input_count':len(maps),'canonical_sha':d['sha256'],'file_sha':sha(out),'preflight':'PASS_METADATA_ONLY','raw_BI4_read':False})
