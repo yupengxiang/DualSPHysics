@@ -27,3 +27,10 @@
 - generic-v4原始重建优化已集成，但live parent/content attestation与current stat绑定不足，依赖generic-v3请求尚未集成，暂不执行。已运行F3-v2继续原预算和截止，不修改消费请求或将临时typed当成功。
 
 F7 selected-nine native observer已实际完成并通过root独立核验：F7_NINE_NATIVE_OBSERVER_ACTUAL_INDEPENDENT_VERIFICATION_001.json。28MB NVMe小读与F3 Home大文件任务分开排程；CPU2.271409s、实际目录360828B、wall8.3373s，同父费用与预留释放闭合。九帧保持70179总粒子及40700流体/325.6kg native sample；原生position/velocity/density有限。0/3/6/9/12查询原生帧括号0、299/300、599/600、899/900、1199/1200。pressure未decode、字段插值未执行；未得积分/输出误差或Q-N信用，下一步真实baseline/half-CFL观察与比较。新标签source/control/semantic反例共10项root测试PASS。
+
+2026-10-08T11:31Z实际forward：
+
+- F3 full836 v2：child returncode0、raw tree完整pre/post一致、正式typed和两个reports写出、全部字段实测相同；worker新typed SHA与CURRENT宣称SHA9020155c...一致。但是parent最终posthash未结束（23个launch hashes，10个after hashes）即达到5400s，整体failed EXCEEDED，CPU329.22809s/实际2480645575B费用闭合且reservation释放。原失败不得改成功；新添加式同父finalization recovery与root新typed哈希独立证明后才给限定信用。此事实在F3_RUNTIME_DEADLINE_AND_F7_INITIAL_QA_FAILURE_ROOT_VERIFICATION_001.json。
+- F7 halfQA v10 exactouter003/root e537893cd实际运行：inner v8初始化六数组和motion stage PASS，但outer失败CaseNp parser未支持实际ullong，failedreceipt/CPU1.386118s/6587228B保存。root独立哈希双方新生成Idp/Posd/Vel/Rhop bin，字节一致；原BI4未二读。消费者修复v11实际头部类型与初态velocity/density检查，halfCFD仍不得提前启动。
+- F2当前401帧真实trajectory labels请求已启动：session88022，supervisor1831300/launcher1831301，单CPU/OMP1/3600s，原子父资源预留。当前大IO槽转给F2；F3已经终态，无并发CFD。静态root检查/小BI4或VTK任务可独立有界排程，不叠加大H5/raw重放。
+- family-label-quality-v1已集成597f30a93，root seven聚焦QA/quality测试PASS。等待真实family labels生成后注册质量/censor/residence/netflux审计；effective physical/control/geometry/recovery graph的development split仍需独立闭合，不能仅用physical_id/trajectory SHA指认安全。
