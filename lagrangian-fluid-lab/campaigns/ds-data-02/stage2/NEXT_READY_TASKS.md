@@ -129,3 +129,11 @@ Actual supervised cold replay is running; unified exec session `84839`, root lau
 ## Root checkpoint 033 — interrupted cold attempt, preserved artifacts
 
 Old exec84839 is missing and all four recorded owned PIDs/process groups are absent; actual raw precheck stopped with a 2,264,442-byte trace, zero stdout/stderr and no created fresh product roots/receipt. Do not rerun047/042 or overwrite artifacts. Reservation remains until same-ledger orphan reconciliation charges a conservative reserved 6000 CPU seconds (actual CPU usage is unrecoverable/UNKNOWN) and exact partial artifact bytes, then releases it. This is execution interruption, not a scientific solver failure. User-level systemd bounded process probe passed; Type=exec, RemainAfterExit=yes retained actual CPUUsageNSec after process exit, allowing monitored long execution outside tool-session lifetime. Probe units are stopped. F7 additional frames302/602/902 snapshot actually completed and root proof443a3ff79 enables selected decode/calibration. Goal remains active; no cold portable completion credit.
+
+
+## 2026-10-08 cold047 closure and managed050 actual launch
+
+- 047 orphan charge reconciled on the same ledger: full reserved 6000 CPU seconds is a conservative ceiling; actual CPU usage stays UNKNOWN. Trace 2,264,442 bytes and receipt 2,822 bytes retained. Reservation removed only by successful failed charge.
+- Fresh 050 V34 request and parent V3 service started as `ds02-f2-cold-v34-050.service` with independent user-manager cgroup, RuntimeMaxSec=6300, KillMode=mixed and CPU accounting. Query live unit and same-ledger reservation/charge; do not restart 047 or reuse 042 outputs.
+- New copied raw/typed/label products, stable worker guards, root proof and relocated evaluator V2 remain pending. This launch does not grant Q-I/Q-N/Q-E.
+- F1 owner-compatible solver preparation, F2 continuum mass repair, F7 4x observer calibration and access/provenance delivery continue under the active full Stage2 goal.
