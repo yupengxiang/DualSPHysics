@@ -308,3 +308,10 @@ ROOT093/094/095/096/097/098/102/103/104/105十次实际CPUdelta闭合：V6真实
 ROOT082 V46父依赖closure 16项实际content validation通过，随后首次真实guardedcold失败于V34相对v5_overlay_template路径在child lab cwd下重复lagrangian-fluid-lab。尚无bundle-target/products，filteredstrace未观察到dataset数组open；真实parentcharge .734478CPUsec/ext135625B/Home3795B（trace133526B），fullsystemd.974359s、.239881s delta及actualreturnedmetadata额外存储待parent-schema专用补账。copy_hash_bytes=8645542997是预声明source-size、不是这次实际copy/read字节。见F2_COLD_V46_ACTUAL_RELATIVE_TEMPLATE_PATH_FAILURE_ROOT_VERIFICATION_082.json；旧metadata/失败receipt/trace不改，consumer准备新V47绝对source-path与V34/V41双metadata校验及新namespace重试。不给cold/label/evaluator信用。
 
 F5新Y-half候选geometry-only模型确认dp.010 Y29→28、dp.005 Y57→56；source Def除了dp/pointref保持、旧Y0候选保留。ROOT106/107两个新的GenCase请求已实际builder+parent metadata prepared并canonical重新计算，绑定20个源码/几何/motion/官方toolchain输入；尚未运行，actual XML mass及guarded VTK clip/support才是下一证据。旧ROOT099/100不消费。完整目标保持ACTIVE，预算/期限不重置，不启动模型或公开发布。
+
+
+2026-10-08 22:31 UTC追加（整体目标ACTIVE）：ROOT106/107 Y-half实际GenCase终态completed。dp.010实际281278fluid/.001kg=281.278kg，相对连续287.736kg少2.244418%，HARDFAIL；dp.005实际2275600fluid/.000125kg=284.450kg，少1.142019%，MARGINAL。没有VTK支持/CFD/Q资格。两个systemd fullCPU1.764285/4.360029s，补记差额共.484922s真实V6 append一次+重复幂等通过，units已stop。新V6支持worker混用GenCase与support envelope字段，尚未消费，由reference准备V7真实metadata链。
+
+F2全401帧V1临时scratch累积及缺动态流header检查已静态识别，V2逐帧清理但真实stat字段mtime_ns访问又失败；V1/V2均NOTRUN，没有raw读取/新资格。V3映射真实os.stat_result并在decoder写入期间轮询128MiB scratch上限，401帧清单、153 derivedcause、solver receipt/command/generatedXML输入的真实metadata preflight PASS。ROOT108新V3 q/manifest父closure23项准备，source raw约9.538GB三遍约28.615GB，1CPU/max10800s/Home256MiB仅新输出+单帧scratch；全原数组SHA第一次在guardedworker reserve之后，不冒称父raw SHA。实际审计仍待启动与终态核验。
+
+V47新的绝对overlay路径/新命名空间真实V34._load_request、V41validate、parentV3 full静态17项content验证PASS，尚未cold执行。旧V46失败保留，专用parent-schema fullCPU差额.239881及实际返回metadata storage费用待consumer；实际cold完成后需全新freshproof/evaluator，不能复用旧ROOT060。最新只读ledger5145charges/0reservations，137.8813742194GPUh/703.9374768556CPUcoreh，硬额度/期限不重置。
