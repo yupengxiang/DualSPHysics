@@ -626,17 +626,23 @@ def verify_manifest_records(manifest: dict[str, Any], expected_contract_path: Pa
     contract_record = manifest.get("contract")
     if not isinstance(contract_record, dict) or contract_record.get("path") != str(expected_contract_path.resolve()):
         raise ValueError("manifest contract binding is wrong")
+    contract_file = regular_file(expected_contract_path, "manifest contract")
+    if contract_file.stat().st_size != contract_record.get("bytes") or sha256(contract_file) != contract_record.get("sha256"):
+        raise ValueError("manifest contract content changed")
     for record_group in manifest.get("runs", {}).values():
         for key in ("observer_report", "root_v8_request", "expected_source_manifest", "runparts", "solver_receipt", "gencase_receipt", "generated_xml"):
             item = record_group.get(key)
             if not isinstance(item, dict):
                 raise ValueError(f"manifest run is missing record {key}")
             path = regular_file(Path(item["path"]), f"manifest {key}")
-            if sha256(path) != item.get("sha256") or path.stat().st_size != item.get("bytes") or path.stat().st_mtime_ns != item.get("mtime_ns"):
+            # mtime_ns remains an audit record, but content SHA/bytes are the
+            # immutable gate so a parent worktree checkout cannot create a
+            # false failure after cherry-pick.
+            if sha256(path) != item.get("sha256") or path.stat().st_size != item.get("bytes"):
                 raise ValueError(f"manifest input changed: {path}")
         for item in record_group.get("control_overlay_xml", []):
             path = regular_file(Path(item["path"]), "manifest control overlay")
-            if sha256(path) != item.get("sha256") or path.stat().st_size != item.get("bytes") or path.stat().st_mtime_ns != item.get("mtime_ns"):
+            if sha256(path) != item.get("sha256") or path.stat().st_size != item.get("bytes"):
                 raise ValueError(f"manifest control overlay changed: {path}")
 
 
