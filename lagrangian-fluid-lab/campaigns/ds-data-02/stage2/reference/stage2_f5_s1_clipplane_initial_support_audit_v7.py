@@ -199,6 +199,18 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
     generated_dp = float(report.get("generated", {}).get("dp_m", -1.0))
     if not _close(generated_dp, identity["expected_dp_m"]):
         raise ValueError("terminal generated XML dp differs from the bound GenCase rung")
+    dynamic_pre = report.get("inputs", {}).get("dynamic_pre", {})
+    dynamic_post = report.get("inputs", {}).get("dynamic_post", {})
+    if not isinstance(dynamic_pre, dict) or not isinstance(dynamic_post, dict):
+        raise ValueError("V4 report has no dynamic pre/post input records")
+    for key in ("fluid_vtk", "bound_vtk"):
+        pre = dynamic_pre.get(key)
+        post = dynamic_post.get(key)
+        if not isinstance(pre, dict) or not isinstance(post, dict):
+            raise ValueError(f"V4 report has no dynamic pre/post record for {key}")
+        for field in ("sha256", "bytes", "mtime_ns", "ctime_ns", "st_dev", "st_ino"):
+            if pre.get(field) != post.get(field):
+                raise ValueError(f"{key} changed between V4 dynamic pre/post checks: {field}")
     report["schema"] = SCHEMA
     report["status"] = "COMPLETED_F5_YHALF_INITIAL_SUPPORT_MASS_CONTROL_AUDIT_V7"
     report["gencase_binding"] = identity
@@ -218,8 +230,10 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         "gencase_request_sha_receipt_sha_checked": True,
         "planned_vs_actual_output_root_recorded": True,
         "support_contract_sha_stat_checked": True,
-        "worker_owned_vtk_full_sha_stat_pre_immediate_post": True,
-        "worker_owned_vtk_hash_scope": "after parent reservation; no builder/local payload hash",
+        "worker_owned_vtk_dynamic_pre_post_sha_stat_equal": True,
+        "worker_owned_vtk_hash_scope": "V4 dynamic_pre/dynamic_post full SHA and stat around the V3 parser, after parent reservation; no builder/local payload hash",
+        "worker_owned_vtk_exact_parser_consumed_byte_hash": "NOT_COMPUTED_BY_V3_READER",
+        "worker_owned_vtk_immediate_consumer_hash_claim": False,
     }
     report["qualification"] = {
         "QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN",
