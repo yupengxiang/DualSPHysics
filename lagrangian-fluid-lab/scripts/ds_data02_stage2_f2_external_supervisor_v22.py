@@ -97,6 +97,14 @@ def build_request(v14_path: Path | str, output_path: Path | str, *,
         "helper_cleanup_grace_seconds": HELPER_CLEANUP_GRACE_SECONDS,
         "cold_terminal_scope": "v20 build/apply helper groups receive the same 25 s TERM→KILL allowance as v14 child cleanup",
     }
+    execution = dict(request.get("execution", {}))
+    execution["outer_entrypoint"] = str(SCRIPT)
+    execution["outer_entrypoint_sha256"] = sha256_file(SCRIPT)
+    execution["outer_command"] = [str(request.get("parent_resource_binding", {}).get("python", "<venv-python>")),
+                                   str(SCRIPT), "run", "--request", "<v22-request>",
+                                   "--parent-pid", "<supervising-parent-pid>"]
+    execution["helper_cleanup_grace_seconds"] = HELPER_CLEANUP_GRACE_SECONDS
+    request["execution"] = execution
     request["limitations"] = list(request.get("limitations", [])) + [
         "v22 forwards the v21 accounting/terminal implementation and only replaces its hard-coded helper cleanup grace.",
         "The parent deadline still bounds child/helper execution; cleanup and ledger finalization are reported separately when the OS delays them.",
