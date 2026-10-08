@@ -338,6 +338,10 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
         time = h["time"][:]
         source = h["source_label"][:]
         masses = h["initial_fluid_mass_kg"][:]
+        if len(time) != EXPECTED_FRAMES or len(source) != EXPECTED_PARTICLES:
+            raise TrajectoryLabelError("operator output frame or identity count differs")
+        if abs(float(time[0])) > 1e-12 or abs(float(time[-1]) - EXPECTED_END_TIME) > 1e-8:
+            raise TrajectoryLabelError("operator output saved time window differs")
         nsource = len(contract_info["config"]["source_regions"])
         total = float(h.attrs["initial_fluid_mass_kg"])
         final = h["final_category"][:]
