@@ -266,3 +266,12 @@ root087静态独立验证：official GenCase clipplane ClipPlaneVec→AddPlane�
 root078补账器首次metadata调用在变更账本前拒绝真实returnedreport缺request字段。原actualreport保持，消费者补独立root-binding侧记/receipt证明后再收费；缺费3.36552CPUsec仍pending，terminal unit保留。root086 F3-S2 official GenCase source-clone实际已启动，BI4已知producerSHA显式声明input_files由parent reserve后hash；旧S1产品不覆盖，等待receipt/费用独立复核。三个既有代理继续工作。
 
 root086实际终态：official GenCase对真实F3-S2 XML+SHA9a776c forcing的新clone运行成功，生成67500fluid×.000216=14.58kg；根从源physical-binding owner .9×.18×.09×1000复算14.58kg，并独立join真实执行命令/source/request/receipt/单charge/prepost输入SHA。源BI4显式声明后父已reserve后fullpreposthash，root未读数组。费用3.3967270000000003CPUsec/62473870B及释放closed，unit已stop。仅exact S2 source/control/initialXML mass前置成立，新VTK支持仍待guarded audit。旧原档错误forcing及细档质量失败保留；下一步修复matched三档，不能把root086当Q资格或完整目标结束。
+
+
+root088/089实际终态：F2 middle/fine parameterized V9 support审计actual完成、根独立XML count/mass、每MK轴边界/计数/严格owner内部、source/candidate/generated parameters+CFL与motion/boundary一致。三档coarse27750/middle222000/fine1776000均18.910848kg，对18.876kg偏差+.184615%。仅initial prereqs成立，CFD/time/output/task Q未授予。worker afterreserve fullprepostVTK SHA/stat与root currentstat稳定，parent只smallinputs不声称VTKfullsha。两service费用tree/CPU/释放核验后stop，初态ladder已交reference继续coarse solvercanary。
+
+root091实际F5官方clip证据审计completed：绑定source/generatedXML、supportreport、officialbinary/template/CHANGES和nm/objdump输入代码，半空间z>=.28(x-2)，连续287.736kg，实际254.477983kg即-11.5585%hardfail；根闭式独立复核质量/体积/误差。修复候选forecast未GenCase、不rescale不放宽门槛。费用/释放closed serviceSTOPPED。
+
+root090 F6实际source namespace mismatch失败已保留/收费/释放/stop，root092新request保留真实historicalreference source XML paths且全部显式SHA绑定，actualworker6/6完成；根独立核每row source/gencase receipt exactpath、source/generatedcasedef和execution parameters，六参数树相同，各哨点三档angular一致S1与S2不同。physicalbody128kg与SPH样本256/257.873535分开；fluid samples coarse5078.125/original5120/fine4904.952kg，finevsoriginal约-4.20%仅诊断且不准当masspass，真实continuousfluidowner仍需来源证明。coarse/fine native支持仍UNKNOWN。费用/释放closedserviceSTOPPED。
+
+消费分支：ROOT078 feeV2真实执行pre-charge失败KeyError cleanup_grace，原charge仍0，不宣称收费闭合；消费者修完整adapter。V42builder实际metadata失败immutable_base_v2_request小JSON时间戳变更，未复制/未reserv；原base请求保留，需小代码/JSON同SHA命名空间stat侧记forward，不允许raw/H5变更忽略。当前无大IO/CFD/GPU运行，三个既有代理继续实现；整体完整goalACTIVE，累计算账 703.8995935894417CPUcoreh（另ROOT078欠3.36552s）、137.8154839296GPUh，hardlimits/deadline不变。
