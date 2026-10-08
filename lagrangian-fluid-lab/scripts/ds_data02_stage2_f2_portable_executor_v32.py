@@ -519,6 +519,7 @@ def build_request(*, v31_request: Path | str, v31_contract: Path | str,
         ("evaluator_v4", SCRIPT_DIR / "ds_data02_stage2_f2_no_model_evaluator_v4.py", "runtime/evaluator/ds_data02_stage2_f2_no_model_evaluator_v4.py"),
         ("evaluator_v3", SCRIPT_DIR / "ds_data02_stage2_f2_no_model_evaluator_v3.py", "runtime/evaluator/ds_data02_stage2_f2_no_model_evaluator_v3.py"),
         ("evaluator_v2", SCRIPT_DIR / "ds_data02_stage2_f2_no_model_evaluator_v2.py", "runtime/evaluator/ds_data02_stage2_f2_no_model_evaluator_v2.py"),
+        ("evaluator_v4_source_request", evaluator_path, "runtime/evaluator/frozen-evaluator-v4-source-request.json"),
         ("operator_v14", SCRIPT_DIR / "ds_data02_stage2_f2_replay_v14.py", "runtime/evaluator/ds_data02_stage2_f2_replay_v14.py"),
         ("operator_v15", SCRIPT_DIR / "ds_data02_stage2_f2_replay_v15.py", "runtime/evaluator/ds_data02_stage2_f2_replay_v15.py"),
         ("operator_v16", SCRIPT_DIR / "ds_data02_stage2_f2_flux_v16.py", "runtime/evaluator/ds_data02_stage2_f2_flux_v16.py"),
@@ -557,7 +558,11 @@ def build_request(*, v31_request: Path | str, v31_contract: Path | str,
         "runtime_sources": runtime_specs,
         "execution": {
             "command": [str(Path(sys.executable)), "-B", "-I", str(SCRIPT), "run",
-                         "--request", "<this-request>", "--io-slot-approved", "--parent-pid", "<parent-pid>"],
+                         "--request", "<this-request>", "--io-slot-approved", "--parent-pid", "<parent-pid>",
+                         "--max-wall-seconds", "6000"],
+            "evaluator_command": [str(Path(sys.executable)), "-B", "-I", str(SCRIPT), "evaluate",
+                                  "--request", "<this-request>", "--evaluator-proof", "<fresh-proof>",
+                                  "--parent-pid", "<parent-pid>"],
             "stages": ["copy_overlay", "seal_overlay", "private_raw_to_typed_to_label",
                        "private_sdk_module_audit", "private_no_model_evaluator"],
             "fresh_subprocess": True, "bytecode": "-B", "isolated_python": "-I",
@@ -733,7 +738,8 @@ def run(request_path: Path | str, *, io_slot_approved: bool, parent_pid: int | N
             raise PortableExecutorError("worker report has no v16 result for evaluator")
         result_path = Path(result_value).resolve()
         frozen_path = aliases["v15"]
-        evaluator_source = load_json(request["evaluator_v4_source_request"]["path"])
+        evaluator_source_item = next(x for x in runtime_records if x["role"] == "evaluator_v4_source_request")
+        evaluator_source = load_json(evaluator_source_item["path"])
         evaluator_request_path = output_root / "evaluator-v4-relocated-request.json"
         evaluator_request = _rewrite_evaluator_request(
             evaluator_source, result=result_path, frozen=frozen_path, proof=proof,
@@ -785,6 +791,95 @@ def run(request_path: Path | str, *, io_slot_approved: bool, parent_pid: int | N
             "evaluator_status": evaluator_status, "output_root": str(output_root)}
 
 
+def evaluate_existing(request_path: Path | str, *, evaluator_proof: Path,
+                      parent_pid: int | None = None, max_wall_seconds: float | None = 300.0) -> dict[str, Any]:
+    """Run only the private JSON evaluator after a completed raw worker.
+
+    This is the post-worker handoff used when the independent proof is
+    produced by the parent guard after the raw/typed/label stage.  It reads
+    no HDF5/BI4 and refuses to consult the original evaluator request or
+    original runtime once the copied bundle exists.
+    """
+    request = _load_request(request_path)
+    if parent_pid is not None and (parent_pid <= 1 or not Path(f"/proc/{parent_pid}").exists()):
+        raise PortableExecutorError("parent guard process is not alive")
+    proof = _require_file(evaluator_proof, "fresh independent proof")
+    output_root = Path(request["fresh_roots"]["output_root"]).expanduser().resolve()
+    target_root = Path(request["fresh_roots"]["target_root"]).expanduser().resolve()
+    if not output_root.is_dir() or not target_root.is_dir():
+        raise PortableExecutorError("completed fresh executor roots are missing")
+    executor_report_path = output_root / "portable-executor-report-v32.json"
+    if not executor_report_path.is_file():
+        raise PortableExecutorError("raw executor report is missing")
+    executor_report = load_json(executor_report_path)
+    if executor_report.get("original_path_fallback") != "FORBIDDEN":
+        raise PortableExecutorError("raw executor report permits original-path fallback")
+    raw_item = executor_report.get("stages", {}).get("raw_to_typed_to_label", {})
+    raw_report_path = Path(str(raw_item.get("report", ""))).expanduser().resolve()
+    raw_report_path = _require_file(raw_report_path, "fresh raw-to-label report")
+    raw_report = load_json(raw_report_path)
+    result_value = raw_report.get("typed_to_label", {}).get("v16_forward", {})
+    result_value = result_value.get("result") if isinstance(result_value, Mapping) else None
+    if not isinstance(result_value, str):
+        raise PortableExecutorError("fresh raw-to-label report has no v16 result")
+    result_path = _require_file(result_value, "fresh v16 result")
+    frozen_path = _require_file(output_root / "relocated-runtime" / "f2-s1-replay-request-v15-relocated.json",
+                                "fresh relocated frozen v15 request")
+    runtime_records: list[dict[str, Any]] = []
+    runtime_root = target_root / "runtime"
+    for raw in request.get("runtime_sources", []):
+        if not isinstance(raw, Mapping):
+            raise PortableExecutorError("runtime source is malformed")
+        role = str(raw.get("role", ""))
+        target = (target_root / _safe_rel(raw.get("target_relative_path"), f"runtime {role}")).resolve()
+        target = _require_file(target, role)
+        expected = _sha(raw.get("sha256"), f"runtime {role}.sha256")
+        if sha256_file(target) != expected:
+            raise PortableExecutorError(f"copied runtime changed: {role}")
+        item = dict(raw)
+        item["path"] = str(target)
+        item["source_path_provenance"] = str(raw.get("path"))
+        runtime_records.append(item)
+    evaluator_source_item = next((x for x in runtime_records if x.get("role") == "evaluator_v4_source_request"), None)
+    if not isinstance(evaluator_source_item, Mapping):
+        raise PortableExecutorError("copied evaluator source request is missing")
+    evaluator_source = load_json(evaluator_source_item["path"])
+    evaluator_request_path = output_root / "evaluator-v4-relocated-request-forward.json"
+    evaluator_request = _rewrite_evaluator_request(
+        evaluator_source, result=result_path, frozen=frozen_path, proof=proof,
+        raw_report=raw_report_path, runtime={x["role"]: x for x in runtime_records},
+        output=evaluator_request_path)
+    evaluator_item = next((x for x in runtime_records if x.get("role") == "evaluator_v4"), None)
+    python_item = next((x for x in runtime_records if x.get("role") == "python_executable"), None)
+    if not isinstance(evaluator_item, Mapping) or not isinstance(python_item, Mapping):
+        raise PortableExecutorError("copied evaluator/python roles are missing")
+    python_path = Path(str(python_item.get("invocation_path", python_item.get("source_path_provenance")))).expanduser()
+    evaluator_report_path = output_root / "no-model-evaluator-v4-forward.json"
+    code, stdout, stderr = _run_private_evaluator(
+        python_path, Path(str(evaluator_item["path"])), evaluator_request,
+        evaluator_report_path, deadline=(time.monotonic() + max_wall_seconds if max_wall_seconds else None))
+    (output_root / "evaluator-forward.stdout.log").write_text(stdout, encoding="utf-8")
+    (output_root / "evaluator-forward.stderr.log").write_text(stderr, encoding="utf-8")
+    if code != 0:
+        raise PortableExecutorError(f"private evaluator failed with {code}: {stderr[-1000:]}")
+    report = {
+        "schema": "ds02.stage2.f2-portable-evaluator-forward-report.v1",
+        "status": "PASS_DEVELOPMENT_RAW_TYPED_LABEL_OPERATOR_TRIAL_V4",
+        "request": {"path": str(Path(request_path).expanduser().resolve()), "sha256": sha256_file(request_path)},
+        "fresh_executor_report": {"path": str(executor_report_path), "sha256": sha256_file(executor_report_path)},
+        "fresh_result": {"path": str(result_path), "sha256": sha256_file(result_path)},
+        "fresh_raw_report": {"path": str(raw_report_path), "sha256": sha256_file(raw_report_path)},
+        "independent_proof": {"path": str(proof), "sha256": sha256_file(proof)},
+        "evaluator_request": {"path": str(evaluator_request_path), "sha256": sha256_file(evaluator_request_path)},
+        "evaluator_report": {"path": str(evaluator_report_path), "sha256": sha256_file(evaluator_report_path)},
+        "hdf5_or_bi4_content_read": False, "model_invoked": False, "cfd_invoked": False,
+        "original_path_fallback": "FORBIDDEN", "qualification": dict(UNKNOWN),
+    }
+    report["sha256"] = canonical_sha(report)
+    report_path = write_new(output_root / "portable-evaluator-forward-report-v32.json", report)
+    return {"status": report["status"], "report": str(report_path), "sha256": report["sha256"]}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -807,6 +902,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     run_parser.add_argument("--parent-pid", type=int)
     run_parser.add_argument("--evaluator-proof", type=Path)
     run_parser.add_argument("--max-wall-seconds", type=float)
+    evaluate_parser = sub.add_parser("evaluate")
+    evaluate_parser.add_argument("--request", type=Path, required=True)
+    evaluate_parser.add_argument("--evaluator-proof", type=Path, required=True)
+    evaluate_parser.add_argument("--parent-pid", type=int)
+    evaluate_parser.add_argument("--max-wall-seconds", type=float, default=300.0)
     args = parser.parse_args(argv)
     try:
         if args.command == "build-request":
@@ -816,10 +916,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                                   target_root=args.target_root, output_root=args.output_root)
         elif args.command == "preflight":
             value = preflight(args.request, args.output)
-        else:
+        elif args.command == "run":
             value = run(args.request, io_slot_approved=args.io_slot_approved,
                         parent_pid=args.parent_pid, evaluator_proof=args.evaluator_proof,
                         max_wall_seconds=args.max_wall_seconds)
+        else:
+            value = evaluate_existing(args.request, evaluator_proof=args.evaluator_proof,
+                                      parent_pid=args.parent_pid,
+                                      max_wall_seconds=args.max_wall_seconds)
     except (PortableExecutorError, OSError, ValueError, TypeError, json.JSONDecodeError) as error:
         print(ERROR_PREFIX + str(error), file=sys.stderr)
         return 2
