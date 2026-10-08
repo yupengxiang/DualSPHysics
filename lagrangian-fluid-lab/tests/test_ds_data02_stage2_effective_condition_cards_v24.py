@@ -45,6 +45,8 @@ def test_actual_cards_have_separate_components_and_unknown_physics(tmp_path: Pat
     assert all(card["task_eligibility"]["dynamical_impact"] == "UNKNOWN" for card in result["cards"])
     assert all(card["condition_evidence"]["solver_receipt_binding"]["all_bound_paths_present"] for card in result["cards"])
     assert result["read_policy"]["materialized_label_h5_opened"] is False
+    assert result["upstream_quality_product_read_policy"]["materialized_label_h5_opened"] is True
+    assert all(card["label_product_binding"]["upstream_quality_product_materialized_label_h5_opened"] is True for card in result["cards"])
     assert result["read_policy"]["original_trajectory_h5_opened"] is False
     assert result["read_policy"]["part_bi4_opened"] is False
     assert result["read_policy"]["solver_started"] is False

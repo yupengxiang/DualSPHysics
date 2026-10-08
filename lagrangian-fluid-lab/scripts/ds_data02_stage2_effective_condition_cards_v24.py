@@ -406,6 +406,9 @@ def build_cards(current_path: Path | str, quality_manifest_path: Path | str,
             "source_role": quality_case.get("source_role"),
             "source_role_basis": quality_case.get("source_role_basis"),
             "producer_split": quality_case.get("split"),
+            "upstream_quality_product_materialized_label_h5_opened": quality_report.get("read_policy", {}).get(
+                "materialized_label_h5_opened"
+            ),
             "label_report": {"path": str(label_report), "sha256": sha256_file(label_report)},
             "labels_h5": {
                 "path": label_source.get("labels_h5"),
@@ -564,6 +567,7 @@ def build_cards(current_path: Path | str, quality_manifest_path: Path | str,
             "solver_started": False,
             "model_invoked": False,
         },
+        "upstream_quality_product_read_policy": _copy_json(quality_report.get("read_policy") or {}),
     }
     output = Path(output).expanduser().resolve()
     if output.exists():
