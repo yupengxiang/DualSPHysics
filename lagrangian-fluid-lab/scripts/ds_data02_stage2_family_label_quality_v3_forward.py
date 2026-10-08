@@ -30,7 +30,6 @@ _SPEC.loader.exec_module(_BASE)
 
 
 REQUEST_SCHEMA = "ds02.stage2.family-label-quality-request.v3-forward-001"
-ATTEMPT_ID = "family-label-quality-v3-f1-f5-forward-001"
 RUNTIME_FAMILY_ID = "infra"
 
 sha256_file = _BASE.sha256_file
@@ -67,27 +66,35 @@ def _request_identity(entries: list[dict[str, Any]]) -> tuple[str, str, list[str
     return runtime_family, f"DS02_STAGE2_FAMILY_LABEL_QUALITY_V3_{family_suffix}", families
 
 
-def _source_inputs(root: Path) -> list[Path]:
+def _attempt_id(families: list[str]) -> str:
+    """Make the attempt identity reflect the exact family scope."""
+    return "family-label-quality-v3-" + "-".join(f.lower() for f in families) + "-forward-002"
+
+
+def _source_inputs(runtime_root: Path, worker_root: Path | None = None) -> list[Path]:
+    worker_root = runtime_root if worker_root is None else worker_root
     return [
-        root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3_forward.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v2.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py",
-        root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",
+        worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3_forward.py",
+        worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3.py",
+        worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v2.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",
     ]
 
 
 def make_request(manifest_path: Path | str, output: Path | str,
-                 worktree_root: Path | str) -> dict[str, Any]:
+                 worktree_root: Path | str,
+                 worker_root: Path | str | None = None) -> dict[str, Any]:
     """Prepare a strict, source-bound CPU request without reading source H5s."""
     manifest_path, manifest = read_json(manifest_path, "family label quality v3 forward manifest")
     entries = _BASE._validate_manifest_payload(manifest, check_paths=True, verify_artifacts=False)
     root = Path(worktree_root).expanduser().resolve()
-    source_inputs = _source_inputs(root)
+    script_root = Path(worker_root).expanduser().resolve() if worker_root is not None else root
+    source_inputs = _source_inputs(root, script_root)
     for path in source_inputs:
-        require_file(path, "quality v3 forward source")
+        require_file(str(path), "quality v3 forward source")
 
     inputs: list[Path] = [manifest_path, *source_inputs]
     current_paths: set[Path] = set()
@@ -142,7 +149,7 @@ def make_request(manifest_path: Path | str, output: Path | str,
             input_hashes[str(path)] = sha256_file(path)
 
     runtime_family, case_id, families = _request_identity(entries)
-    worker = root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3_forward.py"
+    worker = script_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v3_forward.py"
     label_bytes = sum(Path(entry["labels_h5"]).stat().st_size for entry in entries)
     role_counts = {
         role: sum(entry["source_role"] == role for entry in entries)
@@ -151,7 +158,7 @@ def make_request(manifest_path: Path | str, output: Path | str,
     request = {
         "schema": "ds02.runner-request.v1",
         "request_schema": REQUEST_SCHEMA,
-        "attempt_id": ATTEMPT_ID,
+        "attempt_id": _attempt_id(families),
         "case_id": case_id,
         "family_id": runtime_family,
         "dataset_families": families,
@@ -165,7 +172,7 @@ def make_request(manifest_path: Path | str, output: Path | str,
         "command": [
             "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
             str(worker), "run", "--manifest", str(manifest_path),
-            "--output", "{attempt_root}/family-label-quality-v3-f1-f5.json",
+            "--output", "{attempt_root}/family-label-quality-v3-" + "-".join(f.lower() for f in families) + ".json",
         ],
         "input_files": [str(path) for path in unique_inputs],
         "input_sha256": input_hashes,
@@ -232,6 +239,7 @@ def main(argv: list[str] | None = None) -> int:
     make_request_parser.add_argument("--manifest", type=Path, required=True)
     make_request_parser.add_argument("--output", type=Path, required=True)
     make_request_parser.add_argument("--worktree-root", type=Path, required=True)
+    make_request_parser.add_argument("--worker-root", type=Path)
     run_parser = sub.add_parser("run")
     run_parser.add_argument("--manifest", type=Path, required=True)
     run_parser.add_argument("--output", type=Path, required=True)
@@ -241,7 +249,7 @@ def main(argv: list[str] | None = None) -> int:
         raw_entries = payload.get("entries") if isinstance(payload, dict) else payload
         make_manifest(raw_entries, args.output)
     elif args.command == "make-request":
-        make_request(args.manifest, args.output, args.worktree_root)
+        make_request(args.manifest, args.output, args.worktree_root, args.worker_root)
     else:
         run(args.manifest, args.output)
     return 0

@@ -24,6 +24,7 @@ def test_cross_family_request_uses_runtime_infra_namespace() -> None:
     assert runtime_family == "infra"
     assert case_id == "DS02_STAGE2_FAMILY_LABEL_QUALITY_V3_F1_F5"
     assert families == ["F1", "F5"]
+    assert QUALITY._attempt_id(families) == "family-label-quality-v3-f1-f5-forward-002"
 
 
 def test_single_family_request_retains_runtime_family() -> None:
@@ -81,3 +82,38 @@ def test_actual_f1_f7_manifest_has_complete_family_scope() -> None:
     assert manifest["coverage"]["pending_families"] == []
     assert manifest["coverage"]["qualification_credit"] == "none"
     assert manifest["label_semantics_policy"]["physical_fate"] == "UNKNOWN"
+
+
+@pytest.mark.skipif(
+    not (
+        Path(
+            "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/"
+            "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/"
+            "family-label-quality-v3/f1-f7-source-role-manifest-forward-001.json"
+        ).is_file()
+        and Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/"
+                 "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py").is_file()
+    ),
+    reason="actual F1-F7 manifest or root v8 sources are not mounted",
+)
+def test_actual_make_request_binds_seven_scope_without_h5_prepare_hash(tmp_path: Path) -> None:
+    manifest = Path(
+        "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/"
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/"
+        "family-label-quality-v3/f1-f7-source-role-manifest-forward-001.json"
+    )
+    runtime_root = Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics")
+    worker_root = Path("/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics")
+    request = QUALITY.make_request(manifest, tmp_path / "request.json", runtime_root, worker_root)
+    assert request["family_id"] == "infra"
+    assert request["dataset_families"] == ["F1", "F2", "F3", "F4", "F5", "F6", "F7"]
+    assert request["attempt_id"].endswith("f1-f2-f3-f4-f5-f6-f7-forward-002")
+    assert request["launch_allowed"] is True
+    assert request["source_cost"]["original_trajectory_h5_bytes_read"] == 0
+    assert request["source_cost"]["part_bi4_bytes_read"] == 0
+    assert len(request["entries"]) == 7
+    assert len(request["input_files"]) == len(request["input_sha256"])
+    assert all(Path(path).is_file() for path in request["input_files"])
+    label_inputs = [path for path in request["input_files"] if path.endswith("native-labels.h5")]
+    assert len(label_inputs) == 6  # F2's recovered product has its historical H5 filename.
+    assert request["command"][1].startswith(str(worker_root))
