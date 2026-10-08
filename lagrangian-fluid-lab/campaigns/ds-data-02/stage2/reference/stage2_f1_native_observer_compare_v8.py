@@ -56,6 +56,7 @@ RUNNER = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py"
 STRICT = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 RUNTIME = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
 V6_RUNTIME = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
+V2_RUNTIME = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
 COMPARE_WORKER = REFERENCE / "stage2_native_observer_empirical_compare_v1.py"
 QUALITY = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/review-source/QUALITY_LABEL_SPLIT_ZH.md"
 S1_AUDIT = REFERENCE / "stage2_f1_s1_geometry_semantics_audit_v2.json"
@@ -488,7 +489,7 @@ def make_request(group_id: str, contract: dict[str, Any], input_paths: list[Path
     output_name = f"{group_id}_empirical_compare_v8.json"
     all_inputs = [
         Path(__file__), COMPARE_WORKER, CONTRACT_PATH, MANIFEST_PATH,
-        RUNNER, STRICT, RUNTIME, V6_RUNTIME, PYTHON_RESOLVED,
+        RUNNER, STRICT, RUNTIME, V6_RUNTIME, V2_RUNTIME, PYTHON_RESOLVED,
         S1_AUDIT, S2_CONTRACT, QUALITY, ROOT_PROOF,
         *input_paths,
     ]
@@ -560,6 +561,7 @@ def make_request(group_id: str, contract: dict[str, Any], input_paths: list[Path
             "strict_guard": str(STRICT.resolve()),
             "runtime": str(RUNTIME.resolve()),
             "v6_runtime": str(V6_RUNTIME.resolve()),
+            "v2_runtime": str(V2_RUNTIME.resolve()),
             "parent_cpu_guard_required": True,
             "gpu": "none",
             "solver_launch": "forbidden",
