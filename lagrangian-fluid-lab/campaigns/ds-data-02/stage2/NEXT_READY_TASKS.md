@@ -264,3 +264,5 @@ root083/084追加（整体goal ACTIVE）：F2 middle dp.0044与fine dp.0022官�
 root087静态独立验证：official GenCase clipplane ClipPlaneVec→AddPlane→ClipPoint反汇编绑定，有限点保留n·(x-p)<=0，根闭式矩形+三角形有理数独立得到F5所述region .287736m3/287.736kg；此次未运行F5源guarded审计、不读VTK/BI4/H5、不授予support或科学资格。见F5_CLIPPLANE_STATIC_IMPLEMENTATION_INDEPENDENT_ROOT_CHECK_087.json，源几何闭合与表示修复继续交reference。
 
 root078补账器首次metadata调用在变更账本前拒绝真实returnedreport缺request字段。原actualreport保持，消费者补独立root-binding侧记/receipt证明后再收费；缺费3.36552CPUsec仍pending，terminal unit保留。root086 F3-S2 official GenCase source-clone实际已启动，BI4已知producerSHA显式声明input_files由parent reserve后hash；旧S1产品不覆盖，等待receipt/费用独立复核。三个既有代理继续工作。
+
+root086实际终态：official GenCase对真实F3-S2 XML+SHA9a776c forcing的新clone运行成功，生成67500fluid×.000216=14.58kg；根从源physical-binding owner .9×.18×.09×1000复算14.58kg，并独立join真实执行命令/source/request/receipt/单charge/prepost输入SHA。源BI4显式声明后父已reserve后fullpreposthash，root未读数组。费用3.3967270000000003CPUsec/62473870B及释放closed，unit已stop。仅exact S2 source/control/initialXML mass前置成立，新VTK支持仍待guarded audit。旧原档错误forcing及细档质量失败保留；下一步修复matched三档，不能把root086当Q资格或完整目标结束。
