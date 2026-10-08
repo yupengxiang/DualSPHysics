@@ -38,6 +38,7 @@ WORKER = REPO / (
     "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/"
     "stage2_native_physical_observer_v1.py"
 )
+BUILDER = Path(__file__).resolve()
 PYTHON = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python")
 DECODER = Path(
     "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/"
@@ -140,6 +141,7 @@ def build() -> dict[str, Any]:
         if frame is not None
     })
     input_paths = [
+        BUILDER,
         WORKER,
         PYTHON,
         DISPATCH,
