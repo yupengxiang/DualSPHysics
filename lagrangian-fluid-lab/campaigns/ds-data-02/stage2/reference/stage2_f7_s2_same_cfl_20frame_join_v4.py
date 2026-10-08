@@ -390,7 +390,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "identity": {"family_id": FAMILY, "sentinel_id": SENTINEL, "physical_case_id": PHYSICAL_CASE, "same_cfl_only": True},
         "scope": {"old_selected_frame_count": 17, "new_selected_frame_count": 3, "joined_frame_count": 20, "frame_ids": MERGED_FRAMES, "hdf5_read": False, "bi4_read": False, "decoder_launch": False, "particle_field_interpolation": "NOT_PERFORMED", "neighbor_join_only": True},
         "source": {"raw_root": str(Path(args.raw_root).resolve()), "generated_xml": record(args.generated_xml, "generated XML"), "runparts": record(args.runparts, "RunPARTs")},
-        "source_observers": {"same_17": record(args.same_observer, "17-frame observer"), "neighbor_3": record(args.neighbor_observer, "3-frame observer"), "common_identity": old_identity, "producer_receipt": producer_identity},
+        "source_observers": {
+            "same_17": record(args.same_observer, "17-frame observer"),
+            "neighbor_3": record(args.neighbor_observer, "3-frame observer"),
+            "same_17_identity": old_identity,
+            "neighbor_3_identity": new_identity,
+            "common_identity_contract": "PASS_ALL_PHYSICAL_FIELDS_AND_CONTENT; decoder-source checkout path may differ but bytes/SHA/argv contract must match",
+            "producer_receipt": producer_identity,
+        },
         "source_integrity": {
             "status": "PASS_COMPLETE_PRE_POST_RECORDS_FOR_ALL_20_FRAMES_V4",
             "pre_decode_records": [item["pre_decode"] for item in merged_records],
