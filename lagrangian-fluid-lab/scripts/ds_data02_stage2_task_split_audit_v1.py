@@ -347,7 +347,9 @@ def audit(current_path: Path | str, lineage_path: Path | str, source_manifest_pa
                 role = role_by_component[component_id]
                 globally_assigned.setdefault(key, set()).add(task_id)
             records.append({
-                "family_id": key[0], "physical_case_id": key[1], "component_id": component_id,
+                "family_id": key[0], "physical_case_id": key[1],
+                "runtime_case_alias": base_record.get("runtime_case_alias"),
+                "component_id": component_id,
                 "task_status": task_status, "task_development_role": role,
                 "global_equivalence_unresolved": base_record["unresolved_reasons"],
                 "global_promotion_status_unchanged": "UNRESOLVED_EXCLUDED",
