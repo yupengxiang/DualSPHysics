@@ -567,13 +567,14 @@ def make_request(manifest_path: Path | str, output: Path | str, worktree_root: P
     entries = _validate_manifest_payload(manifest, check_paths=True, verify_artifacts=False)
     root = Path(worktree_root).expanduser().resolve()
     worker = root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_family_label_quality_v2.py"
+    runtime_v6 = root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
     dispatch = root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py"
     strict = root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
     runtime = root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
-    for path in (worker, dispatch, strict, runtime):
+    for path in (worker, runtime_v6, dispatch, strict, runtime):
         require_file(str(path), "quality request source")
     current_paths = set()
-    inputs = [manifest_path, worker, dispatch, strict, runtime]
+    inputs = [manifest_path, worker, runtime_v6, dispatch, strict, runtime]
     if isinstance(manifest.get("effective_split_audit"), dict):
         inputs.append(require_file(manifest["effective_split_audit"].get("path"), "effective split audit"))
     for entry in entries:

@@ -595,6 +595,7 @@ def make_request(current_path: Path | str, lineage_path: Path | str,
     worker = root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_equivalence_split_audit_v1.py"
     if runtime_paths is None:
         runtime_paths = (
+            root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
             root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py",
             root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py",
             root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",

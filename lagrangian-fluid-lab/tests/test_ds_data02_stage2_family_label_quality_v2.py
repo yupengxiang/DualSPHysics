@@ -61,3 +61,34 @@ def test_manifest_rejects_missing_external_split_policy(tmp_path: Path) -> None:
     with pytest.raises(QUALITY.QualityError, match="effective split proof external"):
         QUALITY._validate_manifest_payload(payload, check_paths=False, verify_artifacts=False)
 
+
+@pytest.mark.skipif(
+    not Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_DBC_LOWER_HEAD_V1/f1-family-label-canary-v2-lowerhead-root-forward-001/label-report.json").is_file(),
+    reason="actual F1 materialized canary is not mounted",
+)
+def test_request_binds_v6_dependency_and_uses_generic_audit_kind(tmp_path: Path) -> None:
+    base = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_ECC_THICK_DBC_LOWER_HEAD_V1/f1-family-label-canary-v2-lowerhead-root-forward-001")
+    manifest = tmp_path / "manifest.json"
+    QUALITY.make_manifest([{
+        "entry_key": "F1-lowerhead",
+        "family_id": "F1",
+        "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+        "report": str(base / "label-report.json"),
+        "labels_h5": str(base / "native-labels.h5"),
+        "split": "development",
+    }], manifest)
+    root = tmp_path / "root"
+    scripts = root / "lagrangian-fluid-lab" / "scripts"
+    scripts.mkdir(parents=True)
+    for name in (
+        "ds_data02_stage2_family_label_quality_v2.py",
+        "ds_data02_runtime_v6.py",
+        "ds_data02_runtime_v8.py",
+        "ds_data02_stage2_dispatch_v8.py",
+        "ds_data02_strict_dispatch_v8.py",
+    ):
+        (scripts / name).write_text("# fixture\n", encoding="utf-8")
+    request = QUALITY.make_request(manifest, tmp_path / "request.json", root)
+    assert request["cpu_task_kind"] == "audit"
+    assert str(scripts / "ds_data02_runtime_v6.py") in request["input_files"]
+    assert request["source_cost"]["original_trajectory_h5_bytes_read"] == 0
