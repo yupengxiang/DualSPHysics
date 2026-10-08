@@ -1,0 +1,140 @@
+{
+  "schema": "ds02.stage2.f2-s1.cost-plan.v2",
+  "status": "ACTUAL_COARSE_TERMINAL_COST_WITH_CONSERVATIVE_FUTURE_RESERVES",
+  "family_id": "F2",
+  "sentinel_id": "F2-S1",
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "scope": {
+    "purpose": "Record the completed coarse full-window cost and bound the next F2 S1 storage choices before any middle/fine solver dispatch.",
+    "preparation_commit": "d210d5fbb",
+    "solver_dispatch_owner": "primary_root_only",
+    "solver_started_by_this_branch": false,
+    "gpu_6_protected": true,
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN",
+      "reason": "The terminal coarse run supplies resource and output evidence; it does not close the observer, integration, output, or qualification gates."
+    },
+    "immutable_source_policy": "Do not delete or rewrite the ROOT095 raw tree, its receipt, the ROOT076 GenCase output, or prior planning receipts."
+  },
+  "actual_coarse_run": {
+    "case_id": "F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_T4_COARSE_CANARY_ROOT_095",
+    "attempt_id": "f2-s1-owner-centered-cell-selector-dp0088-t4-coarse-canary-v5-root-095-001",
+    "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_T4_COARSE_CANARY_ROOT_095/f2-s1-owner-centered-cell-selector-dp0088-t4-coarse-canary-v5-root-095-001/execution-receipt.json",
+    "receipt_file_sha256": "bf2b5b41bc466eae42db133fc419b5c1fc9fbe12d334708ae0291d5158450816",
+    "receipt_declared_sha256": "ac4973293449fc4b86bb75059c55eaa8cd4e6634f04d3c512cf7262f3940c682",
+    "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-coarse-solver-canary-v5-root-prepared-095-001.json",
+    "request_sha256": "a6b58c806bea2cc8404881b042bf257820947fadfb915e697daaf609db1d46f6",
+    "output_root": "/var/tmp/ds02-stage2/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_T4_COARSE_CANARY_ROOT_095/f2-s1-owner-centered-cell-selector-dp0088-t4-coarse-canary-v5-root-095-001",
+    "source_gencase_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_ROOT_076/f2-s1-owner-centered-cell-selector-gencase-root-076-001-root-forward-030-001",
+    "actual_launch_commit": "79bd42192fea95f4ec73363d45e654d47fca39ec",
+    "actual_launch_commit_scope": "receipt.execution.launch_git_at_actual_child_boundary; this is distinct from the current reference-preparation HEAD",
+    "status": "COMPLETED_DEVELOPMENT_UNKNOWN",
+    "cfd_invoked": true,
+    "native_frames": 401,
+    "total_particles": 540633,
+    "initial_fluid_particles": 27750,
+    "terminal_fluid_particles": 27597,
+    "terminal_fluid_count_delta": -153,
+    "terminal_fluid_count_delta_fraction": -0.005513513513513514,
+    "terminal_fluid_count_scope": "census diagnostic only; no physical outflow or qualification claim",
+    "external_product_bytes": 9538996247,
+    "home_receipt_bytes": 33399,
+    "measured_total_bytes": 9539029646,
+    "wall_seconds_from_receipt": 237.20166966319084,
+    "gpu_seconds_from_parent_terminal_summary": 237.205,
+    "cpu_core_seconds": 101.01175799999999,
+    "gpu_uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599",
+    "input_and_output_scope": "Actual ROOT095 receipt and parent terminal summary; this sidecar does not re-read the raw output tree."
+  },
+  "planning_projections": {
+    "method": "Linear particle-count scaling from the actual ROOT095 external product bytes; planning proxy only, not a wall-time or storage upper bound.",
+    "baseline": {
+      "total_particles": 540633,
+      "external_product_bytes": 9538996247,
+      "frames": 401,
+      "source": "actual_coarse_run.external_product_bytes"
+    },
+    "middle": {
+      "grid": "dp0.0044",
+      "gencase_total_particles": 2213441,
+      "particle_ratio_to_actual_coarse": 4.094165542983872,
+      "linear_output_proxy_bytes": 39054229749,
+      "linear_output_proxy_gb_decimal": 39.05422974911988,
+      "recommended_parent_reservation_gb_decimal": [40.0, 64.0],
+      "storage_device": "Home",
+      "status": "PLANNED_ONLY_WAITING_FOR_NATIVE_QA_AND_PARENT_REVIEW",
+      "uncertainties": [
+        "Boundary and output-size scaling is not proven by particle count.",
+        "Typed/observer scratch and temporary peak are excluded from the linear proxy.",
+        "No middle solver should be launched concurrently with the fine reservation."
+      ]
+    },
+    "fine": {
+      "grid": "dp0.0022",
+      "gencase_total_particles": 9775755,
+      "particle_ratio_to_actual_coarse": 18.082053814694998,
+      "linear_output_proxy_bytes": 172484643476,
+      "linear_output_proxy_gb_decimal": 172.4846434764276,
+      "recommended_parent_reservation_gb_decimal": [192.0, 200.0],
+      "storage_device": "NVMe",
+      "status": "PLANNED_ONLY_WAITING_FOR_NATIVE_QA_AND_PARENT_REVIEW",
+      "uncertainties": [
+        "Boundary/output scaling and temporary peak are not established by the proxy.",
+        "Fine source/observer conversion is a separate guarded task and is not included.",
+        "Keep a single heavy output slot; do not treat the proxy as permission to launch."
+      ]
+    },
+    "cold_side_branch": {
+      "planning_reserve_gb_decimal": 12.0,
+      "status": "BOUNDARY_PLANNING_ONLY",
+      "note": "Use the measured cold branch estimate supplied by the parent; do not restore the earlier unbounded 34 GB placeholder."
+    }
+  },
+  "resource_state_at_planning": {
+    "home_capacity_gb_decimal_approx": 700.0,
+    "home_floor_gb_decimal_approx": 536.87,
+    "nvme_free_gb_decimal_approx": 220.0,
+    "serial_heavy_run_policy": true,
+    "protected_gpu_uuid": "GPU-0889376f-e3a7-cf47-0279-e56f8eb60fec",
+    "protected_gpu_process": 601689,
+    "resource_authority": "Parent resource ledger, fresh UUID inventory and external-solver v5 guard remain authoritative."
+  },
+  "ordered_next_actions": [
+    {
+      "order": 1,
+      "action": "Run a bounded selected-field/native QA and observer audit against the actual ROOT095 coarse tree.",
+      "owner": "primary_root_only",
+      "solver": false,
+      "large_h5_read": false,
+      "qualification": "UNKNOWN until actual fields and brackets are independently checked"
+    },
+    {
+      "order": 2,
+      "action": "Complete the F2-S2 .0125/.010/.008 source/control GenCase-only ladder using the V3 builder and parent CPU guard.",
+      "owner": "primary_root_only",
+      "solver": false,
+      "gencase_only": true,
+      "source_builder": "stage2_f2_s2_source_control_ladder_v3.py"
+    },
+    {
+      "order": 3,
+      "action": "Review coarse QA, terminal fluid census, actual observer fields and storage headroom before considering one middle solver run.",
+      "owner": "primary_root_only",
+      "middle_reservation": "Home 40-64 GB",
+      "fine_reservation": "Deferred"
+    },
+    {
+      "order": 4,
+      "action": "Only after the middle decision, consider one fine run with the 192-200 GB NVMe envelope; preserve the full raw tree and do not batch heavy runs.",
+      "owner": "primary_root_only",
+      "solver": "deferred"
+    }
+  ],
+  "not_claimed": [
+    "The ROOT095 terminal fluid count is not a physical outflow explanation.",
+    "The linear projections are not storage or wall-time upper bounds.",
+    "No middle/fine scientific qualification, time-step credit, observer credit, QI, QN or QE is granted by this metadata."
+  ]
+}
