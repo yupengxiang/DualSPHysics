@@ -343,6 +343,9 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
         final = h["final_category"][:]
         category_mass = {str(code): float(masses[final == code].sum()) for code in range(-2, len(contract_info["config"]["destination_regions"]) + 1)}
         source_mass = {str(code): float(masses[source == code].sum()) for code in range(1, nsource + 1)}
+        missing_mass = float(masses[final == -1].sum())
+        invalid_mass = float(masses[final == -2].sum())
+        unknown_destination_mass = float(masses[final == 0].sum())
         residence = h["residence_time_s"][:]
         unresolved = h["unresolved_interval_time_s"][:]
         missing_gap = h["missing_identity_gap_bracket"][:]
@@ -378,7 +381,9 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
                 "residence_mass_weighted_s": [float((residence[mask, ri] * masses[mask]).sum() / masses[mask].sum()) if masses[mask].sum() else None for ri in range(residence.shape[1])],
                 "unresolved_interval_mass_kg_s": float((unresolved[mask] * masses[mask]).sum()),
                 "missing_identity_mass_kg": float(masses[mask & (final == -1)].sum()),
+                "missing_identity_mass_fraction": float(masses[mask & (final == -1)].sum() / masses[mask].sum()) if masses[mask].sum() else None,
                 "unknown_destination_mass_kg": float(masses[mask & (final == 0)].sum()),
+                "unknown_destination_mass_fraction": float(masses[mask & (final == 0)].sum() / masses[mask].sum()) if masses[mask].sum() else None,
             })
         return {
             "schema": SCHEMA,
@@ -395,6 +400,16 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
             },
             "source_cohorts": source_mass,
             "final_category_mass_kg": category_mass,
+            "mass_screen": {
+                "initial_fluid_mass_kg": total,
+                "missing_identity_mass_kg": missing_mass,
+                "missing_identity_mass_fraction": missing_mass / total if total else None,
+                "invalid_state_mass_kg": invalid_mass,
+                "unknown_final_destination_mass_kg": unknown_destination_mass,
+                "task_mass_fraction_tolerance": contract_info["config"]["gates"]["task_mass_fraction_tolerance"],
+                "unknown_width_gate_fraction": contract_info["config"]["gates"]["unknown_width_gate_fraction"],
+                "decision": "screening_only; no physical-fate or dynamics credit",
+            },
             "source_cohort_diagnostics": source_events,
             "events": events,
             "moving_source_frame": {"coordinate_frame": "fixed_solver_frame", "source_assignment": "native_initial_mk", "motion": "generated XML objreal ref=0, y-axis rotation; positions are not reclassified into a moving frame"},
