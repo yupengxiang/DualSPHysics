@@ -1,0 +1,145 @@
+{
+  "clipplane_contract": {
+    "implementation_evidence": {
+      "changes_lines": "CHANGES.txt:318-319 (clip commands; clip commands also applied to draw points)",
+      "official_binary_disassembly": "ClipPoint returns true only when every stored plane value n.x*x+n.y*y+n.z*z+d <= 0; addresses 0x4f6a30 and 0x6cad80 in the recorded binary",
+      "official_binary_symbols": "JSpaceDraw::ClipPlaneVec -> JClipShape::AddPlane; JClipShape::ClipPoint",
+      "official_template_lines": "GenCase_CaseTemplate.xml:136-144 (point1/2/3 and point+vector forms)"
+    },
+    "plane_equation": "0.28*(x-2.0)-z <= 0",
+    "profile_plane_coincidence_max_abs_m": 1.6653345369377348e-16,
+    "retained_side": "z >= 0.28*(x-2.0)",
+    "source_generated_point_vector_equal": true,
+    "source_point_m": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "source_vector_m": [
+      0.28,
+      0.0,
+      -1.0
+    ]
+  },
+  "continuous_region": {
+    "derivation_status": "SOURCE_DERIVED_ANALYTIC_REGION",
+    "envelope_high_m": [
+      3.4299999999999997,
+      0.14,
+      0.39
+    ],
+    "envelope_low_m": [
+      0.01,
+      -0.14,
+      0.01
+    ],
+    "envelope_y_width_m": 0.28,
+    "mass_at_rho0_1000_kg": 287.73600000000005,
+    "owner_contract_status": "No separate scalar owner file; this is the mass implied by the frozen Def geometry and explicit GenCase clip plane.",
+    "quadrature": {
+      "pieces": [
+        {
+          "classification": "full_z",
+          "integrated_height_area_m2": 0.7697714285714287,
+          "x_interval_m": [
+            0.01,
+            2.0357142857142856
+          ]
+        },
+        {
+          "classification": "above_plane",
+          "integrated_height_area_m2": 0.2578571428571429,
+          "x_interval_m": [
+            2.0357142857142856,
+            3.392857142857143
+          ]
+        },
+        {
+          "classification": "empty",
+          "integrated_height_area_m2": 0.0,
+          "x_interval_m": [
+            3.392857142857143,
+            3.4299999999999997
+          ]
+        }
+      ],
+      "plane_a": 0.28,
+      "plane_b": -0.56,
+      "x_breaks_m": [
+        0.01,
+        2.0357142857142856,
+        3.392857142857143,
+        3.4299999999999997
+      ]
+    },
+    "region_definition": "E intersect {0.28*(x-2)-z <= 0}; this equals the portion of E above the closed bed upper profile for the declared x range",
+    "volume_m3": 0.28773600000000005
+  },
+  "identity": {
+    "family_id": "F5",
+    "geometry_family_id": "F5_C082S1_CLOSED_ANALYTIC_PROFILE_EXTRUDED_Y_V1",
+    "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+    "sentinel_id": "F5-S1"
+  },
+  "inputs": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_FINE_INITIAL_GENCASE_CANARY_ROOT_068/f5-s1-fine-initial-gencase-canary-root-068-001-root-forward-030-001/generated.xml",
+      "sha256": "46d38211d7fc52f1647043821e2aa940084b4ceaeb455dd6749a288515bdd2d8"
+    },
+    "official_changes": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/CHANGES.txt",
+      "sha256": "742fd978500a75103dd4d383e16e7df81aaafc10962bd866bafb02deffc3842d"
+    },
+    "official_gencase": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226",
+      "version": "v5.4.354.01 (07-04-2025)"
+    },
+    "official_template": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/doc/xml_format/GenCase_CaseTemplate.xml",
+      "sha256": "b0c7be2eac1f2bbf9702519cc0c94aa5ca9ef3df94c5e1cda28a005d8a27a38e"
+    },
+    "source_def": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f5/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F5/handoff_20261003/root_followup_118_stage1_f5_c082s1_first24_cpu_contract_disabled_v1/candidates/M095_T090/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1_M095_T090_Def.xml",
+      "sha256": "fc5f044b657f1cd02a9375b74a20ba0496a94e80410a61f71884f7ed8dcec28f"
+    },
+    "support_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_INITIAL_SUPPORT_AUDIT_V3_ROOT_077/f5-s1-initial-support-audit-v3-root-077-001-root-forward-030-001/report/f5_s1_initial_gencase_support_audit_v3.json",
+      "sha256": "6bdeb4942f73ca0e96ec536dcd87cb4ad4302b4b047ab4f650df88e2f03304ed"
+    }
+  },
+  "mass_gate": {
+    "generated_fluid_count": 67708,
+    "generated_sample_mass_kg": 254.4779834119572,
+    "hard_whole_initial_mass_fraction": 0.02,
+    "mass_rescale": false,
+    "preferred_whole_initial_mass_fraction": 0.01,
+    "reason": "The generated particle mass is 11.5585% below the explicit source-geometry/clip-plane region mass. The old +0.4793% source-discrete comparison remains diagnostic only.",
+    "sample_vs_source_derived_continuous_fraction": -0.1155851773432689,
+    "source_discrete_sample_mass_kg": 253.264,
+    "source_sample_vs_source_derived_continuous_fraction": -0.11980426502071351,
+    "status": "HARDFAIL_DISCRETE_SAMPLE_VS_SOURCE_DERIVED_REGION",
+    "threshold_widening": false
+  },
+  "next_action": {
+    "allowed_followup": "A bounded GenCase-only representation can be prepared only after the continuous region is explicitly accepted; no mass-fit/rescale and no CFD for this source-derived hard-fail.",
+    "minimal_required_material": "Either an owner contract that intentionally defines a different fluid region, or a new immutable Def with explicit clip/draw semantics; do not infer a continuous target from the old particle sample.",
+    "solver_or_cfd": "BLOCKED_PENDING_SOURCE_GEOMETRY_DECISION"
+  },
+  "schema": "ds02.stage2.f5-s1.clipplane-volume-audit.v1",
+  "scope": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "bi4_read": false,
+    "generated_xml_read": true,
+    "hdf5_read": false,
+    "official_binary_executed": false,
+    "official_template_read": false,
+    "solver_started": false,
+    "source_xml_read": true,
+    "support_report_read": true,
+    "vtk_read": false
+  },
+  "status": "COMPLETED_SOURCE_CLIP_SEMANTICS_DISCRETE_MASS_HARDFAIL"
+}
