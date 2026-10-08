@@ -115,6 +115,17 @@ def _path_from(item: Any, label: str) -> Path:
     return Path(item["path"]).expanduser().resolve()
 
 
+def _declared_binding(item: Any, label: str) -> dict[str, Any]:
+    """Hash a small declared input and require its contract metadata to agree."""
+    path = _path_from(item, label)
+    actual = binding(path, label)
+    if item.get("bytes") is not None and int(item["bytes"]) != actual["bytes"]:
+        raise TrajectoryLabelError(f"{label} byte count differs from contract")
+    if item.get("sha256") and item["sha256"] != actual["sha256"]:
+        raise TrajectoryLabelError(f"{label} SHA256 differs from contract")
+    return actual
+
+
 def _producer_receipt(path: Path, label: str) -> dict[str, Any]:
     receipt = read_json(path, label)
     if receipt.get("status") != "completed" or int(receipt.get("returncode", -1)) != 0:
@@ -239,7 +250,7 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
     if read_h5 and sha256(h5) != EXPECTED_H5_SHA256:
         raise TrajectoryLabelError("trajectory H5 SHA256 differs at guarded run")
     conversion = _path_from(contract.get("conversion_report"), "conversion report")
-    conversion_binding = binding(conversion, "conversion report")
+    conversion_binding = _declared_binding(contract.get("conversion_report"), "conversion report")
     conversion_payload = read_json(conversion, "conversion report")
     if conversion_payload.get("conversion_status") != "completed" or conversion_payload.get("output_hdf5") != str(h5):
         raise TrajectoryLabelError("conversion does not bind exact trajectory H5")
@@ -264,12 +275,12 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
     if closure.get("native_result", {}).get("status") != "EXACT_SEMANTIC_MATCH":
         raise TrajectoryLabelError("source closure native result is not exact")
     xml = _path_from(contract.get("generated_xml"), "generated XML")
-    xml_binding = binding(xml, "generated XML")
+    xml_binding = _declared_binding(contract.get("generated_xml"), "generated XML")
     geometry = _parse_xml_geometry(xml)
     runout = _path_from(contract.get("runout"), "Run.out")
     runparts = _path_from(contract.get("runparts"), "RunPARTs.csv")
-    runout_binding = binding(runout, "Run.out")
-    runparts_binding = binding(runparts, "RunPARTs.csv")
+    runout_binding = _declared_binding(contract.get("runout"), "Run.out")
+    runparts_binding = _declared_binding(contract.get("runparts"), "RunPARTs.csv")
     native_run = _validate_runout(runout, runparts)
     receipt = _path_from(contract.get("solver_receipt"), "solver receipt")
     _producer_receipt(receipt, "solver receipt")
@@ -290,14 +301,14 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
         "current": current_binding,
         "trajectory_hdf5": h5_item,
         "conversion_report": conversion_binding,
-        "source_closure": binding(closure_path, "F2-S1 source closure"),
+        "source_closure": _declared_binding(contract.get("source_closure"), "F2-S1 source closure"),
         "generated_xml": xml_binding,
         "geometry": geometry,
         "runout": runout_binding,
         "runparts": runparts_binding,
         "native_run": native_run,
-        "solver_receipt": binding(receipt, "solver receipt"),
-        "label_config": binding(config_path, "label config"),
+        "solver_receipt": _declared_binding(contract.get("solver_receipt"), "solver receipt"),
+        "label_config": _declared_binding(contract.get("label_config"), "label config"),
         "config": config,
         "h5_content_verified": read_h5,
     }
