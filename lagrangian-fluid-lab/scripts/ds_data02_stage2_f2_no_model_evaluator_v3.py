@@ -28,6 +28,7 @@ import sys
 from typing import Any, Mapping
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+SCRIPT = Path(__file__).resolve()
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
