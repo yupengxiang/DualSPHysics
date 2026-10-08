@@ -455,6 +455,9 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         if expected:
             if key not in static_pre or static_pre[key]["sha256"] != expected:
                 raise ValueError(f"{key} SHA mismatch before audit")
+    for key, expected in (("generated_xml", args.expected_generated_xml_sha), ("execution_receipt", args.expected_receipt_sha)):
+        if expected and dynamic_pre[key]["sha256"] != expected:
+            raise ValueError(f"{key} SHA mismatch before audit")
 
     receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
     status, returncode = _receipt_status(receipt)
@@ -635,7 +638,7 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     for name in ("generated-xml", "fluid-vtk", "bound-vtk", "receipt", "candidate-def", "source-def", "candidate-motion", "source-motion", "gencase-request", "owner-closure", "output"):
         parser.add_argument(f"--{name}", type=Path)
-    for name in ("candidate-def", "source-def", "candidate-motion", "source-motion", "gencase-request", "owner-closure"):
+    for name in ("candidate-def", "source-def", "candidate-motion", "source-motion", "gencase-request", "owner-closure", "generated-xml", "receipt"):
         parser.add_argument(f"--expected-{name}-sha")
     args = parser.parse_args()
     if args.self_test:
