@@ -207,8 +207,9 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
         "strace": {"path": str(STRACE), "sha256": _sha_file(STRACE),
                    "options": list(STRACE_OPTIONS), "trace_path": str(trace)},
         "closed_command": [str(value["python_binding"]["literal_invocation_path"]), "-B", "-I",
-                           str(CHILD_SHIM), "run", "--evaluator", "<bound_evaluator>",
-                           "--request", "<typed_request>", "--parent-pid", "<strace_pid>"],
+                           str(CHILD_SHIM), "run", "--evaluator", str(P1.TE_SCRIPT),
+                           "--request", str(value["typed_request"]["path"]),
+                           "--parent-pid", "<strace_pid>"],
     })
     value["current_catalog_binding"] = {
         "path": str(sidecar), "sha256": sidecar_sha,
