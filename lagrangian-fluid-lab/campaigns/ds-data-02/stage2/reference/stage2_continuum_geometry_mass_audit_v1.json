@@ -1,0 +1,1570 @@
+{
+  "schema": "ds02.stage2.continuum-geometry-mass-audit.v1",
+  "status": "PASS_DECLARED_GEOMETRY_AUDIT_SCIENTIFIC_QUALIFICATION_UNKNOWN",
+  "generated_at_utc": "2026-10-08T05:04:42.839738+00:00",
+  "audit_scope": {
+    "source_rows": 14,
+    "bi4_read": false,
+    "hdf5_read": false,
+    "solver_launch": false,
+    "continuous_mass_is_declared_primitive_sum": true,
+    "particle_sample_mass_is_not_continuum_truth": true,
+    "rigid_body_mass_inertia_com_separate_from_floating_sample_mass": true
+  },
+  "quality_input": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_reference_quality_cost_v2.json",
+    "bytes": 740320,
+    "mtime_ns": 1791401222554384348,
+    "sha256": "d45a9cb7e9e9dc7f0c4a1068b1e8056f2df8e4ad28d6ce6a9316c1854d9bd101"
+  },
+  "frozen_error_budget_reference": {
+    "initial_whole_fluid_mass_target": "quality contract target remains authoritative; this audit does not widen it",
+    "spatial_position_relative_tolerance": "2% L",
+    "event_position_relative_tolerance": "5% L",
+    "velocity_or_ke_tolerance": "5% nonzero scale",
+    "event_time_tolerance": "1% characteristic time",
+    "time_and_output_budget": "each <= one quarter of total gate; exact consumer calibration still required"
+  },
+  "sources": [
+    {
+      "sentinel_id": "F1-S1",
+      "family_id": "F1",
+      "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_FALLBACK_ECC_COARSE/root-fallback-ecc-coarse-actual-gencase-027/prepared/F1_FALLBACK_ECC_COARSE.xml",
+        "bytes": 7814,
+        "mtime_ns": 1791086083678129219,
+        "sha256": "2d7a43b1d1548fb4f48292adce17fefa7c85739fb890cab3947854ed1c9833df"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.036036000000000006,
+        "declared_continuum_geometry_target_mass_kg": 36.03600000000001,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.005,
+                  0.005,
+                  0.005
+                ],
+                "size_m": [
+                  0.39,
+                  0.66,
+                  0.14
+                ],
+                "volume_m3": 0.036036000000000006,
+                "declared_mass_kg": 36.03600000000001,
+                "comment": "v1 fallback controlled fluid cell centres",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.036036000000000006,
+            "declared_continuum_mass_kg": 36.03600000000001,
+            "particle_count": 40200,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 40.2,
+            "sample_minus_declared_kg": 4.163999999999994
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 40200
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.001
+        ],
+        "reference_particle_sample_mass_target_kg": 40.2,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 4.163999999999994
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F1-S2",
+      "family_id": "F1",
+      "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_STAGE1_DUAL_H340_DP020/root-stage1-dual-h340-actual-gencase-027/prepared/F1_STAGE1_DUAL_H340_DP020.xml",
+        "bytes": 7843,
+        "mtime_ns": 1791113360667740357,
+        "sha256": "8c7f3c5de54c3dfa5dbc521e1536d0663f0075632f77733400869bfee8bbe18f"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.307328,
+        "declared_continuum_geometry_target_mass_kg": 307.328,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  2.21,
+                  0.01,
+                  0.01
+                ],
+                "size_m": [
+                  0.98,
+                  0.98,
+                  0.32
+                ],
+                "volume_m3": 0.307328,
+                "declared_mass_kg": 307.328,
+                "comment": "v1 fallback controlled fluid cell centres",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.307328,
+            "declared_continuum_mass_kg": 307.328,
+            "particle_count": 42500,
+            "massfluid_kg": 0.008,
+            "reference_particle_sample_mass_kg": 340.0,
+            "sample_minus_declared_kg": 32.672000000000025
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 42500
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.008
+        ],
+        "reference_particle_sample_mass_target_kg": 340.0,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 32.672000000000025
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F2-S1",
+      "family_id": "F2",
+      "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-f2_stage1_first48_expansion_rx056_ry014_fill080_rot090_dp010_spatial_reference_save010-actual-gencase-source801-root804/prepared/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+        "bytes": 7738,
+        "mtime_ns": 1791262608319919955,
+        "sha256": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 3,
+        "declared_volume_m3": 0.018876000000000004,
+        "declared_continuum_geometry_target_mass_kg": 18.876000000000005,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.7
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          },
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.788
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          },
+          {
+            "mkfluid_relative": "2",
+            "mk_absolute": "3",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "2",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.876
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 7038
+          },
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 7038
+          },
+          {
+            "mkfluid": "2",
+            "mk": "3",
+            "count": 7038
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.001
+        ],
+        "reference_particle_sample_mass_target_kg": 21.114,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 2.237999999999996
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F2-S2",
+      "family_id": "F2",
+      "physical_case_id": "F2_STAGE1_OFFSET_P03_OPEN_RIM_RX065_RY014_FILL080",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_STAGE1_OFFSET_P03_DP010_SPATIAL_REFERENCE_SAVE010/root-stage1-f2-offset-p03-genuine-gencase-count-fix-101/prepared/F2_STAGE1_OFFSET_P03_DP010_SPATIAL_REFERENCE_SAVE010.xml",
+        "bytes": 7622,
+        "mtime_ns": 1791136409275948101,
+        "sha256": "53792427e34a623b0097ebde3dec34557dcda93b109bbe38a10677e5cc751890"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 3,
+        "declared_volume_m3": 0.018876000000000004,
+        "declared_continuum_geometry_target_mass_kg": 18.876000000000005,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.7
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          },
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.788
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          },
+          {
+            "mkfluid_relative": "2",
+            "mk_absolute": "3",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "2",
+                "point_m": [
+                  0.05,
+                  -0.11,
+                  0.876
+                ],
+                "size_m": [
+                  0.325,
+                  0.22,
+                  0.088
+                ],
+                "volume_m3": 0.006292000000000001,
+                "declared_mass_kg": 6.292000000000001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.006292000000000001,
+            "declared_continuum_mass_kg": 6.292000000000001,
+            "particle_count": 7038,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 7.038,
+            "sample_minus_declared_kg": 0.7459999999999996
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 7038
+          },
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 7038
+          },
+          {
+            "mkfluid": "2",
+            "mk": "3",
+            "count": 7038
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.001
+        ],
+        "reference_particle_sample_mass_target_kg": 21.114,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 2.237999999999996
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F3-S1",
+      "family_id": "F3",
+      "physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005/root-cell3-dp006-twoaxis-ay0p50-actual-gencase-056/prepared/F3_CELL3_LONG_DP006_AY0P50_ADAPTIVE_CFL05_COEF005.xml",
+        "bytes": 9358,
+        "mtime_ns": 1791082662557957585,
+        "sha256": "1162322010c42b9a084d76db0e20de571111cb009eb3afb699f2ee4c17d37406"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.013066704,
+        "declared_continuum_geometry_target_mass_kg": 13.066704,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  -0.447,
+                  -0.087,
+                  0.003
+                ],
+                "size_m": [
+                  0.894,
+                  0.174,
+                  0.084
+                ],
+                "volume_m3": 0.013066704,
+                "declared_mass_kg": 13.066704,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.013066704,
+            "declared_continuum_mass_kg": 13.066704,
+            "particle_count": 67500,
+            "massfluid_kg": 0.000216,
+            "reference_particle_sample_mass_kg": 14.58,
+            "sample_minus_declared_kg": 1.5132960000000004
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 67500
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.000216
+        ],
+        "reference_particle_sample_mass_target_kg": 14.58,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 1.5132960000000004
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F3-S2",
+      "family_id": "F3",
+      "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST48_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-first48-pitch-ay-source-preparation-065-root702-owner-repair1-root704/prepared/pitch120_ay0750/F3_STAGE1_DP006_P1200_AY0750.xml",
+        "bytes": 9358,
+        "mtime_ns": 1791246060348124508,
+        "sha256": "1162322010c42b9a084d76db0e20de571111cb009eb3afb699f2ee4c17d37406"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.013066704,
+        "declared_continuum_geometry_target_mass_kg": 13.066704,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  -0.447,
+                  -0.087,
+                  0.003
+                ],
+                "size_m": [
+                  0.894,
+                  0.174,
+                  0.084
+                ],
+                "volume_m3": 0.013066704,
+                "declared_mass_kg": 13.066704,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.013066704,
+            "declared_continuum_mass_kg": 13.066704,
+            "particle_count": 67500,
+            "massfluid_kg": 0.000216,
+            "reference_particle_sample_mass_kg": 14.58,
+            "sample_minus_declared_kg": 1.5132960000000004
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 67500
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.000216
+        ],
+        "reference_particle_sample_mass_target_kg": 14.58,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 1.5132960000000004
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F4-S1",
+      "family_id": "F4",
+      "physical_case_id": "F4_DROP_gap0p22000_xoff0p00000_yoff0p00000_uz0p50000",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_CENTERED_REFERENCE_001_DP010/gencase-centered-reference-002/F4_DROP_CENTERED_REFERENCE_001_DP010.xml",
+        "bytes": 5469,
+        "mtime_ns": 1790946720035489899,
+        "sha256": "39ead4fa268715af15bba6879537ad7cf2a564283049af921f4bb1a1ba31acd0"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 2,
+        "declared_volume_m3": 0.052770000609800014,
+        "declared_continuum_geometry_target_mass_kg": 52.770000609800015,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.085,
+                  0.045,
+                  0.045
+                ],
+                "size_m": [
+                  1.030000001,
+                  0.310000001,
+                  0.150000001
+                ],
+                "volume_m3": 0.04789500052030001,
+                "declared_mass_kg": 47.89500052030001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.04789500052030001,
+            "declared_continuum_mass_kg": 47.89500052030001,
+            "particle_count": 53248,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 53.248000000000005,
+            "sample_minus_declared_kg": 5.352999479699996
+          },
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.475,
+                  0.125,
+                  0.42500000000000004
+                ],
+                "size_m": [
+                  0.250000001,
+                  0.150000001,
+                  0.130000001
+                ],
+                "volume_m3": 0.004875000089500001,
+                "declared_mass_kg": 4.875000089500001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.004875000089500001,
+            "declared_continuum_mass_kg": 4.875000089500001,
+            "particle_count": 5824,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 5.824,
+            "sample_minus_declared_kg": 0.9489999104999987
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 53248
+          },
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 5824
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.001
+        ],
+        "reference_particle_sample_mass_target_kg": 59.072,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 6.301999390199988
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F4-S2",
+      "family_id": "F4",
+      "physical_case_id": "F4_DROP_gap0p18000_xoffm0p08000_yoff0p04000_uz0p60000",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_DROP_gap0p18000_xoffm0p08000_yoff0p04000_uz0p60000/root-stage1-f4-f4_drop_gap0p18000_xoffm0p08000_yoff0p04000_uz0p60000-genuine-gencase-091/prepared/F4_DROP_gap0p18000_xoffm0p08000_yoff0p04000_uz0p60000.xml",
+        "bytes": 5499,
+        "mtime_ns": 1791219524538258446,
+        "sha256": "1878e3d2e02182e2de488a4ccea83b28fea79a8e82c0a584333202e77d318ed1"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 2,
+        "declared_volume_m3": 0.052770000609800014,
+        "declared_continuum_geometry_target_mass_kg": 52.770000609800015,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.085,
+                  0.045,
+                  0.045
+                ],
+                "size_m": [
+                  1.030000001,
+                  0.310000001,
+                  0.150000001
+                ],
+                "volume_m3": 0.04789500052030001,
+                "declared_mass_kg": 47.89500052030001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.04789500052030001,
+            "declared_continuum_mass_kg": 47.89500052030001,
+            "particle_count": 53248,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 53.248000000000005,
+            "sample_minus_declared_kg": 5.352999479699996
+          },
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.39499999999999996,
+                  0.165,
+                  0.385
+                ],
+                "size_m": [
+                  0.250000001,
+                  0.150000001,
+                  0.130000001
+                ],
+                "volume_m3": 0.004875000089500001,
+                "declared_mass_kg": 4.875000089500001,
+                "comment": null,
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.004875000089500001,
+            "declared_continuum_mass_kg": 4.875000089500001,
+            "particle_count": 5824,
+            "massfluid_kg": 0.001,
+            "reference_particle_sample_mass_kg": 5.824,
+            "sample_minus_declared_kg": 0.9489999104999987
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 53248
+          },
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 5824
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.001
+        ],
+        "reference_particle_sample_mass_target_kg": 59.072,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 6.301999390199988
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F5-S1",
+      "family_id": "F5",
+      "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-genuine-gencase-118-root640/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1.xml",
+        "bytes": 12237,
+        "mtime_ns": 1791241016660706177,
+        "sha256": "48865e7efb6a9e9c4040a6489f3da3e7fce521308640e5e83a2a7867c0ec0c38"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.36388800000000004,
+        "declared_continuum_geometry_target_mass_kg": 363.88800000000003,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.01,
+                  -0.14,
+                  0.01
+                ],
+                "size_m": [
+                  3.42,
+                  0.28,
+                  0.38
+                ],
+                "volume_m3": 0.36388800000000004,
+                "declared_mass_kg": 363.88800000000003,
+                "comment": "c082s1_initial_fluid_equilibrium_cell_centres_solid_recovery",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.36388800000000004,
+            "declared_continuum_mass_kg": 363.88800000000003,
+            "particle_count": 31658,
+            "massfluid_kg": 0.008,
+            "reference_particle_sample_mass_kg": 253.264,
+            "sample_minus_declared_kg": -110.62400000000002
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 31658
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.008
+        ],
+        "reference_particle_sample_mass_target_kg": 253.264,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": -110.62400000000002
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F5-S2",
+      "family_id": "F5",
+      "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M115_T080",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m115_t080-genuine-gencase-118-root640/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1.xml",
+        "bytes": 12237,
+        "mtime_ns": 1791241021761557556,
+        "sha256": "1e441adf431fae9abd3057298291dc262b1a67a406344f8ae9fbc0aec889aa6e"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 0.36388800000000004,
+        "declared_continuum_geometry_target_mass_kg": 363.88800000000003,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.01,
+                  -0.14,
+                  0.01
+                ],
+                "size_m": [
+                  3.42,
+                  0.28,
+                  0.38
+                ],
+                "volume_m3": 0.36388800000000004,
+                "declared_mass_kg": 363.88800000000003,
+                "comment": "c082s1_initial_fluid_equilibrium_cell_centres_solid_recovery",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.36388800000000004,
+            "declared_continuum_mass_kg": 363.88800000000003,
+            "particle_count": 31658,
+            "massfluid_kg": 0.008,
+            "reference_particle_sample_mass_kg": 253.264,
+            "sample_minus_declared_kg": -110.62400000000002
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 31658
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.008
+        ],
+        "reference_particle_sample_mass_target_kg": 253.264,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": -110.62400000000002
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F6-S1",
+      "family_id": "F6",
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025/root-stage1-f6-omega-95p0-genuine-gencase-082/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S095_DP025.xml",
+        "bytes": 6999,
+        "mtime_ns": 1791183106981325890,
+        "sha256": "a958fc3e1878aa3bcf48392f8c51a88c2169c9de0b3658bc2edd90fb2e8bb000"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 4.851988676250775,
+        "declared_continuum_geometry_target_mass_kg": 4851.988676250775,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.4125,
+                  0.4125,
+                  0.0525
+                ],
+                "size_m": [
+                  3.975001,
+                  1.575001,
+                  0.775
+                ],
+                "volume_m3": 4.851988676250775,
+                "declared_mass_kg": 4851.988676250775,
+                "comment": "Frozen continuous fluid cell-centre population",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 4.851988676250775,
+            "declared_continuum_mass_kg": 4851.988676250775,
+            "particle_count": 327680,
+            "massfluid_kg": 0.015625,
+            "reference_particle_sample_mass_kg": 5120.0,
+            "sample_minus_declared_kg": 268.0113237492251
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 327680
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.015625
+        ],
+        "reference_particle_sample_mass_target_kg": 5120.0,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 268.0113237492251
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": 128.0,
+        "source_quality_inertia_kg_m2": {
+          "x": 8.53333333333,
+          "y": 8.53333333333,
+          "z": 13.6533333333
+        },
+        "xml_declarations": [
+          {
+            "mkbound": "50",
+            "mk": null,
+            "count": null,
+            "begin": null,
+            "massbody_kg": 128.0,
+            "masspart_kg": null,
+            "center_m": [
+              2.4,
+              1.2,
+              1.08
+            ],
+            "inertia_kg_m2": [
+              8.53333333333,
+              8.53333333333,
+              13.6533333333
+            ],
+            "declaration_role": "positions_or_floatings_unknown"
+          },
+          {
+            "mkbound": "50",
+            "mk": "60",
+            "count": "16384",
+            "begin": "73441",
+            "massbody_kg": 128.0,
+            "masspart_kg": 0.015625,
+            "center_m": [
+              2.4,
+              1.2,
+              1.08
+            ],
+            "inertia_kg_m2": [
+              8.53333,
+              8.53333,
+              13.6533
+            ],
+            "declaration_role": "positions_or_floatings_unknown"
+          }
+        ],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F6-S2",
+      "family_id": "F6",
+      "physical_case_id": "F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F6/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025/root-stage1-f6-2p0-genuine-gencase-073/F6_STAGE1_ANGULAR_RELEASE_OMEGA_S200_DP025.xml",
+        "bytes": 6993,
+        "mtime_ns": 1791130573198065972,
+        "sha256": "89c594899f1aa88deaddf775ad084e7560d4291a074975e8a17be58055c8eb18"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 1,
+        "declared_volume_m3": 4.851988676250775,
+        "declared_continuum_geometry_target_mass_kg": 4851.988676250775,
+        "per_mk": [
+          {
+            "mkfluid_relative": "0",
+            "mk_absolute": "1",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "0",
+                "point_m": [
+                  0.4125,
+                  0.4125,
+                  0.0525
+                ],
+                "size_m": [
+                  3.975001,
+                  1.575001,
+                  0.775
+                ],
+                "volume_m3": 4.851988676250775,
+                "declared_mass_kg": 4851.988676250775,
+                "comment": "Frozen continuous fluid cell-centre population",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 4.851988676250775,
+            "declared_continuum_mass_kg": 4851.988676250775,
+            "particle_count": 327680,
+            "massfluid_kg": 0.015625,
+            "reference_particle_sample_mass_kg": 5120.0,
+            "sample_minus_declared_kg": 268.0113237492251
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "0",
+            "mk": "1",
+            "count": 327680
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.015625
+        ],
+        "reference_particle_sample_mass_target_kg": 5120.0,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 268.0113237492251
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": 128.0,
+        "source_quality_inertia_kg_m2": {
+          "x": 8.53333333333,
+          "y": 8.53333333333,
+          "z": 13.6533333333
+        },
+        "xml_declarations": [
+          {
+            "mkbound": "50",
+            "mk": null,
+            "count": null,
+            "begin": null,
+            "massbody_kg": 128.0,
+            "masspart_kg": null,
+            "center_m": [
+              2.4,
+              1.2,
+              1.08
+            ],
+            "inertia_kg_m2": [
+              8.53333333333,
+              8.53333333333,
+              13.6533333333
+            ],
+            "declaration_role": "positions_or_floatings_unknown"
+          },
+          {
+            "mkbound": "50",
+            "mk": "60",
+            "count": "16384",
+            "begin": "73441",
+            "massbody_kg": 128.0,
+            "masspart_kg": 0.015625,
+            "center_m": [
+              2.4,
+              1.2,
+              1.08
+            ],
+            "inertia_kg_m2": [
+              8.53333,
+              8.53333,
+              13.6533
+            ],
+            "declaration_role": "positions_or_floatings_unknown"
+          }
+        ],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F7-S1",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_BASE_V1",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_QUINTIC_VERIFIED_MOTION_ASSET_CLONES/root-quintic-verified-three-dp-actual-motion-asset-clones-024/prepared/coarse/F7_OBSTACLE_QUINTIC_TARGET_EXPLICIT_WET_COARSE.xml",
+        "bytes": 7573,
+        "mtime_ns": 1791099812313303629,
+        "sha256": "7414038ad046dae5adba910bcaf504f14c7b3864445339919863e91f285b707f"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 4,
+        "declared_volume_m3": 0.2882880017784001,
+        "declared_continuum_geometry_target_mass_kg": 288.2880017784001,
+        "per_mk": [
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.54,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.460000001,
+                  0.680000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.1313760007916,
+                "declared_mass_kg": 131.3760007916,
+                "comment": "Explicit native cell-center slab 0; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.0,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.540000001,
+                  0.680000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.1542240008796,
+                "declared_mass_kg": 154.2240008796,
+                "comment": "Explicit native cell-center slab 1; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.06,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.040000001,
+                  0.080000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.0013440000536000007,
+                "declared_mass_kg": 1.3440000536000007,
+                "comment": "Explicit native cell-center slab 2; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.06,
+                  0.26,
+                  0.06
+                ],
+                "size_m": [
+                  0.040000001,
+                  0.080000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.0013440000536000007,
+                "declared_mass_kg": 1.3440000536000007,
+                "comment": "Explicit native cell-center slab 3; declared physical wet region unchanged",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.2882880017784001,
+            "declared_continuum_mass_kg": 288.2880017784001,
+            "particle_count": 40700,
+            "massfluid_kg": 0.008,
+            "reference_particle_sample_mass_kg": 325.6,
+            "sample_minus_declared_kg": 37.311998221599936
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 40700
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.008
+        ],
+        "reference_particle_sample_mass_target_kg": 325.6,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 37.311998221599936
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    },
+    {
+      "sentinel_id": "F7-S2",
+      "family_id": "F7",
+      "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+      "source_xml": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+        "bytes": 7537,
+        "mtime_ns": 1791132688263610471,
+        "sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f"
+      },
+      "declared_source": {
+        "rhop0_kg_m3": 1000.0,
+        "rhop0_values_seen": [
+          1000.0,
+          1000.0
+        ],
+        "rhop0_status": "DECLARED_SOURCE_XML_VALUE",
+        "solid_fluid_drawbox_count": 4,
+        "declared_volume_m3": 0.2882880017784001,
+        "declared_continuum_geometry_target_mass_kg": 288.2880017784001,
+        "per_mk": [
+          {
+            "mkfluid_relative": "1",
+            "mk_absolute": "2",
+            "declared_regions": [
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.54,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.460000001,
+                  0.680000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.1313760007916,
+                "declared_mass_kg": 131.3760007916,
+                "comment": "Explicit native cell-center slab 0; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  0.0,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.540000001,
+                  0.680000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.1542240008796,
+                "declared_mass_kg": 154.2240008796,
+                "comment": "Explicit native cell-center slab 1; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.06,
+                  -0.34,
+                  0.06
+                ],
+                "size_m": [
+                  0.040000001,
+                  0.080000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.0013440000536000007,
+                "declared_mass_kg": 1.3440000536000007,
+                "comment": "Explicit native cell-center slab 2; declared physical wet region unchanged",
+                "boxfill": "solid"
+              },
+              {
+                "mkfluid_relative": "1",
+                "point_m": [
+                  -0.06,
+                  0.26,
+                  0.06
+                ],
+                "size_m": [
+                  0.040000001,
+                  0.080000001,
+                  0.420000001
+                ],
+                "volume_m3": 0.0013440000536000007,
+                "declared_mass_kg": 1.3440000536000007,
+                "comment": "Explicit native cell-center slab 3; declared physical wet region unchanged",
+                "boxfill": "solid"
+              }
+            ],
+            "declared_volume_m3": 0.2882880017784001,
+            "declared_continuum_mass_kg": 288.2880017784001,
+            "particle_count": 40700,
+            "massfluid_kg": 0.008,
+            "reference_particle_sample_mass_kg": 325.6,
+            "sample_minus_declared_kg": 37.311998221599936
+          }
+        ],
+        "semantics": {
+          "volume_method": "sum solid drawbox primitives while setmkfluid is active",
+          "overlap_between_primitives": "UNKNOWN",
+          "void_and_boundary_subtraction": "UNKNOWN",
+          "cell_center_crop_or_fill_semantics": "UNKNOWN",
+          "effective_continuum_mass": "UNKNOWN_UNTIL_SOURCE_GEOMETRY_SEMANTICS_CLOSED"
+        }
+      },
+      "reference_particle_initialization": {
+        "fluid_blocks": [
+          {
+            "mkfluid": "1",
+            "mk": "2",
+            "count": 40700
+          }
+        ],
+        "source_massfluid_values_kg": [
+          0.008
+        ],
+        "reference_particle_sample_mass_target_kg": 325.6,
+        "role": "initialization diagnostic only; not a continuum geometry truth target",
+        "sample_mass_minus_declared_geometry_mass_kg": 37.311998221599936
+      },
+      "rigid_body_physical_target": {
+        "source_quality_massbody_kg": null,
+        "source_quality_inertia_kg_m2": null,
+        "xml_declarations": [],
+        "sample_particle_mass_is_not_body_mass": true,
+        "qualification": "UNKNOWN_UNTIL_BODY_MASS_INERTIA_COM_AND_GENERATED_STATE_MATCH"
+      }
+    }
+  ]
+}
