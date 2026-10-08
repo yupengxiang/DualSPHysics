@@ -229,6 +229,8 @@ def self_test() -> dict[str, Any]:
         )
         report = build_report(args)
         assert report["status"] == "PASS_GENERATED_BI4_HASHED_STABLE"
+        assert report["worker_scope"]["read_plan"]["passes"] == 1
+        assert report["worker_scope"]["read_plan"]["estimated_single_stream_read_bytes"] == source.stat().st_size
         try:
             build_report(args)
         except FileExistsError:

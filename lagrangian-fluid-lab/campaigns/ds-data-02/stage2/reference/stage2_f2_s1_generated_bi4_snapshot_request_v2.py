@@ -289,6 +289,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def self_test() -> dict[str, Any]:
+    assert EXPECTED_BI4_BYTES == 23_789_263
     probe = {
         "schema": REQUEST_SCHEMA,
         "deferred_input_files": [str(GENERATED_BI4)],
