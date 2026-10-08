@@ -26,12 +26,17 @@ def _sources(v30):
     # its path and SHA are the source identity, while the local checkout root
     # is only an execution location.
     frozen_v25 = Path(json.loads(v30.V26_V14.read_text())["forward_of"]["path"]).expanduser().resolve()
+    graph = v30._v25_graph(frozen_v25)
+    frozen_v7 = Path(graph["v7_request"]["path"]).expanduser().resolve()
+    frozen_v7_value = json.loads(frozen_v7.read_text())
+    frozen_overlay = Path(frozen_v7_value["v5_inputs"]["overlay"]["path"]).expanduser().resolve()
+    frozen_plan = Path(frozen_v7_value["storage_plan"]["path"]).expanduser().resolve()
     return {
         "v25_v13": frozen_v25,
         "v26_v14": v30.V26_V14,
-        "v25_v7": v30.V25_V7,
-        "overlay": v30.V25_OVERLAY,
-        "plan": v30.V25_PLAN,
+        "v25_v7": frozen_v7,
+        "overlay": frozen_overlay,
+        "plan": frozen_plan,
         "evaluator": v30.EVALUATOR_V3,
     }
 
@@ -83,26 +88,27 @@ def test_v30_rejects_v26_forward_edge_rebinding(tmp_path: Path) -> None:
 
 def test_v30_rejects_overlay_byte_contract_mutation(tmp_path: Path) -> None:
     v30 = _load()
-    frozen_v25 = _sources(v30)["v25_v13"]
-    overlay = json.loads(v30.V25_OVERLAY.read_text())
+    sources = _sources(v30)
+    frozen_v25 = sources["v25_v13"]
+    overlay = json.loads(sources["overlay"].read_text())
     overlay["entries"] = copy.deepcopy(overlay["entries"])
     overlay["entries"][0]["expected_bytes"] += 1
     overlay["sha256"] = v30.canonical(overlay)
     bad_overlay = tmp_path / "bad-overlay.json"
     bad_overlay.write_text(json.dumps(overlay, sort_keys=True) + "\n")
-    v7 = json.loads(v30.V25_V7.read_text())
+    v7 = json.loads(sources["v25_v7"].read_text())
     v7["v5_inputs"] = copy.deepcopy(v7["v5_inputs"])
     v7["v5_inputs"]["overlay"] = {
         "path": str(bad_overlay.resolve()), "sha256": v30.file_sha(bad_overlay),
     }
     v7["storage_plan"] = copy.deepcopy(v7["storage_plan"])
     v7["input_hashes"] = dict(v7["input_hashes"])
-    old_overlay = str(v30.V25_OVERLAY.resolve())
+    old_overlay = str(sources["overlay"].resolve())
     v7["input_hashes"].pop(old_overlay, None)
     v7["input_hashes"][str(bad_overlay.resolve())] = v30.file_sha(bad_overlay)
     v7["sha256"] = v30.canonical(v7)
     bad_v7 = tmp_path / "bad-v7.json"
     bad_v7.write_text(json.dumps(v7, sort_keys=True) + "\n")
     with pytest.raises(v30.V30Error, match="source byte total differs"):
-        v30._validate_frozen_inputs(frozen_v25, v30.V26_V14, bad_v7,
-                                    bad_overlay, v30.V25_PLAN, v30.EVALUATOR_V3)
+        v30._validate_frozen_inputs(frozen_v25, sources["v26_v14"], bad_v7,
+                                    bad_overlay, sources["plan"], sources["evaluator"])
