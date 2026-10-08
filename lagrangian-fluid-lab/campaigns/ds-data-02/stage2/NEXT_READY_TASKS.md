@@ -113,3 +113,7 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - F1 support-v5实际完成并闭合解析前后VTK全内容SHA与完整stat：细档160×268×60、40.2kg、包络最大偏差1.192092902e-8m；F1_OWNER_DP0025_SUPPORT_V5_ACTUAL_INDEPENDENT_VERIFICATION_001.json。原limited-v4及QA-v1失败均保持不可变。下一实际分支是guarded matched CFD/观测量时间积分与输出校准，reference正在准备。
 - consumer c2458459e接入848a00ec9，v30/v31冻结path测试及v32/v33/v34/private-parent相关root19项测试通过；但代码复核发现parent-v1 preexec把child自身PID误当父PID、venv命令被resolve为系统Python、lead退出后helper残留及finalization失败费用遗漏风险，实际冷链尚不启动，须forward修复与真实active helper/deadline反例及OS-level文件跟踪闭合。测试通过不是这些缺陷不存在的证据。
 - 当前无未终态root运行、无CFD或大IO。七族bounded产品已有实际产物/独立proof；完整336资格目录、14参考研究终态、真实portable完整链及许可/依赖访问交付仍推进，完整goal保持active。
+
+## Root actual checkpoint 031 — qualification catalog v29
+
+Actual guarded v29 completed; independent root joins checked all 336 CURRENT identities/audit summary rows, latest v3/v8 for exactly 118 native omission cases, initial whole-fluid mass denominators and per-particle source-visible mass sums. Native counts total 1,328 (1,277 position exclusions; 51 density exclusions), with 117 below and 1 above the frozen 0.003 screen. Seven exact label anchors retained. Detailed field credit follows the heterogeneous source audit rows; no new trajectory scan or QI/QN/QE claim. Original H5/BI4/raw remain unopened by root. Proof: `checkpoints/FINAL_QUALIFICATION_CATALOG_V29_ACTUAL_INDEPENDENT_VERIFICATION_001.json`. Next actual work remains fresh cold portable raw→typed→label→private evaluator and matched sentinel reference runs; full goal remains active.
