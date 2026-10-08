@@ -588,7 +588,8 @@ def _git_commit() -> str | None:
 def make_request(current_path: Path | str, quality_manifest_path: Path | str,
                  quality_report_path: Path | str, quality_receipt_path: Path | str,
                  output: Path | str, runtime_root: Path | str,
-                 worker_root: Path | str) -> dict[str, Any]:
+                 worker_root: Path | str,
+                 attempt_id: str = "seven-effective-condition-cards-v24-forward-001") -> dict[str, Any]:
     """Prepare (but do not launch) the bounded v8 CPU metadata request."""
     paths = [
         require_file(current_path, "CURRENT336"),
@@ -630,7 +631,7 @@ def make_request(current_path: Path | str, quality_manifest_path: Path | str,
     request = {
         "schema": "ds02.runner-request.v1",
         "request_schema": "ds02.stage2.effective-condition-cards-v24-request.v1",
-        "attempt_id": "seven-effective-condition-cards-v24-forward-001",
+        "attempt_id": attempt_id,
         "case_id": "DS02_STAGE2_EFFECTIVE_CONDITION_CARDS_V24",
         "family_id": "infra",
         "dataset_families": FAMILIES,
@@ -692,12 +693,13 @@ def main(argv: list[str] | None = None) -> int:
         if name == "make-request":
             subparser.add_argument("--runtime-root", type=Path, required=True)
             subparser.add_argument("--worker-root", type=Path, required=True)
+            subparser.add_argument("--attempt-id", default="seven-effective-condition-cards-v24-forward-001")
     args = parser.parse_args(argv)
     if args.command == "build":
         build_cards(args.current, args.quality_manifest, args.quality_report, args.quality_receipt, args.output)
     else:
         make_request(args.current, args.quality_manifest, args.quality_report, args.quality_receipt,
-                     args.output, args.runtime_root, args.worker_root)
+                     args.output, args.runtime_root, args.worker_root, args.attempt_id)
     return 0
 
 
