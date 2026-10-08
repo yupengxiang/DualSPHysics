@@ -126,7 +126,9 @@ def build(output: Path, launch_commit: str, known_fluid_vtk_sha: str | None = No
     receipt = json.loads(root_receipt.read_text(encoding="utf-8"))
     if str(receipt.get("status", "")).lower() not in {"completed", "complete", "success", "completed0"} or receipt.get("returncode") not in (0, None):
         raise ValueError("ROOT076 terminal GenCase receipt is not completed zero-return")
-    output_root = regular(Path(str(receipt["output_root"])))
+    output_root = Path(str(receipt["output_root"])).expanduser().resolve()
+    if output_root.is_symlink() or not output_root.is_dir():
+        raise FileNotFoundError(output_root)
     generated_xml = regular(output_root / "generated.xml")
     fluid_vtk = regular(output_root / "generated_Fluid.vtk")
     bound_vtk = regular(output_root / "generated_Bound.vtk")
