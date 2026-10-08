@@ -497,8 +497,11 @@ def candidate_audit(manifest: dict[str, Any], input_paths: dict[str, Path], pre:
         raise AuditError("candidate report is not the reviewed official GenCase completion")
     if report.get("physical_case_id") != PHYSICAL_CASE_ID:
         raise AuditError("candidate physical case differs")
-    if receipt.get("request", {}).get("case_id") not in {None, candidate.get("case_id")}: 
+    request = receipt.get("request", {})
+    if isinstance(request, dict) and request.get("case_id") not in {None, candidate.get("case_id")}:
         raise AuditError("candidate receipt request case differs")
+    if request is not None and not isinstance(request, dict):
+        raise AuditError("candidate receipt request is not an object")
     if receipt.get("output_root") and Path(str(receipt["output_root"])).resolve() != Path(str(candidate["output_root"])).resolve():
         raise AuditError("candidate receipt output root differs from manifest")
     binding = report.get("source_binding") or {}
