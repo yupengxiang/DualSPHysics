@@ -1,0 +1,70 @@
+{
+  "schema": "ds02.stage2.f5-s1.continuous-geometry-scope.v2",
+  "status": "PREPARED_CONTINUOUS_DOMAIN_SCOPE_MASS_UNKNOWN",
+  "source_report": {
+    "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_INITIAL_SUPPORT_AUDIT_V3_ROOT_077/f5-s1-initial-support-audit-v3-root-077-001-root-forward-030-001/report/f5_s1_initial_gencase_support_audit_v3.json",
+    "sha256": "6bdeb4942f73ca0e96ec536dcd87cb4ad4302b4b047ab4f650df88e2f03304ed",
+    "status": "COMPLETED_INITIAL_XML_VTK_SUPPORT_AUDIT"
+  },
+  "identity": {
+    "family_id": "F5",
+    "sentinel_id": "F5-S1",
+    "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+    "geometry_family_id": "F5_C082S1_CLOSED_ANALYTIC_PROFILE_EXTRUDED_Y_V1"
+  },
+  "owner_continuous_geometry": {
+    "fluid_envelope_low_m": [0.01, -0.14, 0.01],
+    "fluid_envelope_high_m": [3.43, 0.14, 0.39],
+    "fluid_envelope_size_m": [3.42, 0.28, 0.38],
+    "fluid_envelope_volume_m3": 0.3638880000000001,
+    "envelope_mass_at_rho0_1000_kg_diagnostic_only": 363.8880000000001,
+    "continuous_owner_mass_kg": "UNKNOWN_UNSPECIFIED_BY_OWNER_CONTRACT",
+    "mass_rule": "Do not use the envelope mass as the fluid target; the closed-bed clipping/draw order defines the fluid region and no scalar owner mass is published."
+  },
+  "closed_bed_geometry": {
+    "representation": "closed analytic xz profile extruded along y",
+    "closed": true,
+    "extrusion_y_bounds_m": [-0.22, 0.22],
+    "lower_profile_xz_m": [[4.8, -0.15], [4.4, -0.15], [3.9, 0.248], [3.6, 0.248], [3.0, 0.08], [2.0, -0.2], [-0.2, -0.2]],
+    "upper_profile_xz_m": [[-0.2, 0.0], [2.0, 0.0], [3.0, 0.28], [3.6, 0.448], [3.9, 0.448], [4.4, 0.05], [4.8, 0.05]],
+    "finite_floor_sidewalls_and_prescribed_piston": true,
+    "polygon_interpretation": "The two ordered profiles bound the closed extruded bed solid. This is a geometry contract, not a measured fluid-volume result."
+  },
+  "formal_scientific_domain": {
+    "envelope_set": "E = [0.01,3.43] x [-0.14,0.14] x [0.01,0.39]",
+    "bed_set": "B = piecewise-linear closed xz polygon between lower_profile_xz_m and upper_profile_xz_m, extruded for y in [-0.22,0.22]",
+    "candidate_fluid_set": "E \\ B (subject to the recorded GenCase clip/draw-order orientation)",
+    "observed_gen_case_operations": [
+      {"op": "drawextrude", "closed": "true", "comment": "closed_xz_slope_profile_extruded_across_y"},
+      {"op": "shapeout", "file": "analytic_thick_bed_and_tank", "reset": "true"},
+      {"op": "clipplane", "comment": "unchanged_profile_separator_for_initial_fluid"},
+      {"op": "drawbox", "boxfill": "solid", "role": "initial_fluid_envelope"},
+      {"op": "clipreset"}
+    ],
+    "clip_orientation_and_quadrature": "UNKNOWN_PENDING_SOURCE_LEVEL_CLIP_CONTRACT",
+    "continuous_fluid_volume_m3": "UNKNOWN",
+    "continuous_fluid_mass_kg": "UNKNOWN",
+    "why": "The V3 report establishes finite generated support inside the envelope and records the closed-bed/clip operations, but it does not publish an owner scalar mass or a source-level fluid-side quadrature of E\\B."
+  },
+  "actual_discrete_diagnostic": {
+    "generated_fluid_count": 67708,
+    "generated_massfluid_kg": 0.0037584625659,
+    "generated_sample_mass_kg": 254.4779834119572,
+    "source_discrete_sample_mass_kg": 253.264,
+    "relative_to_source_discrete_fraction": 0.0047933516487,
+    "relative_to_source_discrete_gate": "PASS_WITHIN_ONE_PERCENT_DIAGNOSTIC_ONLY",
+    "fluid_envelope_inside_count": 67708,
+    "fluid_envelope_outside_count": 0,
+    "fluid_envelope_boundary_tie_count": 23,
+    "scientific_role": "Generated particle support and source-relative sample mass only; this does not establish E\\B continuous mass or a matched continuous initial state."
+  },
+  "frozen_scope_and_next_step": {
+    "continuous_geometry_frozen": true,
+    "continuous_mass_gate": "UNKNOWN until source clip orientation/quadrature and owner mass are explicitly supplied",
+    "no_rescale": true,
+    "no_threshold_widening": true,
+    "no_native_array_read_in_this_sidecar": true,
+    "next_information_gain": "Source-level audit of the Def clipplane/draw order and a bounded analytic piecewise-linear E\\B volume calculation; only then register a material-compatible grid or an explicit continuous-owner failure scope.",
+    "solver_or_cfd": "not authorized by this sidecar"
+  }
+}
