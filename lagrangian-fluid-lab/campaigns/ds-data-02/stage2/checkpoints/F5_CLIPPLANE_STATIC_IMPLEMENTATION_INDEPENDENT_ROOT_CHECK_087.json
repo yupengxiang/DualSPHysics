@@ -1,0 +1,71 @@
+{
+  "schema": "ds02.stage2.root-static-clipplane-check.v1",
+  "utc": "2026-10-08T20:15:16.816185+00:00",
+  "status": "PASS_STATIC_BINARY_FINITE_PLANE_SIDE_AND_INDEPENDENT_CLOSED_FORM",
+  "official_binary": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+    "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+  },
+  "disassembly": [
+    {
+      "command": [
+        "objdump",
+        "-d",
+        "-C",
+        "--start-address=0x4f6a30",
+        "--stop-address=0x4f6ab0",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+      ],
+      "output": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/f5-clipplane-root087/ClipPoint.objdump.txt",
+      "sha256": "29dab04d75a672599e8799b4e5b4cfd542d5719848c7f5f8d0dcd5b78f5f2dc4"
+    },
+    {
+      "command": [
+        "objdump",
+        "-d",
+        "-C",
+        "--start-address=0x6cad80",
+        "--stop-address=0x6cae20",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+      ],
+      "output": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/f5-clipplane-root087/ClipPlaneVec.objdump.txt",
+      "sha256": "6b7fff1aac7a6b2ad2a7968b0b759a80287a949318cf384f0cfc1bb193983d5f"
+    },
+    {
+      "command": [
+        "objdump",
+        "-d",
+        "-C",
+        "--start-address=0x4f4d00",
+        "--stop-address=0x4f51c0",
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64"
+      ],
+      "output": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/f5-clipplane-root087/AddPlane.objdump.txt",
+      "sha256": "332d3483926529ff7b615af28e237695d813d788602d93b9f70f347d3e7fbce0"
+    }
+  ],
+  "root_manual_interpretation": {
+    "ClipPlaneVec": "passes point and vector to JClipShape::AddPlane",
+    "AddPlane": "positive normalization of n, stored plane d=-n dot point; no sign reversal",
+    "ClipPoint": "returns true for finite points only if all stored n dot x + d <= 0",
+    "scope": "static implementation review, not an actual VTK support audit"
+  },
+  "independent_volume": {
+    "method": "full-height rectangle plus right triangle, exact rational arithmetic",
+    "volume_fraction": "35967/125000",
+    "volume_m3": 0.287736,
+    "density_kg_m3": 1000,
+    "mass_kg": 287.736,
+    "x_full_height_end_m": 2.0357142857142856,
+    "x_dry_start_m": 3.392857142857143
+  },
+  "vtk_bi4_h5_or_raw_read": false,
+  "solver_started": false,
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "source_geometry_binding": "pending guarded F5 auditor; does not replace source support QA",
+  "goal_complete": false
+}

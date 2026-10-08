@@ -1,0 +1,44 @@
+
+/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64：     文件格式 elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004f6a30 <JClipShape::ClipPoint(tdouble3 const&) const>:
+  4f6a30:	8b 57 14             	mov    0x14(%rdi),%edx
+  4f6a33:	85 d2                	test   %edx,%edx
+  4f6a35:	74 6c                	je     4f6aa3 <JClipShape::ClipPoint(tdouble3 const&) const+0x73>
+  4f6a37:	48 8b 47 18          	mov    0x18(%rdi),%rax
+  4f6a3b:	83 ea 01             	sub    $0x1,%edx
+  4f6a3e:	48 c1 e2 05          	shl    $0x5,%rdx
+  4f6a42:	f2 0f 10 2e          	movsd  (%rsi),%xmm5
+  4f6a46:	f2 0f 10 66 08       	movsd  0x8(%rsi),%xmm4
+  4f6a4b:	f2 0f 10 5e 10       	movsd  0x10(%rsi),%xmm3
+  4f6a50:	48 01 c2             	add    %rax,%rdx
+  4f6a53:	66 0f ef d2          	pxor   %xmm2,%xmm2
+  4f6a57:	eb 11                	jmp    4f6a6a <JClipShape::ClipPoint(tdouble3 const&) const+0x3a>
+  4f6a59:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  4f6a60:	48 83 c0 20          	add    $0x20,%rax
+  4f6a64:	66 0f 2e d0          	ucomisd %xmm0,%xmm2
+  4f6a68:	72 36                	jb     4f6aa0 <JClipShape::ClipPoint(tdouble3 const&) const+0x70>
+  4f6a6a:	f2 0f 10 08          	movsd  (%rax),%xmm1
+  4f6a6e:	48 39 c2             	cmp    %rax,%rdx
+  4f6a71:	f2 0f 10 40 08       	movsd  0x8(%rax),%xmm0
+  4f6a76:	f2 0f 59 cd          	mulsd  %xmm5,%xmm1
+  4f6a7a:	f2 0f 59 c4          	mulsd  %xmm4,%xmm0
+  4f6a7e:	f2 0f 58 c1          	addsd  %xmm1,%xmm0
+  4f6a82:	f2 0f 10 48 10       	movsd  0x10(%rax),%xmm1
+  4f6a87:	f2 0f 59 cb          	mulsd  %xmm3,%xmm1
+  4f6a8b:	f2 0f 58 c1          	addsd  %xmm1,%xmm0
+  4f6a8f:	f2 0f 58 40 18       	addsd  0x18(%rax),%xmm0
+  4f6a94:	75 ca                	jne    4f6a60 <JClipShape::ClipPoint(tdouble3 const&) const+0x30>
+  4f6a96:	66 0f 2e d0          	ucomisd %xmm0,%xmm2
+  4f6a9a:	0f 93 c0             	setae  %al
+  4f6a9d:	c3                   	ret    
+  4f6a9e:	66 90                	xchg   %ax,%ax
+  4f6aa0:	31 c0                	xor    %eax,%eax
+  4f6aa2:	c3                   	ret    
+  4f6aa3:	b8 01 00 00 00       	mov    $0x1,%eax
+  4f6aa8:	c3                   	ret    
+  4f6aa9:	90                   	nop
+  4f6aaa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)

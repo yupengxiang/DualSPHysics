@@ -1,0 +1,284 @@
+
+/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64：     文件格式 elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000004f4d00 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)>:
+  4f4d00:	55                   	push   %rbp
+  4f4d01:	48 89 e5             	mov    %rsp,%rbp
+  4f4d04:	41 57                	push   %r15
+  4f4d06:	41 56                	push   %r14
+  4f4d08:	41 55                	push   %r13
+  4f4d0a:	41 54                	push   %r12
+  4f4d0c:	49 89 d7             	mov    %rdx,%r15
+  4f4d0f:	53                   	push   %rbx
+  4f4d10:	49 89 f4             	mov    %rsi,%r12
+  4f4d13:	48 89 fb             	mov    %rdi,%rbx
+  4f4d16:	48 81 ec 98 00 00 00 	sub    $0x98,%rsp
+  4f4d1d:	83 7f 14 13          	cmpl   $0x13,0x14(%rdi)
+  4f4d21:	0f 87 89 02 00 00    	ja     4f4fb0 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x2b0>
+  4f4d27:	48 83 7b 18 00       	cmpq   $0x0,0x18(%rbx)
+  4f4d2c:	0f 84 7e 03 00 00    	je     4f50b0 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x3b0>
+  4f4d32:	f2 41 0f 10 07       	movsd  (%r15),%xmm0
+  4f4d37:	f2 41 0f 10 57 08    	movsd  0x8(%r15),%xmm2
+  4f4d3d:	f2 0f 59 c0          	mulsd  %xmm0,%xmm0
+  4f4d41:	f2 0f 59 d2          	mulsd  %xmm2,%xmm2
+  4f4d45:	f2 41 0f 10 4f 10    	movsd  0x10(%r15),%xmm1
+  4f4d4b:	f2 0f 59 c9          	mulsd  %xmm1,%xmm1
+  4f4d4f:	f2 0f 58 d0          	addsd  %xmm0,%xmm2
+  4f4d53:	f2 0f 58 ca          	addsd  %xmm2,%xmm1
+  4f4d57:	f2 0f 51 c1          	sqrtsd %xmm1,%xmm0
+  4f4d5b:	66 0f 2e c0          	ucomisd %xmm0,%xmm0
+  4f4d5f:	0f 8a 1b 04 00 00    	jp     4f5180 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x480>
+  4f4d65:	66 45 0f ef f6       	pxor   %xmm14,%xmm14
+  4f4d6a:	4c 89 f8             	mov    %r15,%rax
+  4f4d6d:	66 41 0f 2e c6       	ucomisd %xmm14,%xmm0
+  4f4d72:	0f 8a f8 01 00 00    	jp     4f4f70 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x270>
+  4f4d78:	0f 85 f2 01 00 00    	jne    4f4f70 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x270>
+  4f4d7e:	f2 41 0f 10 0f       	movsd  (%r15),%xmm1
+  4f4d83:	f2 45 0f 10 67 08    	movsd  0x8(%r15),%xmm12
+  4f4d89:	f2 45 0f 10 6f 10    	movsd  0x10(%r15),%xmm13
+  4f4d8f:	f2 0f 10 53 30       	movsd  0x30(%rbx),%xmm2
+  4f4d94:	66 41 0f 28 dc       	movapd %xmm12,%xmm3
+  4f4d99:	f2 44 0f 10 4b 38    	movsd  0x38(%rbx),%xmm9
+  4f4d9f:	8b 43 14             	mov    0x14(%rbx),%eax
+  4f4da2:	66 0f 28 e2          	movapd %xmm2,%xmm4
+  4f4da6:	49 8b 0c 24          	mov    (%r12),%rcx
+  4f4daa:	f2 41 0f 59 d9       	mulsd  %xmm9,%xmm3
+  4f4daf:	48 8b 53 20          	mov    0x20(%rbx),%rdx
+  4f4db3:	f2 0f 59 e1          	mulsd  %xmm1,%xmm4
+  4f4db7:	66 0f 28 e9          	movapd %xmm1,%xmm5
+  4f4dbb:	f2 0f 10 43 40       	movsd  0x40(%rbx),%xmm0
+  4f4dc0:	48 89 c6             	mov    %rax,%rsi
+  4f4dc3:	48 8d 04 40          	lea    (%rax,%rax,2),%rax
+  4f4dc7:	f2 44 0f 10 5b 50    	movsd  0x50(%rbx),%xmm11
+  4f4dcd:	f2 44 0f 10 43 58    	movsd  0x58(%rbx),%xmm8
+  4f4dd3:	f2 0f 58 e3          	addsd  %xmm3,%xmm4
+  4f4dd7:	66 0f 28 d8          	movapd %xmm0,%xmm3
+  4f4ddb:	48 c1 e0 03          	shl    $0x3,%rax
+  4f4ddf:	f2 41 0f 59 eb       	mulsd  %xmm11,%xmm5
+  4f4de4:	f2 41 0f 59 dd       	mulsd  %xmm13,%xmm3
+  4f4de9:	48 89 0c 02          	mov    %rcx,(%rdx,%rax,1)
+  4f4ded:	49 8b 4c 24 08       	mov    0x8(%r12),%rcx
+  4f4df2:	f2 0f 10 73 60       	movsd  0x60(%rbx),%xmm6
+  4f4df7:	f2 44 0f 10 53 70    	movsd  0x70(%rbx),%xmm10
+  4f4dfd:	48 89 4c 02 08       	mov    %rcx,0x8(%rdx,%rax,1)
+  4f4e02:	49 8b 4c 24 10       	mov    0x10(%r12),%rcx
+  4f4e07:	f2 0f 58 e3          	addsd  %xmm3,%xmm4
+  4f4e0b:	66 41 0f 28 dc       	movapd %xmm12,%xmm3
+  4f4e10:	f2 0f 10 7b 78       	movsd  0x78(%rbx),%xmm7
+  4f4e15:	f2 41 0f 59 d8       	mulsd  %xmm8,%xmm3
+  4f4e1a:	48 89 4c 02 10       	mov    %rcx,0x10(%rdx,%rax,1)
+  4f4e1f:	48 03 43 28          	add    0x28(%rbx),%rax
+  4f4e23:	f2 0f 58 dd          	addsd  %xmm5,%xmm3
+  4f4e27:	66 0f 28 ee          	movapd %xmm6,%xmm5
+  4f4e2b:	f2 0f 11 08          	movsd  %xmm1,(%rax)
+  4f4e2f:	f2 41 0f 59 ca       	mulsd  %xmm10,%xmm1
+  4f4e34:	f2 44 0f 11 60 08    	movsd  %xmm12,0x8(%rax)
+  4f4e3a:	f2 41 0f 59 ed       	mulsd  %xmm13,%xmm5
+  4f4e3f:	f2 44 0f 59 e7       	mulsd  %xmm7,%xmm12
+  4f4e44:	f2 44 0f 11 68 10    	movsd  %xmm13,0x10(%rax)
+  4f4e4a:	48 89 f0             	mov    %rsi,%rax
+  4f4e4d:	48 c1 e0 05          	shl    $0x5,%rax
+  4f4e51:	48 03 43 18          	add    0x18(%rbx),%rax
+  4f4e55:	f2 45 0f 10 3c 24    	movsd  (%r12),%xmm15
+  4f4e5b:	f2 0f 58 dd          	addsd  %xmm5,%xmm3
+  4f4e5f:	f2 0f 10 ab 80 00 00 	movsd  0x80(%rbx),%xmm5
+  4f4e66:	00 
+  4f4e67:	f2 44 0f 58 e1       	addsd  %xmm1,%xmm12
+  4f4e6c:	66 41 0f 28 cd       	movapd %xmm13,%xmm1
+  4f4e71:	f2 45 0f 10 6c 24 08 	movsd  0x8(%r12),%xmm13
+  4f4e78:	49 89 c6             	mov    %rax,%r14
+  4f4e7b:	f2 0f 59 cd          	mulsd  %xmm5,%xmm1
+  4f4e7f:	f2 41 0f 59 d7       	mulsd  %xmm15,%xmm2
+  4f4e84:	f2 45 0f 59 cd       	mulsd  %xmm13,%xmm9
+  4f4e89:	f2 45 0f 59 d7       	mulsd  %xmm15,%xmm10
+  4f4e8e:	f2 41 0f 59 fd       	mulsd  %xmm13,%xmm7
+  4f4e93:	f2 41 0f 58 cc       	addsd  %xmm12,%xmm1
+  4f4e98:	f2 45 0f 10 64 24 10 	movsd  0x10(%r12),%xmm12
+  4f4e9f:	f2 41 0f 58 d1       	addsd  %xmm9,%xmm2
+  4f4ea4:	f2 45 0f 59 df       	mulsd  %xmm15,%xmm11
+  4f4ea9:	f2 41 0f 59 c4       	mulsd  %xmm12,%xmm0
+  4f4eae:	f2 41 0f 58 fa       	addsd  %xmm10,%xmm7
+  4f4eb3:	f2 41 0f 59 ec       	mulsd  %xmm12,%xmm5
+  4f4eb8:	f2 45 0f 59 c5       	mulsd  %xmm13,%xmm8
+  4f4ebd:	f2 41 0f 59 f4       	mulsd  %xmm12,%xmm6
+  4f4ec2:	f2 0f 58 d0          	addsd  %xmm0,%xmm2
+  4f4ec6:	66 0f 28 c3          	movapd %xmm3,%xmm0
+  4f4eca:	f2 0f 58 ef          	addsd  %xmm7,%xmm5
+  4f4ece:	66 0f 28 fc          	movapd %xmm4,%xmm7
+  4f4ed2:	f2 0f 59 c3          	mulsd  %xmm3,%xmm0
+  4f4ed6:	f2 45 0f 58 c3       	addsd  %xmm11,%xmm8
+  4f4edb:	f2 0f 59 fc          	mulsd  %xmm4,%xmm7
+  4f4edf:	f2 0f 58 53 48       	addsd  0x48(%rbx),%xmm2
+  4f4ee4:	f2 0f 58 ab 88 00 00 	addsd  0x88(%rbx),%xmm5
+  4f4eeb:	00 
+  4f4eec:	f2 41 0f 58 f0       	addsd  %xmm8,%xmm6
+  4f4ef1:	f2 0f 58 c7          	addsd  %xmm7,%xmm0
+  4f4ef5:	66 0f 28 f9          	movapd %xmm1,%xmm7
+  4f4ef9:	f2 0f 59 f9          	mulsd  %xmm1,%xmm7
+  4f4efd:	f2 0f 58 73 68       	addsd  0x68(%rbx),%xmm6
+  4f4f02:	f2 0f 58 c7          	addsd  %xmm7,%xmm0
+  4f4f06:	f2 0f 51 f8          	sqrtsd %xmm0,%xmm7
+  4f4f0a:	66 0f 2e ff          	ucomisd %xmm7,%xmm7
+  4f4f0e:	0f 8a 7a 02 00 00    	jp     4f518e <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x48e>
+  4f4f14:	66 41 0f 2e fe       	ucomisd %xmm14,%xmm7
+  4f4f19:	7a 7d                	jp     4f4f98 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x298>
+  4f4f1b:	75 7b                	jne    4f4f98 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x298>
+  4f4f1d:	f2 0f 10 05 eb 14 36 	movsd  0x3614eb(%rip),%xmm0        # 856410 <fun::PrintStr(char const*, ...)::__func__+0x60>
+  4f4f24:	00 
+  4f4f25:	f2 41 0f 11 26       	movsd  %xmm4,(%r14)
+  4f4f2a:	66 0f 57 e0          	xorpd  %xmm0,%xmm4
+  4f4f2e:	f2 41 0f 11 5e 08    	movsd  %xmm3,0x8(%r14)
+  4f4f34:	f2 0f 59 de          	mulsd  %xmm6,%xmm3
+  4f4f38:	f2 41 0f 11 4e 10    	movsd  %xmm1,0x10(%r14)
+  4f4f3e:	f2 0f 59 cd          	mulsd  %xmm5,%xmm1
+  4f4f42:	f2 0f 59 d4          	mulsd  %xmm4,%xmm2
+  4f4f46:	f2 0f 5c d3          	subsd  %xmm3,%xmm2
+  4f4f4a:	f2 0f 5c d1          	subsd  %xmm1,%xmm2
+  4f4f4e:	f2 41 0f 11 56 18    	movsd  %xmm2,0x18(%r14)
+  4f4f54:	83 43 14 01          	addl   $0x1,0x14(%rbx)
+  4f4f58:	74 07                	je     4f4f61 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x261>
+  4f4f5a:	c6 83 b0 00 00 00 01 	movb   $0x1,0xb0(%rbx)
+  4f4f61:	48 8d 65 d8          	lea    -0x28(%rbp),%rsp
+  4f4f65:	5b                   	pop    %rbx
+  4f4f66:	41 5c                	pop    %r12
+  4f4f68:	41 5d                	pop    %r13
+  4f4f6a:	41 5e                	pop    %r14
+  4f4f6c:	41 5f                	pop    %r15
+  4f4f6e:	5d                   	pop    %rbp
+  4f4f6f:	c3                   	ret    
+  4f4f70:	f2 44 0f 10 68 10    	movsd  0x10(%rax),%xmm13
+  4f4f76:	f2 44 0f 10 60 08    	movsd  0x8(%rax),%xmm12
+  4f4f7c:	f2 0f 10 08          	movsd  (%rax),%xmm1
+  4f4f80:	f2 44 0f 5e e8       	divsd  %xmm0,%xmm13
+  4f4f85:	f2 44 0f 5e e0       	divsd  %xmm0,%xmm12
+  4f4f8a:	f2 0f 5e c8          	divsd  %xmm0,%xmm1
+  4f4f8e:	e9 fc fd ff ff       	jmp    4f4d8f <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x8f>
+  4f4f93:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
+  4f4f98:	f2 0f 5e cf          	divsd  %xmm7,%xmm1
+  4f4f9c:	f2 0f 5e df          	divsd  %xmm7,%xmm3
+  4f4fa0:	f2 0f 5e e7          	divsd  %xmm7,%xmm4
+  4f4fa4:	e9 74 ff ff ff       	jmp    4f4f1d <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x21d>
+  4f4fa9:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+  4f4fb0:	4c 8d 6d c0          	lea    -0x40(%rbp),%r13
+  4f4fb4:	48 8d 55 8e          	lea    -0x72(%rbp),%rdx
+  4f4fb8:	be 62 5d 85 00       	mov    $0x855d62,%esi
+  4f4fbd:	4c 89 ef             	mov    %r13,%rdi
+  4f4fc0:	e8 1b 05 f1 ff       	call   4054e0 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>
+  4f4fc5:	48 8d 7d 90          	lea    -0x70(%rbp),%rdi
+  4f4fc9:	ba 14 00 00 00       	mov    $0x14,%edx
+  4f4fce:	be 90 b5 85 00       	mov    $0x85b590,%esi
+  4f4fd3:	31 c0                	xor    %eax,%eax
+  4f4fd5:	e8 b6 5b f4 ff       	call   43ab90 <fun::PrintStr(char const*, ...)>
+  4f4fda:	48 8d 55 8d          	lea    -0x73(%rbp),%rdx
+  4f4fde:	48 8d 7d b0          	lea    -0x50(%rbp),%rdi
+  4f4fe2:	be e8 b5 85 00       	mov    $0x85b5e8,%esi
+  4f4fe7:	e8 f4 04 f1 ff       	call   4054e0 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>
+  4f4fec:	48 8d 55 8c          	lea    -0x74(%rbp),%rdx
+  4f4ff0:	48 8d 7d a0          	lea    -0x60(%rbp),%rdi
+  4f4ff4:	be 53 b5 85 00       	mov    $0x85b553,%esi
+  4f4ff9:	4c 8d 73 08          	lea    0x8(%rbx),%r14
+  4f4ffd:	e8 de 04 f1 ff       	call   4054e0 <std::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string(char const*, std::allocator<char> const&)@plt>
+  4f5002:	48 83 ec 08          	sub    $0x8,%rsp
+  4f5006:	4c 8d 4d 90          	lea    -0x70(%rbp),%r9
+  4f500a:	4c 8d 45 b0          	lea    -0x50(%rbp),%r8
+  4f500e:	41 55                	push   %r13
+  4f5010:	48 8d 75 a0          	lea    -0x60(%rbp),%rsi
+  4f5014:	4c 89 f1             	mov    %r14,%rcx
+  4f5017:	ba 57 00 00 00       	mov    $0x57,%edx
+  4f501c:	48 89 df             	mov    %rbx,%rdi
+  4f501f:	e8 ac fa 0b 00       	call   5b4ad0 <JObject::RunExceptioon(std::string const&, int, std::string const&, std::string const&, std::string const&, std::string const&) const>
+  4f5024:	58                   	pop    %rax
+  4f5025:	48 8b 45 a0          	mov    -0x60(%rbp),%rax
+  4f5029:	5a                   	pop    %rdx
+  4f502a:	48 8d 78 e8          	lea    -0x18(%rax),%rdi
+  4f502e:	48 81 ff a0 1d b0 00 	cmp    $0xb01da0,%rdi
+  4f5035:	0f 85 b5 00 00 00    	jne    4f50f0 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x3f0>
+  4f503b:	48 8b 45 b0          	mov    -0x50(%rbp),%rax
+  4f503f:	48 8d 78 e8          	lea    -0x18(%rax),%rdi
+  4f5043:	48 81 ff a0 1d b0 00 	cmp    $0xb01da0,%rdi
+  4f504a:	0f 85 d0 00 00 00    	jne    4f5120 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x420>
+  4f5050:	48 8b 45 90          	mov    -0x70(%rbp),%rax
+  4f5054:	48 8d 78 e8          	lea    -0x18(%rax),%rdi
+  4f5058:	48 81 ff a0 1d b0 00 	cmp    $0xb01da0,%rdi
+  4f505f:	0f 85 eb 00 00 00    	jne    4f5150 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x450>
+  4f5065:	48 8b 45 c0          	mov    -0x40(%rbp),%rax
+  4f5069:	48 8d 78 e8          	lea    -0x18(%rax),%rdi
+  4f506d:	48 81 ff a0 1d b0 00 	cmp    $0xb01da0,%rdi
+  4f5074:	0f 84 ad fc ff ff    	je     4f4d27 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x27>
+  4f507a:	ba a0 58 40 00       	mov    $0x4058a0,%edx
+  4f507f:	48 85 d2             	test   %rdx,%rdx
+  4f5082:	0f 84 86 01 00 00    	je     4f520e <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x50e>
+  4f5088:	ba ff ff ff ff       	mov    $0xffffffff,%edx
+  4f508d:	f0 0f c1 50 f8       	lock xadd %edx,-0x8(%rax)
+  4f5092:	89 d0                	mov    %edx,%eax
+  4f5094:	85 c0                	test   %eax,%eax
+  4f5096:	0f 8f 8b fc ff ff    	jg     4f4d27 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x27>
+  4f509c:	48 8d 75 b0          	lea    -0x50(%rbp),%rsi
+  4f50a0:	e8 1b 02 f1 ff       	call   4052c0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+  4f50a5:	e9 7d fc ff ff       	jmp    4f4d27 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x27>
+  4f50aa:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+  4f50b0:	bf 80 02 00 00       	mov    $0x280,%edi
+  4f50b5:	c7 43 14 00 00 00 00 	movl   $0x0,0x14(%rbx)
+  4f50bc:	e8 9f fc f0 ff       	call   404d60 <operator new[](unsigned long)@plt>
+  4f50c1:	bf e0 01 00 00       	mov    $0x1e0,%edi
+  4f50c6:	48 89 43 18          	mov    %rax,0x18(%rbx)
+  4f50ca:	e8 91 fc f0 ff       	call   404d60 <operator new[](unsigned long)@plt>
+  4f50cf:	bf e0 01 00 00       	mov    $0x1e0,%edi
+  4f50d4:	48 89 43 20          	mov    %rax,0x20(%rbx)
+  4f50d8:	e8 83 fc f0 ff       	call   404d60 <operator new[](unsigned long)@plt>
+  4f50dd:	48 89 43 28          	mov    %rax,0x28(%rbx)
+  4f50e1:	e9 4c fc ff ff       	jmp    4f4d32 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x32>
+  4f50e6:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+  4f50ed:	00 00 00 
+  4f50f0:	ba a0 58 40 00       	mov    $0x4058a0,%edx
+  4f50f5:	48 85 d2             	test   %rdx,%rdx
+  4f50f8:	0f 84 20 01 00 00    	je     4f521e <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x51e>
+  4f50fe:	ba ff ff ff ff       	mov    $0xffffffff,%edx
+  4f5103:	f0 0f c1 50 f8       	lock xadd %edx,-0x8(%rax)
+  4f5108:	89 d0                	mov    %edx,%eax
+  4f510a:	85 c0                	test   %eax,%eax
+  4f510c:	0f 8f 29 ff ff ff    	jg     4f503b <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x33b>
+  4f5112:	48 8d 75 8f          	lea    -0x71(%rbp),%rsi
+  4f5116:	e8 a5 01 f1 ff       	call   4052c0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+  4f511b:	e9 1b ff ff ff       	jmp    4f503b <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x33b>
+  4f5120:	ba a0 58 40 00       	mov    $0x4058a0,%edx
+  4f5125:	48 85 d2             	test   %rdx,%rdx
+  4f5128:	0f 84 00 01 00 00    	je     4f522e <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x52e>
+  4f512e:	ba ff ff ff ff       	mov    $0xffffffff,%edx
+  4f5133:	f0 0f c1 50 f8       	lock xadd %edx,-0x8(%rax)
+  4f5138:	89 d0                	mov    %edx,%eax
+  4f513a:	85 c0                	test   %eax,%eax
+  4f513c:	0f 8f 0e ff ff ff    	jg     4f5050 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x350>
+  4f5142:	48 8d 75 a0          	lea    -0x60(%rbp),%rsi
+  4f5146:	e8 75 01 f1 ff       	call   4052c0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+  4f514b:	e9 00 ff ff ff       	jmp    4f5050 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x350>
+  4f5150:	ba a0 58 40 00       	mov    $0x4058a0,%edx
+  4f5155:	48 85 d2             	test   %rdx,%rdx
+  4f5158:	0f 84 e0 00 00 00    	je     4f523e <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x53e>
+  4f515e:	ba ff ff ff ff       	mov    $0xffffffff,%edx
+  4f5163:	f0 0f c1 50 f8       	lock xadd %edx,-0x8(%rax)
+  4f5168:	89 d0                	mov    %edx,%eax
+  4f516a:	85 c0                	test   %eax,%eax
+  4f516c:	0f 8f f3 fe ff ff    	jg     4f5065 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x365>
+  4f5172:	48 8d 75 b0          	lea    -0x50(%rbp),%rsi
+  4f5176:	e8 45 01 f1 ff       	call   4052c0 <std::string::_Rep::_M_destroy(std::allocator<char> const&)@plt>
+  4f517b:	e9 e5 fe ff ff       	jmp    4f5065 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x365>
+  4f5180:	66 0f 28 c1          	movapd %xmm1,%xmm0
+  4f5184:	e8 07 01 f1 ff       	call   405290 <sqrt@plt>
+  4f5189:	e9 d7 fb ff ff       	jmp    4f4d65 <JClipShape::AddPlane(tdouble3 const&, tdouble3 const&)+0x65>
+  4f518e:	f2 44 0f 11 b5 48 ff 	movsd  %xmm14,-0xb8(%rbp)
+  4f5195:	ff ff 
+  4f5197:	f2 0f 11 8d 50 ff ff 	movsd  %xmm1,-0xb0(%rbp)
+  4f519e:	ff 
+  4f519f:	f2 0f 11 9d 58 ff ff 	movsd  %xmm3,-0xa8(%rbp)
+  4f51a6:	ff 
+  4f51a7:	f2 0f 11 a5 60 ff ff 	movsd  %xmm4,-0xa0(%rbp)
+  4f51ae:	ff 
+  4f51af:	f2 0f 11 ad 68 ff ff 	movsd  %xmm5,-0x98(%rbp)
+  4f51b6:	ff 
+  4f51b7:	f2 0f 11 b5 70 ff ff 	movsd  %xmm6,-0x90(%rbp)
+  4f51be:	ff 
+  4f51bf:	f2                   	repnz
