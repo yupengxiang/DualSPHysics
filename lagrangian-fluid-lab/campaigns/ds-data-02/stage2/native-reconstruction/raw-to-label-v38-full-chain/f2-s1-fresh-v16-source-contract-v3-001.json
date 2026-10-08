@@ -1,0 +1,169 @@
+{
+  "derived_schema": "ds02.stage2.f2-fresh-v16-source-contract-derived.v2",
+  "expected": {
+    "case_identity": {
+      "current_case_index": 78,
+      "family_id": "F2",
+      "manifest_case_id": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010",
+      "manifest_physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+      "runtime_case_alias": "F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010"
+    },
+    "cohort": {
+      "identity_key": "(Zone,Idp)",
+      "identity_sha256": "bc7c25286faeb5c9bbc9f27c176671c027bbc0650b9051f9d08241b4f3397d70",
+      "initial_mk_codes": [
+        1,
+        2,
+        3
+      ],
+      "initial_mk_counts": {
+        "1": 7038,
+        "2": 7038,
+        "3": 7038
+      },
+      "initial_type_code": 3,
+      "raw_producer_initial_mk_bounds": {
+        "mk_codes": [
+          1,
+          2,
+          3
+        ],
+        "mk_counts": {
+          "1": 7038,
+          "2": 7038,
+          "3": 7038
+        },
+        "selection": "initial.csv frame0 identity set; Type=3 and Mk in {1,2,3}; (Zone,Idp) hash; nominal box is diagnostic only",
+        "type_code": 3
+      },
+      "selected_count": 21114
+    },
+    "events": {
+      "require_receiver_labels": true,
+      "require_residence_semantics": true,
+      "require_total_net_interval": true,
+      "require_unknown_recross": true,
+      "semantics_source": {
+        "aperture": "top z=0.45 finite x/y opening; only downward crossing inside bounds earns observed aperture event; side entry, outside-y/z, and invalid frames are separate unknown/diagnostic states",
+        "event_surface_scope": "diagnostic halfspace only; no receiver/aperture arrival credit",
+        "first_passage_states": [
+          "observed",
+          "right_censored",
+          "failed_before_observation",
+          "initially_inside",
+          "ambiguous_multiple_crossing"
+        ],
+        "flux": "static halfspace net is exact from known endpoint membership; observed saved-bracket gross is a subtotal and total gross is UNKNOWN because hidden recrossings are unbounded; one endpoint net interval per particle when endpoints are missing",
+        "later_missing": "valid=false after each scan missing bracket; initial mass remains denominator and is reported in unknown bucket",
+        "moving_source_rim": "case token ROT090 denotes source metadata rotation_duration_s=0.9; SHA-bound motion.dat supplies 0 deg at t=0 and -105 deg at t=4; XML/motion table coverage is 0..4 s and completed pose is explicitly held after finish",
+        "native_exclusion": "three exact IDs are numerical position exclusions with physical fate UNKNOWN; later missing mass is not physical outflow",
+        "quality": "all labels and scientific qualification remain UNKNOWN until approved reference calibration",
+        "receiver_volume": "finite static world receiver box [0.56,1.66]x[-0.16,0.44]x[0,0.45]; first volume arrival and final destination are separate from aperture downward crossing",
+        "recross": "later endpoint crossings retained; hidden within-bracket recross remains UNKNOWN",
+        "residence": "v14 per-particle compact runs with ID/MK/frozen initial mass; unknown invalid/nonfinite intervals retained and mass-time upper bound explicit",
+        "saved_bracket": "retain first candidate bracket; no arbitrary later bracket substitution"
+      },
+      "status_vocabulary": [
+        "ambiguous_multiple_crossing",
+        "failed_before_observation",
+        "initially_inside",
+        "observed",
+        "right_censored"
+      ]
+    },
+    "initial_mass_denominator": {
+      "denominator_kg": 21.114001002861187,
+      "derivation": "scientific-scan type_ledgers.fluid; frozen initial mass is not augmented by later missing IDs",
+      "initial_missing_mass_kg": 0.0,
+      "initially_absent_count": 0,
+      "later_missing_mass_kg": 0.003000000142492354,
+      "later_missing_unique_count": 3
+    },
+    "observer_fields": [
+      "mass_weighted_com_m",
+      "mass_weighted_mean_velocity_m_s",
+      "mass_weighted_kinetic_energy_J",
+      "mass_quantile_front_m",
+      "mass_distribution_fraction",
+      "event_status",
+      "event_time_s"
+    ],
+    "source_binding": {
+      "binding_status": "EXACT_CURRENT_SOURCE_BOUND",
+      "current_catalog_sha256": "aabfb1e55e47df73276d2bfc053839bd2bce5792330a82a95ad561a6dcde2972",
+      "source_files": {
+        "conversion_report": "ee623240d88fbcf4dfc0b251b6200474dd025988b99c8faef9bd8431afd85a67",
+        "current_catalog": "aabfb1e55e47df73276d2bfc053839bd2bce5792330a82a95ad561a6dcde2972",
+        "gencase_receipt": "485d259026080a8541fa2657ecdb1f57482562c0f14c7f831a5573f99fcde74f",
+        "generated_xml": "a239edb63e803a5d77f8bbe4e5dfbeef658351488343e286bdf86e11579d439e",
+        "initial_csv": "dbd0aba5b10be48b26cc68ed4f5f17ee226bd8e5617dd32f7348e1638b1dca4e",
+        "initial_qa": "e72062c6d48f2e197b8fb2cb841e10393571b8f807695ef547213dd949037340",
+        "initial_stats": "e4994b56aba4daf534fae20891afa7d8ea51f46685704d499e6f259cf56d754c",
+        "manifest": "0b1a50ad6e704a8548b8bc60911cf673b6e635422226cf8e836b7dcd90ce9055",
+        "motion_dat": "fa9cdbaea99cbbdad8005a6cc11cb080864fe4059abfd020d987fbfec5f65d7b",
+        "native_partout": "7b55c47d4744cfe780ec40327845938d0ec19eee0cb5c93c5f26b442132799ce",
+        "native_reconciliation": "d8b4fcf0bd2f3e45a252b58db9a442f0095b94e8a512c6c77aab25cd8b8a2cc9",
+        "native_reconciliation_receipt": "73aebbbe73aee676eaba573b91a181aae1ee74e4d8a7c771524c4519fac66a7b",
+        "native_runparts": "e2bde91995d98a336d4d22113ab92ed5c750c450555274c03575321c12d95cd5",
+        "owner_metadata": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3",
+        "scientific_scan_sidecar": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59",
+        "solver_receipt": "e59d876df8718e17c6cc57c17a822b77d467f423e4b900df7bb10c127a6e5dc6",
+        "source_metadata": "7f5091c496833616c9e6827a00d53fb478d39c92c9ae535e66cec56e9baebf29",
+        "xmf": "7f2a0e3e227e7008e840f044a653938642f06bec3df28d24ac113918d0dec776"
+      },
+      "trajectory_h5_producer_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d"
+    },
+    "time": {
+      "first_s": 0.0,
+      "frame_count": 401,
+      "last_s": 4.000007783879406,
+      "observer_profile_sha256": "4863f4cdd73c28a140b0152c79dd622d2e41c8da47b6cac996f7c852622ce774",
+      "tolerance_s": 0.0,
+      "tolerance_source": "exact saved times from frozen scientific-scan sidecar; no builder widening"
+    }
+  },
+  "original_roots": [
+    "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v37-executor-root-049/bundle-target-v37",
+    "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v37-executor-root-049/reference-products-v37/relocated-runtime"
+  ],
+  "producer_metadata": {
+    "mass_derivation": {
+      "initial_mk_codes": [
+        1,
+        2,
+        3
+      ],
+      "initial_mk_counts": {
+        "1": 7038,
+        "2": 7038,
+        "3": 7038
+      },
+      "initially_absent_count": 0,
+      "later_missing_unique_count": 3,
+      "payload_read": false,
+      "selected_count": 21114,
+      "type_code": 3,
+      "type_ledger": "fluid",
+      "typed_initial_mass_kg": 21.114001002861187
+    },
+    "scientific_scan_sidecar": {
+      "path": "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v37-executor-root-049/bundle-target-v37/sources/0008-scientific-scan.json",
+      "schema": "ds02.stage2.scientific-scan.v1",
+      "sha256": "0b4a66a0ea457137b4d324dc5a8710e2a43b59cea5678fb1b425e2d3bc80be59"
+    },
+    "v15_request": {
+      "path": "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v37-executor-root-049/reference-products-v37/relocated-runtime/f2-s1-replay-request-v15-relocated.json",
+      "schema": "ds02.stage2.f2-s1-replay-request.v15",
+      "sha256": "de83971bfd6c47595d967643bc051bcb0e418a8d59f9a56320cdc7afd82a8d29"
+    }
+  },
+  "quality": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "role": "DEVELOPMENT",
+  "schema": "ds02.stage2.f2-fresh-v16-source-contract.v1",
+  "sha256": "0809dfbc562c4eefcaa29eac76b7f12a2b215bddced5dd450da9fe0482d84a31"
+}
