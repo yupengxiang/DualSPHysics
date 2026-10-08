@@ -1,0 +1,110 @@
+{
+  "schema": "ds02.stage2.f2-evaluator-relocated-validation-checklist.v2",
+  "status": "PENDING_FRESH_V3_REPORT_AND_ROOT_REVIEW",
+  "role": "DEVELOPMENT",
+  "case_id": "F2-S1",
+  "scope": {
+    "consumer": "ds_data02_stage2_f2_portable_evaluator_parent_v2.py",
+    "purpose": "read-only acceptance checklist for a fresh JSON-only evaluator follow-on",
+    "source_copy_and_evaluator_are_distinct": true,
+    "hdf5_bi4_raw_content_read": false,
+    "model_invoked": false,
+    "cfd_invoked": false,
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "prerequisites": [
+    "Reconcile any interrupted parent-v3 reservation with the same parent ledger before creating a retry or evaluator request.",
+    "Use a fresh v34 raw-to-label report and a fresh independent V16 proof; historical proof hashes are forbidden.",
+    "The proof labels.v16_sha256 must equal the fresh V16 result SHA after the evaluator reservation is applied.",
+    "Keep the fresh executor report, raw report, V16 result, private runtime audit, and evaluator output under the relocated target/output roots.",
+    "The exact literal virtualenv invocation path must remain in argv[0]; resolving it to the system interpreter is a failure."
+  ],
+  "fresh_product_binding_checks": [
+    {
+      "check": "executor_report",
+      "evidence": "portable-executor-report-v34.json",
+      "assert": ["original_path_fallback == FORBIDDEN", "path is inside the bound fresh output root"]
+    },
+    {
+      "check": "raw_to_label_report",
+      "evidence": "stages.raw_to_typed_to_label.report",
+      "assert": ["report path is inside the bound fresh product roots", "v16_forward.result exists"]
+    },
+    {
+      "check": "independent_proof",
+      "evidence": "fresh proof JSON",
+      "assert": ["proof SHA is not historical", "qualification QI/QN/QE remain UNKNOWN", "V16 SHA equals fresh result after reserved digest"]
+    }
+  ],
+  "trace_and_pid_checks": {
+    "source_copy_group": {
+      "evidence": "fresh parent-v3 report and its filtered strace prefix",
+      "record": ["parent PID", "strace PID/prefix", "raw worker PID", "source-copy target root"],
+      "assert": ["all source-copy paths are relocated targets or declared runtime files", "original H5/BI4/raw paths are absent"]
+    },
+    "private_evaluator_group": {
+      "evidence": "evaluator-parent-v2-os-trace* and evaluator-parent-v2 logs",
+      "record": ["evaluator parent PID", "strace PID/prefix", "private v34 evaluator PID", "child process-group cleanup"],
+      "assert": ["private worker PID is separate from source-copy PID", "trace files are under the fresh output root", "no original source path is opened"]
+    },
+    "trace_interpretation": "A missing trace after a failed child is UNKNOWN/MAY_HAVE_OPENED, never proof of no read; successful private SDK evidence requires the C-level filtered trace plus module path audit."
+  },
+  "relocated_sdk_checks": [
+    {
+      "check": "module_file_closure",
+      "assert": ["every private SDK/evaluator module.__file__ is under relocated target_root/runtime", "no module.__file__ resolves to the original worktree or source bundle"]
+    },
+    {
+      "check": "runtime_audit",
+      "evidence": "private-runtime-audit-v34.json",
+      "assert": ["all declared role hashes match copied files", "runtime audit path itself is under the relocated target root"]
+    },
+    {
+      "check": "SDK_smoke",
+      "procedure": "Run only the declared JSON evaluator/SDK entry with the literal virtualenv and relocated request/result paths; capture argv, module.__file__, exit status, and output SHA.",
+      "assert": ["no H5/BI4/raw input is opened", "no original-path fallback", "output is a new file in the fresh evaluator namespace"]
+    }
+  ],
+  "accounting_checks": [
+    {
+      "check": "incremental_external_bytes",
+      "assert": ["existing_product_bytes_before is measured before reservation", "new_evaluator_bytes equals after_tree minus before_tree", "old cold-product bytes are not charged again"]
+    },
+    {
+      "check": "two_filesystem_charge",
+      "assert": ["external output delta and Home receipt bytes are separate fields", "trace bytes are reported and included once in the external tree delta", "same parent ledger and no ledger reset"]
+    },
+    {
+      "check": "CPU_and_deadline",
+      "assert": ["timer starts before request load/metadata validation", "static/result digest runs after reservation", "returned charge CPU includes finalization through terminal charge", "cleanup is bounded and owned child groups are gone"]
+    },
+    {
+      "check": "terminal_ledger",
+      "assert": ["reservation is removed exactly once", "charge ID is unique/idempotent", "failed preflight after reservation is charged conservatively or released only after a failed charge", "no orphan reservation remains"]
+    }
+  ],
+  "required_final_fields": [
+    "fresh_executor_report.path and sha256",
+    "fresh_raw_report.path and sha256",
+    "fresh_v16_result.path and sha256",
+    "independent_proof.path and sha256",
+    "private_evaluator_report.path and sha256",
+    "source_copy_pid and private_evaluator_pid trace groups",
+    "module_file_audit.path and sha256",
+    "existing_product_bytes_before",
+    "new_evaluator_bytes",
+    "home_receipt_bytes",
+    "trace_bytes",
+    "actual_cpu_charge_core_seconds",
+    "reservation_id and charge_id",
+    "hdf5_or_bi4_content_read",
+    "model_invoked",
+    "cfd_invoked",
+    "qualification"
+  ],
+  "credit_boundary": "This checklist is a pending procedure. It is not evidence of a fresh report, SDK execution, portability, or scientific qualification until root records the actual relocated run and independently verifies the fields above."
+}
