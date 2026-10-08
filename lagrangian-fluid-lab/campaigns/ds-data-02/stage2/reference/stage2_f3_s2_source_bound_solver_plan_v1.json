@@ -1,0 +1,154 @@
+{
+  "schema": "ds02.stage2.f3-s2.source-bound-solver-plan.v1",
+  "status": "THREE_GRID_SOURCE_AND_GENCASE_COST_READY_SOLVER_NOT_STARTED",
+  "family_id": "F3",
+  "sentinel_id": "F3-S2",
+  "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
+  "scope": {
+    "purpose": "Bind the existing .0075/.006/.003 initial sources and their measured GenCase costs for a future full-window solver review.",
+    "preparation_reads": "Small XML, JSON receipts/reports and source metadata only; no BI4, HDF5, solver output or VTK payload was read to create this plan.",
+    "solver_started_by_this_plan": false,
+    "gpu_started_by_this_plan": false,
+    "mass_rescale": false,
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN",
+      "reason": "The three records close source/GenCase provenance and initial sample counts. They do not establish time integration or observer accuracy."
+    }
+  },
+  "registered_physical_and_time_contract": {
+    "continuous_owner_mass_kg": 14.58,
+    "mass_semantics": "The 14.58 kg values are the source/owner contract used by the existing reports; generated sample mass is retained as a diagnostic and is not a rescaling instruction.",
+    "source_time_window_s": [0.0, 8.350016881886734],
+    "nominal_tmax_s": 8.35,
+    "nominal_output_cadence_s": 0.01,
+    "proposed_dense_output_cadence_s": 0.005,
+    "baseline_cfl": 0.05,
+    "proposed_half_cfl": 0.025,
+    "time_policy": "A future solver request must use actual RunPARTs timestamps and preserve endpoint/bracket status. Do not map frame index to time, infer dt from CFL, or extrapolate the terminal state.",
+    "effective_dt_and_clamp_status": "UNKNOWN until an actual solver receipt with RunPARTs, Run.out, DtAllInfo and official clamp fields is available."
+  },
+  "source_control_binding": {
+    "current_source_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST48_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-first48-pitch-ay-source-preparation-065-root702-owner-repair1-root704/prepared/pitch120_ay0750/F3_STAGE1_DP006_P1200_AY0750.xml",
+      "bytes": 9358,
+      "sha256": "1162322010c42b9a084d76db0e20de571111cb009eb3afb699f2ee4c17d37406"
+    },
+    "current_control": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_STAGE1_FIRST48_PITCH_AY_SOURCE_PREPARATION/root-stage1-f3-first48-pitch-ay-source-preparation-065-root702-owner-repair1-root704/prepared/pitch120_ay0750/CaseSloshingAccData.csv",
+      "bytes": 14377599,
+      "sha256": "9a776c1c02aeeb779902964953cd51b2af1f8ab41905398bb5125a44b93e6989",
+      "time_first_s": 0.0,
+      "time_last_s": 8.35,
+      "row_count": 167001
+    },
+    "control_identity": "The recommended .0075 source below, ROOT086 .006 and ROOT102 .003 all use this current control digest. The separate historical original-coarse record is retained as diagnostic only because it uses control digest 6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3.",
+    "official_gencase": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "bytes": 5809384,
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    }
+  },
+  "grid_records": {
+    "dp0.0075": {
+      "role": "recommended_current_control_coarse_source",
+      "source_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_SPATIAL_V2_COARSE_DP0p007500/f3_s2_spatial_v2_coarse_dp0p007500-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_SPATIAL_V2_COARSE_DP0p007500/f3_s2_spatial_v2_coarse_dp0p007500-001/generated.xml",
+      "generated_xml_sha256": "8fdf820f08a5c1e3d8e9bf25e88a29e2d235f69e8a2f863b557c5d8f7b67a640",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_SPATIAL_V2_COARSE_DP0p007500/f3_s2_spatial_v2_coarse_dp0p007500-001/execution-receipt.json",
+      "receipt_sha256": "24d086cf236375fa6ec8e83a681b5e5c23c5b9f94a77e503e84133cf6a221517",
+      "actual_gencase": {
+        "total_particles": 108000,
+        "fluid_particles": 34560,
+        "fixed_particles": 73440,
+        "sample_mass_kg": 14.58,
+        "massfluid_kg_per_particle": 0.000421875,
+        "output_tree_bytes": 29195761,
+        "cpu_core_seconds": 13.854789,
+        "gpu_seconds": 0.0
+      },
+      "support_scope": "ROOT081 V2 support report: fluid points inside the frozen owner box; this is discrete support evidence, not solver no-penetration or flux evidence.",
+      "support_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_THREE_GRID_SUPPORT_V2_ROOT_081/f3-s2-three-grid-support-v2-root-081-001-root-forward-030-001/f3_s2_initial_support_audit_v2.json",
+      "solver_readiness": "SOURCE_BOUND_PENDING_PARENT_SOLVER_REVIEW"
+    },
+    "dp0.006": {
+      "role": "ROOT086_source_clone_middle_source",
+      "source_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_P1200_AY0750_MATCHED_SOURCE_GENCASE_ROOT_086/f3-s2-source-clone-gencase-v1-root-086-001-root-forward-030-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_P1200_AY0750_MATCHED_SOURCE_GENCASE_ROOT_086/f3-s2-source-clone-gencase-v1-root-086-001-root-forward-030-001/generated/F3_S2_P1200_AY0750_MATCHED.xml",
+      "generated_xml_sha256": "3ae2aae572b0fc8cb0687e0590b0fb1762af61212d037da603d4bc8326a8ae9d",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_P1200_AY0750_MATCHED_SOURCE_GENCASE_ROOT_086/f3-s2-source-clone-gencase-v1-root-086-001-root-forward-030-001/execution-receipt.json",
+      "receipt_sha256": "68ce1e593c568941af8ffadcf37949a1a53714f2e9b99f203b715ed47931e14f",
+      "actual_gencase": {
+        "total_particles": 179208,
+        "fluid_particles": 67500,
+        "fixed_particles": 111708,
+        "sample_mass_kg": 14.58,
+        "massfluid_kg_per_particle": 0.000216,
+        "output_tree_bytes": 62473870,
+        "cpu_core_seconds": 3.396727,
+        "gpu_seconds": 0.0
+      },
+      "support_scope": "ROOT086 binds the ROOT081 support report; that report's original .006 support input used a historical control path, so geometry support is reusable only as a limited diagnostic until the current-control source is independently joined.",
+      "support_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_THREE_GRID_SUPPORT_V2_ROOT_081/f3-s2-three-grid-support-v2-root-081-001-root-forward-030-001/f3_s2_initial_support_audit_v2.json",
+      "solver_readiness": "SOURCE_BOUND_PENDING_CURRENT_CONTROL_SUPPORT_JOIN"
+    },
+    "dp0.003": {
+      "role": "ROOT102_candidate_with_ROOT104_support_QA",
+      "source_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_MATCHED_SOURCE_COMMENSURATE_DP003_GENCASE_ROOT_102/f3-s2-commensurate-dp003-gencase-v1-root-102-001-root-forward-030-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_MATCHED_SOURCE_COMMENSURATE_DP003_GENCASE_ROOT_102/f3-s2-commensurate-dp003-gencase-v1-root-102-001-root-forward-030-001/worker/generated/F3_S2_P1200_AY0750_DP003_MATCHED.xml",
+      "generated_xml_sha256": "9a7abc3187927315a64f182d4f4f71542c83088d734028cba339139798bce7cd",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_MATCHED_SOURCE_COMMENSURATE_DP003_GENCASE_ROOT_102/f3-s2-commensurate-dp003-gencase-v1-root-102-001-root-forward-030-001/execution-receipt.json",
+      "receipt_sha256": "6385d3b560808d67eeb8324c1d8edb0d2bac78325703d3cb3f5eceb07fa67136",
+      "actual_gencase": {
+        "total_particles": 976104,
+        "fluid_particles": 540000,
+        "fixed_particles": 436104,
+        "sample_mass_kg": 14.58,
+        "massfluid_kg_per_particle": 0.000027,
+        "output_tree_bytes": 159454706,
+        "cpu_core_seconds": 8.377299,
+        "gpu_seconds": 0.0
+      },
+      "support_scope": "ROOT104 worker support QA: 540000 fluid points inside the frozen owner envelope; parent did not independently hash the VTK payload, and this does not prove no-penetration or flux.",
+      "support_report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_DP003_ACTUAL_INITIAL_SUPPORT_QA_ROOT_104/f3-s2-dp003-initial-support-qa-v1-root-104-001-root-forward-030-001/f3-s2-dp003-initial-support-qa-v1.json",
+      "support_report_sha256": "e669ad10298e0b3196d99f4836f347babff0b04e03712d0ae0645362d40395c4",
+      "solver_readiness": "SOURCE_BOUND_PENDING_PARENT_SOLVER_REVIEW"
+    }
+  },
+  "historical_diagnostic_not_in_three_grid_binding": {
+    "source_output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_SPATIAL_COARSE_DP0p007500/f3_s2_spatial_coarse_dp0p007500-001",
+    "generated_xml_sha256": "ce4ebdcce94958d4bdf3f2a639c71b4f90e2eb9e714c411445385c820787771c",
+    "receipt_sha256": "2c4483859d4f1b0d182a29e73f91dd1d6663d71a207471dfbd5d59a266024575",
+    "total_particles": 108000,
+    "fluid_particles": 34560,
+    "output_tree_bytes": 22556579,
+    "cpu_core_seconds": 13.409437000000002,
+    "control_sha256": "6f42660acb261a5e451436bb3087af86d09310085ea1ee48d0b02eae8b3205d3",
+    "reason_excluded": "This historical coarse output uses a different forcing-control file and must not be silently paired with the current-control .006/.003 sources."
+  },
+  "future_solver_request_contract": {
+    "request_type": "metadata_only_parent_review_skeleton",
+    "grid_set": [0.0075, 0.006, 0.003],
+    "physical_window_s": [0.0, 8.350016881886734],
+    "same_cfl_dense": {
+      "output_cadence_s": 0.005,
+      "status": "PLANNED_NO_SOLVER_REQUEST_STARTED"
+    },
+    "half_cfl_dense": {
+      "output_cadence_s": 0.005,
+      "status": "PLANNED_NO_SOLVER_REQUEST_STARTED"
+    },
+    "required_observables": ["mass_by_mk", "weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_J", "region_assignment"],
+    "required_dt_evidence": ["Run.out", "RunPARTs", "DtAllInfo.csv", "official_DTsMin_field"],
+    "solver_storage_and_wall_cost": "UNKNOWN until one parent-guarded full-window canary uses these exact inputs. GenCase output bytes above are not solver output estimates.",
+    "resource_policy": "Parent must reserve one fresh UUID/slot and a new attempt root; do not launch all three or infer full-window storage from GenCase bytes.",
+    "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  },
+  "next_actions": [
+    "Use the V2 .0075 source, ROOT086 .006 source and ROOT102/104 .003 source as separate source-bound records; preserve the historical original coarse record as diagnostic.",
+    "Close the current-control support join for ROOT086 .006 before treating it as a matched spatial rung.",
+    "If parent approves a solver canary, run one source-bound grid first and derive actual storage/time from its terminal receipt before considering the other grids.",
+    "Keep all spatial, integration and output qualification UNKNOWN until actual observer and dt/output calibration are independently completed."
+  ]
+}
