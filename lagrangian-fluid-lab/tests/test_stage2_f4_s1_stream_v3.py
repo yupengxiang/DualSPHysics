@@ -72,6 +72,7 @@ def manifest() -> dict:
             "physical_fate": "unknown",
             "continuous_event_time_between_saved_frames": "unknown",
         },
+        "source_evidence": {"path": "/source/f4-actual-evidence-v1.json", "sha256": "2" * 64},
         "operator_contract": {
             "schema": "ds02.stage2.f4-typed-operator.v3",
             "mass_denominator": "whole_initial_fluid_mass_kg",

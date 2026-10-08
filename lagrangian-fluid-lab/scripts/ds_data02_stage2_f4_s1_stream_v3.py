@@ -264,6 +264,7 @@ def validate_manifest_dict(manifest: Mapping[str, Any], *, require_files: bool =
         raise StreamContractError("V3 must use the whole initial fluid mass denominator")
     if operator_contract.get("legacy_event_budget_fraction") is not None or operator_contract.get("legacy_temporal_item_allocation") is not None:
         raise StreamContractError("legacy 2% event or 20% temporal thresholds cannot enter V3")
+    evidence_path, evidence_sha = _verify_small_file(manifest.get("source_evidence"), "source_evidence", require_exists=require_files)
     artifacts = manifest.get("artifacts")
     if not isinstance(artifacts, list) or len(artifacts) != len(EXPECTED_ARTIFACT_SUFFIXES):
         raise StreamContractError("V3 manifest must contain exactly five artifacts")
@@ -320,6 +321,7 @@ def validate_manifest_dict(manifest: Mapping[str, Any], *, require_files: bool =
             "source_regions_path": str(regions_path),
             "source_regions_sha256": regions_sha,
             "source_binding_normalized": source_binding,
+            "source_evidence": {"path": str(evidence_path), "sha256": evidence_sha},
         })
     if {item["variant"] for item in validated} != set(EXPECTED_ARTIFACT_SUFFIXES):
         raise StreamContractError("V3 manifest does not cover all variants")
@@ -814,6 +816,7 @@ def run(*, manifest_path: Path, output_dir: Path) -> dict[str, Any]:
         "schema": SCHEMA,
         "attempt_status": "completed_actual_source_bound_saved_frame_diagnostics",
         "manifest": {"path": str(manifest_path), "sha256": sha256_file(manifest_path)},
+        "source_evidence": manifest.get("source_evidence"),
         "artifact_count": len(artifacts),
         "artifacts": artifacts,
         "operator_regression_fixtures": operator_regression_fixtures(),
