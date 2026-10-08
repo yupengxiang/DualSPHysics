@@ -1,0 +1,145 @@
+{
+  "schema": "ds02.stage2.f5-s1.observer-calibration-contract.v1",
+  "status": "SOURCE_BOUND_SCALES_REGISTERED_EVENT_TIME_UNKNOWN",
+  "sentinel_id": "F5-S1",
+  "family_id": "F5",
+  "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+  "source_inputs": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-genuine-gencase-118-root640/prepared/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1.xml",
+      "bytes": 12237,
+      "mtime_ns": 1791241016660706177,
+      "sha256": "48865e7efb6a9e9c4040a6489f3da3e7fce521308640e5e83a2a7867c0ec0c38"
+    },
+    "motion_table": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_REF_RUNUP_DP020_EQUILIBRIUM_ROOT050_C082S1/root-stage1-f5-c082s1-m095_t090-genuine-gencase-118-root640/prepared/assets/f5_c082s1_motion_m095_t090.dat",
+      "bytes": 17420,
+      "mtime_ns": 1791241016663706089,
+      "sha256": "efea47e4a1fc325387fbce6543c441ab8904cec34b404329582c788f7a20c3f4"
+    },
+    "read_scope": "exact XML geometry/control and prescribed motion table only; no BI4/native Part/HDF5"
+  },
+  "source_geometry": {
+    "initial_fluid_box": {
+      "point_m": [
+        0.01,
+        -0.14,
+        0.01
+      ],
+      "size_m": [
+        3.42,
+        0.28,
+        0.38
+      ],
+      "end_m": [
+        3.4299999999999997,
+        0.14,
+        0.39
+      ],
+      "comment": "c082s1_initial_fluid_equilibrium_cell_centres_solid_recovery"
+    },
+    "initial_fluid_extent_m": [
+      3.42,
+      0.28,
+      0.38
+    ],
+    "tank_floor_box": {
+      "point_m": [
+        -0.2,
+        -0.18,
+        -0.15
+      ],
+      "size_m": [
+        5.0,
+        0.36,
+        0.15
+      ],
+      "end_m": [
+        4.8,
+        0.18,
+        0.0
+      ],
+      "comment": "tank_floor_existing_control"
+    },
+    "tank_longitudinal_extent_m": 5.0,
+    "definition_bounds_m": {
+      "min": [
+        -0.3,
+        -0.25,
+        -0.25
+      ],
+      "max": [
+        5.0,
+        0.25,
+        0.9
+      ]
+    },
+    "gravity_z_m_per_s2": -9.81
+  },
+  "source_particles": {
+    "fluid_particle_count": 31658,
+    "moving_particle_count": 4210,
+    "fluid_particle_mass_kg": 0.008,
+    "moving_particle_mass_kg_diagnostic": 0.008,
+    "fluid_sample_mass_kg": 253.264,
+    "moving_sample_mass_kg_diagnostic": 33.68
+  },
+  "source_control": {
+    "motion_file_names": [
+      "assets/f5_c082s1_motion_m095_t090.dat",
+      "assets/f5_c082s1_motion_m095_t090.dat"
+    ],
+    "motion_duration_s": 14.4,
+    "xml_timemax_s": 26.0,
+    "actual_solver_tmax_is_not_inferred_here": true,
+    "motion_table": {
+      "rows": 641,
+      "time_start_s": 0.0,
+      "time_end_s": 14.4,
+      "sample_dt_min_s": 0.0224999999999973,
+      "sample_dt_max_s": 0.022500000000000853,
+      "position_min_m": -0.02313072938881204,
+      "position_max_m": 0.023130729388812044,
+      "max_abs_prescribed_piston_speed_m_per_s": 0.07421403294122439,
+      "semantics": "prescribed piston position table; this is control kinematics, not a measured fluid field"
+    }
+  },
+  "reference_scales": {
+    "L_position_reference_scalar_m": 5.0,
+    "L_position_reference_definition": "existing tank floor longitudinal extent; initial-fluid extent retained separately",
+    "velocity_scale_m_per_s": 0.07421403294122439,
+    "velocity_scale_definition": "maximum finite-difference speed from exact prescribed piston table",
+    "fluid_kinetic_energy_scale_j": 0.697453939097717,
+    "fluid_kinetic_energy_scale_definition": "0.5 * exact fluid sample mass * prescribed piston speed scale^2; reference denominator only",
+    "gravity_transport_velocity_scale_m_per_s": 1.9307511491644904,
+    "gravity_transport_time_scale_s": 1.7713313295087065,
+    "motion_duration_is_not_event_T": true
+  },
+  "event_time": {
+    "characteristic_time_s": null,
+    "status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+    "reason": "motion table has prescribed coverage only; source does not label first run-up/contact/peak event",
+    "motion_table_coverage_s": [
+      0.0,
+      14.4
+    ],
+    "xml_timemax_s": 26.0,
+    "cannot_use_motion_or_output_duration_as_event_T": true,
+    "consumer_requirement": "bind an event definition and exact source evidence before evaluating 1% event-time budget"
+  },
+  "frozen_error_budget": {
+    "position_fraction_of_L": 0.02,
+    "velocity_and_ke_fraction_of_registered_nonzero_scale": 0.05,
+    "event_time_fraction_of_characteristic_T": 0.01,
+    "time_and_output_each_max_fraction_of_task_budget": 0.25,
+    "event_time_evaluation_status": "BLOCKED_UNKNOWN_UNTIL_EVENT_REGISTRATION"
+  },
+  "comparison_gate": {
+    "field_differences_allowed": false,
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
