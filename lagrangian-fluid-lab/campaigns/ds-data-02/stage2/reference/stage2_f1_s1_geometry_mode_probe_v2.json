@@ -1,0 +1,91 @@
+{
+  "schema": "ds02.stage2.f1-s1-geometry-mode-probe.v2",
+  "status": "READY_PARENT_V8_DISPATCH",
+  "sentinel_id": "F1-S1",
+  "family_id": "F1",
+  "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+  "purpose": "two bounded dp=.009 setshapemode probes to resolve owner-envelope semantics before any CFD",
+  "owner_contract": {
+    "low_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "size_m": [
+      0.4,
+      0.67,
+      0.15
+    ],
+    "mass_kg": 40.2,
+    "density_kg_m3": 1000.0,
+    "mass_target_pct": 1.0,
+    "hard_upper_pct": 2.0,
+    "no_mass_rescale": true
+  },
+  "historical_dp009": {
+    "sample_mass_kg": 40.351608,
+    "sample_mass_error_pct": 0.377134328,
+    "cell_envelope_matches_owner": false,
+    "credit": "diagnostic only; existing input/output untouched"
+  },
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "mode": "actual",
+      "case_id": "F1_S1_SPATIAL_MODE_ACTUAL_DP0p009000",
+      "attempt_id": "f1-s1-spatial-mode-actual-dp0p009000-v2-root-001",
+      "request": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-geometry-mode-probe-v2/f1_s1_dp009_setshapemode_actual_v2.json",
+      "candidate_def": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s1_geometry_mode_probe_inputs_v2/F1_S1/dp0p009000/setshapemode_actual/F1_S1_DP009_MODE_ACTUAL_Def.xml",
+        "bytes": 4969,
+        "mtime_ns": 1791450331580074767,
+        "sha256": "169cc7f45eb2651ec2310d4db3866722a500b0fde46b5a64bc7540f4c1b1b699"
+      },
+      "dp_m": 0.009,
+      "status": "READY_PARENT_V8_DISPATCH",
+      "mass_status": "UNKNOWN_UNTIL_TERMINAL_XML_AND_GEOMETRY_AUDIT",
+      "scientific_qualification": {
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN",
+        "QE": "UNKNOWN"
+      }
+    },
+    {
+      "mode": "bound",
+      "case_id": "F1_S1_SPATIAL_MODE_BOUND_DP0p009000",
+      "attempt_id": "f1-s1-spatial-mode-bound-dp0p009000-v2-root-001",
+      "request": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-geometry-mode-probe-v2/f1_s1_dp009_setshapemode_bound_v2.json",
+      "candidate_def": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s1_geometry_mode_probe_inputs_v2/F1_S1/dp0p009000/setshapemode_bound/F1_S1_DP009_MODE_BOUND_Def.xml",
+        "bytes": 4968,
+        "mtime_ns": 1791450334103100561,
+        "sha256": "ee9f3ea603074641724ec34bd8b43e2cfa24869920d8fec9627cd4f02fdd8269"
+      },
+      "dp_m": 0.009,
+      "status": "READY_PARENT_V8_DISPATCH",
+      "mass_status": "UNKNOWN_UNTIL_TERMINAL_XML_AND_GEOMETRY_AUDIT",
+      "scientific_qualification": {
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN",
+        "QE": "UNKNOWN"
+      }
+    }
+  ],
+  "requests": [
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-geometry-mode-probe-v2/f1_s1_dp009_setshapemode_actual_v2.json",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-geometry-mode-probe-v2/f1_s1_dp009_setshapemode_bound_v2.json"
+  ],
+  "guard": {
+    "runner": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py",
+    "strict_guard": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",
+    "runtime": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py",
+    "parent_cpu_guard_required": true,
+    "gpu": "none",
+    "solver_launch": "forbidden",
+    "hdf5_read": "forbidden",
+    "bi4_read": "forbidden",
+    "max_wall_seconds_each": 600,
+    "estimated_storage_bytes_each": 67108864
+  },
+  "followup": "After terminal output audit only, parent may prepare a separate source-bound CFD request; this queue grants no CFD or scientific qualification."
+}
