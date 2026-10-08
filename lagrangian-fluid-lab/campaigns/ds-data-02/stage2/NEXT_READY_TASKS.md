@@ -175,3 +175,14 @@ Next: verify/charge/release actual auxiliary snapshot; build/run fresh V37 cold 
 - Precise F2 V5 coarse sample-mass relative error: 0.11806030769230757 (11.806030769230757%). Earlier rounded checkpoint text is not an acceptance number.
 
 The entire Stage2 goal stays ACTIVE. None of these diagnostic products complete it.
+
+### Root 050–051 terminal reconciliation and ready tasks
+
+- All four F1 owner-controlled CFD jobs are terminal and charged, with GPU leases released. Fine dp0025 half-CFL saved 321 frames and 105159333618 external bytes; one particle was removed, whose native identity/type/MK remains UNKNOWN until the guarded postsolver audit. Actual native observation and DtInfo studies remain pending; solver completion grants no science qualification.
+- V37 preserved the original isolated 405-file raw SHA and completed conversion into a new 1191110530-byte typed HDF5. Labels failed on a copied V15-to-V14 private import. Preserve the failed receipt and trace. The explicit forward accounting repair charged exactly 219.229727 CPU seconds, 9884343809 external bytes, 3848 Home bytes and 37855258 trace bytes; the reservation is released. Do not repeat the repair or scientific payload for fees.
+- F2 inner-mode coarse GenCase actually produced the same 30969 particles and 21.104506368 kg as bound mode, against 18.876 kg owner mass. The 11.806030769% initial-mass hard failure persists. Next is an actual guarded position/lattice/support audit, not another predicted mode fix; middle/fine CFD remains ineligible.
+- F7 strict 20-frame join actually passed with all 20 pre/post records, unchanged native source stats, 40700 fluid particles and 325.6 kg per selected frame. Reuse the actual join in the forward output calibration. Half-CFL still has 17 observed frames; its missing 302/602/902 radius-two observations remain UNKNOWN.
+- Ready root051 requests: F2 typed-only labels from V37's newly generated HDF5, F4 fine native versus half-save/half-dt saved-sidecar diagnostics, and F7 actual join20/half17 calibration. Each runs only after parent reservation and immutable input validation. The typed-only follow-on is not a successful cold replay; a fresh full V38 chain remains necessary after its interface works.
+- V9 split-filesystem guard is integrated and tested. New CPU requests bind its full source closure; historical requests/receipts remain unchanged.
+
+Closed ledger before these root051 tasks: 137.81548393 GPU h and 703.75798179 CPU core h; 643 qualification, 23 production and 4381 CPU attempts, zero active reservations. Original hard resource limits, Home 500 GiB free floor and deadline remain unchanged. Goal remains ACTIVE; QI/QN/QE remain scoped to actual evidence, with unresolved parts UNKNOWN.
