@@ -1,0 +1,134 @@
+{
+  "schema": "ds02.stage2.event-registration.v2",
+  "status": "EVENTS_PRE_REGISTERED_ACTUAL_EVENTS_UNKNOWN",
+  "purpose": "define finite event regions and characteristic T before any field differences",
+  "input_owner_scale_closure": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f2_f3_f6_owner_scale_closure_v2.json",
+    "bytes": 20123,
+    "mtime_ns": 1791456575948994742,
+    "sha256": "30701aa8034d9270be56ccc24307f236a9f2ebcd0a98693419013fcd10ab51c9"
+  },
+  "input_owner_files": {
+    "F2-S1": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-f6/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F6/handoff_20261003/root_followup_140_f2_actual_native_typed157_home4gib_v1/owners/F2_STAGE1_FIRST48_EXPANSION_RX056_RY014_FILL080_ROT090_DP010_SPATIAL_REFERENCE_SAVE010-actual-native-typed157-owner.json",
+      "bytes": 9678,
+      "mtime_ns": 1791306473908819948,
+      "sha256": "6614fdd38608149841a26d373c103e8582e6804f3f02a0df17fd7470899a23c3"
+    }
+  },
+  "event_time_policy": {
+    "output_duration_is_not_event_T": true,
+    "control_table_duration_is_not_event_T": true,
+    "event_error_fraction_of_registered_T": 0.01,
+    "event_observation_requires_actual_time_bracket": true,
+    "event_time_unknown_if_event_not_observed_or_field_unavailable": true
+  },
+  "field_error_budget": {
+    "position_fraction_of_registered_L": 0.02,
+    "velocity_and_ke_fraction_of_registered_nonzero_scale": 0.05,
+    "time_and_output_each_max_fraction_of_task_budget": 0.25,
+    "all_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "events": {
+    "F2-S1": [
+      {
+        "event_id": "F2-S1-fluid-crosses-receiver-plane-v1",
+        "cohort": "all initial fluid particles, retaining mkfluid identity 0/1/2",
+        "finite_region": {
+          "source_geometry": "receiver x boundary from owner geometry",
+          "plane_x_m": 0.56,
+          "receiver_low_m": [
+            0.56,
+            -0.16,
+            0.0
+          ],
+          "receiver_size_m": [
+            1.1,
+            0.6,
+            0.45
+          ],
+          "initial_fluid_max_x_m": 0.375,
+          "gap_m": 0.18500000000000005
+        },
+        "direction": "+x",
+        "condition": "first tracked initial-fluid sample with x >= receiver_plane_x_m",
+        "observable": "typed particle position with mkfluid cohort and actual RunPARTs time",
+        "characteristic_length_m": 0.18500000000000005,
+        "characteristic_speed_m_per_s": 1.9795752168147214,
+        "characteristic_time_s": 0.0934543928558968,
+        "time_error_tolerance_s": 0.0009345439285589679,
+        "scale_source": "owner receiver_low_m.x - owner fluid_low_m.x - owner fluid_source_size_m.x; frozen F2 registered moving-body velocity scale",
+        "output_or_control_duration_used_as_T": false,
+        "actual_event_status": "UNKNOWN_UNTIL_FIELD_OBSERVATION",
+        "field_availability_status": "UNKNOWN_UNTIL_TYPED_OBSERVER_SCHEMA_CHECK"
+      }
+    ],
+    "F3-S2": [
+      {
+        "event_id": "F3-S2-fluid-enters-half-depth-top-band-v1",
+        "cohort": "initial owner fluid cohort mkfluid=0",
+        "finite_region": {
+          "source_geometry": "owner initial fluid volume, top band above its initial free-surface level",
+          "initial_top_z_m": 0.0,
+          "threshold_z_m": 0.135,
+          "threshold_increment_m": 0.045,
+          "open_top_face": true
+        },
+        "direction": "+z",
+        "condition": "first tracked initial-fluid sample with z >= threshold_z_m",
+        "observable": "typed particle position with initial-fluid cohort and actual RunPARTs time",
+        "characteristic_length_m": 0.045,
+        "characteristic_speed_m_per_s": 0.9077664897978995,
+        "characteristic_time_s": 0.049572219844795734,
+        "time_error_tolerance_s": 0.0004957221984479574,
+        "scale_source": "0.5 * owner continuous fluid depth; frozen F3 gravity transport velocity scale",
+        "output_or_control_duration_used_as_T": false,
+        "actual_event_status": "UNKNOWN_UNTIL_FIELD_OBSERVATION",
+        "field_availability_status": "UNKNOWN_UNTIL_TYPED_OBSERVER_SCHEMA_CHECK"
+      }
+    ],
+    "F6-S2": [
+      {
+        "event_id": "F6-S2-rigid-orientation-half-radian-v1",
+        "cohort": "physical floating rigid body defined by massbody, COM and inertia",
+        "finite_region": {
+          "source_geometry": "physical rigid-body state, not floating SPH sample mass",
+          "orientation_angle_threshold_rad": 0.5,
+          "physical_center_m": [
+            2.4,
+            1.2,
+            1.08
+          ]
+        },
+        "direction": "increasing rotation angle from initial orientation",
+        "condition": "first rigid-body orientation angle with geodesic delta >= 0.5 rad",
+        "observable": "typed rigid-body orientation/state; if unavailable, retain UNKNOWN",
+        "characteristic_length_m": 0.5,
+        "characteristic_speed_m_per_s": 0.31240998703626616,
+        "characteristic_time_s": 1.6004609991611998,
+        "time_error_tolerance_s": 0.016004609991611997,
+        "scale_source": "pre-registered orientation threshold divided by physical initial angular-speed scale",
+        "output_or_control_duration_used_as_T": false,
+        "actual_event_status": "UNKNOWN_UNTIL_FIELD_OBSERVATION",
+        "field_availability_status": "UNKNOWN_UNTIL_TYPED_OBSERVER_SCHEMA_CHECK"
+      }
+    ]
+  },
+  "consumer_gate": {
+    "allowed_next_step": "bind actual typed observer fields and RunPARTs brackets to these pre-registered definitions",
+    "forbidden": [
+      "choose a different threshold after seeing results",
+      "use output/control duration as T",
+      "treat event occurrence as grid truth"
+    ],
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
