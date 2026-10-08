@@ -1,0 +1,608 @@
+{
+  "schema": "ds02.stage2.f4-late-common-time-calibration.v2",
+  "status": "ACTUAL_LATE_COMMON_TIME_OUTPUT_RESOLUTION_AUDIT",
+  "preparation_source_commit": "68c48e14ceb8656e37d9b3a0f42ae88bfbc0a8ae",
+  "source_v1_report": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f4_actual_common_time_calibration_v1.json",
+    "bytes": 69489,
+    "mtime_ns": 1791417535029935434,
+    "sha256": "2e53cd96d81ea30766dfd2dce95ea40a792030cfc0ede1beb4288590f2799082"
+  },
+  "sentinel_id": "F4-S1",
+  "family_id": "F4",
+  "scope": {
+    "native_or_h5_read_by_this_worker": false,
+    "inputs": "immutable v1 report, four completed selected-observer JSONs, four RunPARTs CSVs",
+    "full_native_tree_scanned": false,
+    "field_interpolation_performed": false,
+    "frame_index_pairing": false,
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "late_common_queries": {
+    "query_times_s": [
+      0.9,
+      1.2
+    ],
+    "all_runs_have_exact_or_bracketed_query": true,
+    "brackets_by_query": {
+      "0.9": {
+        "dp0_same_cfl": {
+          "query_time_s": 0.9,
+          "status": "BRACKETED",
+          "lower_frame": 1799,
+          "upper_frame": 1800,
+          "lower_time_s": 0.8995356181838214,
+          "upper_time_s": 0.9000884463332933,
+          "bracket_width_s": 0.0005528281494718845,
+          "interpolation_fraction": 0.8400111619175069
+        },
+        "dp0_half_cfl": {
+          "query_time_s": 0.9,
+          "status": "BRACKETED",
+          "lower_frame": 1799,
+          "upper_frame": 1800,
+          "lower_time_s": 0.8995472020528581,
+          "upper_time_s": 0.9000288918637117,
+          "bracket_width_s": 0.00048168981085361384,
+          "interpolation_fraction": 0.9400197740108127
+        },
+        "coarse_same_cfl": {
+          "query_time_s": 0.9,
+          "status": "BRACKETED",
+          "lower_frame": 1799,
+          "upper_frame": 1800,
+          "lower_time_s": 0.8996153496335391,
+          "upper_time_s": 0.9001233188990734,
+          "bracket_width_s": 0.0005079692655343138,
+          "interpolation_fraction": 0.7572315739543017
+        },
+        "fine_same_cfl": {
+          "query_time_s": 0.9,
+          "status": "BRACKETED",
+          "lower_frame": 1799,
+          "upper_frame": 1800,
+          "lower_time_s": 0.8995933560296794,
+          "upper_time_s": 0.900026458419266,
+          "bracket_width_s": 0.00043310238958660374,
+          "interpolation_fraction": 0.9389095514083475
+        }
+      },
+      "1.2": {
+        "dp0_same_cfl": {
+          "query_time_s": 1.2,
+          "status": "BRACKETED",
+          "lower_frame": 2399,
+          "upper_frame": 2400,
+          "lower_time_s": 1.199524906399148,
+          "upper_time_s": 1.200084396929538,
+          "bracket_width_s": 0.000559490530390061,
+          "interpolation_fraction": 0.8491539624821521
+        },
+        "dp0_half_cfl": {
+          "query_time_s": 1.2,
+          "status": "BRACKETED",
+          "lower_frame": 2399,
+          "upper_frame": 2400,
+          "lower_time_s": 1.199535277197562,
+          "upper_time_s": 1.200023593498368,
+          "bracket_width_s": 0.0004883163008060354,
+          "interpolation_fraction": 0.951683983661474
+        },
+        "coarse_same_cfl": {
+          "query_time_s": 1.2,
+          "status": "BRACKETED",
+          "lower_frame": 2399,
+          "upper_frame": 2400,
+          "lower_time_s": 1.199567457782889,
+          "upper_time_s": 1.200061449336894,
+          "bracket_width_s": 0.00049399155400498,
+          "interpolation_fraction": 0.8756065029942103
+        },
+        "fine_same_cfl": {
+          "query_time_s": 1.2,
+          "status": "BRACKETED",
+          "lower_frame": 2399,
+          "upper_frame": 2400,
+          "lower_time_s": 1.199569446986076,
+          "upper_time_s": 1.200001418842329,
+          "bracket_width_s": 0.0004319718562528774,
+          "interpolation_fraction": 0.9967154287752279
+        }
+      }
+    },
+    "common_physical_time_rule": "query is usable only when every run has an actual saved-time bracket; no extrapolation"
+  },
+  "frozen_error_budget": {
+    "position_relative_to_L": 0.02,
+    "event_position_relative_to_L": 0.05,
+    "velocity_and_ke_nonzero_scale": 0.05,
+    "regional_mass_fraction_of_whole_initial_fluid": 0.03,
+    "event_time_fraction": 0.01,
+    "time_error_gate_fraction_of_1p2s": 0.25,
+    "output_error_gate_fraction_of_1p2s": 0.25,
+    "field_and_event_error_status": "UNKNOWN_PENDING_CONSUMER_CALIBRATION"
+  },
+  "manufactured_bracket_selftest": {
+    "status": "PASS",
+    "cases": [
+      {
+        "name": "exact_zero",
+        "expected": "EXACT",
+        "actual": "EXACT",
+        "pass": true
+      },
+      {
+        "name": "bracket_midpoint",
+        "expected": "BRACKETED",
+        "actual": "BRACKETED",
+        "pass": true
+      },
+      {
+        "name": "outside_right",
+        "expected": "OUTSIDE_SAVED_WINDOW",
+        "actual": "OUTSIDE_SAVED_WINDOW",
+        "pass": true
+      },
+      {
+        "name": "nonfinite",
+        "expected": "REJECT_NONFINITE_QUERY",
+        "actual": "REJECT_NONFINITE_QUERY",
+        "pass": true
+      }
+    ],
+    "scope": "bracket classification only; no field-error calibration"
+  },
+  "runs": {
+    "dp0_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAME_CFL_SELECTED_PHYSICAL_OBSERVER_V2/f4-s1-dp0-same-cfl-selected-observer-primary-001/observer/f4_s1_dp0_selected_physical_observer.json",
+        "bytes": 197083,
+        "mtime_ns": 1791410714091916474,
+        "sha256": "a37c843b0aefdb9e8aa0dbf252861c4032a4820414fe92af7298d2549f4eac2b"
+      },
+      "runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_SAME_CFL_DENSE_T1P2/f4-s1-dp0-savedt-same_cfl-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 483428,
+        "mtime_ns": 1791408798882963696,
+        "sha256": "781e0bc39c2c218550ddb73f8cd197f25c1408be6fd06ea297571499a972bfc3"
+      },
+      "selected_frame_contract": {
+        "frames": [
+          0,
+          599,
+          600,
+          1199,
+          1200,
+          1799,
+          1800,
+          2399,
+          2400
+        ],
+        "all_exact_runparts_bindings": true,
+        "selected_field_digests": {
+          "0": "7ec475403cb5f41f6de0e892d5a31ba2908e6bc8bccc2826d44ab01a3a0eaa1b",
+          "599": "1847f7ccfb56a266403b6cd19d77411be5b8c43e90718f0dbaa905779281f684",
+          "600": "22440ffd9327b6aa06009ab50816fd1babd9b6ca795544dfc5328555c3d636bf",
+          "1199": "1db8c6207965274e099f4c463c4b9f0bce54c5dfde8e5a354e9c2c2a51b0c3ca",
+          "1200": "ef802095843d28155883cecf5f84aadffb6ca650ef8c76248781c6073a1c2084",
+          "1799": "c269048e9853c91a01c979ee0145caeadcc5eca66b68e22e098d5971f2752110",
+          "1800": "549649b357f031dceb2b7d27dadbc002665201509c528df8a60abfc98a09abc9",
+          "2399": "9ae74df8c3e1d94b4ef7b68f977d83519aef544e56834cdc5d0940f47b4587bb",
+          "2400": "d9b2a2aad39a1459e15d01c4e00d80ad11e0074bd431bd508c37738c25ed6aa9"
+        }
+      },
+      "runparts_contract": {
+        "frame_count": 2401,
+        "terminal_time_s": 1.200084396929538,
+        "source_window_endpoint_delta_from_1p2_s": 8.439692953809974e-05,
+        "global_saved_spacing_s": {
+          "min": 0.0003773288219790505,
+          "max": 0.0006170954491480085,
+          "median": 0.000520316274915722
+        },
+        "late_query_brackets": {
+          "0.9": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 1799,
+            "upper_frame": 1800,
+            "lower_time_s": 0.8995356181838214,
+            "upper_time_s": 0.9000884463332933,
+            "bracket_width_s": 0.0005528281494718845,
+            "interpolation_fraction": 0.8400111619175069
+          },
+          "1.2": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 2399,
+            "upper_frame": 2400,
+            "lower_time_s": 1.199524906399148,
+            "upper_time_s": 1.200084396929538,
+            "bracket_width_s": 0.000559490530390061,
+            "interpolation_fraction": 0.8491539624821521
+          }
+        },
+        "late_local_spacing_s": {
+          "0.9": 0.0005528281494718845,
+          "1.2": 0.000559490530390061
+        }
+      },
+      "source_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "time_resolution_status": {
+        "status": "PROVISIONAL_BRACKET_WIDTH_WITHIN_FROZEN_QUARTER_WINDOW_GATE",
+        "gate_s": 0.3,
+        "observed_bracket_widths_s": {
+          "0.9": 0.0005528281494718845,
+          "1.2": 0.000559490530390061
+        },
+        "interpretation": "saved-time spacing is a resolution diagnostic; it does not bound physical event or field interpolation error"
+      },
+      "field_output_status": "UNKNOWN_NO_INDEPENDENT_REAL_FIELD_INTERPOLATION_CALIBRATION"
+    },
+    "dp0_half_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_HALF_CFL_SELECTED_PHYSICAL_OBSERVER_FORWARD_V1/f4-s1-half-cfl-selected-observer-primary-001/observer/f4_s1_selected_physical_observer.json",
+        "bytes": 196971,
+        "mtime_ns": 1791411262155858236,
+        "sha256": "2c396109d4266eba6aaf381b4489ef2912cc0c7ba75cacbf488d5da2d69bd84b"
+      },
+      "runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_DP0_SAVEDT_HALF_CFL_DENSE_T1P2/f4-s1-dp0-savedt-half_cfl-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 484658,
+        "mtime_ns": 1791409280552019654,
+        "sha256": "030c93be8f204496ef1d7ce05f917f1cac6ce1f820fd773481ef353506baf5c6"
+      },
+      "selected_frame_contract": {
+        "frames": [
+          0,
+          599,
+          600,
+          1199,
+          1200,
+          1799,
+          1800,
+          2399,
+          2400
+        ],
+        "all_exact_runparts_bindings": true,
+        "selected_field_digests": {
+          "0": "7ec475403cb5f41f6de0e892d5a31ba2908e6bc8bccc2826d44ab01a3a0eaa1b",
+          "599": "4d0cf1edc5a5dfd1da819007715e861d78fbf030e2608b8674921787217d6e7e",
+          "600": "613d0aee13b61b84d1d00fb003ce1d48b0f4405627330bce7c7ce8afe4a75f2c",
+          "1199": "f9dcc2b537b7bd5dc086d9593fb66beec750406f932b7c547c089309df3e7f4f",
+          "1200": "eeceec6da5e053169880d57ae1ec06f32380c88ec53af962339fe27c6b1896a2",
+          "1799": "1944e1a2e6ac99abb5164ac7fd1ae197c1928ae63ac63bdbfe965861ae5ee360",
+          "1800": "0a6a0c5212d0a8283d4c15d059e911bc179431e59f8c478387af8d13b7caa658",
+          "2399": "3f2156d4813c9deea606d6bf2dc4cf5871e9eccd81a6fe34431d98d81ce0bf04",
+          "2400": "70436836302c2b9d8e41af1baec434d05ff0595cc5cca77698d7c94670b10275"
+        }
+      },
+      "runparts_contract": {
+        "frame_count": 2401,
+        "terminal_time_s": 1.200023593498368,
+        "source_window_endpoint_delta_from_1p2_s": 2.3593498368112975e-05,
+        "global_saved_spacing_s": {
+          "min": 0.00043950971254935745,
+          "max": 0.0005705821566431707,
+          "median": 0.0004991676902570408
+        },
+        "late_query_brackets": {
+          "0.9": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 1799,
+            "upper_frame": 1800,
+            "lower_time_s": 0.8995472020528581,
+            "upper_time_s": 0.9000288918637117,
+            "bracket_width_s": 0.00048168981085361384,
+            "interpolation_fraction": 0.9400197740108127
+          },
+          "1.2": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 2399,
+            "upper_frame": 2400,
+            "lower_time_s": 1.199535277197562,
+            "upper_time_s": 1.200023593498368,
+            "bracket_width_s": 0.0004883163008060354,
+            "interpolation_fraction": 0.951683983661474
+          }
+        },
+        "late_local_spacing_s": {
+          "0.9": 0.00048168981085361384,
+          "1.2": 0.0004883163008060354
+        }
+      },
+      "source_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "time_resolution_status": {
+        "status": "PROVISIONAL_BRACKET_WIDTH_WITHIN_FROZEN_QUARTER_WINDOW_GATE",
+        "gate_s": 0.3,
+        "observed_bracket_widths_s": {
+          "0.9": 0.00048168981085361384,
+          "1.2": 0.0004883163008060354
+        },
+        "interpretation": "saved-time spacing is a resolution diagnostic; it does not bound physical event or field interpolation error"
+      },
+      "field_output_status": "UNKNOWN_NO_INDEPENDENT_REAL_FIELD_INTERPOLATION_CALIBRATION"
+    },
+    "coarse_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_COARSE_SELECTED_PHYSICAL_OBSERVER_FORWARD_V1/f4-s1-coarse-selected-observer-primary-001/observer/f4_s1_selected_physical_observer.json",
+        "bytes": 198274,
+        "mtime_ns": 1791411215853212274,
+        "sha256": "20d6cf8aa7e71e0b9a08897e577e04790c268ae89cddae1cb9142eea3a51ffe8"
+      },
+      "runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FULL_WINDOW_CANARY_COARSE_DP01230_T1P2/f4-s1-full-window-coarse-dp01230-v4-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 480658,
+        "mtime_ns": 1791407240730011995,
+        "sha256": "3433ddac4b3c56710fb0fc012b1b1fe4ced650bcfaf7e301308d203657fc1cf3"
+      },
+      "selected_frame_contract": {
+        "frames": [
+          0,
+          599,
+          600,
+          1199,
+          1200,
+          1799,
+          1800,
+          2399,
+          2400
+        ],
+        "all_exact_runparts_bindings": true,
+        "selected_field_digests": {
+          "0": "461dd3d0634b579d217bf166ffec930ca7121f4c17e81ac89336da967278b394",
+          "599": "94c1c6d96e67106255ee1368b53b9cadb5aacbfdd1bbf3433b5712b00d9b7879",
+          "600": "a315ba6ab06d2fc4e5d851b473fafb6e1856b8b55d61c077b0d522a6d5ed7b8e",
+          "1199": "4e01738532cc838b3dbd953aac65257bafc85247efca38ea2423cf59fbecb095",
+          "1200": "46cb03ff25032f0c197df416ca2476689090ba93a79c36e11a9dc772c245b99f",
+          "1799": "3665106c984c9a8d7cd48f64e487dcccff3a9b146846354e806a6bd2afa15e76",
+          "1800": "008e2b2c5568f0a5ce90e48981028222cc76ee383b979df78b721579447d76f0",
+          "2399": "ac23b36e66dd5cc1172e4111a371a324d24306d8683ce952ff055f49549bd848",
+          "2400": "4e6bdcbbd4e9e6ed4f952d9cc67fb3a5f9124dea776104465da73edefe56c5a7"
+        }
+      },
+      "runparts_contract": {
+        "frame_count": 2401,
+        "terminal_time_s": 1.200061449336894,
+        "source_window_endpoint_delta_from_1p2_s": 6.144933689400389e-05,
+        "global_saved_spacing_s": {
+          "min": 0.0003359117508548448,
+          "max": 0.0006663359293099802,
+          "median": 0.0005036096508329591
+        },
+        "late_query_brackets": {
+          "0.9": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 1799,
+            "upper_frame": 1800,
+            "lower_time_s": 0.8996153496335391,
+            "upper_time_s": 0.9001233188990734,
+            "bracket_width_s": 0.0005079692655343138,
+            "interpolation_fraction": 0.7572315739543017
+          },
+          "1.2": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 2399,
+            "upper_frame": 2400,
+            "lower_time_s": 1.199567457782889,
+            "upper_time_s": 1.200061449336894,
+            "bracket_width_s": 0.00049399155400498,
+            "interpolation_fraction": 0.8756065029942103
+          }
+        },
+        "late_local_spacing_s": {
+          "0.9": 0.0005079692655343138,
+          "1.2": 0.00049399155400498
+        }
+      },
+      "source_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "time_resolution_status": {
+        "status": "PROVISIONAL_BRACKET_WIDTH_WITHIN_FROZEN_QUARTER_WINDOW_GATE",
+        "gate_s": 0.3,
+        "observed_bracket_widths_s": {
+          "0.9": 0.0005079692655343138,
+          "1.2": 0.00049399155400498
+        },
+        "interpretation": "saved-time spacing is a resolution diagnostic; it does not bound physical event or field interpolation error"
+      },
+      "field_output_status": "UNKNOWN_NO_INDEPENDENT_REAL_FIELD_INTERPOLATION_CALIBRATION"
+    },
+    "fine_same_cfl": {
+      "observer": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FINE_DP008_SELECTED_PHYSICAL_OBSERVER_V3/f4-s1-fine-dp008-selected-observer-v3-primary-001/observer/f4_s1_fine_dp0008_selected_physical_observer_v3.json",
+        "bytes": 197841,
+        "mtime_ns": 1791416807494097828,
+        "sha256": "3fc0d912051985ec11b6210f70a83b94c3cdbfaa7869fe4c3bf4e1ed39fe0f50"
+      },
+      "runparts": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F4/F4_S1_FINE_DP008_FULL_WINDOW_T1P2/f4-s1-fine-dp008-full-window-primary-001/solver_output/RunPARTs.csv",
+        "bytes": 500949,
+        "mtime_ns": 1791415059946890422,
+        "sha256": "a91724a1b7c13b304941b84e3f8a998045828c721f2e7425c9008582a4c322aa"
+      },
+      "selected_frame_contract": {
+        "frames": [
+          0,
+          599,
+          600,
+          1199,
+          1200,
+          1799,
+          1800,
+          2399,
+          2400
+        ],
+        "all_exact_runparts_bindings": true,
+        "selected_field_digests": {
+          "0": "f312a68a9998179c9fc713a3757db56c1976a48b5ed05ee345a6dd87e646e394",
+          "599": "971b10f5746d951afe9c814da2f6b6e3044aa2c9488334a6474d89a510641a29",
+          "600": "04dae91b7684cd7cd37f3933f383421f5e078fca56f33525117abc7ca205b776",
+          "1199": "1c0cc1b21d8bf29d0b9b6da0ddabb75600f96bdcbe95efa377a3d403de3519af",
+          "1200": "85f028ae4f559a206dced05f9ca0646de520f0ba5c25ae8fcc1b97e47cbc0026",
+          "1799": "de2390be2f230a0cddd26e9d1d90790bd4f8bc3037ae56de7bf9b8a37520d304",
+          "1800": "7dad17b8d4a4d33c976ffdecd03ff71978ecd326c74e2d1854b3c9df10b1ec26",
+          "2399": "e1fd978b450a49a79a253692e6a7a12e860b1037a85ff457e8b97eb5b6be2f9f",
+          "2400": "7dca33ef08d9ad6d70cad4641350125eb40a6423e1fc2079e68f250cb71903f4"
+        }
+      },
+      "runparts_contract": {
+        "frame_count": 2401,
+        "terminal_time_s": 1.200001418842329,
+        "source_window_endpoint_delta_from_1p2_s": 1.418842328959613e-06,
+        "global_saved_spacing_s": {
+          "min": 0.0004017002869363684,
+          "max": 0.0005947945779277708,
+          "median": 0.0005095105226585184
+        },
+        "late_query_brackets": {
+          "0.9": {
+            "query_time_s": 0.9,
+            "status": "BRACKETED",
+            "lower_frame": 1799,
+            "upper_frame": 1800,
+            "lower_time_s": 0.8995933560296794,
+            "upper_time_s": 0.900026458419266,
+            "bracket_width_s": 0.00043310238958660374,
+            "interpolation_fraction": 0.9389095514083475
+          },
+          "1.2": {
+            "query_time_s": 1.2,
+            "status": "BRACKETED",
+            "lower_frame": 2399,
+            "upper_frame": 2400,
+            "lower_time_s": 1.199569446986076,
+            "upper_time_s": 1.200001418842329,
+            "bracket_width_s": 0.0004319718562528774,
+            "interpolation_fraction": 0.9967154287752279
+          }
+        },
+        "late_local_spacing_s": {
+          "0.9": 0.00043310238958660374,
+          "1.2": 0.0004319718562528774
+        }
+      },
+      "source_output_parameters": {
+        "SavePosDouble": 0.0,
+        "StepAlgorithm": 1.0,
+        "VerletSteps": 40.0,
+        "Kernel": 2.0,
+        "ViscoTreatment": 1.0,
+        "Visco": 0.08,
+        "ViscoBoundFactor": 1.0,
+        "DensityDT": 2.0,
+        "DensityDTvalue": 0.1,
+        "Shifting": 0.0,
+        "RigidAlgorithm": 1.0,
+        "FtPause": 0.0,
+        "CoefDtMin": 0.05,
+        "DtIni": 0.0,
+        "DtMin": 0.0,
+        "DtFixed": 0.0,
+        "DtAllParticles": 0.0,
+        "TimeMax": 1.2,
+        "TimeOut": 0.001,
+        "MinFluidStop": 0.0,
+        "RhopOutMin": 700.0,
+        "RhopOutMax": 1300.0
+      },
+      "time_resolution_status": {
+        "status": "PROVISIONAL_BRACKET_WIDTH_WITHIN_FROZEN_QUARTER_WINDOW_GATE",
+        "gate_s": 0.3,
+        "observed_bracket_widths_s": {
+          "0.9": 0.00043310238958660374,
+          "1.2": 0.0004319718562528774
+        },
+        "interpretation": "saved-time spacing is a resolution diagnostic; it does not bound physical event or field interpolation error"
+      },
+      "field_output_status": "UNKNOWN_NO_INDEPENDENT_REAL_FIELD_INTERPOLATION_CALIBRATION"
+    }
+  },
+  "interpretation": {
+    "time": "All four actual 2401-row RunPARTs windows bracket 0.9 s and 1.2 s; widths are recorded per run.",
+    "output": "The selected 9 observer frames are exact native fields at their own saved times; late common-time values are not declared exact unless the bracket says EXACT.",
+    "qualification": "No QI/QN/QE credit; bracket width and manufactured classification do not calibrate real observer interpolation or event error."
+  },
+  "all_selected_observer_bindings_exact": true,
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
