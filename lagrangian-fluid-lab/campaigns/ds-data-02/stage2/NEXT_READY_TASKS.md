@@ -1,3 +1,13 @@
+最新执行入口（2026-10-08 22:42 UTC）：以下长记录为保留的历史检查点，恢复时以这段与实际收据为准。完整目标ACTIVE。
+
+| 分支 | 实际状态 | 下一依赖 |
+|---|---|---|
+| F2 V47冷重放 ROOT082 | 已启动，受控源哈希中；仅supervisor存在 | 真正终态/newproducts，之后fresh独立proof/evaluator |
+| F2 401帧审计 ROOT111 V4 | 真实source/stat/backend import/runtime metadata PASS，未启动 | V47释放父I/O时段 |
+| F5初态 ROOT106/107 | 实际质量HARDFAIL 2.2444% /MARGINAL 1.1420%；CPU已补齐，units已停 | V7真实GenCase/support接口修复后guarded VTK QA |
+| F2旧ROOT108 V3 | 实际dataclass导入失败、CPU已闭合、unit已停 | 保留失败并使用新ROOT111，不重跑旧请求 |
+| F2旧V46 parent | 实际路径失败，CPU差额及6608B metadata已补齐 | 原q/receipt/trace不改，不能赋cold信用 |
+
 # 下一就绪任务：检查点 024 及后续实际核验
 
 完整 Stage2 目标继续，未完成。沿用原父账、512 GPU·h/3840 CPU core·h、Home 至少 500GiB 空闲及原截止；336 例属于已接触开发素材。
