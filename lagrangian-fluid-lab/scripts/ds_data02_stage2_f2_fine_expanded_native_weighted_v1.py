@@ -515,19 +515,20 @@ def prepare(output_dir: Path) -> dict[str, Any]:
         "classification_source": record(EXPANDED_CLASSIFICATION, "expanded classification"),
         "classification_status": classification.get("status"),
     }
+    # The manifest is the container for the source hash set, so it cannot
+    # contain a self-hash without creating an impossible fixed point.  Keep
+    # it out of its own input map; bind its final bytes in the dispatch
+    # request below, where the manifest is an ordinary declared input.
     atomic_json(manifest_path, manifest)
-    input_hashes[str(manifest_path)] = sha256(manifest_path)
-    manifest["guard_input_files"] = sorted(input_hashes)
-    manifest["input_sha256"] = dict(sorted(input_hashes.items()))
-    atomic_json(manifest_path, manifest, refuse_existing=False)
-    input_hashes[str(manifest_path)] = sha256(manifest_path)
+    request_input_hashes = dict(input_hashes)
+    request_input_hashes[str(manifest_path)] = sha256(manifest_path)
     request = {
         "schema": "ds02.request.v1", "family_id": "F2", "case_id": REQUEST_CASE, "physical_case_id": PHYSICAL_CASE,
         "attempt_id": REQUEST_ATTEMPT, "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1,
         "max_wall_seconds": 1800, "estimated_storage_bytes": 512 * 1024 * 1024,
         "cwd": str(SCRIPT.parent), "worktree_root": str(WORKTREE_ROOT),
         "command": [str(VENV), str(SCRIPT), "run", "--manifest", str(manifest_path), "--output", "{attempt_root}/f2-s1-fine-expanded-native-weighted.json"],
-        "input_files": sorted(input_hashes), "input_sha256": dict(sorted(input_hashes.items())),
+        "input_files": sorted(request_input_hashes), "input_sha256": dict(sorted(request_input_hashes.items())),
         "runtime_binding": manifest["official_runtime"]["runtime_v4"],
         "official_decoder_argv": [str(TOOL), "-dirdata", "<expanded raw solver_output/data>", "-savecsv", "<attempt>/expanded-decoder/PartOut.csv", "-saveresume", "<attempt>/expanded-decoder/resume.csv", "-createdirs:1", "-csvsep:1"],
         "source_scope": {"expanded_decoder_raw_partout_only": True, "original_decoder_csv_reused": True, "h5_or_trajectory_inputs": [], "config_closed": True},
@@ -543,6 +544,7 @@ def prepare(output_dir: Path) -> dict[str, Any]:
     atomic_json(request_path, request)
     return {"status": "prepared", "manifest": str(manifest_path), "manifest_sha256": sha256(manifest_path),
             "request": str(request_path), "request_sha256": sha256(request_path), "input_count": len(input_hashes),
+            "guard_input_count": len(request_input_hashes),
             "original_native_expected": 175, "expanded_native_expected": 111,
             "runtime_pre_post_hash_bytes": request["source_read_cost"]["runtime_pre_post_hash_bytes"]}
 
