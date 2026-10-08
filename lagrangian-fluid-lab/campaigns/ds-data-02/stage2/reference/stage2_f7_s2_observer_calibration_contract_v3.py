@@ -229,9 +229,14 @@ def xml_scalar(root: ET.Element, element_name: str, attribute: str, default: flo
 def xml_particle_counts(root: ET.Element) -> dict[str, int]:
     result: dict[str, int] = {}
     for node in root.iter():
-        if tag(node) == "fluid" and node.attrib.get("mkfluid") == "1" and "count" in node.attrib:
+        if (
+            tag(node) == "fluid"
+            and node.attrib.get("mkfluid") == "1"
+            and "count" in node.attrib
+            and "begin" in node.attrib
+        ):
             result["fluid"] = result.get("fluid", 0) + int(node.attrib["count"])
-        elif tag(node) == "moving" and "count" in node.attrib:
+        elif tag(node) == "moving" and "count" in node.attrib and "begin" in node.attrib:
             result["moving"] = result.get("moving", 0) + int(node.attrib["count"])
     if result.get("fluid") != 40700 or result.get("moving") != 1984:
         raise ValueError(f"unexpected F7 particle counts: {result}")
@@ -348,7 +353,7 @@ def self_test() -> None:
       <file name='m.dat'/><axisp1 x='0' y='0' z='0'/><axisp2 x='0' y='0' z='1'/>
     </mvrotfile><mvrotfile duration='1' anglesunits='degrees'><file name='m.dat'/>
       <axisp1 x='0' y='0' z='0'/><axisp2 x='0' y='0' z='1'/></mvrotfile></motion>
-      <execution><particles><fluid mkfluid='1' count='4'/><moving count='2'/></particles>
+      <execution><particles><fluid mkfluid='1' count='4' begin='0'/><moving count='2' begin='4'/></particles>
       <constants><massfluid value='2'/><massbound value='3'/></constants></execution></case>"""
     with tempfile.TemporaryDirectory(prefix="f7-contract-test-") as tmp:
         root = ET.fromstring(xml)
