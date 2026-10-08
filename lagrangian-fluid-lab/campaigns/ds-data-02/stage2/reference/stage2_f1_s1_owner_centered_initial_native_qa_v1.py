@@ -425,7 +425,10 @@ def build_request() -> dict[str, Any]:
         }
         deferred_bytes += int(stat["bytes"])
     estimated_small = sum(int(item["bytes"]) for item in records.values())
-    input_files = list(records) + [str(path.resolve()) for path in deferred]
+    # Deferred native inputs are guarded and hashed by the parent around the
+    # decode; strict v8 therefore requires them in deferred_input_files only,
+    # never in the digest-bound input_files list.
+    input_files = list(records)
     request = {
         "schema": REQUEST_SCHEMA,
         "kind": "cpu",
