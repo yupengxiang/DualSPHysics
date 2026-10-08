@@ -1,0 +1,147 @@
+{
+  "schema": "ds02.stage2.f7-s2.observer-calibration-contract.v3",
+  "status": "SOURCE_BOUND_SCALES_REGISTERED_EVENT_TIME_UNKNOWN",
+  "sentinel_id": "F7-S2",
+  "family_id": "F7",
+  "physical_case_id": "F7_OBSTACLE_QUINTIC_B08_A065",
+  "purpose": "pre-register field comparison scales before any actual differences are evaluated",
+  "source_inputs": {
+    "generated_xml": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/F7_OBSTACLE_QUINTIC_B08_A065.xml",
+      "bytes": 7537,
+      "mtime_ns": 1791132688263610471,
+      "sha256": "e92f2422b2416ce32ad36350bf19aa129e9fdf6c474ef92009e39dee13acb81f"
+    },
+    "motion_table": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F7/F7_OBSTACLE_QUINTIC_B08_A065/root-stage1-f7-angle065-genuine-gencase-085/prepared/motion_obstacle_quintic.dat",
+      "bytes": 356875,
+      "mtime_ns": 1791132688265610410,
+      "sha256": "6aedfbd0d7daff931917bcb126368856c63c1bb53ba17aebf9033ebea0067814"
+    },
+    "read_scope": "XML geometry/control and prescribed motion table only; no BI4/native Part/HDF5"
+  },
+  "source_geometry": {
+    "fluid_union_bounds_m": {
+      "min": [
+        -0.54,
+        -0.34,
+        0.06
+      ],
+      "max": [
+        0.540000001,
+        0.340000001,
+        0.480000001
+      ]
+    },
+    "fluid_union_extent_m": [
+      1.0800000010000002,
+      0.680000001,
+      0.420000001
+    ],
+    "L_position_reference_scalar_m": 1.0800000010000002,
+    "L_position_reference_definition": "longest declared mkfluid=1 wet-region union extent; aggregate scalar only",
+    "axis_specific_position_scales_m": [
+      1.0800000010000002,
+      0.680000001,
+      0.420000001
+    ],
+    "moving_obstacle_box": {
+      "point_m": [
+        -0.07,
+        -0.24,
+        0.05
+      ],
+      "size_m": [
+        0.06,
+        0.48,
+        0.48
+      ],
+      "end_m": [
+        -0.010000000000000009,
+        0.24,
+        0.53
+      ],
+      "comment": null,
+      "mk_role": "bound",
+      "mk": "2"
+    },
+    "moving_radius_about_prescribed_axis_m": 0.24186773244895649
+  },
+  "source_control": {
+    "rotation_axis": {
+      "file_name": "motion_obstacle_quintic.dat",
+      "duration_s": 12.0,
+      "angles_units": "degrees",
+      "axis_p1_m": [
+        -0.04,
+        0.0,
+        0.05
+      ],
+      "axis_p2_m": [
+        -0.04,
+        0.0,
+        1.05
+      ],
+      "axis_unit": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "motion_table": {
+      "rows": 12001,
+      "time_start_s": 0.0,
+      "time_end_s": 12.0,
+      "sample_dt_min_s": 0.0009999999999994458,
+      "sample_dt_max_s": 0.0010000000000012221,
+      "angle_min_deg": -65.0,
+      "angle_max_deg": 65.0,
+      "max_abs_angular_speed_deg_per_s": 121.87491875006111,
+      "max_abs_angular_speed_rad_per_s": 2.1271186077891384,
+      "table_semantics": "prescribed rotation angle; solver evaluates the source table, no event label is declared"
+    },
+    "control_coverage_s": [
+      0.0,
+      12.0
+    ],
+    "control_coverage_is_event_time": false
+  },
+  "reference_scales": {
+    "velocity_scale_m_per_s": 0.5144813543159401,
+    "velocity_scale_definition": "max source-table angular speed times maximum moving-obstacle corner radius",
+    "angular_speed_scale_rad_per_s": 2.1271186077891384,
+    "fluid_sample_mass_kg": 325.6,
+    "moving_sample_mass_kg_diagnostic_only": 15.872,
+    "moving_sample_mass_is_rigid_body_mass": false,
+    "kinetic_energy_scale_j": 43.09170520923077,
+    "kinetic_energy_scale_definition": "0.5 * fluid sample mass * source-driven velocity scale^2",
+    "scale_role": "reference denominator; not a predicted fluid value and not rigid-body physical mass"
+  },
+  "event_time": {
+    "characteristic_time_s": null,
+    "status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+    "reason": "source declares motion-table coverage but no contact, peak, run-up, or other event landmark",
+    "cannot_use_control_duration_as_event_T": true,
+    "consumer_requirement": "bind an event definition and exact source evidence before evaluating 1% event-time budget"
+  },
+  "frozen_error_budget": {
+    "position_fraction_of_L": 0.02,
+    "velocity_and_ke_fraction_of_registered_nonzero_scale": 0.05,
+    "event_time_fraction_of_characteristic_T": 0.01,
+    "time_and_output_each_max_fraction_of_task_budget": 0.25,
+    "event_time_evaluation_status": "BLOCKED_UNKNOWN_UNTIL_EVENT_REGISTRATION"
+  },
+  "comparison_gate": {
+    "field_differences_allowed": false,
+    "required_inputs": [
+      "this contract",
+      "actual query brackets",
+      "event registration if event-time field is used"
+    ],
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
