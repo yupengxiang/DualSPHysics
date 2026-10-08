@@ -133,7 +133,12 @@ def _source_mode_contract(item: Mapping[str, Any], *, path: Path | None = None) 
         raise PortableV36Error(f"bound executable role lacks execute permission: {role}")
     return {
         "role": role,
-        "path": str(source),
+        # Keep the caller's literal path in the request.  In particular a
+        # venv invocation path may be a symlink whose resolved target is the
+        # system interpreter; replacing it here would recreate the ABI bug
+        # that this forward version is meant to prevent.  The resolved path
+        # is provenance/stat evidence only.
+        "resolved_source_path": str(source),
         "source_stat_expected": source_stat,
         "source_mode_bits": source_stat["mode_bits"],
         "preserve_mode": True,
@@ -213,7 +218,11 @@ def _annotate_collection(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = []
     for item in items:
         value = dict(item)
-        value.update(_source_mode_contract(value))
+        contract = _source_mode_contract(value)
+        # ``path`` remains the exact invocation/source URI supplied by the
+        # previous request.  Only the resolved path is recorded separately.
+        contract.pop("path", None)
+        value.update(contract)
         result.append(value)
     return result
 

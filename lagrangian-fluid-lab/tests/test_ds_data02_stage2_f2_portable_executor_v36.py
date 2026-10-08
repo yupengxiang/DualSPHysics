@@ -51,6 +51,22 @@ def test_decoder_copy_preserves_execute_mode_and_distinct_inode(tmp_path: Path) 
     assert record["target_mode_bits"] == 0o755
 
 
+def test_mode_annotation_keeps_literal_venv_invocation_path(tmp_path: Path) -> None:
+    real = tmp_path / "system-python"
+    real.write_bytes(b"python-fixture\n")
+    os.chmod(real, 0o755)
+    invocation = tmp_path / "venv" / "bin" / "python"
+    invocation.parent.mkdir(parents=True)
+    invocation.symlink_to(real)
+    item = {"path": str(invocation), "role": "python_executable"}
+
+    annotated = v36._annotate_collection([item])[0]
+
+    assert annotated["path"] == str(invocation)
+    assert annotated["resolved_source_path"] == str(real)
+    assert annotated["required_executable"] is True
+
+
 def test_decoder_mode_contract_rejects_source_without_execute_bit(tmp_path: Path) -> None:
     source = tmp_path / "bi4_dump"
     source.write_bytes(b"decoder-fixture\n")
