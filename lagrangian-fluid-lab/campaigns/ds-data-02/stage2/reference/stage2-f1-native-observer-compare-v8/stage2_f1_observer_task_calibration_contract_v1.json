@@ -1,0 +1,122 @@
+{
+  "schema": "ds02.stage2.f1-observer-task-calibration-contract.v1",
+  "status": "PREREGISTERED_CALIBRATION_ONLY",
+  "preparation_source_commit": "b69c80536b38be758636bb2649ebb94cf43f167f",
+  "quality_source": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/review-source/QUALITY_LABEL_SPLIT_ZH.md",
+  "quality_source_semantics": {
+    "position_macro_rmse": "<= 2% characteristic L",
+    "event_position": "<= 5% characteristic L",
+    "velocity_or_ke": "<= 5% fixed nonzero scale",
+    "whole_initial_region_mass_or_flux": "<= 0.03 fraction of whole initial source mass (three percentage points)",
+    "event_time": "<= 1% task-specific characteristic T; T is UNKNOWN until event declaration",
+    "time_budget_share": "at most one quarter of the corresponding task gate; budget share, not automatic pass/fail",
+    "output_reconstruction_budget_share": "at most one quarter of the corresponding task gate; budget share, not automatic pass/fail"
+  },
+  "comparison_policy": {
+    "field_interpolation": "NOT_PERFORMED",
+    "query_alignment": "only exact actual saved-time endpoints are aligned; unequal endpoint times are UNKNOWN_TIME_ALIGNMENT",
+    "adjacent_grid_as_truth": "FORBIDDEN",
+    "common_time_axis_is_event_time": false,
+    "event_characteristic_time": "UNKNOWN_UNTIL_EVENT_DECLARATION",
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "velocity_scale_method": {
+    "formula": "sqrt(abs(g_m_per_s2) * L_position_m)",
+    "gravity_m_per_s2": -9.81,
+    "status": "REGISTERED_SCALE_ONLY_NOT_EVALUATED"
+  },
+  "groups": {
+    "f1_s1_same_half": {
+      "sentinel_id": "F1-S1",
+      "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "query_times_s": [
+        0.0,
+        0.4,
+        0.8,
+        1.2,
+        1.6
+      ],
+      "common_saved_time_intersection_s": [
+        0.0,
+        1.600039573589642
+      ],
+      "characteristic_length": {
+        "value_m": 0.67,
+        "basis": "F1-S1 owner continuous fluid box maximum span from exact owner binding size [0.4,0.67,0.15] m",
+        "event_local_geometry_m": 0.12,
+        "event_local_geometry_status": "DIAGNOSTIC_ONLY_UNTIL_EVENT_DECLARATION"
+      },
+      "event_characteristic_time": "UNKNOWN_UNTIL_EVENT_DECLARATION",
+      "initial_fluid_sample_mass_target_kg": 40.2,
+      "continuous_mass_status": "OWNER_AUTHORITY_40P2_KG; PARTICLE_SUM_IS_DISCRETE_OBSERVABLE",
+      "controls": {
+        "source_xml": "same exact CURRENT XML and referenced motion/control inputs",
+        "same_cfl": 0.2,
+        "half_cfl": 0.1,
+        "savedt_all": 1,
+        "savedt_interval_s": 0.005,
+        "physical_window_s": [
+          0.0,
+          1.6
+        ],
+        "actual_saved_endpoint_policy": "Use RunPARTs endpoint; query 1.6 is bracketed when not an exact saved row"
+      },
+      "output_time_policy": "actual RunPARTs brackets only; no interpolation",
+      "qualification": {
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN",
+        "QE": "UNKNOWN"
+      }
+    },
+    "f1_s2_three_grid": {
+      "sentinel_id": "F1-S2",
+      "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+      "query_times_s": [
+        0.0,
+        1.0,
+        2.0,
+        3.0,
+        4.0
+      ],
+      "common_saved_time_intersection_s": [
+        0.0,
+        4.000039181464766
+      ],
+      "characteristic_length": {
+        "value_m": 0.98,
+        "basis": "F1-S2 source fluid box maximum span [0.98,0.98,0.32] m; continuous-mass authority remains separate",
+        "global_channel_span_m": 3.3,
+        "divider_size_m": [
+          0.8,
+          0.8,
+          0.8
+        ]
+      },
+      "event_characteristic_time": "UNKNOWN_UNTIL_EVENT_DECLARATION",
+      "initial_fluid_sample_mass_target_kg": 340.0,
+      "continuous_mass_status": "UNKNOWN_CONTINUOUS_AUTHORITY; 340_KG_IS_SOURCE_DISCRETE_SAMPLE_TARGET",
+      "controls": {
+        "source_xml": "same mother geometry/fill/motion/control semantics; intentional dp/h/mass/count vary by grid",
+        "same_cfl": 0.2,
+        "savedt_all": 1,
+        "savedt_interval_s": 0.005,
+        "medium_native_output_interval_s": 0.01,
+        "physical_window_s": [
+          0.0,
+          4.0
+        ],
+        "actual_saved_endpoint_policy": "Use each RunPARTs endpoint; query 4.0 may be exact/bracketed depending on actual saved rows"
+      },
+      "output_time_policy": "actual RunPARTs brackets only; medium output cadence differs and is diagnostic, not truth",
+      "qualification": {
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN",
+        "QE": "UNKNOWN"
+      }
+    }
+  }
+}
