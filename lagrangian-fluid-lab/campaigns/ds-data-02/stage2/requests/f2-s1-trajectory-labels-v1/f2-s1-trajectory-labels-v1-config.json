@@ -1,0 +1,88 @@
+{
+  "schema": "ds02.stage2.f2-s1-trajectory-label-config.v1",
+  "case_key": "F2/scan-F2-S1-001",
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "coordinate_frame": "fixed_solver_frame",
+  "frame_kind": "fixed_solver_frame",
+  "source_assignment": "native_initial_mk",
+  "source_mk_semantics": "typed initial (Zone,Idp) conversion blocks; legacy Zone is not an MK/material label",
+  "source_regions": [
+    {
+      "id": "fluid_mk1",
+      "native_mk": 1,
+      "mkfluid": 0,
+      "bounds": [[0.05, 0.375], [-0.11, 0.11], [0.7, 0.788]],
+      "geometry_source": "generated XML fluid mkfluid=0"
+    },
+    {
+      "id": "fluid_mk2",
+      "native_mk": 2,
+      "mkfluid": 1,
+      "bounds": [[0.05, 0.375], [-0.11, 0.11], [0.788, 0.876]],
+      "geometry_source": "generated XML fluid mkfluid=1"
+    },
+    {
+      "id": "fluid_mk3",
+      "native_mk": 3,
+      "mkfluid": 2,
+      "bounds": [[0.05, 0.375], [-0.11, 0.11], [0.876, 0.964]],
+      "geometry_source": "generated XML fluid mkfluid=2"
+    }
+  ],
+  "destination_regions": [
+    {
+      "id": "receiver_box_mkbound1",
+      "bounds": [[0.56, 1.66], [-0.16, 0.44], [0.0, 0.45]],
+      "boundary_rule": "lower-inclusive upper-exclusive",
+      "geometry_source": "generated XML mkbound=1 drawbox; finite box diagnostic, not proof of wetted fluid volume"
+    },
+    {
+      "id": "spill_tray_mkbound2",
+      "bounds": [[-1.2, 2.8], [-1.0, 1.0], [-0.2, -0.05]],
+      "boundary_rule": "lower-inclusive upper-exclusive",
+      "geometry_source": "generated XML mkbound=2 drawbox; finite box diagnostic, not proof of legal outflow"
+    }
+  ],
+  "events": [
+    {
+      "id": "receiver_aperture_entry_x056",
+      "axis": 0,
+      "value": 0.56,
+      "aperture_bounds": [[-0.16, 0.44], [0.0, 0.45]],
+      "forward_direction": "+x",
+      "geometry_source": "receiver mkbound=1 front x face",
+      "event_semantics": "finite-aperture saved-frame chord crossing; repeated crossings retained"
+    },
+    {
+      "id": "tray_aperture_entry_zm005",
+      "axis": 2,
+      "value": -0.05,
+      "aperture_bounds": [[-1.2, 2.8], [-1.0, 1.0]],
+      "forward_direction": "-z",
+      "geometry_source": "spill tray mkbound=2 upper z face",
+      "event_semantics": "backward column represents +z to -z entry; repeated crossings retained"
+    }
+  ],
+  "lifecycle_model": "open",
+  "time_window_s": [0.0, 4.000007783879406],
+  "expected_frames": 401,
+  "trajectory_hdf5_sha256": "f882a38dca872cbe81523b0691ea10ff6cc122037917b5d0a3004337eb6a8e9d",
+  "gates": {
+    "task_mass_fraction_tolerance": 0.03,
+    "unknown_width_gate_fraction": 0.003,
+    "semantics": "screening bounds only; no gate grants physical fate, dynamics, QN, or QE"
+  },
+  "moving_source_semantics": {
+    "source_frame": "fixed_solver_frame",
+    "body_motion": "generated XML objreal ref=0 rotating about y-axis from (0,-1,0.65) to (0,1,0.65), degrees",
+    "source_labels": "native initial MK is fixed to typed identity; positions are not reclassified into a moving frame",
+    "finite_aperture": "receiver/tray apertures are fixed solver-frame geometry"
+  },
+  "output_semantics": {
+    "missing_identity": "open-lifecycle right censoring; physical fate and legal spill UNKNOWN",
+    "first_arrival": "observed saved-frame bracket [t_i,t_i+1] with linear-chord estimate; exact continuous time UNKNOWN",
+    "residence": "piecewise-linear chord occupancy in finite boxes; interpolation error unassessed",
+    "net_flux": "forward minus backward finite-aperture crossings; not a force or dynamics error",
+    "momentum": "not computed; no cross-time momentum sum is permitted"
+  }
+}
