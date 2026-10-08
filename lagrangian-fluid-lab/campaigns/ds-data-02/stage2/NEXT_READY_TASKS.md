@@ -98,3 +98,10 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - F1 initial-native-QA-v1 实际失败：保存帧 decoder 合同拒绝 GenCase generated.bi4 的 PeriMode=96；无QA报告，父费用/释放已核对。F1_INITIAL_NATIVE_QA_V1_ACTUAL_INTERFACE_FAILURE_INDEPENDENT_VERIFICATION_001.json 保全原失败，reference准备 source-grounded GenCase专用前向读取路径与错误模式反例，不静默放宽动态字段。通过后才可推进 matched CFD。
 - 接入 root 新测试13项，8通过/5失败：v30/v31四项仍有冻结overlay/plan绝对consumer路径未正确跟随；catalog-v26一项CURRENT来源路径与实际v25 proof不闭合。已分别交回代理修复，不能称全通过。catalog-v26预制request尚未实际启动，须改为实际v25输出/manifest和CURRENT路径，而非代理预制品。
 - 当前无CFD、大IO或未终态运行；portable实际executor-v32及同父双FS guard 仍由consumer实现，下一就绪优先完整冷回放。reference继续F1修复/真实matched请求及F2连续owner支撑质量证据，forensics继续336最终资格产品。完整goal保持active，本轮交付尚未完成。
+
+2026-10-08 root forward 031 后续产品组装：
+
+- final-family-product-v27 实际同父 v8 完成，28个digest-bound输入前后稳定，root独立核对336逐案CURRENT身份/alias/帧数/实际时窗、七精确anchor（F2索引78）、七卡5native-MK/2spatial来源、2train/2validation/3test同父角色、20个来源引用SHA及实际v25生产者CURRENT精确路径/report/manifest/receipt。FINAL_FAMILY_PRODUCT_V27_ACTUAL_BOUNDED_INDEPENDENT_VERIFICATION_001.json；root四项新组装器测试通过。
+- 此产品是336暴露开发元数据库存及七个保存帧诊断family card，非完整336逐案科学资格目录；尚须接入既有336字段审计、118遗漏质量影响与原因语义及逐任务失败/删失/误差范围记录。F3原parent失败保留，只给已完成阶段恢复信用；portable完整链未完成，QN/QE/QI和真实物理划分/连续事件/恢复迁移仍UNKNOWN。
+- consumer v32/v33真实executor代码已接入，但root新测试8项6通过/2失败（root缺冻结v5未跟踪来源文件）；还发现私有audit参数list/dict不符和nested session清理缺口，v34修复及双FS实际父guard正在准备。未以任何预制request或测试通过声称8.64GB冷链已执行。
+- 所有root运行已终态/父预留释放；当前无CFD或大IO。继续等待reference守护support-v5/初态QA-v2源依据修复和consumer实际冷链守护入口，forensics继续资格/许可依赖与产品交付。完整goal继续active，边界/期限不重置。
