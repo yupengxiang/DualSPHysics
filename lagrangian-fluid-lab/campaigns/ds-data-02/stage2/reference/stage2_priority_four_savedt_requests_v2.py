@@ -94,7 +94,10 @@ def load_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[
     cost = json.loads(PAIR_COST.read_text(encoding="utf-8"))
     quality = json.loads(QUALITY.read_text(encoding="utf-8"))
     minimal = json.loads(MINIMAL.read_text(encoding="utf-8"))
-    if binding.get("status") != "PREPARED_SOURCE_BOUND_SAVEDT_CFL_PAIR_REQUESTS":
+    if binding.get("status") not in {
+        "PREPARED_SOURCE_BOUND_SAVEDT_CFL_PAIR_REQUESTS",
+        "PREPARED_LAUNCH_DISABLED_26_SAVEDT_REQUESTS",
+    }:
         raise ValueError(f"unexpected SaveDt binding status: {binding.get('status')}")
     return binding, cost, quality, minimal
 
