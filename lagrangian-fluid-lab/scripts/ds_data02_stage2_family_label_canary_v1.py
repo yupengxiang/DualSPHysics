@@ -202,6 +202,11 @@ def validate_contract(contract: dict[str, Any], *, check_content: bool = True) -
     configured_physical = config.get("physical_case_id")
     if configured_physical is not None and configured_physical != physical:
         raise ContractError("label config physical_case_id differs from CURRENT case")
+    geometry_source = config.get("geometry_source")
+    if geometry_source is not None:
+        _assert_same_path(geometry_source, by_key["generated_xml"][0], "label config geometry_source")
+        if config.get("geometry_sha256") != by_key["generated_xml"][1]:
+            raise ContractError("label config geometry_sha256 differs from the bound CURRENT XML")
     if config.get("frame_kind") != "fixed_solver_frame":
         raise ContractError("moving-frame label config has no bound saved transform")
     if not config.get("coordinate_frame"):
