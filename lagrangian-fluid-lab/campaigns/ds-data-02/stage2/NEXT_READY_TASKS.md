@@ -56,3 +56,15 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - F6 geometry v4实际成功：root补核原始云和候选云，身体128kg与~256kg粒子支撑分开，exact physical ID与app alias分开；F6_RIGID_CLOUD_V4_ACTUAL_INDEPENDENT_VERIFICATION_001.json。当前/粗/细云COM偏差与sample惯量为诊断，不是physical真值。
 - event v3/v4登记root builder/制造方向反例/来源SHA/尺度算式复核：EVENT_V3_V4_PREREGISTRATION_ROOT_VERIFICATION_028.json。F2有限孔径/MK0→1等映射，F3 top=.09阈值=.135、冻结velocity仍sqrt(9.81*.084)，F6刚体state identity；实际事件仍待匹配观察。此登记不给QI/QN/QE。
 - 当前大IO槽：F4 family labels实际运行（session2783，supervisor1859747/launcher1859753，1CPU/OMP1/7200s，同父资源预留），F3 recovery已终态；没有活跃CFD。之后依次F5/F6/F7标签、其余完整raw anchors与portable实际链。新portable v22/v29已集成，但full outer取消while-helper及wrapper计时边界需forward修复/实际验证，不凭仅metadata validator启动8.64GB试验。root聚焦17测试当前15PASS/2frozen绝对路径迁移失败已反馈，两失败不是不存在或全通过。
+
+
+2026-10-08 root actual forward 029（历史记录保留，以下更新运行状态）：
+
+- F4/F5/F6/F7锚点标签现已全部实际完成并独立核验，连同已有F1/F2/F3形成七族实际标签产物。F3/F7是初始空间来源cohort，F1/F2/F4/F5/F6为原生初始MK来源；不混称材料身份。F6仅3个流体身份缺失（.046875kg/5120kg），保留删失；F5四类事件均未观测，不能推出机制缺失。
+- F7 half-CFL九原生帧实际来源快照、观察器均已root核验，分别记录独立proof95cb751b.../510e67ca...；same/half实际字段比较已root独立算式核验（F7_SAME_HALF_ACTUAL_FIELD_COMPARISON_INDEPENDENT_VERIFICATION_001.json）。最大聚合质心差8.1968821e-5m、平均速度差.0003790456m/s、KE差.0062111985J；8/9保存时刻异步，最大差7.26734235e-5s。这是实际聚合字段诊断，不等于逐粒子精度、隔离积分误差或输出误差，QI/QN/QE仍UNKNOWN。下一步准备有界时间观测/制造轨迹校准与明确任务范围。
+- F1 dp005 owner-centered-v1 GenCase实际成功但质量验收硬失败：304703fluid×.000125=38.087875kg，相对40.2kg约−5.254%，原321600预估未实现。保留实际Def/XML/费用/收据，禁止放宽2%门槛或改owner；继续forward版本的离散选择方式修正，连续物理几何/control保持绑定。F1 support-v1 actual CPU失败：source Def被错误要求含generated fluid blocks，尚无支持审计结果，forward修复中。
+- F2 recovery语义sidecar已实际完成并root核验（F2_RECOVERY_SEMANTICS_ACTUAL_INDEPENDENT_VERIFICATION_001.json）：本任务读取恢复report/receipt JSON，不打开H5；原recovery只打开completed labels H5，不重读trajectory。缺失身份与未知目的区域各.00300000014249kg，实际独立来源为不同身份，combined accounting .00600000028498kg；首观测saved-chord不保证连续/有向首次到达。
+- 当前唯一大IO：F5 full801原始锚点→typed比较，session7769，supervisor1873356/launcher1873357，request requests/f5-full801-raw-anchor-v8-root-001.json，1CPU/OMP1/5400s/Home16GiB同父预留。启动commit677beb2a9时存在尚未提交F7独立label proof；源文件哈希与父guard仍绑定，勿声称clean launch。无运行CFD。
+- 具体就绪后继：forensics准备七族actual质量v3 manifest/guarded请求及family cards、有效物理/control/geometry/recovery条件划分；task-split builder已发现嵌套output对象被当字符串的实际准备错误，forward修复。metadata任务输入资格不自动等于科学任务有效split。consumer推进portable v23完整outer取消/helper组清理/entry计时及冷8.64GB raw→typed→labels→privateSDK/evaluator实际请求，IO槽空闲后优先执行。remaining完整raw anchors F4/F6/F7逐一接续，F3旧parent失败保留且只给已闭合重建阶段信用。
+- 新集成quality-v3/recovery-semantic/task-split三组测试root9项通过，F7字段比较制造自测3项/F1 owner-support制造自测4项通过；actual parser失败说明自测不代替生产接口验证。
+- 父资源保持512GPUh/3840CPUcoreh/资格1024/生产720、Home≥500GiB、截止2026-10-14T07:23:48Z。已记GPU137.234341h/CPU约701.088245h（不含运行F5终态费用）；Home约665GiB，单IO预留16GiB不改变额度。目标继续active，七族三网格/积分输出校准、完整portable实际链及完整内部资格产品尚未完成。
