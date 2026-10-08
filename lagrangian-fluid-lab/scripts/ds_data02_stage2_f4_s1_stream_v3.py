@@ -459,6 +459,7 @@ def _new_source_event() -> dict[str, Any]:
         "semantics": {
             "crossing_counts": "saved-record crossings accepted at the finite plane/aperture intersection",
             "later_saved_crossings": "accepted crossings after the first for the same (Zone,Idp)",
+            "legacy_aggregate_count": "if a legacy aggregate count is compared, it is a total saved-crossing diagnostic, not a per-identity repeat count",
             "continuous_event_time": "unknown; only adjacent saved-record bracket is retained",
             "physical_flux": "unknown; counts are not a flux or fate classification",
         },
@@ -792,9 +793,10 @@ def run(*, manifest_path: Path, output_dir: Path) -> dict[str, Any]:
             "legacy_operator_comparison": {
                 "legacy_compute_curve_and_events_used": False,
                 "legacy_event_budget_fraction_used": None,
-                "legacy_temporal_item_allocation_used": None,
-                "legacy_repeat_crossings_reused": False,
-                "reason": "V3 counts per typed identity and uses exact saved-segment plane intersections; old aggregate endpoint operator is not a Stage2 calibration source",
+            "legacy_temporal_item_allocation_used": None,
+            "legacy_repeat_crossings_reused": False,
+            "legacy_aggregate_count_semantics": "total saved-crossing diagnostic only; never interpreted as per-identity repeats or physical flux",
+            "reason": "V3 counts per typed identity and uses exact saved-segment plane intersections; old aggregate endpoint operator is not a Stage2 calibration source",
             },
             "claim_boundary": {
                 "continuous_event_time_between_saved_frames": "unknown",
