@@ -60,7 +60,7 @@ OWNER_FILE = Path(
     "handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/"
     "ecc_coarse/owner.json"
 )
-OWNER_BINDING = OWNER_FILE.with_name("ecc-physical-binding.json")
+OWNER_BINDING = OWNER_FILE.parent.parent / "ecc-physical-binding.json"
 GEOMETRY_AUDIT = REFERENCE / "stage2_f1_s1_geometry_semantics_audit_v2.json"
 QUALITY = REFERENCE / "stage2_reference_quality_cost_v2.json"
 DOC_TEMPLATE = REPO / "doc/xml_format/GenCase_CaseTemplate.xml"
@@ -181,7 +181,7 @@ def derive_definition(mode: str) -> dict[str, Any]:
         "setshapemode": {"source": "dp | actual | bound", "candidate": mode},
         "intentional_changes_only": ["definition dp: 0.010 m -> 0.009 m", f"setshapemode token list -> {mode}"],
         "continuous_drawboxes_and_controls_normalized_equal": True,
-        "mode_semantics": "UNKNOWN_UNTIL_PARENT_GUARDED_GENC CASE_OUTPUT_AUDIT",
+        "mode_semantics": "UNKNOWN_UNTIL_PARENT_GUARDED_GENCASE_OUTPUT_AUDIT",
         "official_token_evidence": str(DOC_TEMPLATE.resolve()),
     }
 
