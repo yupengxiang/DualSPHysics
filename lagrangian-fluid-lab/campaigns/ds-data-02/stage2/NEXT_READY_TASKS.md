@@ -11,4 +11,8 @@
 7. v21七族卡绑定全部336审计和118影响证据；root元数据核验通过，仍为development/provisional，QI/QN/QE未知，split_safe=false。继续实质任务子域、谱系与安全划分；不把卡片存在当资格。
 8. dp009 GenCase质量相对已声明40.2kg连续初态偏差+.377%；匹配三档网格及初态/控制仍待闭合。actual/bound两种几何解释探针均已实际完成且固定/流体数相同，OMP=1；接着核对粒子几何支持。F1完整161帧原始锚点重建已实际与CURRENT逐字节一致；F3完整836帧重建当前运行，F5完整801/F7完整601请求已登记，逐一使用同父IO槽。其余哨点参考、七个完整原始锚点、标签及删失区间、依赖/许可/访问和复现入口持续推进。
 
-三名既有代理继续各分支；root负责集成、独立核验、全局状态及同父资源排程。当前无活跃CFD；F3完整原始锚点实际重建占用父IO槽。F7选定九帧快照已实际完成，等待观察器请求；半CFL初态QA-v3尚未实际执行，须前向补足原始冻结stat与前后完整hash守卫。下一次运行须实时核对库存并原子预留。
+9. 新集成F2-S1/F3-S2/F5-S1/F6-S2/F7-S2来源尺度合同；root独立重建、小文件来源SHA及主要尺度算式核验通过。SOURCE_CALIBRATION_REGISTRATION_ROOT_VERIFICATION_025.json仅登记信用：事件T未知，F6表面速度须绑定声明身体中心，F2/F3须闭合统一连续owner尺度，不给数值误差信用。19项轨迹语义/初态QA/取消进程/evaluator制造测试通过。
+10. portable v27实际V21→V15/V14→V11→V10→V25 V7加载图已由确切consumer程序验证；见PORTABLE_V27_ACTUAL_LOADER_CANCEL_BOUNDARY_AUDIT_001.json。25秒清理窗口及实际terminal predicate已绑定，但测试预写终态charge/receipt，真实取消reserve→charge闭合未证明；不得据此启动大复制。consumer继续真实小桥取消清算及有界收尾证据。
+11. F7九帧原生观察器root请求已登记（requests/f7-s2-native-observer-v2-request-root-001.json位于stage2-f7-s2-native-observer-v2-root-prepared-001目录），读取槽释放后启动；F7 half-CFL初态QA-v8已交付完整冻结stat/前后hash、数组比较及motion staging，尚未实际运行，待CaseNp/XML元数据闭合的forward版本与outer请求。F2-S1真实401帧轨迹标签root请求已登记：requests/f2-s1-trajectory-labels-v1-root-001.json，CPU单线程有限3600秒，尚未实际读取H5；.003未知质量仍使用全初始21.114001002861187kg分母。标签成功后构建deferred轨迹/原生排除语义对照合同。
+
+三名既有代理继续各分支；root负责集成、独立核验、全局状态及同父资源排程。当前无活跃CFD；F3完整836帧原始锚点正在实际重建，临时typed文件已写出并进行收尾检查，仍占用父IO槽，尚未取得成功收据。随后依次推进F7选定帧观察器、half-CFL初态QA、F2轨迹标签及其余完整原始锚点。下一次运行须实时核对库存并原子预留。
