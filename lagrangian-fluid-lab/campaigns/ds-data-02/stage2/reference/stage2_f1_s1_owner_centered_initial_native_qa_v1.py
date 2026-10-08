@@ -44,6 +44,8 @@ OBSERVER = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/st
 RUNNER = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py"
 STRICT = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 RUNTIME = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
+RUNTIME_V6 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
+RUNTIME_V2 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
 OWNER = Path(
     "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/"
     "lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/"
@@ -403,7 +405,7 @@ def build_request() -> dict[str, Any]:
     if QA_REQUEST.exists():
         raise FileExistsError(f"refuse overwrite immutable request: {QA_REQUEST}")
     records_paths = [
-        Path(__file__), OBSERVER, PYTHON, DECODER, DECODER_SOURCE, RUNNER, STRICT, RUNTIME,
+        Path(__file__), OBSERVER, PYTHON, DECODER, DECODER_SOURCE, RUNNER, STRICT, RUNTIME, RUNTIME_V6, RUNTIME_V2,
         OWNER, OWNER_BINDING, DP005_PROOF, DP0025_PROOF, READ_SCOPE_SIDECAR,
     ]
     deferred: list[Path] = []

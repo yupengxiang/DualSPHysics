@@ -45,6 +45,8 @@ GENCASE = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/off
 RUNNER = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py"
 STRICT = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 RUNTIME = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
+RUNTIME_V6 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
+RUNTIME_V2 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
 OWNER = Path("/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/ecc_coarse/owner.json")
 OWNER_BINDING = OWNER.parent.parent / "ecc-physical-binding.json"
 GEOMETRY_EVIDENCE = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s1_geometry_semantics_source_evidence_v1.json"
@@ -525,7 +527,7 @@ def build_audit_request() -> dict[str, Any]:
     dp0025_proof = MAIN / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_OWNER_DP0025_V3_GENCASE_ACTUAL_INDEPENDENT_VERIFICATION_001.json"
     dp005_proof = MAIN / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_OWNER_DP005_V2_SUPPORT_CONTROL_ACTUAL_INDEPENDENT_VERIFICATION_001.json"
     read_scope = MAIN / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_OWNER_SUPPORT_ROOT_READ_SCOPE_SEMANTIC_SIDECAR_030.json"
-    paths = [Path(__file__), PYTHON, RUNNER, STRICT, RUNTIME, OWNER, OWNER_BINDING, GEOMETRY_EVIDENCE,
+    paths = [Path(__file__), PYTHON, RUNNER, STRICT, RUNTIME, RUNTIME_V6, RUNTIME_V2, OWNER, OWNER_BINDING, GEOMETRY_EVIDENCE,
              CANDIDATE_DEF, DERIVATION, CANDIDATE_OUTPUT_ROOT / "generated.xml", CANDIDATE_OUTPUT_ROOT / "execution-receipt.json",
              dp0025_proof, dp005_proof, read_scope]
     for spec in case_specs(include_candidate=True).values():
