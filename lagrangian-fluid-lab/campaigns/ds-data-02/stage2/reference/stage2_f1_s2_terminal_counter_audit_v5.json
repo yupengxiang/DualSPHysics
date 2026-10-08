@@ -1,0 +1,454 @@
+{
+  "schema": "ds02.stage2.f1-s2-terminal-counter-audit.v5",
+  "status": "ACTUAL_F1_S2_SAVEDT_COUNTER_AUDIT",
+  "preparation_source_commit": "e4123623ace5258ee90a86a4c2c7ef5f1ea59a84",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "scope": {
+    "native_or_h5_read_by_this_worker": false,
+    "inputs": "RunPARTs.csv, Run.csv, Run.out, DtAllInfo.csv, official v5.4 source excerpts, prior fine audit JSON",
+    "full_native_tree_scanned": false,
+    "terminal_state_after_last_saved_part": "UNKNOWN_NOT_READ_FROM_NATIVE_PAYLOAD",
+    "unsaved_terminal_step_inferred": false
+  },
+  "official_source_provenance": "SOURCE_RANGES_AUDIT_ONLY; actual solver binary provenance remains UNKNOWN unless receipt closes it",
+  "official_source_evidence": {
+    "main_loop_and_save": {
+      "file": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+        "bytes": 59520,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef"
+      },
+      "line_start": 998,
+      "line_end": 1047,
+      "text": [
+        "  while(TimeStep<TimeMax){",
+        "    InterStep=(TStep==STEP_Symplectic? INTERSTEP_SymPredictor: INTERSTEP_Verlet);",
+        "    if(ViscoTime)Visco=ViscoTime->GetVisco(float(TimeStep));",
+        "    if(DDTRamp.x)RunInitialDDTRamp(); //<vs_ddramp>",
+        "    const double stepdt=ComputeStep();",
+        "    RunGaugeSystem(TimeStep+stepdt);",
+        "    if(CaseNmoving)RunMotion(stepdt);",
+        "    if(InOut)InOutComputeStep(stepdt);",
+        "    else RunCellDivide(true);",
+        "    if(FlexStruc)UpdateFlexStrucGeometry();",
+        "    TimeStep+=stepdt;",
+        "    LastDt=stepdt;",
+        "    Nstep++;",
+        "    //-Save extra PART data.",
+        "    if(TimeOutExtraCheck(TimeStep)){",
+        "      if(PartFloatSave)PartFloatSave->AddDataExtra(Part,TimeStep,Nstep);",
+        "      if(PartMotionSave)PartMotionSave->AddDataExtraGpu(Part,TimeStep,Nstep,Np",
+        "        ,Posxy_g->cptr(),Posz_g->cptr(),RidpMotg);",
+        "      TimeOutExtraUpdate(TimeStep);",
+        "    }",
+        "    //-Check minimum fluid allowed.",
+        "    const unsigned npfnormal=Np-NpbPer-NpfPer-CaseNbound;",
+        "    minfluidstopped=(npfnormal<NpfMinimum || !Np);",
+        "    //-Save main PART data.",
+        "    if(TimeStep>=TimePartNext || minfluidstopped){",
+        "      if(minfluidstopped){",
+        "        Log->PrintWarning(fun::PrintStr(\"The minimum number of fluid particles (%s) was reached.\",KINT(NpfMinimum)));",
+        "        TimeMax=TimeStep;",
+        "      }",
+        "      SaveData();",
+        "      Part++;",
+        "      PartNstep=Nstep;",
+        "      TimeStepM1=TimeStep;",
+        "      TimePartNext=(SvAllSteps? TimeStep: OutputTime->GetNextTime(TimeStep));",
+        "      TimerPart.Start();",
+        "    }",
+        "    UpdateMaxValues();",
+        "    const bool laststep=(TimeStep>=TimeMax || (NstepsBreak && Nstep>=NstepsBreak));",
+        "    if(DsPips)ComputePips(laststep);",
+        "    if(Part<=PartIni+1 && tc.CheckTime())Log->Print(string(\"  \")",
+        "      +tc.GetInfoFinish((TimeStep-TimeStepIni)/(TimeMax-TimeStepIni)));",
+        "    //-Terminates the simulation according to NstepsBreak (for debugging).",
+        "    if(NstepsBreak && Nstep>=NstepsBreak)break;",
+        "  }",
+        "  TimerSim.Stop(); TimerTot.Stop();",
+        "",
+        "  //-End of Simulation.",
+        "  //--------------------",
+        "  FinishRun(minfluidstopped);",
+        "}"
+      ]
+    },
+    "finish_run": {
+      "file": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpuSingle.cpp",
+        "bytes": 59520,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "7d22adb354da717c6d7cf55c886ec9a3d5dca6a613b2e168d7027ded7f7da5ef"
+      },
+      "line_start": 1144,
+      "line_end": 1159,
+      "text": [
+        "void JSphGpuSingle::FinishRun(bool stop){",
+        "  const float tsim=(float)TimerSim.GetSecs();",
+        "  const float ttot=(float)TimerTot.GetSecs();",
+        "  JSph::ShowResume(stop,tsim,ttot,true,\"\");",
+        "  Log->Print(\" \");",
+        "  string hinfo,dinfo;",
+        "  if(SvTimers){",
+        "    Timersg->ShowTimes(\"[GPU Timers]\",Log);",
+        "    Timersg->GetTimersInfo(hinfo,dinfo);",
+        "  }",
+        "  if(SvRes)SaveRes(tsim,ttot,hinfo,dinfo);",
+        "  if(SvData&SDAT_Info)SaveRunPartsCsvFinal();",
+        "  Log->PrintFilesList();",
+        "  Log->PrintWarningList();",
+        "  VisuRefs();",
+        "}"
+      ]
+    },
+    "dtvariable_records_before_step_increment": {
+      "file": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JSphGpu.cpp",
+        "bytes": 71667,
+        "mtime_ns": 1747898528000000000,
+        "sha256": "376a499523fe10b6d4e62a7aac4c5a8b3dde3f71ec2ae6b46a27985cfcd5b4d0"
+      },
+      "line_start": 1103,
+      "line_end": 1146,
+      "text": [
+        "double JSphGpu::DtVariable(bool final){",
+        "  //-dt1 depends on force per unit mass.",
+        "  const double acemax=sqrt(double(AceMax));",
+        "  const double dt1=(AceMax? (sqrt(double(KernelH)/AceMax)): DBL_MAX); ",
+        "  //-dt2 combines the Courant and the viscous time-step controls.",
+        "  const double dt2=double(KernelH)/(max(Cs0,VelMax*10.)+double(KernelH)*ViscDtMax);",
+        "  //-dt3 uses the maximum speed of sound across all structure particles.",
+        "  const double dt3=(FlexStrucDtMax? double(KernelH)/FlexStrucDtMax: DBL_MAX); //<vs_flexstruc>",
+        "  //-dt new value of time step.",
+        "  #ifdef AVAILABLE_DIVCLEAN",
+        "    //-dt4 uses the maximum local speed of sound across all fluid particles.",
+        "    const double dt4=(DivCleaning? double(KernelH)/CsPsiCleanMax: DBL_MAX); //<vs_divclean>",
+        "    double dt=CFLnumber*min(dt1,min(dt2,min(dt3,dt4)));",
+        "  #else",
+        "  double dt=CFLnumber*min(dt1,min(dt2,dt3));",
+        "  #endif",
+        "  //-Use dt value defined by FixedDt object.",
+        "  if(FixedDt)dt=FixedDt->GetDt(TimeStep,dt);",
+        "  //-Check that the dt is valid.",
+        "  if(fun::IsNAN(dt) || fun::IsInfinity(dt)){",
+        "    if(FlexStruc)Run_Exceptioon(fun::PrintStr(",
+        "    \"The computed Dt=%f (from AceMax=%f, VelMax=%f, ViscDtMax=%f, FlexStrucDtMax=%f) is NaN or infinity at nstep=%u.\"",
+        "    ,dt,AceMax,VelMax,ViscDtMax,FlexStrucDtMax,Nstep));",
+        "    else         Run_Exceptioon(fun::PrintStr(",
+        "    \"The computed Dt=%f (from AceMax=%f, VelMax=%f, ViscDtMax=%f) is NaN or infinity at nstep=%u.\"",
+        "    ,dt,AceMax,VelMax,ViscDtMax,Nstep));",
+        "  }",
+        "  //-Correct dt with minimum allowed value.",
+        "  if(dt<double(DtMin)){ ",
+        "    dt=double(DtMin); DtModif++;",
+        "    if(DtModif>=DtModifWrn){",
+        "      Log->PrintfWarning(\"%d DTs adjusted to DtMin (t:%g, nstep:%u)\",DtModif,TimeStep,Nstep);",
+        "      DtModifWrn*=10;",
+        "    }",
+        "  }",
+        "  //-Saves information about dt.",
+        "  if(final){",
+        "    if(PartDtMin>dt)PartDtMin=dt;",
+        "    if(PartDtMax<dt)PartDtMax=dt;",
+        "    //-Saves detailed information about dt in SaveDt object.",
+        "    if(SaveDt)SaveDt->AddValues(TimeStep,dt,dt1*CFLnumber,dt2*CFLnumber",
+        "      ,dt3*CFLnumber,AceMax,ViscDtMax,FlexStrucDtMax,VelMax);",
+        "  }",
+        "  return(dt);"
+      ]
+    },
+    "savedt_flush": {
+      "file": {
+        "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/src/source/JDsSaveDt.cpp",
+        "bytes": 11220,
+        "mtime_ns": 1747898527000000000,
+        "sha256": "7c6ecba8ab96acbcc4f55ce2af62e91c00e1cadd8ef27b7d9d9fd6ec771049b2"
+      },
+      "line_start": 273,
+      "line_end": 284,
+      "text": [
+        "void JDsSaveDt::SaveData(){",
+        "  SaveFileValuesEnd();",
+        "  if(AllDt)SaveFileAllDts();",
+        "}",
+        "",
+        ""
+      ]
+    }
+  },
+  "runs": {
+    "coarse_dp0225_same_cfl": {
+      "label": "coarse_dp0225_same_cfl",
+      "run_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_COARSE_DP0p022500_FULL4S_SAMECFL_SAVEDT/f1-s2-coarse-dp0225-samecfl-full4s-savedt-v6-primary-001",
+      "inputs": {
+        "runparts": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_COARSE_DP0p022500_FULL4S_SAMECFL_SAVEDT/f1-s2-coarse-dp0225-samecfl-full4s-savedt-v6-primary-001/solver_output/RunPARTs.csv",
+          "bytes": 164533,
+          "mtime_ns": 1791422993895138143,
+          "sha256": "e2d9ed1b203ad5c59c47d8a1a535fcbd282f08b82ed469d1f0c2283acc9c416b"
+        },
+        "run_csv": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_COARSE_DP0p022500_FULL4S_SAMECFL_SAVEDT/f1-s2-coarse-dp0225-samecfl-full4s-savedt-v6-primary-001/solver_output/Run.csv",
+          "bytes": 1094,
+          "mtime_ns": 1791422993894138175,
+          "sha256": "feb6588d0a008316465fd474a9b2eec3d4c7e7d10cb980b37c85444baf80a577"
+        },
+        "run_out": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_COARSE_DP0p022500_FULL4S_SAMECFL_SAVEDT/f1-s2-coarse-dp0225-samecfl-full4s-savedt-v6-primary-001/solver_output/Run.out",
+          "bytes": 88101,
+          "mtime_ns": 1791422993897138079,
+          "sha256": "6c5232ff2cde8f668634ec7ec6638139167b24564f06da0869e66f3dc16da134"
+        },
+        "dtall": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_SPATIAL_COARSE_DP0p022500_FULL4S_SAMECFL_SAVEDT/f1-s2-coarse-dp0225-samecfl-full4s-savedt-v6-primary-001/solver_output/DtAllInfo.csv",
+          "bytes": 820613,
+          "mtime_ns": 1791422993894138175,
+          "sha256": "d0d056e0e18b0b205d5b63425e960500ba91bac02b4f5bb9722e1b1cd4a03377"
+        }
+      },
+      "runparts": {
+        "count": 801,
+        "terminal_part": 800,
+        "terminal_time_s": 4.00012583307162,
+        "steps_sum": 19539,
+        "dts_min_count_sum": 0,
+        "terminal_interval_steps": 24,
+        "terminal_dtmin_s": 0.0002102801042280297,
+        "terminal_dtmax_s": 0.0002107006032928955
+      },
+      "run_csv": {
+        "run_name": "F1_S2_SPATIAL_COARSE_DP0p022500_SAVEDT_SAME_CFL",
+        "steps": 19538,
+        "physical_time_text": "4.000126",
+        "physical_time_s_rounded": 4.000126,
+        "part_files": 801,
+        "dp_m": 0.0225,
+        "h_m": 0.038971,
+        "version_text": "hb7jzl5m-DualSPHysics5 v5.4.355 (08-04-2025)",
+        "raw_keys": [
+          "CF-Forces",
+          "CF-PreForces",
+          "CF-PreMDBC",
+          "Configuration",
+          "DateTime",
+          "Dp",
+          "GPIPS",
+          "H",
+          "Hardware",
+          "MaxCells",
+          "MaxParticles",
+          "MemCpu",
+          "MemGpu",
+          "MemGpuCells",
+          "NL-CellBegin",
+          "NL-Limits",
+          "NL-OutCheck",
+          "NL-PreSort",
+          "NL-RadixSort",
+          "NL-SortData",
+          "Nbound",
+          "Nfixed",
+          "Np",
+          "PartFiles",
+          "PartsOut",
+          "PartsOutRho",
+          "PartsOutVel",
+          "PhysicalTime",
+          "Rcode-VersionInfo",
+          "RunMode",
+          "RunName",
+          "SU-Chrono",
+          "SU-ComputeStep",
+          "SU-DownData",
+          "SU-FlexStruc",
+          "SU-Floating",
+          "SU-Gauges",
+          "SU-InOut",
+          "SU-Moorings",
+          "SU-Motion",
+          "SU-Periodic",
+          "SU-ResizeNp",
+          "SU-SavePart",
+          "SU-Shifting",
+          "Steps",
+          "TSeg",
+          "TSimul",
+          "TTotal",
+          "VA-Init"
+        ]
+      },
+      "run_out": {
+        "steps": 19538,
+        "matched_text": "Steps of simulation..............: 19,538"
+      },
+      "dtall": {
+        "rows": 19538,
+        "first_time_s": 0.0,
+        "last_start_time_s": 3.999915552967,
+        "last_dt_s": 0.000210280104228,
+        "last_end_time_s": 4.000125833071228,
+        "sum_dt_s": 4.000125833071653,
+        "max_continuity_error_s": 9.969802761133906e-13
+      },
+      "counter_relation": {
+        "runparts_steps_sum_minus_dtall_rows": 1,
+        "runparts_steps_sum_minus_run_out_steps": 1,
+        "run_out_steps_minus_dtall_rows": 0,
+        "status": "UNKNOWN_COUNTING_CONVENTION_NO_UNSAVED_TERMINAL_STATE_INFERRED"
+      },
+      "endpoint_relation": {
+        "saved_part_time_s": 4.00012583307162,
+        "dtall_last_start_plus_dt_s": 4.000125833071228,
+        "delta_s": -3.9257486150745535e-13,
+        "status": "PASS_SAVED_WINDOW_CLOSED_BY_DTALL_ENDPOINT"
+      },
+      "report_binding": "NOT_BOUND"
+    },
+    "fine_dp017_same_cfl": {
+      "label": "fine_dp017_same_cfl",
+      "run_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INTERVAL_DP0p017_FULL4S_SAMECFL_SAVEDT_DENSE/f1-s2-fine-dp017-samecfl-full4s-savedt-v5-primary-001",
+      "inputs": {
+        "runparts": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INTERVAL_DP0p017_FULL4S_SAMECFL_SAVEDT_DENSE/f1-s2-fine-dp017-samecfl-full4s-savedt-v5-primary-001/solver_output/RunPARTs.csv",
+          "bytes": 168801,
+          "mtime_ns": 1791420497446549439,
+          "sha256": "ab2016fbe826d5e6926a1f2c024ddd9ed4e8f3f136cbffa7537273b5df6ad070"
+        },
+        "run_csv": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INTERVAL_DP0p017_FULL4S_SAMECFL_SAVEDT_DENSE/f1-s2-fine-dp017-samecfl-full4s-savedt-v5-primary-001/solver_output/Run.csv",
+          "bytes": 1083,
+          "mtime_ns": 1791420497446549439,
+          "sha256": "6c80ffc869545cc5d45968f44e0e353e2a55f2a42362a7ea79b702e045c3718f"
+        },
+        "run_out": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INTERVAL_DP0p017_FULL4S_SAMECFL_SAVEDT_DENSE/f1-s2-fine-dp017-samecfl-full4s-savedt-v5-primary-001/solver_output/Run.out",
+          "bytes": 88087,
+          "mtime_ns": 1791420497452549237,
+          "sha256": "ba8bc6dc8f08343ae33117aeed4db363e0d181212cc96dacd45e055a93076d39"
+        },
+        "dtall": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INTERVAL_DP0p017_FULL4S_SAMECFL_SAVEDT_DENSE/f1-s2-fine-dp017-samecfl-full4s-savedt-v5-primary-001/solver_output/DtAllInfo.csv",
+          "bytes": 1070681,
+          "mtime_ns": 1791420497445549472,
+          "sha256": "f613a6a7efb41d79a522b215f85b56deb692ccaf1eb511d36297501966362514"
+        }
+      },
+      "runparts": {
+        "count": 801,
+        "terminal_part": 800,
+        "terminal_time_s": 4.000039181464766,
+        "steps_sum": 25493,
+        "dts_min_count_sum": 0,
+        "terminal_interval_steps": 31,
+        "terminal_dtmin_s": 0.0001619321518888813,
+        "terminal_dtmax_s": 0.0001620976621925501
+      },
+      "run_csv": {
+        "run_name": "F1_S2_INTERVAL_DP0p017_SAVEDT_SAME_CFL",
+        "steps": 25493,
+        "physical_time_text": "4.000201",
+        "physical_time_s_rounded": 4.000201,
+        "part_files": 801,
+        "dp_m": 0.017,
+        "h_m": 0.029445,
+        "version_text": "3cgmxr0h-DualSPHysics5 v5.4.355 (08-04-2025)",
+        "raw_keys": [
+          "CF-Forces",
+          "CF-PreForces",
+          "CF-PreMDBC",
+          "Configuration",
+          "DateTime",
+          "Dp",
+          "GPIPS",
+          "H",
+          "Hardware",
+          "MaxCells",
+          "MaxParticles",
+          "MemCpu",
+          "MemGpu",
+          "MemGpuCells",
+          "NL-CellBegin",
+          "NL-Limits",
+          "NL-OutCheck",
+          "NL-PreSort",
+          "NL-RadixSort",
+          "NL-SortData",
+          "Nbound",
+          "Nfixed",
+          "Np",
+          "PartFiles",
+          "PartsOut",
+          "PartsOutRho",
+          "PartsOutVel",
+          "PhysicalTime",
+          "Rcode-VersionInfo",
+          "RunMode",
+          "RunName",
+          "SU-Chrono",
+          "SU-ComputeStep",
+          "SU-DownData",
+          "SU-FlexStruc",
+          "SU-Floating",
+          "SU-Gauges",
+          "SU-InOut",
+          "SU-Moorings",
+          "SU-Motion",
+          "SU-Periodic",
+          "SU-ResizeNp",
+          "SU-SavePart",
+          "SU-Shifting",
+          "Steps",
+          "TSeg",
+          "TSimul",
+          "TTotal",
+          "VA-Init"
+        ]
+      },
+      "run_out": {
+        "steps": 25493,
+        "matched_text": "Steps of simulation..............: 25,493"
+      },
+      "dtall": {
+        "rows": 25492,
+        "first_time_s": 0.0,
+        "last_start_time_s": 3.999877083803,
+        "last_dt_s": 0.0001620976621926,
+        "last_end_time_s": 4.000039181465193,
+        "sum_dt_s": 4.000039181464767,
+        "max_continuity_error_s": 9.85211912052364e-13
+      },
+      "counter_relation": {
+        "runparts_steps_sum_minus_dtall_rows": 1,
+        "runparts_steps_sum_minus_run_out_steps": 0,
+        "run_out_steps_minus_dtall_rows": 1,
+        "status": "UNKNOWN_COUNTING_CONVENTION_NO_UNSAVED_TERMINAL_STATE_INFERRED"
+      },
+      "endpoint_relation": {
+        "saved_part_time_s": 4.000039181464766,
+        "dtall_last_start_plus_dt_s": 4.000039181465193,
+        "delta_s": 4.2721381987576024e-13,
+        "status": "PASS_SAVED_WINDOW_CLOSED_BY_DTALL_ENDPOINT"
+      },
+      "report_binding": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_s2_fine_terminal_savedt_audit_v4.json",
+        "bytes": 30337,
+        "mtime_ns": 1791422313218122502,
+        "sha256": "cbd682fafab98ec514a13732c340d32ac6e582982c96ef7c6b3f9c58a5014194"
+      }
+    }
+  },
+  "terminal_semantics": {
+    "saved_time_authority": "actual RunPARTs.csv Part/time rows",
+    "DtAllInfo_role": "saved-window detailed dt rows; endpoint is checked against the last saved Part",
+    "Run_out_and_Run_csv_role": "reported cumulative counters/rounded summary; not used to create an extra native frame",
+    "counter_mismatch_policy": "preserve per-file counts and UNKNOWN counting convention; no extra terminal integration or state is claimed",
+    "query_4s_policy": "EXACT only if RunPARTs timestamp equals 4.0 within declared tolerance; otherwise BRACKETED/UNKNOWN without extrapolation"
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
