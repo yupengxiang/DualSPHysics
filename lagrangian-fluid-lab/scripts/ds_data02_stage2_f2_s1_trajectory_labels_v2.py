@@ -544,6 +544,10 @@ def _stable_failed_receipt(failed_receipt_path: Path, contract_path: Path,
         raise TrajectoryLabelError("failed receipt source H5 differs from source contract")
     if not recovered_h5.is_file() or recovered_h5.stat().st_size <= 0:
         raise TrajectoryLabelError("recovered label H5 is missing or empty")
+    stdout_path = failed_receipt_path.parent / "stdout.log"
+    stdout_sha = receipt.get("stdout_sha256")
+    if not stdout_path.is_file() or not isinstance(stdout_sha, str) or sha256(stdout_path) != stdout_sha:
+        raise TrajectoryLabelError("v1 failed stdout is missing or differs from receipt")
     command = request.get("command")
     if not isinstance(command, list) or not any(str(item).endswith("ds_data02_stage2_f2_s1_trajectory_labels_v1.py") for item in command):
         raise TrajectoryLabelError("failed receipt command is not the consumed v1 worker")
@@ -557,6 +561,8 @@ def _stable_failed_receipt(failed_receipt_path: Path, contract_path: Path,
         "source_trajectory_path": str(trajectory_path),
         "source_trajectory_sha256": EXPECTED_H5_SHA256,
         "source_trajectory_bytes": EXPECTED_H5_BYTES,
+        "stdout_path": str(stdout_path.resolve()),
+        "stdout_sha256": stdout_sha,
         "failure_credit": "none; v1 worker summary schema failure only",
         "old_attempt_preserved": True,
     }
@@ -625,7 +631,8 @@ def make_recovery_request(contract_path: Path, failed_receipt_path: Path,
             root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",
         ]
     runtime_paths = [Path(path).expanduser().resolve() for path in runtime_paths]
-    source_paths: list[Path] = [worker, operator, contract_path, failed_receipt_path, recovered_h5, *runtime_paths]
+    source_paths: list[Path] = [worker, operator, contract_path, failed_receipt_path, recovered_h5,
+                                Path(failure["stdout_path"]), *runtime_paths]
     old_receipt = read_json(failed_receipt_path, "v1 failed execution receipt")
     old_request = old_receipt.get("request", {})
     for raw_path in old_request.get("input_files", []):
