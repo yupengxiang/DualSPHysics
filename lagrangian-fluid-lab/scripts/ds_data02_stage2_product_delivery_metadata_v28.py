@@ -298,16 +298,85 @@ def build_delivery_metadata(product_path: Path | str, manifest_path: Path | str,
     return result
 
 
+def make_request(product_path: Path | str, manifest_path: Path | str, request_path: Path | str, proof_path: Path | str, receipt_path: Path | str, output: Path | str, runtime_root: Path | str, worker_root: Path | str, attempt_id: str = "product-delivery-metadata-v28-forward-001") -> dict[str, Any]:
+    """Create the CPU guard request after v27 actual proof is available."""
+    product_path = _path(product_path, "v27 product")
+    manifest_path = _path(manifest_path, "v27 manifest")
+    request_path = _path(request_path, "v27 request")
+    proof_path = _path(proof_path, "v27 proof")
+    receipt_path = _path(receipt_path, "v27 receipt")
+    _, product = _json(product_path, "v27 product")
+    _, manifest = _json(manifest_path, "v27 manifest")
+    _, request = _json(request_path, "v27 request")
+    _, proof = _json(proof_path, "v27 proof")
+    _, receipt = _json(receipt_path, "v27 receipt")
+    load_product_json(product_path)
+    if (product.get("inputs") or {}).get("manifest", {}).get("path") != str(manifest_path):
+        raise DeliveryError("v27 product does not bind the supplied manifest")
+    _validate_execution_identity(product_path, manifest_path, request_path, proof_path, receipt_path, manifest, request, proof, receipt)
+    runtime_root = Path(runtime_root).expanduser().resolve()
+    worker_root = Path(worker_root).expanduser().resolve()
+    worker = worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_product_delivery_metadata_v28.py"
+    v27_worker = worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_final_family_product_assembler_v27.py"
+    inputs = [
+        worker, v27_worker, runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py",
+        runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py",
+        product_path, manifest_path, request_path, proof_path, receipt_path,
+    ]
+    unique: list[Path] = []
+    seen: set[str] = set()
+    for path in inputs:
+        path = _path(path, "v28 request input")
+        if str(path) not in seen:
+            unique.append(path); seen.add(str(path))
+    hashes = {str(path): sha256_file(path) for path in unique}
+    command = [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python", str(worker),
+        "build", "--product", str(product_path), "--manifest", str(manifest_path), "--request", str(request_path),
+        "--proof", str(proof_path), "--receipt", str(receipt_path), "--output", "{attempt_root}/product-delivery-metadata-v28.json",
+    ]
+    result = {
+        "schema": "ds02.runner-request.v1", "request_schema": "ds02.stage2.product-delivery-metadata-v28-request.v1",
+        "attempt_id": attempt_id, "case_id": "DS02_STAGE2_PRODUCT_DELIVERY_METADATA_V28", "family_id": "infra",
+        "dataset_families": ["F2"], "kind": "cpu", "cpu_task_kind": "metadata_audit", "cpu_threads": 1,
+        "max_wall_seconds": 900, "estimated_storage_bytes": 16 * 1024 * 1024,
+        "cwd": str(worker_root / "lagrangian-fluid-lab/scripts"), "worktree_root": str(worker_root), "command": command,
+        "input_files": [str(path) for path in unique], "input_sha256": hashes,
+        "launch_allowed": True, "primary_launch_owner": "root", "status": "prepared_guard_pending_actual_CPU",
+        "source_cost": {"small_json_receipt_proof_bytes_read": sum(path.stat().st_size for path in unique), "materialized_label_h5_bytes_read": 0, "original_trajectory_h5_bytes_read": 0, "part_bi4_bytes_read": 0, "raw_solver_output_bytes_read": 0, "solver_started": False, "cfd_or_model_run": False},
+        "claim_boundary": {"physical_fate": "UNKNOWN", "legal_outflow_or_spill": "UNKNOWN", "continuous_events": "UNKNOWN", "dynamical_impact": "UNKNOWN", "portable_full_chain": "PENDING_CONSUMER_GUARD", "QN": "UNKNOWN", "QE": "UNKNOWN", "QI": "UNKNOWN", "qualification_credit": "none"},
+        "coverage_contract": {"v27_actual_product": True, "single_case": "F2 CURRENT index 78", "portable_full_chain": "not executed by this request"},
+        "read_policy": {"metadata_json_opened": True, "trajectory_h5_opened": False, "materialized_label_h5_opened": False, "part_bi4_opened": False, "solver_started": False, "model_invoked": False},
+    }
+    output = Path(output).expanduser().resolve()
+    if output.exists():
+        raise DeliveryError(f"refusing to overwrite v28 request: {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return result
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--product", type=Path, required=True)
-    parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--request", type=Path, required=True)
-    parser.add_argument("--proof", type=Path, required=True)
-    parser.add_argument("--receipt", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    sub = parser.add_subparsers(dest="command", required=True)
+    for command in ("build", "make-request"):
+        p = sub.add_parser(command)
+        p.add_argument("--product", type=Path, required=True)
+        p.add_argument("--manifest", type=Path, required=True)
+        p.add_argument("--request", type=Path, required=True)
+        p.add_argument("--proof", type=Path, required=True)
+        p.add_argument("--receipt", type=Path, required=True)
+        p.add_argument("--output", type=Path, required=True)
+        if command == "make-request":
+            p.add_argument("--runtime-root", type=Path, required=True)
+            p.add_argument("--worker-root", type=Path, required=True)
+            p.add_argument("--attempt-id", default="product-delivery-metadata-v28-forward-001")
     args = parser.parse_args(argv)
-    build_delivery_metadata(args.product, args.manifest, args.request, args.proof, args.receipt, args.output)
+    if args.command == "build":
+        build_delivery_metadata(args.product, args.manifest, args.request, args.proof, args.receipt, args.output)
+    else:
+        make_request(args.product, args.manifest, args.request, args.proof, args.receipt, args.output, args.runtime_root, args.worker_root, args.attempt_id)
     return 0
 
 
