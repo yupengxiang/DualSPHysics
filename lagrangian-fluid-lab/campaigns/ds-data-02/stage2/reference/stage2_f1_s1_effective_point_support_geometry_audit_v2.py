@@ -70,6 +70,7 @@ CASE_ID = "F1_S1_EFFECTIVE_POINT_SUPPORT_GEOMETRY_AUDIT_V2"
 ATTEMPT_ID = "f1-s1-effective-point-support-geometry-audit-v2-root-001"
 REQUEST_DIR = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-effective-point-support-geometry-audit-v2"
 REQUEST_PATH = REQUEST_DIR / "f1_s1_effective_point_support_geometry_audit_v2.json"
+V1_REQUEST = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-effective-point-support-geometry-audit-v1/f1_s1_effective_point_support_geometry_audit_v1.json"
 DEFAULT_OUTPUT = Path(__file__).with_name("stage2_f1_s1_effective_point_support_geometry_audit_v2.json")
 
 FILE_NAMES = (
@@ -633,7 +634,7 @@ def audit(output: Path) -> dict[str, Any]:
 
 
 def all_input_paths() -> list[Path]:
-    paths: list[Path] = [Path(__file__), OWNER, BINDING, CURRENT_SOURCE_DEF, CURRENT_SOURCE_XML, CURRENT_SOURCE_RECEIPT, V8_RUNNER, V8_STRICT, V8_RUNTIME, PYTHON]
+    paths: list[Path] = [Path(__file__), V1_REQUEST, OWNER, BINDING, CURRENT_SOURCE_DEF, CURRENT_SOURCE_XML, CURRENT_SOURCE_RECEIPT, V8_RUNNER, V8_STRICT, V8_RUNTIME, PYTHON]
     paths.extend(spec["source_def"] for spec in CASES.values())
     for spec in CASES.values():
         root = Path(spec["root"])
@@ -648,7 +649,30 @@ def build_request(output: Path = REQUEST_PATH) -> dict[str, Any]:
     if output.exists():
         raise FileExistsError(f"refuse to overwrite immutable request: {output}")
     input_paths = [regular(path, "audit input") for path in all_input_paths()]
-    records = {str(path): file_record(path, "audit input") for path in input_paths}
+    # The v1 request already carries the immutable SHA/stat records for the
+    # 37.8 MB VTK closure.  Reuse those exact records here instead of
+    # rereading/re-hashing the geometry while preparing a forward v2 request.
+    # The parent v8 guard still hashes every input immediately before and
+    # after the actual v2 run, so a changed source is rejected there.
+    previous = load_json(V1_REQUEST, "immutable v1 audit request")
+    previous_product_records: dict[str, dict[str, Any]] = {}
+    for case in previous.get("source_binding", {}).get("cases", {}).values():
+        for record in case.get("generated_products", {}).values():
+            if isinstance(record, dict) and isinstance(record.get("path"), str):
+                previous_product_records[record["path"]] = record
+    records: dict[str, dict[str, Any]] = {}
+    reused_paths: list[str] = []
+    for path in input_paths:
+        key = str(path)
+        cached = previous_product_records.get(key)
+        if cached is None:
+            records[key] = file_record(path, "audit input")
+            continue
+        current_stat = path.stat()
+        if int(current_stat.st_size) != int(cached["bytes"]) or int(current_stat.st_mtime_ns) != int(cached["mtime_ns"]):
+            raise ValueError(f"cached v1 product stat changed; refuse v2 request: {path}")
+        records[key] = dict(cached)
+        reused_paths.append(key)
     geometry_read_bytes = sum(record["bytes"] for path, record in records.items() if path.endswith(".vtk"))
     output_root = DATA_ROOT / "families/F1" / CASE_ID / ATTEMPT_ID
     request = {
@@ -699,14 +723,20 @@ def build_request(output: Path = REQUEST_PATH) -> dict[str, Any]:
                     "case_id": spec["case_id"],
                     "attempt_id": spec["attempt_id"],
                     "terminal_root": str(Path(spec["root"]).resolve()),
-                    "receipt": file_record(Path(spec["root"]) / "execution-receipt.json", f"{label} receipt"),
-                    "source_def": file_record(spec["source_def"], f"{label} source Def"),
-                    "generated_products": {name: file_record(Path(spec["root"]) / name, f"{label} {name}") for name in FILE_NAMES},
+                    "receipt": records[str((Path(spec["root"]) / "execution-receipt.json").resolve())],
+                    "source_def": records[str(Path(spec["source_def"]).resolve())],
+                    "generated_products": {name: records[str((Path(spec["root"]) / name).resolve())] for name in FILE_NAMES},
                 }
                 for label, spec in CASES.items()
             },
             "same_count_requires_point_payload_digest": True,
             "three_grid_rule": "actual/bound same dp=.009 mode outputs cannot count as a third resolution; if their products differ, retain the mismatch rather than promoting either mode",
+            "v1_product_sha_reuse": {
+                "v1_request": records[str(V1_REQUEST.resolve())],
+                "reused_product_paths": reused_paths,
+                "builder_reread_vtk": False,
+                "parent_guard_prepost_hash_required": True,
+            },
         },
         "output": {
             "atomic": True,
