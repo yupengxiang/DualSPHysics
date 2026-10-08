@@ -16,6 +16,14 @@ contains 1328 case-qualified rows. The verified family/motive counts are F2
 1078 position, F4 51 density, and F6 199 position. Global `Idp` is reused
 across physical cases, so `(case_key, Idp)` is mandatory.
 
+The actual root071 native-motive task input is
+`/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/STAGE2_NATIVE_MOTIVE_TASK_INPUT_V1_ROOT_071/native-motive-task-input-v1-root-071-001-root-forward-030-001/native-motive-task-input.json`
+with SHA256
+`ee1348d2d3af606f6113ad7a027acd6181b191f487591f8aedf8515aa0316592`. Its
+completed receipt SHA256 is
+`383418ff2e3377ff0f4752ffcb19821c937cbf5b711e10c2a825fa3e68fad3a6`;
+the receipt records no model/CFD invocation and fixed-point storage passed.
+
 The loader is
 `lagrangian-fluid-lab/scripts/ds_data02_stage2_native_identity_task_loader_v1.py`.
 The source-bound evaluator is
