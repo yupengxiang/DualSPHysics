@@ -147,8 +147,17 @@ def validate_v2(report_path: Path, receipt_path: Path, manifest_path: Path,
     if receipt.get("schema") != "ds02.execution-receipt.v1" or receipt.get("status") != "completed" or int(receipt.get("returncode", -1)) != 0:
         raise MechanismProbeV3Error("v2 receipt is not completed code 0")
     receipt_request = receipt.get("request", {})
-    if receipt_request.get("case_id") != request.get("case_id") or receipt_request.get("attempt_id") != request.get("attempt_id"):
-        raise MechanismProbeV3Error("v2 receipt request identity differs")
+    if receipt_request.get("case_id") != request.get("case_id"):
+        raise MechanismProbeV3Error("v2 receipt request case identity differs")
+    # The completed root replay wraps the immutable v2 request and assigns a
+    # new attempt id.  Bind that wrapper to the exact original request bytes;
+    # do not require the wrapper attempt id to equal the old request id.
+    forward = receipt_request.get("forward_root_binding")
+    if isinstance(forward, dict):
+        if Path(str(forward.get("original_request", ""))).resolve() != request_path.resolve() or forward.get("original_request_sha256") != sha256(request_path):
+            raise MechanismProbeV3Error("v2 root replay does not bind exact original request")
+    elif receipt_request.get("attempt_id") != request.get("attempt_id"):
+        raise MechanismProbeV3Error("v2 receipt request attempt identity differs")
     if len(report.get("cases", [])) != 118 or report.get("coverage", {}).get("selected_case_counts") != FAMILY_COUNTS:
         raise MechanismProbeV3Error("v2 report coverage differs")
     if report.get("coverage", {}).get("selected_native_id_count") != 1328:
