@@ -340,15 +340,16 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             receipt['interrupted'] = True
     finally:
         child_elapsed = time.monotonic() - child_started if child_started is not None else 0.0
-        measured_cpu = max(0.0, base.cpu_usage() - entry_cpu)
-        receipt.update(finished_at_utc=base.now(), elapsed_seconds=child_elapsed,
-                       wall_seconds_from_entry=time.monotonic() - entry_wall,
-                       cpu_core_seconds=measured_cpu,
-                       gpu_seconds=child_elapsed if device and child_started is not None else 0.0,
-                       bytes=tree_bytes(output),
-                       stdout_sha256=base.sha256(output / 'stdout.log') if (output / 'stdout.log').is_file() else None,
-                       input_hashes_after_run={path: base.sha256(path) if Path(path).is_file() else None for path in hashes})
-        if receipt['input_hashes_after_run'] != hashes:
+        # Perform every source post-hash, output byte walk, stdout hash, and
+        # approval revalidation before taking the accounting cutoff.  v2/v5
+        # measured before this comprehension, which omitted large post-run
+        # source hashes from both the receipt and the parent charge.
+        input_hashes_after_run = {
+            path: base.sha256(path) if Path(path).is_file() else None for path in hashes
+        }
+        output_bytes = tree_bytes(output)
+        stdout_hash = base.sha256(output / 'stdout.log') if (output / 'stdout.log').is_file() else None
+        if input_hashes_after_run != hashes:
             receipt['status'] = 'failed'
             receipt['provenance_error'] = 'input_mutated_during_run'
         if approval_context:
@@ -358,6 +359,16 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             except (OSError, ValueError) as error:
                 receipt.update(status='failed', provenance_error='selected_scientific_approval_changed',
                                scientific_approval_revalidation=dict(status='failed', error=str(error)))
+        measured_cpu = max(0.0, base.cpu_usage() - entry_cpu)
+        wall_from_entry = time.monotonic() - entry_wall
+        receipt.update(finished_at_utc=base.now(), elapsed_seconds=child_elapsed,
+                       wall_seconds_from_entry=wall_from_entry,
+                       cpu_core_seconds=measured_cpu,
+                       gpu_seconds=child_elapsed if device and child_started is not None else 0.0,
+                       bytes=output_bytes, stdout_sha256=stdout_hash,
+                       input_hashes_after_run=input_hashes_after_run)
+        receipt['timing_scope']['cpu_cutoff'] = 'after_source_posthash_output_bytes_stdout_hash_and_approval_revalidation'
+        receipt['timing_scope']['wall_cutoff'] = 'after_source_posthash_output_bytes_stdout_hash_and_approval_revalidation'
         _guarded_atomic_json(output / 'execution-receipt.json', receipt)
         if registered:
             with ledger_locked(data_root) as ledger:

@@ -39,7 +39,7 @@ def _preflight_request(path: Path) -> dict:
     for bound in BOUND_RUNNER_FILES:
         key = str(bound)
         if key not in inputs or hashes.get(key) != _sha(bound):
-        raise ValueError(f"v6 request does not bind current guard closure: {bound}")
+            raise ValueError(f"v6 request does not bind current guard closure: {bound}")
     return value
 
 

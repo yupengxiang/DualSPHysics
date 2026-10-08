@@ -58,6 +58,20 @@ def test_v6_entry_clock_includes_manufactured_prevalidation_cpu(tmp_path: Path, 
     }
     request_path.write_text(json.dumps(request))
 
+    original_sha = module.base.sha256
+    posthash_calls: list[str] = []
+
+    def delayed_source_hash(path):
+        if Path(path).resolve() == source.resolve():
+            posthash_calls.append(str(path))
+            total = 0
+            for number in range(450_000):
+                total += number * 5
+            assert total > 0
+        return original_sha(path)
+
+    monkeypatch.setattr(module.base, "sha256", delayed_source_hash)
+
     def slow_validation(value, *, approval_context=None):
         # Burn measurable user CPU before the child is launched.  This models
         # a large source preflight without reading any scientific file.
@@ -65,7 +79,7 @@ def test_v6_entry_clock_includes_manufactured_prevalidation_cpu(tmp_path: Path, 
         for number in range(350_000):
             total += number * 3
         assert total > 0
-        return {str(source.resolve()): module.base.sha256(source)}
+        return {str(source.resolve()): original_sha(source)}
 
     monkeypatch.setattr(module, "validate_request", slow_validation)
     result = module.run_request(request_path, data_root=data_root)
@@ -75,6 +89,8 @@ def test_v6_entry_clock_includes_manufactured_prevalidation_cpu(tmp_path: Path, 
     assert result["wall_seconds_from_entry"] >= result["elapsed_seconds"]
     assert result["timing_scope"]["clock_start"].startswith("function_entry")
     assert result["timing_scope"]["cpu_includes_input_hashing_and_validation"] is True
+    assert result["timing_scope"]["cpu_cutoff"].startswith("after_source_posthash")
+    assert posthash_calls, "the final source post-hash must be observed"
     receipt = data_root / "families" / "infra" / "manufactured-v6-entry" / "entry-001" / "execution-receipt.json"
     saved = json.loads(receipt.read_text())
     assert saved["cpu_core_seconds"] == result["cpu_core_seconds"]
