@@ -370,6 +370,11 @@ def _runtime_closure(manifest: dict[str, Any], backend: Any) -> dict[str, Any]:
     }
     if closure["cpu_threads"] != 1:
         raise StreamObservationError("active stream runtime contract is not CPU1")
+    for key in ("numpy_version", "h5py_version"):
+        expected_version = runtime.get(key)
+        observed_version = closure.get(f"{key}_imported_by_direct_converter" if key == "h5py_version" else key)
+        if expected_version is not None and observed_version != expected_version:
+            raise StreamObservationError(f"active stream {key} differs: {observed_version!r}!={expected_version!r}")
     return closure
 
 
