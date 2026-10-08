@@ -100,6 +100,7 @@ def _validate_evidence_record(record: dict[str, Any], current_sha: str, count: i
     kind = record.get("kind")
     if not isinstance(kind, str) or not kind:
         raise TaskSplitError(f"evidence {evidence_id} lacks kind")
+    bound_files: list[dict[str, str]] = []
     if kind == "source_proof_v21":
         if payload.get("schema") != "ds02.stage2.current336-source-proof.v21":
             raise TaskSplitError("v21 source proof schema differs")
@@ -138,6 +139,15 @@ def _validate_evidence_record(record: dict[str, Any], current_sha: str, count: i
         claims = payload.get("claim_boundary", {})
         if claims.get("physical_fate") != "UNKNOWN" or claims.get("dynamical_impact") != "UNKNOWN":
             raise TaskSplitError("all118 impact proof overclaims fate/dynamics")
+        for nested_name in ("output", "receipt"):
+            nested = payload.get(nested_name)
+            if not isinstance(nested, dict):
+                raise TaskSplitError(f"all118 impact proof lacks {nested_name} binding")
+            nested_path = require_file(nested.get("path"), f"all118 impact {nested_name}")
+            nested_sha = nested.get("sha256")
+            if not isinstance(nested_sha, str) or len(nested_sha) != 64 or sha256_file(nested_path) != nested_sha:
+                raise TaskSplitError(f"all118 impact {nested_name} digest differs")
+            bound_files.append({"role": nested_name, "path": str(nested_path), "sha256": nested_sha})
     elif kind == "all118_label_calibration":
         if payload.get("schema") != "ds02.stage2.label-calibration.v1" or payload.get("status") != "LABEL_CALIBRATED_SOURCE_MK_CENSORING_NO_MODEL":
             raise TaskSplitError("all118 label calibration is not source/censor-only")
@@ -171,6 +181,15 @@ def _validate_evidence_record(record: dict[str, Any], current_sha: str, count: i
             raise TaskSplitError("F1 raw-to-typed read/identity proof is not exact")
         if payload.get("portable_trial_completed") is not False:
             raise TaskSplitError("F1 proof unexpectedly claims portable replay")
+        for nested_name in ("request", "receipt", "report", "converter_report"):
+            nested_path_value = payload.get(nested_name)
+            nested_sha = payload.get(f"{nested_name}_sha256")
+            if nested_path_value is None and nested_sha is None:
+                continue
+            nested_path = require_file(nested_path_value, f"F1 raw-to-typed {nested_name}")
+            if not isinstance(nested_sha, str) or len(nested_sha) != 64 or sha256_file(nested_path) != nested_sha:
+                raise TaskSplitError(f"F1 raw-to-typed {nested_name} digest differs")
+            bound_files.append({"role": nested_name, "path": str(nested_path), "sha256": nested_sha})
     elif kind == "label_report":
         schema = payload.get("schema")
         if schema == "ds02.stage2.family-label-report.v1":
@@ -204,7 +223,8 @@ def _validate_evidence_record(record: dict[str, Any], current_sha: str, count: i
             actual_physical = payload.get("physical_case_id")
         if (expected_identity.get("family_id"), expected_identity.get("physical_case_id")) != (actual_family, actual_physical):
             raise TaskSplitError(f"evidence {evidence_id} identity differs from producer report")
-    return {"evidence_id": evidence_id, "kind": kind, "path": str(path), "sha256": actual, "payload": payload}
+    return {"evidence_id": evidence_id, "kind": kind, "path": str(path), "sha256": actual,
+            "payload": payload, "bound_files": bound_files}
 
 
 def _mechanism_case_ids(evidence: dict[str, Any], current_keys: set[tuple[str, str]]) -> set[tuple[str, str]]:
@@ -280,6 +300,21 @@ def audit(current_path: Path | str, lineage_path: Path | str, source_manifest_pa
         if normalized["evidence_id"] in evidence:
             raise TaskSplitError("duplicate evidence id")
         evidence[normalized["evidence_id"]] = normalized
+    mechanism_evidence = evidence.get("all118_mechanism_v2")
+    label_evidence = evidence.get("all118_label_calibration")
+    if mechanism_evidence is not None and label_evidence is not None:
+        mechanism_keys = {
+            (item.get("family_id"), item.get("case_key"))
+            for item in mechanism_evidence["payload"].get("cases", [])
+            if isinstance(item, dict)
+        }
+        label_keys = {
+            (item.get("family_id"), item.get("case_key"))
+            for item in label_evidence["payload"].get("cases", [])
+            if isinstance(item, dict)
+        }
+        if len(mechanism_keys) != 118 or len(label_keys) != 118 or mechanism_keys != label_keys:
+            raise TaskSplitError("all118 mechanism and label products do not bind the same exact case keys")
     base_result = _BASE.audit(current_path, lineage_path)
     current_keys = set(current_by_key)
     tasks = evidence_manifest.get("tasks")
@@ -332,7 +367,7 @@ def audit(current_path: Path | str, lineage_path: Path | str, source_manifest_pa
             "roles_sufficient_for_three_way_split": len(eligible_components) >= 3,
             "component_unit_preserved": True,
             "cases": records,
-            "evidence_bindings": [{k: value[k] for k in ("evidence_id", "kind", "path", "sha256")} for value in (evidence[item] for item in sorted(required))],
+            "evidence_bindings": [{k: value[k] for k in ("evidence_id", "kind", "path", "sha256", "bound_files")} for value in (evidence[item] for item in sorted(required))],
             "claim_boundary": {
                 "task_scope": task.get("claim_boundary", "diagnostic/task-input eligibility only"),
                 "physical_fate": "UNKNOWN", "legal_flux": "UNKNOWN", "dynamical_impact": "UNKNOWN",
@@ -394,6 +429,17 @@ def make_request(current_path: Path | str, lineage_path: Path | str, source_mani
              *[Path(path).expanduser().resolve() for path in runtime_paths]]
     for item in evidence_manifest.get("evidence", []):
         paths.append(require_file(item.get("path"), f"evidence {item.get('evidence_id')}"))
+    # Bind nested output/receipt/reference JSONs discovered from each proof;
+    # the guarded child then consumes the same bytes that the validator checks.
+    for item in evidence_manifest.get("evidence", []):
+        _, payload = read_json(item.get("path"), f"evidence {item.get('evidence_id')}")
+        kind = item.get("kind")
+        nested_names = ("output", "receipt") if kind == "all118_impact_v8" else (
+            "request", "receipt", "report", "converter_report") if kind == "f1_raw_to_typed_proof" else ()
+        for nested_name in nested_names:
+            nested_path = payload.get(nested_name)
+            if nested_path:
+                paths.append(require_file(nested_path, f"evidence {item.get('evidence_id')} {nested_name}"))
     unique: list[Path] = []
     seen: set[str] = set()
     for path in paths:
