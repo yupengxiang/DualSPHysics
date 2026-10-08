@@ -166,7 +166,12 @@ def trim_candidate(row: dict[str, Any]) -> dict[str, Any]:
 
 def pair_request(sentinel_id: str, mode: str) -> dict[str, Any]:
     stem = sentinel_id.lower().replace("-", "_")
-    relative = STAGE2 / "requests/stage2-savedt-cfl-pairs-v1" / f"{stem}_original_savedt_{mode}.json"
+    savedt = STAGE2 / "requests/stage2-savedt-cfl-pairs-v1" / f"{stem}_original_savedt_{mode}.json"
+    # F4-S1's already reviewed pair uses the original-cfl-pairs-v2 request
+    # names; preserve that exact request rather than emitting a nonexistent
+    # alias.  Other rows use the SavedDt-v1 names when present.
+    fallback = STAGE2 / "requests/stage2-original-cfl-pairs-v2" / f"{stem}_original_{mode}_cfl_dense.json"
+    relative = savedt if savedt.is_file() else fallback
     return request_record(relative)
 
 
