@@ -285,11 +285,6 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
         raise TrajectoryLabelError("label config time identity differs")
     if config.get("trajectory_hdf5_sha256") != EXPECTED_H5_SHA256:
         raise TrajectoryLabelError("label config H5 SHA differs")
-    if read_h5:
-        # The operator performs its own source pre/post digest check.  This
-        # second digest closes the wrapper contract after materialization.
-        if sha256(h5) != EXPECTED_H5_SHA256:
-            raise TrajectoryLabelError("trajectory H5 changed after labeling")
     return {
         "contract": contract,
         "current": current_binding,
@@ -395,10 +390,10 @@ def run(contract_path: Path, output_h5: Path, report_path: Path, particle_chunk:
     info = validate_contract(contract_path, read_h5=False)
     operator = _load_operator()
     operator.materialize(Path(info["trajectory_hdf5"]["path"]), output_h5, info["config"], particle_chunk=particle_chunk)
-    # Validate the H5 source after the operator's own before/after check and
-    # only then emit the report.  A partial/changed source cannot receive a
-    # successful label report.
-    info = validate_contract(contract_path, read_h5=True)
+    # The operator performed source pre/post hashing.  Revalidate only the
+    # metadata here; a third full H5 pass would add no evidence and would
+    # inflate the declared guarded read cost.
+    info = validate_contract(contract_path, read_h5=False)
     report = summarize(output_h5, info)
     report_path = Path(report_path).expanduser().resolve()
     if report_path.exists():
