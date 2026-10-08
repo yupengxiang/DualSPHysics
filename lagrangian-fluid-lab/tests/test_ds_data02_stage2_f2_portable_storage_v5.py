@@ -9,7 +9,9 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "ds_data02_stage2_f2_portable_storage_v5.py"
-PLAN = ROOT / "campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v5/f2-s1-portable-storage-plan-v5-002.json"
+# v5-003 is the committed canonical storage plan.  Earlier 001/002 files are
+# local historical generation attempts and are intentionally not test inputs.
+PLAN = ROOT / "campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v5/f2-s1-portable-storage-plan-v5-003.json"
 
 
 def _module():
