@@ -33,7 +33,12 @@ from typing import Any, Mapping, Sequence
 SCRIPT = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT.parent
 V38_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_portable_executor_v38.py"
+# V41 and V38 are copied into the executor directory.  The V40 producer is
+# likewise bound there by V41; the second candidate keeps source-tree imports
+# readable if a caller invokes this module directly from a split source tree.
 V40_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_cold_producer_forward_v2.py"
+if not V40_SCRIPT.is_file():
+    V40_SCRIPT = SCRIPT_DIR.parent / "producer" / V40_SCRIPT.name
 PARENT_V3_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_portable_executor_parent_v3.py"
 SCHEMA = "ds02.stage2.f2-portable-executor-request.v34"
 PARENT_SCHEMA = "ds02.stage2.f2-portable-executor-parent-request.v3"
@@ -165,7 +170,7 @@ def build_forward(*, v38_request: Path | str, v39_contract: Path | str,
     roles = {str(item.get("role")) for item in runtime if isinstance(item, Mapping)}
     additions = [
         ("v39_source_contract", contract_path, "runtime/producer/f2-s1-source-contract-v39.json"),
-        ("cold_producer_v40", V40.SCRIPT, "runtime/producer/ds_data02_stage2_f2_cold_producer_forward_v2.py"),
+        ("cold_producer_v40", V40.SCRIPT, "runtime/executor/ds_data02_stage2_f2_cold_producer_forward_v2.py"),
         ("executor_v41", SCRIPT, "runtime/executor/ds_data02_stage2_f2_portable_executor_v41.py"),
     ]
     if any(role in roles for role, _, _ in additions):
@@ -319,6 +324,53 @@ def _copied_runtime_path(request: Mapping[str, Any], role: str, target_root: Pat
     if sha256_file(target) != _sha(item.get("sha256"), f"runtime {role}.sha256"):
         raise PortableV41Error(f"copied runtime role SHA differs: {role}")
     return target
+
+
+def _validate_completed_label_report(path: Path) -> dict[str, Any]:
+    """Require the native worker's actual typed/V15/V16 stages to finish.
+
+    V34 writes a report even when its label stage is pending or rejected.  A
+    report file alone therefore cannot be promoted to a completed cold
+    producer.  This check is JSON-only after the worker has finished; it
+    hashes only the newly produced typed/result artifacts already named by
+    that report and never substitutes an old result or proof.
+    """
+    value = load_json(path, "native raw-to-typed-to-label report")
+    if value.get("schema") != "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2":
+        raise PortableV41Error("native worker report schema differs")
+    if value.get("status") != "COMPLETE_DEVELOPMENT_UNKNOWN":
+        raise PortableV41Error(
+            f"native worker did not complete: {value.get('status')!r}")
+    typed = value.get("typed_output")
+    if not isinstance(typed, Mapping) or not isinstance(typed.get("path"), str):
+        raise PortableV41Error("native report has no typed output")
+    typed_path = _require_file(typed["path"], "actual reconstructed typed H5")
+    if typed.get("sha256") != sha256_file(typed_path):
+        raise PortableV41Error("native typed output SHA differs from its report")
+    labels = value.get("typed_to_label")
+    if not isinstance(labels, Mapping):
+        raise PortableV41Error("native report has no typed-to-label stage")
+    if labels.get("status") != "V15_LABEL_REPLAY_COMPLETE_DEVELOPMENT_UNKNOWN":
+        raise PortableV41Error(
+            f"V15 label stage is incomplete: {labels.get('status')!r}")
+    v15_result = labels.get("result")
+    if not isinstance(v15_result, str):
+        raise PortableV41Error("native report has no V15 result")
+    v15_path = _require_file(v15_result, "actual V15 label result")
+    if labels.get("result_sha256") != sha256_file(v15_path):
+        raise PortableV41Error("V15 result SHA differs from its report")
+    v16 = labels.get("v16_forward")
+    if not isinstance(v16, Mapping) or v16.get("status") != "COMPLETE_DEVELOPMENT_UNKNOWN":
+        raise PortableV41Error(
+            f"V16 label stage is incomplete: {v16.get('status') if isinstance(v16, Mapping) else None!r}")
+    v16_result = v16.get("result")
+    if not isinstance(v16_result, str):
+        raise PortableV41Error("native report has no V16 result")
+    v16_path = _require_file(v16_result, "actual V16 label result")
+    if v16.get("result_sha256") != sha256_file(v16_path):
+        raise PortableV41Error("V16 result SHA differs from its report")
+    return {"report": value, "typed_path": typed_path,
+            "v15_path": v15_path, "v16_path": v16_path}
 
 
 def _make_v40_engine_inputs(request: Mapping[str, Any], output: Path,
@@ -522,6 +574,37 @@ def _run_fresh_evaluator(v34: Any, request: Mapping[str, Any], state: Mapping[st
     if not isinstance(result_path_value, str):
         raise PortableV41Error("worker report has no actual V16 result for fresh evaluator")
     result_path = _require_file(result_path_value, "actual V16 label result")
+    # A V40 header contract is deliberately insufficient for this stage.  The
+    # proof must be the fresh JSON-only semantic proof of this exact V16 file,
+    # generated after the relocated producer completed; an old proof or a
+    # header-only proof cannot be injected into a new namespace.
+    try:
+        result_path.relative_to(output_root.resolve())
+    except ValueError as error:
+        raise PortableV41Error("actual V16 result is outside the relocated output root") from error
+    proof_value = load_json(proof, "fresh V16 semantic proof")
+    if proof_value.get("schema") != "ds02.stage2.f2-fresh-v16-proof.v8":
+        raise PortableV41Error(
+            "fresh evaluator requires the V8/V10 semantic proof; V40 label-header proof is insufficient")
+    if proof_value.get("sha256") != V38.canonical_sha(proof_value):
+        raise PortableV41Error("fresh semantic proof canonical SHA differs")
+    if proof_value.get("status") != "FRESH_V16_RESULT_VERIFIED_DEVELOPMENT_UNKNOWN":
+        raise PortableV41Error("fresh semantic proof is not a completed development verification")
+    proof_result = proof_value.get("source_result")
+    if not isinstance(proof_result, Mapping):
+        raise PortableV41Error("fresh semantic proof has no source_result binding")
+    actual_result_sha = sha256_file(result_path)
+    if proof_result.get("sha256") != actual_result_sha:
+        raise PortableV41Error("fresh semantic proof does not bind this V16 result SHA")
+    if Path(str(proof_result.get("path", ""))).expanduser().resolve() != result_path.resolve():
+        raise PortableV41Error("fresh semantic proof result path differs from the relocated V16 result")
+    proof_binding = proof_value.get("source_binding")
+    if not isinstance(proof_binding, Mapping) or proof_binding.get("current_catalog_sha256") != relocated_sha:
+        raise PortableV41Error("fresh semantic proof does not bind the V40 relocated CURRENT view")
+    try:
+        proof.resolve().relative_to(output_root.resolve())
+    except ValueError as error:
+        raise PortableV41Error("fresh semantic proof is outside the relocated output root") from error
     runtime = _runtime_records(request, Path(request["fresh_roots"]["target_root"]))
     evaluator_source = Path(runtime["evaluator_v4_source_request"]["path"])
     evaluator_module = Path(runtime["evaluator_v4"]["path"])
@@ -581,8 +664,11 @@ def run(request_path: Path | str, *, io_slot_approved: bool,
         raise PortableV41Error("V40 relocation/contract stage did not run")
     actual: dict[str, Any] = {"worker_report": None, "typed_output": None,
                               "v15_label_result": None, "v16_label_result": None}
+    completed_worker = False
     if worker_report.is_file():
-        worker_value = load_json(worker_report, "V40 raw-to-label report")
+        completed = _validate_completed_label_report(worker_report)
+        worker_value = completed["report"]
+        completed_worker = True
         actual["worker_report"] = {"path": str(worker_report), "sha256": sha256_file(worker_report)}
         typed = worker_value.get("typed_output")
         if isinstance(typed, Mapping) and isinstance(typed.get("path"), str):
@@ -608,7 +694,7 @@ def run(request_path: Path | str, *, io_slot_approved: bool,
                      "status": "COMPLETE_DEVELOPMENT_UNKNOWN"}
     final = dict(integration)
     final.update({"schema": "ds02.stage2.f2-v40-engine-integration-report.v1",
-                  "status": "COMPLETE_V40_RELOCATED_RAW_TYPED_LABEL" if worker_report.is_file() else "FAILED_V40_LABEL_STAGE",
+                  "status": "COMPLETE_V40_RELOCATED_RAW_TYPED_LABEL" if completed_worker else "FAILED_V40_LABEL_STAGE",
                   "actual_outputs": actual,
                   "independent_fresh_evaluator": evaluator,
                   "old_f208_reuse": "FORBIDDEN",

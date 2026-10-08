@@ -15,6 +15,11 @@ the parent guard and are only entered with ``--io-slot-approved``.
 """
 from __future__ import annotations
 
+# Keep this before the ordinary stdlib imports: the V4 parent already does
+# the same for its CPU/cgroup baseline, and the wall clock must cover Python
+# bootstrap as well as the V5/V4 closure import.
+_SCRIPT_ENTRY_WALL = __import__("time").monotonic()
+
 import argparse
 import importlib.util
 import json
@@ -22,13 +27,6 @@ from pathlib import Path
 import tempfile
 import time
 from typing import Any, Mapping, Sequence
-
-# Capture the wall clock before importing V5/V4 and their transitive closure.
-# V4 already captures its process/cgroup CPU baseline at its first script
-# lines; this companion timestamp gives the reviewed V4 timer the same
-# invocation scope instead of silently dropping evaluator-module import time.
-_SCRIPT_ENTRY_WALL = time.monotonic()
-
 
 SCRIPT = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT.parent
