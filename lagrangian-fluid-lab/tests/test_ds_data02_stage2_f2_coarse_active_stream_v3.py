@@ -80,3 +80,25 @@ def test_v3_directory_bytes_does_not_follow_symlink(tmp_path: Path):
     target.write_bytes(b"outside")
     (root / "link").symlink_to(target)
     assert loaded.directory_bytes(root) == 3
+
+
+def test_v3_frame_stat_binding_uses_real_os_stat_result_fields(tmp_path: Path):
+    loaded = module()
+    raw = tmp_path / "data"
+    raw.mkdir()
+    refs = []
+    for index in range(2):
+        path = raw / f"Part_{index:04d}.bi4"
+        path.write_bytes(f"frame-{index}".encode())
+        stat = path.stat()
+        refs.append({
+            "path": str(path),
+            "bytes": stat.st_size,
+            "mtime_ns": stat.st_mtime_ns,
+            "ctime_ns": stat.st_ctime_ns,
+            "st_dev": stat.st_dev,
+            "st_ino": stat.st_ino,
+            "sha256": "PARENT_GUARD_COMPUTED",
+        })
+    frames = loaded._validate_frames({"frames": refs, "expected": {"frame_count": 2}}, raw)
+    assert [path.name for path in frames] == ["Part_0000.bi4", "Part_0001.bi4"]

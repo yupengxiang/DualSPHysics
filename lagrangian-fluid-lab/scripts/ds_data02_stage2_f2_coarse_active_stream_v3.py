@@ -123,8 +123,9 @@ def bind_frame_stat(ref: dict[str, Any], raw_root: Path, label: str) -> Path:
     stat = path.stat()
     if ref.get("bytes") is not None and stat.st_size != int(ref["bytes"]):
         raise StreamObservationError(f"{label} byte count differs: {path}")
-    for field in ("mtime_ns", "ctime_ns", "st_dev", "st_ino"):
-        if ref.get(field) is not None and getattr(stat, field) != int(ref[field]):
+    stat_fields = {"mtime_ns": "st_mtime_ns", "ctime_ns": "st_ctime_ns", "st_dev": "st_dev", "st_ino": "st_ino"}
+    for field, stat_field in stat_fields.items():
+        if ref.get(field) is not None and getattr(stat, stat_field) != int(ref[field]):
             raise StreamObservationError(f"{label} {field} differs: {path}")
     return path
 
