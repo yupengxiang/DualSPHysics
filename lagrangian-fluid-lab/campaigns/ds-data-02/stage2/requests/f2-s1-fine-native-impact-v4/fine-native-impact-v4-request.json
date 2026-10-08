@@ -39,6 +39,45 @@
   "dynamical_impact": "UNKNOWN",
   "estimated_storage_bytes": 134217728,
   "execution_allowed": true,
+  "expected_native_endpoint_contract": {
+    "last_integration_step": {
+      "conservative_time_bound_s": [
+        3.999964747279437,
+        4.000018446461944
+      ],
+      "dt_max_s": 5.369918250689863e-05,
+      "dt_min_s": 5.31533254348448e-05,
+      "requested_end_inside_bound": true,
+      "source": "RunPARTs.csv final row DtMin [s]/DtMax [s]; bound is conservative, not an exact prior state",
+      "steps_in_saved_row": 93
+    },
+    "overshoot_s": 1.06625825377904e-05,
+    "policy": "retain every native saved row; distinguish requested endpoint, saved endpoint, and final-step bound; no crop or tolerance",
+    "requested_endpoint": {
+      "requested_end_s": 4.000007783879406,
+      "requested_window_s": [
+        0.0,
+        4.000007783879406
+      ],
+      "source": "completed solver receipt request.physical_window_s"
+    },
+    "saved_endpoint": {
+      "part": 800,
+      "previous_saved_part": 799,
+      "previous_saved_time_s": 3.995046455559066,
+      "saved_time_s": 4.000018446461944,
+      "source": "RunPARTs.csv TimeStep [s] final row"
+    },
+    "saved_transition_bracket_s": [
+      3.995046455559066,
+      4.000018446461944
+    ],
+    "source_runparts": {
+      "bytes": 174334,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FINE_FULL_REFERENCE_DP00855_T4_SAME_CFL_DENSE/f2-s1-fine-dp00855-same-cfl-full4s-primary-001/solver_output/RunPARTs.csv",
+      "sha256": "ec147bb7c376a72db64dcb5964b3bd93f2e3888288592dab4b6695058134a1af"
+    }
+  },
   "expected_native_timeline": {
     "runparts_rows": 801,
     "runparts_totals": {
@@ -94,7 +133,7 @@
     "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v4.py": "a33f931a9f6d3c0c9195b931e65682727fd88fcff557886ca2f898831e88d5d4",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_s1_fine_native_canonical_v2.py": "a3e4a4dcd17624f4fae5728416e45ed4ad7e83c407ee531d2116d75eae54513d",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_s1_fine_native_impact_v1.py": "dc2c6aa10ada485ad004b86dc3a7d34b80c536d5e47deec6bf91cfde1cdacec2",
-    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_s1_fine_native_impact_v4.py": "eedf6dd8bd3f34a8724ae03281cd2e66e11441c015e4907bc938755cf1b0b8b1",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_s1_fine_native_impact_v4.py": "85706066c1e5ba597194a7c59b0e99548abcf4e58015d6f5fc2b06e83e1fd9de",
     "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v4.py": "e0d3296d103a94576c59e2a7cb966142e25c7d03f9489fa1b3264fe925104452",
     "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F2_FINE175_NATIVE_C50_SOURCE_CLOSURE_001.json": "25e91ddd9bc842ea208ea2862a8da15b892be6a57c2fd684225eb38c499ed41a",
     "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F2_FINE_FULL4S_NATIVE_INDEPENDENT_VERIFICATION_001.json": "d4b84e155fbeaf765866e236a5b11aa258a1a840c7909dd5fe645efec5aa894a",
@@ -121,6 +160,7 @@
   "kind": "cpu",
   "launch": true,
   "launch_allowed": true,
+  "launch_commit": "d9288ce217b57bcdecabc431c2b8764fe698719a",
   "max_wall_seconds": 300,
   "native_identity_contract": {
     "decoder_attempt_id": "f2-s1-fine-partvtkout-v2-primary-002",
@@ -208,7 +248,7 @@
   "omp_threads": 1,
   "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
   "physical_fate": "UNKNOWN",
-  "request_note": "Forward v4 CPU-only audit fixes C52 by exact V2 primary002 decoder identity mapping; it consumes the completed 175-row CSV and does not rerun PartVTKOut, solver, H5, or trajectory data.",
+  "request_note": "Forward v4 CPU-only audit fixes C52 by exact V2 primary002 decoder identity mapping and C55 by separating requested endpoint, final saved RunPARTs endpoint, and conservative final DtMax integration-step bound; it consumes the completed 175-row CSV and does not rerun PartVTKOut, solver, H5, or trajectory data.",
   "schema": "ds02.request.v1",
   "shared_lease_required": true,
   "solver_launch_forbidden": true,
