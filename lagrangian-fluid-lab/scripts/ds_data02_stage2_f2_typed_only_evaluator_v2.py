@@ -48,6 +48,21 @@ def _load(path: Path, name: str) -> Any:
 V1 = _load(V1_SCRIPT, "ds02_bound_typed_only_evaluator_v1_for_v2")
 V10 = _load(V10_SCRIPT, "ds02_bound_fresh_v16_consumer_v10_for_typed_v2")
 V8 = V10.V8
+# V10 re-exports the V9/V8 implementation, whose immutable module exposes
+# ``_read_result`` but not the convenience ``load_json`` used by this V2
+# validator.  Keep the binding strict while supplying that metadata-only
+# helper locally; this reads only the small V8 proof JSON at build/run time.
+if not hasattr(V8, "load_json"):
+    def _load_json_compat(path: Path) -> dict[str, Any]:
+        target = Path(path).expanduser().resolve()
+        try:
+            value = json.loads(target.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise TypedEvaluatorV2Error(f"cannot read V8 proof JSON: {error}") from error
+        if not isinstance(value, dict):
+            raise TypedEvaluatorV2Error("V8 proof JSON must be an object")
+        return value
+    V8.load_json = _load_json_compat
 
 
 def canonical_sha(value: Mapping[str, Any]) -> str:
