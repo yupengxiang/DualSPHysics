@@ -145,3 +145,9 @@ Old exec84839 is missing and all four recorded owned PIDs/process groups are abs
 - Same-ledger failed charge: 52.376101 CPU seconds, 8,670,962,780 external bytes, 3,872 receipt bytes; reservation released and owned process group gone. System service exit0 reports guard completion only.
 - Required next: forward portable executor path-map preserving exact top-level native Part names, actual-shape regression, fresh execution namespace; do not weaken raw source contract or reuse copied output as a successful replay.
 - Access/provenance V1 actual guarded output independently verified (metadata/license/dependency scope only). Continue full Stage2 science and product scope.
+
+## Root continuation 2026-10-09 — actual receipts preserved
+
+- Cold V35/051 copied all bound source bytes and passed top-level raw Part path validation, but FAILED decoder executable validation: source0755/target0644. Root proof F2_COLD_PORTABLE_V35_DECODER_EXECUTABLE_FAILURE_ROOT_VERIFICATION_037.json; actual 60.777399 CPU seconds, two-filesystem fees retained, reservation released and owned PGID gone. No qualification credit.
+- 336 detail V1 failed CURRENT index access; failure evidence and charge retained. Corrected detail V2 actually completed; root compared all 336 fresh cards against immutable CURRENT order, original scientific JSON fields and execution receipts. Proof SCIENTIFIC_SCAN_DETAIL_V2_ALL336_ACTUAL_INDEPENDENT_VERIFICATION_001.json. Missing science remains UNKNOWN.
+- Next: fresh root-bound V36b managed cold replay, then fresh-result proof, relocated evaluator and process ancestry audit. F1 copy/GPU forward V2 receives key/SHA binding fix before actual execution. F4 V3 request binding graph must match final worker/manifest before H5 read. F2 source-centered phase V3 native counts remain prospective.
