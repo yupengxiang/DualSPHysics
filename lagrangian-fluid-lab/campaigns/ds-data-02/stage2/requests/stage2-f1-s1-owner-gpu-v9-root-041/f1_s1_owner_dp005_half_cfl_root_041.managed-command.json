@@ -1,0 +1,29 @@
+{
+  "command": [
+    "/usr/bin/systemd-run",
+    "--user",
+    "--unit",
+    "ds02-f1-dp005-half-cfl-v5-root-041",
+    "--collect",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=RuntimeMaxSec=7230",
+    "--property=TimeoutStopSec=45",
+    "--property=KillMode=mixed",
+    "--property=CPUAccounting=yes",
+    "--property=StandardOutput=journal",
+    "--property=StandardError=journal",
+    "--",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-B",
+    "-I",
+    "-c",
+    "import sys,os,json;sys.path.insert(0,'/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts');import ds_data02_stage2_external_solver_v5 as m;v=m.run('/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-owner-gpu-v9-root-041/f1_s1_owner_dp005_half_cfl_root_041.json',io_slot_approved=True,parent_pid=os.getppid());print(json.dumps(v),flush=True);sys.exit(0 if v.get('status')=='COMPLETED_DEVELOPMENT_UNKNOWN' else 1)"
+  ],
+  "parent_pid_source": "os.getppid() stable systemd user manager",
+  "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/stage2-f1-s1-owner-gpu-v9-root-041/f1_s1_owner_dp005_half_cfl_root_041.json",
+  "request_sha256": "338e9d1fb1a8546af95ac3f49a16ffa896d99490876b60d3784fc74b923bb46a",
+  "scientific_qualification": "UNKNOWN",
+  "status": "PREPARED_NOT_STARTED",
+  "unit": "ds02-f1-dp005-half-cfl-v5-root-041"
+}
