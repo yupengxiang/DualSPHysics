@@ -10,6 +10,7 @@ import pytest
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 from ds_data02_stage2_f2_s1_trajectory_labels_operator_v1 import (  # noqa: E402
+    finite_crossing,
     materialize,
     validate_config,
 )
@@ -89,6 +90,16 @@ def test_controls_reject_alias_and_region_ambiguity(tmp_path):
         h["particle_id"][2] = 1
     with pytest.raises(ValueError, match="typed identity"):
         materialize(source, tmp_path / "alias.h5", config)
+
+
+def test_negative_axis_entry_is_the_backward_operator_column():
+    p0 = np.array([[0.0, 0.0, 1.0]])
+    p1 = np.array([[0.0, 0.0, -1.0]])
+    forward, backward, _ = finite_crossing(
+        p0, p1, {"axis": 2, "value": 0.0, "aperture_bounds": [[-1.0, 1.0], [-1.0, 1.0]]}
+    )
+    assert not bool(forward[0])
+    assert bool(backward[0])
 
 
 def test_preparation_contract_does_not_hash_h5():

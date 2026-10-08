@@ -361,18 +361,31 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
         net = h["cumulative_net_flux_kg"][-1]
         events = []
         for index, event in enumerate(contract_info["config"].get("events", [])):
+            entry_direction = event.get("forward_direction", "+axis")
+            if entry_direction not in {"+x", "-x", "+y", "-y", "+z", "-z"}:
+                raise TrajectoryLabelError(f"event direction is not explicit: {entry_direction!r}")
+            entry_column = 0 if entry_direction[0] == "+" else 1
+            exit_column = 1 - entry_column
             observed = censor[:, index] == 0
             events.append({
                 "id": event["id"],
+                "axis": "xyz"[event["axis"]],
+                "entry_direction": entry_direction,
+                "operator_column_semantics": "column0=negative-to-positive along selected axis; column1=positive-to-negative",
                 "observed_first_passage_mass_kg": float(masses[observed].sum()),
                 "censored_first_passage_mass_kg": float(masses[~observed].sum()),
                 "first_passage_time_min_s": float(np.nanmin(first[observed, index, 0])) if np.any(observed) else None,
                 "first_passage_time_max_s": float(np.nanmax(first[observed, index, 1])) if np.any(observed) else None,
-                "forward_mass_kg": float(flux[index, 0]),
-                "backward_mass_kg": float(flux[index, 1]),
-                "net_flux_mass_kg": float(net[index]),
+                "positive_axis_mass_kg": float(flux[index, 0]),
+                "negative_axis_mass_kg": float(flux[index, 1]),
+                "positive_axis_net_flux_mass_kg": float(net[index]),
+                "entry_direction_mass_kg": float(flux[index, entry_column]),
+                "exit_direction_mass_kg": float(flux[index, exit_column]),
+                "entry_direction_net_flux_mass_kg": float(flux[index, entry_column] - flux[index, exit_column]),
                 "forward_crossing_count": int(crossings[:, index, 0].sum()),
                 "backward_crossing_count": int(crossings[:, index, 1].sum()),
+                "entry_direction_crossing_count": int(crossings[:, index, entry_column].sum()),
+                "exit_direction_crossing_count": int(crossings[:, index, exit_column].sum()),
                 "repeated_crossing_particles": int(np.count_nonzero(crossings[:, index].sum(axis=1) > 1)),
                 "semantics": "saved-frame finite-aperture bracket; hidden crossings unresolved",
             })
