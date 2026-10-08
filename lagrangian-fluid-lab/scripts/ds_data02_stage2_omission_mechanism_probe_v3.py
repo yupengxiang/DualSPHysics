@@ -51,6 +51,8 @@ CLOSURE_DEFAULT = WORKTREE_ROOT / (
     "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/evidence/"
     "f2-s1-native-source-closure-v1/f2-s1-native-source-closure.json"
 )
+CURRENT_DEFAULT = WORKTREE_ROOT / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/CURRENT336.json"
+CURRENT_SHA256 = "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b"
 OUTPUT_SCHEMA = "ds02.stage2.omission-mechanism-probe.v3"
 MANIFEST_SCHEMA = "ds02.stage2.omission-mechanism-probe-manifest.v3"
 V2_SCHEMA = "ds02.stage2.omission-mechanism-probe.v2"
@@ -277,9 +279,10 @@ def merged_cases(report: dict[str, Any], closure: dict[str, Any]) -> list[dict[s
 
 
 def audit(v2_report_path: Path, v2_receipt_path: Path, v2_manifest_path: Path,
-          v2_request_path: Path, closure_path: Path, output_path: Path) -> dict[str, Any]:
+          v2_request_path: Path, closure_path: Path, current_path: Path, output_path: Path) -> dict[str, Any]:
     report, receipt, base = validate_v2(v2_report_path, v2_receipt_path, v2_manifest_path, v2_request_path)
     closure = validate_closure(closure_path)
+    current = binding(current_path, "CURRENT336 identity", CURRENT_SHA256)
     cases = merged_cases(report, closure)
     source_counts = {"EXACT_NATIVE_SOURCE_CLOSED": 1, "V2_NATIVE_SOURCE_CLOSED": 117}
     output = {
@@ -293,6 +296,7 @@ def audit(v2_report_path: Path, v2_receipt_path: Path, v2_manifest_path: Path,
             "report_bytes_and_cases_preserved": True,
         },
         "f2_s1_source_closure": closure["payload"],
+        "current_identity": current,
         "coverage": {
             "selected_case_counts": dict(FAMILY_COUNTS),
             "selected_case_count": 118,
@@ -332,11 +336,13 @@ def audit(v2_report_path: Path, v2_receipt_path: Path, v2_manifest_path: Path,
 def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
             v2_receipt_path: Path = V2_RECEIPT_DEFAULT, v2_manifest_path: Path = V2_MANIFEST_DEFAULT,
             v2_request_path: Path = V2_REQUEST_DEFAULT, closure_path: Path = CLOSURE_DEFAULT,
+            current_path: Path = CURRENT_DEFAULT,
             variant: str = "v3") -> dict[str, Any]:
     if not variant.startswith("v") or not variant[1:].isdigit():
         raise MechanismProbeV3Error(f"invalid variant: {variant}")
     report, receipt, base = validate_v2(v2_report_path, v2_receipt_path, v2_manifest_path, v2_request_path)
     closure = validate_closure(closure_path)
+    current = binding(current_path, "CURRENT336 identity", CURRENT_SHA256)
     output_dir = output_dir.expanduser().resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     name = f"omission-mechanism-probe-{variant}"
@@ -369,6 +375,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
     add(v2_manifest_path, "v2 source manifest")
     add(v2_request_path, "v2 source request")
     add(closure_path, "F2-S1 exact source closure")
+    add(current_path, "CURRENT336 identity", CURRENT_SHA256)
     closure_bindings = closure["payload"].get("source_bindings", {})
     omitted_raw: dict[str, Any] = {}
     for name_key, item in sorted(closure_bindings.items()):
@@ -402,6 +409,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
         "v2_base_report": {"path": base["path"], "sha256": base["sha256"], "bytes": base["bytes"]},
         "v2_base_receipt": {"path": base["receipt_path"], "sha256": base["receipt_sha256"], "bytes": base["receipt_bytes"]},
         "f2_s1_closure": {"path": closure["path"], "sha256": closure["sha256"], "bytes": closure["bytes"]},
+        "current_identity": current,
         "input_files": input_files,
         "input_sha256": {path: inputs[path]["sha256"] for path in input_files},
         "input_bytes": {path: inputs[path]["bytes"] for path in input_files},
@@ -425,7 +433,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
         "physical_case_id": "F2_F4_F6_ALL118_NATIVE_SOURCE_CLOSURE_V3", "attempt_id": f"{name}-primary-001",
         "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 900,
         "estimated_storage_bytes": 64 * 1024 * 1024, "cwd": str(SCRIPT.parent), "worktree_root": str(WORKTREE_ROOT),
-        "command": [str(VENV), str(SCRIPT), "audit", "--v2-report", str(v2_report_path), "--v2-receipt", str(v2_receipt_path), "--v2-manifest", str(v2_manifest_path), "--v2-request", str(v2_request_path), "--closure", str(closure_path), "--output", f"{{attempt_root}}/{name}.json"],
+        "command": [str(VENV), str(SCRIPT), "audit", "--v2-report", str(v2_report_path), "--v2-receipt", str(v2_receipt_path), "--v2-manifest", str(v2_manifest_path), "--v2-request", str(v2_request_path), "--closure", str(closure_path), "--current", str(current_path), "--output", f"{{attempt_root}}/{name}.json"],
         "input_files": input_files_request, "input_sha256": {path: inputs_with_manifest[path]["sha256"] for path in input_files_request},
         "shared_runtime_version": "v8",
         "runtime_binding": {label: {"path": str(path), "sha256": sha256(path)} for label, path in runtime.items() if label.startswith("runtime_")},
@@ -452,6 +460,7 @@ def main() -> int:
     prep.add_argument("--v2-manifest", type=Path, default=V2_MANIFEST_DEFAULT)
     prep.add_argument("--v2-request", type=Path, default=V2_REQUEST_DEFAULT)
     prep.add_argument("--closure", type=Path, default=CLOSURE_DEFAULT)
+    prep.add_argument("--current", type=Path, default=CURRENT_DEFAULT)
     prep.add_argument("--variant", default="v3")
     aud = sub.add_parser("audit")
     aud.add_argument("--v2-report", type=Path, required=True)
@@ -459,13 +468,14 @@ def main() -> int:
     aud.add_argument("--v2-manifest", type=Path, required=True)
     aud.add_argument("--v2-request", type=Path, required=True)
     aud.add_argument("--closure", type=Path, required=True)
+    aud.add_argument("--current", type=Path, required=True)
     aud.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
         if args.action == "prepare":
-            result = prepare(args.output_dir, v2_report_path=args.v2_report, v2_receipt_path=args.v2_receipt, v2_manifest_path=args.v2_manifest, v2_request_path=args.v2_request, closure_path=args.closure, variant=args.variant)
+            result = prepare(args.output_dir, v2_report_path=args.v2_report, v2_receipt_path=args.v2_receipt, v2_manifest_path=args.v2_manifest, v2_request_path=args.v2_request, closure_path=args.closure, current_path=args.current, variant=args.variant)
         else:
-            result = audit(args.v2_report, args.v2_receipt, args.v2_manifest, args.v2_request, args.closure, args.output)
+            result = audit(args.v2_report, args.v2_receipt, args.v2_manifest, args.v2_request, args.closure, args.current, args.output)
     except MechanismProbeV3Error as exc:
         raise SystemExit(f"MechanismProbeV3Error: {exc}")
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
