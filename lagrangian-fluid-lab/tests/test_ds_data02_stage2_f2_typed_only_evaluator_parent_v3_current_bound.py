@@ -54,6 +54,7 @@ def test_forward_builder_defers_current_content_hash(tmp_path: Path, monkeypatch
     assert result["hdf5_or_bi4_read"] is False
     assert value["execution"]["current_source_validation_phase"] == "AFTER_PARENT_RESERVATION"
     assert value["execution"]["pre_reservation_scientific_content_hash"] is False
+    assert value["current_catalog_binding"]["historical_result_current_catalog_sha256"] == "aabfb1e55e47df73276d2bfc053839bd2bce5792330a82a95ad561a6dcde2972"
     roles = {item["role"]: item for item in value["static_bindings"]}
     assert roles["current_catalog_source"]["content_hash_phase"] == "AFTER_PARENT_RESERVATION"
     assert value["sha256"] == V3.canonical_sha(value)

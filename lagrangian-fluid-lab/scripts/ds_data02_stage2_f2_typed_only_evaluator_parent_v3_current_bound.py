@@ -144,8 +144,12 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
     current_sha = str(sidecar_value["current_catalog"]["sha256"])
     frozen_sha = str(sidecar_value["frozen_v15_request"]["sha256"])
     proof_sha = str(sidecar_value["historical_v10_proof"]["sha256"])
+    historical_catalog_sha = str(
+        sidecar_value["historical_v10_proof"].get("declared_current_catalog_sha256", "")
+    )
     for name, value in (("CURRENT336", current_sha), ("frozen V15", frozen_sha),
-                        ("historical proof", proof_sha)):
+                        ("historical proof", proof_sha),
+                        ("historical result CURRENT", historical_catalog_sha)):
         if len(value) != 64:
             raise TypedParentV3CurrentError(f"{name} declared SHA is malformed")
 
@@ -210,7 +214,7 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
         "path": str(sidecar), "sha256": sidecar_sha,
         "schema": CURRENT.SCHEMA, "content_read_during_build": False,
         "current_catalog_sha256": current_sha,
-        "historical_result_current_catalog_sha256": proof_sha,
+        "historical_result_current_catalog_sha256": historical_catalog_sha,
         "case_join_status": "DEFERRED_UNTIL_PARENT_RESERVATION",
     }
     existing = value.get("static_bindings")
@@ -240,7 +244,7 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
         "current_binding": {"path": str(sidecar), "sha256": sidecar_sha},
         "actual_current_catalog_sha256": current_sha,
         "frozen_v15_sha256": frozen_sha,
-        "historical_result_catalog_sha256": proof_sha,
+        "historical_result_catalog_sha256": historical_catalog_sha,
         "same_parent_ledger": True, "new_ledger_owner": False,
         "scientific_source_validation": "AFTER_PARENT_RESERVATION",
         "original_path_fallback": "FORBIDDEN",
