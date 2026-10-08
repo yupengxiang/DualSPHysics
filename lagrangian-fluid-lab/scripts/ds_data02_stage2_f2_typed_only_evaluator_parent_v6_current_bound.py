@@ -23,6 +23,12 @@ import tempfile
 import time
 from typing import Any, Mapping, Sequence
 
+# Capture the wall clock before importing V5/V4 and their transitive closure.
+# V4 already captures its process/cgroup CPU baseline at its first script
+# lines; this companion timestamp gives the reviewed V4 timer the same
+# invocation scope instead of silently dropping evaluator-module import time.
+_SCRIPT_ENTRY_WALL = time.monotonic()
+
 
 SCRIPT = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT.parent
@@ -48,6 +54,10 @@ def _load(path: Path, name: str) -> Any:
 
 V5 = _load(V5_SCRIPT, "ds02_bound_typed_only_evaluator_parent_v5_current_bound_for_v6")
 V4 = V5.V4
+
+# Keep the name used by the V6 callback wrapper, but source it from the first
+# executable timestamp above.  Do not recapture after V5/V4 import.
+_BOOTSTRAP_WALL = _SCRIPT_ENTRY_WALL
 
 
 def canonical_sha(value: Mapping[str, Any]) -> str:
@@ -146,6 +156,12 @@ def build_forward_request(*, base_request: Path | str, current_binding: Path | s
         "lookup": "V4.BASE.BASE._current_item",
         "phase": "AFTER_PARENT_RESERVATION",
         "source_callback_is_not_mocked": True,
+    }
+    value["execution"]["wall_clock_capture"] = {
+        "phase": "FIRST_SCRIPT_EXECUTION_BEFORE_V5_V4_CLOSURE_IMPORT",
+        "remaining_wall_includes_closure_import": True,
+        "outer_runtime_max_must_cover_full_invocation": True,
+        "cleanup_grace_is_separate_bounded_phase": True,
     }
     value["v6_current_forward"] = {
         "schema": FORWARD_SCHEMA,

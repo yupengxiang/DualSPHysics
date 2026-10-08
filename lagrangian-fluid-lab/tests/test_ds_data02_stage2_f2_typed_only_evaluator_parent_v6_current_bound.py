@@ -60,3 +60,8 @@ def test_v6_post_reservation_callback_uses_real_v2_adapter(tmp_path: Path) -> No
 def test_v6_does_not_silently_fallback_to_v3_callback() -> None:
     assert not hasattr(V6.V4.BASE, "_current_item")
     assert callable(V6._current_after_reservation)
+
+
+def test_v6_wall_baseline_is_captured_before_v5_v4_closure_import() -> None:
+    assert V6._BOOTSTRAP_WALL == V6._SCRIPT_ENTRY_WALL
+    assert V6._BOOTSTRAP_WALL > 0.0
