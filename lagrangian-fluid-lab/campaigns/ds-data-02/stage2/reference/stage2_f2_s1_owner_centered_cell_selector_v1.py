@@ -187,7 +187,7 @@ def build_request(launch_commit: str) -> dict[str, Any]:
         "resource_guard": {"owner": "stage2-reference-preparation", "runner": str(DISPATCH), "strict_guard": str(STRICT), "runtime": str(RUNTIME), "launch_commit": launch_commit, "cpu_parent_binding": "required", "gpu": "none", "solver_launch": "forbidden", "hdf5_read": "forbidden", "output_tree_charge": "required; new attempt only"},
         "qualification_stage": "stage2_f2_s1_owner_centered_cell_selector_gencase_only_pending_actual_geometry_and_mass_qa", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}, "status": "READY_FOR_PARENT_CPU_GUARD_REVIEW",
     }
-    request_path = REQUEST_DIR / f"{CASE_ID.lower()}.json"; atomic_json(request_path, request)
+    request_path = REQUEST_PATH; atomic_json(request_path, request)
     report = {"schema": SCHEMA, "status": "REGISTERED_ONE_Gencase_ONLY_REQUEST", "launch_commit": launch_commit, "request": record(request_path), "candidate": record(candidate), "gencase_started": False, "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
     atomic_json(REFERENCE / "stage2_f2_s1_owner_centered_cell_selector_v1_request_report.json", report)
     return report
