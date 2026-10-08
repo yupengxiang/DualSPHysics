@@ -372,11 +372,11 @@ def audit(current_path: Path | str, lineage_path: Path | str,
             raise SplitAuditError("root verification CURRENT digest differs")
         if root.get("cases") != len(rows):
             raise SplitAuditError("root verification case count differs")
-        if root.get("root_h5_bi4_read") is True:
+        if root.get("root_h5_bi4_read") is not False:
             # This audit still does not consume raw content.  The flag is
-            # informational, but an unexpected broader scope is a hard error
-            # so the request cannot be mistaken for a metadata-only worker.
-            raise SplitAuditError("equivalence audit expects root metadata proof without H5/BI4 reads")
+            # informational, but an absent/true flag is a hard error so the
+            # request cannot be mistaken for a metadata-only worker.
+            raise SplitAuditError("root verification must explicitly prove no H5/BI4 reads")
 
     root_case_proofs = _guard_case_proofs(root) if root is not None else {}
     records: list[dict[str, Any]] = []
