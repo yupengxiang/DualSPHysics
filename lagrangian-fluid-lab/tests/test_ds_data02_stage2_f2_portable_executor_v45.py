@@ -118,6 +118,9 @@ def test_v45_refreshes_nested_stat_contracts_and_rebinds_runtime(tmp_path: Path)
     assert value["forward_v45"]["mode_copy_policy"].startswith("preserve_source_mode")
     assert value["execution"]["deadline_contract"]["subtractions"] == 1
     roles = {item["role"]: item for item in value["runtime_sources"]}
+    all_roles = {item["role"]: item for item in value["runtime_sources"] + value["source_entries"]}
+    assert all_roles["runtime_v2"]["target_relative_path"]
+    assert roles["python_executable"]["target_relative_path"]
     assert roles["executor_v41_compat"]["target_relative_path"].endswith(
         "ds_data02_stage2_f2_portable_executor_v41.py")
     assert roles["executor_v43_builder"]["target_relative_path"].endswith(
