@@ -33,6 +33,7 @@ DISPATCH = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatc
 STRICT = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 RUNTIME_V8 = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
 RUNTIME_V6 = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
+RUNTIME_V2 = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
 ROOT_CASE = "F2_S1_OWNER_CENTERED_CELL_SELECTOR_SUPPORT_AUDIT_V8_ROOT_078"
 ROOT_ATTEMPT = "f2-s1-owner-centered-cell-selector-support-audit-v8-root-forward-078-001"
 REQUEST = PRIMARY_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-owner-centered-cell-selector-support-audit-v8-root-forward-078-001.json"
@@ -113,7 +114,7 @@ def _digest_arg(value: str | None, label: str) -> str | None:
 def build(output: Path, launch_commit: str, known_fluid_vtk_sha: str | None = None, known_bound_vtk_sha: str | None = None) -> dict[str, Any]:
     known_fluid_vtk_sha = _digest_arg(known_fluid_vtk_sha, "known-fluid-vtk-sha")
     known_bound_vtk_sha = _digest_arg(known_bound_vtk_sha, "known-bound-vtk-sha")
-    for path in (ROOT_REQUEST, OWNER_CLOSURE, DISPATCH, STRICT, RUNTIME_V8, RUNTIME_V6, PYTHON, WORKER, BUILDER):
+    for path in (ROOT_REQUEST, OWNER_CLOSURE, DISPATCH, STRICT, RUNTIME_V8, RUNTIME_V6, RUNTIME_V2, PYTHON, WORKER, BUILDER):
         if not path.is_file():
             raise FileNotFoundError(path)
     root_request = json.loads(ROOT_REQUEST.read_text(encoding="utf-8"))
@@ -138,7 +139,7 @@ def build(output: Path, launch_commit: str, known_fluid_vtk_sha: str | None = No
     candidate_motion = regular(Path(source_binding["candidate_motion"]["path"]))
     source_motion = regular(Path(source_binding["source_motion"]["path"]))
 
-    static_paths = [ROOT_REQUEST, root_receipt, generated_xml, OWNER_CLOSURE, DISPATCH, STRICT, RUNTIME_V8, RUNTIME_V6, PYTHON, WORKER, BUILDER, candidate, source_def, candidate_motion, source_motion]
+    static_paths = [ROOT_REQUEST, root_receipt, generated_xml, OWNER_CLOSURE, DISPATCH, STRICT, RUNTIME_V8, RUNTIME_V6, RUNTIME_V2, PYTHON, WORKER, BUILDER, candidate, source_def, candidate_motion, source_motion]
     static_paths = list(dict.fromkeys(path.resolve() for path in static_paths))
     records = {str(path): record(path) for path in static_paths}
     dynamic_stat = {"generated_fluid_vtk": stat_only(fluid_vtk), "generated_bound_vtk": stat_only(bound_vtk)}
