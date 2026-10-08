@@ -248,6 +248,26 @@ def _impact_row(impact: dict[str, Any], case: dict[str, Any]) -> dict[str, Any]:
     return row
 
 
+def _match_impact_sources(case: dict[str, Any], refs: dict[str, dict[str, Any]],
+                          impact_row: dict[str, Any]) -> None:
+    """Prevent a same-Idp/time join with a different producer run."""
+    source = impact_row.get("evidence_bindings", {}).get("full_probe_sources", {})
+    aliases = {
+        "scan": "scan", "scan_receipt": "scan_receipt", "native_csv": "native_csv",
+        "decoder_receipt": "decoder_receipt", "runparts": "runparts",
+        "conversion_report": "conversion_report", "solver_receipt": "solver_receipt",
+        "gencase_receipt": "gencase_receipt", "xml": "xml", "partvtk_binary": "partvtk_binary",
+    }
+    for manifest_key, impact_key in aliases.items():
+        expected = source.get(impact_key)
+        if not isinstance(expected, dict):
+            raise IdentityAuditError(f"{case['case_key']} impact source binding lacks {impact_key}")
+        if _canonical(refs[manifest_key]["path"]) != _canonical(expected.get("path", "")):
+            raise IdentityAuditError(f"{case['case_key']} {manifest_key} path differs from impact binding")
+        if refs[manifest_key].get("sha256") != expected.get("sha256"):
+            raise IdentityAuditError(f"{case['case_key']} {manifest_key} digest differs from impact binding")
+
+
 def _validate_current(current: dict[str, Any], case: dict[str, Any]) -> dict[str, Any]:
     rows = [row for row in current.get("cases", [])
             if row.get("family_id") == case.get("family_id")
@@ -449,6 +469,7 @@ def _find_block(blocks: list[dict[str, Any]], idp: int, label: str) -> dict[str,
 def _audit_case(case: dict[str, Any], impact: dict[str, Any], current: dict[str, Any]) -> dict[str, Any]:
     refs = _source_refs(case)
     impact_row = _impact_row(impact, case)
+    _match_impact_sources(case, refs, impact_row)
     current_row = _validate_current(current, case)
     loaded: dict[str, tuple[Path, dict[str, Any], dict[str, Any]]] = {}
     for key in ("conversion_report", "decoder_receipt", "solver_receipt", "gencase_receipt"):
@@ -526,6 +547,11 @@ def _audit_case(case: dict[str, Any], impact: dict[str, Any], current: dict[str,
     initial_filter_count = int(initial_filter.get("count", -1))
     if initial_filter_count < 0:
         raise IdentityAuditError(f"{case['case_key']} initial conversion exclusion ledger is missing")
+    expected_initial_filter_count = int(case.get("expected_initial_conversion_exclusion_count", -1))
+    if initial_filter_count != expected_initial_filter_count:
+        raise IdentityAuditError(
+            f"{case['case_key']} initial conversion exclusion count differs from manifest"
+        )
     source_conversion_status = (
         "NO_INITIAL_CONVERSION_FILTER_OBSERVED_FOR_SELECTED_IDS"
         if initial_filter_count == 0 else "INITIAL_CONVERSION_FILTER_OBSERVED"
