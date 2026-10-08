@@ -137,3 +137,11 @@ Old exec84839 is missing and all four recorded owned PIDs/process groups are abs
 - Fresh 050 V34 request and parent V3 service started as `ds02-f2-cold-v34-050.service` with independent user-manager cgroup, RuntimeMaxSec=6300, KillMode=mixed and CPU accounting. Query live unit and same-ledger reservation/charge; do not restart 047 or reuse 042 outputs.
 - New copied raw/typed/label products, stable worker guards, root proof and relocated evaluator V2 remain pending. This launch does not grant Q-I/Q-N/Q-E.
 - F1 owner-compatible solver preparation, F2 continuum mass repair, F7 4x observer calibration and access/provenance delivery continue under the active full Stage2 goal.
+
+
+## 2026-10-08 managed050 actual private input contract failure
+
+- V34 copied 8,644,512,838 bytes then private raw worker rejected frame 0: `raw frame 0 is not the exact top-level Part path`. Preserve V34 request/products/trace and parent failed receipt; no raw-to-label/evaluator success.
+- Same-ledger failed charge: 52.376101 CPU seconds, 8,670,962,780 external bytes, 3,872 receipt bytes; reservation released and owned process group gone. System service exit0 reports guard completion only.
+- Required next: forward portable executor path-map preserving exact top-level native Part names, actual-shape regression, fresh execution namespace; do not weaken raw source contract or reuse copied output as a successful replay.
+- Access/provenance V1 actual guarded output independently verified (metadata/license/dependency scope only). Continue full Stage2 science and product scope.
