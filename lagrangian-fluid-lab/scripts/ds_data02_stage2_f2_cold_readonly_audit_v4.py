@@ -37,6 +37,8 @@ from typing import Any, Iterable, Mapping, Sequence
 SCRIPT = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT.parent
 V2_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_cold_readonly_audit_v2.py"
+V3_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_cold_readonly_audit_v3.py"
+BOUND_V3_SHA256 = "8800a8c8e8f6d245220ecff4f29c6208e756db477d7405cbc31613c052b2a618"
 SCHEMA = "ds02.stage2.f2-cold-readonly-audit.v4"
 UNKNOWN = {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
 PROCESS_SYSCALLS = {"clone", "clone3", "fork", "vfork"}
@@ -93,6 +95,15 @@ def _canonical_sha(value: Mapping[str, Any]) -> str:
 
 def _sha256_file(path: Path | str) -> str:
     return V2.sha256_file(path)
+
+
+def _assert_v3_binding() -> str:
+    if not V3_SCRIPT.is_file():
+        raise AuditV4Error(f"bound v3 audit dependency is missing: {V3_SCRIPT}")
+    observed = _sha256_file(V3_SCRIPT)
+    if observed != BOUND_V3_SHA256:
+        raise AuditV4Error("bound v3 audit dependency SHA differs")
+    return observed
 
 
 # Keep the small helper surface used by the v2 tests and by parent-side
@@ -545,6 +556,7 @@ def audit(*, executor_report_path: Path, v34_request_path: Path, provenance_path
           target_root: Path, output_root: Path, parent_guard_path: Path | None = None,
           v16_proof: Path | None = None, v16_result: Path | None = None,
           evaluator_report_path: Path | None = None) -> dict[str, Any]:
+    previous_audit_sha = _assert_v3_binding()
     executor = _load_json(executor_report_path)
     v34 = _load_json(v34_request_path)
     if executor.get("original_path_fallback") != "FORBIDDEN":
@@ -584,6 +596,8 @@ def audit(*, executor_report_path: Path, v34_request_path: Path, provenance_path
     return {
         "schema": SCHEMA, "status": status,
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "previous_audit": {"path": str(V3_SCRIPT), "sha256": previous_audit_sha,
+                            "schema": "ds02.stage2.f2-cold-readonly-audit.v3"},
         "executor_report": {"path": str(executor_report_path.expanduser().resolve()),
                              "sha256": _sha256_file(executor_report_path)},
         "trace": trace, "parent_guard": {"path": guard["path"], "sha256": guard.get("sha256"),
