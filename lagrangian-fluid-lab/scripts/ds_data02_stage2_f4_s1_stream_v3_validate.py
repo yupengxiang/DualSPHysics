@@ -309,6 +309,13 @@ def validate(*, report_path: Path, manifest_path: Path, output_path: Path) -> di
         "manifest": {"path": str(manifest_path), "sha256": sha256_file(manifest_path)},
         "artifacts": summaries,
         "frozen_tolerances": FROZEN_TOLERANCES,
+        "tolerance_basis": {
+            "status": "pre_registered_V3_diagnostic_comparison_only",
+            "spatial_and_integral_relative": "5% comparator for saved-frame proxies/integrals; exceeding it is a finding, not a qualification failure",
+            "save_sampling_endpoint": "1e-4 s saved-grid comparator; no event-time interpolation or 2% event budget",
+            "legacy_temporal_allocation": "not used",
+            "qualification_credit": "not granted",
+        },
         "comparison_reference": REFERENCE_VARIANT,
         "spatial_proxy": _compare_group(summaries, REFERENCE_VARIANT, "spatial_proxy_terminal", FROZEN_TOLERANCES["spatial_proxy_relative_linf"]),
         "integral": _compare_group(summaries, REFERENCE_VARIANT, "integrals_saved_trapezoid", FROZEN_TOLERANCES["integral_relative_linf"]),
