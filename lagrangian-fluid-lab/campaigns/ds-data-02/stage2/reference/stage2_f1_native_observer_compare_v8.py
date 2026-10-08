@@ -355,6 +355,22 @@ def build_contract() -> dict[str, Any]:
         "status": "PREREGISTERED_CALIBRATION_ONLY",
         "preparation_source_commit": git_head(),
         "quality_source": str(QUALITY.resolve()),
+        "owner_scale_and_time_bindings": {
+            "f1_s1_same_half": {
+                "owner_geometry_semantics_audit": record(S1_AUDIT, "F1-S1 owner geometry semantics audit"),
+                "characteristic_length_m": 0.67,
+                "length_basis": "exact owner continuous size [0.4,0.67,0.15] m; maximum span",
+                "common_saved_time_intersection_s": [0.0, 1.600039573589642],
+                "event_characteristic_time": "UNKNOWN_UNTIL_EVENT_DECLARATION",
+            },
+            "f1_s2_three_grid": {
+                "owner_reference_contract": record(S2_CONTRACT, "F1-S2 owner reference contract"),
+                "characteristic_length_m": 0.98,
+                "length_basis": "source fluid box [0.98,0.98,0.32] m; maximum span",
+                "common_saved_time_intersection_s": [0.0, 4.000039181464766],
+                "event_characteristic_time": "UNKNOWN_UNTIL_EVENT_DECLARATION",
+            },
+        },
         "quality_source_semantics": {
             "position_macro_rmse": "<= 2% characteristic L",
             "event_position": "<= 5% characteristic L",
