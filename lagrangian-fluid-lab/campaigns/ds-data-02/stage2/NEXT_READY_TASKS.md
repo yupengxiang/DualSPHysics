@@ -80,3 +80,13 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - portable supervisor-v24新增active-helper取消测试root通过，但root发现预留前/预留helperCPU未纳入V21实际费用、pre-reserve异常缺少终态记账释放。consumer继续forward修复（原v24保留），完整8.64GB冷回放未执行；不能用tiny fixture/selftest声称portable交付。generic-v4快速attestation仍不能代替实际同父内容保护，不执行该优化。
 - 当前唯一大IO：F6 full241原始锚点→typed，session22240，supervisor1898826/launcher1898828，1CPU/OMP1/5400s/Home16GiB，同父v8预留；无CFD。其后portable完整链在修复/请求就绪时优先，否则F7 full601接续。reference推进14哨点matched三网格、积分/输出独立研究的可执行前提与科学终态；forensics继续有效条件开发子域划分与完整family cards。
 - 最近实际父用量GPU137.234341h/CPU701.184419h（运行F6尚未终态），资格639/1024、生产23/720，CPU父上限3840coreh，Home约661GiB≥500GiB、NVMe约473GiB；历史累计字节不作为1TiB累积cap，采用既有home_free_floor。截止2026-10-14T07:23:48Z不重置。完整目标仍active，尚未满足本轮交付条件。
+
+2026-10-08 root forward 030 后续实际状态：
+
+- F6 full241及F7 full601原始重建均实际完成并独立核验：F6 raw246文件SHA6c8f708a...、typed a6bbe1dc...、CPU122.914125s/2793856716B；F7 raw605文件SHA1e902211...、typed962f87e9...、CPU65.709516s/948824209B。七族锚点实际证据已索引于SEVEN_RAW_ANCHOR_ACTUAL_STATE_030.json：六个正常完成重建及F3原失败parent的已完成重建阶段恢复；不可声称七个全流程parent全部成功或F3原失败已变成功。
+- F1 dp005支持/control实际核验和dp0025 GenCase质量预检完成，详细proof及root小VTK哈希读取语义sidecar均已提交。dp0025 generated Fluid/Bound/All VTK支持、原生数组QA及matched CFD仍待代理实现就绪请求。只改源Def的dp/pointref/fluid点选择表示，既有physical owner/control不改。
+- F2 evaluator-v4实际同父guard完成，20个实际输入pre/post稳定，六个结果派生预测/错误反例按预期；F2_EVALUATOR_V4_ACTUAL_INDEPENDENT_VERIFICATION_001.json。零selftest误差和合成积分/输出budget不是物理误差测量；无model/CFD/H5/BI4读，旧v2/v3失败保持原字节。v25 supervisor取消/费用测试root通过，但v30/v31原默认测试因冻结V26绝对consumer路径在root发生四个失败，已反馈修复，未称全通过。
+- source-closed development split-v25实际完成并root核验：七个精确CURRENT锚点按同父component分配2 development_train/2 validation/3 test，核对controls/geometry/owner物理条件hash、原生parent、时间窗和来源角色；latest mechanism-v3 118例映射CURRENT及质量比例算式、1328原生遗漏数均核对。SRC proof为SOURCE_CLOSED_DEVELOPMENT_SPLIT_V25_ACTUAL_INDEPENDENT_VERIFICATION_001.json，物理scientific split-safe/recovery-transfer仍UNKNOWN，仅限定artifact/source-role/mass metadata开发任务。
+- F2 recovery-semantics-v2实际完成且producer output_root/attempt/case/--output路径及7稳定输入hash严格绑定；wrong completed receipt反例root测试拒绝。对应F2_RECOVERY_SEMANTICS_V2_ACTUAL_INDEPENDENT_VERIFICATION_001.json。
+- 当前没有运行CFD或大IO。portable-v31推荐请求034仅附路径映射契约，V25/V15实际执行仍沿冻结V25目标，尚不执行V31映射/private SDK/v4 evaluator；root未将其作为完整cold chain启动。consumer优先实现真实executor-v32及同父双FS预留/实际CPU字节费用/取消/终态保护，先可完成cold raw→typed→label并等待root独立新proof，再另次guarded private evaluator闭合，原proof不可代替新result字节。此执行入口缺口是可修复实现任务，不是额度/用户授权阻塞。
+- reference继续14哨点科学参考前提与真实可执行分支，F2三档接近的是CURRENT离散21.114kg而不是连续nominal18.876kg；不把源相对质量门槛改成连续owner验收。forensics继续336资格目录/七族card交付。完整goal仍active。
