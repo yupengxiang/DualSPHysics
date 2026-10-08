@@ -20,6 +20,7 @@ ROOT_V46_PARENT = ROOT / (
     "f2-s1-portable-parent-request-v46-root-082.json"
 )
 ROOT_V34 = ROOT / "lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v34.py"
+ROOT_V45 = ROOT / "lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v45.py"
 ROOT_PARENT_V3 = ROOT / (
     "lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_parent_v3.py"
 )
@@ -92,6 +93,9 @@ def test_v34_and_parent_v3_load_the_normalized_metadata_only_request(tmp_path: P
     v34 = _load("root_v34_for_v47_test", ROOT_V34)
     loaded = v34._load_request(executor)
     assert loaded["schema"] == V47.EXECUTOR_SCHEMA
+    v45 = _load("root_v45_for_v47_test", ROOT_V45)
+    validated = v45.V41._validate_request(executor)
+    assert validated["schema"] == V47.EXECUTOR_SCHEMA
     parent_v3 = _load("root_parent_v3_for_v47_test", ROOT_PARENT_V3)
     checked = parent_v3._validate_request(parent, verify_static_content=False)
     assert checked["request"]["schema"] == V47.SCHEMA
