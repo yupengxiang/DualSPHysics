@@ -1,0 +1,39 @@
+{
+  "schema": "ds02.stage2.root-pre-reservation-rejection.v1",
+  "status": "PRESERVED_ACTUAL_V8_HOME_FLOOR_PRE_RESERVATION_REJECTION",
+  "utc": "2026-10-08T16:59:16.575678+00:00",
+  "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f7-s2-same-cfl-20frame-strict-join-v4-root-forward-048-001.json",
+  "request_sha256": "18141e517696fe45f4ec63c57ab7701034a2c093b5479a5e703c9a04b3b070af",
+  "actual_error": "RuntimeError: Home free-space floor would be crossed",
+  "attempt_root_absent": true,
+  "parent_charge_and_reservation_absent": true,
+  "child_not_launched": true,
+  "H5_BI4_read_by_root": false,
+  "home_free_bytes_at_followup": 703113203712,
+  "home_floor_bytes": 536870912000,
+  "active_reservations": [
+    {
+      "id": "F1/f1-s1-owner-dp0025-half_cfl-savedt-nvme-v2/f1-s1-owner-dp0025-half_cfl-savedt-v5-root-041-001",
+      "new_storage_bytes": 141742309376,
+      "home_storage_bytes": 8388608,
+      "external_storage_bytes": 141733920768
+    },
+    {
+      "id": "f2-s1-portable-executor-v37-root-049-001::f2-v34-parent-v3-reservation",
+      "new_storage_bytes": 34360786944,
+      "external_storage_bytes": 34359738368,
+      "home_storage_bytes": 1048576,
+      "storage_filesystems": [
+        "/var/tmp/ds02-stage2",
+        "/home/jade"
+      ]
+    }
+  ],
+  "cause": "V8 delegates V6 home-floor reserved_storage sum and includes external NVMe bytes in Home reservation calculation",
+  "retry_policy": "same immutable root048 request may retry only after capacity/forward-guard correction; no attempt directory, charge or payload existed",
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
