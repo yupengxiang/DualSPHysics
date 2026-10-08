@@ -60,6 +60,10 @@ def test_seal_overlay_rejects_same_size_wrong_content(tmp_path):
         "forbidden_original_prefixes": ["/old"],
     }
     overlay_path = tmp_path / "overlay.json"
+    # The loader validates the overlay envelope before inspecting copied
+    # bytes.  Bind this synthetic fixture so the assertion reaches the
+    # same-size wrong-content branch it is intended to cover.
+    overlay["sha256"] = module.canonical_sha(overlay)
     module.write_new(overlay_path, overlay)
     with pytest.raises(module.PortableV4Error, match="target SHA differs"):
         module.seal_overlay(overlay_path, tmp_path / "sealed.json")
