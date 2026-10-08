@@ -123,6 +123,29 @@ def test_stop_group_reaps_nested_helper_after_leader_exits(tmp_path: Path) -> No
     assert marker.read_text() == "term"
 
 
+def test_actual_owned_popen_uses_parent_death_and_single_thread_env(tmp_path: Path) -> None:
+    marker = tmp_path / "env.marker"
+    child_code = (
+        "import os,pathlib,signal,time; "
+        f"p=pathlib.Path({str(marker)!r}); "
+        "p.write_text('|'.join(os.environ.get(k,'') for k in "
+        "['OMP_NUM_THREADS','OPENBLAS_NUM_THREADS','MKL_NUM_THREADS','NUMEXPR_NUM_THREADS'])); "
+        "signal.signal(signal.SIGTERM,lambda *_: None); time.sleep(30)"
+    )
+    wrapper_pid = os.getpid()
+    env = os.environ.copy()
+    env.update(parent.THREAD_ENV)
+    proc = subprocess.Popen([sys.executable, "-c", child_code], start_new_session=True,
+                            preexec_fn=lambda pid=wrapper_pid: parent._pdeath(pid), env=env)
+    deadline = time.monotonic() + 2.0
+    while not marker.exists() and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert marker.read_text() == "1|1|1|1"
+    result = parent._stop_group(proc, grace=0.2)
+    assert result["sigterm_sent"] is True
+    assert result["group_gone"] is True
+
+
 def test_full_report_home_size_fixed_point() -> None:
     report = {"schema": parent.REPORT_SCHEMA,
               "filesystem": {"home_receipt_bytes": None, "external_bytes": 13},
