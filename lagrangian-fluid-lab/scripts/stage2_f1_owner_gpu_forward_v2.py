@@ -199,8 +199,115 @@ def _replace_string(value: Any, old: str, new: str) -> Any:
     if isinstance(value, list):
         return [_replace_string(item, old, new) for item in value]
     if isinstance(value, dict):
-        return {key: _replace_string(item, old, new) for key, item in value.items()}
+        # Paths occur both as values (argv/input_files) and as keys
+        # (input_sha256/input_content_scope).  Rebinding values only leaves a
+        # stale source key behind, so recurse over keys as well as values.
+        rebound: dict[Any, Any] = {}
+        for key, item in value.items():
+            new_key = _replace_string(key, old, new) if isinstance(key, str) else key
+            rebound[new_key] = _replace_string(item, old, new)
+        return rebound
     return value
+
+
+def _normalise_external_input_bindings(base: dict[str, Any], *, source: str,
+                                       old_materializer: str, materializer: Path,
+                                       old_prefix: str, new_bi4: Path, new_xml: Path,
+                                       source_sha: str, xml_sha: str) -> dict[str, Any]:
+    """Close the v5 actionable-input maps after path rebinding.
+
+    The consumed v2/v6 request carries several historical maps.  Keeping a
+    key that is not in ``input_files`` makes the strict v5 validator reject
+    the request; keeping the old materializer digest would also bind the
+    request to a file that is no longer executed.  This helper deliberately
+    reconstructs both maps from the final actionable file list.  The future
+    BI4/XML copies are represented by their already-bound plan digests and
+    are never opened by this builder.
+    """
+    source = str(Path(source).expanduser().resolve())
+    old_materializer = str(Path(old_materializer).expanduser().resolve())
+    old_overlay_bi4 = str(Path(old_prefix + ".bi4").expanduser().resolve())
+    old_overlay_xml = str(Path(old_prefix + ".xml").expanduser().resolve())
+    new_bi4 = new_bi4.expanduser().resolve()
+    new_xml = new_xml.expanduser().resolve()
+    materializer = materializer.expanduser().resolve()
+    new_bi4_key = str(new_bi4)
+    new_xml_key = str(new_xml)
+    materializer_key = str(materializer)
+
+    final_paths: list[str] = []
+    dropped: list[str] = []
+    seen: set[str] = set()
+    for raw in base.get("input_files", []):
+        path = str(Path(str(raw)).expanduser().resolve())
+        # The producer BI4 is retained only in materialization metadata.  Any
+        # old overlay BI4 is replaced by the copy under the new attempt root.
+        if path in {source, old_overlay_bi4, old_overlay_xml, old_materializer}:
+            dropped.append(path)
+            continue
+        if path.lower().endswith(".bi4") and path != new_bi4_key:
+            dropped.append(path)
+            continue
+        if path not in seen:
+            seen.add(path)
+            final_paths.append(path)
+
+    # The copied XML/BI4 and the actual v3 materializer are required bindings,
+    # even if a predecessor omitted one of them from its input_files list.
+    for required in (new_bi4_key, new_xml_key, materializer_key):
+        if required not in seen:
+            seen.add(required)
+            final_paths.append(required)
+
+    old_scopes = base.get("input_content_scope", {})
+    if not isinstance(old_scopes, Mapping):
+        old_scopes = {}
+    hashes: dict[str, str] = {}
+    scopes: dict[str, str] = {}
+    for path_value in final_paths:
+        path = Path(path_value)
+        if path_value == new_bi4_key:
+            # This is an expected post-copy digest from the QA proof; do not
+            # read the future copy here.
+            digest = source_sha
+            scope = "post_reservation_hash"
+        elif path_value == new_xml_key:
+            # The tiny source XML was hashed while building the copy plan; the
+            # attempt-tree destination is not present until the CPU copy task.
+            digest = xml_sha
+            scope = "post_reservation_hash"
+        elif path_value == materializer_key:
+            digest = sha256_file(materializer)
+            scope = "post_reservation_hash"
+        else:
+            if not path.is_file() or path.is_symlink():
+                raise BuildError(f"actionable external input is unavailable: {path}")
+            # Existing small bindings are re-hashed from their actual source;
+            # stale predecessor values are not carried into the v3 request.
+            digest = sha256_file(path)
+            scope = str(old_scopes.get(path_value, "post_reservation_hash"))
+        hashes[path_value] = str(digest)
+        scopes[path_value] = scope
+
+    base["input_files"] = final_paths
+    base["input_sha256"] = hashes
+    base["input_content_scope"] = scopes
+    base["input_binding_audit"] = {
+        "schema": "ds02.stage2.f1.actionable-input-binding-audit.v3",
+        "actionable_files_only": True,
+        "input_sha256_keys_equal_input_files": list(hashes) == final_paths,
+        "input_content_scope_keys_equal_input_files": list(scopes) == final_paths,
+        "source_bi4_excluded_from_actionable_inputs": source not in final_paths,
+        "stale_paths_removed": sorted(set(dropped)),
+        "materializer": {"path": materializer_key, "sha256": hashes[materializer_key]},
+        "deferred_copy_bindings": {
+            new_bi4_key: {"sha256": source_sha, "content_scope": "post_reservation_hash",
+                          "payload_read_by_builder": False},
+            new_xml_key: {"sha256": xml_sha, "content_scope": "post_reservation_hash",
+                          "payload_read_by_builder": False},
+        },
+    }
+    return base
 
 
 def _solver_request(v2: dict[str, Any], v2_path: Path, proof: Mapping[str, Any], rung: str, mode: str,
@@ -249,16 +356,17 @@ def _solver_request(v2: dict[str, Any], v2_path: Path, proof: Mapping[str, Any],
         "copy_attempt_root": str(copy_root), "overlay_bi4": str(new_bi4), "overlay_xml": str(new_xml),
         "must_be_inside_attempt_root": True,
     }]
-    # The recursive rebind leaves the old overlay digest values intact; make
-    # the two future copy paths explicit and keep the producer excluded.
+    # Rebuild the strict v5 actionable-input maps from the final paths.  This
+    # removes stale v2 materializer/source keys and records the actual v3
+    # materializer digest while leaving the future copy payload unopened.
     source = str(plan["source_bi4"]["path"])
-    base["input_files"] = [p for p in base["input_files"] if p != source]
-    base["input_sha256"].pop(source, None)
-    base["input_content_scope"].pop(source, None)
-    base["input_sha256"][str(new_bi4)] = str(plan["source_bi4"]["sha256"])
-    base["input_sha256"][str(new_xml)] = str(destination["source_xml"]["sha256"])
-    base["input_content_scope"][str(new_bi4)] = "post_reservation_hash"
-    base["input_content_scope"][str(new_xml)] = "post_reservation_hash"
+    base = _normalise_external_input_bindings(
+        base, source=source, old_materializer=old_materializer,
+        materializer=MATERIALIZER_V3, old_prefix=old_prefix,
+        new_bi4=new_bi4, new_xml=new_xml,
+        source_sha=str(plan["source_bi4"]["sha256"]),
+        xml_sha=str(destination["source_xml"]["sha256"]),
+    )
     base["launch_commit"] = launch_commit
     base["forward_of"] = {
         "consumed_request": str(v2_path.resolve()), "consumed_request_sha256": sha256_file(v2_path),
