@@ -223,7 +223,18 @@ def _integrity_records(value: dict[str, Any], expected_frames: list[int], label:
     selected = value.get("source", {}).get("selected_part_records")
     if not isinstance(selected, list) or len(selected) != len(expected_frames):
         raise ValueError(f"{label} selected_part_records are incomplete")
-    selected_by = {int(item.get("frame", -1)): item for item in selected if isinstance(item, dict)}
+    selected_by: dict[int, dict[str, Any]] = {}
+    for index, item in enumerate(selected):
+        if not isinstance(item, dict):
+            raise ValueError(f"{label} selected_part_records contains a non-object record")
+        # The official observer records selected_part_records in selected
+        # frame order and intentionally omits a duplicated frame field.  A
+        # producer that includes frame must agree with that positional map.
+        frame_value = item.get("frame")
+        frame = expected_frames[index] if frame_value is None else int(frame_value)
+        if frame != expected_frames[index] or frame in selected_by:
+            raise ValueError(f"{label} selected_part_records frame binding is not the registered order")
+        selected_by[frame] = item
     merged: list[dict[str, Any]] = []
     for frame in expected_frames:
         before = pre_by.get(frame); after = post_by.get(frame); reported = selected_by.get(frame)
@@ -278,7 +289,13 @@ def validate_observer(
         raise ValueError(f"{label} decoder source content differs")
     if source.get("decoder_interface", {}).get("status") != "PASS_SOURCE_ARGC3_OUTPUT_PREFIX_CONTRACT":
         raise ValueError(f"{label} decoder contract status is not the registered argv contract")
+    # Older completed v2 observer artifacts expose the selected frame list
+    # under source.selected_frames; newer workers may also mirror it at the
+    # top level.  Require one explicit list, never infer it from payload
+    # length or observation ordering.
     frames = value.get("selected_frames")
+    if frames is None:
+        frames = source.get("selected_frames")
     observations = value.get("observations")
     if frames != expected_frames or not isinstance(observations, list) or len(observations) != len(expected_frames):
         raise ValueError(f"{label} frame/observation set differs: {frames}")
