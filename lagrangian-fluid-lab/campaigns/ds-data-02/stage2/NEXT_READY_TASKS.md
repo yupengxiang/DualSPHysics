@@ -90,3 +90,11 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - F2 recovery-semantics-v2实际完成且producer output_root/attempt/case/--output路径及7稳定输入hash严格绑定；wrong completed receipt反例root测试拒绝。对应F2_RECOVERY_SEMANTICS_V2_ACTUAL_INDEPENDENT_VERIFICATION_001.json。
 - 当前没有运行CFD或大IO。portable-v31推荐请求034仅附路径映射契约，V25/V15实际执行仍沿冻结V25目标，尚不执行V31映射/private SDK/v4 evaluator；root未将其作为完整cold chain启动。consumer优先实现真实executor-v32及同父双FS预留/实际CPU字节费用/取消/终态保护，先可完成cold raw→typed→label并等待root独立新proof，再另次guarded private evaluator闭合，原proof不可代替新result字节。此执行入口缺口是可修复实现任务，不是额度/用户授权阻塞。
 - reference继续14哨点科学参考前提与真实可执行分支，F2三档接近的是CURRENT离散21.114kg而不是连续nominal18.876kg；不把源相对质量门槛改成连续owner验收。forensics继续336资格目录/七族card交付。完整goal仍active。
+
+2026-10-08 root forward 031 实际状态（保留历史）：
+
+- 七族 quality evaluator-v2 strict 实际同父 v8 完成，root 独立核对实际 producer output_root/case/attempt、展开后的 --output 精确路径，以及 manifest/CURRENT/worker 三个 launch/end 内容哈希；SEVEN_FAMILY_QUALITY_EVALUATOR_V2_STRICT_ACTUAL_INDEPENDENT_VERIFICATION_001.json。不重新打开原始 H5/BI4 或标签 H5，仅保存帧来源/质量/删失诊断，无科学晋升。
+- F1 dp0025 support-v4 实际完成：160×268×60=2572800 fluid、40.2kg、最大包络偏差1.192092902e-8m，小于冻结3e-6m。F1_OWNER_DP0025_SUPPORT_V4_ACTUAL_LIMITED_INDEPENDENT_VERIFICATION_001.json 明确限制：deferred VTK 未由 v8 父级 hash；worker 在解析POINTS后只算一次全文件SHA，缺完整稳定前后边界，后续 forward v5 补齐。root仅核对当前stat/算式/XML与GenCase收据，不二次读取VTK。
+- F1 initial-native-QA-v1 实际失败：保存帧 decoder 合同拒绝 GenCase generated.bi4 的 PeriMode=96；无QA报告，父费用/释放已核对。F1_INITIAL_NATIVE_QA_V1_ACTUAL_INTERFACE_FAILURE_INDEPENDENT_VERIFICATION_001.json 保全原失败，reference准备 source-grounded GenCase专用前向读取路径与错误模式反例，不静默放宽动态字段。通过后才可推进 matched CFD。
+- 接入 root 新测试13项，8通过/5失败：v30/v31四项仍有冻结overlay/plan绝对consumer路径未正确跟随；catalog-v26一项CURRENT来源路径与实际v25 proof不闭合。已分别交回代理修复，不能称全通过。catalog-v26预制request尚未实际启动，须改为实际v25输出/manifest和CURRENT路径，而非代理预制品。
+- 当前无CFD、大IO或未终态运行；portable实际executor-v32及同父双FS guard 仍由consumer实现，下一就绪优先完整冷回放。reference继续F1修复/真实matched请求及F2连续owner支撑质量证据，forensics继续336最终资格产品。完整goal保持active，本轮交付尚未完成。
