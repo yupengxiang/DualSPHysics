@@ -58,3 +58,26 @@ def test_actual_f1_f5_manifest_has_explicit_source_roles_and_chord_boundary() ->
     assert all(entry["label_semantics"]["saved_frame_chords"] is True for entry in manifest["entries"])
     assert manifest["label_semantics_policy"]["continuous_first_arrival"] == "UNKNOWN"
     assert manifest["label_semantics_policy"]["hidden_recrossings"] == "UNKNOWN"
+
+
+@pytest.mark.skipif(
+    not Path(
+        "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/"
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/"
+        "family-label-quality-v3/f1-f7-source-role-manifest-forward-001.json"
+    ).is_file(),
+    reason="forward F1-F7 manifest is not mounted",
+)
+def test_actual_f1_f7_manifest_has_complete_family_scope() -> None:
+    path = Path(
+        "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/"
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/"
+        "family-label-quality-v3/f1-f7-source-role-manifest-forward-001.json"
+    )
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    assert [entry["family_id"] for entry in manifest["entries"]] == [
+        "F1", "F2", "F3", "F4", "F5", "F6", "F7"
+    ]
+    assert manifest["coverage"]["pending_families"] == []
+    assert manifest["coverage"]["qualification_credit"] == "none"
+    assert manifest["label_semantics_policy"]["physical_fate"] == "UNKNOWN"
