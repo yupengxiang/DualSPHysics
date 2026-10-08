@@ -231,3 +231,5 @@ Latest closed ledger: 137.8154839296 GPU h /703.8429295694 CPU core h;643 qualif
 - F1三跨网格derived观测来源SHA及质心/时间差独立重算，.005↔.0025最大.103903517m，.01↔.0025最大.201444474m，冻结.0134m；异步时刻和边界离散混合，邻网格不作真值、不盲更细。
 - F5 root068实际GenCase完成：67708fluid、mf=.0037584625659kg。只给源相对离散质量诊断；continuous owner/斜bed支持及控制审计继续，实际控制窗16s、XML TimeMax26s分开。
 - 完整目标ACTIVE，资源/期限不重置。截至root068独立核验137.8154839296GPUh、703.8534330422CPUcoreh。root061至068所有terminal服务均在实际费用核验后stop；无活跃CFD/大IO，root069小JSON子域消费运行，三既有代理继续参考、真实evaluator/cold、源身份子域分支。
+
+root069追加：源身份开发子集实际完成并独立核验，118例1328(case_key,Idp)，F1两组41条；精确family/motive/MK统计与parent fullpre/post输入SHA/真实费用/释放闭合。科学split_safe、flow、physical fate、continuous event、dynamics仍UNKNOWN。服务已在费用核对后stop。见NATIVE_SOURCE_IDENTITY_DEV_SUBSET_ACTUAL_INDEPENDENT_ROOT_VERIFICATION_069.json。继续等待消费代理forward真正CURRENT/overlay child interface、参考代理实际bed/初态支持与F2 GenCase语义修复；本检查点不结束完整goal。
