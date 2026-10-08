@@ -1,0 +1,27 @@
+{
+  "status": "PREPARED_NOT_STARTED",
+  "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-raw-405-auxiliary-snapshot-v1-root-forward-044-001.json",
+  "request_sha256": "33d0dfbe2d3419190743c69cd1c754fb7f11f6b75264f4827f0303c148c5efdb",
+  "unit": "ds02-f2-raw-aux-snapshot-v1-root-044",
+  "command": [
+    "/usr/bin/systemd-run",
+    "--user",
+    "--unit",
+    "ds02-f2-raw-aux-snapshot-v1-root-044",
+    "--collect",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=RuntimeMaxSec=930",
+    "--property=TimeoutStopSec=45",
+    "--property=KillMode=mixed",
+    "--property=CPUAccounting=yes",
+    "--property=StandardOutput=journal",
+    "--property=StandardError=journal",
+    "--",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-B",
+    "-I",
+    "-c",
+    "import sys,os;sys.path.insert(0,'/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts');import ds_data02_runtime_v8 as m;r=m.run_request('/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-raw-405-auxiliary-snapshot-v1-root-forward-044-001.json',data_root='/home/jade/Projects/DualSPHysics-data/ds-data-02',parent_pid=os.getppid());print(r,flush=True)"
+  ]
+}

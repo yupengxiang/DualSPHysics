@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.root-managed-launch-command.v1",
+  "unit": "ds02-f4-s1-typed-v3-root-040",
+  "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f4-s1-stream-v3-root-forward-040-001.json",
+  "request_sha256": "3978cff2dbe2af79c472c4e9c3581ab13f94b61c39db4ac97fbac4c7593aac4a",
+  "command": [
+    "/usr/bin/systemd-run",
+    "--user",
+    "--unit",
+    "ds02-f4-s1-typed-v3-root-040",
+    "--collect",
+    "--property=Type=exec",
+    "--property=RemainAfterExit=yes",
+    "--property=RuntimeMaxSec=3630",
+    "--property=TimeoutStopSec=45",
+    "--property=KillMode=mixed",
+    "--property=CPUAccounting=yes",
+    "--property=StandardOutput=journal",
+    "--property=StandardError=journal",
+    "--",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "-B",
+    "-I",
+    "-c",
+    "import sys,os;sys.path.insert(0,'/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts');import ds_data02_stage2_dispatch_v8 as m;sys.argv=['ds_data02_stage2_dispatch_v8','run','--request','/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f4-s1-stream-v3-root-forward-040-001.json','--data-root','/home/jade/Projects/DualSPHysics-data/ds-data-02','--parent-pid',str(os.getppid())];sys.exit(m.main())"
+  ],
+  "status": "PREPARED_NOT_STARTED",
+  "parent_pid_source": "os.getppid() systemd user manager",
+  "science_scope": "typed saved-frame diagnostics; no solver or qualification"
+}
