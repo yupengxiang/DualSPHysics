@@ -177,7 +177,10 @@ def build_request_with_commit(launch_commit: str) -> dict[str, Any]:
     }
     if REQUEST_PATH.exists():
         raise FileExistsError(f"refuse overwrite immutable request: {REQUEST_PATH}")
-    source_paths = [Path(__file__).resolve(), GENCASE, RUNNER, STRICT, RUNTIME, CURRENT_DEF, CURRENT_XML, CURRENT_RECEIPT, OWNER, OWNER_BINDING, GEOMETRY_EVIDENCE, EFFECTIVE_AUDIT, CANDIDATE_DEF]
+    # The effective-point audit report is intentionally not an input here: it
+    # is the downstream bounded audit for this new product and does not exist
+    # before the guarded GenCase attempt.  Bind its source/evidence instead.
+    source_paths = [Path(__file__).resolve(), GENCASE, RUNNER, STRICT, RUNTIME, CURRENT_DEF, CURRENT_XML, CURRENT_RECEIPT, OWNER, OWNER_BINDING, GEOMETRY_EVIDENCE, CANDIDATE_DEF]
     paths: list[Path] = []
     seen: set[str] = set()
     for path in source_paths:
