@@ -57,3 +57,5 @@ def test_systemd_command_preserves_literal_venv_and_does_not_start_service(tmp_p
 def test_observed_pid_gate_requires_absent_processes() -> None:
     assert reconcile._pid_absent(os.getpid()) is False
     assert reconcile._pid_absent(2_147_483_000) is True
+    assert reconcile._pgid_absent(os.getpgrp()) is False
+    assert reconcile._pgid_absent(2_147_483_000) is True

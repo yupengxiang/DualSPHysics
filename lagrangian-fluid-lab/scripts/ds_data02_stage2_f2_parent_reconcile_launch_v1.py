@@ -166,6 +166,30 @@ def _pid_absent(pid: int) -> bool:
     return not Path(f"/proc/{int(pid)}").exists()
 
 
+def _proc_pgid(pid: int) -> int | None:
+    try:
+        stat = Path(f"/proc/{int(pid)}/stat").read_text(encoding="utf-8")
+        fields = stat.rsplit(")", 1)[1].strip().split()
+        # After the comm field: state, ppid, pgrp, session.
+        return int(fields[2])
+    except (OSError, IndexError, ValueError):
+        return None
+
+
+def _pgid_absent(pgid: int) -> bool:
+    proc_root = Path("/proc")
+    try:
+        entries = list(proc_root.iterdir())
+    except OSError as error:
+        raise ReconcileError(f"cannot inspect /proc for PGID closure: {error}") from error
+    for entry in entries:
+        if not entry.name.isdigit():
+            continue
+        if _proc_pgid(int(entry.name)) == int(pgid):
+            return False
+    return True
+
+
 def _load_old_request(path: Path) -> tuple[dict[str, Any], Path, Path, Path]:
     request = load_json(path)
     if request.get("schema") != "ds02.stage2.f2-portable-executor-parent-request.v3":
@@ -230,9 +254,12 @@ def reconcile(*, request_path: Path, receipt_path: Path, observed_pids: Sequence
         raise ReconcileError("an explicit observed PID set is required")
     if tuple(sorted(set(int(pid) for pid in observed_pgids))) == ():
         raise ReconcileError("an explicit observed PGID set is required")
-    missing = [pid for pid in [*observed_pids, *observed_pgids] if not _pid_absent(int(pid))]
-    if missing:
-        raise ReconcileError(f"observed process/group is still alive: {sorted(set(missing))}")
+    missing_pids = [pid for pid in observed_pids if not _pid_absent(int(pid))]
+    missing_pgids = [pgid for pgid in observed_pgids if not _pgid_absent(int(pgid))]
+    if missing_pids or missing_pgids:
+        raise ReconcileError(
+            f"observed process/group is still alive: pids={sorted(set(missing_pids))}, "
+            f"pgids={sorted(set(missing_pgids))}")
     if float(cpu_seconds) != EXPECTED_CPU_RESERVATION:
         raise ReconcileError("reconciliation CPU must remain the full reserved 6000 seconds")
     value, reservations, charges = _ledger_rows(ledger)
@@ -255,6 +282,10 @@ def reconcile(*, request_path: Path, receipt_path: Path, observed_pids: Sequence
     reservation = reservation_rows[0]
     if float(reservation.get("cpu_core_seconds", -1.0)) != EXPECTED_CPU_RESERVATION:
         raise ReconcileError("reservation CPU differs from the observed 6000-second ceiling")
+    if int(reservation.get("home_storage_bytes", -1)) != int(request["storage_scope"]["home_receipt_bytes"]):
+        raise ReconcileError("reservation Home bytes differ from request")
+    if str(reservation.get("storage_filesystems", [None, None])[0]) != str(external):
+        raise ReconcileError("reservation external filesystem differs from request")
     if int(reservation.get("external_storage_bytes", -1)) != int(request["storage_scope"]["external_reservation_bytes"]):
         raise ReconcileError("reservation external bytes differ from request")
     files = _prefix_files(output_root / "os-trace-v34")
