@@ -68,6 +68,13 @@ def test_v44_refreshes_nested_stat_contracts_and_rebinds_runtime(tmp_path: Path)
     assert result["nested_stat_refresh_count"] >= 1
     assert value["forward_v44"]["mode_copy_policy"].startswith("preserve_source_mode")
     assert value["execution"]["deadline_contract"]["subtractions"] == 1
+    roles = {item["role"]: item for item in value["runtime_sources"]}
+    assert roles["executor_v41_compat"]["target_relative_path"].endswith(
+        "ds_data02_stage2_f2_portable_executor_v41.py")
+    assert roles["executor_v43_builder"]["target_relative_path"].endswith(
+        "ds_data02_stage2_f2_portable_executor_v43.py")
+    assert roles["executor_v41_compat"]["sha256"] == V44.sha256_file(V44.V41_SCRIPT)
+    assert roles["executor_v43_builder"]["sha256"] == V44.sha256_file(V44.V43_SCRIPT)
     assert all(
         not isinstance(item.get("source_stat_expected"), dict)
         or int(item["mtime_ns"]) == int(item["source_stat_expected"]["st_mtime_ns"])

@@ -237,6 +237,48 @@ def _copy_one_preserving_mode(source: Path, target: Path,
             "target_inode_distinct": True, "required_executable": bool(source_pre["mode_bits"] & 0o111)}
 
 
+def _append_compatibility_runtime_sources(value: dict[str, Any]) -> list[dict[str, Any]]:
+    """Bind the V41/V43 modules that the copied V44 imports by basename.
+
+    V43's request replaced its ``executor_v41`` row with the forward wrapper,
+    so the old V41 basename was no longer materialized beside it.  V44 loads
+    V41 and V43 from its private executor directory; both modules in turn
+    resolve the already-bound V38 sibling.  Add distinct, SHA/stat/mode
+    checked roles instead of relying on the original worktree or PYTHONPATH.
+    """
+    runtime = value.get("runtime_sources")
+    if not isinstance(runtime, list):
+        raise PortableV44Error("V43 runtime_sources are missing")
+    desired = (
+        ("executor_v41_compat", V41_SCRIPT,
+         "runtime/executor/ds_data02_stage2_f2_portable_executor_v41.py"),
+        ("executor_v43_builder", V43_SCRIPT,
+         "runtime/executor/ds_data02_stage2_f2_portable_executor_v43.py"),
+    )
+    added: list[dict[str, Any]] = []
+    for role, source, target_relative_path in desired:
+        if any(isinstance(item, Mapping) and item.get("role") == role for item in runtime):
+            continue
+        info = _stat_record(source)
+        item = {
+            "role": role,
+            "path": str(source),
+            "target_relative_path": target_relative_path,
+            "bytes": int(info["st_size"]),
+            "mtime_ns": int(info["st_mtime_ns"]),
+            "mode_bits": int(info["mode_bits"]),
+            "sha256": sha256_file(source),
+            "source_stat_expected": info,
+            "source_mode_bits": int(info["mode_bits"]),
+            "compatibility_role": role,
+        }
+        runtime.append(item)
+        added.append({"role": role, "path": str(source),
+                      "target_relative_path": target_relative_path,
+                      "sha256": item["sha256"], "mode_bits": item["mode_bits"]})
+    return added
+
+
 def _load_mode_bound_v34() -> Any:
     """Load the actual V34 module and replace only its global copy primitive."""
     original_loader = V41.V38._load_v34
@@ -317,6 +359,7 @@ def _rebind_v43(value: dict[str, Any], *, output: Path,
         found += 1
     if found != 1:
         raise PortableV44Error("V43 executor_v41 runtime role is not unique")
+    compatibility_sources = _append_compatibility_runtime_sources(value)
     roots = {"target_root": str(target_root), "output_root": str(output_root)}
     value["fresh_roots"] = roots
     parent = dict(value.get("parent_resource_binding", {}))
@@ -330,6 +373,7 @@ def _rebind_v43(value: dict[str, Any], *, output: Path,
         "previous_request_sha256": value.get("sha256"),
         "wrapper": {"path": str(SCRIPT), "sha256": sha256_file(SCRIPT)},
         "nested_stat_refreshes": refreshes,
+        "compatibility_runtime_sources": compatibility_sources,
         "nested_stat_policy": "small_sha_verified_code_json_only; payload_reject",
         "mode_copy_policy": "preserve_source_mode_and_distinct_target_inode",
         "deadline_policy": "one_absolute_monotonic_subtraction",
