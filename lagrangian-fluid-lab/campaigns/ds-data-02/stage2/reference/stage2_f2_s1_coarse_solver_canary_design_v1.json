@@ -1,0 +1,258 @@
+{
+  "schema": "ds02.stage2.f2-s1.coarse-solver-canary-design.v1",
+  "status": "READY_FOR_PARENT_SOLVER_REQUEST_REVIEW_AFTER_F2_V9_QA",
+  "family_id": "F2",
+  "sentinel_id": "F2-S1",
+  "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
+  "scope": {
+    "purpose": "One bounded full-window coarse solver canary after actual owner-centered support QA; estimate resource cost and calibrate time/output observables.",
+    "scientific_status": "development_canary_only",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "solver_launch_owner": "primary_root_only",
+    "preparation_worktree_may_launch": false,
+    "no_fine_solver_before_coarse_review": true,
+    "no_mass_rescale": true,
+    "foreign_gpu_6_protected": true
+  },
+  "source_and_control_contract": {
+    "continuous_owner_mass_kg": 18.876,
+    "native_sample_mass_is_not_continuum_truth": true,
+    "geometry_identity": "F2_GEOM_CUP_RECEIVER_OFFSET_V1",
+    "control_identity": "F2_CTRL_SMOOTH_ROTATE_Y_V1",
+    "motion_table_window_s": [0.0, 4.0],
+    "motion_terminal_angle_deg": -105.0,
+    "motion_duration_s": 0.9,
+    "physical_query_window_s": [0.0, 4.0],
+    "query_times_s": [0.0, 1.0, 2.0, 3.0, 4.0],
+    "query_time_policy": "Use actual RunPARTs timestamps and EXACT/EXACT_OR_LEFT/BRACKETED records. Never map frame index to time, extrapolate a missing terminal frame, or claim an exact saved time when only a bracket exists.",
+    "control_changes_in_canary": [],
+    "intentional_numerical_changes": ["dp_m", "h_m", "massfluid_kg", "particle_count", "particle_lattice_phase", "savedt_logging_only"],
+    "savedt_contract": {
+      "xml_logging": "JDsSaveDt alldt=1 if present in the bound overlay",
+      "cli_svdt": "UNSUPPORTED_UNVERIFIED; do not add -svdt",
+      "required_records": ["Run.out", "RunPARTs", "DtAllInfo.csv", "DTsMin_count_or_official_field"],
+      "row_semantics": "UNKNOWN until official source and terminal metadata close the Run.out/RunPARTs/DtAllInfo count relation; do not call saved-window rows a complete per-step trace.",
+      "clamp_semantics": "Report actual DTsMin count/official units. Do not infer clamp events from CFL or from a missing row."
+    }
+  },
+  "actual_input_evidence": {
+    "coarse_owner_centered_gencase": {
+      "grid": "coarse",
+      "dp_m": 0.0088,
+      "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_ROOT_076/f2-s1-owner-centered-cell-selector-gencase-root-076-001-root-forward-030-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_ROOT_076/f2-s1-owner-centered-cell-selector-gencase-root-076-001-root-forward-030-001/generated.xml",
+      "generated_xml_sha256": "41c5a9d065d38e30c257e2e2ece68408ace58741eb497c8ba7a9772bcbb8493f",
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_ROOT_076/f2-s1-owner-centered-cell-selector-gencase-root-076-001-root-forward-030-001/execution-receipt.json",
+      "gencase_receipt_sha256": "fdfa3019772352cc736764ac74552b62ccbe0128c2e35a1a812e44df816819ff",
+      "actual_particle_counts": {"total": 540633, "fluid": 27750, "fixed": 480366, "moving": 32517, "floating": 0},
+      "fluid_counts_by_mk": {"1": 9250, "2": 9250, "3": 9250},
+      "massfluid_kg": 0.000681472,
+      "sample_mass_kg": 18.910848,
+      "sample_mass_error_vs_owner": 0.001846153846153745,
+      "sample_mass_gate": "PASS_PREFERRED_1PCT_DIAGNOSTIC",
+      "generated_bi4_bytes": 23789263,
+      "generated_fluid_vtk_bytes": 1165779,
+      "generated_bound_vtk_bytes": 13335205,
+      "generated_boundary_points": 512883,
+      "support_qa": {
+        "status": "PASS",
+        "schema": "ds02.stage2.f2-s1.owner-centered-cell-selector-support-audit.v8",
+        "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_CELL_SELECTOR_SUPPORT_V8_ROOT_080/f2-s1-cell-selector-support-v8-root-080-001-root-forward-030-001/report/f2_s1_owner_centered_cell_selector_support_audit_v8.json",
+        "report_sha256": "c5ce62c8ab5ab44fbbb60ba5c1b8c3df76cd046df3e69bb9de6c74e2a83e4bd6",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_CELL_SELECTOR_SUPPORT_V8_ROOT_080/f2-s1-cell-selector-support-v8-root-080-001-root-forward-030-001/execution-receipt.json",
+        "vtk_content_scope": "worker pre/post SHA+stat closed; parent did not read payload",
+        "mass_gate": "PASS_SOURCE_OWNER_SAMPLE_DIAGNOSTIC_WITHIN_ONE_PERCENT",
+        "support_gate": "PASS_DISCRETE_SUPPORT_INSIDE_FROZEN_OWNER_BOXES"
+      }
+    },
+    "middle_owner_centered_gencase": {
+      "grid": "middle",
+      "dp_m": 0.0044,
+      "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0044_ROOT_083/f2-s1-owner-centered-cell-selector-dp0044-gencase-root-083-001-root-forward-030-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0044_ROOT_083/f2-s1-owner-centered-cell-selector-dp0044-gencase-root-083-001-root-forward-030-001/generated.xml",
+      "generated_xml_sha256": "081197395b960f744bc049ff588febfd3f5514c33c56eb754d8a68c76ddea452",
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0044_ROOT_083/f2-s1-owner-centered-cell-selector-dp0044-gencase-root-083-001-root-forward-030-001/execution-receipt.json",
+      "gencase_receipt_sha256": "988a3d97a5d569184075ed904c069125d4eadbbcdbe4fb3a1e515d242e2f2d50",
+      "actual_particle_counts": {"total": 2213441, "fluid": 222000, "fixed": 1864757, "moving": 126684, "floating": 0},
+      "fluid_counts_by_mk": {"1": 74000, "2": 74000, "3": 74000},
+      "massfluid_kg": 0.000085184,
+      "sample_mass_kg": 18.910848,
+      "sample_mass_error_vs_owner": 0.001846153846153745,
+      "sample_mass_gate": "PASS_PREFERRED_1PCT_DIAGNOSTIC_ONLY",
+      "generated_bi4_bytes": 97392815,
+      "generated_fluid_vtk_bytes": 9324287,
+      "generated_boundary_points": 1991441,
+      "generated_bound_vtk_bytes": 51777718,
+      "support_qa": {
+        "status": "PASS",
+        "schema": "ds02.stage2.f2-s1.owner-centered-cell-selector-support-audit.v9",
+        "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_MIDDLE_SUPPORT_V9_ROOT_088/f2-s1-middle-support-v9-root-088-001-root-forward-030-001/report/f2_s1_owner_centered_cell_selector_support_audit_v9.json",
+        "report_sha256": "5fc9cb0ca12e09189055628ee63f09839fd95b17e1566b7af4dd7ac1780b082d",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_MIDDLE_SUPPORT_V9_ROOT_088/f2-s1-middle-support-v9-root-088-001-root-forward-030-001/execution-receipt.json",
+        "vtk_content_scope": "worker pre/post SHA+stat closed; parent did not read payload",
+        "mass_gate": "PASS_SOURCE_OWNER_SAMPLE_DIAGNOSTIC_WITHIN_ONE_PERCENT",
+        "support_gate": "PASS_DISCRETE_SUPPORT_INSIDE_FROZEN_OWNER_BOXES"
+      },
+      "solver_status": "DO_NOT_LAUNCH_FROM_THIS_DESIGN"
+    },
+    "fine_owner_centered_gencase": {
+      "grid": "fine",
+      "dp_m": 0.0022,
+      "output_root": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0022_ROOT_084/f2-s1-owner-centered-cell-selector-dp0022-gencase-root-084-001-root-forward-030-001",
+      "generated_xml": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0022_ROOT_084/f2-s1-owner-centered-cell-selector-dp0022-gencase-root-084-001-root-forward-030-001/generated.xml",
+      "generated_xml_sha256": "0703e1aef17a0f3c07fbffad11faf7393b21246a7e697f6eadab7d12e8aeb63c",
+      "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0022_ROOT_084/f2-s1-owner-centered-cell-selector-dp0022-gencase-root-084-001-root-forward-030-001/execution-receipt.json",
+      "gencase_receipt_sha256": "bf854aaa62cb686bad8755fbd46d1cd5227697194a6b13e1bffdb4ecac62f0e3",
+      "actual_particle_counts": {"total": 9775755, "fluid": 1776000, "fixed": 7506591, "moving": 269164, "floating": 0},
+      "fluid_counts_by_mk": {"1": 592000, "2": 592000, "3": 592000},
+      "massfluid_kg": 0.000010648,
+      "sample_mass_kg": 18.910848,
+      "sample_mass_error_vs_owner": 0.001846153846153745,
+      "sample_mass_gate": "PASS_PREFERRED_1PCT_DIAGNOSTIC_ONLY",
+      "generated_bi4_bytes": 430134631,
+      "generated_fluid_vtk_bytes": 74592295,
+      "generated_boundary_points": 7999755,
+      "generated_bound_vtk_bytes": 207993883,
+      "support_qa": {
+        "status": "PASS",
+        "schema": "ds02.stage2.f2-s1.owner-centered-cell-selector-support-audit.v9",
+        "report": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FINE_SUPPORT_V9_ROOT_089/f2-s1-fine-support-v9-root-089-001-root-forward-030-001/report/f2_s1_owner_centered_cell_selector_support_audit_v9.json",
+        "report_sha256": "b636a397d0ce1ad2095ca94b54f3ede13aa564750c3328cc50f5f9dcefce8be9",
+        "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FINE_SUPPORT_V9_ROOT_089/f2-s1-fine-support-v9-root-089-001-root-forward-030-001/execution-receipt.json",
+        "vtk_content_scope": "worker pre/post SHA+stat closed; parent did not read payload",
+        "mass_gate": "PASS_SOURCE_OWNER_SAMPLE_DIAGNOSTIC_WITHIN_ONE_PERCENT",
+        "support_gate": "PASS_DISCRETE_SUPPORT_INSIDE_FROZEN_OWNER_BOXES"
+      },
+      "solver_status": "DO_NOT_LAUNCH_FROM_THIS_DESIGN"
+    }
+  },
+  "cost_proxy": {
+    "method": "Planning proxy only: linear scaling from one completed F2 full-window 401-frame run by actual total particle count. The parent terminal receipt, storage guard, UUID lease and actual output are authoritative.",
+    "baseline_completed_run": {
+      "case_id": "F2_S1_FULL_CFD_CANARY_DP01258_T4",
+      "receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_S1_FULL_CFD_CANARY_DP01258_T4/f2_s1_full_cfd_canary_dp01258_t4_tout010-root-001/execution-receipt.json",
+      "receipt_sha256": "5015710453e1e1e6a9b369b958663f09f121583a378809015a343b80beee88c0",
+      "actual_total_particles": 264357,
+      "actual_native_frames": 401,
+      "actual_tree_bytes": 4665670874,
+      "actual_non_receipt_bytes": 4665609698,
+      "elapsed_seconds": 64.81670932285488,
+      "cpu_core_seconds": 74.699076,
+      "gpu_seconds": 64.81670932285488,
+      "output_interval_s": 0.01,
+      "physical_window_s": [0.0, 4.0],
+      "terminal_storage_reservation_bytes": 17179869184,
+      "scientific_status": "development_canary_only"
+    },
+    "grids": {
+      "coarse": {
+        "total_particles": 540633,
+        "np_ratio_to_baseline": 2.0450867576799556,
+        "projected_raw_tree_bytes": 9541701720,
+        "projected_raw_tree_bytes_safety_1p15": 10972956978,
+        "recommended_initial_reservation_bytes": 17179869184,
+        "projected_elapsed_seconds": 132.555793913,
+        "projected_cpu_core_seconds": 152.766091139,
+        "projected_gpu_seconds": 132.555793913,
+        "launch_order": 1,
+        "solver_ready": "ONLY_AFTER_COARSE_F2_V9_SUPPORT_QA_PASS_AND_PARENT_REVIEW"
+      },
+      "middle": {
+        "total_particles": 2213441,
+        "np_ratio_to_baseline": 8.372923735705882,
+        "projected_raw_tree_bytes": 39065306404,
+        "projected_raw_tree_bytes_safety_1p15": 44925102364,
+        "recommended_initial_reservation_bytes": 58597959605,
+        "projected_elapsed_seconds": 542.70536396,
+        "projected_cpu_core_seconds": 625.449666475,
+        "projected_gpu_seconds": 542.70536396,
+        "launch_order": 2,
+      "solver_ready": "NO; first revise proxy with coarse terminal receipt and independent support/observer evidence",
+      "boundary_points": 1991441
+      },
+      "fine": {
+        "total_particles": 9775755,
+        "np_ratio_to_baseline": 36.97936880808906,
+        "projected_raw_tree_bytes": 172533563987,
+        "projected_raw_tree_bytes_safety_1p15": 198413598585,
+        "recommended_initial_reservation_bytes": 258800345980,
+        "projected_elapsed_seconds": 2396.880998976,
+        "projected_cpu_core_seconds": 2762.324681027,
+        "projected_gpu_seconds": 2396.880998976,
+        "launch_order": 3,
+      "solver_ready": "NO; do not launch blindly or reserve alongside the coarse canary",
+      "boundary_points": 7999755
+      }
+    },
+    "storage_policy": {
+      "raw_native_tree_is_immutable": true,
+      "do_not_delete_existing_raw_or_vtk": true,
+      "typed_hdf5": "Separate guarded CPU conversion only after terminal raw receipt; do not include an unmeasured typed duplicate in the coarse solver reservation.",
+      "downsample": "Derived from the one complete native run; no extra CFD for 2x/4x output sampling. Keep all raw source rows available for the calibration worker.",
+      "proxy_uncertainty": "The NP-scaled values are planning estimates, not wall-time or storage upper bounds. Recompute from the terminal coarse receipt before any middle/fine decision."
+    }
+  },
+  "coarse_canary_execution_contract": {
+    "request_status": "NOT_BUILT_NOT_LAUNCHED",
+    "parent_guard": {
+      "fresh_gpu_inventory_and_uuid_lease": true,
+      "atomic_parent_reservation": true,
+      "protected_gpu_index": 6,
+      "max_wall_seconds": 7200,
+      "cpu_threads": 2,
+      "omp_threads": 2,
+      "max_storage_bytes": 17179869184,
+      "estimated_peak_gpu_mib": 4096,
+      "solver_runner": "shared parent external solver v5/v4 path selected by root",
+      "no_preparation_worktree_launch": true
+    },
+    "solver_command_shape": ["DualSPHysics5.4_linux64", "-gpu:<fresh-parent-selected-index>", "<owner-centered-coarse-generated-prefix>", "{attempt_root}/solver_output", "-tmax:4", "-tout:0.01"],
+    "source_input_closure": [
+      "actual coarse GenCase request and terminal receipt",
+      "actual coarse generated.xml",
+      "source Def/motion/control binding",
+      "F2 V9 support QA report and worker receipt",
+      "SaveDt overlay source and hash if used",
+      "official solver/GenCase/PartVTK binary hashes",
+      "parent selected external-solver runner and resource ledger"
+    ],
+    "preconditions": [
+      "F2 coarse V9 support worker reports finite points, selector/owner identity and actual MK blocks",
+      "F2 coarse whole-owner mass gate is PASS under the frozen 18.876 kg target",
+      "source/control/motion SHA and generated XML are parent-guarded before and after use",
+      "no solver output path exists and overwrite is refused",
+      "root reviews the actual V9 report before GPU dispatch"
+    ],
+    "post_run_required": [
+      "terminal receipt with actual raw tree bytes and GPU/CPU charge",
+      "Run.out, RunPARTs and DtAllInfo actual endpoint/count fields",
+      "all 401 native frames retained through 0..4 s",
+      "selected physical observer on actual timestamps: mass by MK, weighted COM, velocity, KE and region assignment",
+      "QI/QN/QE remain UNKNOWN until independent calibration"
+    ]
+  },
+  "frozen_error_and_calibration_contract": {
+    "position_abs_scale": "0.02 * registered continuous-owner L; F2 L registration remains source-bound and must not be replaced by sample mass",
+    "velocity_relative": 0.05,
+    "kinetic_energy_relative": 0.05,
+    "region_mass_fraction_points": 0.03,
+    "event_time_fraction": 0.01,
+    "time_alignment_fraction_of_task_tolerance": 0.25,
+    "output_reconstruction_fraction_of_task_tolerance": 0.25,
+    "event_time": "UNKNOWN until a finite source-defined event and characteristic T are registered; do not use the 4 s window as event T.",
+    "comparison_observables": ["weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_J", "mass_by_native_mk", "region_assignment"],
+    "not_claimed": ["pointwise particle truth", "pressure truth", "neighbor-grid truth", "full per-step integrator error", "QI", "QN", "QE"],
+    "manufactured_calibration": "Use a separate known trajectory/known brackets fixture to validate EXACT/BRACKETED/terminal handling; this cannot supply the physical F2 error bound.",
+    "output_calibration": "Compare native dense rows with 2x/4x derived selections at registered source timestamps, retaining actual RunPARTs brackets and reporting UNKNOWN when a required neighbor is absent.",
+    "half_cfl": "A separate half-CFL run is not part of the first coarse launch. Register it only after same-CFL terminal storage/time/clamp evidence and review; do not infer dt from CFL."
+  },
+  "next_actions": [
+    "Complete parent-guarded F2 V9 coarse support QA and preserve its receipt/report.",
+    "If and only if coarse V9 support/mass/control preconditions pass, build a new parent-reviewed external solver request from the actual coarse receipt; do not reuse the old dp01258 request identity.",
+    "Run one full 0..4 s coarse same-CFL dense canary with the actual owner-centered coarse generated prefix and new output root.",
+    "Recompute storage/time proxies from that terminal receipt before any middle/fine solver discussion.",
+    "Keep F2 S2 and the other sentinels in the global study graph; this S1 coarse design is not a 14-sentinel completion claim."
+  ]
+}
