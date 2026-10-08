@@ -26,8 +26,13 @@ the receipt records no model/CFD invocation and fixed-point storage passed.
 
 The loader is
 `lagrangian-fluid-lab/scripts/ds_data02_stage2_native_identity_task_loader_v1.py`.
-The source-bound evaluator is
+The preserved V2 evaluator is
 `lagrangian-fluid-lab/scripts/ds_data02_stage2_native_identity_task_evaluator_v2.py`.
+The strict forward evaluator is
+`lagrangian-fluid-lab/scripts/ds_data02_stage2_native_identity_task_evaluator_v3.py`;
+it joins every task row to the ordered root070 source row, checking the exact
+case-qualified key sequence and family/motive/code/cause fields. This rejects
+count-preserving case-key swaps that could pass aggregate checks.
 The evaluator must receive the expected root070 path and SHA plus the root071
 completed execution receipt, including its fixed-point storage and no-model
 flags. It rejects
