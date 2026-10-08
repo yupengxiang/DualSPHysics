@@ -419,6 +419,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
     inputs_with_manifest = dict(inputs)
     inputs_with_manifest[str(manifest_path)] = {"path": str(manifest_path), "sha256": sha256(manifest_path), "bytes": manifest_path.stat().st_size}
     input_files_request = sorted(inputs_with_manifest)
+    request_input_bytes = sum(item["bytes"] for item in inputs_with_manifest.values())
     request = {
         "schema": "ds02.request.v1", "family_id": "infra", "case_id": "STAGE2_OMISSION_MECHANISM_PROBE_ALL118_V3",
         "physical_case_id": "F2_F4_F6_ALL118_NATIVE_SOURCE_CLOSURE_V3", "attempt_id": f"{name}-primary-001",
@@ -430,7 +431,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
         "runtime_binding": {label: {"path": str(path), "sha256": sha256(path)} for label, path in runtime.items() if label.startswith("runtime_")},
         "dispatch_binding": {label: {"path": str(path), "sha256": sha256(path)} for label, path in runtime.items() if label.startswith("dispatch_")},
         "strict_dispatch_binding": {label: {"path": str(path), "sha256": sha256(path)} for label, path in runtime.items() if label.startswith("strict_")},
-        "source_read_cost": {"h5_bytes_read": 0, "trajectory_bytes_read": 0, "raw_partout_bytes_read": 0, "small_source_bytes_read": input_bytes, "runtime_pre_post_hash_bytes": 2 * input_bytes, "estimated_output_bytes": 64 * 1024 * 1024},
+        "source_read_cost": {"h5_bytes_read": 0, "trajectory_bytes_read": 0, "raw_partout_bytes_read": 0, "small_source_bytes_read": request_input_bytes, "runtime_pre_post_hash_bytes": 2 * request_input_bytes, "estimated_output_bytes": 64 * 1024 * 1024},
         "source_scope": {"selected_cases": dict(FAMILY_COUNTS), "native_ids": 1328, "v2_outcome_preserved": True, "f2_s1_exact_source_closure_merged": True, "h5_content_read": False, "trajectory_content_read": False, "raw_partout_content_read": False, "physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN"},
         "censoring_semantics": semantic_counterexamples(),
         "canonical_ready": True, "launch": True, "launch_allowed": True, "execution_allowed": True, "launch_owner": "root", "primary_launch_owner": "root", "shared_lease_required": True, "foreign_process_protection_required": True,
@@ -438,7 +439,7 @@ def prepare(output_dir: Path, *, v2_report_path: Path = V2_REPORT_DEFAULT,
         "request_note": "Forward all-118 mechanism source-closure v3. Preserves completed v2 report/CSV/RunPARTs bytes and merges exact F2-S1 native-source closure case 030. No H5/trajectory/raw PartOut/BI4 content, decoder, solver, CFD or model. Repeated crossings, signed net flux, material/region destination, exact event times and unknown-width dynamics remain UNKNOWN; 0.003 is a screening gate only.",
     }
     atomic_json(request_path, request)
-    return {"status": "prepared", "manifest": str(manifest_path), "manifest_sha256": sha256(manifest_path), "request": str(request_path), "request_sha256": sha256(request_path), "selected_case_count": 118, "selected_native_id_count": 1328, "input_count": len(input_files_request), "input_bytes": input_bytes, "h5_opened": False, "launch_allowed": True}
+    return {"status": "prepared", "manifest": str(manifest_path), "manifest_sha256": sha256(manifest_path), "request": str(request_path), "request_sha256": sha256(request_path), "selected_case_count": 118, "selected_native_id_count": 1328, "input_count": len(input_files_request), "input_bytes": request_input_bytes, "h5_opened": False, "launch_allowed": True}
 
 
 def main() -> int:
