@@ -45,3 +45,14 @@ F1 lowerhead材料/区域/事件标签actual/root独立PASS，见F1_ANCHOR_FAMIL
 - F1/F6 小规模点几何实际检查均成功，F1_F6_POINT_GEOMETRY_ACTUAL_INDEPENDENT_VERIFICATION_001.json：F1 .009 两模式12份产品源闭合、selected points/全文件字节相同，仍仅 .009/.010 两档，.009离散cell envelope与连续owner有毫米残差；质量+.377%不能单独证明几何等价。F6 2哨点×3档身体声明一致，候选粒子云质量/质心/惯量独立含义保留；original cloud诊断和候选case ID输出需v4。未新增数值参考信用。
 - F3 family-label 当前已实际 completed，父预留已释放，等待root新label/source/fees独立核验；大原始H5读取槽释放。依次推进其余族标签或已完成F3重建finalization recovery，不重复解码F3。
 - F7 half-CFL v7 builder 消费真实 v12 QA；root 添加式 forward 闭合真实 inner QA/receipt、官方库、root启动来源，v6真实validator元数据PASS。见native-reconstruction/f7-half-cfl-v7-root-prepared-001/f7-s2-half-cfl-solver-v6-root-forward-001.json。仅在fresh UUID inventory/原子parent lease和两个FS预留成功后实际运行，CFD动态结果与误差仍未知。
+
+2026-10-08T12:14Z actual forward（原记录保留）：
+
+- F7 half-CFL v6完整实际成功并root核验：F7_HALF_CFL_V6_FULL_NATIVE_ACTUAL_INDEPENDENT_VERIFICATION_001.json，1201原生帧，0至12.00003421429911s，原生排除和DtMin夹紧均0；GPU250.12970504071563s、CPU250.088017s、NVMe3716183638B/Home33490B与父账精确一致，UUID租约和预留释放。原请求tmax12.00003209155591不是实际终点；尚无积分/输出误差或Q-N信用，继续actual9帧half/baseline观察与预登记校准。
+- F2 recovery v2实际成功：F2_LABEL_SUMMARY_RECOVERY_ACTUAL_INDEPENDENT_VERIFICATION_001.json，旧4MBlabel H5及failed receipt保留；3个MK材料来源各7.038000334kg、401帧。数值缺失.003kg与未知区域.003kg为不同身份，合计未知物理去向.006kg/全初始21.114001003kg=.00028417，不能把筛选阈值当动力学合格。摘要继承trajectory_content_opened=True语义错误已由root proof明确：此次仅生成label H5被读，original trajectory未读。等待forward语义修正和quality v3适配。
+- F1/F3新label产品quality v2实际审计和root独立核验PASS：F1_F3_LABEL_QUALITY_V2_ACTUAL_INDEPENDENT_VERIFICATION_001.json，2个development产物，无originalH5/BI4读，不给split/Q-N。F3来源是初始空间分区，不能冒充native MK材料。
+- F3 full836 phase recovery实际成功并root核验：F3_FULL836_PHASE_RECOVERY_ACTUAL_INDEPENDENT_VERIFICATION_001.json，新typed全文件SHA9020155c...与CURRENT一致，839个原始文件/6594344514B完整pre/post tree一致，源小文件pre/post及费用/释放闭合；实际CPU36.95545s/wall412.653s/38762B。原5400s超时失败保持failed，恢复信用限定已完成的重建/一致性阶段，typed pressure为EOS诊断，科学资格UNKNOWN。
+- F1新增dp.008 GenCase实际完成：F1_THIRD_DP008_GENCASE_ACTUAL_INDEPENDENT_VERIFICATION_001.json，79800fluid/193882fixed，XML inventory40.8576kg，连续owner40.2kg，+1.6358208955%属原1–2% MARGINAL，未达到1% preferred；不是>2% hard fail。新离散点支持及native binary mass未复核，仍需owner-centred多档离散合同，禁止rescale/宽阈值。
+- F6 geometry v4实际成功：root补核原始云和候选云，身体128kg与~256kg粒子支撑分开，exact physical ID与app alias分开；F6_RIGID_CLOUD_V4_ACTUAL_INDEPENDENT_VERIFICATION_001.json。当前/粗/细云COM偏差与sample惯量为诊断，不是physical真值。
+- event v3/v4登记root builder/制造方向反例/来源SHA/尺度算式复核：EVENT_V3_V4_PREREGISTRATION_ROOT_VERIFICATION_028.json。F2有限孔径/MK0→1等映射，F3 top=.09阈值=.135、冻结velocity仍sqrt(9.81*.084)，F6刚体state identity；实际事件仍待匹配观察。此登记不给QI/QN/QE。
+- 当前大IO槽：F4 family labels实际运行（session2783，supervisor1859747/launcher1859753，1CPU/OMP1/7200s，同父资源预留），F3 recovery已终态；没有活跃CFD。之后依次F5/F6/F7标签、其余完整raw anchors与portable实际链。新portable v22/v29已集成，但full outer取消while-helper及wrapper计时边界需forward修复/实际验证，不凭仅metadata validator启动8.64GB试验。root聚焦17测试当前15PASS/2frozen绝对路径迁移失败已反馈，两失败不是不存在或全通过。
