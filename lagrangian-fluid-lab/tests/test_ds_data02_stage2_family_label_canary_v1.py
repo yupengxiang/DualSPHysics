@@ -153,3 +153,19 @@ def test_contract_rejects_unearned_dynamic_credit(tmp_path: Path) -> None:
     contract["semantics"]["dynamic_impact"] = "BOUNDED"
     with pytest.raises(family_canary.ContractError, match="dynamic impact"):
         family_canary.validate_contract(contract, check_content=True)
+
+
+def test_contract_rejects_runparts_from_another_raw_parent(tmp_path: Path) -> None:
+    source = _tiny_h5(tmp_path / "source.h5")
+    config = _tiny_config(tmp_path / "config.json")
+    contract = _synthetic_contract(tmp_path, config, source)
+    other = tmp_path / "other-solver"
+    other.mkdir()
+    other_runparts = other / "RunPARTs.csv"
+    other_runparts.write_text("same-looking-but-different-solver-parent")
+    contract["source"]["run_parts"] = {
+        "path": str(other_runparts),
+        "sha256": family_canary.sha256_file(other_runparts),
+    }
+    with pytest.raises(family_canary.ContractError, match="raw solver output"):
+        family_canary.validate_contract(contract, check_content=True)
