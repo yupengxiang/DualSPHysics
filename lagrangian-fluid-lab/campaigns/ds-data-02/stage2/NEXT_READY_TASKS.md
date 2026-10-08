@@ -239,3 +239,10 @@ root070–073追加：root070实际导出1328条case-qualified身份记录，并
 root074–075追加：完整closure typed evaluator root074实际失败于V4 BASE改到V3后仍调用BASE._current_item；未启动child/ext0，4334B Home receipt及failedcharge保存，追加实测0.207814CPUsec使原charge+delta=systemd8.008238CPUsec。服务已stop，消费者实现真正完整parent→reserve→CURRENT→shim→report→charge小集成，后续CLI需线程环境在import前、wall clock在首次script行。V39仅metadata、新V40 helper仍待cold engine实际接入；未启动大复制。
 
 root075严格native_motive接口实际完成，1328条与root070/071精确有序(case_key,Idp)/family/motive/code/cause来源join。根基于真实小JSON记录独立做wrong case、count-preserving case swap、wrong code、same-family cause mutation、duplicate key五个内存反例，均拒绝；未做模型/研究分数/排行榜。所有科学UNKNOWN保持，服务费用/预留释放核验后stop。F3-S2初态source/mass/support/control审计已改交forensics；reference专注F5 parser/连续bed owner依据和F2有效lattice/clip表示修复，避免重复。整体goal仍active。
+
+
+root076–077追加（实际终态，整体goal ACTIVE）：F2 owner-centered cell-selector GenCase实际生成每MK9250，共27750，mf=.000681472kg，总18.910848kg，相对冻结连续owner18.876kg偏差+.184615385%，通过初始质量preferred门槛。根直接解析实际XML；点位支持、控制可比性和CFD仍待guarded检查，绝不把这一步当科学资格。见F2_CELL_SELECTOR_ACTUAL_GENCASE_MASS_ROOT_VERIFICATION_076.json。
+
+F5修复V3实际完整解析ROOT068 XML/Fluid/Bound VTK；父和worker full input SHA/stat前后稳定、与ROOT072失败父收据锚digest一致。67708 fluid全在声明box envelope内，outside0，23 boundary ties；质量254.477983412kg相对历史离散样本253.264kg偏差+.479335165%。根独立复算XML质量、源样本与归一化Def字节等价（只排除dp），motion SHA相同。continuous owner质量、bed clip/overlap支持仍UNKNOWN，不能用envelope质量或旧离散样本替代。见F5_V3_ACTUAL_INITIAL_SUPPORT_DIAGNOSTIC_ROOT_VERIFICATION_077.json。
+
+两次普通CPU实际费用2.238769/1.413992 CPUsec，61,079,088/110,119B；收据、ledger charge和预留释放独立闭合后服务已stop。线程环境现从systemd入口设定，防止import前BLAS无界线程。累计137.8154839296GPUh /703.8584178514CPUcoreh，零预留，资源与期限不重置。下一步：参考代理准备F2实际点位guarded snapshot/support和F5连续owner推导；forensics准备F3-S2既有三档初态审计；消费者修复完整typed parent actual接口并接入真正cold重放。当前无CFD/GPU/大I/O工作运行。
