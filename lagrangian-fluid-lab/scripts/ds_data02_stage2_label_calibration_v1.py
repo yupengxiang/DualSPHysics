@@ -192,6 +192,30 @@ def validate_v2(report_path: Path, receipt_path: Path, manifest_path: Path,
     receipt_request = receipt.get("request", {})
     if receipt_request.get("case_id") != request.get("case_id"):
         raise LabelCalibrationError("v2 receipt request identity differs")
+    request_hashes = receipt_request.get("input_sha256")
+    request_files = receipt_request.get("input_files")
+    launch_hashes = receipt.get("input_hashes_at_launch")
+    end_hashes = receipt.get("input_hashes_after_run")
+    if not isinstance(request_hashes, dict) or not isinstance(request_files, list):
+        raise LabelCalibrationError("v2 receipt request lacks exact input hash map")
+    if set(request_files) != set(request_hashes):
+        raise LabelCalibrationError("v2 receipt request input file/hash sets differ")
+    if launch_hashes != request_hashes or end_hashes != request_hashes:
+        raise LabelCalibrationError("v2 receipt launch/end input hashes differ from its completed request")
+    # A guarded forward request may embed the canonical request while retaining
+    # the original request/manifest paths.  Bind those original files by the
+    # explicit forward-root hashes; do not silently assume the mutable path's
+    # current bytes are the canonical wrapper request.
+    request_binding = binding(request_path, "v2 request")
+    manifest_binding = binding(manifest_path, "v2 manifest")
+    forward = receipt_request.get("forward_root_binding")
+    if isinstance(forward, dict):
+        if forward.get("original_request") != request_binding["path"] or forward.get("original_request_sha256") != request_binding["sha256"]:
+            raise LabelCalibrationError("v2 forward receipt does not bind the supplied original request")
+        if forward.get("source_manifest_sha256") != manifest_binding["sha256"]:
+            raise LabelCalibrationError("v2 forward receipt does not bind the supplied manifest")
+    elif receipt.get("request_sha256") != request_binding["sha256"]:
+        raise LabelCalibrationError("v2 receipt request SHA is not the supplied request")
     if len(report.get("cases", [])) != 118 or report.get("coverage", {}).get("selected_case_counts") != FAMILY_COUNTS:
         raise LabelCalibrationError("v2 report coverage differs")
     if report.get("coverage", {}).get("selected_native_id_count") != 1328:
@@ -208,8 +232,61 @@ def validate_v2(report_path: Path, receipt_path: Path, manifest_path: Path,
     }
 
 
-def validate_scan(case: dict[str, Any]) -> tuple[Path, dict[str, Any], list[str]]:
+def validate_completed_receipt(item: Any, label: str, expected_output_root: Path | None = None) -> tuple[dict[str, Any] | None, list[str]]:
+    """Validate a producer receipt without opening its scientific payloads."""
+    errors: list[str] = []
+    try:
+        receipt_path, _ = get_path_binding(item, label)
+        receipt = read_json(receipt_path, label)[1]
+    except LabelCalibrationError as exc:
+        return None, [str(exc)]
+    if receipt.get("schema") != "ds02.execution-receipt.v1":
+        errors.append(f"{label}_schema_mismatch")
+    if receipt.get("status") != "completed" or int(receipt.get("returncode", -1)) != 0:
+        errors.append(f"{label}_not_completed_code_0")
+    launch = receipt.get("input_hashes_at_launch")
+    after = receipt.get("input_hashes_after_run")
+    if not isinstance(launch, dict) or not isinstance(after, dict) or launch != after:
+        errors.append(f"{label}_input_hashes_not_stable")
+    request = receipt.get("request")
+    if not isinstance(request, dict) or not isinstance(request.get("input_sha256"), dict) or not isinstance(launch, dict):
+        errors.append(f"{label}_request_input_hashes_not_bound")
+    else:
+        requested = request["input_sha256"]
+        missing = set(requested) - set(launch)
+        extra = set(launch) - set(requested)
+        interpreter_path = lambda value: Path(value).name.startswith("python") or str(value).endswith("/bin/python")
+        if missing and not all(interpreter_path(value) for value in missing):
+            errors.append(f"{label}_request_input_hashes_not_bound")
+        # The v8 runner records its normalized interpreter as an additional
+        # input after request construction.  It is a source identity check,
+        # not an unbound scientific input.  Any other extra is rejected.
+        if extra and not all(interpreter_path(value) for value in extra):
+            errors.append(f"{label}_unexpected_runner_inputs")
+    if expected_output_root is not None:
+        declared = receipt.get("output_root")
+        if not declared or Path(declared).expanduser().resolve() != expected_output_root.expanduser().resolve():
+            errors.append(f"{label}_output_root_mismatch")
+    return receipt, errors
+
+
+def validate_scan(case: dict[str, Any], closure: dict[str, Any] | None = None) -> tuple[Path, dict[str, Any], list[str]]:
     source_files = case.get("source_files", {})
+    # The historical three-particle F2-S1 case predates the all-118 report's
+    # per-case decoder/solver aliases.  Its exact source-closure sidecar is a
+    # producer-bound substitute; do not silently join a neighboring run.
+    if case.get("case_key") == F2_S1_KEY and closure is not None:
+        closure_bindings = closure.get("source_bindings", {})
+        source_files = dict(source_files)
+        for role, closure_name in (
+            ("native_csv", "old_partvtkout_csv"),
+            ("decoder_receipt", "old_partvtkout_receipt"),
+            ("run_out", "runout"),
+            ("runparts", "runparts"),
+            ("solver_receipt", "solver_receipt"),
+        ):
+            if role not in source_files and isinstance(closure_bindings.get(closure_name), dict):
+                source_files[role] = closure_bindings[closure_name]
     scan_path, scan_binding = get_path_binding(source_files.get("scan"), f"{case.get('case_key')} scan")
     scan = read_json(scan_path, "scientific scan")[1]
     errors: list[str] = []
@@ -229,6 +306,29 @@ def validate_scan(case: dict[str, Any]) -> tuple[Path, dict[str, Any], list[str]
         errors.append("scan_fluid_initial_mass_missing")
     if not isinstance(scan.get("missing_id_records"), list):
         errors.append("scan_missing_id_records_not_list")
+    # The v2 report's native motive is credited only when its producer
+    # receipts are still completed and point to the exact small outputs used
+    # by the report.  This checks JSON receipt metadata only; it never reads
+    # the trajectory, BI4/OBI4, or a decoder input.
+    native_csv_item = source_files.get("native_csv")
+    run_out_item = source_files.get("run_out")
+    try:
+        native_csv_path, _ = get_path_binding(native_csv_item, f"{case.get('case_key')} native CSV")
+        run_out_path, _ = get_path_binding(run_out_item, f"{case.get('case_key')} Run.out")
+    except LabelCalibrationError as exc:
+        errors.append(str(exc))
+        native_csv_path = run_out_path = None
+    receipt_specs = (
+        ("scan_receipt", scan_path.parent),
+        ("decoder_receipt", native_csv_path.parent if native_csv_path is not None else None),
+        ("solver_receipt", run_out_path.parent.parent if run_out_path is not None else None),
+    )
+    for role, expected_root in receipt_specs:
+        if expected_root is None:
+            errors.append(f"{case.get('case_key')}_{role}_output_root_unavailable")
+            continue
+        _, receipt_errors = validate_completed_receipt(source_files.get(role), f"{case.get('case_key')} {role}", expected_root)
+        errors.extend(receipt_errors)
     return scan_path, scan, errors
 
 
@@ -310,11 +410,61 @@ def source_mk_match(idp: int, type_code: int, zone: Any, conversion: dict[str, A
     return result
 
 
-def particle_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str, Any] | None) -> tuple[list[dict[str, Any]], list[str]]:
+def enrich_f2_s1_observations(observations: list[dict[str, Any]], reconciliation: dict[str, Any] | None) -> list[dict[str, Any]]:
+    """Attach the exact small F2-S1 pre-gap kinematics to old observations.
+
+    The all-118 report deliberately preserved the historical three-ID ledger
+    without RunPARTs/CSV fields.  The separate source-closure reconciliation
+    contains the last known saved time, velocity, and native endpoint.  This
+    enrichment names the saved time correctly and never treats it as the
+    physical deletion time.
+    """
+    if not reconciliation:
+        return observations
+    by_id = {
+        row.get("idp"): row
+        for row in reconciliation.get("missing_fluid_ids", [])
+        if isinstance(row, dict) and isinstance(row.get("idp"), int)
+    }
+    enriched: list[dict[str, Any]] = []
+    for original in observations:
+        obs = copy.deepcopy(original)
+        row = by_id.get(obs.get("idp"))
+        previous = row.get("first_gap_previous_state", {}) if isinstance(row, dict) else {}
+        mass = row.get("initial_mass_kg") if isinstance(row, dict) else obs.get("mass_kg")
+        velocity = previous.get("velocity_m_s") if isinstance(previous, dict) else None
+        if (
+            isinstance(velocity, list)
+            and len(velocity) == 3
+            and all(finite_number(value) for value in velocity)
+            and finite_number(mass)
+        ):
+            mass_float = float(mass)
+            velocity_float = [float(value) for value in velocity]
+            obs["saved_record_time_s"] = previous.get("time_s")
+            obs["saved_record_velocity_m_s"] = velocity_float
+            obs["momentum_kg_m_s"] = [mass_float * value for value in velocity_float]
+            obs["kinetic_energy_j"] = 0.5 * mass_float * sum(value * value for value in velocity_float)
+            obs["saved_record_time_semantics"] = "last_known_pre_gap_saved_time; not exact physical deletion time"
+            obs["kinematic_source"] = "F2-S1 native source-closure first_gap_previous_state"
+        if isinstance(row, dict):
+            native_record = row.get("native_record", {})
+            if isinstance(native_record, dict):
+                if isinstance(native_record.get("position_m"), list):
+                    obs["endpoint_position_m"] = native_record["position_m"]
+                if finite_number(native_record.get("density_kg_m3")):
+                    obs["endpoint_density_kg_m3"] = native_record["density_kg_m3"]
+        enriched.append(obs)
+    return enriched
+
+
+def particle_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str, Any] | None,
+                   reconciliation: dict[str, Any] | None = None) -> tuple[list[dict[str, Any]], list[str]]:
     errors: list[str] = []
     observations = case.get("particle_observations")
     if not isinstance(observations, list):
         return [], ["native_particle_observations_missing"]
+    observations = enrich_f2_s1_observations(observations, reconciliation)
     records = [r for r in scan.get("missing_id_records", []) if isinstance(r, dict) and r.get("type_code") == 3]
     by_id: dict[int, list[dict[str, Any]]] = {}
     for record in records:
@@ -356,9 +506,18 @@ def particle_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[
             },
             "censoring": {
                 "saved_record_bracket_s": bracket if bracket_valid else None,
+                "saved_record_time_s": obs.get("saved_record_time_s"),
+                "saved_record_time_semantics": obs.get("saved_record_time_semantics", "saved native record time; exact physical event time UNKNOWN"),
                 "exact_physical_event_time": "UNKNOWN",
                 "reentry_or_repeated_crossing": "UNKNOWN",
                 "signed_net_flux": "UNKNOWN",
+            },
+            "saved_record_kinematics": {
+                "velocity_m_s": obs.get("saved_record_velocity_m_s"),
+                "momentum_kg_m_s": obs.get("momentum_kg_m_s"),
+                "kinetic_energy_j": obs.get("kinetic_energy_j"),
+                "aggregation": "per-particle saved-record observation; no cross-time system sum",
+                "physical_event_time": "UNKNOWN",
             },
             "labels": {
                 "native_cause": "VALID_NATIVE_CAUSE" if not row_errors and obs.get("native_motive") in {"position", "density", "movement"} else "ERROR_NATIVE_CAUSE",
@@ -376,8 +535,9 @@ def particle_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[
 
 
 def case_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str, Any] | None,
-               conversion_errors: list[str], scan_errors: list[str]) -> dict[str, Any]:
-    labels, join_errors = particle_label(case, scan, conversion)
+               conversion_errors: list[str], scan_errors: list[str],
+               reconciliation: dict[str, Any] | None = None) -> dict[str, Any]:
+    labels, join_errors = particle_label(case, scan, conversion, reconciliation)
     errors = list(scan_errors) + list(conversion_errors) + list(join_errors)
     native = case.get("native_gate", {})
     native_count = int(native.get("native_count", len(labels))) if isinstance(native.get("native_count", len(labels)), int) else len(labels)
@@ -393,6 +553,10 @@ def case_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str,
         "revived_unique_ids": ledger.get("revived_unique_ids", "UNKNOWN"),
         "births_unique_ids": ledger.get("births_unique_ids", "UNKNOWN"),
         "initially_absent_count": ledger.get("initially_absent_count", "UNKNOWN"),
+        "first_arrival": "UNKNOWN",
+        "residence_time": "UNKNOWN",
+        "reentry_or_repeated_crossing": "UNKNOWN",
+        "signed_net_flux": "UNKNOWN",
         "interpretation": "lifecycle/re-entry semantics do not follow from first missing saved record",
     }
     mass_visibility = case.get("mass_visibility", {})
@@ -405,6 +569,42 @@ def case_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str,
         errors.append("mass_screen_denominator_missing")
     if mass_fraction is not None and mass_fraction_recomputed is not None and abs(float(mass_fraction) - mass_fraction_recomputed) > 1e-9:
         errors.append("mass_screen_fraction_mismatch")
+    source_mk_cohorts: dict[str, dict[str, Any]] = {}
+    for label in labels:
+        mapping = label.get("source_mk_mapping", {})
+        if mapping.get("status") != "VALID_SOURCE_MK_MAPPING":
+            continue
+        cohort_key = f"mk{mapping['source_mk']}/mkfluid{mapping['source_mkfluid']}"
+        cohort = source_mk_cohorts.setdefault(cohort_key, {
+            "source_mk": mapping["source_mk"],
+            "source_mkfluid": mapping["source_mkfluid"],
+            "typed_block_begin": mapping.get("source_block_begin"),
+            "typed_block_count": mapping.get("source_block_count"),
+            "missing_particle_count": 0,
+            "missing_source_visible_mass_kg": 0.0,
+            "native_motive_counts": {},
+            "first_missing_brackets_s": [],
+            "source_mk_initial_mass_denominator_kg": None,
+            "source_mk_mass_fraction": "UNKNOWN_PER_MK_INITIAL_ARRAY_NOT_READ",
+            "first_arrival": "UNKNOWN",
+            "residence_time": "UNKNOWN",
+            "repeated_crossing": "UNKNOWN",
+            "signed_net_flux": "UNKNOWN",
+            "destination_material_region": "UNKNOWN",
+            "physical_fate": "UNKNOWN",
+        })
+        cohort["missing_particle_count"] += 1
+        mass = label.get("typed_record", {}).get("initial_mass_kg")
+        if finite_number(mass):
+            cohort["missing_source_visible_mass_kg"] += float(mass)
+        motive = label.get("native_motive") or "UNKNOWN"
+        motive_counts = cohort["native_motive_counts"]
+        motive_counts[motive] = motive_counts.get(motive, 0) + 1
+        bracket = label.get("censoring", {}).get("saved_record_bracket_s")
+        if isinstance(bracket, list):
+            cohort["first_missing_brackets_s"].append(bracket)
+    for cohort in source_mk_cohorts.values():
+        cohort["missing_source_visible_mass_kg"] = round(cohort["missing_source_visible_mass_kg"], 15)
     if errors:
         structural = "ERROR_LABEL_EVIDENCE"
     elif source_error:
@@ -423,10 +623,17 @@ def case_label(case: dict[str, Any], scan: dict[str, Any], conversion: dict[str,
         "native_motive": native.get("motive"),
         "native_count": native_count,
         "source_mk_counts": {"valid": source_valid, "error": source_error, "unknown": source_unknown},
+        "source_mk_cohorts": source_mk_cohorts,
         "saved_record_bracket_count": bracket_valid,
         "saved_record_bracket_status": "VALID_SAVED_RECORD_BRACKET" if bracket_valid == len(labels) else ("UNKNOWN_SAVED_RECORD_BRACKET" if bracket_valid == 0 else "PARTIAL_SAVED_RECORD_BRACKET"),
         "first_missing_window_s": case.get("first_missing_window_s"),
         "censoring": lifecycle,
+        "source_semantic_enrichment": {
+            "status": "F2_S1_CLOSURE_KINEMATICS_BOUND" if reconciliation is not None else "NOT_APPLICABLE",
+            "saved_record_velocity_momentum_ke": "bound from first_gap_previous_state" if reconciliation is not None else "from completed v2 observation if present",
+            "physical_event_time": "UNKNOWN",
+            "cross_time_system_aggregation": "FORBIDDEN_AS_DYNAMICS_ESTIMATE",
+        },
         "mass_screen": {
             "frozen_gate_fraction": MASS_GATE,
             "initial_fluid_mass_denominator_kg": initial_mass,
@@ -574,16 +781,45 @@ def audit(v2_report_path: Path, v2_receipt_path: Path, v2_manifest_path: Path, v
     closure = read_json(closure_path, "F2-S1 exact source closure")[1]
     if closure.get("schema") != "ds02.stage2.f2-s1-native-source-closure.v1" or closure.get("status") != "EXACT_NATIVE_SOURCE_CLOSED_WITH_PHYSICAL_FATE_UNKNOWN":
         raise LabelCalibrationError("F2-S1 closure schema/status differs")
+    f2_s1_reconciliation = load_f2_s1_reconciliation(closure)
     cases = []
     status_counts = {"VALID_LABEL_EVIDENCE": 0, "ERROR_LABEL_EVIDENCE": 0, "UNKNOWN_LABEL_EVIDENCE": 0}
     family_status: dict[str, dict[str, int]] = {family: {key: 0 for key in status_counts} for family in FAMILY_COUNTS}
     for case in report["cases"]:
-        _, scan, scan_errors = validate_scan(case)
+        _, scan, scan_errors = validate_scan(case, closure)
         _, conversion, conversion_errors = conversion_for_case(case, closure)
-        row = case_label(case, scan, conversion, conversion_errors, scan_errors)
+        reconciliation = f2_s1_reconciliation if case.get("case_key") == F2_S1_KEY else None
+        row = case_label(case, scan, conversion, conversion_errors, scan_errors, reconciliation)
         cases.append(row)
         status_counts[row["structural_label_status"]] += 1
         family_status[row["family_id"]][row["structural_label_status"]] += 1
+    source_mk_summary: dict[str, dict[str, Any]] = {}
+    for row in cases:
+        for cohort_key, cohort in row.get("source_mk_cohorts", {}).items():
+            summary_key = f"{row['family_id']}/{cohort_key}"
+            summary = source_mk_summary.setdefault(summary_key, {
+                "family_id": row["family_id"],
+                "source_mk": cohort["source_mk"],
+                "source_mkfluid": cohort["source_mkfluid"],
+                "case_count": 0,
+                "missing_particle_count": 0,
+                "missing_source_visible_mass_kg": 0.0,
+                "native_motive_counts": {},
+                "source_mk_initial_mass_denominator": "UNKNOWN_PER_MK_INITIAL_ARRAY_NOT_READ",
+                "first_arrival": "UNKNOWN",
+                "residence_time": "UNKNOWN",
+                "repeated_crossing": "UNKNOWN",
+                "signed_net_flux": "UNKNOWN",
+                "destination_material_region": "UNKNOWN",
+                "physical_fate": "UNKNOWN",
+            })
+            summary["case_count"] += 1
+            summary["missing_particle_count"] += cohort["missing_particle_count"]
+            summary["missing_source_visible_mass_kg"] += cohort["missing_source_visible_mass_kg"]
+            for motive, count in cohort["native_motive_counts"].items():
+                summary["native_motive_counts"][motive] = summary["native_motive_counts"].get(motive, 0) + count
+    for summary in source_mk_summary.values():
+        summary["missing_source_visible_mass_kg"] = round(summary["missing_source_visible_mass_kg"], 15)
     semantics = floating_semantics(f6_output_path, f6_receipt_path, f6_bundle_path, official_paths)
     return {
         "schema": OUTPUT_SCHEMA,
@@ -592,6 +828,7 @@ def audit(v2_report_path: Path, v2_receipt_path: Path, v2_manifest_path: Path, v
         "current": base["current"],
         "coverage": {"selected_case_counts": FAMILY_COUNTS, "selected_case_count": len(cases), "selected_native_id_count": sum(x["native_count"] for x in cases), "structural_status_counts": status_counts, "family_structural_status": family_status},
         "cases": cases,
+        "source_mk_summary": source_mk_summary,
         "floatinginfo_semantics": semantics,
         "controls": {
             "frozen_whole_initial_mass_gate_fraction": MASS_GATE,
@@ -623,6 +860,21 @@ def runtime_source_paths() -> dict[str, Path]:
     }
 
 
+def load_f2_s1_reconciliation(closure: dict[str, Any]) -> dict[str, Any]:
+    """Load the immutable, receipt-bound F2-S1 three-ID reconciliation."""
+    item = closure.get("source_bindings", {}).get("old_native_reconciliation")
+    path, reconciliation = get_path_binding(item, "F2-S1 old native reconciliation")
+    reconciliation = read_json(path, "F2-S1 old native reconciliation")[1]
+    if reconciliation.get("schema") != "ds02.stage2.native-exclusion-reconciliation.v1":
+        raise LabelCalibrationError("F2-S1 old native reconciliation schema differs")
+    if reconciliation.get("status") != "CAUSES_RECONCILED" or reconciliation.get("joined_count") != 3:
+        raise LabelCalibrationError("F2-S1 old native reconciliation is not the exact three-ID closure")
+    rows = reconciliation.get("missing_fluid_ids")
+    if not isinstance(rows, list) or {row.get("idp") for row in rows if isinstance(row, dict)} != {397194, 403829, 404024}:
+        raise LabelCalibrationError("F2-S1 old native reconciliation ID set differs")
+    return reconciliation
+
+
 def collect_inputs(report: dict[str, Any], closure: dict[str, Any], closure_path: Path,
                    official_paths: list[Path], base: dict[str, Any], f6_output_path: Path,
                    f6_receipt_path: Path, f6_bundle_path: Path,
@@ -647,7 +899,7 @@ def collect_inputs(report: dict[str, Any], closure: dict[str, Any], closure_path
             if isinstance(item, dict) and item.get("path"):
                 add(item["path"], f"{case.get('case_key')} {name}", item.get("sha256"))
     closure_bindings = closure.get("source_bindings", {})
-    for name in ("current_conversion_report",):
+    for name in ("current_conversion_report", "old_native_reconciliation", "old_native_reconciliation_receipt", "old_partvtkout_csv", "old_partvtkout_receipt", "runout", "runparts", "solver_receipt"):
         item = closure_bindings.get(name)
         if isinstance(item, dict):
             add(item["path"], f"F2-S1 closure {name}", item.get("sha256"))
@@ -682,6 +934,7 @@ def prepare(output_dir: Path, v2_report_path: Path = V2_REPORT_DEFAULT, v2_recei
     official_paths = official_paths or list(OFFICIAL_FILES_DEFAULT)
     report, receipt, base = validate_v2(v2_report_path, v2_receipt_path, v2_manifest_path, v2_request_path, current_path)
     closure = read_json(closure_path, "F2-S1 exact source closure")[1]
+    load_f2_s1_reconciliation(closure)
     # Validate the already-completed F6 semantic source before creating a
     # launchable request.  This remains a JSON/XML/source-text audit only.
     semantics = floating_semantics(f6_output_path, f6_receipt_path, f6_bundle_path, official_paths)

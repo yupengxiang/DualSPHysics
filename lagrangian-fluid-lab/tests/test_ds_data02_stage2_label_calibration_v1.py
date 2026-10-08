@@ -114,3 +114,35 @@ def test_runtime_bindings_are_source_files_and_exist() -> None:
     assert set(paths) == {"runtime_v8", "runtime_v6", "dispatch_v8", "strict_v8"}
     assert all(path.is_file() for path in paths.values())
 
+
+def test_receipt_allows_normalized_interpreter_alias_but_rejects_foreign_input(tmp_path: Path) -> None:
+    output_root = tmp_path / "producer"
+    output_root.mkdir()
+    output = output_root / "small.json"
+    output.write_text("{}", encoding="utf-8")
+    declared = tmp_path / "declared.json"
+    declared.write_text("declared", encoding="utf-8")
+    declared_hash = MODULE.sha256(declared)
+    receipt_path = output_root / "execution-receipt.json"
+    receipt = {
+        "schema": "ds02.execution-receipt.v1",
+        "status": "completed",
+        "returncode": 0,
+        "output_root": str(output_root),
+        "request": {"input_sha256": {str(declared): declared_hash}},
+        "input_hashes_at_launch": {str(declared): declared_hash, "/usr/bin/python3.10": "interpreter"},
+        "input_hashes_after_run": {str(declared): declared_hash, "/usr/bin/python3.10": "interpreter"},
+    }
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+    item = {"path": str(receipt_path), "bytes": receipt_path.stat().st_size, "sha256": MODULE.sha256(receipt_path)}
+    _, errors = MODULE.validate_completed_receipt(item, "manufactured receipt", output_root)
+    assert errors == []
+
+    bad = copy.deepcopy(receipt)
+    bad["input_hashes_at_launch"][str(tmp_path / "foreign.json")] = "foreign"
+    bad["input_hashes_after_run"][str(tmp_path / "foreign.json")] = "foreign"
+    bad_path = output_root / "bad-receipt.json"
+    bad_path.write_text(json.dumps(bad), encoding="utf-8")
+    bad_item = {"path": str(bad_path), "bytes": bad_path.stat().st_size, "sha256": MODULE.sha256(bad_path)}
+    _, bad_errors = MODULE.validate_completed_receipt(bad_item, "bad receipt", output_root)
+    assert "bad receipt_unexpected_runner_inputs" in bad_errors
