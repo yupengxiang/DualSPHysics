@@ -25,3 +25,5 @@
 - F1 lowerhead/F6 DXYZ-YAW标签已另建requests/f1-family-label-canary-v2-raw-anchor-root-001.json及f6同名请求，对应完整raw anchors，单CPU/OMP1、新有限7200s同父预留；父轻预检及CURRENT/原生父/来源小文件SHA核对PASS，H5未读取。旧H110/omega095请求保留。
 - ANCHOR_LABEL_AND_OWNER_SOURCE_REGISTRATION_ROOT_VERIFICATION_026.json：owner-scale-v2、source-support-v2实际builder重建及small source SHA闭合；root独立计算F6物理COM角点最大速度0.1813655976198352m/s。F2/F3保留连续owner与离散质量不同，禁止rescale。event-v2的有限孔径、MK映射、F3初始top坐标发现需forward修复，不能当已经可评估事件。
 - generic-v4原始重建优化已集成，但live parent/content attestation与current stat绑定不足，依赖generic-v3请求尚未集成，暂不执行。已运行F3-v2继续原预算和截止，不修改消费请求或将临时typed当成功。
+
+F7 selected-nine native observer已实际完成并通过root独立核验：F7_NINE_NATIVE_OBSERVER_ACTUAL_INDEPENDENT_VERIFICATION_001.json。28MB NVMe小读与F3 Home大文件任务分开排程；CPU2.271409s、实际目录360828B、wall8.3373s，同父费用与预留释放闭合。九帧保持70179总粒子及40700流体/325.6kg native sample；原生position/velocity/density有限。0/3/6/9/12查询原生帧括号0、299/300、599/600、899/900、1199/1200。pressure未decode、字段插值未执行；未得积分/输出误差或Q-N信用，下一步真实baseline/half-CFL观察与比较。新标签source/control/semantic反例共10项root测试PASS。
