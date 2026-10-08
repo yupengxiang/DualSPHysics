@@ -349,6 +349,10 @@ def _validate_request(request: Mapping[str, Any], *, verify_content: bool = Fals
             raise SupervisorError(f"static source is missing: {path}")
         if verify_content and sha256_file(path) != expected:
             raise SupervisorError(f"static source SHA differs: {path}")
+    supervisor_python = next((Path(str(item["path"])).expanduser().resolve()
+                              for item in bindings if item.get("role") == "supervisor_python"), None)
+    if supervisor_python is None or not supervisor_python.is_file():
+        raise SupervisorError("bound supervisor Python is missing")
     runtime_binding = request.get("runtime_binding")
     if not isinstance(runtime_binding, Mapping):
         raise SupervisorError("shared runtime binding is missing")
@@ -367,6 +371,7 @@ def _validate_request(request: Mapping[str, Any], *, verify_content: bool = Fals
             "paths": {key: Path(str(paths[key])).expanduser().resolve() for key in ("stdout", "stderr", "report")},
             "v13_request": Path(str(v13["request_path"])).expanduser().resolve(),
             "v13_report": Path(str(v13["report_path"])).expanduser().resolve(),
+            "supervisor_python": supervisor_python,
             "max_wall_seconds": float(request.get("execution", {}).get("max_wall_seconds", 0))}
 
 
@@ -582,13 +587,14 @@ def run(request_path: Path | str, *, io_slot_approved: bool = False,
         remaining = max(0.001, max_wall - (time.monotonic() - entry_wall))
         v13_request = checked["v13_request"]
         v13_report = checked["v13_report"]
-        build_cmd = [str(sys.executable), "-B", str(V13_PATH), "build-request",
+        supervisor_python = checked["supervisor_python"]
+        build_cmd = [str(supervisor_python), "-B", str(V13_PATH), "build-request",
                      "--v12-request", str(checked["v12_path"]), "--output", str(v13_request)]
         build = subprocess.run(build_cmd, cwd=str(SCRIPT_DIR.parents[1]), capture_output=True,
                                text=True, timeout=remaining, check=False)
         if build.returncode != 0:
             raise SupervisorError(f"v13 build failed: {build.stderr[-1000:]}")
-        apply_cmd = [str(sys.executable), "-B", str(V13_PATH), "apply", "--request", str(v13_request)]
+        apply_cmd = [str(supervisor_python), "-B", str(V13_PATH), "apply", "--request", str(v13_request)]
         apply = subprocess.run(apply_cmd, cwd=str(SCRIPT_DIR.parents[1]), capture_output=True,
                                text=True, timeout=max(0.001, max_wall - (time.monotonic() - entry_wall)), check=False)
         v13_result = _parse_last_json(apply.stdout)
