@@ -406,9 +406,10 @@ def build_manifest(contract: dict[str, Any]) -> tuple[dict[str, Any], list[Path]
         expected_group = GROUPS["f1_s1_same_half" if label.startswith("f1_s1") else "f1_s2_three_grid"]
         if root_request.get("physical_case_id") != expected_group["physical_case_id"]:
             raise ValueError(f"{label}: root request physical identity mismatch")
-        if root_request.get("selected_native_frame_ids") != expected_manifest.get("selected_native_frame_ids"):
+        root_source_binding = root_request.get("source_binding", {})
+        if root_source_binding.get("selected_native_frame_ids") != expected_manifest.get("selected_native_frame_ids"):
             raise ValueError(f"{label}: root request/manifest frame mismatch")
-        if root_request.get("query_times_s") != expected_group["query_times_s"]:
+        if root_source_binding.get("query_times_s") != expected_group["query_times_s"]:
             raise ValueError(f"{label}: root request/query axis mismatch")
         overlay_paths = overlay_xml_paths(solver_receipt)
         for path in overlay_paths:
