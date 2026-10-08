@@ -1,0 +1,159 @@
+{
+  "schema": "ds02.stage2.f1.owner-postsolver-observation-contract.v1",
+  "status": "PRE_REGISTERED_NO_SOLVER_RESULT",
+  "identity": {
+    "family_id": "F1",
+    "sentinel_id": "F1-S1",
+    "physical_case_id": "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+    "lineage_group_id": "F1_ecc_THICK_DBC_ALL_HEADS_SHARED_GEOMETRY_NO_LEAK"
+  },
+  "source_authority": {
+    "owner": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/ecc_coarse/owner.json",
+      "bytes": 5233,
+      "mtime_ns": 1791101820393722848,
+      "sha256": "7a901cb5c91525529ea87680aabdff0f0b2496fd0db88bacc206004b88520472"
+    },
+    "physical_binding": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/handoff_20261003/root_actual_fallback_canonical_bindings_and_typed_034/ecc-physical-binding.json",
+      "bytes": 3353,
+      "mtime_ns": 1791101819957741225,
+      "sha256": "8fd95d61d4bd65546b44767ead3e930c7c45e20a1690f6a1237c5272970c594f"
+    },
+    "quality_label_split": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/review-source/QUALITY_LABEL_SPLIT_ZH.md",
+      "bytes": 4999,
+      "mtime_ns": 1791392482079225068,
+      "sha256": "7e6acd9e706c80030a1d4703fb50ac78e880bf39108e0d061f67bfb5b27d03e0"
+    },
+    "continuous_geometry": {
+      "low_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size_m": [
+        0.4,
+        0.67,
+        0.15
+      ],
+      "mkfluid": 0,
+      "label": "Continuous lower-head initial fluid volume; native cohortType3/Mk1",
+      "volume_m3": 0.0402
+    },
+    "continuous_mass_kg": 40.2,
+    "mass_role": "continuous owner mass; particle sample sums remain a separate diagnostic",
+    "gravity_m_s2": [
+      0,
+      0,
+      -9.81
+    ],
+    "event_window_from_owner_s": [
+      0,
+      1.6
+    ],
+    "solver_output_window_is_not_event_characteristic_time": true
+  },
+  "spatial_runs": {
+    "dp005": {
+      "dp_m": 0.005,
+      "role": "owner-centred fine rung",
+      "initial_qa_required": true
+    },
+    "dp0025": {
+      "dp_m": 0.0025,
+      "role": "owner-centred third rung",
+      "initial_qa_required": true
+    },
+    "cross_grid_particle_id_pairing": "FORBIDDEN",
+    "continuous_geometry_and_control": "MUST_MATCH_SOURCE_AUTHORITY; only dp/h/mass/count/lattice fields may vary"
+  },
+  "registered_observables": {
+    "query_times_s": [
+      0.0,
+      0.4,
+      0.8,
+      1.2,
+      1.6
+    ],
+    "time_binding": "actual RunPARTs timestamps per run; EXACT/BRACKETED retained; no extrapolation",
+    "fields": [
+      "fluid weighted centroid by source MK",
+      "fluid weighted velocity by source MK",
+      "fluid sample mass by source MK",
+      "fluid kinetic energy by source MK",
+      "first-passage state with saved-time bracket",
+      "terminal destination with censoring state"
+    ],
+    "mk_coordinate_contract": "mkfluid_relative and mk_absolute remain separate; source cohort mapping is explicit",
+    "pressure_status": "NOT_DECODED_BY_OBSERVER_UNLESS_SEPARATE_SOURCE_BOUND_FIELD_TASK"
+  },
+  "task_tolerances": {
+    "position": {
+      "reference_scale_m": 0.67,
+      "rmse_fraction": 0.02,
+      "rmse_absolute_m": 0.0134,
+      "event_max_fraction": 0.05,
+      "event_max_absolute_m": 0.0335
+    },
+    "velocity": {
+      "reference_scale_m_per_s": 2.5637277546572688,
+      "rmse_fraction": 0.05
+    },
+    "kinetic_energy": {
+      "reference_scale_j": 132.11127000000002,
+      "rmse_fraction": 0.05,
+      "zero_or_near_zero_policy": "UNKNOWN; never divide by near-zero result"
+    },
+    "source_mass": {
+      "denominator_kg": 40.2,
+      "absolute_fraction": 0.03,
+      "unit": "fraction of whole initial owner mass; three percentage points"
+    },
+    "event_time": {
+      "characteristic_time": "UNKNOWN_UNTIL_EVENT_DEFINITION_AND_OBSERVATION",
+      "relative_width_fraction": 0.01,
+      "physical_seconds_required": true
+    },
+    "time_alignment_budget": {
+      "fraction_of_corresponding_task_tolerance": 0.25,
+      "window_fraction_gate": "FORBIDDEN"
+    },
+    "output_reconstruction_budget": {
+      "fraction_of_corresponding_task_tolerance": 0.25,
+      "window_fraction_gate": "FORBIDDEN"
+    }
+  },
+  "calibration_plan": {
+    "status": "PENDING_PARENT_GUARDED_POSTSOLVER_OBSERVER",
+    "manufactured_trajectory": {
+      "purpose": "verify bracket/time interpolation implementation only",
+      "trajectory": "quadratic position, linear velocity, constant mass/KE reference",
+      "does_not_calibrate_physical_solver": true
+    },
+    "actual_output": {
+      "same_run_dense_rows_subsample_factors": [
+        2,
+        4
+      ],
+      "compare_only_deleted_rows_with_actual_neighbor_brackets": true,
+      "time_source": "RunPARTs actual saved rows",
+      "spatial_truth": "not inferred from adjacent grid differences",
+      "integration_error": "separate UNKNOWN channel until an independent time/integration anchor exists"
+    }
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reason": "pre-registration only; no postsolver fields or brackets consumed"
+  },
+  "scope": {
+    "solver_started": false,
+    "native_read": false,
+    "hdf5_read": false,
+    "partvtk_read": false,
+    "gpu_lease": "none"
+  },
+  "preparation_commit": "7ec5d06fdaa02c477068b6e4b60291c88f8097dc"
+}
