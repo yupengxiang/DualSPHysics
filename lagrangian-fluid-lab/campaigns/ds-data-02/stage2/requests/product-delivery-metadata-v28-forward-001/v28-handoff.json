@@ -1,0 +1,97 @@
+{
+  "schema": "ds02.stage2.product-delivery-metadata-v28-handoff.v1",
+  "status": "PREPARED_REQUEST_PENDING_CONSUMER_GUARD",
+  "scope": "JSON-only dependency, access, and exact F2 index-78 reproduction chain",
+  "dependencies": [
+    {
+      "commit": "e30fea6ee",
+      "scope": "v28 JSON-only delivery loader, family-card accessors, exact F2 reproduction contract, and read policy"
+    },
+    {
+      "commit": "87741b84c",
+      "scope": "require terminal F2 native-v4 status before exposing the native stage"
+    },
+    {
+      "commit": "455d6b730",
+      "scope": "guarded shared-runner v28 CPU request builder"
+    },
+    {
+      "commit": "86db22652",
+      "scope": "bind v28 request to the actual v27 product, proof, manifest, and receipt"
+    }
+  ],
+  "request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/product-delivery-metadata-v28-forward-001/product-delivery-metadata-v28-request.json",
+    "sha256": "a939ce4d5c1e69f4ca32c56e957438b320eaa18cf01149772a80440506a28d85",
+    "request_schema": "ds02.stage2.product-delivery-metadata-v28-request.v1",
+    "attempt_id": "product-delivery-metadata-v28-forward-001",
+    "primary_launch_owner": "root",
+    "cpu_threads": 1,
+    "max_wall_seconds": 900,
+    "estimated_storage_bytes": 16777216,
+    "small_json_receipt_proof_bytes_read": 854806,
+    "launch_allowed": true,
+    "actual_execution_receipt": null
+  },
+  "source_bindings": {
+    "v28_worker": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_product_delivery_metadata_v28.py",
+      "sha256": "02f6e6c2422fe9d0d575222eb1bf38bdac72df302ad78ea152a65581d64fc9ca"
+    },
+    "v27_worker": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-forensics/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_final_family_product_assembler_v27.py",
+      "sha256": "26cdbaa9240ef96fbbc20d0d6ebb3c5d31f6b3707667c20dbf742981f6f928b7"
+    },
+    "v27_product": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/DS02_STAGE2_FINAL_FAMILY_PRODUCT_V27/final-family-product-v27-forward-001-root-forward-030-001/final-family-product-v27.json",
+      "sha256": "8823afabc7c2b0845745aebd41e5f80d080de06e0eb98d0d7aa47e46ba03bcd2"
+    },
+    "v27_manifest": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/DS02_STAGE2_FINAL_FAMILY_PRODUCT_V27/final-family-product-v27-forward-001-root-forward-030-001/final-family-product-manifest-v27.json",
+      "sha256": "11915ca934e762f5bb5a151e302c9a20027899cd03d21e68e8736c4e168666ed"
+    },
+    "v27_request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/final-family-product-v27-root-forward-031-001.json",
+      "sha256": "a3b24d911d005a285171c6e80e5a080d77eff21a49ccef42293ebdde57657e6f"
+    },
+    "v27_proof": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/FINAL_FAMILY_PRODUCT_V27_ACTUAL_BOUNDED_INDEPENDENT_VERIFICATION_001.json",
+      "sha256": "16bc278221093eae88f2b0c37d2635df1c9a751da5672d8ce11613a488682309"
+    },
+    "v27_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/DS02_STAGE2_FINAL_FAMILY_PRODUCT_V27/final-family-product-v27-forward-001-root-forward-030-001/execution-receipt.json",
+      "sha256": "b14c717119b7f1167dc2c7bb6b7a7c3b4ce01afe40991f30aa97f8346db18b49"
+    }
+  },
+  "reproduction_chain": {
+    "v27_product_and_current": "ACTUAL_VERIFIED_JSON_ONLY",
+    "native_raw_to_typed_and_label": "ACTUAL_NATIVE_V4_TERMINAL_VERIFIED_FOR_F2_CURRENT_INDEX_78",
+    "saved_frame_quality": "ACTUAL_STRICT_PRODUCER_BOUND",
+    "portable_raw_to_typed_to_label_replay": "PENDING_CONSUMER_GUARD",
+    "physical_fate": "UNKNOWN",
+    "dynamical_impact": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN"
+  },
+  "access_policy": {
+    "permitted": [
+      "read exact v27 product, manifest, request, proof, receipt JSON",
+      "read source-bound metadata/proof/receipt JSON named by the request",
+      "use loader entrypoints load_product_json, get_family_card, get_current_case, single_case_reproduction_contract"
+    ],
+    "forbidden": [
+      "open original trajectory H5",
+      "open materialized label H5",
+      "open BI4 or raw solver output",
+      "start solver, CFD, model, or portable chain outside the shared guard",
+      "redistribute workspace evidence"
+    ],
+    "qualification_credit": "source owner/control/geometry metadata, F2 native identity scope, source-role mass bookkeeping, and saved-frame artifact diagnostics only"
+  },
+  "verification": {
+    "loader_tests": "7 passed with v27 regression tests",
+    "actual_v28_execution": "NOT_YET_EXECUTED; request remains pending consumer guard",
+    "bytes_are_immutable": true
+  }
+}
