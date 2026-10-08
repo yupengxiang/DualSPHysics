@@ -35,6 +35,7 @@ V30_SCHEMA = "ds02.stage2.task-scope-catalog.v30"
 V30_MANIFEST_SCHEMA = "ds02.stage2.task-scope-catalog-manifest.v30"
 V30_REQUEST_SCHEMA = "ds02.stage2.task-scope-catalog-v30-request.v1"
 V28_REQUEST_SCHEMA = "ds02.stage2.product-delivery-metadata-v28-request.v1"
+V28_HANDOFF_SCHEMA = "ds02.stage2.product-delivery-metadata-v28-handoff.v1"
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -123,6 +124,28 @@ def _validate_v28_request(path: Path, request: dict[str, Any]) -> dict[str, Any]
         _require_file_sha(p, hashes[item], f"v28 request input {item}")
         refs.append(_ref(p, "v28 request input"))
     return {"request": _ref(path, "v28 guarded request"), "inputs": refs, "resource": {"cpu_threads": request["cpu_threads"], "max_wall_seconds": request["max_wall_seconds"], "estimated_storage_bytes": request.get("estimated_storage_bytes")}, "status": request["status"], "claim_boundary": request.get("claim_boundary")}
+
+
+def _validate_v28_handoff(path: Path, handoff: dict[str, Any], request_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    if handoff.get("schema") != V28_HANDOFF_SCHEMA or handoff.get("status") != "PREPARED_REQUEST_PENDING_CONSUMER_GUARD":
+        raise ScopeError("v28 handoff is not the immutable pending-guard handoff")
+    request_ref = handoff.get("request") or {}
+    if request_ref.get("path") != str(request_path) or request_ref.get("sha256") != sha256_file(request_path):
+        raise ScopeError("v28 handoff does not bind the exact request")
+    if request_ref.get("request_schema") != V28_REQUEST_SCHEMA:
+        raise ScopeError("v28 handoff request schema differs")
+    expected = ["e30fea6ee", "87741b84c", "455d6b730", "86db22652"]
+    dependencies = handoff.get("dependencies")
+    if not isinstance(dependencies, list) or [item.get("commit") for item in dependencies] != expected:
+        raise ScopeError("v28 handoff dependency chain is incomplete or reordered")
+    worker = next((item for item in request.get("input_files", []) if item.endswith("ds_data02_stage2_product_delivery_metadata_v28.py")), None)
+    worker_ref = (handoff.get("source_bindings") or {}).get("v28_worker") or {}
+    if worker is None or worker_ref.get("path") != worker or worker_ref.get("sha256") != request.get("input_sha256", {}).get(worker):
+        raise ScopeError("v28 handoff worker source does not bind the request")
+    stages = handoff.get("reproduction_chain") or {}
+    if stages.get("portable_raw_to_typed_to_label_replay") != "PENDING_CONSUMER_GUARD" or stages.get("physical_fate") != "UNKNOWN" or stages.get("dynamical_impact") != "UNKNOWN":
+        raise ScopeError("v28 handoff weakens pending/UNKNOWN reproduction boundaries")
+    return {"handoff": _ref(path, "v28 exact dependency/access handoff"), "dependencies": dependencies, "request": request_ref, "reproduction_chain": stages, "access_policy": handoff.get("access_policy"), "verification": handoff.get("verification")}
 
 
 def _validate_v29(
@@ -298,9 +321,12 @@ def _assemble(
     v29_receipt: dict[str, Any],
     v28_request_path: Path,
     v28_request: dict[str, Any],
+    v28_handoff_path: Path,
+    v28_handoff: dict[str, Any],
 ) -> dict[str, Any]:
     cases = _validate_v29(v29_product_path, v29_product, v29_manifest_path, v29_manifest, v29_request_path, v29_request, v29_proof_path, v29_proof, v29_receipt_path, v29_receipt)
     v28 = _validate_v28_request(v28_request_path, v28_request)
+    v28_handoff_summary = _validate_v28_handoff(v28_handoff_path, v28_handoff, v28_request_path, v28_request)
     task_cases = [_task_case(case) for case in cases]
     finite_failure_free = sum(x["finite_field_scope"]["field_failure_count"] == 0 for x in task_cases)
     lifecycle_closed = sum(x["finite_field_scope"]["lifecycle"] == "CLOSED_ZERO_NONFINITE_AND_NONPOSITIVE_MASS_DENSITY" for x in task_cases)
@@ -311,7 +337,7 @@ def _assemble(
         "schema": V30_SCHEMA,
         "status": "ACTUAL_V29_TASK_SCOPE_INDEX_WITH_QN_QE_QI_UNKNOWN",
         "producer": {"script_path": str(SCRIPT), "script_sha256": sha256_file(SCRIPT), "git_commit": _git_commit()},
-        "source": {"v29_product": _ref(v29_product_path, "actual v29 catalog"), "v29_manifest": _ref(v29_manifest_path, "actual v29 manifest"), "v29_request": _ref(v29_request_path, "actual v29 request"), "v29_proof": _ref(v29_proof_path, "actual v29 proof"), "v29_receipt": _ref(v29_receipt_path, "actual v29 receipt"), "v28": v28},
+        "source": {"v29_product": _ref(v29_product_path, "actual v29 catalog"), "v29_manifest": _ref(v29_manifest_path, "actual v29 manifest"), "v29_request": _ref(v29_request_path, "actual v29 request"), "v29_proof": _ref(v29_proof_path, "actual v29 proof"), "v29_receipt": _ref(v29_receipt_path, "actual v29 receipt"), "v28": v28, "v28_handoff": v28_handoff_summary},
         "coverage": {"current_cases": 336, "finite_field_failure_free_cases": finite_failure_free, "finite_lifecycle_zero_metric_cases": lifecycle_closed, "native_motive_id_cases": native, "saved_record_bracket_cases": censor, "strict_quality_anchor_cases": quality, "all_qn_qe_qi_unknown": True},
         "cases": task_cases,
         "task_qualification": {
@@ -348,14 +374,15 @@ def _assemble(
     return result
 
 
-def build_catalog(v29_product: Path | str, v29_manifest: Path | str, v29_request: Path | str, v29_proof: Path | str, v29_receipt: Path | str, v28_request: Path | str, output: Path | str, manifest_output: Path | str) -> dict[str, Any]:
+def build_catalog(v29_product: Path | str, v29_manifest: Path | str, v29_request: Path | str, v29_proof: Path | str, v29_receipt: Path | str, v28_request: Path | str, v28_handoff: Path | str, output: Path | str, manifest_output: Path | str) -> dict[str, Any]:
     v29_product, product = _json(v29_product, "actual v29 product")
     v29_manifest, manifest = _json(v29_manifest, "actual v29 manifest")
     v29_request, request = _json(v29_request, "actual v29 request")
     v29_proof, proof = _json(v29_proof, "actual v29 proof")
     v29_receipt, receipt = _json(v29_receipt, "actual v29 receipt")
     v28_request, v28 = _json(v28_request, "v28 guarded request")
-    result = _assemble(v29_product, product, v29_manifest, manifest, v29_request, request, v29_proof, proof, v29_receipt, receipt, v28_request, v28)
+    v28_handoff, handoff = _json(v28_handoff, "v28 handoff")
+    result = _assemble(v29_product, product, v29_manifest, manifest, v29_request, request, v29_proof, proof, v29_receipt, receipt, v28_request, v28, v28_handoff, handoff)
     output = _path(output, "v30 output", output=True).resolve()
     manifest_output = _path(manifest_output, "v30 manifest output", output=True).resolve()
     if output.exists() or manifest_output.exists():
@@ -368,15 +395,15 @@ def build_catalog(v29_product: Path | str, v29_manifest: Path | str, v29_request
     return result
 
 
-def make_request(v29_product: Path | str, v29_manifest: Path | str, v29_request: Path | str, v29_proof: Path | str, v29_receipt: Path | str, v28_request: Path | str, output: Path | str, runtime_root: Path | str, worker_root: Path | str, attempt_id: str = "task-scope-catalog-v30-forward-001") -> dict[str, Any]:
-    paths = [v29_product, v29_manifest, v29_request, v29_proof, v29_receipt, v28_request]
-    loaded = [_json(item, label) for item, label in zip(paths, ("v29 product", "v29 manifest", "v29 request", "v29 proof", "v29 receipt", "v28 request"))]
-    v29_product, product = loaded[0]; v29_manifest, manifest = loaded[1]; v29_request, request = loaded[2]; v29_proof, proof = loaded[3]; v29_receipt, receipt = loaded[4]; v28_request, v28 = loaded[5]
-    _assemble(v29_product, product, v29_manifest, manifest, v29_request, request, v29_proof, proof, v29_receipt, receipt, v28_request, v28)
+def make_request(v29_product: Path | str, v29_manifest: Path | str, v29_request: Path | str, v29_proof: Path | str, v29_receipt: Path | str, v28_request: Path | str, v28_handoff: Path | str, output: Path | str, runtime_root: Path | str, worker_root: Path | str, attempt_id: str = "task-scope-catalog-v30-forward-001") -> dict[str, Any]:
+    paths = [v29_product, v29_manifest, v29_request, v29_proof, v29_receipt, v28_request, v28_handoff]
+    loaded = [_json(item, label) for item, label in zip(paths, ("v29 product", "v29 manifest", "v29 request", "v29 proof", "v29 receipt", "v28 request", "v28 handoff"))]
+    v29_product, product = loaded[0]; v29_manifest, manifest = loaded[1]; v29_request, request = loaded[2]; v29_proof, proof = loaded[3]; v29_receipt, receipt = loaded[4]; v28_request, v28 = loaded[5]; v28_handoff, handoff = loaded[6]
+    _assemble(v29_product, product, v29_manifest, manifest, v29_request, request, v29_proof, proof, v29_receipt, receipt, v28_request, v28, v28_handoff, handoff)
     runtime_root = Path(runtime_root).expanduser().resolve(); worker_root = Path(worker_root).expanduser().resolve()
     worker = worker_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_task_scope_catalog_v30.py"
     runtime_files = [runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py", runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py", runtime_root / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"]
-    inputs = [worker, *runtime_files, v29_product, v29_manifest, v29_request, v29_proof, v29_receipt, v28_request]
+    inputs = [worker, *runtime_files, v29_product, v29_manifest, v29_request, v29_proof, v29_receipt, v28_request, v28_handoff]
     unique: list[Path] = []; seen: set[str] = set()
     for item in inputs:
         item = _path(item, "v30 request input")
@@ -384,7 +411,7 @@ def make_request(v29_product: Path | str, v29_manifest: Path | str, v29_request:
     hashes = {str(item): sha256_file(item) for item in unique}
     result = {
         "schema": "ds02.runner-request.v1", "request_schema": V30_REQUEST_SCHEMA, "attempt_id": attempt_id, "case_id": "DS02_STAGE2_TASK_SCOPE_CATALOG_V30", "family_id": "infra", "dataset_families": FAMILIES, "kind": "cpu", "cpu_task_kind": "metadata_task_scope_catalog", "cpu_threads": 1, "max_wall_seconds": 600, "estimated_storage_bytes": 16 * 1024 * 1024, "cwd": str(worker_root / "lagrangian-fluid-lab/scripts"), "worktree_root": str(worker_root),
-        "command": ["/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python", str(worker), "build", "--v29-product", str(v29_product), "--v29-manifest", str(v29_manifest), "--v29-request", str(v29_request), "--v29-proof", str(v29_proof), "--v29-receipt", str(v29_receipt), "--v28-request", str(v28_request), "--output", "{attempt_root}/task-scope-catalog-v30.json", "--manifest-output", "{attempt_root}/task-scope-catalog-manifest-v30.json"],
+        "command": ["/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python", str(worker), "build", "--v29-product", str(v29_product), "--v29-manifest", str(v29_manifest), "--v29-request", str(v29_request), "--v29-proof", str(v29_proof), "--v29-receipt", str(v29_receipt), "--v28-request", str(v28_request), "--v28-handoff", str(v28_handoff), "--output", "{attempt_root}/task-scope-catalog-v30.json", "--manifest-output", "{attempt_root}/task-scope-catalog-manifest-v30.json"],
         "input_files": [str(item) for item in unique], "input_sha256": hashes, "launch_allowed": True, "primary_launch_owner": "root", "status": "prepared_guard_pending_actual_CPU", "source_cost": {"small_json_receipt_proof_bytes_read": sum(item.stat().st_size for item in unique if item.suffix.lower() == ".json"), "trajectory_h5_bytes_read": 0, "materialized_label_h5_bytes_read": 0, "part_bi4_bytes_read": 0, "raw_solver_output_bytes_read": 0, "solver_started": False, "cfd_or_model_run": False}, "claim_boundary": {"finite": "field/lifecycle diagnostic only", "mass": "source-visible lower bound only", "physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "QI": "UNKNOWN", "qualification_credit": "none"}, "read_policy": {"metadata_json_opened": True, "trajectory_h5_opened": False, "materialized_label_h5_opened": False, "part_bi4_opened": False, "solver_started": False, "model_invoked": False},
     }
     output = _path(output, "v30 request output", output=True).resolve()
@@ -397,7 +424,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__); sub = parser.add_subparsers(dest="command", required=True)
     for name in ("build", "make-request"):
         p = sub.add_parser(name)
-        for arg in ("v29-product", "v29-manifest", "v29-request", "v29-proof", "v29-receipt", "v28-request"):
+        for arg in ("v29-product", "v29-manifest", "v29-request", "v29-proof", "v29-receipt", "v28-request", "v28-handoff"):
             p.add_argument(f"--{arg}", type=Path, required=True)
         p.add_argument("--output", type=Path, required=True)
         if name == "build": p.add_argument("--manifest-output", type=Path, required=True)
@@ -405,9 +432,9 @@ def main(argv: list[str] | None = None) -> int:
             p.add_argument("--runtime-root", type=Path, required=True); p.add_argument("--worker-root", type=Path, required=True); p.add_argument("--attempt-id", default="task-scope-catalog-v30-forward-001")
     args = parser.parse_args(argv)
     if args.command == "build":
-        build_catalog(args.v29_product, args.v29_manifest, args.v29_request, args.v29_proof, args.v29_receipt, args.v28_request, args.output, args.manifest_output)
+        build_catalog(args.v29_product, args.v29_manifest, args.v29_request, args.v29_proof, args.v29_receipt, args.v28_request, args.v28_handoff, args.output, args.manifest_output)
     else:
-        make_request(args.v29_product, args.v29_manifest, args.v29_request, args.v29_proof, args.v29_receipt, args.v28_request, args.output, args.runtime_root, args.worker_root, args.attempt_id)
+        make_request(args.v29_product, args.v29_manifest, args.v29_request, args.v29_proof, args.v29_receipt, args.v28_request, args.v28_handoff, args.output, args.runtime_root, args.worker_root, args.attempt_id)
     return 0
 
 

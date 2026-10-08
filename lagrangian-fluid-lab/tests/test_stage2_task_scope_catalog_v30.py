@@ -88,3 +88,15 @@ def test_v28_request_rejects_scientific_payload_read(tmp_path: Path):
     }
     with pytest.raises(MODULE.ScopeError, match="scientific payload reads"):
         MODULE._validate_v28_request(tmp_path / "request.json", request)
+
+
+def test_committed_v28_handoff_binds_the_real_request():
+    handoff_path = Path(__file__).parents[1] / "campaigns/ds-data-02/stage2/requests/product-delivery-metadata-v28-forward-001/v28-handoff.json"
+    request_path = handoff_path.parent / "product-delivery-metadata-v28-request.json"
+    if not handoff_path.is_file() or not request_path.is_file():
+        pytest.skip("v28 handoff is not present in this checkout")
+    handoff = json.loads(handoff_path.read_text(encoding="utf-8"))
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+    summary = MODULE._validate_v28_handoff(handoff_path, handoff, request_path, request)
+    assert summary["request"]["sha256"] == MODULE.sha256_file(request_path)
+    assert [item["commit"] for item in summary["dependencies"]] == ["e30fea6ee", "87741b84c", "455d6b730", "86db22652"]
