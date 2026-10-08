@@ -461,7 +461,8 @@ def _case_record(
     impact: dict[str, Any] | None,
     mechanism: dict[str, Any] | None,
     quality: dict[str, Any] | None,
-    v27_card: dict[str, Any] | None,
+    v27_case: dict[str, Any] | None,
+    v27_anchor_card: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     key = _key(current)
     mass, initial_absent, missing = _audit_mass(audit)
@@ -523,7 +524,7 @@ def _case_record(
             "actual_time_window_s": copy_json(current.get("actual_time_window_s")),
             "known_numeric_physical_parameters": copy_json(current.get("known_numeric_physical_parameters") or {}),
             "source_bindings": _source_binding_metadata(current),
-            "source_role": (v27_card or {}).get("source_role", "CURRENT_DECLARED_SOURCE_ROLE"),
+            "source_role": (v27_case or {}).get("source_role", "CURRENT_DECLARED_SOURCE_ROLE"),
         },
         "scientific_audit": {
             "status": audit.get("scan_status"),
@@ -547,7 +548,7 @@ def _case_record(
             "censoring": censor_scope,
             "failed_scope": {
                 "scientific_audit_field_failures": field_failures,
-                "producer_parent_failure_or_recovery": "UNKNOWN_FOR_NON_ANCHOR" if v27_card is None else copy_json((v27_card.get("raw_reconstruction") or {}).get("full_original_parent_replay_recovered")),
+                "producer_parent_failure_or_recovery": "UNKNOWN_FOR_NON_ANCHOR" if v27_anchor_card is None else copy_json((v27_anchor_card.get("raw_reconstruction") or {}).get("full_original_parent_replay_recovered")),
                 "error_scope": "metadata/field-audit failure scope only; no numerical solution error bound",
             },
             "error_qualification": {
@@ -622,11 +623,16 @@ def _load_and_validate(
     quality_proof_path, quality_proof = _json(quality_proof_path, "strict quality proof")
     quality_by_key = _validate_quality(quality_path, quality, quality_proof_path, quality_proof, quality_receipt_path, quality_receipt, by_key)
     cards = product.get("family_cards") or {}
+    inventory_by_index = {item.get("current_index"): item for item in (product.get("case_inventory") or [])}
+    if len(inventory_by_index) != 336:
+        raise CatalogError("v27 case inventory does not expose unique current indices")
+    anchor_indices = {0, 78, 96, 144, 192, 240, 288}
     catalog_cases = []
     for index, row in enumerate(rows):
         key = _key(row)
-        card = cards.get(row.get("family_id")) if index in {0, 78, 96, 144, 192, 240, 288} else None
-        catalog_cases.append(_case_record(index, row, audit_by_key[key], impact_by_key.get(key), mechanism_by_key.get(key), quality_by_key.get(key), card))
+        case_inventory = inventory_by_index[index]
+        anchor_card = cards.get(row.get("family_id")) if index in anchor_indices else None
+        catalog_cases.append(_case_record(index, row, audit_by_key[key], impact_by_key.get(key), mechanism_by_key.get(key), quality_by_key.get(key), case_inventory, anchor_card))
     sources = {
         "v27": v27_summary,
         "current": _ref(current, "producer CURRENT336"),
