@@ -218,8 +218,8 @@ def audit(manifest_path: Path, receipt_path: Path, output: Path) -> dict[str, An
     request_command = receipt.get("request", {}).get("command", [])
     if expanded(request_command, output_root) != command:
         raise AuditError("decoder receipt command differs from expanded request")
-    if len(command) < 2 or Path(command[1]).resolve() != TOOL.resolve():
-        raise AuditError("decoder does not invoke the bound official PartVTKOut binary")
+    if not command or Path(command[0]).resolve() != TOOL.resolve():
+        raise AuditError("decoder does not invoke the bound official PartVTKOut binary as argv[0]")
     if any(value.startswith("-threads") for value in command):
         raise AuditError("PartVTKOut request contains unsupported -threads flag")
     data_root = Path(flag_value(command, "-dirdata", "decoder")).expanduser().resolve()

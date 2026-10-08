@@ -65,7 +65,6 @@ def _make_fixture(tmp_path: Path, *, count: int = 1, bad_part_frame: bool = Fals
     resume = output / "resume.csv"
     resume.write_text("ok\n", encoding="utf-8")
     command = [
-        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
         str(TOOL),
         "-dirdata", str(data),
         "-savecsv", str(csv_path),
@@ -113,7 +112,7 @@ def _make_fixture(tmp_path: Path, *, count: int = 1, bad_part_frame: bool = Fals
             "input_files": [str(path) for path in files],
             "input_sha256": hashes,
             "command": [
-                command[0], command[1], "-dirdata", str(data), "-savecsv",
+                command[0], "-dirdata", str(data), "-savecsv",
                 "{attempt_root}/PartOut.csv", "-saveresume", "{attempt_root}/resume.csv",
                 "-createdirs:1", "-csvsep:1",
             ],
