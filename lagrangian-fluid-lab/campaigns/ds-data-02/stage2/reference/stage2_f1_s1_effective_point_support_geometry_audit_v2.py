@@ -638,6 +638,7 @@ def all_input_paths() -> list[Path]:
     paths.extend(spec["source_def"] for spec in CASES.values())
     for spec in CASES.values():
         root = Path(spec["root"])
+        paths.append(root / "execution-receipt.json")
         paths.extend(root / name for name in FILE_NAMES)
     unique = list(dict.fromkeys(path.expanduser().resolve() for path in paths))
     if any(path.suffix.lower() in {".bi4", ".h5", ".hdf5"} for path in unique):
