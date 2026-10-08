@@ -34,6 +34,7 @@ EXPECTED_H5_BYTES = 1_191_110_523
 EXPECTED_FRAMES = 401
 EXPECTED_PARTICLES = 418_104
 EXPECTED_END_TIME = 4.000007783879406
+EXPECTED_TRAJECTORY_COORDINATE_FRAME = "DualSPHysics case Cartesian coordinates (x,y,z)"
 SCHEMA = "ds02.stage2.f2-s1-trajectory-labels.v1"
 CONTRACT_SCHEMA = "ds02.stage2.f2-s1-trajectory-source-contract.v1"
 
@@ -244,6 +245,8 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
         raise TrajectoryLabelError("conversion does not bind exact trajectory H5")
     if conversion_payload.get("output_sha256") != EXPECTED_H5_SHA256:
         raise TrajectoryLabelError("conversion output SHA differs")
+    if conversion_payload.get("coordinate_frame") != EXPECTED_TRAJECTORY_COORDINATE_FRAME:
+        raise TrajectoryLabelError("conversion coordinate frame differs")
     frames_value = conversion_payload.get("frames")
     if isinstance(frames_value, dict):
         frames_value = frames_value.get("count")
@@ -274,7 +277,7 @@ def validate_contract(contract_path: Path | str, *, read_h5: bool = False) -> di
     config = read_json(config_path, "label config")
     if config.get("schema") != "ds02.stage2.f2-s1-trajectory-label-config.v1":
         raise TrajectoryLabelError("label config schema differs")
-    if config.get("coordinate_frame") != "fixed_solver_frame" or config.get("frame_kind") != "fixed_solver_frame":
+    if config.get("coordinate_frame") != EXPECTED_TRAJECTORY_COORDINATE_FRAME or config.get("frame_kind") != "fixed_solver_frame":
         raise TrajectoryLabelError("trajectory labels require fixed solver frame")
     if config.get("lifecycle_model") != "open":
         raise TrajectoryLabelError("F2-S1 trajectory labels require open lifecycle")
