@@ -1,0 +1,53 @@
+"""Strict digest guard for the additive Stage2 runtime v8."""
+from __future__ import annotations
+
+from pathlib import Path
+
+import ds_data02_runtime_v8 as runtime
+
+
+_base_validate = runtime.validate_request
+GUARD_PATH = str(Path(__file__).resolve())
+
+
+def _check_registered_hashes(request, actual):
+    declared = [request[key] for key in ("input_sha256", "input_hashes") if key in request]
+    if not declared:
+        raise ValueError("registered expected input digests are required")
+    expected = {}
+    for mapping in declared:
+        for name, value in mapping.items():
+            key = str(Path(name).expanduser().resolve())
+            if key in expected and expected[key] != value:
+                raise ValueError("conflicting registered input digest: " + key)
+            expected[key] = value
+    if GUARD_PATH not in actual or GUARD_PATH not in expected:
+        raise ValueError("strict dispatch v8 guard must be a digest-bound input")
+    for name in request["input_files"]:
+        key = str(Path(name).expanduser().resolve())
+        if key not in expected or key not in actual:
+            raise ValueError("missing registered input digest: " + key)
+        if expected[key] != actual[key]:
+            raise ValueError("input differs from registered digest: " + key)
+
+
+def validate_request(request, approval_context=None):
+    actual = _base_validate(request, approval_context=approval_context)
+    _check_registered_hashes(request, actual)
+    return actual
+
+
+def install_guard():
+    if runtime.validate_request not in (_base_validate, validate_request):
+        raise RuntimeError("shared v8 validator was unexpectedly replaced")
+    runtime.validate_request = validate_request
+
+
+def run_request(request_path, **kwargs):
+    install_guard()
+    return runtime.run_request(request_path, **kwargs)
+
+
+if __name__ == "__main__":
+    install_guard()
+    raise SystemExit(runtime.main())
