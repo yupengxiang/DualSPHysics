@@ -1,0 +1,230 @@
+{
+  "accounting": {
+    "allow_missing_parent": true,
+    "charge_fields": [
+      "cpu_core_seconds",
+      "new_storage_bytes",
+      "external_storage_bytes",
+      "home_storage_bytes",
+      "trace_bytes",
+      "copy_hash_bytes",
+      "storage_filesystems"
+    ],
+    "charge_id": "f2-s1-portable-executor-v45-root-082-001::f2-v34-parent-v3-charge",
+    "idempotent": true,
+    "owner": "existing DS-DATA-02 parent ledger",
+    "parent_terminal_requirement": "active parent rows are rejected; absent parent is explicit scoped fallback",
+    "reservation_id": "f2-s1-portable-executor-v45-root-082-001::f2-v34-parent-v3-reservation",
+    "same_parent_ledger": true
+  },
+  "attempt_id": "f2-s1-portable-executor-v45-root-082-001::f2-v34-parent",
+  "case_id": "STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V38_ROOT_060",
+  "cfd_invoked": false,
+  "execution": {
+    "cancel_scope": "own v34 process group only; 25s cooperative cleanup then SIGKILL",
+    "child_cleanup_grace_seconds": 25.0,
+    "child_process_group": "v34 and nested worker/evaluator share wrapper-owned group",
+    "closed_executor_command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-B",
+      "-I",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v45.py",
+      "run",
+      "--request",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v45-full-chain-root-082/f2-s1-portable-executor-request-v45-root-082.json",
+      "--io-slot-approved",
+      "--parent-pid",
+      "<parent_pid>",
+      "--max-wall-seconds",
+      "6000.0"
+    ],
+    "command": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "-B",
+      "-I",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v45.py",
+      "run",
+      "--request",
+      "<this-request>",
+      "--io-slot-approved",
+      "--parent-pid",
+      "<parent-pid>",
+      "--max-wall-seconds",
+      "6000"
+    ],
+    "cpu_reservation_seconds": 6000.0,
+    "entry_clock": "function entry before metadata validation/reservation",
+    "hdf5_or_bi4_read": "only after --io-slot-approved and reservation",
+    "max_wall_seconds": 6000.0,
+    "os_trace": "outer shared guard must strace/openat the wrapper; inner filtered trace covers file/process syscalls and bytes are charged if under external root",
+    "parent_death_signal": "PR_SET_PDEATHSIG=SIGTERM on wrapper and v34 child",
+    "reservation_order": "same-parent ledger reservation before source content SHA",
+    "strace": {
+      "options": [
+        "-ff",
+        "-e",
+        "trace=%file,%process",
+        "-s",
+        "4096"
+      ],
+      "path": "/usr/bin/strace",
+      "scope": "v34 executor and nested private worker/evaluator process group",
+      "sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d"
+    },
+    "thread_environment": {
+      "MKL_NUM_THREADS": "1",
+      "NUMEXPR_NUM_THREADS": "1",
+      "OMP_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1"
+    },
+    "trace_path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_S1_V45_RELOCATED_COLD_ROOT_082/supervisor/os-trace-v34"
+  },
+  "executor_request": {
+    "immutable": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v45-full-chain-root-082/f2-s1-portable-executor-request-v45-root-082.json",
+    "schema": "ds02.stage2.f2-portable-executor-request.v34",
+    "sha256": "b3c138044e6c8dbb26feae697fdd46fbaf27ed1dfbdb3137aa1ab6a0f46a4117"
+  },
+  "executor_script": {
+    "immutable": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v45.py",
+    "sha256": "d843b5400f09aed16124b11a37d00c3303ff8acf6f7db702f4a5345ca3777265"
+  },
+  "family_id": "F2",
+  "hdf5_opened": false,
+  "limitations": [
+    "This is a DEVELOPMENT parent replay and grants no QI/QN/QE.",
+    "Scientific source SHA and HDF5/BI4 reads begin only after the reservation; metadata stat checks precede it.",
+    "Parent OS strace is required for C-level HDF5/BI4 opens; Python audit alone is insufficient.",
+    "The v34 child owns no ledger; the wrapper is the sole supplemental ledger writer."
+  ],
+  "model_invoked": false,
+  "parent_resource_binding": {
+    "allow_missing_parent": true,
+    "attempt_id": "f2-s1-portable-executor-v45-root-082-001",
+    "charge_id": "f2-s1-portable-executor-v45-root-082-001::f2-v34-parent-v3-charge",
+    "deadline_utc": "2026-10-14T07:23:48+00:00",
+    "external_filesystem": "/var/tmp/ds02-stage2",
+    "home_min_free_bytes": 536870912000,
+    "home_path": "/home/jade",
+    "ledger_path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+    "ledger_reset": false,
+    "no_new_data_root": true,
+    "reservation_id": "f2-s1-portable-executor-v45-root-082-001::f2-v34-parent-v3-reservation",
+    "same_parent_ledger": true,
+    "storage_policy": "home_free_floor"
+  },
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "raw_opened": false,
+  "role": "DEVELOPMENT",
+  "runtime_binding": {
+    "immutable": true,
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+    "role": "shared_runtime_v6",
+    "sha256": "a5f240e369fe8514737df3583ce62917607f8296cf6574d702d0eba32407cbe9"
+  },
+  "schema": "ds02.stage2.f2-portable-executor-parent-request.v3",
+  "sha256": "b6a3bf8753cb554a5fbe6fd1d5065b804f5f07650a8f09cb8fb4581532cc3018",
+  "static_bindings": [
+    {
+      "bytes": 64231,
+      "mtime_ns": 1791470190069018254,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_parent_v3.py",
+      "role": "parent_executor_v3",
+      "sha256": "64284507799fba378e767a183ac4ef0b6df186b05de884a9d98612543a4a5975"
+    },
+    {
+      "bytes": 66585,
+      "mtime_ns": 1791455393643030216,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_external_supervisor_v21.py",
+      "role": "shared_v21_accounting",
+      "sha256": "19769fc10e1d5779895e44f6a627bc7cf7ed8873af3df107e89afb376d269dbc"
+    },
+    {
+      "bytes": 22502,
+      "mtime_ns": 1791428812404998522,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+      "role": "shared_runtime_v6",
+      "sha256": "a5f240e369fe8514737df3583ce62917607f8296cf6574d702d0eba32407cbe9"
+    },
+    {
+      "bytes": 25964,
+      "mtime_ns": 1791494821577487099,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v45.py",
+      "role": "executor_v34",
+      "sha256": "d843b5400f09aed16124b11a37d00c3303ff8acf6f7db702f4a5345ca3777265"
+    },
+    {
+      "bytes": 678741,
+      "mtime_ns": 1791495304180802185,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v45-full-chain-root-082/f2-s1-portable-executor-request-v45-root-082.json",
+      "role": "executor_v34_request",
+      "sha256": "b3c138044e6c8dbb26feae697fdd46fbaf27ed1dfbdb3137aa1ab6a0f46a4117"
+    },
+    {
+      "bytes": 1972848,
+      "mtime_ns": 1645004241000000000,
+      "path": "/usr/bin/strace",
+      "role": "os_strace",
+      "sha256": "38a5c75cb29dd85ddd7780d54f5bf595554d7a1b5c42524b23065f5dc4c4b01d"
+    },
+    {
+      "bytes": 8465,
+      "mode_bits": 436,
+      "mtime_ns": 1791480813182423741,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v38-full-chain/f2-s1-fresh-v16-source-contract-v3-001.json",
+      "role": "v39_source_contract",
+      "sha256": "f92731372f5149f06892e4046f25f2d270b8e5af58f434c6f4069d7da757f445"
+    },
+    {
+      "bytes": 23645,
+      "mode_bits": 436,
+      "mtime_ns": 1791486972738247503,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_cold_producer_forward_v2.py",
+      "role": "cold_producer_v40",
+      "sha256": "8791d612b3437416db87cd1254fec20155a5478df35bb0b7ea11d822dec2d0e4"
+    }
+  ],
+  "status": "READY_FOR_PARENT_GUARD",
+  "storage_scope": {
+    "external_filesystem": "/var/tmp/ds02-stage2",
+    "external_min_free_bytes": 1,
+    "external_reservation_bytes": 12884901888,
+    "home_min_free_bytes": 536870912000,
+    "home_receipt_bytes": 65536,
+    "home_receipt_path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v45-full-chain-root-082/f2-s1-portable-parent-v45-root-082-receipt.json",
+    "new_namespace_absent_before_run": true,
+    "source_copy_bytes": 8645542997,
+    "supervisor_output_root": "/var/tmp/ds02-stage2/F2/STAGE2_F2_S1_V45_RELOCATED_COLD_ROOT_082/supervisor",
+    "two_filesystem_charge_required": true
+  },
+  "v41_forward": {
+    "allow_missing_parent": true,
+    "executor_request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v45-full-chain-root-082/f2-s1-portable-executor-request-v45-root-082.json",
+      "sha256": "b469b961ffb6d22ca69e4fda2a4d37840de6a0b218acd11ffeb9069c47cf43b8"
+    },
+    "new_ledger_owner": false,
+    "old_f208_reuse": "FORBIDDEN",
+    "qualification": {
+      "QE": "UNKNOWN",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN"
+    },
+    "same_parent_ledger": true,
+    "schema": "ds02.stage2.f2-portable-executor-v41-forward.v1",
+    "source_contract": {
+      "bytes": 8465,
+      "mode_bits": 436,
+      "mtime_ns": 1791480813182423741,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v38-full-chain/f2-s1-fresh-v16-source-contract-v3-001.json",
+      "role": "v39_source_contract",
+      "sha256": "f92731372f5149f06892e4046f25f2d270b8e5af58f434c6f4069d7da757f445"
+    }
+  },
+  "worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics"
+}
