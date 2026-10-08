@@ -1,0 +1,102 @@
+{
+  "case": {
+    "case_id": "F1_DP0025_SAME_NATIVE_PARTVTKOUT_AUDIT_V1",
+    "expected_excluded_count": 22,
+    "expected_runout_density_excluded": 4,
+    "physical_case_id": "F1_S1_OWNER_DP0025_SAME_CFL_SAVEDT"
+  },
+  "claim_boundary": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "dynamical_impact": "UNKNOWN",
+    "legal_outflow": "UNKNOWN",
+    "native_motive": "source-closed only after exact CSV/RunPARTs/Run.out count and Idp join",
+    "physical_fate": "UNKNOWN",
+    "saved_time": "RunPARTs saved record bracket, not continuous event time"
+  },
+  "decoder": {
+    "command_template": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+      "-dirdata",
+      "/var/tmp/ds02-stage2/F1/F1_S1_OWNER_DP0025_SAME_CFL_NVME_SAVEDT_V2/f1-s1-owner-dp0025-same_cfl-savedt-v5-root-041-001/solver_output/data",
+      "-savecsv",
+      "{attempt_root}/PartOut.csv",
+      "-saveresume",
+      "{attempt_root}/resume.csv",
+      "-createdirs:1",
+      "-csvsep:1"
+    ],
+    "config": {
+      "bytes": 300,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml",
+      "sha256": "a2bc1f88c6ea95347187a64a991ebada177c6314de5c35ab078b06d78235eece"
+    },
+    "input_scope": "PartOut_000.obi4 only; no Part_*.bi4/H5/BI4 trajectory frames",
+    "tool": {
+      "bytes": 6222440,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    },
+    "unsupported_flags": [
+      "-threads:1"
+    ]
+  },
+  "family_id": "F1",
+  "manifest_version": "v1",
+  "read_policy": {
+    "h5_opened": false,
+    "raw_partout_only": true,
+    "solver_started": false,
+    "trajectory_part_frames_opened": false
+  },
+  "schema": "ds02.stage2.f1.dp0025.native-motive-audit-manifest.v1",
+  "source": {
+    "config": {
+      "bytes": 300,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml",
+      "sha256": "a2bc1f88c6ea95347187a64a991ebada177c6314de5c35ab078b06d78235eece"
+    },
+    "prior": {
+      "bytes": 7503,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_DP0025_SAME_CFL_SAVEDT_ACTUAL_INDEPENDENT_VERIFICATION_053.json",
+      "sha256": "b297305fb093faab1c565686cd142fbe6c69be07371fcfc4f02c29c1d269927d"
+    },
+    "raw_partout": {
+      "bytes": 2226,
+      "path": "/var/tmp/ds02-stage2/F1/F1_S1_OWNER_DP0025_SAME_CFL_NVME_SAVEDT_V2/f1-s1-owner-dp0025-same_cfl-savedt-v5-root-041-001/solver_output/data/PartOut_000.obi4",
+      "sha256": "c8dfb7fb0bd32d9c5cace3d24f84806bad70ed9e5014d90e7cbe35ea9d6eb5ad"
+    },
+    "run_out": {
+      "bytes": 42184,
+      "path": "/var/tmp/ds02-stage2/F1/F1_S1_OWNER_DP0025_SAME_CFL_NVME_SAVEDT_V2/f1-s1-owner-dp0025-same_cfl-savedt-v5-root-041-001/solver_output/Run.out",
+      "sha256": "1d7cb1c49170ff1d055db699563d3254ff10875846a6fa16efee593db8bdece0"
+    },
+    "runparts": {
+      "bytes": 76524,
+      "path": "/var/tmp/ds02-stage2/F1/F1_S1_OWNER_DP0025_SAME_CFL_NVME_SAVEDT_V2/f1-s1-owner-dp0025-same_cfl-savedt-v5-root-041-001/solver_output/RunPARTs.csv",
+      "sha256": "d31116bdd2547b07962f6589861b5da4fdd8c7e4a7b015144abb5eae2482688e"
+    },
+    "solver_proof": {
+      "bytes": 19353,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_DP0025_SAME_CFL_ACTUAL_EXTERNAL_V5_SOLVER_ROOT_VERIFICATION_041.json",
+      "sha256": "55e8a92a5514c347ad9852a10ce066139b6adaf2ed1c1dfe7f0e30780866b893"
+    },
+    "solver_receipt": {
+      "bytes": 38440,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/f1-s1-owner-dp0025-same_cfl-savedt-nvme-v2/f1-s1-owner-dp0025-same_cfl-savedt-v5-root-041-001/execution-receipt.json",
+      "sha256": "d1b2bc56e981f0044a94de3469befcf436f407b16a6e5c39f7c24909c231bbd6"
+    },
+    "tool": {
+      "bytes": 6222440,
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+      "sha256": "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
+    },
+    "xml": {
+      "bytes": 8330,
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S1_OWNER_DP0025_BI4_COPY_V3/f1-s1-owner-dp0025-bi4-copy-v3-root-039-001-root-forward-030-001/solver-inputs/same_cfl/F1_S1_OWNER_DP0025_same_cfl_SAVEDT.xml",
+      "sha256": "2f5e06f0cdaa8fbcafd4052f433cb3c28289ffc5730a602e44217d2cf3c395f6"
+    }
+  }
+}
