@@ -246,3 +246,5 @@ root076–077追加（实际终态，整体goal ACTIVE）：F2 owner-centered ce
 F5修复V3实际完整解析ROOT068 XML/Fluid/Bound VTK；父和worker full input SHA/stat前后稳定、与ROOT072失败父收据锚digest一致。67708 fluid全在声明box envelope内，outside0，23 boundary ties；质量254.477983412kg相对历史离散样本253.264kg偏差+.479335165%。根独立复算XML质量、源样本与归一化Def字节等价（只排除dp），motion SHA相同。continuous owner质量、bed clip/overlap支持仍UNKNOWN，不能用envelope质量或旧离散样本替代。见F5_V3_ACTUAL_INITIAL_SUPPORT_DIAGNOSTIC_ROOT_VERIFICATION_077.json。
 
 两次普通CPU实际费用2.238769/1.413992 CPUsec，61,079,088/110,119B；收据、ledger charge和预留释放独立闭合后服务已stop。线程环境现从systemd入口设定，防止import前BLAS无界线程。累计137.8154839296GPUh /703.8584178514CPUcoreh，零预留，资源与期限不重置。下一步：参考代理准备F2实际点位guarded snapshot/support和F5连续owner推导；forensics准备F3-S2既有三档初态审计；消费者修复完整typed parent actual接口并接入真正cold重放。当前无CFD/GPU/大I/O工作运行。
+
+root079追加：F3两个现有two-axis初态dp006/dp005来源metadata审计实际完成；根直接解析generated XML分别67500×.000216/116640×.000125均14.58kg，并核对源投影/forcing SHA。VTK仅stat，几何envelope来自既有QA，此次不给新的VTK SHA/三档支持信用；第三档来源投影未查。费用1.38815CPUsec/68714B和预留释放闭合后unit已stop。见F3_TWO_TIER_INITIAL_SOURCE_METADATA_ACTUAL_ROOT_VERIFICATION_079.json。forensics继续完整三档实际支持域，复用已有native QA须明确足够的源绑定；不把两个来源projection检查当原三档任务完成。整体goal仍ACTIVE。
