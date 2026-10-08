@@ -176,6 +176,11 @@ def build_report(args: argparse.Namespace) -> dict[str, Any]:
         "worker_scope": {
             "single_generated_bi4": True,
             "full_payload_streamed": False,
+            "read_plan": {
+                "passes": 1,
+                "estimated_single_stream_read_bytes": expected_bytes,
+                "estimated_peak_buffer_bytes": CHUNK_BYTES,
+            },
             "bi4_decode": False,
             "hdf5_read": False,
             "raw_directory_scan": False,

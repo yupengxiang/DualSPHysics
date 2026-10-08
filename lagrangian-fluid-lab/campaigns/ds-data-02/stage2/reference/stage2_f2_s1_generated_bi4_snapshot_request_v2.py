@@ -234,6 +234,12 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "estimated_input_read_bytes": EXPECTED_BI4_BYTES,
         "estimated_native_read_bytes": EXPECTED_BI4_BYTES,
         "estimated_bi4_read_bytes": EXPECTED_BI4_BYTES,
+        "read_plan": {
+            "passes": 1,
+            "estimated_single_stream_read_bytes": EXPECTED_BI4_BYTES,
+            "estimated_peak_buffer_bytes": 1024 * 1024,
+            "source": "worker_stream_after_parent_reservation",
+        },
         "estimated_hdf5_read_bytes": 0,
         "estimated_storage_bytes": 128 * 1024 * 1024,
         "estimated_peak_memory_bytes": 512 * 1024 * 1024,
