@@ -619,7 +619,9 @@ def make_request(current_path: Path | str, lineage_path: Path | str,
         "case_id": "DS02_STAGE2_CURRENT336_EQUIVALENCE_SPLIT_AUDIT_V1",
         "family_id": "F1_F2_F3_F4_F5_F6_F7",
         "kind": "cpu",
-        "cpu_task_kind": "metadata_equivalence_component_audit",
+        # Stage2 runner allowlists the generic metadata audit kind; the
+        # scientific scope is carried separately in request_schema/note.
+        "cpu_task_kind": "audit",
         "cpu_threads": 1,
         "max_wall_seconds": 900,
         "estimated_storage_bytes": 64 * 1024 * 1024,
