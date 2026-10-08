@@ -1,0 +1,85 @@
+{
+  "schema": "ds02.stage2.f4-mk1-gravity-anchor-selftest.v4",
+  "status": "PASS_ALL_MANUFACTURED_REJECTS_AND_ARTIFACT_GUARDS",
+  "cases": [
+    {
+      "name": "zero_or_nonpositive_mass_rejected",
+      "status": "REJECTED_PRECONTACT_ANCHOR",
+      "reasons": [
+        "REJECT_NONPOSITIVE_OR_NONFINITE_PARTICLE_MASS"
+      ],
+      "pass": true
+    },
+    {
+      "name": "multiple_particles_with_nonzero_internal_pair_force_rejected",
+      "status": "REJECTED_PRECONTACT_ANCHOR",
+      "reasons": [
+        "REJECT_NONZERO_OR_UNBALANCED_INTERNAL_PAIR_FORCE"
+      ],
+      "pass": true
+    },
+    {
+      "name": "contact_within_support_rejected",
+      "status": "REJECTED_PRECONTACT_ANCHOR",
+      "reasons": [
+        "REJECT_CONTACT_OR_UNSUPPORTED_SPATIAL_SEPARATION"
+      ],
+      "pass": true
+    },
+    {
+      "name": "nonuniform_gravity_rejected",
+      "status": "REJECTED_PRECONTACT_ANCHOR",
+      "reasons": [
+        "REJECT_NONUNIFORM_GRAVITY"
+      ],
+      "pass": true
+    },
+    {
+      "name": "id_exclusion_rejected",
+      "status": "REJECTED_PRECONTACT_ANCHOR",
+      "reasons": [
+        "REJECT_ID_EXCLUSION_OR_REUSE"
+      ],
+      "pass": true
+    },
+    {
+      "name": "wrong_source_contract_rejected",
+      "status": "REJECTED",
+      "reason": "source contract patterns missing in /tmp/f4-gravity-anchor-v4-selftest-9b3mcr5y/wrong_JSph.cpp: ['gravity_loaded_from_case_constants', 'shifting_parameter_loaded', 'kernel_size_from_h', 'kernel_radius_squared']",
+      "pass": true
+    },
+    {
+      "name": "nonfinite_runparts_time_rejected",
+      "status": "REJECTED",
+      "reason": "non-finite RunPARTs time at Part 1",
+      "pass": true
+    },
+    {
+      "name": "successful_cli_writes_nonempty_json_artifact",
+      "status": "UNKNOWN_TEST_SUCCESS",
+      "artifact_bytes": 498,
+      "artifact_write_contract": {
+        "status": "WRITTEN_BY_WORKER_SUCCESS_PATH",
+        "path": "/tmp/f4-gravity-anchor-v4-selftest-9b3mcr5y/success/anchor.json",
+        "refuse_overwrite": true,
+        "nonempty_json_required": true
+      },
+      "pass": true
+    },
+    {
+      "name": "nonfinite_cli_input_writes_failure_artifact",
+      "status": "FAILED_INPUT_OR_RUNTIME_WITH_ARTIFACT",
+      "reason": "expected_final_time_s must be finite: nan",
+      "artifact_bytes": 607,
+      "pass": true
+    }
+  ],
+  "uses_native_or_h5": false,
+  "worker_schema_under_test": "ds02.stage2.f4-mk1-gravity-anchor.v4",
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "scope_note": "CLI artifact existence is tested with a monkeypatched computation; no scientific result is inferred."
+}
