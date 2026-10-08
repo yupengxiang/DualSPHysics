@@ -70,7 +70,8 @@ def main() -> None:
             "request_exists_in_target_tree": REQUEST_REL in target_files,
             "request_kind": target_request.get("kind"),
             "request_schema": target_request.get("schema"),
-            "launch_disabled": target_request.get("launch_disabled"),
+            "launch_disabled": target_request.get("launch_policy", {}).get("launch_disabled"),
+            "solver_started": target_request.get("scope", {}).get("solver_started", target_request.get("solver_started")),
         },
         "minimal_recovery": {
             "builder_commit": BUILDER_COMMIT,
