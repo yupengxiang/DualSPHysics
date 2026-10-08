@@ -345,6 +345,8 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
         source_mass = {str(code): float(masses[source == code].sum()) for code in range(1, nsource + 1)}
         residence = h["residence_time_s"][:]
         unresolved = h["unresolved_interval_time_s"][:]
+        missing_gap = h["missing_identity_gap_bracket"][:]
+        missing_censor = h["missing_identity_censor"][:].astype(bool)
         crossings = h["event_crossing_counts"][:]
         first = h["first_passage_interval"][:]
         censor = h["first_passage_censor"][:]
@@ -386,6 +388,11 @@ def summarize(output: Path, contract_info: dict[str, Any]) -> dict[str, Any]:
             "source_contract": contract_info,
             "output_hdf5": {"path": str(output.resolve()), "bytes": output.stat().st_size, "sha256": sha256(output)},
             "trajectory": {"frames": len(time), "identities": len(source), "time_window_s": [float(time[0]), float(time[-1])], "initial_fluid_mass_kg": total},
+            "missing_identity_observations": {
+                "censored_particle_count": int(missing_censor.sum()),
+                "first_gap_bracket_time_bounds_s": [float(np.nanmin(missing_gap[:, 0])), float(np.nanmax(missing_gap[:, 1]))] if np.any(missing_censor) else None,
+                "semantics": "first saved-frame gap bracket only; physical event time, downstream region and fate UNKNOWN",
+            },
             "source_cohorts": source_mass,
             "final_category_mass_kg": category_mass,
             "source_cohort_diagnostics": source_events,

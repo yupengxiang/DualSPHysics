@@ -183,6 +183,8 @@ def materialize(source, output, config, *, particle_chunk=65536):
         crossings = ds('event_crossing_counts', (nparticles, ne, 2), 'i4')
         residence = ds('residence_time_s', (nparticles, nr), 'f8')
         unresolved = ds('unresolved_interval_time_s', (nparticles,), 'f8')
+        missing_gap = ds('missing_identity_gap_bracket', (nparticles, 2), 'f8', np.nan)
+        missing_censor = ds('missing_identity_censor', (nparticles,), 'i1')
         origin_mass = ds('initial_fluid_mass_kg', (nparticles,), 'f8')
         flux = np.zeros((nt, ne, 2), dtype=float)
         unknown = np.zeros(nt)
@@ -215,6 +217,8 @@ def materialize(source, output, config, *, particle_chunk=65536):
             disappeared = np.zeros(end-begin, dtype=bool)
             residence_local = np.zeros((end-begin, nr))
             unresolved_local = np.zeros(end-begin)
+            missing_gap_local = np.full((end-begin, 2), np.nan)
+            missing_censor_local = np.zeros(end-begin, dtype=np.int8)
             bracket = np.full((end-begin, ne, 2), np.nan)
             first_estimate = np.full((end-begin, ne), np.nan)
             censor_local = np.ones((end-begin, ne), dtype=np.int8)
@@ -228,6 +232,11 @@ def materialize(source, output, config, *, particle_chunk=65536):
                     raise ValueError('fluid identity changes type')
                 if np.any(disappeared & fluid & valid):
                     raise ValueError('lost fluid identity reappeared without lineage')
+                if ti:
+                    first_missing = fluid & ~valid & ~missing_censor_local.astype(bool)
+                    missing_gap_local[first_missing, 0] = time[ti-1]
+                    missing_gap_local[first_missing, 1] = timestamp
+                    missing_censor_local[first_missing] = 1
                 disappeared |= fluid & ~valid
                 pos = chunk_pos[ti]
                 current_mass = chunk_mass[ti]
@@ -267,6 +276,7 @@ def materialize(source, output, config, *, particle_chunk=65536):
             first[sl], estimate[sl], censor[sl] = bracket, first_estimate, censor_local
             crossings[sl] = crossing_local
             residence[sl], unresolved[sl], final_ds[sl] = residence_local, unresolved_local, destination
+            missing_gap[sl], missing_censor[sl] = missing_gap_local, missing_censor_local
             failure_ds[sl] = np.where(~fluid, 4, np.where(destination == -1, 1,
                                      np.where(destination == -2, 2, np.where(destination == 0, 3, 0))))
             for si in range(mass_table.shape[0]):
@@ -287,6 +297,7 @@ def materialize(source, output, config, *, particle_chunk=65536):
                                                         **{str(i):r['id'] for i,r in enumerate(regions,1)}}),
                          first_passage_censor_codes='0=observed_saved_chord;1=not_observed_or_censored',
                          crossing_count_semantics='per-particle saved-chord crossings; column 0=forward, column 1=backward',
+                         missing_identity_gap_semantics='first saved-frame gap bracket [last-known-time, first-missing-time]; later physical exit/fate UNKNOWN',
                          missing_identity_semantics=('numerical_loss' if lifecycle_model == 'closed' else 'open-lifecycle censoring; physical fate UNKNOWN'),
                          failure_reason_codes=('0=none;1=numerical_loss;2=invalid_state;3=unclassified_region;4=noninitial_fluid' if lifecycle_model == 'closed' else '0=none;1=missing_identity_censored;2=invalid_state;3=unclassified_region;4=noninitial_fluid'),
                          source_final_columns='invalid_state,numerical_loss,unknown,then destination_regions',

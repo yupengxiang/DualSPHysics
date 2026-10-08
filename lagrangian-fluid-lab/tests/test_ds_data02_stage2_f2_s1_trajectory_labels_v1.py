@@ -73,6 +73,8 @@ def test_crossing_counts_cancellation_and_open_censoring(tmp_path):
         assert h["first_passage_censor"][2, 0] == 1
         assert h["final_category"][2] == -1
         assert h["failure_reason"][2] == 1
+        np.testing.assert_allclose(h["missing_identity_gap_bracket"][2], [1.0, 2.0])
+        assert h["missing_identity_censor"][2] == 1
         assert h.attrs["missing_identity_semantics"].startswith("open-lifecycle censoring")
 
 
