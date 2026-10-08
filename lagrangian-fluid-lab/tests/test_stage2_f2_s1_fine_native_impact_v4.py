@@ -74,68 +74,106 @@ def main() -> int:
         old_receipt["request"]["attempt_id"] = "f2-s1-fine-partvtkout-v2-primary-001"
         expect_reject(old_receipt, source, root, "old-v1-receipt")
 
+    actual_timeline = v1.parse_runparts(source["runparts"])
+    actual_endpoint_rows = MODULE.parse_runparts_endpoint(source["runparts"], actual_timeline["rows"])
+    actual_endpoint = MODULE.endpoint_contract(solver, actual_timeline["rows"], actual_endpoint_rows, source["runparts"])
+    assert actual_endpoint["requested_endpoint"]["requested_end_s"] == 4.000007783879406
+    assert actual_endpoint["saved_endpoint"]["saved_time_s"] == 4.000018446461944
+    assert actual_endpoint["last_integration_step"]["dt_max_s"] == 5.369918250689863e-05
+    assert actual_endpoint["last_integration_step"]["requested_end_inside_bound"] is True
+    assert actual_endpoint["overshoot_s"] == 1.06625825377904e-05
+
     class FakeV1:
         @staticmethod
         def parse_run_out(_path: Path):
             return {"case_name": "case.xml", "map_real_pos": {"border": [[0, 0, 0], [1, 1, 1]], "final": [[0, 0, 0], [1, 1, 1]]}}
 
-    source_stub = {
-        "run_out": Path("/tmp/unused-run.out"),
-        "solver_command": ["solver", "case.xml"],
-        "xml": {"massfluid_kg": 1.0, "initial_fluid_mass_kg": 2.0},
-    }
-    solver_stub = {"request": {"physical_window_s": [0.0, 0.1]}}
-    good_timeline = {
-        "rows": [
-            {"part": 0, "time_s": 0.0, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
-            {"part": 1, "time_s": 0.1, "NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
-        ],
-        "totals": {"NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
-    }
-    good_partout = [{"idp": 4, "part_out": 1, "motive_code": 1, "position_m": [0, 0, 0], "density_kg_m3": 1000}]
-    MODULE._native_rows(FakeV1, good_timeline, good_partout, solver_stub, source_stub)
+    def write_endpoint_csv(path: Path, times: list[float], dt_max: list[float]) -> None:
+        rows = ["Part;TimeStep [s];Steps;DtMin [s];DtMax [s]"]
+        rows.extend(f"{i};{time};1;{step / 2};{step}" for i, (time, step) in enumerate(zip(times, dt_max)))
+        path.write_text("\n".join(rows) + "\n", encoding="utf-8")
 
-    wrong_count = copy.deepcopy(good_timeline)
-    wrong_count["rows"][1]["NpOutPos"] = 0
-    try:
-        MODULE._native_rows(FakeV1, wrong_count, good_partout, solver_stub, source_stub)
-    except MODULE.FineAuditError:
-        pass
-    else:
-        raise AssertionError("count/time inconsistent native join received cause credit")
+    with tempfile.TemporaryDirectory(prefix="ds02-fine-v4-endpoint-tests-") as directory:
+        root = Path(directory)
+        good_runparts = root / "good-RunPARTs.csv"
+        write_endpoint_csv(good_runparts, [0.0, 0.1], [0.01, 0.02])
+        source_stub = {
+            "run_out": Path("/tmp/unused-run.out"),
+            "runparts": good_runparts,
+            "solver_command": ["solver", "case.xml"],
+            "xml": {"massfluid_kg": 1.0, "initial_fluid_mass_kg": 2.0},
+        }
+        solver_stub = {"request": {"physical_window_s": [0.0, 0.1]}}
+        good_timeline = {
+            "rows": [
+                {"part": 0, "time_s": 0.0, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
+                {"part": 1, "time_s": 0.1, "NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
+            ],
+            "totals": {"NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
+        }
+        good_partout = [{"idp": 4, "part_out": 1, "motive_code": 1, "position_m": [0, 0, 0], "density_kg_m3": 1000}]
+        MODULE._native_rows(FakeV1, good_timeline, good_partout, solver_stub, source_stub)
 
-    duplicate = good_partout + [dict(good_partout[0])]
-    duplicate[1]["idp"] = duplicate[0]["idp"]
-    try:
-        MODULE._native_rows(FakeV1, good_timeline, duplicate, solver_stub, source_stub)
-    except MODULE.FineAuditError:
-        pass
-    else:
-        raise AssertionError("ambiguous Idp native join received cause credit")
+        wrong_count = copy.deepcopy(good_timeline)
+        wrong_count["rows"][1]["NpOutPos"] = 0
+        try:
+            MODULE._native_rows(FakeV1, wrong_count, good_partout, solver_stub, source_stub)
+        except MODULE.FineAuditError:
+            pass
+        else:
+            raise AssertionError("count/time inconsistent native join received cause credit")
 
-    # An integration step may overshoot tmax, but the first saved row at or
-    # after tmax must be the final row and its preceding row must bracket tmax.
-    endpoint_solver = {"request": {"physical_window_s": [0.0, 0.15]}}
-    overshoot_timeline = {
-        "rows": [
-            {"part": 0, "time_s": 0.0, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
-            {"part": 1, "time_s": 0.1, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
-            {"part": 2, "time_s": 0.2, "NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
-        ],
-        "totals": {"NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
-    }
-    overshoot_partout = [dict(good_partout[0], part_out=2)]
-    MODULE._native_rows(FakeV1, overshoot_timeline, overshoot_partout, endpoint_solver, source_stub)
-    post_endpoint = copy.deepcopy(overshoot_timeline)
-    post_endpoint["rows"].append({"part": 3, "time_s": 0.3, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0})
-    try:
-        MODULE._native_rows(FakeV1, post_endpoint, overshoot_partout, endpoint_solver, source_stub)
-    except MODULE.FineAuditError:
-        pass
-    else:
-        raise AssertionError("timeline with post-endpoint rows received native credit")
+        duplicate = good_partout + [dict(good_partout[0])]
+        duplicate[1]["idp"] = duplicate[0]["idp"]
+        try:
+            MODULE._native_rows(FakeV1, good_timeline, duplicate, solver_stub, source_stub)
+        except MODULE.FineAuditError:
+            pass
+        else:
+            raise AssertionError("ambiguous Idp native join received cause credit")
 
-    print("stage2 fine native v4 identity/count/ambiguity/endpoint counterexamples: PASS")
+        # An integration step may overshoot tmax, but the first saved row at
+        # or after tmax must be final and its preceding row must bracket tmax.
+        endpoint_solver = {"request": {"physical_window_s": [0.0, 0.15]}}
+        overshoot_timeline = {
+            "rows": [
+                {"part": 0, "time_s": 0.0, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
+                {"part": 1, "time_s": 0.1, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0},
+                {"part": 2, "time_s": 0.2, "NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
+            ],
+            "totals": {"NpOut": 1, "NpOutPos": 1, "NpOutRho": 0, "NpOutMov": 0},
+        }
+        overshoot_runparts = root / "overshoot-RunPARTs.csv"
+        write_endpoint_csv(overshoot_runparts, [0.0, 0.1, 0.2], [0.01, 0.02, 0.06])
+        source_stub["runparts"] = overshoot_runparts
+        overshoot_partout = [dict(good_partout[0], part_out=2)]
+        MODULE._native_rows(FakeV1, overshoot_timeline, overshoot_partout, endpoint_solver, source_stub)
+
+        # A saved row beyond the requested endpoint is accepted only when the
+        # requested endpoint lies in the final row's conservative DtMax bound.
+        beyond_last_step = root / "beyond-last-step-RunPARTs.csv"
+        write_endpoint_csv(beyond_last_step, [0.0, 0.1, 0.2], [0.01, 0.02, 0.01])
+        source_stub["runparts"] = beyond_last_step
+        try:
+            MODULE._native_rows(FakeV1, overshoot_timeline, overshoot_partout, endpoint_solver, source_stub)
+        except MODULE.FineAuditError:
+            pass
+        else:
+            raise AssertionError("requested endpoint outside final DtMax bound received native credit")
+
+        post_endpoint = copy.deepcopy(overshoot_timeline)
+        post_endpoint["rows"].append({"part": 3, "time_s": 0.3, "NpOut": 0, "NpOutPos": 0, "NpOutRho": 0, "NpOutMov": 0})
+        post_runparts = root / "post-endpoint-RunPARTs.csv"
+        write_endpoint_csv(post_runparts, [0.0, 0.1, 0.2, 0.3], [0.01, 0.02, 0.05, 0.05])
+        source_stub["runparts"] = post_runparts
+        try:
+            MODULE._native_rows(FakeV1, post_endpoint, overshoot_partout, endpoint_solver, source_stub)
+        except MODULE.FineAuditError:
+            pass
+        else:
+            raise AssertionError("timeline with post-endpoint rows received native credit")
+
+    print("stage2 fine native v4 identity/count/ambiguity/endpoint/DtMax counterexamples: PASS")
     return 0
 
 

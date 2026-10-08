@@ -20,6 +20,7 @@ import csv
 import hashlib
 import importlib.util
 import json
+import math
 import os
 import tempfile
 from collections import Counter, defaultdict
@@ -254,6 +255,95 @@ def _binding(path: Path) -> dict[str, Any]:
     return {"path": str(path.resolve()), "sha256": sha256(path), "bytes": path.stat().st_size}
 
 
+def parse_runparts_endpoint(path: Path, timeline: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Read the final-step fields discarded by the preserved v1 parser.
+
+    ``TimeStep [s]`` is the saved observer time.  ``DtMax [s]`` is a
+    conservative bound for the integration step represented by that saved
+    row; it is not silently treated as an exact previous state.  Keeping the
+    two sources separate prevents a requested endpoint from being confused
+    with the last saved frame.
+    """
+    path = require_file(path, "RunPARTs.csv")
+    lines = [line for line in path.read_text(encoding="utf-8", errors="replace").splitlines()
+             if line.strip() and not line.lstrip().startswith("#")]
+    reader = csv.DictReader(lines, delimiter=";")
+    required = {"Part", "TimeStep [s]", "Steps", "DtMin [s]", "DtMax [s]"}
+    if reader.fieldnames is None or not required <= set(reader.fieldnames):
+        raise FineAuditError("RunPARTs lacks final integration-step fields")
+    rows: list[dict[str, Any]] = []
+    for raw in reader:
+        try:
+            part = int(raw["Part"].replace(",", ""))
+            time_s = float(raw["TimeStep [s]"])
+            steps = int(raw["Steps"].replace(",", ""))
+            dt_min_s = float(raw["DtMin [s]"])
+            dt_max_s = float(raw["DtMax [s]"])
+        except (AttributeError, KeyError, TypeError, ValueError) as exc:
+            raise FineAuditError("RunPARTs final integration-step row is invalid") from exc
+        if part != len(rows) or not math.isfinite(time_s) or not math.isfinite(dt_min_s) or not math.isfinite(dt_max_s):
+            raise FineAuditError("RunPARTs final integration-step sequence is invalid")
+        initial_zero_step = part == 0 and steps == 0 and dt_min_s == 0.0 and dt_max_s == 0.0
+        if steps < 0 or dt_min_s < 0.0 or dt_min_s > dt_max_s or (dt_max_s <= 0.0 and not initial_zero_step):
+            raise FineAuditError("RunPARTs final integration-step bounds are invalid")
+        rows.append({"part": part, "time_s": time_s, "steps": steps,
+                     "dt_min_s": dt_min_s, "dt_max_s": dt_max_s})
+    if len(rows) != len(timeline):
+        raise FineAuditError("RunPARTs endpoint rows do not match parsed timeline length")
+    for row, parsed in zip(rows, timeline):
+        if row["part"] != parsed["part"] or row["time_s"] != parsed["time_s"]:
+            raise FineAuditError("RunPARTs endpoint rows differ from the bound time timeline")
+    return rows
+
+
+def endpoint_contract(solver_receipt: dict[str, Any], timeline: list[dict[str, Any]],
+                      endpoint_rows: list[dict[str, Any]], runparts_path: Path) -> dict[str, Any]:
+    requested_window = solver_receipt.get("request", {}).get("physical_window_s")
+    if not isinstance(requested_window, list) or len(requested_window) != 2:
+        raise FineAuditError("solver receipt lacks the exact requested physical window")
+    requested_start, requested_end = (float(value) for value in requested_window)
+    if not math.isfinite(requested_start) or not math.isfinite(requested_end) or requested_end < requested_start:
+        raise FineAuditError("requested physical window is invalid")
+    if not endpoint_rows or endpoint_rows[-1]["part"] != len(timeline) - 1:
+        raise FineAuditError("RunPARTs endpoint row is not the final saved row")
+    saved = endpoint_rows[-1]
+    previous = endpoint_rows[-2] if len(endpoint_rows) > 1 else None
+    saved_time = float(saved["time_s"])
+    if saved_time < requested_end:
+        raise FineAuditError("native saved endpoint does not reach requested endpoint")
+    if previous is not None and previous["time_s"] >= requested_end:
+        raise FineAuditError("requested endpoint is not bracketed by the final saved transition")
+    lower = saved_time - float(saved["dt_max_s"])
+    if requested_end < lower or requested_end > saved_time:
+        raise FineAuditError("requested endpoint lies outside the final integration-step bound")
+    return {
+        "requested_endpoint": {
+            "requested_window_s": [requested_start, requested_end],
+            "requested_end_s": requested_end,
+            "source": "completed solver receipt request.physical_window_s",
+        },
+        "saved_endpoint": {
+            "part": saved["part"],
+            "saved_time_s": saved_time,
+            "previous_saved_part": previous["part"] if previous is not None else None,
+            "previous_saved_time_s": previous["time_s"] if previous is not None else None,
+            "source": "RunPARTs.csv TimeStep [s] final row",
+        },
+        "last_integration_step": {
+            "steps_in_saved_row": saved["steps"],
+            "dt_min_s": saved["dt_min_s"],
+            "dt_max_s": saved["dt_max_s"],
+            "conservative_time_bound_s": [lower, saved_time],
+            "requested_end_inside_bound": True,
+            "source": "RunPARTs.csv final row DtMin [s]/DtMax [s]; bound is conservative, not an exact prior state",
+        },
+        "saved_transition_bracket_s": [previous["time_s"] if previous is not None else None, saved_time],
+        "overshoot_s": saved_time - requested_end,
+        "source_runparts": _binding(runparts_path),
+        "policy": "retain every native saved row; distinguish requested endpoint, saved endpoint, and final-step bound; no crop or tolerance",
+    }
+
+
 def _native_rows(v1: Any, runparts: dict[str, Any], partout: list[dict[str, Any]],
                  solver_receipt: dict[str, Any], source: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     run_out = v1.parse_run_out(source["run_out"])
@@ -295,6 +385,10 @@ def _native_rows(v1: Any, runparts: dict[str, Any], partout: list[dict[str, Any]
         "overshoot_s": actual_final - requested_end,
         "policy": "native final saved step is the first saved row at or after requested tmax; no tolerance and no row crop",
     }
+    endpoint_rows = parse_runparts_endpoint(source["runparts"], timeline)
+    endpoint_details = endpoint_contract(solver_receipt, timeline, endpoint_rows, source["runparts"])
+    endpoint_bracket["last_integration_step"] = endpoint_details["last_integration_step"]
+    endpoint_bracket["saved_transition_bracket_s"] = endpoint_details["saved_transition_bracket_s"]
     if runparts["totals"]["NpOut"] != len(partout):
         raise FineAuditError("PartOut row count differs from RunPARTs NpOut total")
     rows_by_part: dict[int, Counter[str]] = defaultdict(Counter)
@@ -356,7 +450,8 @@ def _native_rows(v1: Any, runparts: dict[str, Any], partout: list[dict[str, Any]
         "requested_physical_window_s": [requested_start, requested_end],
         "native_endpoint_bracket": endpoint_bracket,
     }
-    return records, {"run_out": run_out, "dynamic_impact_plan": plan}
+    return records, {"run_out": run_out, "dynamic_impact_plan": plan,
+                     "endpoint_contract": endpoint_details}
 
 
 def audit(solver_receipt_path: Path, decoder_receipt_path: Path, v1_script_path: Path, output: Path) -> dict[str, Any]:
@@ -418,6 +513,7 @@ def audit(solver_receipt_path: Path, decoder_receipt_path: Path, v1_script_path:
             "runparts_row_count": len(runparts["rows"]),
             "actual_time_window_s": [runparts["rows"][0]["time_s"], runparts["rows"][-1]["time_s"]],
             "runparts_totals": runparts["totals"], "partout_rows": len(records),
+            "endpoint_contract": derived["endpoint_contract"],
             "motive_counts": dict(sorted(motive_counts.items())), "run_out": derived["run_out"],
         },
         "typed_mass_visibility": {
@@ -481,6 +577,8 @@ def prepare(decoder_receipt_path: Path, solver_receipt_path: Path, v1_script_pat
         require_file(path, f"audit input {path.name}")
     digests = {str(path): sha256(path) for path in unique}
     timeline = v1.parse_runparts(source["runparts"])
+    endpoint_rows = parse_runparts_endpoint(source["runparts"], timeline["rows"])
+    endpoint_details = endpoint_contract(solver, timeline["rows"], endpoint_rows, source["runparts"])
     request = {
         "schema": "ds02.request.v1", "family_id": "F2", "case_id": AUDIT_CASE_ID,
         "physical_case_id": PHYSICAL_CASE_ID, "attempt_id": AUDIT_ATTEMPT_ID,
@@ -511,6 +609,7 @@ def prepare(decoder_receipt_path: Path, solver_receipt_path: Path, v1_script_pat
         },
         "expected_native_timeline": {"runparts_rows": len(timeline["rows"]), "runparts_totals": timeline["totals"],
                                       "time_window_s": [timeline["rows"][0]["time_s"], timeline["rows"][-1]["time_s"]]},
+        "expected_native_endpoint_contract": endpoint_details,
         "dynamic_impact_plan": {
             "status": "PLANNED_ONLY_UNTIL_EXPANDED_DOMAIN_PAIR_COMPLETES",
             "pair_control": "same generated BI4/motion, all physical XML settings, and DP00855/CFL; numerical xyz bounds only",
@@ -523,7 +622,7 @@ def prepare(decoder_receipt_path: Path, solver_receipt_path: Path, v1_script_pat
         "foreign_process_protection_required": True, "shared_lease_required": True,
         "solver_launch_forbidden": True, "trajectory_h5_read": False,
         "physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN", "QN": "NOT_ASSESSED", "QE": "NOT_ASSESSED",
-        "request_note": "Forward v4 CPU-only audit fixes C52 by exact V2 primary002 decoder identity mapping; it consumes the completed 175-row CSV and does not rerun PartVTKOut, solver, H5, or trajectory data.",
+        "request_note": "Forward v4 CPU-only audit fixes C52 by exact V2 primary002 decoder identity mapping and C55 by separating requested endpoint, final saved RunPARTs endpoint, and conservative final DtMax integration-step bound; it consumes the completed 175-row CSV and does not rerun PartVTKOut, solver, H5, or trajectory data.",
     }
     atomic_json(output_request, request)
     return {"status": "prepared", "request": str(output_request.resolve()), "request_sha256": sha256(output_request),
