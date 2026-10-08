@@ -641,6 +641,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     build.add_argument("--max-wall-seconds", type=float)
     build.add_argument("--trace-path", type=Path)
     build.add_argument("--allow-missing-parent", action="store_true")
+    build.add_argument("--disallow-missing-parent", action="store_true",
+                       help="require an existing same-parent ledger attempt")
     preflight = sub.add_parser("preflight")
     preflight.add_argument("--request", type=Path, required=True)
     run_parser = sub.add_parser("run")
@@ -656,7 +658,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 supervisor_output_root=args.supervisor_output_root,
                 home_receipt=args.home_receipt, max_wall_seconds=args.max_wall_seconds,
                 trace_path=args.trace_path,
-                allow_missing_parent=True if args.allow_missing_parent else None)
+                allow_missing_parent=(False if args.disallow_missing_parent else
+                                      (True if args.allow_missing_parent else None)))
         elif args.command == "preflight":
             _validate_request(args.request, verify_static_content=False)
             value = {"schema": REPORT_SCHEMA, "status": "READY_FOR_PARENT_IO_SLOT",

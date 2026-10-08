@@ -129,3 +129,15 @@ def test_forward_builder_registers_v3_child_and_dual_binding(tmp_path: Path) -> 
     assert value["current_catalog_binding"]["current_catalog_sha256"] == "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b"
     assert value["current_catalog_binding"]["historical_result_current_catalog_sha256"] == "aabfb1e55e47df73276d2bfc053839bd2bce5792330a82a95ad561a6dcde2972"
     assert result["hdf5_or_bi4_read"] is False
+
+
+def test_builder_can_require_existing_parent_attempt(tmp_path: Path) -> None:
+    output = tmp_path / "v4-existing-parent.json"
+    PARENT.build_forward_request(
+        base_request=BASE_REQUEST, current_binding=CURRENT_BINDING, output=output,
+        parent_attempt_id="typed-v4-existing-parent-test",
+        supervisor_output_root=Path("/var/tmp/ds02-stage2") / "typed-v4-existing-parent-test",
+        home_receipt=tmp_path / "parent-receipt.json", max_wall_seconds=30.0,
+        allow_missing_parent=False)
+    value = json.loads(output.read_text(encoding="utf-8"))
+    assert value["parent_resource_binding"]["allow_missing_parent"] is False
