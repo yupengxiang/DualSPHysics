@@ -28,6 +28,13 @@ SCHEMA = "ds02.stage2.f2-s1-semantic-compare.v2"
 CONTRACT_SCHEMA = "ds02.stage2.f2-s1-semantic-compare-contract.v2"
 EXPECTED_CASES = {"F2": 48, "F4": 22, "F6": 48}
 EXPECTED_IDS = 1328
+BASE_CONTRACT_SCHEMA = "ds02.stage2.f2-s1-trajectory-semantics-contract.v1"
+BASE_REPORT_FIELDS = (
+    "trajectory_report",
+    "conversion_report",
+    "expanded_native_report",
+    "expanded_runout",
+)
 
 
 class SemanticCompareError(RuntimeError):
@@ -150,6 +157,16 @@ def _validate_calibration(path: Path, payload: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def _validate_base_contract(path: Path, payload: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    """Validate the exact v1 contract and all four small producer reports."""
+    if payload.get("schema") != BASE_CONTRACT_SCHEMA:
+        raise SemanticCompareError("F2 trajectory semantic base is not the completed v1 contract")
+    return {
+        name: binding(payload.get(name), f"F2 trajectory {name}")
+        for name in BASE_REPORT_FIELDS
+    }
+
+
 def analyze(contract_path: Path | str) -> dict[str, Any]:
     contract_path, contract = read_json(contract_path, "semantic comparison contract")
     if contract.get("schema") != CONTRACT_SCHEMA:
@@ -159,6 +176,8 @@ def analyze(contract_path: Path | str) -> dict[str, Any]:
     calibration_payload = read_json(calibration_path, "all-118 calibration report")[1]
     calibration = _validate_calibration(calibration_path, calibration_payload)
     base_binding = binding(contract.get("base_semantics_contract"), "F2 trajectory semantics contract")
+    base_payload = read_json(base_binding["path"], "F2 trajectory semantics contract")[1]
+    _validate_base_contract(Path(base_binding["path"]), base_payload)
     v1 = _load_v1()
     try:
         base = v1.analyze(base_binding["path"])
@@ -199,6 +218,10 @@ def analyze(contract_path: Path | str) -> dict[str, Any]:
 def make_contract(calibration_report: Path | str, base_semantics_contract: Path | str, output: Path | str) -> dict[str, Any]:
     calibration = binding({"path": str(calibration_report)}, "all-118 calibration report")
     base = binding({"path": str(base_semantics_contract)}, "F2 trajectory semantics contract")
+    calibration_path, calibration_payload = read_json(calibration["path"], "all-118 calibration report")
+    _validate_calibration(calibration_path, calibration_payload)
+    base_path, base_payload = read_json(base["path"], "F2 trajectory semantics contract")
+    _validate_base_contract(base_path, base_payload)
     contract = {
         "schema": CONTRACT_SCHEMA,
         "physical_case_id": "F2_STAGE1_FIRST48_OFFSET_OPEN_RIM_RX056_RY014_FILL080_ROT090",
@@ -239,21 +262,15 @@ def make_request(contract_path: Path | str, output: Path | str, worktree_root: P
     runtime = root / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.py"
     base_path = require_file(contract["base_semantics_contract"]["path"], "F2 trajectory semantics contract")
     base = read_json(base_path, "F2 trajectory semantics contract")[1]
-    if base.get("schema") != "ds02.stage2.f2-s1-trajectory-semantics-contract.v1":
+    if base.get("schema") != BASE_CONTRACT_SCHEMA:
         raise SemanticCompareError("request requires the completed v1 trajectory semantics contract")
     # Revalidate every producer-side small report binding before placing it in
     # a new request.  A path-only join could otherwise silently consume a
     # report from another F2 attempt with the same case label.
     calibration_binding = binding(contract["calibration_report"], "all-118 calibration report")
-    base_bindings = {
-        name: binding(base.get(name), f"F2 trajectory {name}")
-        for name in (
-            "trajectory_report",
-            "conversion_report",
-            "expanded_native_report",
-            "expanded_runout",
-        )
-    }
+    base_bindings = _validate_base_contract(base_path, base)
+    calibration_path, calibration_payload = read_json(calibration_binding["path"], "all-118 calibration report")
+    _validate_calibration(calibration_path, calibration_payload)
     report_items = [
         ("calibration_report", calibration_binding["path"]),
         ("trajectory_semantics_contract", str(base_path)),

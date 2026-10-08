@@ -71,7 +71,15 @@ def test_make_contract_is_forward_only_and_unknown(tmp_path: Path) -> None:
     calibration = tmp_path / "calibration.json"
     base = tmp_path / "base-semantics-contract.json"
     calibration.write_text(json.dumps(_calibration()), encoding="utf-8")
-    base.write_text(json.dumps({"schema": "ds02.stage2.f2-s1-trajectory-semantics-contract.v1"}), encoding="utf-8")
+    report_bindings = {}
+    for name in MODULE.BASE_REPORT_FIELDS:
+        report = tmp_path / f"{name}.json"
+        report.write_text(json.dumps({"name": name}), encoding="utf-8")
+        report_bindings[name] = {"path": str(report)}
+    base.write_text(json.dumps({
+        "schema": MODULE.BASE_CONTRACT_SCHEMA,
+        **report_bindings,
+    }), encoding="utf-8")
     output = tmp_path / "compare-contract.json"
     contract = MODULE.make_contract(calibration, base, output)
     assert contract["physical_fate"] == "UNKNOWN"
@@ -127,6 +135,10 @@ def test_make_request_rejects_non_v1_semantics_contract(tmp_path: Path) -> None:
     calibration.write_text(json.dumps(_calibration()), encoding="utf-8")
     base = tmp_path / "base.json"
     base.write_text(json.dumps({"schema": "wrong"}), encoding="utf-8")
-    MODULE.make_contract(calibration, base, contract)
+    contract.write_text(json.dumps({
+        "schema": MODULE.CONTRACT_SCHEMA,
+        "calibration_report": {"path": str(calibration)},
+        "base_semantics_contract": {"path": str(base)},
+    }), encoding="utf-8")
     with pytest.raises(MODULE.SemanticCompareError, match="completed v1"):
         MODULE.make_request(contract, tmp_path / "request.json", tmp_path)
