@@ -190,6 +190,20 @@ def _validate_evidence_record(record: dict[str, Any], current_sha: str, count: i
             raise TaskSplitError(f"{evidence_id} unsupported label report schema")
     else:
         raise TaskSplitError(f"unsupported evidence kind {kind!r}")
+    expected_identity = record.get("identity")
+    if expected_identity is not None:
+        if not isinstance(expected_identity, dict):
+            raise TaskSplitError(f"evidence {evidence_id} identity binding is not an object")
+        if kind != "label_report":
+            raise TaskSplitError(f"evidence {evidence_id} identity binding is unsupported for {kind}")
+        if payload.get("schema") == "ds02.stage2.f2-s1-trajectory-labels-recovery.v2":
+            actual_family = "F2"
+            actual_physical = payload.get("physical_case_id")
+        else:
+            actual_family = payload.get("family_id")
+            actual_physical = payload.get("physical_case_id")
+        if (expected_identity.get("family_id"), expected_identity.get("physical_case_id")) != (actual_family, actual_physical):
+            raise TaskSplitError(f"evidence {evidence_id} identity differs from producer report")
     return {"evidence_id": evidence_id, "kind": kind, "path": str(path), "sha256": actual, "payload": payload}
 
 
