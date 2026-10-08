@@ -22,8 +22,12 @@ def _load():
 
 
 def _sources(v30):
+    # Follow the immutable V26 forward edge across integration worktree roots;
+    # its path and SHA are the source identity, while the local checkout root
+    # is only an execution location.
+    frozen_v25 = Path(json.loads(v30.V26_V14.read_text())["forward_of"]["path"]).expanduser().resolve()
     return {
-        "v25_v13": v30.V25_V13,
+        "v25_v13": frozen_v25,
         "v26_v14": v30.V26_V14,
         "v25_v7": v30.V25_V7,
         "overlay": v30.V25_OVERLAY,
@@ -65,19 +69,21 @@ def test_v30_builds_v24_outer_and_exact_v29_bundle_contract(tmp_path: Path) -> N
 
 def test_v30_rejects_v26_forward_edge_rebinding(tmp_path: Path) -> None:
     v30 = _load()
+    frozen_v25 = _sources(v30)["v25_v13"]
     source = json.loads(v30.V26_V14.read_text())
     source["forward_of"] = dict(source["forward_of"])
-    source["forward_of"]["path"] = str(v30.V25_V13.parent / "wrong-frozen-v25.json")
+    source["forward_of"]["path"] = str(frozen_v25.parent / "wrong-frozen-v25.json")
     source["sha256"] = v30.canonical(source)
     bad_v26 = tmp_path / "bad-v26.json"
     bad_v26.write_text(json.dumps(source, sort_keys=True) + "\n")
     with pytest.raises(v30.V30Error, match="V26.forward_of path differs"):
-        v30._validate_frozen_inputs(v30.V25_V13, bad_v26, v30.V25_V7,
+        v30._validate_frozen_inputs(frozen_v25, bad_v26, v30.V25_V7,
                                     v30.V25_OVERLAY, v30.V25_PLAN, v30.EVALUATOR_V3)
 
 
 def test_v30_rejects_overlay_byte_contract_mutation(tmp_path: Path) -> None:
     v30 = _load()
+    frozen_v25 = _sources(v30)["v25_v13"]
     overlay = json.loads(v30.V25_OVERLAY.read_text())
     overlay["entries"] = copy.deepcopy(overlay["entries"])
     overlay["entries"][0]["expected_bytes"] += 1
@@ -98,5 +104,5 @@ def test_v30_rejects_overlay_byte_contract_mutation(tmp_path: Path) -> None:
     bad_v7 = tmp_path / "bad-v7.json"
     bad_v7.write_text(json.dumps(v7, sort_keys=True) + "\n")
     with pytest.raises(v30.V30Error, match="source byte total differs"):
-        v30._validate_frozen_inputs(v30.V25_V13, v30.V26_V14, bad_v7,
+        v30._validate_frozen_inputs(frozen_v25, v30.V26_V14, bad_v7,
                                     bad_overlay, v30.V25_PLAN, v30.EVALUATOR_V3)
