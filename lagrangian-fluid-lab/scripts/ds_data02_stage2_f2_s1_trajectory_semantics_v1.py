@@ -410,13 +410,47 @@ def analyze(contract_path: Path | str) -> dict[str, Any]:
     }
 
 
+def make_contract(trajectory_report: Path | str, conversion_report: Path | str,
+                  expanded_native_report: Path | str, expanded_runout: Path | str,
+                  output: Path | str) -> dict[str, Any]:
+    """Create a new exact small-input contract after v1 report completion.
+
+    The trajectory report is intentionally supplied at this point rather than
+    guessed before the guarded v1 attempt.  The command hashes only these four
+    small files; it never follows the report's H5 path.
+    """
+    contract = {
+        "schema": CONTRACT_SCHEMA,
+        "physical_case_id": PHYSICAL_CASE,
+        "trajectory_report": bind({"path": str(trajectory_report)}, "trajectory labels report")[1],
+        "conversion_report": bind({"path": str(conversion_report)}, "typed conversion report")[1],
+        "expanded_native_report": bind({"path": str(expanded_native_report)}, "expanded native report")[1],
+        "expanded_runout": bind({"path": str(expanded_runout)}, "expanded Run.out")[1],
+        "read_policy": {"h5_opened": False, "trajectory_content_opened": False, "solver_started": False},
+    }
+    path = Path(output).expanduser().resolve()
+    atomic_json(path, contract)
+    return {"status": "CONTRACT_CREATED", "contract": str(path), "sha256": sha256(path), "bytes": path.stat().st_size}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--contract", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    run = subparsers.add_parser("run", help="validate an exact four-file semantic contract")
+    run.add_argument("--contract", type=Path, required=True)
+    run.add_argument("--output", type=Path, required=True)
+    make = subparsers.add_parser("make-contract", help="bind the completed v1 report and small native evidence")
+    make.add_argument("--trajectory-report", type=Path, required=True)
+    make.add_argument("--conversion-report", type=Path, required=True)
+    make.add_argument("--expanded-native-report", type=Path, required=True)
+    make.add_argument("--expanded-runout", type=Path, required=True)
+    make.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = analyze(args.contract)
-    atomic_json(args.output, result)
+    if args.command == "make-contract":
+        result = make_contract(args.trajectory_report, args.conversion_report, args.expanded_native_report, args.expanded_runout, args.output)
+    else:
+        result = analyze(args.contract)
+        atomic_json(args.output, result)
     print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True))
 
 

@@ -163,3 +163,18 @@ def test_non_unknown_physical_claim_is_rejected(tmp_path: Path) -> None:
     contract.write_text(json.dumps(contract_payload) + "\n", encoding="utf-8")
     with pytest.raises(MODULE.SemanticError, match="grants physical or dynamical credit"):
         MODULE.analyze(contract)
+
+
+def test_make_contract_binds_report_only_after_it_exists(tmp_path: Path) -> None:
+    contract, paths = _fixture(tmp_path)
+    original = json.loads(contract.read_text(encoding="utf-8"))
+    output = tmp_path / "made-contract.json"
+    result = MODULE.make_contract(
+        paths["trajectory"],
+        Path(original["conversion_report"]["path"]),
+        paths["native"],
+        Path(original["expanded_runout"]["path"]),
+        output,
+    )
+    assert result["status"] == "CONTRACT_CREATED"
+    assert MODULE.analyze(output)["status"] == "SEMANTICS_VALIDATED_SOURCE_BOUND"
