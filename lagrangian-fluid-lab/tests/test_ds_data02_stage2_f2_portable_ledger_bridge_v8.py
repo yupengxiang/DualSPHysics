@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,3 +51,22 @@ def test_v8_artifact_gate_rejects_missing_outputs(tmp_path: Path) -> None:
     result = module._artifact_check([{"role": "required", "path": str(tmp_path / "missing.json")}])
     assert result["status"] == "MISSING_REQUIRED_ARTIFACTS"
     assert result["missing"] == [str((tmp_path / "missing.json").resolve())]
+
+
+def test_v8_rejects_mutated_guard_sha_before_reservation() -> None:
+    value = json.loads(REQUEST.read_text())
+    bad = copy.deepcopy(value)
+    bad["guard_bindings"][0]["sha256"] = "0" * 64
+    with pytest.raises(module.BridgeV8Error, match="source content SHA differs"):
+        module._stat_binding(bad["guard_bindings"][0], verify_content=True)
+
+
+def test_v8_rejects_existing_external_namespace_before_reservation(tmp_path: Path) -> None:
+    value = json.loads(REQUEST.read_text())
+    bad = copy.deepcopy(value)
+    existing = tmp_path / "already-created"
+    existing.mkdir()
+    bad["external_storage_scope"]["roots"][0] = str(existing)
+    bad["sha256"] = module.canonical_sha(bad)
+    with pytest.raises(module.BridgeV8Error, match="outside /var/tmp"):
+        module._validate(bad, verify_content=False)
