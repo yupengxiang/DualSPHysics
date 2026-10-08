@@ -1,0 +1,37 @@
+{
+  "schema": "ds02.stage2.portable-v19-integration-audit.v1",
+  "status": "NOT_READY_FOR_ACTUAL_RAW_TRIAL",
+  "utc": "2026-10-08T09:13:47.826396+00:00",
+  "v10_bridge_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v19-consistent/f2-s1-portable-ledger-bridge-request-v10-007.json",
+    "sha256": "7f04115d696d9a9963132bfc3e520ac8647a209c8fe75f3d2a36c21db83a3820"
+  },
+  "actually_loaded_v7_request": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-consumers/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v7-f2-orchestration/f2-s1-portable-orchestration-request-v7-001.json",
+    "sha256": "9616539779d46e44c7eb3dce27b60df0468f2527fe8396ae7d8789a7bf50f742"
+  },
+  "v7_loader_output_directory": "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-reference-products-v7-001",
+  "v10_declared_external_output_roots": [
+    "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v13-replay-001/bundle-target-v13",
+    "/var/tmp/ds02-stage2/ds-data-02/families/F2/STAGE2_F2_S1_PORTABLE_RAW_TO_LABEL_V5/f2-s1-v13-replay-001/reference-products-v13"
+  ],
+  "actual_loaded_request_matches_declared_output_roots": false,
+  "real_v13_launcher": {
+    "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_parent_launcher_v13.py",
+    "sha256": "20eddf16f19e54b21dcc76494add10fc50589914b259ef093e4e8a10abc71951"
+  },
+  "cancel_findings": [
+    "V13 only checks current ppid; no installed SIGTERM handler or PR_SET_PDEATHSIG",
+    "V13 nested strace starts own session; supervisor cancellation of V13 group cannot by itself close strace/bridge group",
+    "manufactured V19 tests fake launcher and group helper; do not execute real V13 nested cancellation"
+  ],
+  "actual_raw_copy_started": false,
+  "source_content_read_scope": "small JSON/code only",
+  "raw_or_h5_content_opened": false,
+  "required_forward_fix": [
+    "new actual-loaded V7 request and dependent private-loader paths with exact declared output/trace/attempt bindings",
+    "real launcher cancellation/parent-death cleanup and terminal fee evidence with manufactured small fixture"
+  ],
+  "existing_v19_consumed_bytes_preserved": true,
+  "goal_complete": false
+}

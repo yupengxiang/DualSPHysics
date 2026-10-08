@@ -4,10 +4,10 @@
 
 1. 全部336例字段/生命周期审计和all118原生原因/质量/删失影响账已实际完成并独立核验。使用proof023和impact-v8，不重复H5扫描；动力学、合法通量和物理去向保持UNKNOWN。
 2. F6 rigid ledger-v2已实际成功，root独立匹配2×241帧CSV与proper SO3诊断。128kg身体与256kg粒子支撑分开；物理COM和姿态真值仍UNKNOWN。继续官方来源语义及标签控制。
-3. F1五组原生观测已实际完成，45选定记录来源/字段/分组/时刻/费用已核验。运行S1同/半CFL、S2粗/中/细的实际比较与冻结任务容差校准；不插值、不将邻网格当真值，不让不齐时刻获得误差资格。
+3. F1五组原生观测及S1同/半CFL、S2粗/中/细比较均实际完成。root复核20查询比较的来源、端点、MK轴及差异计算；仅初态时间对齐，后续时间差的科学误差为UNKNOWN_TIME_ALIGNMENT。根工作树路径迁移失败收据保留，重试使用确切绑定程序。继续预登记积分/输出容差校准；不插值、不将邻网格当真值。
 4. F7-S2 v4运行库失败收据保留。v5已完整实际成功并独立核验：1201帧，0至12.00003209155591秒，无原生排除或DtMin夹紧，3,718,036,281字节NVMe输出。计划1202仅估计；后续按实际RunPARTs。半CFL GenCase已实际完成，粒子40700流体/27495固定/1984移动，325.6kg流体；须完成初态数组QA与单独绑定运动文件复制后再运行半CFL。继续积分误差和输出采样误差的分离校准。
-5. mechanism-v3因注册源SHA不一致在子进程前失败，CPU.71712秒/647686字节已记账释放。等待添加式forward002完整小输入哈希闭合后重新登记不同attempt；不改历史manifest/失败请求。
-6. portable v13保留venv路径，但v18对v15 helper CLI/sidecar schema不兼容，trace路径和bridge attempt也需一起前向闭合。等待添加式版本及制造端到端取消/收尾测试，再实际执行8.64GB复制、raw→typed→label/private SDK与无模型evaluator。不能以metadata预检替代真实回放。
+5. mechanism-v3原注册源SHA失败保留。添加式forward002现已实际成功并独立核验118例/1328粒子、117例原测量保持及F2-S1来源修复。旧F2-S1粒子端点速度/时刻未知说明需添加式语义补充；不改已消费输出。继续真实材料/区域/事件及删失标签。
+6. portable v19修复helper CLI/trace/attempt并通过4项制造/元数据测试；root进一步发现实际加载V7仍为旧输出请求，且真实V13未处理嵌套strace取消。等待前向闭合实际V7/private loader路径及真实launcher取消/收尾制造测试，再执行8.64GB复制、raw→typed→label/private SDK与无模型evaluator。见PORTABLE_V19_ROOT_WIRING_AND_CANCEL_AUDIT_001.json；目前尚无真实回放。
 7. v21七族卡绑定全部336审计和118影响证据；root元数据核验通过，仍为development/provisional，QI/QN/QE未知，split_safe=false。继续实质任务子域、谱系与安全划分；不把卡片存在当资格。
 8. dp009 GenCase质量相对已声明40.2kg连续初态偏差+.377%；匹配三档网格及初态/控制仍待闭合。其余14哨点参考、七个完整原始锚点、标签及删失区间、依赖/许可/访问和复现入口持续推进。
 
