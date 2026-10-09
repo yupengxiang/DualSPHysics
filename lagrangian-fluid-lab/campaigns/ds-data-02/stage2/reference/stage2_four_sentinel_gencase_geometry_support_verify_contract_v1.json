@@ -1,0 +1,28 @@
+{
+  "schema": "ds02.stage2.four-sentinel-gencase-geometry-support-output-verifier-contract.v1",
+  "status": "SOURCE_PREPARED_PARENT_VERIFICATION_ONLY",
+  "worker_output_schema": "ds02.stage2.four-sentinel-gencase-geometry-support-audit.v1",
+  "sentinels": ["F2-S2", "F4-S2", "F5-S2", "F7-S1"],
+  "checks": {
+    "request_manifest_deferred_join": "exactly eight VTK and four BI4 records; no deferred payload promoted to input_files",
+    "vtk_output": "path, bytes, device, inode, mtime_ns, ctime_ns, equal pre/post stat, equal full pre/post SHA, two guarded payload passes",
+    "bi4_output": "path and stat pre/post only; payload_read=false; no payload SHA exposed",
+    "xml_particle_support": "worker XML fluid count and finite Fluid point count equal the source geometry count when present",
+    "owner_policy": "F2-S2 is UNVERIFIED_CROSS_SENTINEL_TARGET from F2-S1; F4-S2/F5-S2/F7-S1 remain UNKNOWN_CONTINUOUS_OWNER",
+    "scientific_credit": "QI/QN/QE UNKNOWN and zero credit",
+    "current_source": "stat-only current checks; verifier does not reopen VTK, BI4, HDF5, or solver payloads"
+  },
+  "negative_fixtures": [
+    "ASCII VTK replacement/stat mutation",
+    "wrong XML fluid particle count",
+    "deferred stat mutation",
+    "unsupported owner target on an UNKNOWN sentinel"
+  ],
+  "scope": {
+    "vtk_bytes_read": false,
+    "bi4_bytes_read": false,
+    "hdf5_read": false,
+    "solver_launch": false,
+    "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  }
+}
