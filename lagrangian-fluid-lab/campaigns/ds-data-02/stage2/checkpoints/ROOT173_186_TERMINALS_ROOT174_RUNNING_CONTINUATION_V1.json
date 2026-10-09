@@ -1,0 +1,140 @@
+{
+  "schema": "ds02.stage2.continuation-checkpoint.v1",
+  "utc": "2026-10-09T09:07:04.027565+00:00",
+  "status": "ROOT173_ACTUAL_COMPLETED_ROOT186_ACTUAL_CLI_FAILED_ROOT174_ACTUAL_RUNNING",
+  "completed_or_failed_actual": [
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F3_MIDDLE_HALF_CFL_EXTERNAL_ACTUAL_NATIVE_ROOT_VERIFICATION_173.json",
+      "sha256": "010350df375a4a289466be7c77c621af29308323293df87ffdc6ef038d13ee8b",
+      "status": "VERIFIED_ACTUAL_F3_MIDDLE_HALF_CFL_NATIVE_WINDOW_CONTROL_MATERIALIZATION_NO_SCIENTIFIC_Q",
+      "full_systemd_cpu_seconds": 1440.866456,
+      "parent_reservation_released": true,
+      "repeat_fee_idempotent": true
+    },
+    {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/TYPED_LIFECYCLE_V2_ACTUAL_CLI_FAILURE_ROOT_VERIFICATION_186.json",
+      "sha256": "7df1d364c8dc0744d6a12651af0601b2e7b3df87fa77e8bf4c964ce4b87d937f",
+      "status": "VERIFIED_ACTUAL_TYPED_LIFECYCLE_V2_CLI_FAILED_BEFORE_H5_OPEN",
+      "full_systemd_cpu_seconds": 1.871769,
+      "parent_reservation_released": true,
+      "repeat_fee_idempotent": true
+    }
+  ],
+  "running": {
+    "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-middle-half-output-external-v8-root174-primary-forward-002.json",
+    "request_sha256": "5d7a73d08cbcc0bb100933dc548bed882f902b5305872da105fbcb6aa610a6d1",
+    "unit": "ds02-f3-s2-middle-half-output-external-v8-root-174.service",
+    "observed_unit": {
+      "MainPID": "2621310",
+      "Result": "success",
+      "CPUUsageNSec": "215673296000",
+      "SubState": "running"
+    },
+    "complete_saved_rows_at_snapshot": 516,
+    "last_complete_saved_row": {
+      "Part": "515",
+      "TimeStep [s]": "2.575004739817406",
+      "Steps": "290",
+      "DTsMin": "0",
+      "PartRuntime [s]": "0.419536",
+      "NpSave": "179,208",
+      "NpSim": "179,208",
+      "NpNew": "0",
+      "NpOut": "0",
+      "NctSim": "9,408",
+      "NpAlloc [X]": "1.000714",
+      "NctAlloc [X]": "1.750000",
+      "SimRuntime [s]": "212.273851",
+      "NpbSim": "111,708",
+      "NpfSim": "67,500",
+      "NpNormal": "179,208",
+      "NpOutPos": "0",
+      "NpOutRho": "0",
+      "NpOutMov": "0",
+      "DtMin [s]": "1.720903698370634e-05",
+      "DtMax [s]": "1.723190538073893e-05",
+      "MemCPU [MiB]": "33.300758",
+      "MemGPU [MiB]": "42.307762",
+      "MemGPU_Cells [MiB]": "0.251259",
+      "NpAlloc": "179,336",
+      "NctAlloc": "16,464"
+    },
+    "no_terminal_credit": true,
+    "declared_inputs_must_remain_immutable": 28
+  },
+  "resources": {
+    "cpu_core_hours_charged": 707.0901807680531,
+    "gpu_hours_charged": 140.01530744364422,
+    "attempt_counts": {
+      "cpu": 4511,
+      "qualification": 650,
+      "production": 23
+    },
+    "reservations": [
+      {
+        "id": "F3/F3_S2_MATCHED_MIDDLE_HALF_OUTPUT_ROOT174_V8/f3-s2-matched-middle-half-output-root-174-v8-001",
+        "kind": "qualification",
+        "cpu_threads": 2,
+        "cpu_core_seconds": 7200.0,
+        "gpu_seconds": 3600.0,
+        "new_storage_bytes": 25786580992,
+        "home_storage_bytes": 16777216,
+        "external_storage_bytes": 25769803776,
+        "external_filesystem": "/var/tmp/ds02-stage2",
+        "reserved_at_utc": "2026-10-09T09:03:28.553700+00:00",
+        "launcher_pid": 2621310,
+        "host": "user-SYS-421GE-TNRT",
+        "gpu_uuid": "GPU-3dd8e277-f7e1-3893-292a-5928ea229599"
+      }
+    ],
+    "hard_limits": {
+      "gpu_seconds": 1843200,
+      "cpu_core_seconds": 13824000,
+      "new_storage_bytes": 1099511627776,
+      "qualification_attempts": 1024,
+      "production_attempts": 720,
+      "material_configurations": 12,
+      "material_cpu_fraction": 0.05,
+      "fluid_learning_attempts": 0,
+      "storage_policy": "home_free_floor",
+      "home_min_free_bytes": 536870912000,
+      "home_path": "/home/jade"
+    },
+    "deadline_utc": "2026-10-14T07:23:48+00:00",
+    "home_free_bytes": 691146072064,
+    "external_free_bytes": 130522279936,
+    "soft140GPU800CPU96planning_is_not_hard_limit": true,
+    "no_limit_reset_or_extension": true
+  },
+  "next_executable_tasks": [
+    {
+      "task": "ROOT174 terminal verification/full CPU reconciliation",
+      "depends": "actual terminal only",
+      "state": "RUNNING_NATIVE_SOLVER"
+    },
+    {
+      "task": "ROOT179C V66 copied-recovery conversion",
+      "request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-s1-root145-v66-root179c-primary-prepared-003.json",
+      "state": "READY_TESTED_NOTRUN_WAIT_EXCLUSIVE_IO",
+      "followups": "fresh V65 proof then typed-only evaluator only if real conversion succeeds"
+    },
+    {
+      "task": "ROOT187 full native half-CFL observer",
+      "state": "AGENT_METADATA_REQUEST_PREPARATION",
+      "followups": "reuse ROOT177 baseline audit; actual half-output observer and calibrated task comparison"
+    },
+    {
+      "task": "ROOT189 additive lifecycle V3 pilot",
+      "state": "AGENT_REAL_CLI_FIX_IN_PROGRESS",
+      "followups": "cost-aware exact CURRENT336 batches only after actual pilot succeeds"
+    }
+  ],
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "original_CURRENT336_sha256": "df7ea3229efed933aab1e1219823b151218427cb22c024a70b12f9513304c62b",
+  "goal_complete": false,
+  "root_native_h5_content_read": false
+}

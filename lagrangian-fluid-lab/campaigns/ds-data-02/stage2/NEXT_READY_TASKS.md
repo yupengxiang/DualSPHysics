@@ -588,3 +588,12 @@ ROOT179B candidate002 actually failed: parent createsproducts directory beforest
 ROOT173 ACTUALLY RUNNING ds02-f3-s2-middle-half-cfl-external-v8-root-173.service main2596048 GPU0UUIDGPU-3dd8e277-f7e1-3893-292a-5928ea229599. Actualprimary002 fileSHA ec5aef94a3d5e44588c2d94e84410139ed59b1fb732d701b6c8e3052e897165e,28inputsimmutable. Primary001 GPUUUIDNone staysNOTRUN;002 bindsselectedUUID+001metadataedge. ActualexclusiveGPUlease/qualificationreservation2CPU/3600s/GPU3600/ext16GiB/Home16MiB/Memory8GiB. As-of 352 completeframes/3.510001443334763s, notterminal. Do notchange28sourceinputs orlaunchparallelheavyIO. ROOT174primary001 sourceonlyNOTRUN; liveUUIDmustbindlater.
 
 Originaltyped lifecyclepilotV1 source5PASS but NOTRUN; additiveV2 genericcase/manifest closure/units authority fix preparing. AllsevenitemgoalACTIVE/incomplete; chargedCPU706.6894201499974coreh/GPU139.61368736436228h, originalhardlimits/deadline/Homefloor unchanged. Continueactual173terminal→pilot/174→temporalnativeobservations, plusF2ROOT179C conditional actualconversion/freshproof/evaluator.
+
+
+## 2026-10-09 ROOT173 / ROOT186 终态与 ROOT174 实际运行
+
+ROOT173 减半 CFL 已完成836帧，保存日志无粒子排除、新增或 DT 钳制；已完成原生文件 stat、控制复制与 XML 改动核对、终态 CPU 记账及幂等检查，科学 Q 仍 UNKNOWN。ROOT186 生命周期 V2 实际 CLI 在读取 H5 前失败：局部解析器变量遮蔽 audit 函数。失败产物保留且记账完成，新增 V3 修复与真正子进程 fixture 正在准备。
+
+ROOT174 减半输出间隔已在共享 guard 内实际运行；28 个声明输入在终态前保持不变。它占用独立 I/O 槽，不启动第二个 payload 任务。结束后先完成收据、租约、完整 CPU 与资源闭合；再执行已通过真实目录 guard 测试的 ROOT179C V66 转换、ROOT187 半 CFL 原生观测与 ROOT189 生命周期 V3 试点。转换成功后才能产生新 V65 proof 和 typed-only evaluator；生命周期试点成功并测得成本后才能排批次。
+
+继续沿全七项 Stage2 目标推进；这份检查点、成功运行或失败修复均不代表目标完成。详细快照见 `checkpoints/ROOT173_186_TERMINALS_ROOT174_RUNNING_CONTINUATION_V1.json`。
