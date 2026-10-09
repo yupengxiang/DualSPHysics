@@ -41,13 +41,20 @@ def test_v5_request_binds_new_worker_and_first_frame_only_manifest():
     assert request["request_schema"] == "ds02.stage2.f2.coarse-active-stream.v5-request.v1"
     assert request["attempt_id"] == "f2-coarse-active-stream-v5-root-forward-116-001"
     assert request["cpu_task_kind"] == "audit"
-    assert request["command"][1] == str(worker)
-    assert request["command"][3] == str(manifest_path)
+    declared_worker = Path(request["command"][1]).resolve()
+    declared_manifest = Path(request["command"][3]).resolve()
+    assert declared_worker.is_file()
+    assert declared_manifest.is_file()
+    # A root launch may preserve the forensic producer path while this test
+    # runs from a rebased clone. Require byte identity and digest binding,
+    # never a path-only match.
+    assert digest(declared_worker) == digest(worker)
+    assert digest(declared_manifest) == digest(manifest_path)
     assert manifest["schema"] == "ds02.stage2.f2.coarse-active-stream.manifest.v5"
     assert manifest["probe_mode"] == "first_frame_header_only"
-    assert request["input_hashes"][str(worker)] == digest(worker)
+    assert request["input_hashes"][str(declared_worker)] == digest(declared_worker)
     assert request["input_sha256"] == request["input_hashes"]
-    assert request["input_hashes"][str(manifest_path)] == digest(manifest_path)
+    assert request["input_hashes"][str(declared_manifest)] == digest(declared_manifest)
     deferred_paths = [entry["path"] for entry in request["deferred_input_files"]]
     assert any(path.endswith("Part_0000.bi4") for path in deferred_paths)
     assert not any("Part_0001.bi4" in path for path in deferred_paths)

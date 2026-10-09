@@ -1,0 +1,38 @@
+{
+  "schema": "ds02.stage2.f2.coarse-active-stream.v6-header-contract.v1",
+  "mode": "first_frame_header_only",
+  "forward_of": "ds02.stage2.f2.coarse-active-stream.v5",
+  "source_boundary": {
+    "first_frame_content_sha256": "worker_after_parent_reservation_pre_decoder_and_post_decoder",
+    "remaining_frame_content": "manifest_metadata_only",
+    "minimum_first_frame_content_reads": 3,
+    "scratch": "actor_owned_per_frame_directory_with_final_cap_and_bounded_cleanup"
+  },
+  "typed_massfluid_gate": {
+    "required_v5_status": "TYPED_HEADER_MATCHES_EXPECTED_ENCODING_NO_RAW_SERIALIZATION_PROOF",
+    "allowed_header_tags": [
+      "float",
+      "double"
+    ],
+    "ambiguous_real_tag": "reject_without_bound_abi_width",
+    "frame_zero_value_comparison": "exact_equality_to_completed_v5_typed_value",
+    "later_frame_value_comparison": "exact_equality_to_frame_zero_value",
+    "decimal_tolerance": 0.0,
+    "float32_precision_correction": "NOT_APPLIED",
+    "raw_header_bytes_required_for_serialization_credit": true
+  },
+  "mass_denominators": {
+    "xml_whole_initial_mass": "frozen source denominator for unknown-mass screen",
+    "native_header_mass": "reported separately as observed-header product",
+    "native_minus_xml_delta": "diagnostic only; no automatic rescaling"
+  },
+  "claim_boundary": {
+    "physical_fate": "UNKNOWN",
+    "legal_outflow_or_spill": "UNKNOWN",
+    "continuous_event_time": "UNKNOWN",
+    "dynamical_impact": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
