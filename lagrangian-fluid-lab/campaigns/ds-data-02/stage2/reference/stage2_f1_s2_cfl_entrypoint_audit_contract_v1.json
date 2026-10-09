@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.stage2.f1-s2.cfl-entrypoint-audit-contract.v1",
+  "authority": {
+    "cfl_xml": "case.execution.constants.cflnumber parsed by JCaseCtes::ReadXmlDef",
+    "cfl_cli": "-cfl parsed by JSphCfgRun and applied as JSph::LoadConfig override when present",
+    "timestep": "JSphCpu::DtVariable and JSphGpu::DtVariable multiply the limiting dt by CFLnumber",
+    "output": "-tout is receipt launch output cadence; XML TimeOut and case.execution.special.savedt are declarations/controls when no launch override is present",
+    "actual_argv_precedence": ["receipt.execution.launch_argv", "receipt.command", "request.command"]
+  },
+  "comparison": {
+    "half_cfl_requires": ["same source/grid and terminal receipt", "bound XML cflnumber difference or explicit receipt -cfl", "all other runtime controls equal"],
+    "half_output_requires": ["same source/grid and terminal receipt", "receipt -tout difference", "CFL and all timestep controls equal"],
+    "labels_are_evidence": false,
+    "interpolation": false,
+    "neighbor_grid_truth": false
+  },
+  "f1_s2_next_overlay": {
+    "status": "SOURCE_ONLY_PREPARED_NOT_RUN",
+    "single_change": "case.execution.constants.cflnumber 0.2 -> 0.1",
+    "preserve": ["BI4/source identity", "geometry", "rho/mass", "execution parameters", "-tmax", "-tout", "savedt"],
+    "admission": "parent must materialize and hash the new overlay and bind its terminal receipt before any solver launch"
+  },
+  "scope": {
+    "read": ["request JSON", "terminal receipt JSON", "small solver XML", "bounded official source files"],
+    "forbidden": ["BI4", "H5", "VTK", "Part", "RunPARTs", "solver launch"],
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}

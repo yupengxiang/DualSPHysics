@@ -1,0 +1,30 @@
+{
+  "schema": "ds02.stage2.f6-continuous-owner-geometry-audit-contract.v1",
+  "sentinel_ids": ["F6-S1", "F6-S2"],
+  "authority": {
+    "geometry": "source/generated XML drawbox and setmk commands",
+    "density": "XML constantsdef rhop0",
+    "body": "XML floating massbody/center/inertia/translationDOF/rotationDOF",
+    "sample_mass": "particles fluid count times XML massfluid; diagnostic only"
+  },
+  "continuous_owner": {
+    "basis": "axis-aligned solid fluid drawbox volume when explicitly present",
+    "clip_or_boolean": "UNKNOWN unless represented by an explicit XML primitive",
+    "mass": "rhop0 times parsed solid drawbox volume; never rescaled to sample mass"
+  },
+  "support": {
+    "fluid_floating_overlap": "AABB diagnostic in source coordinates, including XML initial move",
+    "native_initial_support": "UNKNOWN_PENDING_GUARDED_NATIVE_FRAME_AUDIT",
+    "fluid_initial_velocity": "UNKNOWN when not explicitly declared in XML",
+    "rigid_angular_velocity": "reported from angularvelini with units_comment",
+    "rigid_dof": "reported from translationDOF and rotationDOF"
+  },
+  "scope": {
+    "read": "bounded proof/report/XML metadata",
+    "forbidden": ["BI4", "H5", "VTK", "Part", "RunPARTs", "solver launch"],
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "continuous_geometry_qualification": "UNKNOWN until guarded native support audit"
+  }
+}
