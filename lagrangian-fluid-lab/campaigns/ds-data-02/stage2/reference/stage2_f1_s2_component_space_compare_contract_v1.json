@@ -1,0 +1,63 @@
+{
+  "schema": "ds02.stage2.f1-s2.component-space-compare-contract.v1",
+  "status": "PRE_REGISTERED_DIAGNOSTIC_ONLY",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "scope": "Compare already produced compact native observer records for the three F1-S2 spatial grids in solver-component coordinates. This contract never reads BI4/H5/VTK and never treats a neighboring grid as truth.",
+  "grids": [
+    {"label": "coarse", "aliases": ["coarse", "dp0p0225", "0.0225"], "dp_m": 0.0225, "native_sample_mass_kg": 338.3015496656, "fluid_count": 29700, "continuum_owner_mass": "UNKNOWN"},
+    {"label": "medium", "aliases": ["medium", "dp0p020", "0.020"], "dp_m": 0.02, "native_sample_mass_kg": 340.0000161491, "fluid_count": 42500, "continuum_owner_mass": "UNKNOWN"},
+    {"label": "fine", "aliases": ["fine", "dp0p017", "0.017"], "dp_m": 0.017, "native_sample_mass_kg": 342.0430547278, "fluid_count": 69620, "continuum_owner_mass": "UNKNOWN"}
+  ],
+  "source_control_gate": {
+    "required_equal_parameters": ["Boundary", "SavePosDouble", "StepAlgorithm", "VerletSteps", "Kernel", "ViscoTreatment", "Shifting", "RigidAlgorithm", "CoefDtMin", "TimeOut", "RhopOutMin", "RhopOutMax", "TimeMax"],
+    "required_equal_gravity": [0.0, 0.0, -9.81],
+    "motion_policy": "No moving/floating control tag in the three bound F1-S2 generated XML files; this is a source fact, not a physical no-force claim.",
+    "resolution_exception": "definition dp and generated discrete count/mass may differ by grid; do not normalize them away",
+    "owner_geometry": "continuum owner geometry/mass is unresolved and remains UNKNOWN"
+  },
+  "native_observation_gate": {
+    "required_fields": ["time_s", "native_header.MassFluid", "native_header.Dp", "observables.role_counts", "fluid weighted centroid", "fluid weighted velocity", "fluid kinetic energy"],
+    "role_policy": "fluid-only aggregates; fixed/moving/floating groups must be counted separately and excluded",
+    "mass_policy": "use native MassFluid; XML mass is never a native fallback",
+    "time_policy": "decoded saved seconds/RunPARTs only; frame index is not time",
+    "producer_join": "each report must be bound to the actual ROOT207 proof identity/SHA; missing or mismatched proof is a hard worker failure"
+  },
+  "reader_calibration_prerequisite": {
+    "proof_relative_path": "stage2/checkpoints/OFFICIAL_WRITER_CALIBRATION_V4_ACTUAL_ROOT_VERIFICATION_217.json",
+    "proof_sha256": "7df9b02c339e3b3eb8bae8f108c16d5db0fd2b6cb3f03d192c4edc827ae1bdf0",
+    "status": "VERIFIED_MANUFACTURED_WRITER_DUMP_OBSERVER_STORAGE_ONLY",
+    "supports": ["official writer-to-dump array layout", "typed role/count decoding", "native MassFluid/MassBound/Dp scalar decoding", "finite weighted arithmetic on an asymmetric six-particle fixture"],
+    "does_not_support": ["producer world-axis orientation", "continuum-owner mass", "production solver accuracy", "QI/QN/QE qualification"],
+    "binding_policy": "metadata prerequisite only; actual F1-S2 producer reports still require their own ROOT207 identity/receipt/proof join"
+  },
+  "comparison": {
+    "query_times_s": [0.0, 1.0, 2.0, 3.0, 4.0],
+    "exact_time_tolerance_s": 1.0e-12,
+    "same_time_operation": "report component-space COM/velocity/KE/mass deltas only when actual saved timestamps match",
+    "asynchronous_operation": "report lower/upper frame IDs, actual times, and bracket width; do not interpolate",
+    "error_separation": ["saved-time misalignment", "output sampling", "integrator/CFL", "spatial-grid change", "particle deletion/role censoring"],
+    "spatial_difference_is_truth": false,
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN"
+  },
+  "frozen_task_tolerances": {
+    "source": "stage2_f1_com_observer_calibration_contract_v1.json",
+    "changed": false,
+    "position_relative_to_L": 0.02,
+    "event_position_relative_to_L": 0.05,
+    "velocity_and_ke_nonzero_reference": 0.05,
+    "regional_mass_fraction_of_whole_initial_fluid_mass": 0.03,
+    "event_time_fraction_of_characteristic_time": 0.01,
+    "zero_or_unknown_scale": "UNKNOWN; no retrospective normalization"
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "read_scope": {
+    "compact_json_only": true,
+    "production_bi4_h5_vtk_read": false,
+    "solver_started": false,
+    "ledger_mutation": false,
+    "large_report_limit_bytes": 16777216
+  }
+}
