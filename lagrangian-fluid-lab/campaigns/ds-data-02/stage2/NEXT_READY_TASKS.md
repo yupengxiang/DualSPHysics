@@ -1,3 +1,16 @@
+最新实际复核（2026-10-09T03:06:54Z）：完整七项长期目标 ACTIVE，阶段未完成，原额度/期限/Home floor不重置。
+
+- ROOT139 F3十选定原生帧实际单次全SHA/stat快照闭合，10,695,950B；无字段decode或全部836审计。旧builder字节已在source-code-archive/root139-native-audit-builder保全，更新后的当前builder不能替代旧源哈希。fullCPU1.488614s闭账幂等、unit停。
+- ROOT141 F7 prepared初态与native首帧实际V2空间QA成功，70179IDs完全相同、坐标最大差0、40700fluid、allPosfinite。header Idp分区回退，不独立nativeType/MK。prepared MassFluid .008000000000000002与native .00800000037997961分开；质量325.600015kg/owner320.1984kg约+1.68696%，仅diagnostic。fullCPU1.589320s闭账、unit停。
+- ROOT142 F2实际官方PartOut CSV逐Idp证实67数值position原因；与ROOT138 missing IDs和全部保存时刻括号精确join。XML质量下界.045658624kg/18.910848=.0024144144仅screenPASS；合法flux/physicalfate/contact/dynamics及科学Q仍UNKNOWN。fullCPU1.448601s闭账、unit停。
+- ROOT140 V53新冷复制实际失败（childrc1）：V34执行overlay v2_worker位于bundle-target/sources，而四模块绑定runtime/runtime/native，真实V38入口拒绝。474目标文件/8,670,735,443B外部失败树、七metadata产品全部保留，没有converter/typed/labels/cold成功。fullCPU73.825643s及同父metadata完整补账幂等、unit停。main启动前误哈希3个.ibi4辅助文件423063B已独立披露，UNKNOWN未测CPU/无资格信用；未来smallhash filter同时排除.ibi4和raw_auxiliary角色。
+- ROOT143 F7三档sourceXML非分辨率声明相同；质量356.34375/325.6/314.413056kg的旧source325.6分母与owner320.1984分开。声明相同不等于continuous geometry/control等价；fullCPU1.421823s闭账。
+- ROOT144 F3十帧header审计实际failed，外层ROOT139 snapshot schema不符合enforcer selected-manifest schema，在任何native读取/decode前拒绝。无新增原生字段信用。fullCPU1.318063s同父闭账幂等、unit停；reference准备distinct ROOT147 manifest adapter，不改144产物。
+- ROOT146 F7三档GenCase BI4实际initialQA完成，fullpre/postSHA/stat覆盖所有坐标/Idp读取，total/fluid counts和MassFluid与XML一致，allfinite/unique。coarse质量比owner+11.2884%；original+1.68695%；fine−1.8068%。coarse exact outsideowner810与ymax0.3500000000000001需representation face-distance诊断，不能当810物理越界。无nativeType/MK、contact/flux/dynamics/Q信用。fullCPU1.505292s闭账幂等、unit停；forensics准备ROOT148窄诊断/随后最小修复候选，不盲跑CFD。
+- consumer V54源码已集成，但root postterminal测试2FAIL/5PASS（跨工作树冻结绑定）；还需真实inode/mode与有界导入修复，新V55准备中。ROOT145新cold未启动，禁止借旧ROOT060 proof或ROOT122/140部分复制授予fresh cold成功。
+- reference full836 V2已增加SIGTERM/SIGINT、decoder group kill/reap、best-effort PDEATHSIG及实时log/scratch caps；尚disabled，必须先ROOT147实际ten-header通过再绑定。源码/人造tests不授予actual原生信用。
+- 共享账CPU704.512894459core h/GPU137.966689117h，qualification646/1024、production23/720、cpu4478 attempts；无active reservations/CFD/大数组任务。Home最新free695225110528B、/var/tmp192641388544B。GPU6外来PID601689须保护，每次solver fresh UUID inventory+atomic lease。原deadline2026-10-14T07:23:48Z、CPU3840h/GPU512h/Home536870912000B边界保持。
+
 最新执行复核（2026-10-09T02:27:56.479867+00:00）：完整目标ACTIVE，尚无新实际任务启动。
 
 - ROOT141 F7初态空间QA v1源码已集成a12c98e01。root代码复核发现final postSHA/stat先于实际Pos/Idp/Type/Mk/Mass数组memmap读取，未覆盖完整解码；由forensics准备不可变v2前向修复后再启动。两源仅prepared初始BI4/native Part_0000，旧产品不改，不新增CFD。safe scanner本身真实fd pre/post全SHA，不等于之后array-reader exact consumed SHA。
