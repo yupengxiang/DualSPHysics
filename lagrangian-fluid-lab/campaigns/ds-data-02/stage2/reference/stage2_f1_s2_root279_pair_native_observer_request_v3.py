@@ -27,6 +27,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import tempfile
 from typing import Any
 
 
@@ -252,7 +253,7 @@ def _snapshot_records(path: Path | None, selected: list[dict[str, Any]]) -> tupl
             "stat_before": stat_before,
             "stat_after": stat_after,
         }
-    required = {item["path"] for item in selected}
+    required = {str(Path(item["path"]).expanduser().absolute()) for item in selected}
     if set(by_path) != required:
         raise BuildError("ROOT279 snapshot path set does not exactly match selected frames")
     expected_items: list[dict[str, Any]] = []
@@ -463,6 +464,28 @@ def self_test() -> None:
         pass
     else:
         raise AssertionError("receipt attempt identity mismatch was accepted")
+    # Rehearse the actual ROOT310 snapshot-v2 shape with ten metadata records:
+    # requests[].selected_native_files, stat_before/stat_after, and the
+    # immutable aggregate list.  No fixture payload is opened or hashed.
+    with tempfile.TemporaryDirectory(prefix="root279-v3-snapshot-") as td:
+        root = Path(td); files = []
+        for mode in ("same", "half"):
+            entry_files = []
+            for index, frame in enumerate((0, 49, 50, 99, 100)):
+                path = root / mode / f"Part_{frame:04d}.bi4"; path.parent.mkdir(parents=True, exist_ok=True)
+                stat = {"bytes": 100 + index, "mtime_ns": 10 + index, "ctime_ns": 20 + index, "st_dev": 1, "st_ino": 1000 + len(files)}
+                item = {"path": str(path), "bytes": stat["bytes"], "mtime_ns": stat["mtime_ns"], "sha256": f"{len(files) + 1:064x}", "stat_before": stat, "stat_after": dict(stat), "stat_consistency": "PASS_PRE_POST_IDENTICAL", "frame": frame}
+                entry_files.append(item); files.append(item)
+            # Keep one request entry per ROOT310 template.
+            if mode == "same":
+                same_entry = entry_files
+            else:
+                half_entry = entry_files
+        immutable = [{"frame": item["frame"], "path": item["path"], "bytes": item["bytes"], "sha256": item["sha256"]} for item in files]
+        snapshot = {"schema": SNAPSHOT_SCHEMA, "status": SNAPSHOT_STATUS, "worker_scope": {"bi4_decode": False, "solver_launch": False}, "requests": [{"selected_native_files": same_entry}, {"selected_native_files": half_entry}], "immutable_source_sha_list": immutable, "selected_native_total_bytes": sum(item["bytes"] for item in files), "source_sha_list_digest": hashlib.sha256(json.dumps(immutable, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()}
+        snapshot_path = root / "native_selected_source_snapshot_v2.json"; snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
+        parsed, _ = _snapshot_records(snapshot_path, [{"path": item["path"]} for item in files])
+        assert len(parsed) == EXPECTED_DEFERRED_COUNT and all("stat_at_prepare" in item for item in parsed.values())
     print("PASS_F1_S2_ROOT279_REQUEST_V3_SELFTEST")
 
 
