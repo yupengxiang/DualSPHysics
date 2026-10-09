@@ -177,6 +177,45 @@ def _parse_def(path: Path) -> ET.ElementTree:
     return tree
 
 
+def _validate_fixed_source_geometry(tree: ET.ElementTree) -> None:
+    """Pin the candidate's non-fluid geometry/control to the known F7 source."""
+    root = tree.getroot()
+    mainlist = root.find(".//geometry/commands/mainlist")
+    if mainlist is None:
+        raise CandidateError("coarse Def lacks geometry commands/mainlist")
+    active_mk: str | None = None
+    boxes: dict[str, list[tuple[tuple[float, float, float], tuple[float, float, float]]]] = {}
+    for element in mainlist:
+        tag = _tag(element)
+        if tag in {"setmkbound", "setmkfluid"}:
+            active_mk = element.get("mk")
+        elif tag == "drawbox" and active_mk in {"0", "2"}:
+            point = element.find("point")
+            size = element.find("size")
+            if point is None or size is None:
+                raise CandidateError("fixed source drawbox lacks point/size")
+            low = _vec(point, "fixed source drawbox point")
+            extent = _vec(size, "fixed source drawbox size")
+            boxes.setdefault(active_mk, []).append((low, tuple(low[i] + extent[i] for i in range(3))))
+    _expect(len(boxes.get("0", [])), 1, "fixed tank drawbox count")
+    _expect(len(boxes.get("2", [])), 1, "fixed paddle drawbox count")
+    _expect(boxes["0"][0][0], (-0.6, -0.4, 0.0), "fixed tank low")
+    _expect(boxes["0"][0][1], (0.6, 0.4, 0.6), "fixed tank high")
+    _expect(boxes["2"][0][0], PADDLE_LOW, "fixed paddle low")
+    paddle_high = boxes["2"][0][1]
+    if any(not math.isclose(paddle_high[i], (PADDLE_HIGH[0], PADDLE_HIGH[1], 0.53)[i], rel_tol=0.0, abs_tol=2e-15) for i in range(3)):
+        raise CandidateError(f"fixed paddle high: expected {(PADDLE_HIGH[0], PADDLE_HIGH[1], 0.53)!r}, got {paddle_high!r}")
+    constants = root.find(".//casedef/constantsdef")
+    if constants is None:
+        raise CandidateError("coarse Def lacks constantsdef")
+    gravity = constants.find("gravity")
+    rhop0 = constants.find("rhop0")
+    if gravity is None or rhop0 is None:
+        raise CandidateError("coarse Def lacks gravity/rhop0")
+    _expect(_vec(gravity, "gravity"), (0.0, 0.0, -9.81), "fixed gravity")
+    _expect(_finite(rhop0.get("value"), "rhop0"), RHO_KG_M3, "fixed density")
+
+
 def _drawbox(low: tuple[float, float, float], high: tuple[float, float, float], comment: str) -> ET.Element:
     box = ET.Element("drawbox", {"cmt": comment})
     ET.SubElement(box, "boxfill").text = "solid"
@@ -370,7 +409,15 @@ def _validate_source(manifest_path: Path) -> tuple[dict[str, Any], dict[str, Pat
     _expect(coarse149.get("spacing_phase_by_axis")[0].get("coordinate_unique_count"), 45, "ROOT149 coarse x count")
     _expect(coarse149.get("spacing_phase_by_axis")[1].get("coordinate_unique_count"), 29, "ROOT149 coarse y count")
     _expect(coarse149.get("spacing_phase_by_axis")[2].get("coordinate_unique_count"), 18, "ROOT149 coarse z count")
+    owner = docs["owner_metadata"].get("physical_binding", {})
+    _expect(owner.get("family_id"), "F7", "owner metadata family")
+    _expect(owner.get("physical_case_id"), CASE_ID, "owner metadata case")
+    _expect(owner.get("initial_state", {}).get("initial_mass_total_kg"), OWNER_MASS_KG, "owner metadata mass")
+    _expect(owner.get("geometry", {}).get("fluid_envelope", {}).get("low_m"), list(OWNER_LOW), "owner metadata envelope low")
+    _expect(owner.get("geometry", {}).get("paddle", {}).get("low_m"), list(PADDLE_LOW), "owner metadata paddle low")
+    _expect(owner.get("geometry", {}).get("paddle", {}).get("size_m"), [0.06, 0.48, 0.48], "owner metadata paddle size")
     tree = _parse_def(paths["coarse_def"])
+    _validate_fixed_source_geometry(tree)
     return manifest, paths, stats, docs
 
 
