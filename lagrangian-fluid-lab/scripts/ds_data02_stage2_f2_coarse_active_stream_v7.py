@@ -197,7 +197,7 @@ def _validate_source_contract(contract: dict[str, Any], manifest: dict[str, Any]
     _require_equal(target.get("type_enum"), 12, "source target type enum")
     _require_equal(target.get("type_name"), "DatDouble", "source target type name")
     _require_equal(target.get("value_bytes"), 8, "source target byte width")
-    _require_equal(target.get("item_path"), ["root"], "source target item path")
+    _require_equal(target.get("item_path"), ["JPartDataBi4"], "source target item path")
     if target.get("offset_mode") != "serialized_header_discovery":
         raise RawHeaderError("source target offset is not the bounded serialized-header discovery")
     files = contract.get("source_files")
@@ -370,7 +370,9 @@ def _find_massfluid_in_item(reader: PrefixReader, *, si64: bool, item_path: list
     return None
 
 
-def discover_massfluid(path: Path, *, target_path: list[str] = ["root"]) -> dict[str, Any]:
+def discover_massfluid(path: Path, *, target_path: list[str] | None = None) -> dict[str, Any]:
+    if target_path is None:
+        target_path = ["JPartDataBi4"]
     reader = PrefixReader(path)
     try:
         header = reader.read(HEADER_SIZE)
@@ -467,7 +469,7 @@ def audit(manifest_path: Path, output_path: Path) -> dict[str, Any]:
     if v6_manifest_stat["sha256"] != str((v6_report.get("manifest") or {}).get("sha256")):
         raise RawHeaderError("V7 V6 manifest does not bind the completed V6 report manifest")
     bound_sources = _validate_source_contract(source_contract, manifest, source_contract_path)
-    raw = discover_massfluid(first_frame, target_path=(source_contract.get("serialization") or {}).get("target", {}).get("item_path", ["root"]))
+    raw = discover_massfluid(first_frame, target_path=(source_contract.get("serialization") or {}).get("target", {}).get("item_path", ["JPartDataBi4"]))
     frame_post = stat_record(first_frame)
     for field in ("bytes", "mtime_ns", "ctime_ns", "st_dev", "st_ino"):
         if frame_pre[field] != frame_post[field]:

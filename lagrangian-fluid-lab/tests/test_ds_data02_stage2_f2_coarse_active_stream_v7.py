@@ -45,7 +45,7 @@ def synthetic_bi4(*, mass_type: int = 12, mass_value: float = 0.0006814720109105
     base = b"".join(
         (
             jstr("\nITEM\n"),
-            jstr("root"),
+            jstr("JPartDataBi4"),
             struct.pack("<i", 0),
             struct.pack("<i", 0),
             jstr("%.7E"),
@@ -77,7 +77,7 @@ def test_v7_discovers_root_massfluid_offset_and_original_bytes(tmp_path):
     path = tmp_path / "Part_0000.bi4"
     path.write_bytes(payload)
     found = loaded.discover_massfluid(path)
-    assert found["item_path"] == ["root"]
+    assert found["item_path"] == ["JPartDataBi4"]
     assert found["field_name"] == "MassFluid"
     assert found["type_enum"] == 12
     assert found["type_name"] == "DatDouble"
@@ -164,7 +164,7 @@ def test_v7_source_target_contract_requires_serialized_discovery():
                     "format": "JBinaryData",
                     "header_layout": {"size_bytes": 64, "byte_order": "little"},
                     "target": {
-                        "item_path": ["root"],
+                        "item_path": ["JPartDataBi4"],
                         "field_name": "MassFluid",
                         "type_enum": 12,
                         "type_name": "DatDouble",
