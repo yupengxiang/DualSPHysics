@@ -1,0 +1,134 @@
+{
+  "schema": "ds02.stage2.f2.coarse-active-stream.v7.massfluid-source-contract.v1",
+  "status": "SOURCE_BOUND_RAW_SCALAR_PROOF_ONLY",
+  "source_files": {
+    "jbinarydata_header": {
+      "path_hint": "src/source/JBinaryData.h",
+      "sha256": "6c5ae894216685b6c24792c229760e093eb1ffdcdab71ea22261784e3a251903",
+      "evidence": [
+        "TpData::DatDouble=12 at lines 84-88",
+        "StHeadFmtBin 60-byte title plus byteorder/si64 at lines 186-193",
+        "InDouble uses sizeof(double) at line 263",
+        "JBinaryData file layout at lines 462-489"
+      ]
+    },
+    "jbinarydata_source": {
+      "path_hint": "src/source/JBinaryData.cpp",
+      "sha256": "29b39fe132795fe941d83c7ade8a842d2b47da281a3dc7855003c2ddb2f899e1",
+      "evidence": [
+        "InValue dispatches DatDouble to InDouble at lines 792-815",
+        "SaveValues writes the VALUES marker, count, and values in sequence at lines 1095-1100",
+        "MakeFileHead writes byte order and si64 at lines 1283-1298",
+        "SetvDouble stores the DatDouble union value at lines 2628-2633"
+      ]
+    },
+    "jpartdata_header": {
+      "path_hint": "src/source/JPartDataBi4.h",
+      "sha256": "97b9493d72063d210def5677813f5ce8016de996e468d3665e741fba34e3e37e",
+      "evidence": [
+        "ConfigCtes accepts MassFluid as a double at lines 139-142"
+      ]
+    },
+    "jpartdata_source": {
+      "path_hint": "src/source/JPartDataBi4.cpp",
+      "sha256": "5aeb4f25c173aabe1fca4de8b253ade789be1ba3db1f2e0eb9fa57fb67c6a544",
+      "evidence": [
+        "Config copies the part-head MassFluid into ConfigCtes at lines 169-180",
+        "ConfigCtes calls Data->SetvDouble(\"MassFluid\", massfluid) at lines 234-243",
+        "SaveFileData delegates the BI4 file to Data->SaveFile at lines 412-430"
+      ]
+    },
+    "jsph_source": {
+      "path_hint": "src/source/JSph.cpp",
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7",
+      "evidence": [
+        "LoadConfigCtes casts XML MassFluid to the solver float at lines 642-655",
+        "ConfigSaveData passes solver MassFluid to the part header at lines 2734-2743"
+      ]
+    },
+    "functions_header": {
+      "path_hint": "src/source/Functions.h",
+      "sha256": "f6b8ad32c87f9503a2e9b4433a5852fbc8a0052a0a09b67724544a243a46018b",
+      "evidence": [
+        "GetByteOrder declaration at line 395"
+      ]
+    },
+    "functions_source": {
+      "path_hint": "src/source/Functions.cpp",
+      "sha256": "6f811c422ef490d0876ef8d6fbece91cc23b7335a5591211e3ae05d9ad8a2c81",
+      "evidence": [
+        "GetByteOrder returns LittleEndian when the first byte of int 1 is 1 at lines 1943-1948"
+      ]
+    },
+    "official_bi4_dump": {
+      "path_hint": "lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e",
+      "evidence": [
+        "Pinned official decoder binary used by the consumed V6 typed-header producer"
+      ]
+    },
+    "jsph_header": {
+      "path_hint": "src/source/JSph.h",
+      "sha256": "abb087c020641d94c3968507f0ce067da4f45cac246ff6bc586d4e8665e39eda",
+      "evidence": [
+        "float MassFluid at line236"
+      ]
+    },
+    "jpartdatahead_header": {
+      "path_hint": "src/source/JPartDataHead.h",
+      "sha256": "520e312392299d4c4b44a62444053405286750f53466c3056f3c14b6cdc014cc",
+      "evidence": [
+        "double MassFluid at line96 and double GetMassFluid at line222"
+      ]
+    },
+    "jpartdatahead_source": {
+      "path_hint": "src/source/JPartDataHead.cpp",
+      "sha256": "af4fe9e984d3738cd3abe57063aef63881dff8e6ea204b91fc725dd29197f440",
+      "evidence": [
+        "ConfigCtes double massfluid then MassFluid=massfluid at lines143-150"
+      ]
+    }
+  },
+  "serialization": {
+    "format": "JBinaryData",
+    "header_layout": {
+      "size_bytes": 64,
+      "title_bytes": 60,
+      "byte_order_marker_offset": 60,
+      "si64_marker_offset": 61,
+      "byte_order": "little",
+      "size_integer": "uint32 unless the header byteorder marker adds 10 for si64"
+    },
+    "target": {
+      "item_path": [
+        "JPartDataBi4"
+      ],
+      "field_name": "MassFluid",
+      "type_enum": 12,
+      "type_name": "DatDouble",
+      "value_bytes": 8,
+      "byte_order": "little",
+      "offset_mode": "serialized_header_discovery",
+      "offset_definition": "absolute byte offset of the eight value bytes after the field name length/name and type enum in the root VALUES sequence"
+    },
+    "source_to_file_path": [
+      "JSph::LoadConfigCtes reads XML MassFluid and casts to solver float",
+      "JSph::ConfigSaveData passes the solver MassFluid into JPartDataHead",
+      "JPartDataBi4::Config calls ConfigCtes",
+      "JPartDataBi4::ConfigCtes calls Data->SetvDouble(\"MassFluid\", massfluid)",
+      "JBinaryData::SaveValues serializes the root VALUES sequence",
+      "JBinaryData::InValue dispatches DatDouble to eight-byte InDouble"
+    ]
+  },
+  "claim_boundary": {
+    "raw_byte_result": "one first-frame scalar only",
+    "full_stream": "UNKNOWN_AND_NOT_READ",
+    "native_numerical_cause": "UNCHANGED_FROM_V6",
+    "physical_fate": "UNKNOWN",
+    "legal_flux": "UNKNOWN",
+    "dynamical_impact": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
