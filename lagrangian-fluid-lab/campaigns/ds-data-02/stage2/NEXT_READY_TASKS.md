@@ -1,3 +1,12 @@
+最新实际增量（2026-10-09T02:13:22.007927+00:00）：完整目标 ACTIVE。
+
+- ROOT133 F3 .015 full-window native canary实际completed/rc0：836 files，0→8.350023358431661s、4320fluid全窗保留，RunPARTs全部排除计数与DTsMin夹紧为0。ROOT120 generatedXML/BI4/forcing在共享预留后复制到attempt-owned solver-inputs，三文件独立inode、full copy SHA及parent full pre/post sourceSHA闭合，literal venv shebang与actual argv/environment入账。full systemdCPU203.232353s已同父补账幂等、unit停、GPU UUID lease移除；输出912592711B，实际GPU fee 202.88610091200098s。root只小JSON/XML/CSV/stat，原生粒子字段及科学Q未审计/未通过；reference准备ROOT139完整源字段与有界观测，不盲跑最细档。
+- ROOT135 F5三源JSON诊断实际completed，root独立q117/q124/q123→actualreceipt/proof/hash核对。yhalf→yzero fluid减少40625、质量少5.078125kg，盒外y600→0；既定>2%初始质量hardfail保持、all-shapes/contact/forcing/per-MK边界UNKNOWN。CPU1.361181s闭账、unit停，无CFD。q123为GenCase，其几何已由q124独立实际审计；schema的q123无standalone报告不等于全无几何证据。
+- ROOT137 F7-S1 source/control/CURRENT288严格核对actualcompleted，XML样本325.6kg与prior nativeCSV325.60001628kg分开，与owner320.1984kg偏差1.68696%；旧质量probe百分比使用325.6kg离散分母，不能授予连续owner等价。CPU1.466547s闭账、unit停。forensics准备ROOT141初态空间QA复用原有源产物。
+- ROOT138 F2 domain-control V10全401帧审计已managed启动，unit ds02-f2-coarse-domain-active-stream-v10-root-138.service，3600s入口/3630s outer/CPU1/2GiB Memory，原生SHA在实际预留后由worker执行，67只当日志校验，不造ID/per-ID motive。当前占用主I/O槽；无GPU/CFD任务。主数组不由root读或哈希。
+- consumer V51→V52→V53复制模块/实际runtime/runtime/executor闭包修复已集成，13 root focused tests PASS（含ROOT138/F7）。准备新ROOT140 actual executor/parent/后置hand-off，ROOT122失败及复制字节不改；新copy不是旧失败成功。postterminal必须真实CLI/split receipts匹配，不用旧ROOT060 proof。
+- reference一次未预留verify_content=True实际读取210068056B（包括1.3MB BI4及forcing/binaries/code）的operational-only披露已保存，UTC/CPU/wall未测量为UNKNOWN，无decoded fields/solver/ledger/资格信用。今后source校验False，真实root133 afterreserve内容验证与该操作独立。
+
 最新实际增量（2026-10-09T01:55:22.108592+00:00）：完整七项目标 ACTIVE，原边界不变。
 
 - ROOT130 数值域六面微增对照实际 completed/rc0，401原生files，0→4.00002065943922s、27750→27683活跃fluid。RunPARTs逐输出区间 NpOut求和67，全position，rho/moving均0；末行NpOut=0仅表示末区间，不能当全窗零遗漏。原域153→margin域67说明数值域敏感，不赋物理去向/科学Q。DTsMin全0、boundary512883不变，root独立XML仅两节点六坐标改变、comment及其余结构一致。root未读/哈希native数组，身份与全场待ROOT138 guarded V10 stream。full systemd CPU101.528309s同父补账幂等，外部9539885702B、Home收据精确计费，unit停、UUID租约移除。
