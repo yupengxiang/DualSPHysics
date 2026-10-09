@@ -280,8 +280,13 @@ def _snapshot_records(path: Path | None, selected: list[dict[str, Any]]) -> tupl
             "sha256": item["sha256"],
             "bytes": int(item["bytes"]),
             "stat_at_prepare": {
-                "dev": item["stat_after"]["st_dev"],
-                "ino": item["stat_after"]["st_ino"],
+                # The ROOT310 snapshot worker reports POSIX names
+                # ``st_dev``/``st_ino``.  The consumed V4 guard accepts the
+                # normalized names ``device``/``inode``; retaining the
+                # worker spelling here silently leaves those two identity
+                # fields unchecked, so normalize at this boundary.
+                "device": item["stat_after"]["st_dev"],
+                "inode": item["stat_after"]["st_ino"],
                 "bytes": item["stat_after"]["bytes"],
                 "mtime_ns": item["stat_after"]["mtime_ns"],
                 "ctime_ns": item["stat_after"]["ctime_ns"],
@@ -359,6 +364,17 @@ def _member(mode: str, intake: dict[str, Any], request: dict[str, Any], proof: d
                 raise BuildError(f"{key} snapshot record lacks concrete SHA")
             if not isinstance(concrete_bytes, int) or not isinstance(concrete_stat, dict):
                 raise BuildError(f"{key} snapshot record lacks concrete bytes/stat")
+            # Snapshot-v2 uses st_dev/st_ino; V4 uses device/inode.  Accept
+            # either only as an explicit normalization, and emit the V4
+            # spelling in the manifest consumed by the guard.
+            concrete_stat = dict(concrete_stat)
+            if "device" not in concrete_stat and "st_dev" in concrete_stat:
+                concrete_stat["device"] = concrete_stat.pop("st_dev")
+            if "inode" not in concrete_stat and "st_ino" in concrete_stat:
+                concrete_stat["inode"] = concrete_stat.pop("st_ino")
+            required_stat = {"bytes", "mtime_ns", "ctime_ns", "device", "inode"}
+            if not required_stat.issubset(concrete_stat):
+                raise BuildError(f"{key} snapshot record lacks V4 guard stat fields")
             item = {**item, "known_sha256": concrete_sha, "bytes": concrete_bytes, "stat_at_prepare": concrete_stat}
         selected_with_snapshot.append(item)
         deferred[item["path"]] = item
@@ -485,7 +501,10 @@ def self_test() -> None:
         snapshot = {"schema": SNAPSHOT_SCHEMA, "status": SNAPSHOT_STATUS, "worker_scope": {"bi4_decode": False, "solver_launch": False}, "requests": [{"selected_native_files": same_entry}, {"selected_native_files": half_entry}], "immutable_source_sha_list": immutable, "selected_native_total_bytes": sum(item["bytes"] for item in files), "source_sha_list_digest": hashlib.sha256(json.dumps(immutable, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()}
         snapshot_path = root / "native_selected_source_snapshot_v2.json"; snapshot_path.write_text(json.dumps(snapshot), encoding="utf-8")
         parsed, _ = _snapshot_records(snapshot_path, [{"path": item["path"]} for item in files])
-        assert len(parsed) == EXPECTED_DEFERRED_COUNT and all("stat_at_prepare" in item for item in parsed.values())
+        assert len(parsed) == EXPECTED_DEFERRED_COUNT
+        assert all("stat_at_prepare" in item for item in parsed.values())
+        assert all({"bytes", "mtime_ns", "ctime_ns", "device", "inode"}.issubset(item["stat_at_prepare"]) for item in parsed.values())
+        assert all("dev" not in item["stat_at_prepare"] and "ino" not in item["stat_at_prepare"] for item in parsed.values())
     print("PASS_F1_S2_ROOT279_REQUEST_V3_SELFTEST")
 
 

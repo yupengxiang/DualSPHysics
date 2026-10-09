@@ -194,6 +194,16 @@ def _xml_diff(source: Path, candidate: Path) -> dict[str, Any]:
             "allowed_path": allowed_path}
 
 
+def _assert_observed_def_pair(def_diff: dict[str, Any], source_declared_sha: str, candidate_declared_sha: str) -> None:
+    """Require declared Def digests to match the stable bytes just parsed."""
+    observed_source = def_diff.get("source", {}).get("sha256")
+    observed_candidate = def_diff.get("candidate", {}).get("sha256")
+    if observed_source != source_declared_sha:
+        raise BuildFailure("source Def declared SHA differs from observed bytes")
+    if observed_candidate != candidate_declared_sha:
+        raise BuildFailure("candidate Def declared SHA differs from observed bytes")
+
+
 def _source_identity(source_case: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     receipt, request, receipt_rec = _receipt(source_case, "source-current producer receipt")
     physical = request.get("physical_case_id")
@@ -235,9 +245,18 @@ def _source_identity(source_case: dict[str, Any]) -> tuple[dict[str, Any], dict[
             source_def_path = candidate_path
     if source_def_path is None:
         raise BuildFailure("source-current Def path for declared hash is absent")
+    # The request input map is a declaration, not proof that the bytes at
+    # that semantic path still match it.  Capture the exact Def once and
+    # require the observed digest to equal the declared source definition.
+    # This keeps source-current identity closed across a replacement/touch
+    # race and prevents a digest-only source authority claim.
+    _, source_def_record = _read_stable_bytes(Path(source_def_path), "source-current Def XML")
+    if source_def_record["sha256"] != source_def:
+        raise BuildFailure("source-current Def declaration does not match bytes at its semantic path")
     scope = request.get("scope") if isinstance(request.get("scope"), dict) else {}
     identity = {"physical_case_id": physical, "case_id": request.get("case_id"), "attempt_id": request.get("attempt_id"),
                 "source_xml": xml_rec, "source_bi4_path": str(Path(native["path"]).expanduser().absolute()), "source_bi4_sha256": native["known_sha256"], "source_def_path": source_def_path, "source_def_sha256": source_def,
+                "source_def_record": source_def_record,
                 "source_receipt_path": receipt_rec["path"], "source_receipt_sha256": receipt_rec["sha256"], "source_map": source_map, "source_scope": scope,
                 "source_request": request, "source_receipt": receipt}
     return identity, request, receipt_rec
@@ -343,6 +362,14 @@ def _bridge(source_case: dict[str, Any], candidate_case: dict[str, Any], sentine
             def_diff = {"status": "UNKNOWN_DEF_PATH"}
         else:
             def_diff = _xml_diff(Path(source_def_pair[0]), Path(candidate_def_pair[0]))
+            # A basename/digest pair in the request map is not enough: the
+            # XML comparison has just read these exact paths.  Join both
+            # declared digests to the observed stable-byte SHA values before
+            # accepting the narrow resolution-only bridge.
+            try:
+                _assert_observed_def_pair(def_diff, source_def_pair[1], candidate_def_pair[1])
+            except BuildFailure as exc:
+                missing.append(str(exc))
             if def_diff["status"] != "PASS_ONLY_DP_RESOLUTION_CHANGE":
                 missing.append("Def XML non-resolution difference")
         scope = request.get("scope") if isinstance(request.get("scope"), dict) else {}
@@ -499,7 +526,15 @@ def _self_test() -> None:
         # The production path is intentionally strict: this fixture has the
         # exact approved geometry/@dp path, while the second mutation must be
         # rejected as a non-resolution change.
-        assert _xml_diff(source, candidate)["status"] == "PASS_ONLY_DP_RESOLUTION_CHANGE"
+        good_diff = _xml_diff(source, candidate)
+        assert good_diff["status"] == "PASS_ONLY_DP_RESOLUTION_CHANGE"
+        _assert_observed_def_pair(good_diff, good_diff["source"]["sha256"], good_diff["candidate"]["sha256"])
+        try:
+            _assert_observed_def_pair(good_diff, "0" * 64, good_diff["candidate"]["sha256"])
+        except BuildFailure:
+            pass
+        else:
+            raise AssertionError("source Def declared/observed SHA mismatch was accepted")
         assert _xml_diff(source, bad)["status"] == "UNKNOWN_DEF_NON_RESOLUTION_CHANGE"
         # A role digest cannot be smuggled in under a different basename.
         source_identity = {
