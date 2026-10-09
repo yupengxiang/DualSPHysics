@@ -79,12 +79,21 @@ print(json.dumps({"status": "PASS_MANUFACTURED_DIRECT_RECOVERY"}))
             },
             "recovery_binding": {"new_output_root": "<V58_OUTPUT_ROOT>"},
         },
-        "runtime": {"worker_target": str(target / "runtime/native/ds_data02_stage2_f2_native_raw_to_typed_label_v2.py")},
+        "runtime": {
+            "worker_target": str(target / "runtime/native/ds_data02_stage2_f2_native_raw_to_typed_label_v2.py"),
+            "code_overlay_bindings": [{
+                "role": "worker", "source_path": str(worker),
+                "target_path": str(target / "runtime/native/ds_data02_stage2_f2_native_raw_to_typed_label_v2.py"),
+                "sha256": _sha(worker), "bytes": worker.stat().st_size,
+                "mode_bits": stat.S_IMODE(worker.stat().st_mode),
+                "required_executable": False,
+            }],
+        },
         "execution": {"max_wall_seconds": 20, "env": {}},
     }
     _write(request, request_value)
     command = [str(PYTHON), str(SCRIPT), "run", "--request", str(request),
-               "--worker-override", str(worker), "--io-slot-approved"]
+               "--io-slot-approved"]
     completed = subprocess.run(command, capture_output=True, text=True,
                                check=False, timeout=30)
     assert completed.returncode == 0, completed.stderr + completed.stdout
