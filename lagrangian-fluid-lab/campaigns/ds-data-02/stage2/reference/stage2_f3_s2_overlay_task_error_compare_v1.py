@@ -28,6 +28,7 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 CONTRACT_NAME = "stage2_f3_s2_overlay_native_task_contract_v1.json"
+FIXTURE_NAME = "stage2_f3_s2_overlay_task_error_compare_manufactured_fixture_v1.json"
 SCHEMA = "ds02.stage2.f3-s2.overlay-task-error-compare.v1"
 SUMMARY_SCHEMAS = {
     "ds02.stage2.f3-s2.full-native-stream-observer.v4",
@@ -427,6 +428,15 @@ def manufactured_self_test() -> dict[str, Any]:
         },
         "observation_contract": {"event_time": {"status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION", "characteristic_time_s": None}},
     }
+    fixture_path = HERE / FIXTURE_NAME
+    fixture_value = json.loads(fixture_path.read_text(encoding="utf-8"))
+    if fixture_value.get("schema") != "ds02.stage2.f3-s2.overlay-task-error-compare.manufactured-trajectory.v1":
+        raise AssertionError("manufactured trajectory fixture schema changed")
+    if fixture_value.get("native_mass_kg") != 3.0 or fixture_value.get("xml_mass_kg_decoy") == 3.0:
+        raise AssertionError("manufactured native/XML mass source fixture changed")
+    expected = fixture_value.get("expected_diagnostics", {})
+    if expected.get("same_cfl_baseline_vs_half_cfl") != "MEASURED_ALIGNED_TIME" or expected.get("same_cfl_baseline_vs_half_output") != "UNKNOWN_TIME_ALIGNMENT":
+        raise AssertionError("manufactured time-diagnostic fixture changed")
     with tempfile.TemporaryDirectory(prefix="f3-overlay-compare-fixture-") as root_text:
         root = Path(root_text)
         paths = {}

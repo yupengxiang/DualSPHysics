@@ -1,0 +1,42 @@
+{
+  "schema": "ds02.stage2.f3-s2.overlay-task-error-compare.manufactured-trajectory.v1",
+  "purpose": "Interface-only fixture for exact saved-time versus asynchronous endpoint diagnostics; no solver/native payload.",
+  "native_mass_kg": 3.0,
+  "xml_mass_kg_decoy": 99.0,
+  "trajectory": {
+    "same_cfl_baseline": {
+      "saved_times_s": [0.0, 1.0],
+      "position_x_m": [0.0, 1.0],
+      "velocity_x_m_per_s": [0.0, 0.01],
+      "kinetic_energy_j": [0.0, 0.1]
+    },
+    "half_cfl": {
+      "saved_times_s": [0.0, 1.0],
+      "position_x_m": [0.0, 1.0],
+      "velocity_x_m_per_s": [0.0, 0.01],
+      "kinetic_energy_j": [0.0, 0.1]
+    },
+    "half_output": {
+      "saved_times_s": [0.001, 1.001],
+      "position_x_m": [0.0, 1.0],
+      "velocity_x_m_per_s": [0.0, 0.01],
+      "kinetic_energy_j": [0.0, 0.1]
+    }
+  },
+  "registered_query": {
+    "query_time_s": 0.5,
+    "status": "BRACKETED",
+    "lower_frame": 0,
+    "upper_frame": 1,
+    "interpolation": false
+  },
+  "expected_diagnostics": {
+    "same_cfl_baseline_vs_half_cfl": "MEASURED_ALIGNED_TIME",
+    "same_cfl_baseline_vs_half_output": "UNKNOWN_TIME_ALIGNMENT",
+    "mass_source": "native_header.MassFluid; xml_mass_kg_decoy is ignored",
+    "event_time": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
