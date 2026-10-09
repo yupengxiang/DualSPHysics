@@ -42,6 +42,25 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def record_literal(path: Path, label: str) -> dict[str, Any]:
+    """Keep the literal venv path in the request's ABI/input closure."""
+    path = path.expanduser()
+    if not path.is_file():
+        raise FileNotFoundError(f"{label}: {path}")
+    stat = path.stat()
+    return {
+        "path": str(path),
+        "label": label,
+        "bytes": int(stat.st_size),
+        "mtime_ns": int(stat.st_mtime_ns),
+        "ctime_ns": int(stat.st_ctime_ns),
+        "st_dev": int(stat.st_dev),
+        "st_ino": int(stat.st_ino),
+        "sha256": sha256(path),
+        "content_scope": "small_JSON_hashed_by_builder_and_parent_v8",
+    }
+
+
 def record(path: Path, label: str) -> dict[str, Any]:
     path = regular(path, label)
     stat = path.stat()
@@ -116,7 +135,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     for run in source["runs"].values():
         for item in run.values():
             records[item["path"]] = item
-    records[str(PYTHON)] = record(PYTHON, "literal venv interpreter")
+    records[str(PYTHON)] = record_literal(PYTHON, "literal venv interpreter")
     worker_path = str(worker.resolve())
     proofs = [f"{label}={PROOF_PATHS[label].resolve()}" for label in sorted(PROOF_PATHS)]
     command = [str(PYTHON), worker_path, "--compare"]

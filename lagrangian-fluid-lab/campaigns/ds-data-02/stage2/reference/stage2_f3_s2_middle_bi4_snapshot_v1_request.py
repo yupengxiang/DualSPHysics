@@ -68,6 +68,25 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def record_literal(path: Path, label: str) -> dict[str, Any]:
+    """Record the venv under its literal argv path, preserving the ABI binding."""
+    path = path.expanduser()
+    if not path.is_file():
+        raise FileNotFoundError(f"{label}: {path}")
+    stat = path.stat()
+    return {
+        "path": str(path),
+        "label": label,
+        "bytes": int(stat.st_size),
+        "mtime_ns": int(stat.st_mtime_ns),
+        "ctime_ns": int(stat.st_ctime_ns),
+        "st_dev": int(stat.st_dev),
+        "st_ino": int(stat.st_ino),
+        "sha256": sha256(path),
+        "content_scope": "small_input_hashed_by_builder_and_parent_v8",
+    }
+
+
 def record(path: Path, label: str) -> dict[str, Any]:
     path = regular(path, label)
     stat = path.stat()
@@ -130,7 +149,8 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         (RUNTIME_V8, "runtime v8"), (BATCH, "batch runner"), (DISPATCH, "dispatch v8"), (STRICT, "strict dispatch v8"),
         (PYTHON, "literal venv interpreter"),
     ]
-    records = {str(regular(path, label)): record(path, label) for path, label in paths}
+    records = {str(regular(path, label)): record(path, label) for path, label in paths if path != PYTHON}
+    records[str(PYTHON)] = record_literal(PYTHON, "literal venv interpreter")
     worker_path = str(worker.resolve())
     q_path = str(SOURCE_Q.resolve())
     receipt_path = str(MIDDLE_RECEIPT.resolve())
