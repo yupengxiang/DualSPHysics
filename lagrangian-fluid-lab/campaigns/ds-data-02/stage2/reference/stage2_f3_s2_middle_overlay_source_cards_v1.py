@@ -74,10 +74,10 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _small_record(path: Path, label: str, expected_sha: str | None = None) -> dict[str, Any]:
+def _small_record(path: Path, label: str, expected_sha: str | None = None, *, max_bytes: int = 2 * 1024 * 1024) -> dict[str, Any]:
     path = _regular(path, label)
     stat = path.stat()
-    if stat.st_size > 2 * 1024 * 1024:
+    if stat.st_size > max_bytes:
         raise ValueError(f"{label} exceeds small input limit: {stat.st_size} bytes")
     return {
         "path": str(path),
@@ -337,7 +337,7 @@ def build_request(args: argparse.Namespace) -> dict[str, Any]:
     if args.forcing_sha256 != FORCING_SHA:
         raise ValueError("forcing SHA must be the frozen current-control SHA")
     worker = _regular(MATERIALIZER, "external v5 materializer")
-    python_record = _small_record(PYTHON, "literal venv interpreter")
+    python_record = _small_record(PYTHON, "literal venv interpreter", max_bytes=16 * 1024 * 1024)
     materializer_record = _small_record(worker, "external v5 materializer")
     overlay_record = _small_record(args.overlay_xml, "new XML overlay")
     input_records = {python_record["path"]: python_record, materializer_record["path"]: materializer_record, overlay_record["path"]: overlay_record}
