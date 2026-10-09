@@ -1,3 +1,12 @@
+最新实际进展（2026-10-09T01:22:18.753035+00:00）：完整七项目标 ACTIVE，原期限与额度不重置。
+
+- ROOT128 F3 support V6 实际 completed/rc0；4320fluid/19944fixed、60×12×6、14.58kg，声明初态owner盒外0；actual ROOT120 q/receipt/output root、forcing SHA、worker Fluid/Bound VTK full pre/post SHA+stat 精确绑定。root仅核对小JSON/XML/stat，exact parser-consumed SHA未算；continuous equivalence/contact/flux/dynamics与QI/QN/QE UNKNOWN。完整systemd CPU1.616426s同父补账、重复幂等、unit已停。ROOT121标签比较失败与源字节保留不变。下一为forcing guard内物理复制后的有限coarse external solver V5请求审查，待冷重放释放主IO。
+- ROOT129 F2 native stream sidecar V2 已实际完成并独立核验，full CPU1.306791s闭合且unit停。明确401帧源闭合、153遗漏、XMLwhole分母未知质量0.551%>.003 FAIL；所有科学Q和physical fate未知，新产品不改旧报告。ROOT131 independently核对153行native排除位置/密度/时间括号与实际log/XML map域，全部越过至少一面；这证明数值map排除关系，不证明合法出流或物理wall/contact。
+- F2 ROOT130仅源准备，新增CPU/GPU位置predicate源码绑定，compiled binary-source link UNKNOWN；border175是face events而非153 unique IDs，静态bottom reference不是moving contact证据。仅数值域六面变化的新对照未运行，.003质量门不变。root focused tests 17PASS/1FAIL：ROOT130测试误用root绝对路径索引agent冻结request，代理前向修测试，root启动前另作新请求重绑定。
+- ROOT122 V50 cold replay仍实际running，父PID2315886、同父12GiB external预留、6000s/8GiB入口；源校验后进入复制阶段，无终态/typed/label信用。cgroup MemoryCurrent含文件cache，不能当父进程RSS。新postterminal derived sidecar builder、V50 sealer V2及literal venv adapter V2源码已接入；待实际终态再接新产品，禁止借旧ROOT060 proof。重数组/F5 ROOT124 geometry与CFD继续等主IO释放。
+- F5 ROOT123 yzero实际初始279.371875kg相对owner287.736kg为-2.907% HARDFAIL；ROOT124 geometry V10与shape compare源码已就绪未启动。全局phase影响所有shapes，边界per-MK/forcing坐标比较未获证据，不能赋all-shape pass。
+- 三名既有代理继续source-only消费者接入、reference请求审查、F2目录限定语义。当前无CFD/GPU任务，GPU6外来进程保护。共享已记CPU约704.339955core h；GPU沿实际原ledger，不含当前cold未终态CPU。恢复以真实reservation/receipt为准。
+
 最新实际进展（2026-10-09T00:56:07.902669+00:00）：完整目标 ACTIVE。
 
 - ROOT126 V8实际completed/returncode0，401全原生帧0→4.000013929480705s，27750→27597活跃流体，all401 exact MassFluid bits000000009a54463f；153个position原因Idp/MK/首次missing/删失括号与原生QA逐一一致。root从2.3MB新报告独立重算401×MK质量/计数/加权诊断、缺失ID digest及所有401 file stat，未读数组。XMLwhole18.910848kg/nativewhole18.91084830276668kg分开，未知质量分数.005513513601786032>.003，仍FAIL；QI/QN/QE及物理去向/dynamics未知。full systemd CPU118.39121s已补账且unit停，scratchpeak23791755B、清理完毕。V8 decoder继承worker pgid；后续V9异常/真实SIGTERM清理与输出上限修复进行中，不改已消费V8证据。
