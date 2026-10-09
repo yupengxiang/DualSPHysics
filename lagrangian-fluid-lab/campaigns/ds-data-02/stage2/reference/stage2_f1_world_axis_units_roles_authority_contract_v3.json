@@ -1,0 +1,137 @@
+{
+  "schema": "ds02.stage2.f1.world-axis-units-roles-authority-contract.v3",
+  "status": "SOURCE_ONLY_SCOPE_CORRECTION_NO_SCIENTIFIC_Q_CREDIT",
+  "purpose": "Partition the existing F1 observer contract into claims that are closed in the solver component basis and claims that require a producer-to-world orientation record. This additive sidecar does not change the consumed v1/v2 contract or any tolerance.",
+  "consumed_contract": {
+    "path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_com_observer_calibration_contract_v1.json",
+    "status": "immutable",
+    "world_cartesian_claims_remain_guarded": true,
+    "tolerances_changed": false
+  },
+  "claim_scopes": {
+    "component_space_native": {
+      "orientation_gate": "not_required",
+      "meaning": "The stored x/y/z component tuple, typed role, native header mass, component-space weighted COM/velocity/KE, and exact decoded saved time may be reported in solver-component coordinates when the source XML/control, role mapping, native producer proof, and source time convention are joined.",
+      "preconditions": [
+        "same producer storage convention and component labels are source-bound",
+        "fluid/fixed/moving roles are disjoint and identity-checked",
+        "native header mass is used for weighted quantities; XML mass is not a native fallback",
+        "time comes from decoded seconds/RunPARTs, never frame index",
+        "the report says component-space and makes no physical-world direction claim"
+      ],
+      "current_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+      "reason": "These preconditions establish a bounded data-integrity/diagnostic scope, not continuum truth, integration error, output error, or external validation."
+    },
+    "world_frame_physical": {
+      "orientation_gate": "required",
+      "examples": [
+        "gravity-aligned trajectory or acceleration",
+        "physical-world position/velocity direction",
+        "external boundary or sensor direction",
+        "cross-case comparison whose axes are physical rather than solver-component axes"
+      ],
+      "required_evidence": [
+        "producer writer/case source record for the solver-to-world transform",
+        "exact source SHA/stat and binary receipt/request join",
+        "the transform is tied to the same XML geometry, gravity, and control inputs"
+      ],
+      "current_status": "UNKNOWN",
+      "reason": "JPartDataBi4 stores ordered component arrays but the current small writer/dump evidence has no producer-to-world transform record. Gravity [0,0,-9.81] is an input expressed in the solver basis and does not independently prove that basis is physically oriented."
+    }
+  },
+  "source_closed_units": {
+    "position": {
+      "unit": "m",
+      "evidence": ["F1 source Def geometry units_comment=metres (m)", "JPartDataBi4 Pos/Posd component arrays"]
+    },
+    "time": {
+      "unit": "s",
+      "evidence": [
+        "JSph.cpp:334 labels time [s] and dt [s]",
+        "JSph.cpp:2987 labels RunPARTs TimeStep [s]",
+        "JSph.cpp:3031-3034 defines TimeStep [s] as physical simulation time and runtime [s]",
+        "JSph.cpp:786-787 reads TimeMax and TimeOut as run/output times",
+        "JSphCpuSingle.cpp:1197 advances TimeStep by stepdt"
+      ]
+    },
+    "velocity": {
+      "unit": "m/s",
+      "status": "PASS_SOLVER_DIMENSIONAL_CONVENTION_FOR_F1_COMPONENTS",
+      "evidence": [
+        "JSphGpuSimple_ker.cu:161-163 computes displacement as velocity*dt plus acceleration*dt^2/2 componentwise",
+        "JSphGpuSimple_ker.cu:300-302 computes displacement as velocity*dt componentwise",
+        "JSphGpuSimple_ker.cu:443-445 computes predictor/corrector displacement from velocity*dt",
+        "JSph.h:238 labels gravity [m/s^2]",
+        "F1 XML gravity carries units_comment=m/s^2 and position geometry is metres"
+      ],
+      "scope": "This closes the SI time/velocity convention in the actual solver update chain; it does not close the producer-to-world orientation or a physical-world velocity claim."
+    },
+    "mass": {"unit": "kg", "evidence": ["F1 XML massfluid/massbound units_comment=kg", "ROOT207 native header proof reference"]},
+    "density": {"unit": "kg/m^3", "evidence": ["F1 XML rhop0 units_comment=kg/m^3"]}
+  },
+  "f1_s2_next_minimum_task": {
+    "scope": "component-space diagnostic only",
+    "source_cases": ["S2 coarse", "S2 medium", "S2 fine"],
+    "required_join": [
+      "the three actual generated XML/Def source records and unchanged control parameters",
+      "ROOT207 proof/request/receipt identity and SHA (proof payload is not read by this sidecar)",
+      "native header Dp/MassFluid/MassBound and role/Idp evidence from the guarded observer",
+      "actual decoded saved timestamp/RunPARTs evidence for every compared row"
+    ],
+    "stages": [
+      {
+        "id": "A",
+        "name": "same-time component arithmetic",
+        "operation": "Compare only rows whose decoded saved times are equal within the pre-registered timestamp equality rule; use native mass-weighted fluid COM, velocity, and KE, with fixed/moving groups excluded.",
+        "interpolation": false,
+        "world_orientation_required": false,
+        "credit": "bounded diagnostic only"
+      },
+      {
+        "id": "B",
+        "name": "asynchronous saved-time separation",
+        "operation": "For each requested physical query, report actual lower/upper frame IDs, times, bracket width, and whether an exact native row exists. Keep field differences, time misalignment, integration effects, output sampling effects, and spatial-grid differences as separate UNKNOWN components.",
+        "interpolation": false,
+        "world_orientation_required": false,
+        "credit": "metadata/diagnostic only; a bracket is not a field-error bound"
+      },
+      {
+        "id": "C",
+        "name": "world-frame extension",
+        "operation": "Do not promote component results to gravity/world direction until a producer-to-world orientation source record is joined.",
+        "interpolation": false,
+        "world_orientation_required": true,
+        "credit": "UNKNOWN pending source closure"
+      }
+    ],
+    "mass_scope": {
+      "f1_s2_native_samples_kg": {
+        "coarse": 338.3015496656,
+        "medium": 340.0000161491,
+        "fine": 342.0430547278
+      },
+      "continuum_owner_mass": "UNKNOWN",
+      "rule": "These sample masses are recorded for diagnostics only; their differences are not a truth estimate and cannot replace the unresolved continuum-owner contract."
+    },
+    "frozen_tolerance_policy": "Use the already consumed F1 task contract and its tolerances unchanged; do not widen a gate or infer truth from a neighboring grid."
+  },
+  "world_orientation_status": {
+    "status": "UNKNOWN",
+    "why_not_a_global_prerequisite": "A component-space native record is still a well-defined ordered tuple even when its physical-world orientation is unknown. Orientation is a gate for world-frame interpretation, not for every storage, role, mass, COM, velocity-unit, or saved-time diagnostic.",
+    "known_source_limits": [
+      "JPartDataBi4.cpp creates Idp/Posd-or-Pos/Vel/Rhop arrays without a world transform",
+      "JPartDataBi4.h exposes component array getters, not a world orientation",
+      "bi4_dump.cpp is a read-only storage dump and does not assign physical axes",
+      "gravity XML values alone do not independently calibrate the producer axis"
+    ]
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "read_scope": {
+    "source_only": true,
+    "production_native_payload_read": false,
+    "production_h5_vtk_read": false,
+    "large_report_read": false,
+    "solver_started": false,
+    "ledger_mutation": false
+  }
+}
