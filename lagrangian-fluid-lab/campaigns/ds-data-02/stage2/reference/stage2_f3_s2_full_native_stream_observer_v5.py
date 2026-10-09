@@ -440,11 +440,12 @@ def _lifecycle_counts(value: dict[str, Any]) -> dict[str, Any]:
             return "UNKNOWN"
         return _sample_mass(observations[0] if which == "initial" else observations[-1])
 
+    lost_by_kind = _kind_counts(disappeared_ids, records_by_id)
+    reappeared_by_kind = _kind_counts(reappeared_ids, records_by_id)
+    new_by_kind = _kind_counts(newly_seen_ids, records_by_id)
     event_counts = {
-        "fluid": {"lost": _kind_counts(disappeared_ids, records_by_id)["fluid"], "reappeared": _kind_counts(reappeared_ids, records_by_id)["fluid"], "new": _kind_counts(newly_seen_ids, records_by_id)["fluid"]},
-        "fixed": {"lost": _kind_counts(disappeared_ids, records_by_id)["fixed"], "reappeared": _kind_counts(reappeared_ids, records_by_id)["fixed"], "new": _kind_counts(newly_seen_ids, records_by_id)["fixed"]},
-        "moving": {"lost": _kind_counts(disappeared_ids, records_by_id)["moving"], "reappeared": _kind_counts(reappeared_ids, records_by_id)["moving"], "new": _kind_counts(newly_seen_ids, records_by_id)["moving"]},
-        "floating": {"lost": _kind_counts(disappeared_ids, records_by_id)["floating"], "reappeared": _kind_counts(reappeared_ids, records_by_id)["floating"], "new": _kind_counts(newly_seen_ids, records_by_id)["floating"]},
+        kind: {"lost": lost_by_kind[kind], "reappeared": reappeared_by_kind[kind], "new": new_by_kind[kind]}
+        for kind in ("fluid", "fixed", "moving", "floating", "UNKNOWN")
     }
     return {
         "status": "MEASURED_FROM_FRAME_EVENT_LIFECYCLE_V5",
