@@ -1,0 +1,95 @@
+{
+  "schema": "ds02.stage2.f3-s2.generated-bi4-source-snapshot-root-rebind.v1",
+  "status": "READY_FOR_PARENT_V8_ROOT132_REBIND",
+  "scope": {
+    "reads_bi4_by_builder": false,
+    "worker_reads_one_complete_bi4_stream_after_parent_reservation": true,
+    "decoder": false,
+    "solver": false,
+    "hdf5": false,
+    "vtk": false,
+    "source_sha_authority": "parent-v8-worker-after-reservation-only"
+  },
+  "producer_binding": {
+    "family_id": "F3",
+    "sentinel_id": "F3-S2",
+    "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
+    "gencase_request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-owner-centered-dp015-gencase-v2-root-forward-120-001.json",
+    "gencase_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OWNER_CENTERED_DP015_GENCASE_ROOT_120/f3-s2-owner-centered-dp015-gencase-v2-root-120-001-root-forward-030-001/execution-receipt.json",
+    "generated_bi4": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OWNER_CENTERED_DP015_GENCASE_ROOT_120/f3-s2-owner-centered-dp015-gencase-v2-root-120-001-root-forward-030-001/generated.bi4",
+    "generated_bi4_expected_bytes": 1308397,
+    "generated_bi4_sha256": "NOT_COMPUTED_UNTIL_PARENT_GUARDED_WORKER",
+    "receipt_q_exact_join_required": true,
+    "receipt_request_sha256_exact_q_required": true,
+    "producer_output_root_is_authoritative": true
+  },
+  "parent_request": {
+    "case_id": "F3_S2_OWNER_CENTERED_DP015_BI4_SOURCE_SNAPSHOT_ROOT132",
+    "attempt_id": "f3-s2-owner-centered-dp015-bi4-source-snapshot-v2-root132-001",
+    "launch_commit": "e6a58f2a6",
+    "output_root": "{attempt_root}",
+    "output": "{attempt_root}/native_source_snapshot.json",
+    "estimated_bi4_read_bytes": 1308397,
+    "estimated_storage_bytes": 16777216,
+    "cpu_threads": 1,
+    "omp_threads": 1,
+    "max_wall_seconds": 1800,
+    "worker_command_template": [
+      "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "{integrated_worktree_root}/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_generated_bi4_snapshot_v1.py",
+      "--gencase-request",
+      "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-owner-centered-dp015-gencase-v2-root-forward-120-001.json",
+      "--receipt",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OWNER_CENTERED_DP015_GENCASE_ROOT_120/f3-s2-owner-centered-dp015-gencase-v2-root-120-001-root-forward-030-001/execution-receipt.json",
+      "--input-bi4",
+      "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OWNER_CENTERED_DP015_GENCASE_ROOT_120/f3-s2-owner-centered-dp015-gencase-v2-root-120-001-root-forward-030-001/generated.bi4",
+      "--expected-bytes",
+      "1308397",
+      "--output",
+      "{attempt_root}/native_source_snapshot.json",
+      "--case-id",
+      "F3_S2_OWNER_CENTERED_DP015_BI4_SOURCE_SNAPSHOT_ROOT132"
+    ]
+  },
+  "root_rebind": {
+    "reference_worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics",
+    "integrated_worktree_root": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+    "replace_only": [
+      "worker script path in command",
+      "request cwd/worktree_root metadata",
+      "small input record path and SHA for the integrated worker"
+    ],
+    "preserve_exactly": [
+      "ROOT120 request path and bytes",
+      "ROOT120 receipt path and bytes",
+      "ROOT120 generated.bi4 path and expected byte count",
+      "producer q/receipt identity and actual output root",
+      "deferred BI4 SHA placeholder before worker execution"
+    ],
+    "reject": [
+      "hardlinking or touching the producer BI4",
+      "parent-v8 deferred SHA claim",
+      "manual/generated BI4 SHA",
+      "output overwrite or reuse of an existing attempt root"
+    ]
+  },
+  "after_terminal": {
+    "required_status": "PASS_F3_GENERATED_BI4_HASHED_STABLE",
+    "required_report_fields": [
+      "source.sha256",
+      "source.bytes",
+      "source.stat_before",
+      "source.stat_after",
+      "source.fd_stat_before",
+      "source.fd_stat_after",
+      "producer_join",
+      "worker_scope.full_payload_streamed"
+    ],
+    "only_then": "build stage2_f3_s2_external_solver_v7_snapshot_request.py with --bi4-snapshot for a separate ROOT133 parent review",
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  }
+}
