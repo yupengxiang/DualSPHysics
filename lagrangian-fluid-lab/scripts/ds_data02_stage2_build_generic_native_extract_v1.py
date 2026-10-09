@@ -36,7 +36,11 @@ ORIGINAL_PRIMARY = Path("/home/jade/Projects/DualSPHysics")
 OFFICIAL_LAB = ORIGINAL_PRIMARY / "lagrangian-fluid-lab"
 STAGE2 = PRIMARY / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2"
 SCRIPTS = PRIMARY / "lagrangian-fluid-lab/scripts"
-INTAKE = SCRIPTS / "ds_data02_stage2_f6_root245_native_cause_intake_v1.py"
+INTAKE_V1 = SCRIPTS / "ds_data02_stage2_f6_root245_native_cause_intake_v1.py"
+INTAKE_V2 = SCRIPTS / "ds_data02_stage2_f6_root245_native_cause_intake_v2.py"
+# The V2 wrapper imports and re-exports V1 identity/PartOut logic, while its
+# RunPARTs reader handles the official footer and allocation-ratio columns.
+INTAKE = INTAKE_V2
 CURRENT_DEFAULT = STAGE2 / "CURRENT336.json"
 INVENTORY_DEFAULT = STAGE2 / "checkpoints/HISTORICAL118_NATIVE_TYPED_SOURCE_INVENTORY_AFTER_ROOT193_V1.json"
 PARTVTKOUT = OFFICIAL_LAB / "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64"
@@ -136,6 +140,31 @@ def _small_ref(path: Path, label: str, expected: str | None = None) -> dict[str,
         raise GenericExtractError(f"{label} SHA differs")
     value.update({"sha256": actual, "content_opened": True})
     return value
+
+
+def _literal_small_ref(path: Path, label: str) -> dict[str, Any]:
+    """Hash a command path without replacing its ORIGINAL venv spelling."""
+    literal = Path(path).expanduser().absolute()
+    if not literal.is_file():
+        raise GenericExtractError(f"{label} file is missing: {literal}")
+    value = literal.stat()
+    if value.st_size > MAX_SMALL_BYTES:
+        raise GenericExtractError(f"{label} exceeds small source bound")
+    digest = hashlib.sha256()
+    with literal.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return {
+        "path": str(literal),
+        "bytes": int(value.st_size),
+        "mtime_ns": int(value.st_mtime_ns),
+        "ctime_ns": int(value.st_ctime_ns),
+        "st_dev": int(value.st_dev),
+        "st_ino": int(value.st_ino),
+        "sha256": digest.hexdigest(),
+        "content_opened": True,
+        "literal_path": True,
+    }
 
 
 def _deferred(path: Path, label: str, declared: dict[str, Any] | None = None, *, directory: bool = False, expected: str | None = None) -> dict[str, Any]:
@@ -415,7 +444,10 @@ def _official_refs() -> list[dict[str, Any]]:
     tool = _small_ref(PARTVTKOUT, "official PartVTKOut")
     if tool["sha256"] != PARTVTKOUT_SHA:
         raise GenericExtractError("official PartVTKOut SHA differs")
-    return [tool, _small_ref(CONFIG, "official DsphConfig.xml"), _small_ref(INTAKE, "reviewed native intake parser"), _small_ref(SCRIPT, "generic native extractor"), _small_ref(VENV, "original literal Python interpreter"), _small_ref(VENV.parent.parent / "pyvenv.cfg", "original Python pyvenv.cfg")]
+    interpreter_literal = _literal_small_ref(VENV, "original literal Python interpreter")
+    interpreter_resolved = _small_ref(VENV.expanduser().resolve(), "original resolved Python interpreter")
+    pyvenv_cfg = _small_ref(VENV.expanduser().absolute().parent.parent / "pyvenv.cfg", "original Python pyvenv.cfg")
+    return [tool, _small_ref(CONFIG, "official DsphConfig.xml"), _small_ref(INTAKE_V1, "ROOT245 base native intake parser"), _small_ref(INTAKE_V2, "ROOT259 reviewed native intake parser"), _small_ref(SCRIPT, "generic native extractor"), interpreter_literal, interpreter_resolved, pyvenv_cfg]
 
 
 def prepare(args: argparse.Namespace) -> dict[str, Any]:
@@ -446,7 +478,8 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         raise GenericExtractError(f"refusing to reuse output root: {output_root}")
     contracts: list[dict[str, Any]] = []
     contract_refs: list[dict[str, Any]] = []
-    static_refs: list[dict[str, Any]] = [lifecycle_refs["request"], lifecycle_refs["manifest"], current_ref, inventory_ref, *consumed_refs, *_official_refs(), _small_ref(args.current, "CURRENT336 catalog", CURRENT_SHA), _small_ref(args.inventory, "historical 118 inventory")]
+    official_refs = _official_refs()
+    static_refs: list[dict[str, Any]] = [lifecycle_refs["request"], lifecycle_refs["manifest"], current_ref, inventory_ref, *consumed_refs, *official_refs, _small_ref(args.current, "CURRENT336 catalog", CURRENT_SHA), _small_ref(args.inventory, "historical 118 inventory")]
     for case_id in case_ids:
         row = current[case_id]
         native = _native_edges(case_id, row, inventory.get(case_id))
@@ -478,6 +511,16 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         contract_refs.append(contract_ref)
         static_refs.append(contract_ref)
         contracts.append(contract)
+    historical_118_case_ids = [item["physical_case_id"] for item in contracts if item["historical_118_membership"] is True]
+    diagnostic_case_ids = [item["physical_case_id"] for item in contracts if item["historical_118_membership"] is not True]
+    case_scope = {
+        "historical_118_exact_case_ids": historical_118_case_ids,
+        "historical_118_exact_count": len(historical_118_case_ids),
+        "diagnostic_case_ids": diagnostic_case_ids,
+        "diagnostic_case_count": len(diagnostic_case_ids),
+        "membership_source": inventory_ref,
+        "membership_rule": "inventory historical_118_membership is true; every other selected CURRENT case remains diagnostic-only",
+    }
     manifest = {
         "schema": MANIFEST_SCHEMA,
         "status": "READY_PARENT_GUARDED_NATIVE_EXTRACT" if terminal_ref else "READY_SOURCE_ONLY_WAITING_FOR_TERMINAL_PROOF",
@@ -488,12 +531,21 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "lifecycle_manifest": lifecycle_refs["manifest"],
         "current_catalog": current_ref,
         "historical_inventory": inventory_ref,
+        "case_scope": case_scope,
         "consumed_native_evidence": consumed_refs,
         "explicit_excluded_case_ids": sorted(explicit_excluded),
         "terminal_proof": terminal_ref,
         "terminal_proof_edges": proof_edges,
         "contracts": contract_refs,
-        "official_sources": {"partvtkout": next(item for item in _official_refs() if item["path"] == str(PARTVTKOUT)), "config": next(item for item in _official_refs() if item["path"] == str(CONFIG))},
+        "official_sources": {
+            "partvtkout": next(item for item in official_refs if item["path"] == str(PARTVTKOUT)),
+            "config": next(item for item in official_refs if item["path"] == str(CONFIG)),
+            "intake_v1": next(item for item in official_refs if item["path"] == str(INTAKE_V1.resolve())),
+            "intake_v2": next(item for item in official_refs if item["path"] == str(INTAKE_V2.resolve())),
+            "interpreter": next(item for item in official_refs if item.get("literal_path") is True),
+            "interpreter_resolved": next(item for item in official_refs if item["path"] == str(VENV.expanduser().resolve())),
+            "pyvenv_cfg": next(item for item in official_refs if item["path"] == str(VENV.expanduser().absolute().parent.parent / "pyvenv.cfg")),
+        },
         "resource_policy": {"cpu_threads": 1, "max_wall_seconds": 3600, "memory_max_bytes": 4 * 1024 * 1024 * 1024, "one_case_at_a_time": True, "native_obi4_hash_passes": 2, "partvtkout_passes": 1, "runparts_passes": 1, "h5_content_read": False, "solver_started": False},
         "claim_boundary": {"native_cause": "exact official PartOut Motive only", "historical118_cause_credit": "only exact CURRENT/inventory membership plus complete join", "physical_fate": "UNKNOWN", "legal_flux": "UNKNOWN", "continuous_event_time": "UNKNOWN", "dynamics": "UNKNOWN", "QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
         "read_policy": {"prepare_opened_h5": False, "prepare_opened_jsonl": False, "prepare_opened_bi4": False, "prepare_opened_obi4": False, "prepare_opened_partout": False, "prepare_opened_runparts": False, "parent_reservation_required_for_audit": True},
@@ -528,9 +580,10 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "deferred_input_files": sorted({str(item["path"]) for item in deferred if isinstance(item, dict) and isinstance(item.get("path"), str)}),
         "deferred_input_records": deferred,
         "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]},
-        "official_tool": manifest["official_sources"]["partvtkout"], "official_config": manifest["official_sources"]["config"],
+        "official_tool": manifest["official_sources"]["partvtkout"], "official_config": manifest["official_sources"]["config"], "official_sources": manifest["official_sources"],
         "launch_allowed": terminal_ref is not None, "execution_allowed": terminal_ref is not None, "launch_owner": "root",
         "claim_boundary": manifest["claim_boundary"],
+        "case_scope": case_scope,
         "request_note": "Generic native extraction is parent-gated. Exact case IDs and terminal proof are required; no empty/global target shortcut and no fate/flux/dynamics/Q credit.",
     }
     _atomic(request_path, request)

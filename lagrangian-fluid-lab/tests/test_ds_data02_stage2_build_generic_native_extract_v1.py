@@ -124,3 +124,21 @@ def test_generic_proof_adapter_requires_unique_exact_case_and_real_edges(tmp_pat
     proof.write_text(json.dumps(duplicate), encoding="utf-8")
     with pytest.raises(module.GenericExtractError, match="duplicates case ID"):
         module._validate_proof(proof, ["F6_CASE"], "F6")
+
+
+def test_generic_extractor_closes_both_intake_layers_and_literal_venv() -> None:
+    module = _load_module()
+    refs = module._official_refs()
+    paths = {item["path"] for item in refs}
+    assert str(module.INTAKE_V1.resolve()) in paths
+    assert str(module.INTAKE_V2.resolve()) in paths
+    assert str(module.VENV.expanduser().absolute()) in paths
+    assert str(module.VENV.expanduser().resolve()) in paths
+    assert str(module.VENV.expanduser().absolute().parent.parent / "pyvenv.cfg") in paths
+
+
+def test_generic_extractor_closes_both_intake_layers() -> None:
+    source = SCRIPT.read_text(encoding="utf-8")
+    assert "ds_data02_stage2_f6_root245_native_cause_intake_v1.py" in source
+    assert "ds_data02_stage2_f6_root245_native_cause_intake_v2.py" in source
+    assert "INTAKE = INTAKE_V2" in source

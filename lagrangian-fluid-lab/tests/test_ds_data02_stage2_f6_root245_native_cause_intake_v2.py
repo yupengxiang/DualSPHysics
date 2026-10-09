@@ -79,3 +79,19 @@ def test_root259_extractor_is_new_namespace_and_uses_v2_intake() -> None:
     assert "root259-native-extract.v3" in result.stdout
     source = EXTRACTOR.read_text(encoding="utf-8")
     assert "ds_data02_stage2_f6_root245_native_cause_intake_v2.py" in source
+
+
+def test_root259_source_closure_binds_original_literal_and_resolved_venv() -> None:
+    spec = importlib.util.spec_from_file_location("stage2_root259_extract_test", EXTRACTOR)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    refs = module._source_tool_refs()
+    literal = module.VENV.expanduser().absolute()
+    resolved = module.VENV.expanduser().resolve()
+    assert refs["interpreter"]["path"] == str(literal)
+    assert refs["interpreter"]["sha256"] == refs["interpreter_resolved"]["sha256"]
+    assert refs["interpreter_resolved"]["path"] == str(resolved)
+    assert refs["pyvenv_cfg"]["path"] == str(literal.parent.parent / "pyvenv.cfg")
+    assert refs["interpreter_binding"]["literal_path"] == str(literal)
+    assert refs["interpreter_binding"]["resolved_path"] == str(resolved)

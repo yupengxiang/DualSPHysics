@@ -38,6 +38,7 @@ SCRIPT = Path(__file__).resolve()
 PRIMARY = Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics")
 STAGE2 = PRIMARY / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2"
 INTAKE_SCRIPT = SCRIPT.with_name("ds_data02_stage2_f6_root245_native_cause_intake_v2.py")
+BASE_INTAKE_SCRIPT = SCRIPT.with_name("ds_data02_stage2_f6_root245_native_cause_intake_v1.py")
 ORIGINAL_LAB = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab")
 PARTVTKOUT = ORIGINAL_LAB / "vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64"
 PARTVTKOUT_SHA = "62630430902484f4aede017108313673fe6414f40fb59b6ae7f14ac23219db00"
@@ -134,6 +135,37 @@ def _small_ref(path: Path, label: str, expected: str | None = None) -> dict[str,
         raise ExtractError(f"{label} SHA differs")
     value.update({"sha256": actual, "content_opened": True})
     return value
+
+
+def _literal_small_ref(path: Path, label: str) -> dict[str, Any]:
+    """Hash a literal path while retaining its symlink spelling.
+
+    The runtime command must use the ORIGINAL virtualenv path exactly as
+    declared.  ``_path`` resolves symlinks for ordinary source joins, which
+    would lose that command-level identity.  Keep both the literal venv path
+    and its resolved interpreter in the request closure.
+    """
+    literal = Path(path).expanduser().absolute()
+    if not literal.is_file():
+        raise ExtractError(f"{label} file is missing: {literal}")
+    value = literal.stat()
+    if value.st_size > MAX_SMALL:
+        raise ExtractError(f"{label} exceeds small source bound")
+    digest = hashlib.sha256()
+    with literal.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return {
+        "path": str(literal),
+        "bytes": int(value.st_size),
+        "mtime_ns": int(value.st_mtime_ns),
+        "ctime_ns": int(value.st_ctime_ns),
+        "st_dev": int(value.st_dev),
+        "st_ino": int(value.st_ino),
+        "sha256": digest.hexdigest(),
+        "content_opened": True,
+        "literal_path": True,
+    }
 
 
 def _deferred(path: Path, label: str, declared: dict[str, Any] | None = None, *, directory: bool = False, expected_sha: str | None = None) -> dict[str, Any]:
@@ -347,7 +379,31 @@ def _source_tool_refs() -> dict[str, Any]:
     if tool_sha != PARTVTKOUT_SHA:
         raise ExtractError(f"official PartVTKOut SHA differs: {tool_sha}")
     config_ref = _small_ref(CONFIG, "official DsphConfig.xml")
-    return {"partvtkout": {**_stat(PARTVTKOUT, "official PartVTKOut"), "sha256": tool_sha, "source_namespace": "ORIGINAL_LAB_VENDOR", "executable": True, "content_opened_by_preparer": True}, "config": config_ref, "tool_command_template": [str(PARTVTKOUT), "-dirdata", "{native_data_dir}", "-savecsv", "{attempt_root}/PartOut.csv", "-saveresume", "{attempt_root}/resume.csv", "-createdirs:1", "-csvsep:1"]}
+    interpreter_literal = _literal_small_ref(VENV, "ORIGINAL literal Python interpreter")
+    interpreter_resolved_path = VENV.expanduser().resolve()
+    interpreter_resolved = _small_ref(interpreter_resolved_path, "ORIGINAL resolved Python interpreter")
+    pyvenv_cfg = VENV.expanduser().absolute().parent.parent / "pyvenv.cfg"
+    pyvenv_ref = _small_ref(pyvenv_cfg, "ORIGINAL pyvenv.cfg")
+    intake_v2_ref = _small_ref(INTAKE_SCRIPT, "ROOT259 reviewed intake parser")
+    intake_v1_ref = _small_ref(BASE_INTAKE_SCRIPT, "ROOT245 base intake parser")
+    return {
+        "partvtkout": {**_stat(PARTVTKOUT, "official PartVTKOut"), "sha256": tool_sha, "source_namespace": "ORIGINAL_LAB_VENDOR", "executable": True, "content_opened_by_preparer": True},
+        "config": config_ref,
+        "interpreter": interpreter_literal,
+        "interpreter_resolved": interpreter_resolved,
+        "pyvenv_cfg": pyvenv_ref,
+        "intake_v2": intake_v2_ref,
+        "intake_v1": intake_v1_ref,
+        "interpreter_binding": {
+            "literal_path": str(VENV.expanduser().absolute()),
+            "literal_sha256": interpreter_literal["sha256"],
+            "resolved_path": str(interpreter_resolved_path),
+            "resolved_sha256": interpreter_resolved["sha256"],
+            "pyvenv_cfg_path": str(pyvenv_cfg),
+            "pyvenv_cfg_sha256": pyvenv_ref["sha256"],
+        },
+        "tool_command_template": [str(PARTVTKOUT), "-dirdata", "{native_data_dir}", "-savecsv", "{attempt_root}/PartOut.csv", "-saveresume", "{attempt_root}/resume.csv", "-createdirs:1", "-csvsep:1"],
+    }
 
 
 def _load_intake() -> Any:
@@ -409,7 +465,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     # The worker opens each case contract after the parent reservation.  Bind
     # those small JSON files explicitly; a manifest entry alone would leave
     # a mutable source edge outside the request's input SHA closure.
-    input_refs = [request_edges["request"], request_edges["manifest"], plan_ref, inventory_ref, tool_refs["partvtkout"], tool_refs["config"], _small_ref(INTAKE_SCRIPT, "ROOT245 intake parser"), _small_ref(SCRIPT, "ROOT245 extract worker"), _small_ref(manifest_path, "ROOT245 extract manifest"), *entries]
+    input_refs = [request_edges["request"], request_edges["manifest"], plan_ref, inventory_ref, tool_refs["partvtkout"], tool_refs["config"], tool_refs["interpreter"], tool_refs["interpreter_resolved"], tool_refs["pyvenv_cfg"], tool_refs["intake_v2"], tool_refs["intake_v1"], _small_ref(SCRIPT, "ROOT245 extract worker"), _small_ref(manifest_path, "ROOT245 extract manifest"), *entries]
     if proof_ref:
         input_refs.append(proof_ref)
         input_refs.extend(batch_proof_edges.values())
@@ -426,7 +482,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
             for ref in typed_deferred.values():
                 if isinstance(ref, dict) and isinstance(ref.get("path"), str):
                     deferred_paths.add(ref["path"])
-    root_request = {"schema": REQUEST_SCHEMA, "family_id": "F6", "case_id": V2_CASE_ID, "physical_case_ids": list(ROOT245_CASES), "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 3600, "max_memory_bytes": 4 * 1024 * 1024 * 1024, "estimated_storage_bytes": 8 * 1024 * 1024, "estimated_deferred_read_bytes": 7 * 4 * 1024 * 1024 * 1024, "cwd": str(PRIMARY / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY), "command": command, "input_files": input_files, "input_sha256": input_sha, "deferred_input_files": sorted(deferred_paths), "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]}, "batch_proof_edges": batch_proof_edges, "source_read_cost": manifest["resource_policy"], "claim_boundary": manifest["claim_boundary"], "launch_allowed": bool(proof_ref), "execution_allowed": bool(proof_ref), "launch_owner": "root", "request_note": "ROOT245 terminal proof is mandatory; batch_summary/report and every case summary/records edge are source-bound. Native PartOut/RunPARTs content is opened only after parent reservation. No solver, no H5 content, and no fate/flux credit."}
+    root_request = {"schema": REQUEST_SCHEMA, "family_id": "F6", "case_id": V2_CASE_ID, "physical_case_ids": list(ROOT245_CASES), "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 3600, "max_memory_bytes": 4 * 1024 * 1024 * 1024, "estimated_storage_bytes": 8 * 1024 * 1024, "estimated_deferred_read_bytes": 7 * 4 * 1024 * 1024 * 1024, "cwd": str(PRIMARY / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY), "command": command, "input_files": input_files, "input_sha256": input_sha, "deferred_input_files": sorted(deferred_paths), "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]}, "batch_proof_edges": batch_proof_edges, "official_sources": manifest["official_sources"], "interpreter_binding": manifest["official_sources"]["interpreter_binding"], "source_read_cost": manifest["resource_policy"], "claim_boundary": manifest["claim_boundary"], "launch_allowed": bool(proof_ref), "execution_allowed": bool(proof_ref), "launch_owner": "root", "request_note": "ROOT245 terminal proof is mandatory; batch_summary/report and every case summary/records edge are source-bound. Native PartOut/RunPARTs content is opened only after parent reservation. No solver, no H5 content, and no fate/flux credit."}
     _atomic(request_out, root_request)
     return {"status": manifest["status"], "manifest": str(manifest_path), "manifest_sha256": _digest(manifest_path, "extract manifest", max_bytes=MAX_OUTPUT), "request": str(request_out), "request_sha256": _digest(request_out, "extract request", max_bytes=MAX_OUTPUT), "case_ids": list(ROOT245_CASES), "terminal_proof_bound": proof_ref is not None, "launch_allowed": bool(proof_ref), "payload_content_opened": False}
 
