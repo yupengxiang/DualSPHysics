@@ -269,7 +269,12 @@ def _validate_historic_scan(
     expected_key = f"F3/{PHYSICAL_CASE_ID}"
     if detail.get("schema") != "ds02.stage2.scientific-scan-detail-card.v2" or detail.get("case_key") != expected_key:
         raise FineMotiveError("historic detail card identity differs")
-    if detail.get("current_index") != current_row.get("current_index"):
+    detail_index = detail.get("current_index")
+    if detail_index is None:
+        identity = detail.get("current_identity")
+        if isinstance(identity, dict):
+            detail_index = identity.get("current_index", identity.get("current_list_index"))
+    if detail_index != current_row.get("current_index"):
         raise FineMotiveError("historic detail card current index differs")
     if (detail.get("scan_provenance") or {}).get("path") != str(scan_path):
         raise FineMotiveError("historic detail card scan path differs")
