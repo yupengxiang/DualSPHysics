@@ -1,3 +1,7 @@
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT298_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 73a764654ddc7997881b57d2d3a4b1e4ae12f4a576d5d236a210bee4570ba210）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT297_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 6f19f651fcdd4f2576468aefd5b49752fb0fdc3621fdc0f5ca082dcf48053221）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
 后续几何/可迁移等待入口 V1 已在 WAIT_ONLY 阶段停止，ROOT316/242均未启动。需先补实际项目虚拟环境下的完整V11接口测试，再以新版交接入口恢复。当前生命周期、原生取证与质量影响串行流程继续，完整七项目标 ACTIVE。
 
 几何支持与可迁移接口的串行交接等待进程已启动：ROOT_POSTMASS_GEOMETRY_PORTABLE_WAITER_STARTED_V1.json 绑定 PID 3076512 与单实例锁，实际重复启动已被拒绝。当前仅等待 ROOT313 实际终态及前序进程退出；ROOT316、ROOT242尚未启动。完整七项目标 ACTIVE。
