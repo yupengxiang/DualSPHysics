@@ -48,22 +48,30 @@ FULL_REPORT_STORAGE_FLOOR_MIDDLE = 512 * MIB
 FULL_REPORT_STORAGE_FLOOR_FINE = 2 * GIB
 FULL_REPORT_MEMORY_FLOOR_MIDDLE = 4 * GIB
 FULL_REPORT_MEMORY_FLOOR_FINE = 8 * GIB
+REFERENCE_REPORT_BYTES = 14_825_462
+REFERENCE_REPORT_IDS = 24_264
+DEFAULT_MIDDLE_OUTPUT_IDS = 179_208
+DEFAULT_FINE_OUTPUT_IDS = 976_104
 
 
-def _resource_policy(initial_fluid_count: int) -> dict[str, Any]:
+def _resource_policy(initial_fluid_count: int, output_record_count: int | None = None) -> dict[str, Any]:
     """Return conservative report/scratch floors for a full-window run."""
-    if int(initial_fluid_count) >= 500_000:
-        return {
-            "grid_class": "fine_or_larger",
-            "minimum_storage_bytes": FULL_REPORT_STORAGE_FLOOR_FINE,
-            "memory_bytes": FULL_REPORT_MEMORY_FLOOR_FINE,
-            "reason": "ROOT150 24,264-ID report scales to roughly 600MB at ~976k IDs; v2 and v3 JSON coexist briefly",
-        }
+    fine = int(initial_fluid_count) >= 500_000
+    output_ids = int(output_record_count or (DEFAULT_FINE_OUTPUT_IDS if fine else DEFAULT_MIDDLE_OUTPUT_IDS))
+    if output_ids <= 0:
+        raise ValueError("estimated full-observer output record count must be positive")
+    report_bytes = (REFERENCE_REPORT_BYTES * output_ids + REFERENCE_REPORT_IDS - 1) // REFERENCE_REPORT_IDS
+    transient_json_bytes = 2 * report_bytes
     return {
-        "grid_class": "middle_or_smaller",
-        "minimum_storage_bytes": FULL_REPORT_STORAGE_FLOOR_MIDDLE,
-        "memory_bytes": FULL_REPORT_MEMORY_FLOOR_MIDDLE,
-        "reason": "ROOT150 24,264-ID report scales to roughly 110MB at ~179k IDs; reserve transient v2/v3 JSON copies",
+        "grid_class": "fine_or_larger" if fine else "middle_or_smaller",
+        "minimum_storage_bytes": FULL_REPORT_STORAGE_FLOOR_FINE if fine else FULL_REPORT_STORAGE_FLOOR_MIDDLE,
+        "memory_bytes": FULL_REPORT_MEMORY_FLOOR_FINE if fine else FULL_REPORT_MEMORY_FLOOR_MIDDLE,
+        "estimated_output_record_count": output_ids,
+        "estimated_report_bytes_from_root150": report_bytes,
+        "estimated_transient_v2_v3_json_bytes": transient_json_bytes,
+        "report_scaling_basis": {"root150_report_bytes": REFERENCE_REPORT_BYTES, "root150_native_id_count": REFERENCE_REPORT_IDS},
+        "estimate_is_proxy": True,
+        "reason": "ROOT150 report-size proxy plus transient v2/v3 JSON coexistence; parent must replace proxy with terminal peak",
     }
 
 
@@ -151,7 +159,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("expected source dp/count must be positive")
     if args.estimated_native_bytes <= 0 or args.estimated_storage_bytes <= 0:
         raise ValueError("native read and output storage estimates must be positive")
-    resource_policy = _resource_policy(int(args.expected_initial_fluid_count))
+    resource_policy = _resource_policy(int(args.expected_initial_fluid_count), args.estimated_output_records)
     if int(args.estimated_storage_bytes) < int(resource_policy["minimum_storage_bytes"]):
         raise ValueError(
             "estimated storage reservation is below the full-report floor: "
@@ -232,7 +240,7 @@ def self_test() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True); mode.add_argument("--self-test", action="store_true"); mode.add_argument("--build-request", action="store_true")
-    parser.add_argument("--solver-request", type=Path); parser.add_argument("--terminal-receipt", type=Path); parser.add_argument("--terminal-proof", type=Path); parser.add_argument("--source-snapshot-proof", type=Path); parser.add_argument("--source-snapshot-report", type=Path); parser.add_argument("--raw-root", type=Path); parser.add_argument("--runparts", type=Path); parser.add_argument("--generated-xml", type=Path); parser.add_argument("--calibration-contract", type=Path, default=CALIBRATION); parser.add_argument("--expected-frame-count", type=int); parser.add_argument("--expected-final-time-s", type=float); parser.add_argument("--expected-dp-m", type=float); parser.add_argument("--expected-initial-fluid-count", type=int); parser.add_argument("--final-time-tolerance-s", type=float, default=1.0e-9); parser.add_argument("--estimated-native-bytes", type=int); parser.add_argument("--estimated-storage-bytes", type=int); parser.add_argument("--launch-commit"); parser.add_argument("--case-id", default="F3_S2_FULL_NATIVE_STREAM_ROOT177_OR_ROOT178"); parser.add_argument("--attempt-id", default="f3-s2-full-native-stream-root177-or-root178-001"); parser.add_argument("--output", type=Path, default=LOCAL_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-full-native-stream-observer-v3-root177-or-root178-001.json")
+    parser.add_argument("--solver-request", type=Path); parser.add_argument("--terminal-receipt", type=Path); parser.add_argument("--terminal-proof", type=Path); parser.add_argument("--source-snapshot-proof", type=Path); parser.add_argument("--source-snapshot-report", type=Path); parser.add_argument("--raw-root", type=Path); parser.add_argument("--runparts", type=Path); parser.add_argument("--generated-xml", type=Path); parser.add_argument("--calibration-contract", type=Path, default=CALIBRATION); parser.add_argument("--expected-frame-count", type=int); parser.add_argument("--expected-final-time-s", type=float); parser.add_argument("--expected-dp-m", type=float); parser.add_argument("--expected-initial-fluid-count", type=int); parser.add_argument("--final-time-tolerance-s", type=float, default=1.0e-9); parser.add_argument("--estimated-native-bytes", type=int); parser.add_argument("--estimated-output-records", type=int, help="optional full-report record count for the ROOT150 size proxy"); parser.add_argument("--estimated-storage-bytes", type=int); parser.add_argument("--launch-commit"); parser.add_argument("--case-id", default="F3_S2_FULL_NATIVE_STREAM_ROOT177_OR_ROOT178"); parser.add_argument("--attempt-id", default="f3-s2-full-native-stream-root177-or-root178-001"); parser.add_argument("--output", type=Path, default=LOCAL_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-full-native-stream-observer-v3-root177-or-root178-001.json")
     args = parser.parse_args()
     if args.self_test:
         print(json.dumps(self_test(), ensure_ascii=False, indent=2)); return 0
