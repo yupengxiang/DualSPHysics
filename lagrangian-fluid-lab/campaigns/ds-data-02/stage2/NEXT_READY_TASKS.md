@@ -1,3 +1,5 @@
+四哨点首帧串行等待入口已启动：ROOT_FRAME0_AFTER_SUPPORT_WAITER_STARTED_V1.json 绑定 PID 3104941 与单实例锁，重复启动实际被拒绝。当前仅等待ROOT276实际交接；ROOT314尚未启动，完整七项目标ACTIVE。
+
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT300_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 6aa529db5394832953b5bead8078c7b37daee4e628b6920561f7ef3b6a67c3a3）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
 
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT299_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 525e5862121dd9d54a4103a49c1682f378711ed1466573602d96cf96b89590b6）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
