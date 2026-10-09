@@ -1,3 +1,13 @@
+## 2026-10-10：87例实际生命周期，18例typed/native对账；F1初态与query1/234端点已实际闭合
+
+恢复入口：`checkpoints/ROOT234_CLOSED_ACTUAL87_CAUSE65_JOIN18_F1_SUPPORT_ENDPOINTS_PORTABLE230_FAILURE_CONTINUATION_V1.json`。ROOT232八例F4全部核验并结清fullCPU514.748989秒；生命周期87实际/248未调度/1alias。ROOT235三case五个fluid Id首次缺失帧与原生密度数值排除一致，新增3对账但0原因，原118仍65原因/53未定位，actualjoin18。
+
+ROOT233三档frame0支持实际PASS（outside0/divideroverlap0），ROOT234 query1六端点实际PASS，ROOT231 query234十八端点已闭合；离散质量与340kg continuousowner分开，所有科学Q仍UNKNOWN。ROOT230 V5复制/recursivepreflight后在私有frozen E00864 manifest路径门失败；fullCPU3.195608秒闭合，额外live administrativeledger input问题明确验证记录，无portable产品信用。当前无payload任务和reservation。
+
+继续239 F1S1/240 F3S2小报告比较、243粗档compact/238真实排除、241全336物理union及242portable修复。14哨点、材料/事件标签、划分/七族产品与有界扩展仍须实际证据，完整七项目标ACTIVE，原预算/期限不重置。
+
+以下为历史记录。
+
 ## 2026-10-09：ROOT232 F4下一8例已实际启动；F1查询234共18端点核验完成
 
 恢复入口：`checkpoints/ROOT232_ACTUAL_PENDING_ACTUAL79_CAUSE65_QUERY234_SUCCESS_INITIAL229_FAILURE_CONTINUATION_V1.json`。ROOT231实际18个原生端点成功，独立保存时刻/质量/角色/prepostSHA与stat核验通过，fullCPU4.560391秒闭合；Q仍UNKNOWN。ROOT229第一case记录匹配门在任何原生读取前失败，fullCPU1.722920秒闭合，另开ROOT233修复。
