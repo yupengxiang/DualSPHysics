@@ -1,0 +1,42 @@
+{
+  "schema": "ds02.stage2.f1.world-axis-unit-calibration-contract.v1",
+  "status": "SOURCE_AUTHORITY_ROUTE_READY_WORLD_AXIS_STILL_UNKNOWN",
+  "purpose": "Bind the official BI4 writer, loader, periodic transform, XML/Run.out inputs, and a future guarded native observation without inferring producer world orientation from field names or a manufactured fixture.",
+  "official_mapping": {
+    "particle_identity": "JPartDataBi4::AddPartData writes Idp or Idpd",
+    "position": "JPartDataBi4::AddPartData writes Pos (tfloat3) or Posd (tdouble3); JPartsLoad4 reads Pos/Posd into the simulation position buffer",
+    "velocity": "JPartDataBi4::AddPartData writes Vel as tfloat3 and JPartsLoad4 reads it as velocity",
+    "density": "JPartDataBi4::AddPartData writes Rhop as float and JPartsLoad4 reads it as density",
+    "constants": "JPartDataBi4::ConfigCtes records Dp, H, B, Rhop0, Gamma, MassBound, MassFluid",
+    "domain": "JPartDataBi4::ConfigSimMap records MapPosMin/MapPosMax; JPartsLoad4 consumes those limits",
+    "periodic": "JPartDataBi4::ConfigSimPeri records PeriMode and PeriXinc/PeriYinc/PeriZinc; JSphCpu::Interaction_PosNoPeriodic applies increments at map limits",
+    "time": "JPartDataBi4::AddPartInfo records TimeStep; XML/Run.out execution time is a separate source binding and must be joined by the guarded observer"
+  },
+  "units": {
+    "position": {"unit": "m", "authority": "case geometry/source contract; BI4 serialization preserves the numeric component value"},
+    "velocity": {"unit": "m/s", "authority": "XML/source position-update contract and BI4 Vel field; no unit conversion is inferred from a key name"},
+    "mass": {"unit": "kg", "authority": "MassBound/MassFluid source constants plus native header; particle sum is diagnostic only"},
+    "time": {"unit": "s", "authority": "Run.out/RunPARTs and BI4 TimeStep joined by exact producer receipt"},
+    "density": {"unit": "kg/m^3", "authority": "Rhop0/source contract; not a world-axis claim"}
+  },
+  "coordinate_scope": {
+    "component_frame": "BI4 Pos/Posd/Vel component order is source-defined x,y,z storage order",
+    "world_frame": "UNKNOWN until actual producer XML/Run.out/source update and guarded native metadata agree",
+    "rotation_to_world": "UNKNOWN",
+    "periodic_offset": "MapPosMin/MapPosMax and Peri*inc are source-defined; only the explicit JSph periodic transform is admitted",
+    "axis_swap_or_sign_flip": "must be rejected by asymmetric guarded calibration values"
+  },
+  "pre_registered_observation": {
+    "basis_position_m": [[0.137, -0.281, 0.419], [-0.353, 0.227, -0.491]],
+    "basis_velocity_m_per_s": [[0.173, -0.307, 0.521], [-0.419, 0.263, -0.587]],
+    "basis_mass_kg": {"fluid": [0.071, 0.113], "fixed": [0.157], "moving": [0.211]},
+    "required_roles": ["fluid", "fixed", "moving"],
+    "required_fields": ["Idp/Idpd", "Pos/Posd", "Vel", "Rhop", "MassFluid", "MassBound", "Dp", "TimeStep"],
+    "storage_tolerances": {"position_float32_m": 1.0e-6, "velocity_float32_m_per_s": 1.0e-6, "metadata_time_s": 1.0e-12},
+    "scientific_task_tolerance": "not assigned by this storage calibration",
+    "interpolation": "FORBIDDEN",
+    "neighbor_grid_truth": false
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0},
+  "known_limit": "ROOT217 proves official writer/decoder storage arithmetic for a manufactured fixture only; it does not establish historical producer world orientation or continuum-owner equivalence."
+}
