@@ -577,3 +577,14 @@ ROOT178 completed and verified all836 native frame boundaries, counts and exact 
 ROOT184 V2 actual finalize failed before request/reservation: expected compact.stat, but true producer uses stable_read/stat_before/stat_after. AdditiveV3 compatibility, summary binding and literal venv/cfg closure delegated; do not launch V2. ROOT173/174 V7 source-only actual gate positive, but validator module is not declared and its actual SHA unchecked; additiveV8 repair pending, no solver. V65 actual V8 proof contract/file-versus-canonical SHA fixed, 8primary tests PASS; ROOT179B candidate002 still NOTRUN. Existing earlier checkpoint states are historical.
 
 Current chargedCPU 706.680415462775coreh/GPU 139.61368736436228h; full seven-item goal remains ACTIVE/incomplete, all hard limits/deadline/Homefloor unchanged. Next ROOT184→ROOT172→conditional temporal controls/F2 recovery; original336 typed lifecycle pilot source preparing.
+
+
+## Authoritative actual continuation 2026-10-09T08:15:10.973108+00:00
+
+ROOT178,184,172 terminal evidence/fee idempotence/services closed. ROOT184512/512 ID and first-missing saved bracket MATCH, no physicalfate/Q credit. ROOT17215 query pairs/30 endpoints (24async), actualmiddle/fine maxCOM.0114814384m/velocity.0785201675m/s/KE.7354633842J, savedoffset≤.00001233898351s. Producer limited-QI diagnostic flag does not grant formalQI; root proof keepsQI/QN/QE UNKNOWN. Fullreports only guardedworker read, rootstat-only.
+
+ROOT179B candidate002 actually failed: parent createsproducts directory beforestrictchild requiresnonexistence. Originalrequest/failedreceipt/cachepreserved; parentrawhash opened, childrawUNKNOWN/no typed/labelsuccess. CPU17.024208s, sameparentdelta.189552s appended/idempotent, unitstopped/reset. AdditiveROOT179C realCLI protocol fix delegated. Existingcode/preflight PASS was not execution credit.
+
+ROOT173 ACTUALLY RUNNING ds02-f3-s2-middle-half-cfl-external-v8-root-173.service main2596048 GPU0UUIDGPU-3dd8e277-f7e1-3893-292a-5928ea229599. Actualprimary002 fileSHA ec5aef94a3d5e44588c2d94e84410139ed59b1fb732d701b6c8e3052e897165e,28inputsimmutable. Primary001 GPUUUIDNone staysNOTRUN;002 bindsselectedUUID+001metadataedge. ActualexclusiveGPUlease/qualificationreservation2CPU/3600s/GPU3600/ext16GiB/Home16MiB/Memory8GiB. As-of 352 completeframes/3.510001443334763s, notterminal. Do notchange28sourceinputs orlaunchparallelheavyIO. ROOT174primary001 sourceonlyNOTRUN; liveUUIDmustbindlater.
+
+Originaltyped lifecyclepilotV1 source5PASS but NOTRUN; additiveV2 genericcase/manifest closure/units authority fix preparing. AllsevenitemgoalACTIVE/incomplete; chargedCPU706.6894201499974coreh/GPU139.61368736436228h, originalhardlimits/deadline/Homefloor unchanged. Continueactual173terminal→pilot/174→temporalnativeobservations, plusF2ROOT179C conditional actualconversion/freshproof/evaluator.
