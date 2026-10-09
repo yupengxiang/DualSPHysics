@@ -1,3 +1,5 @@
+最新权威恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT241_CLOSED_ACTUAL102_CAUSE70_JOIN23_NATIVE259_RECOVERY_FULL_GOAL_CONTINUATION_V1.json`（SHA256 06d1c00ae99d7a5d0ecac1db2b9d7bf6bc7dda7db8f9d3e51c653438096c0e70）。完整七项目标 ACTIVE；实际102，未排233，历史alias1；原118原因70/未知48/实际join23。ROOT241/253结账关闭，ROOT251实际失败无新增信用；顺序运行ROOT259恢复及后续父作业。
+
 最新权威恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT253_PENDING_ACTUAL94_CAUSE70_JOIN23_REFERENCE240252254_FULL_GOAL_CONTINUATION_V1.json`（SHA256 007bb6c3cc32e81ac3d45f813977c5600d7a197406d4effca2f2a941d94f8065）。完整七项目标 ACTIVE；实际94，ROOT253 pending8不计完成，原118原因70/未知48/实际join23。先核对ROOT253终态、完整CPU与重复结算及unit停止，再顺序执行后续父作业。
 
 ## 2026-10-10：ROOT250实际新增5例原因；ROOT245下一7例F6已启动
