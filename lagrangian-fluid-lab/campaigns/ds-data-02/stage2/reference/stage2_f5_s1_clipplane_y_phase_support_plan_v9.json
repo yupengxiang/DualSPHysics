@@ -1,0 +1,157 @@
+{
+  "diagnosis": {
+    "cause_supported_by_v8": "The two candidates use a half-cell y phase while retaining the frozen y drawbox [-0.14,0.14]. The only observed outside axis is y, with excess dp/2; x and z have zero outside points.",
+    "not_proven": [
+      "No contact, penetration, flux, or physical-fate conclusion follows from the AABB/clip diagnostics.",
+      "No new candidate mass or support result exists yet."
+    ]
+  },
+  "forward_candidate": {
+    "candidate_expected_y_lattice": {
+      "dp005": {
+        "axis_count": 57,
+        "forecast_only": true,
+        "max_m": 0.14,
+        "min_m": -0.14
+      },
+      "dp010": {
+        "axis_count": 29,
+        "forecast_only": true,
+        "max_m": 0.14,
+        "min_m": -0.14
+      }
+    },
+    "candidate_pointref_y_m": {
+      "dp005": 0.0,
+      "dp010": 0.0
+    },
+    "change_only": "Set pointref.y=0.0 for the fluid selector; retain the frozen fluid box, clip primitive, x/z pointref, motion, controls, density, and source identity.",
+    "forecast_limit": "These counts are lattice arithmetic only; official GenCase must determine actual points, clipping, support, and mass.",
+    "priority": "Run a single parent-guarded dp005 GenCase/support QA first. The dp010 y-zero phase is a diagnostic only because fitting 30 layers into the frozen 0.28 m y width is impossible without changing the owner box or dropping a layer; do not silently alter either.",
+    "representation": "source-preserving y-zero lattice phase"
+  },
+  "frozen_continuous_contract": {
+    "box_high_m": [
+      3.43,
+      0.14,
+      0.39
+    ],
+    "box_low_m": [
+      0.01,
+      -0.14,
+      0.01
+    ],
+    "box_size_m": [
+      3.42,
+      0.28,
+      0.38
+    ],
+    "clip_equation": "0.28*(x-2.0)-z <= 0",
+    "clip_point_m": [
+      2.0,
+      0.0,
+      0.0
+    ],
+    "clip_vector": [
+      0.28,
+      0.0,
+      -1.0
+    ],
+    "mass_kg": 287.736,
+    "mass_rescale": false,
+    "motion_and_controls_unchanged": true,
+    "old_discrete_sample_is_not_continuous_truth": true
+  },
+  "identity": {
+    "family_id": "F5",
+    "physical_case_id": "F5_COMPACT_RUNUP_RECOVERY_C082S1_M095_T090",
+    "sentinel_id": "F5-S1"
+  },
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "required_parent_guarded_qa": {
+    "execution": "GenCase only; no solver, CFD, BI4/HDF5, or native trajectory read.",
+    "gates": [
+      "All fluid y coordinates within frozen [-0.14,0.14] under the recorded float32 policy.",
+      "x/z containment, Idp/type mapping, and clip-plane relation remain explicit.",
+      "Actual MassFluid and whole-initial mass error preferred <=1%, hard >2%; no rescale.",
+      "Record exact boundary tuples and clip-side counts without physical contact/flux credit.",
+      "If dp005 remains outside, mass-hardfail, or support-unknown, stop this repair branch; no blind finer grid or CFD."
+    ],
+    "input_closure": [
+      "New candidate XML and exact source/control/motion/clip evidence are parent-bound after reservation.",
+      "Generated XML must join the actual receipt and remain in the attempt root.",
+      "Fluid/Bound VTK must be hashed/stat-checked by the worker before and after parsing; parent must not claim VTK parent-input hashing."
+    ]
+  },
+  "schema": "ds02.stage2.f5-s1.clipplane-y-phase-support-plan.v9",
+  "scope": {
+    "bi4_read": false,
+    "gencase_started": false,
+    "hdf5_read": false,
+    "solver_started": false,
+    "vtk_read_by_builder": false
+  },
+  "source_evidence": {
+    "dp005": {
+      "clip_outside_count": 0,
+      "dp_m": 0.005,
+      "exact_float32_boundary_tuple_count": 0,
+      "fluid_count": 2275600,
+      "relative_error_percent": -1.142019073039191,
+      "report": {
+        "bytes": 126368,
+        "mtime_ns": 1791505155100264279,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_YHALF_DP005_GEOMETRY_DIAGNOSTIC_V8_ROOT_117/f5-s1-yhalf-dp005-geometry-v8-root-117-001-root-forward-030-001/report/stage2_f5_s1_clipplane_geometry_diagnostic_v8.json",
+        "sha256": "d373c07f972c2e6c614e17b6f896664e6b09fd826428afa9f52b3e7ebd5de439"
+      },
+      "sample_mass_kg": 284.45,
+      "worker_dynamic_payload_scope": {
+        "first_payload_hash_after_parent_reservation": true,
+        "note": "Generated XML is in the parent receipt closure; Fluid/Bound VTK content SHA/stat is worker-owned after reservation.",
+        "parent_full_hash_of_vtk": false,
+        "pre_post_sha_stat_equal": true
+      },
+      "y_phase_observed": {
+        "max_m": 0.14249999821186066,
+        "max_positive_excess_m": 0.0024999982118606434,
+        "min_m": -0.13750000298023224,
+        "outside_count": 600,
+        "pointref_y_m": 0.0025,
+        "unique_count": 57
+      }
+    },
+    "dp010": {
+      "clip_outside_count": 0,
+      "dp_m": 0.01,
+      "exact_float32_boundary_tuple_count": 0,
+      "fluid_count": 281278,
+      "relative_error_percent": -2.244418494731293,
+      "report": {
+        "bytes": 125933,
+        "mtime_ns": 1791505102298817120,
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_S1_YHALF_DP010_GEOMETRY_DIAGNOSTIC_V8_ROOT_116/f5-s1-yhalf-dp010-geometry-v8-root-116-001-root-forward-030-001/report/stage2_f5_s1_clipplane_geometry_diagnostic_v8.json",
+        "sha256": "f3ed986bd1a3667d2b613011a5af9599a5e37f90fb2dc1252f53d8380220016b"
+      },
+      "sample_mass_kg": 281.278,
+      "worker_dynamic_payload_scope": {
+        "first_payload_hash_after_parent_reservation": true,
+        "note": "Generated XML is in the parent receipt closure; Fluid/Bound VTK content SHA/stat is worker-owned after reservation.",
+        "parent_full_hash_of_vtk": false,
+        "pre_post_sha_stat_equal": true
+      },
+      "y_phase_observed": {
+        "max_m": 0.14499999582767487,
+        "max_positive_excess_m": 0.004999995827674852,
+        "min_m": -0.14499999582767487,
+        "outside_count": 298,
+        "pointref_y_m": 0.005,
+        "unique_count": 30
+      }
+    }
+  },
+  "status": "READY_FOR_PARENT_GUARDED_PHASE_SUPPORT_QA_ONLY"
+}
