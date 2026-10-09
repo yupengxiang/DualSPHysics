@@ -1,0 +1,55 @@
+{
+  "schema": "ds02.stage2.f6-initial-native-support-audit-contract.v6",
+  "status": "ROOT276_SOURCE_ONLY_LAUNCH_DISABLED",
+  "identity_gate": {
+    "required_actual_fields": [
+      "producer receipt status=completed and returncode=0",
+      "producer request.case_id",
+      "producer request.attempt_id or receipt.attempt_id",
+      "producer request.physical_case_id",
+      "producer receipt.output_root containing the generated XML",
+      "producer request.input_files and input_hashes/input_sha256",
+      "explicit sentinel/grid/domain mapping sidecar",
+      "ROOT244 rigid proof and ROOT252 continuous-owner proof edges"
+    ],
+    "physical_case_id_fallback": "FORBIDDEN",
+    "missing_field_result": "UNKNOWN_FOR_THIS_CASE",
+    "case_label_substitution": "FORBIDDEN",
+    "source_xml_and_generation_input": "retain actual paths/hashes from producer request/receipt; no inferred CURRENT identity"
+  },
+  "case_mapping": {
+    "sentinels": ["F6-S1", "F6-S2"],
+    "grids": ["source_current", "coarse", "fine"],
+    "mapping_scope": "domain label only; it cannot manufacture physical_case_id",
+    "partial_report": true,
+    "failed_case_is_not_success": true
+  },
+  "native_scope": {
+    "field_scope": "POSITION_ONLY_INITIAL_SUPPORT",
+    "required": ["Idp", "Pos/Posd", "typed roles", "fluid/fixed/floating separation"],
+    "optional": ["Vel", "Rhop", "MassFluid", "MassBound"],
+    "optional_missing": "UNKNOWN; no XML value or zero substitution",
+    "source_integrity": "pre-SHA/stat before decoder and post-SHA/stat after decoder; decoder exception remains primary",
+    "vtk_scope": "Fluid/Bound point-count and finite envelope diagnostic only; no flux/no-penetration credit"
+  },
+  "mass_separation": {
+    "continuous_owner_mass_kg": 4851.988676250775,
+    "physical_massbody_kg": 128.0,
+    "legacy_discrete_sample_mass_kg": 5120.0,
+    "rescale": "FORBIDDEN",
+    "Q_credit": "none"
+  },
+  "source_read_scope": {
+    "builder": "small proof/report/receipt/XML metadata and deferred-file stat only",
+    "unknown_case_worker": "no BI4/VTK reads",
+    "valid_case_worker": "one frame-0 BI4 plus Fluid/Bound VTK per valid case under parent guard",
+    "forbidden": ["HDF5", "full native tree scan", "solver launch", "scientific QI/QN/QE credit"]
+  },
+  "negative_cases": [
+    "coarse receipt missing physical_case_id -> per-case UNKNOWN",
+    "wrong producer case_id/attempt_id -> per-case FAILED identity join",
+    "generated XML path or SHA not joined to receipt/output root -> per-case FAILED",
+    "input_hashes is a list/absent -> UNKNOWN_SOURCE_INPUT_HASH_SCHEMA",
+    "physical identity changed to a sentinel label -> reject; never promote"
+  ]
+}

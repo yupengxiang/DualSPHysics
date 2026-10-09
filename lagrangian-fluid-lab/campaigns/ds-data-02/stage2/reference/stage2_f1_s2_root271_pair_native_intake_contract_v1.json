@@ -1,0 +1,86 @@
+{
+  "schema": "ds02.stage2.f1-s2.root271-pair-native-intake-contract.v1",
+  "status": "SOURCE_ONLY_LAUNCH_DISABLED",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "pair_source": "ROOT271 bounded DP020 SaveDt=.005 pair; ROOT273 supplies the only terminal same/half receipts",
+  "registered_queries_s": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "frame_selection": {
+    "include": [
+      "native frame 0",
+      "native final frame from each actual RunPARTs.csv",
+      "both native frame IDs for every exact or bracketed registered query"
+    ],
+    "frame_identity": "RunPARTs.csv Part/native frame ID; selected-array position is never a native ID",
+    "query_time_source": "each member's terminal RunPARTs.csv",
+    "out_of_range": "UNKNOWN_NO_EXTRAPOLATION",
+    "interpolation": "FORBIDDEN",
+    "bracket_width_as_error": "FORBIDDEN"
+  },
+  "terminal_join": {
+    "required": [
+      "completed receipt with returncode 0",
+      "receipt output_root contains RunPARTs.csv and native output root",
+      "RunPARTs frame IDs contiguous from zero and saved times monotone",
+      "actual launch argv and ReadXmlRun/control precedence",
+      "RunPARTs.csv, Run.out, and DtAllInfo metadata join",
+      "same/half source pair identity and fresh new-inode XML/BI4 copy"
+    ],
+    "unavailable_before_root273": true,
+    "unknown_sha_policy": "PARENT_AFTER_RESERVATION_REQUIRED"
+  },
+  "native_snapshot": {
+    "selected_frame_sha": "PARENT_AFTER_RESERVATION_REQUIRED",
+    "pre_decode_stat": "PARENT_AFTER_RESERVATION_REQUIRED",
+    "post_decode_stat": "PARENT_AFTER_RESERVATION_REQUIRED",
+    "full_native_tree_hash": "FORBIDDEN",
+    "fields": [
+      "Idp",
+      "Pos/Posd",
+      "Vel",
+      "Rhop",
+      "native MassFluid",
+      "native MassBound when exposed",
+      "typed fluid/fixed/moving/floating and MK role counts",
+      "component-space weighted COM/velocity/KE"
+    ],
+    "xml_mass_fallback": "FORBIDDEN",
+    "continuum_owner_mass": "340 kg owner contract remains separate from native sample mass"
+  },
+  "calibration_edges": {
+    "ROOT207": {
+      "proof_sha256": "c2016d5a36922230eafc57c49baadaeff3a2bc920bb953b5fef215eb9fda30ab",
+      "scope": "native header/storage and weighted-observable calibration; no world-axis credit"
+    },
+    "ROOT217": {
+      "proof_sha256": "7df9b02c339e3b3eb8bae8f108c16d5db0fd2b6cb3f03d192c4edc827ae1bdf0",
+      "scope": "official writer/decoder manufactured fixture; no producer world-axis credit"
+    },
+    "world_axis": "UNKNOWN",
+    "QI_QN_QE": "UNKNOWN"
+  },
+  "resource_guard": {
+    "cpu_threads": 1,
+    "memory_max_bytes": 2147483648,
+    "scratch_max_bytes": 268435456,
+    "max_wall_seconds": 1800,
+    "log_max_bytes": 65536,
+    "solver_launch": "parent only",
+    "gpu": "parent only; this intake never launches"
+  },
+  "source_read_scope": {
+    "builder": "receipts, RunPARTs, proofs, pair manifest, and source code only",
+    "worker": "selected Part files after parent reservation only",
+    "forbidden": [
+      "full native tree scan",
+      "HDF5",
+      "VTK",
+      "interpolation",
+      "neighbor grid as truth"
+    ]
+  }
+}
