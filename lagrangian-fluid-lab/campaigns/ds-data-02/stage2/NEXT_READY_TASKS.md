@@ -1,3 +1,11 @@
+## 2026-10-09：ROOT232 F4下一8例已实际启动；F1查询234共18端点核验完成
+
+恢复入口：`checkpoints/ROOT232_ACTUAL_PENDING_ACTUAL79_CAUSE65_QUERY234_SUCCESS_INITIAL229_FAILURE_CONTINUATION_V1.json`。ROOT231实际18个原生端点成功，独立保存时刻/质量/角色/prepostSHA与stat核验通过，fullCPU4.560391秒闭合；Q仍UNKNOWN。ROOT229第一case记录匹配门在任何原生读取前失败，fullCPU1.722920秒闭合，另开ROOT233修复。
+
+唯一heavyIO为ROOT232 F4生命周期8案例，当前79实际/8pending无信用/248未调度/1alias；原118仍65原因/53未定位/15物理对账。先等待实际终态、独立核验及fullCPU/repeat/dead，再调度235 F4原生对账、233初态、234 query1与230 portable。七项目标ACTIVE，原预算/截止不重置。
+
+以下为历史记录。
+
 ## 2026-10-09：79例实际生命周期，65例原生原因绑定，15例实际typed/native对账
 
 恢复入口：`checkpoints/ROOT226_CLOSED_ACTUAL79_CAUSE65_JOIN15_FULL_GOAL_CONTINUATION_V2.json`。ROOT226三案例实际成功，新增2例原生原因和3例物理案例对账；完整CPU12.063038秒已结清、重复核销幂等、unit dead。原118为65原因绑定/53未定位，生命周期79实际/256未调度/1历史alias。当前无payload任务和资源预约。
