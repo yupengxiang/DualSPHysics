@@ -1,0 +1,51 @@
+{
+  "schema": "ds02.stage2.f1-s2.root279-common-endpoint-observer-contract.v1",
+  "status": "SOURCE_PREPARED_WAITING_ROOT279_TERMINAL_RESULT",
+  "worker_schema": "ds02.stage2.f1-s2.root279-common-endpoint-observer.v1",
+  "manifest_schema": "ds02.stage2.f1-s2.root279-common-endpoint-manifest.v1",
+  "source_inputs": {
+    "root279_pair_manifest": "The prepared ROOT279 same-CFL/half-CFL pair manifest is the producer identity and selected-frame authority.",
+    "root279_guard_result": "Bound only after ROOT279/ROOT310 terminal completion with concrete SHA/stat.",
+    "root279_child_report": "The guarded child observer JSON is bound independently; an outer wrapper is not an observer report.",
+    "calibration_card": "The preregistered F1-S2 bracket and tolerance card is immutable input."
+  },
+  "query_contract": {
+    "query_times_s": [0.0, 0.25, 0.5],
+    "selected_part_indices": [0, 49, 50, 99, 100],
+    "interpolation": false,
+    "extrapolation": false,
+    "saved_time_brackets": "Use the actual lower/upper saved times from the ROOT279 child report; selected-index adjacency is not a native-time error bound."
+  },
+  "field_contract": {
+    "native_header_required_for_mass": true,
+    "missing_massfluid": "UNKNOWN; XML mass is never a fallback.",
+    "observables": ["weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_j"],
+    "source_roles": "Fluid-only observables are kept separate from bound/fixed roles and component-space axis qualification."
+  },
+  "error_separation": {
+    "saved_output_bracket": "Observed metadata only.",
+    "field_interpolation": "NOT_PERFORMED",
+    "integrator_cfl_difference": "UNKNOWN when saved times differ; no bracket slope is promoted to an error bound.",
+    "neighbor_grid_truth": false,
+    "event_time": "UNKNOWN"
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0
+  },
+  "read_scope": {
+    "builder_reads_native_payload": false,
+    "worker_reads_only_guarded_child_json": true,
+    "hdf5_read": false,
+    "vtk_read": false,
+    "solver_launch": false
+  },
+  "negative_cases": [
+    "missing or XML-only MassFluid must remain UNKNOWN",
+    "selected-frame/index or bracket mismatch must fail",
+    "changed output interval/control or interpolation flag must fail",
+    "outer wrapper JSON presented as the child observer report must fail"
+  ]
+}

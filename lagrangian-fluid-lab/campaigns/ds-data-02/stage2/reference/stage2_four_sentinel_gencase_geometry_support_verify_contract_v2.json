@@ -1,0 +1,29 @@
+{
+  "schema": "ds02.stage2.four-sentinel-gencase-geometry-support-output-verifier-contract.v2",
+  "status": "SOURCE_PREPARED_PARENT_VERIFICATION_ONLY",
+  "supersedes": "stage2_four_sentinel_gencase_geometry_support_verify_contract_v1.json",
+  "request_contract": {
+    "input_records": "The original producer input_records map remains an exact subset of input_files.",
+    "input_sha256": "Must cover input_files exactly; every normalized addition is hashed and stat-checked as a bounded non-payload file.",
+    "deferred_payloads": "All eight VTK and four BI4 records remain deferred and absent from input_files; BI4 remains stat-only.",
+    "static_cap_bytes": 33554432,
+    "payload_suffixes_rejected_from_static_additions": [".bi4", ".h5", ".hdf5", ".hdf", ".vtk", ".vtu"]
+  },
+  "checks": {
+    "manifest_and_worker": "All v1 manifest/output and owner-policy checks are retained.",
+    "normalized_static_closure": "The eleven root-forward additions are concrete SHA/stat-bound files, not a declaration-only map.",
+    "scientific_credit": "QI/QN/QE UNKNOWN and zero credit; verifier does not reopen production payloads."
+  },
+  "negative_fixtures": [
+    "added static file absent from input_sha256",
+    "deferred VTK promoted into input_files",
+    "added static digest changed on disk"
+  ],
+  "scope": {
+    "vtk_bytes_read": false,
+    "bi4_bytes_read": false,
+    "hdf5_read": false,
+    "solver_launch": false,
+    "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  }
+}
