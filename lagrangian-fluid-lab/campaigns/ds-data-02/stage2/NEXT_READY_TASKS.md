@@ -1,3 +1,11 @@
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT290_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 46b86d8c5caa385653078db56c74d248c82c750576a8f89a8cb799056a8d5660）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT289_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 e648955cdea10430cc7a9c75cc2c2318f301312073b5dc5c4fae3a6d34699884）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT289_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 d3b797734cb790235a2dde12e169a0d3709eee1f579bff3ae9eeda2b0b985b10）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT288_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 7dcc7cdd2a639fcaad02db981887f263169990c25cbeb427c06aa3a33fdf171d）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT288_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 63eeac8474f1b72f91f904e23e8e68388ec8cce1a829d97d68f8c7e0e3a88a57）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
 
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT287_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 060f27bb0af5e68905837ef1a67e302a37913cfcf993e44825701a5412be0ff2）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
