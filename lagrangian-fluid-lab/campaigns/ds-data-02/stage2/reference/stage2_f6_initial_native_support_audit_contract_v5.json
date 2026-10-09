@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.stage2.f6-initial-native-support-contract.v5",
+  "status": "PREPARED_NOT_RUN_ROOT272_V5",
+  "purpose": "Guarded frame-0 support diagnostics for F6-S1 and F6-S2 products with a decoder-enclosing native integrity boundary and explicit GenCase position-only mode.",
+  "source_evidence": {
+    "root244_proof_report": "required exact path/SHA join for rigid/source metadata",
+    "root252_proof_report": "required exact path/SHA join for explicit continuous-owner XML geometry",
+    "owner_support_status": "ROOT252 owner geometry remains diagnostic; native support is measured only by this audit"
+  },
+  "native_integrity": {
+    "pre": "full BI4 SHA and dev/ino/bytes/mtime/ctime immediately before official decoder entry",
+    "decoder": "official decoder must return frame.saved_file.path, frame.saved_file.bytes, and frame.saved_file.sha256; legacy frame.source_file is rejected",
+    "post": "full BI4 SHA and stat after decoder return, including decoder failure cleanup",
+    "acceptance": "pre SHA == decoder SHA == post SHA and pre stat == post stat; known producer SHA is checked at both boundaries",
+    "v2_failure": "ROOT255 V2 looked for frame.source_file; the actual decoder returns frame.saved_file and V2 therefore failed before scientific decoding credit",
+    "v3_acceptance": "the caller validates the complete saved_file path/bytes/SHA shape, then compares it with the guarded post SHA/stat",
+    "v5_failure_preservation": "when decoder raises, post SHA/stat and scratch cleanup run without requiring saved_file; the original decoder exception/type/message remains primary and any finalization error is attached as context",
+    "v5_success_requirement": "saved_file path/bytes/SHA is required only after a successful decoder return",
+    "v5_no_legacy_alias": "source_file is never accepted as saved_file",
+    "v5_cli_fixture": "six manufactured producer/XML/BI4/Fluid/Bound cases are exercised through the actual worker CLI; failure mutations must be rejected"
+  },
+  "source_authority": {
+    "continuous_owner_mass_kg": 4851.988676250775,
+    "continuous_owner_basis": "explicit XML fluid drawbox volume times rhop0",
+    "physical_rigid_massbody_kg": 128.0,
+    "legacy_source_fluid_sample_mass_kg": 5120.0,
+    "sample_mass_is_not_continuous_owner": true,
+    "mass_rescaling": "forbidden",
+    "world_axis_calibration": "UNKNOWN_PENDING_SOURCE_WRITER_ORIENTATION_RECORD"
+  },
+  "deferred_scope": {
+    "native_frame": 0,
+    "native_files_per_case": 1,
+    "vtk_files_per_case": 2,
+    "native_fields": ["Idp", "Pos/Posd", "Vel if present", "Rhop if present", "decoder MassFluid if present", "decoder MassBound if present", "decoder Dp if present"],
+    "initial_field_scope": "POSITION_ONLY_INITIAL_SUPPORT",
+    "position_only_required_fields": ["Idp", "Pos/Posd"],
+    "position_only_optional_unknown_fields": ["Vel", "Rhop", "MassFluid", "MassBound", "Dp", "TimeStep"],
+    "position_only_no_fabrication": true,
+    "vtk_fields": ["binary POINTS count", "finite POINTS summary"],
+    "hdf5_read": false,
+    "solver_launch": false,
+    "full_native_tree_scan": false
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0}
+}
