@@ -1,0 +1,19 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-launch-status.v4",
+  "status": "V3_NOT_LAUNCH_READY",
+  "v3_request_bytes_immutable": true,
+  "v3_defect": {
+    "command_path": "stage2_f1_native_selected_observer_guarded_v3.py",
+    "failure": "run_guard calls args.python.expanduser().resolve(), so Popen argv0 becomes the resolved system interpreter",
+    "impact": "the required literal venv/numpy runtime binding is lost",
+    "payload_read_or_solver_started": false
+  },
+  "required_forward": {
+    "variant": "ds02.stage2.f1.native-selected-observer-request.v4",
+    "command": "stage2_f1_native_selected_observer_guarded_v4.py",
+    "argv0": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "resolved_target_use": "provenance/stat/hash check only"
+  },
+  "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "launch_authority": "parent must regenerate/admit a V4 request; this sidecar is not an execution receipt"
+}
