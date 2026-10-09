@@ -553,6 +553,65 @@ def _compact_summary(value: dict[str, Any], full_report_path: Path, request_bind
     }
 
 
+def actual_producer_schema_test(path: Path) -> dict[str, Any]:
+    """Validate a bounded, already-produced JSON report's field shape.
+
+    This is intentionally a separate opt-in check so ordinary self-tests do
+    not scan a producer report.  It accepts both the ten-frame selected
+    producer report (which has no query_brackets) and a v3 full report (which
+    has frame-number brackets).  It checks the actual field names and does
+    not decode native payloads or infer lifecycle/mass semantics.
+    """
+    report_path = _regular(path, "actual producer JSON report")
+    value = json.loads(report_path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict) or not isinstance(value.get("observations"), list):
+        raise ValueError("actual producer report lacks an observations list")
+    observations = value["observations"]
+    if not observations:
+        raise ValueError("actual producer report has no observations")
+    for index, observation in enumerate(observations):
+        if not isinstance(observation, dict) or not isinstance(observation.get("frame"), int):
+            raise ValueError(f"actual producer observation {index} lacks integer frame")
+        if not isinstance(observation.get("native_header"), dict):
+            raise ValueError(f"actual producer observation {index} lacks native_header")
+        if not isinstance(observation.get("fluid_observable_using_native_header_mass"), dict):
+            raise ValueError(f"actual producer observation {index} lacks native mass fields")
+    time_window = value.get("time_window")
+    if not isinstance(time_window, dict):
+        raise ValueError("actual producer report lacks time_window")
+    brackets = time_window.get("query_brackets")
+    if brackets is None:
+        # The actual ROOT167 selected producer is intentionally selected-frame
+        # only and carries registered queries rather than bracket objects.
+        selected_indices = _selected_indices(value)
+        bracket_semantics = "selected-frame producer: no query_brackets; endpoints only"
+    elif isinstance(brackets, list):
+        for item in brackets:
+            if not isinstance(item, dict):
+                raise ValueError("actual producer query bracket is not an object")
+            if item.get("status") not in {"EXACT", "EXACT_OR_LEFT", "BRACKETED"}:
+                raise ValueError(f"actual producer has unsupported query bracket status: {item.get('status')!r}")
+            if not isinstance(item.get("lower_frame"), int) or not isinstance(item.get("upper_frame"), int):
+                raise ValueError("actual producer query bracket lacks lower_frame/upper_frame")
+        selected_indices = _selected_indices(value)
+        bracket_semantics = "full producer: lower_frame/upper_frame mapped through observations.frame"
+    else:
+        raise ValueError("actual producer query_brackets is not a list")
+    return {
+        "status": "PASS_ACTUAL_PRODUCER_SCHEMA",
+        "path": str(report_path),
+        "schema": value.get("schema"),
+        "observation_count": len(observations),
+        "first_frame": observations[0].get("frame"),
+        "last_frame": observations[-1].get("frame"),
+        "selected_indices": selected_indices,
+        "selected_frames": [observations[index].get("frame") for index in selected_indices],
+        "bracket_semantics": bracket_semantics,
+        "identity_lifecycle_present": any(isinstance(item, dict) and "identity_lifecycle" in item for item in observations),
+        "native_payload_read": False,
+    }
+
+
 def run(args: argparse.Namespace) -> dict[str, Any]:
     output = _path(args.output)
     summary_output = _path(args.summary_output)
@@ -654,6 +713,8 @@ def self_test() -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--actual-producer-schema-test", action="store_true")
+    parser.add_argument("--producer-report", type=Path)
     parser.add_argument("--solver-request", type=Path)
     parser.add_argument("--terminal-receipt", type=Path)
     parser.add_argument("--terminal-proof", type=Path)
@@ -680,6 +741,15 @@ def main() -> int:
     args = parser.parse_args()
     if args.self_test:
         print(json.dumps(self_test(), ensure_ascii=False, indent=2)); return 0
+    if args.actual_producer_schema_test:
+        if args.producer_report is None:
+            parser.error("--actual-producer-schema-test requires --producer-report")
+        try:
+            print(json.dumps(actual_producer_schema_test(args.producer_report), ensure_ascii=False, indent=2))
+        except Exception as exc:
+            print(json.dumps({"status": "FAILED_ACTUAL_PRODUCER_SCHEMA_TEST", "error": {"type": type(exc).__name__, "message": str(exc)}}, ensure_ascii=False))
+            return 1
+        return 0
     required = (args.solver_request, args.terminal_receipt, args.terminal_proof, args.source_snapshot_proof, args.source_snapshot_report, args.raw_root, args.runparts, args.generated_xml, args.decoder, args.decoder_source, args.calibration_contract, args.output, args.summary_output, args.scratch_root, args.expected_frame_count, args.expected_final_time_s, args.expected_dp_m, args.expected_initial_fluid_count, args.query_times)
     if any(item is None for item in required):
         parser.error("full v5 observer requires terminal/source provenance, report/summary outputs, and bounded decoder arguments")
