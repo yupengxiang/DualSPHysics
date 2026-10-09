@@ -238,6 +238,32 @@ def _code_role(role: str, relative: str, source: Path) -> dict[str, Any]:
     }
 
 
+def _metadata_binding(role: str, source: Path, target_root: Path, relative: str) -> dict[str, Any]:
+    """Bind a small request JSON to its future copied path.
+
+    This records a physical hash of the request itself.  It does not inspect
+    any path named inside that JSON; payload/source content remains a parent
+    after-reservation responsibility.
+    """
+    if source.is_symlink() or not source.is_file():
+        raise PostterminalRequestError(f"{role} is not a regular non-symlink file: {source}")
+    info = source.stat()
+    if info.st_size > MAX_JSON_BYTES:
+        raise PostterminalRequestError(f"{role} exceeds the metadata bound")
+    relative = _relative(relative, f"{role}.target_relative_path")
+    return {
+        "role": role,
+        "source_path_provenance": str(source),
+        "target_relative_path": relative,
+        "target_path": str(target_root / relative),
+        "expected_sha256": sha256_file(source, limit=MAX_JSON_BYTES),
+        "expected_bytes": int(info.st_size),
+        "source_mode_bits": int(stat.S_IMODE(info.st_mode)),
+        "copy_phase": "PARENT_GUARDED_COPY_AFTER_RESERVATION",
+        "source_path_fallback": "FORBIDDEN",
+    }
+
+
 def _postterminal_roles() -> list[tuple[str, str, str]]:
     return [
         ("executor_v51", "runtime/executor/ds_data02_stage2_f2_portable_executor_v51.py",
@@ -268,7 +294,8 @@ def _literal_python(executor: Mapping[str, Any]) -> str:
     raise PostterminalRequestError("V50 has no literal pinned .venv/bin/python invocation")
 
 
-def _commands(python: str, target: Path, output: Path) -> dict[str, Any]:
+def _commands(python: str, target: Path, output: Path, *, executor_request: Path,
+              parent_request: Path, preflight: Path) -> dict[str, Any]:
     runtime = target / "runtime"
     post = runtime / "postterminal"
     return {
@@ -284,7 +311,7 @@ def _commands(python: str, target: Path, output: Path) -> dict[str, Any]:
             "phase": "AFTER_PARENT_RESERVATION",
             "timeout_seconds": 300,
             "command_template": [python, "-B", "-I", str(post / "ds_data02_stage2_f2_v50_source_only_postterminal_builder_v2.py"),
-                                  "--executor-request", "<copied-v51-request>", "--parent-request", "<copied-parent-request>",
+                                  "--executor-request", str(executor_request), "--parent-request", str(parent_request),
                                   "--runtime-root", str(target), "--output", str(output / "runtime-closure.json"),
                                   "--abi-smoke", str(output / "runtime" / "abi-smoke.json")],
             "content_scope": "code/JSON/stat only; no HDF5/BI4/raw/typed/result payload",
@@ -293,16 +320,16 @@ def _commands(python: str, target: Path, output: Path) -> dict[str, Any]:
             "phase": "AFTER_PARENT_TERMINAL",
             "timeout_seconds": 300,
             "command_template": [python, "-B", "-I", str(post / "ds_data02_stage2_f2_v50_source_only_postterminal_builder_v3.py"),
-                                  "--executor-request", "<copied-v51-request>", "--parent-request", "<copied-parent-request>",
-                                  "--v50-preflight", "<copied-v50-preflight>", "--home-receipt", "<actual-home-receipt>",
+                                  "--executor-request", str(executor_request), "--parent-request", str(parent_request),
+                                  "--v50-preflight", str(preflight), "--home-receipt", "<actual-home-receipt>",
                                   "--returned-parent-report", "<actual-returned-parent-report>", "--output-root", str(output)],
         },
         "v50_sealer": {
             "phase": "AFTER_NEW_TYPED_RESULT_AND_PARENT_STATIC_RECEIPT",
             "timeout_seconds": 900,
             "command_template": [python, "-B", "-I", str(post / "ds_data02_stage2_f2_v50_terminal_sealer_v2.py"),
-                                  "--v50-executor-request", "<copied-v51-request>", "--v50-parent-request", "<copied-parent-request>",
-                                  "--v50-metadata-preflight", "<copied-v50-preflight>", "--parent-static-verification", "<parent-static-receipt>",
+                                  "--v50-executor-request", str(executor_request), "--v50-parent-request", str(parent_request),
+                                  "--v50-metadata-preflight", str(preflight), "--parent-static-verification", "<parent-static-receipt>",
                                   "--terminal-manifest", str(output / "terminal-manifest.json"), "--source-contract", str(output / "source-contract.json"),
                                   "--adapter-output", str(output / "producer-adapter.json"), "--v10-request-output", str(output / "fresh-v10-request.json"),
                                   "--seal-output", str(output / "v50-seal.json")],
@@ -361,6 +388,14 @@ def build_request(*, executor_request: Path | str, parent_request: Path | str,
     runtime_rows = _runtime_rows(executor, target)
     module_plan = _module_plan(executor, target)
     literal_python = _literal_python(executor)
+    request_bindings = [
+        _metadata_binding("v51_executor_request", executor_path, target,
+                          "sources/postterminal-v51-executor-request.json"),
+        _metadata_binding("parent_request", parent_path, target,
+                          "sources/postterminal-parent-request.json"),
+        _metadata_binding("v50_preflight", preflight_path, target,
+                          "sources/postterminal-v50-preflight.json"),
+    ]
     post_roles: list[dict[str, Any]] = []
     existing_runtime_roles = {row["role"] for row in runtime_rows}
     for role, relative, filename in _postterminal_roles():
@@ -461,7 +496,11 @@ def build_request(*, executor_request: Path | str, parent_request: Path | str,
         "execution": {
             "command": command,
             "stages": ["copy_and_seal", "v51_module_rebound_raw_to_typed_to_label", "new_v16_semantic_proof", "private_no_model_evaluator"],
-            "postterminal_commands": _commands(literal_python, target, product),
+            "postterminal_commands": _commands(
+                literal_python, target, product,
+                executor_request=Path(request_bindings[0]["target_path"]),
+                parent_request=Path(request_bindings[1]["target_path"]),
+                preflight=Path(request_bindings[2]["target_path"])),
             "parent_guard_required": True,
             "max_wall_seconds": {"copy_and_native": 6000, "closure": 300, "sealer": 900, "fresh_proof": 900, "evaluator": 900},
             "payload_content_hash_phase": "AFTER_ATOMIC_PARENT_RESERVATION",
@@ -475,6 +514,7 @@ def build_request(*, executor_request: Path | str, parent_request: Path | str,
             "v50_seal": {"status": "PENDING", "path": None, "sha256": None},
             "evaluator_request": {"status": "PENDING", "path": None, "sha256": None},
         },
+        "copied_metadata_inputs": request_bindings,
         "historical_failure": {
             "scope": "ROOT122 failed before native conversion; preserved for provenance only",
             "successful_product_reuse": "FORBIDDEN",

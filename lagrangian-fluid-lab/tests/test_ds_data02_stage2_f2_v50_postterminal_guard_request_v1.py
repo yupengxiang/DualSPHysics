@@ -119,6 +119,10 @@ def test_build_preserves_copied_module_paths_and_pending_products(tmp_path: Path
     assert len(roles) == len(set(roles))
     assert value["artifacts"]["new_typed_hdf5"] == {"status": "PENDING", "path": None, "sha256": None}
     assert value["execution"]["postterminal_commands"]["evaluator_adapter"]["model_invoked"] is False
+    copied = {row["role"]: row for row in value["copied_metadata_inputs"]}
+    assert copied["v51_executor_request"]["source_path_fallback"] == "FORBIDDEN"
+    closure_cmd = value["execution"]["postterminal_commands"]["runtime_closure"]["command_template"]
+    assert closure_cmd[closure_cmd.index("--executor-request") + 1] == copied["v51_executor_request"]["target_path"]
     assert not target.exists() and not products.exists()
 
 
