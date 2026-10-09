@@ -597,3 +597,7 @@ ROOT173 减半 CFL 已完成836帧，保存日志无粒子排除、新增或 DT 
 ROOT174 减半输出间隔已在共享 guard 内实际运行；28 个声明输入在终态前保持不变。它占用独立 I/O 槽，不启动第二个 payload 任务。结束后先完成收据、租约、完整 CPU 与资源闭合；再执行已通过真实目录 guard 测试的 ROOT179C V66 转换、ROOT187 半 CFL 原生观测与 ROOT189 生命周期 V3 试点。转换成功后才能产生新 V65 proof 和 typed-only evaluator；生命周期试点成功并测得成本后才能排批次。
 
 继续沿全七项 Stage2 目标推进；这份检查点、成功运行或失败修复均不代表目标完成。详细快照见 `checkpoints/ROOT173_186_TERMINALS_ROOT174_RUNNING_CONTINUATION_V1.json`。
+
+
+2026-10-09T10:21:34.359605+00:00 continuation: /home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT187_190_TERMINALS_ROOT188_RUNNING_CONTINUATION_V1.json
+ROOT188 running; terminal verification/fees first. ROOT193 real CLI fix, ROOT194 denominator contract fix and F3 producer-bound comparator V3 delegated. Full Stage2 goal ACTIVE.
