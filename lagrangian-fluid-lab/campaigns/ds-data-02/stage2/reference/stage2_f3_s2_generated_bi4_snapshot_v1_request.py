@@ -41,7 +41,8 @@ def record(path: Path, label: str) -> dict[str, Any]:
 def build(args: argparse.Namespace) -> dict[str, Any]:
     q = regular(args.gencase_request, "ROOT120 GenCase request"); receipt = regular(args.receipt, "ROOT120 receipt"); bi4 = regular(args.input_bi4, "ROOT120 generated BI4")
     qv = json.loads(q.read_text(encoding="utf-8")); rv = json.loads(receipt.read_text(encoding="utf-8"))
-    if qv.get("schema") != SCHEMA or qv.get("family_id") != "F3" or qv.get("sentinel_id") != "F3-S2" or qv.get("scope", {}).get("physical_case_id") != PHYSICAL_CASE_ID: raise ValueError("ROOT120 q identity mismatch")
+    scope = qv.get("scope") if isinstance(qv.get("scope"), dict) else {}
+    if qv.get("schema") != SCHEMA or (qv.get("family_id") or scope.get("family_id")) != "F3" or (qv.get("sentinel_id") or scope.get("sentinel_id")) != "F3-S2" or (qv.get("physical_case_id") or scope.get("physical_case_id")) != PHYSICAL_CASE_ID: raise ValueError("ROOT120 q identity mismatch")
     if rv.get("request") != qv or rv.get("request_sha256") != sha256(q): raise ValueError("ROOT120 receipt exact q/SHA join failed")
     root = Path(str(rv.get("output_root", ""))).expanduser().resolve()
     if bi4.parent != root or bi4.name != "generated.bi4": raise ValueError("BI4 must be ROOT120 actual generated.bi4")

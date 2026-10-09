@@ -93,7 +93,10 @@ def strict_join(q_path: Path, receipt_path: Path) -> dict[str, Any]:
     q = _load(q_path, "F3 GenCase request"); receipt = _load(receipt_path, "F3 GenCase receipt")
     if q.get("schema") != REQUEST_SCHEMA: raise ValueError("F3 GenCase request schema mismatch")
     scope = q.get("scope") if isinstance(q.get("scope"), dict) else {}
-    if q.get("family_id") != "F3" or q.get("sentinel_id") != "F3-S2" or scope.get("physical_case_id") != PHYSICAL_CASE_ID:
+    family_id = q.get("family_id") or scope.get("family_id")
+    sentinel_id = q.get("sentinel_id") or scope.get("sentinel_id")
+    physical_case_id = q.get("physical_case_id") or scope.get("physical_case_id")
+    if family_id != "F3" or sentinel_id != "F3-S2" or physical_case_id != PHYSICAL_CASE_ID:
         raise ValueError("F3 ROOT120 request identity mismatch")
     if receipt.get("request") != q: raise ValueError("receipt.request is not exactly the supplied ROOT120 request")
     q_sha = _sha(q_path)
