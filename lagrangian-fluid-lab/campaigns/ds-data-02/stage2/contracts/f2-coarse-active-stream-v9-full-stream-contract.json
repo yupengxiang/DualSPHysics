@@ -1,0 +1,104 @@
+{
+  "schema": "ds02.stage2.f2.coarse-active-stream.v9.full-stream-contract.v1",
+  "status": "SOURCE_READY_FORWARD_V9_CLEANUP_AND_OUTPUT_BOUND",
+  "scope": {
+    "family_id": "F2",
+    "case_key": "F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_T4_COARSE_CANARY_ROOT_095",
+    "frame_count": 401,
+    "frame_inventory": "Part_0000.bi4 through Part_0400.bi4, contiguous and source-bound"
+  },
+  "preconditions": {
+    "v7_report_schema": "ds02.stage2.f2.coarse-active-stream.v7",
+    "v7_status": "RAW_HEADER_SCALAR_PROOF_COMPLETED_NO_FULL_STREAM_CREDIT",
+    "v7_remaining_frames_opened": 0,
+    "v7_raw_massfluid_scalar_required": true,
+    "v7_matches_completed_typed_value": true,
+    "v7_official_source_contract_schema": "ds02.stage2.f2.coarse-active-stream.v7.massfluid-source-contract.v1",
+    "v7_official_target": {
+      "item_path": ["JPartDataBi4"],
+      "field_name": "MassFluid",
+      "type_enum": 12,
+      "type_name": "DatDouble",
+      "value_bytes": 8,
+      "byte_order": "little"
+    },
+    "unlock_rule": "No V9 frame is opened until the actual V7 report, V7 source contract, and V7 completed execution receipt are bound by exact case identity and SHA."
+  },
+  "massfluid_contract": {
+    "comparison": "every decoded frame metadata MassFluid is packed as little-endian binary64 and must equal V7 raw_bytes_hex byte-for-byte",
+    "absolute_tolerance": null,
+    "mass_rescaling": false,
+    "first_frame_only_gate": false,
+    "framewise_gate": true,
+    "changed_bits_are_failure": true,
+    "decimal_xml_match_is_insufficient": true,
+    "official_path": "JSph XML MassFluid -> solver float -> ConfigSaveData -> JPartDataBi4::ConfigCtes -> JBinaryData::SetvDouble -> serialized JPartDataBi4 MassFluid",
+    "mismatch_status": "MASSFLUID_BITS_DIFFER_FROM_V7_RAW_SCALAR"
+  },
+  "mass_denominators": {
+    "xml_whole_initial_fluid_mass": "generated XML fluid count multiplied by source XML MassFluid; this is the frozen .003 unknown-identity screen denominator",
+    "native_whole_initial_fluid_mass": "generated XML fluid count multiplied by the exact decoded native MassFluid; report separately",
+    "native_excluded_mass": "native omitted identity count multiplied by exact native MassFluid",
+    "xml_and_native_masses_must_remain_separate": true,
+    "unknown_identity_fraction_max": 0.003,
+    "physical_fate_or_dynamics_credit": "UNKNOWN"
+  },
+  "frame_processing": {
+    "decoder": "official pinned bi4_dump through fixed direct-converter backend registration",
+    "backend_module_registration": "insert the exact module name into sys.modules before dataclass-decorated import and remove only the temporary name on failure",
+    "per_frame_scratch": {
+      "max_bytes": 134217728,
+      "scope": "actor-owned frame directory",
+      "delete_after_scalar_reduction": true,
+      "cleanup_on_exception": true,
+      "peak_must_be_recorded": true,
+      "peak_must_not_accumulate_across_frames": true
+    },
+    "active_fields": ["Idp", "Pos", "Vel", "Rhop", "TimeStep", "type", "MK", "mass"],
+    "lifecycle": "saved-frame identity censoring only; re-entry and hidden continuous events remain UNKNOWN",
+    "hdf5_opened": false,
+    "solver_or_gencase_started": false,
+    "gpu_started": false
+  },
+  "result_output": {
+    "max_json_bytes": 134217728,
+    "oversize_is_failure": true,
+    "atomic_write_after_size_check": true
+  },
+  "input_stability": {
+    "pre_snapshot": "all 401 frame stat+full SHA and all small inputs before decoder opens any frame",
+    "post_snapshot": "same frame and small-input stat+full SHA after final native join",
+    "all_fields_must_match": true,
+    "first_frame_sha_provenance": "V7 worker pre/post source when supplied by V7; do not relabel as a parent full-frame hash",
+    "header_prefix_physical_bytes_are_not_kernel_io": true
+  },
+  "frozen_tolerances": {
+    "whole_initial_unknown_mass_fraction_max": 0.003,
+    "mk_region_flux_error_fraction_whole_initial": 0.03,
+    "integration_error_allocation_fraction": 0.25,
+    "output_sampling_error_allocation_fraction": 0.25,
+    "position_reference_fraction": 0.02,
+    "velocity_ke_nonzero_reference_fraction": 0.05,
+    "event_time_nonzero_window_fraction": 0.01,
+    "tolerances_are_preregistration_not_qualification": true
+  },
+  "claim_boundary": {
+    "native_numerical_identity_and_motive": "SOURCE_CLOSED only after exact V7 gate, all-frame exact-bit gate, and complete pre/post stability equality",
+    "active_finite_fields": "OBSERVED_SAVED_FRAMES",
+    "physical_destination": "UNKNOWN",
+    "legal_flux_or_spill": "UNKNOWN",
+    "continuous_event_time": "UNKNOWN beyond saved BI4/RunPARTs brackets",
+    "dynamical_impact": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "provenance_boundary": {
+    "v7_report_and_contract_are_required_inputs": true,
+    "v7_execution_receipt_must_be_bound_by_root_request": true,
+    "v9_request_must_be_generated_after_v7_actual_completion": true,
+    "old_v4_v5_v6_v7_products_immutable": true,
+    "no_full_stream_credit_until_v9_actual_completion": true
+  },
+  "old_products_immutable": true
+}
