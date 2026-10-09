@@ -377,6 +377,9 @@ def _case_record(current: dict[str, Any], v29: dict[str, Any] | None, v30: dict[
         finite_status = "contradicted"
     else:
         finite_status = "evidence_verified"
+    v30_finite = (v30 or {}).get("finite_field_scope") or {}
+    lifecycle = v30_finite.get("lifecycle") if isinstance(v30_finite, dict) else None
+    lifecycle_status = "missing" if lifecycle in (None, "NOT_EXPOSED_IN_AUDIT_ROW", "NOT_EXPOSED_IN_THIS_AUDIT_ROW") else "evidence_verified" if isinstance(lifecycle, str) else "contradicted"
     quality = (v30 or {}).get("quality_scope") or {}
     quality_status = "evidence_verified" if quality.get("status") == "ELIGIBLE_STRICT_ANCHOR_TASK_SCOPE" else "weak"
     return {
@@ -396,6 +399,12 @@ def _case_record(current: dict[str, Any], v29: dict[str, Any] | None, v30: dict[
             "field_failure_count": len(finite.get("field_failures", [])) if isinstance(finite, dict) and isinstance(finite.get("field_failures"), list) else None,
             "audit_status": finite.get("audit_status") if isinstance(finite, dict) else None,
             "qualification_credit": "diagnostic only; no numerical error bound",
+        },
+        "lifecycle_scope_status": lifecycle_status,
+        "lifecycle_scope": {
+            "status": lifecycle_status,
+            "value": lifecycle,
+            "qualification_credit": "diagnostic only; lifecycle coverage is absent when the source product marks it NOT_EXPOSED",
         },
         "task_scope": {
             "status": quality_status,
@@ -462,10 +471,12 @@ def _sentinel_matrix(status: dict[str, Any], next_requests: dict[str, Any]) -> t
             "scientific_qualification": {key: q.get(key, "UNKNOWN") for key in ("QI", "QN", "QE")},
             "evidence": copy_json(evidence) if isinstance(evidence, list) else [],
             "next_request": {
-                "status": "evidence_verified" if next_row and next_row.get("state") in {"SOURCE_READY_PARENT_REVIEW", "READY_PARENT_GPU_DISPATCH_AFTER_SOURCE_PREFLIGHTS"} else "weak" if next_row else "missing",
+                "status": "weak" if next_row else "missing",
                 "request_id": next_row.get("request_id") if next_row else None,
                 "task_kind": next_row.get("task_kind") if next_row else None,
                 "qualification_after_task": copy_json(next_row.get("qualification_after_task")) if next_row else None,
+                "temporality": "HISTORIC_FROZEN_INDEX_NOT_CURRENT_SCHEDULER",
+                "reason": "v3 next requests are a pinned source index; actual later terminal proofs require a separate current binding",
             },
             "issues": issues,
         }
@@ -581,6 +592,7 @@ def build_matrix(manifest_path: Path | str, output: Path | str) -> dict[str, Any
             "case_explanation_status": count_status(case_rows, "case_explanation"),
             "omission_scope_status": count_status(case_rows, "omission_scope"),
             "finite_scope_status": count_status(case_rows, "finite_field_scope"),
+            "lifecycle_scope_status": count_status(case_rows, "lifecycle_scope_status"),
             "task_scope_status": count_status(case_rows, "task_scope"),
             "native_omission_cases": sum(row["omission_scope"]["status"] == "evidence_verified" for row in case_rows),
             "non_native_cases_explicitly_not_applicable": sum(row["omission_scope"]["status"] == "not_applicable" for row in case_rows),
@@ -592,17 +604,20 @@ def build_matrix(manifest_path: Path | str, output: Path | str) -> dict[str, Any
         "sentinel_matrix": sentinel_rows,
         "artifact_matrix": artifacts,
         "qualification_gap_matrix": {
-            "finite_field_and_lifecycle_diagnostics": {"status": "evidence_verified", "usable_scope": "reported field/lifecycle diagnostics only", "error_bound": "UNKNOWN"},
+            "finite_field_diagnostics": {"status": "evidence_verified", "usable_scope": "field-failure list and audit status only", "error_bound": "UNKNOWN"},
+            "active_finite_lifecycle": {"status": "missing", "usable_scope": "not exposed for the 290 non-native rows; only 46 rows expose a closed lifecycle field", "error_bound": "UNKNOWN"},
             "native_motive_identity_and_saved_brackets": {"status": "evidence_verified", "usable_scope": "exact 118 source-closed native records", "physical_destination": "UNKNOWN", "continuous_event_time": "UNKNOWN"},
             "seven_anchor_task_labels": {"status": "evidence_verified", "usable_scope": "source-role and saved-frame task diagnostics", "scientific_qualification": "UNKNOWN"},
             "physical_qualification": {"status": "missing", "reason": "no QI/QN/QE, legal flux, continuous event, fate, or dynamics/error evidence in the bounded products"},
             "effective_split_safety": {"status": "weak", "reason": "component assignments are source-closed, but transfer/split safety remains UNKNOWN"},
             "license_and_redistribution": {"status": "weak", "reason": "workspace license paths are recorded; external access and redistribution are UNKNOWN_NOT_ESTABLISHED"},
             "portable_replay": {"status": "weak", "reason": "v28 replay chain remains pending consumer guard"},
+            "sentinel_next_ready_inventory": {"status": "weak", "reason": "v3 is a historic frozen index; refresh it by binding actual later terminal proofs before treating next requests as current"},
         },
         "usable_task_subsets": {
             "current_inventory": {"status": "evidence_verified", "count": 336, "qualification_credit": "none"},
             "finite_field_diagnostics": {"status": "evidence_verified", "count": 336, "qualification_credit": "none"},
+            "active_finite_lifecycle_diagnostics": {"status": "weak", "count": 46, "qualification_credit": "reported lifecycle field only; 290 cases missing lifecycle exposure"},
             "native_cause_and_identity": {"status": "evidence_verified", "count": 118, "qualification_credit": "native motive/ID only"},
             "saved_record_censor_brackets": {"status": "evidence_verified", "count": 118, "qualification_credit": "bracket only"},
             "seven_anchor_saved_frame_artifacts": {"status": "evidence_verified", "count": 7, "qualification_credit": "task diagnostics only"},
@@ -618,6 +633,13 @@ def build_matrix(manifest_path: Path | str, output: Path | str) -> dict[str, Any
                 "F7 ROOT141/146/148/149/154/160 selector and spatial candidate references",
             ],
             "rule": "No new reference case is merged into the 336 or 118 counts.",
+        },
+        "priority_executable_product_gap": {
+            "status": "missing",
+            "product": "current_sentinel_terminal_index",
+            "why_priority": "the bound fourteen-sentinel next-request file is historic and cannot represent ROOT163/164/167/175 terminal state or ROOT170 pending state",
+            "next_action": "build a JSON-only source-bound refresh joining the actual terminal proofs/receipts to the same 14 sentinel identities before any new array or solver work",
+            "scope": "metadata/status/receipt joins only; no QI/QN/QE or physical transfer credit",
         },
         "source_inputs": records,
         "source_index_declared": copy_json(manifest.get("source_index", {})),

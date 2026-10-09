@@ -47,11 +47,12 @@ def _v29(*, native: bool = False, known_q: bool = False, family: str = "F1", phy
     return result
 
 
-def _v30(*, family: str = "F1", physical: str = "CASE") -> dict:
+def _v30(*, family: str = "F1", physical: str = "CASE", lifecycle: str | None = None) -> dict:
     return {
         "case_key": f"{family}/{physical}",
         "error_qualification": {key: "UNKNOWN" for key in ("QN", "QE", "QI", "physical_fate", "dynamical_impact")},
         "quality_scope": {"status": "ELIGIBLE_STRICT_ANCHOR_TASK_SCOPE"},
+        "finite_field_scope": {"lifecycle": lifecycle} if lifecycle is not None else {},
     }
 
 
@@ -109,6 +110,8 @@ def test_sentinel_matrix_requires_exact_two_per_family() -> None:
     rows, by_family = MODULE._sentinel_matrix(status, next_requests)
     assert len(rows) == 14
     assert all(len(by_family[family]) == 2 for family in MODULE.FAMILIES)
+    assert all(row["next_request"]["status"] == "weak" for row in rows)
+    assert all(row["next_request"]["temporality"] == "HISTORIC_FROZEN_INDEX_NOT_CURRENT_SCHEDULER" for row in rows)
 
     status_bad, next_bad = _sentinel_inputs(12)
     with pytest.raises(MODULE.MatrixError, match="exactly 14"):
@@ -125,6 +128,10 @@ def test_finite_scope_missing_is_not_reported_as_verified() -> None:
     del v29["qualification_dimensions"]["finite_fields"]
     row = MODULE._case_record(_current(), v29, _v30())
     assert row["finite_field_scope"]["status"] == "missing"
+    assert row["lifecycle_scope"]["status"] == "missing"
+
+    exposed = MODULE._case_record(_current(), _v29(), _v30(lifecycle="CLOSED_ZERO_NONFINITE_AND_NONPOSITIVE_MASS_DENSITY"))
+    assert exposed["lifecycle_scope"]["status"] == "evidence_verified"
 
 
 def _write_json(path: Path, value: dict) -> Path:
