@@ -329,7 +329,17 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     input_files = sorted({item["path"] for item in input_refs})
     input_sha = {item["path"]: item["sha256"] for item in input_refs}
     request_out = Path(args.request_output).expanduser().resolve()
-    root_request = {"schema": REQUEST_SCHEMA, "family_id": "F6", "case_id": "ROOT245_F6_NATIVE_EXTRACT_V1", "physical_case_ids": list(ROOT245_CASES), "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 3600, "max_memory_bytes": 4 * 1024 * 1024 * 1024, "estimated_storage_bytes": 8 * 1024 * 1024, "estimated_deferred_read_bytes": 7 * 4 * 1024 * 1024 * 1024, "cwd": str(PRIMARY / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY), "command": command, "input_files": input_files, "input_sha256": input_sha, "deferred_input_files": sorted({ref["path"] for c in contracts for ref in c["native_deferred"].values() if isinstance(ref, dict) and isinstance(ref.get("path"), str)}), "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]}, "source_read_cost": manifest["resource_policy"], "claim_boundary": manifest["claim_boundary"], "launch_allowed": bool(proof_ref), "execution_allowed": bool(proof_ref), "launch_owner": "root", "request_note": "ROOT245 terminal proof is mandatory; native PartOut/RunPARTs content is opened only after parent reservation. No solver, no H5 content, and no fate/flux credit."}
+    deferred_paths: set[str] = set()
+    for contract in contracts:
+        for ref in contract["native_deferred"].values():
+            if isinstance(ref, dict) and isinstance(ref.get("path"), str):
+                deferred_paths.add(ref["path"])
+        typed_deferred = contract.get("typed_deferred")
+        if isinstance(typed_deferred, dict):
+            for ref in typed_deferred.values():
+                if isinstance(ref, dict) and isinstance(ref.get("path"), str):
+                    deferred_paths.add(ref["path"])
+    root_request = {"schema": REQUEST_SCHEMA, "family_id": "F6", "case_id": "ROOT245_F6_NATIVE_EXTRACT_V1", "physical_case_ids": list(ROOT245_CASES), "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 3600, "max_memory_bytes": 4 * 1024 * 1024 * 1024, "estimated_storage_bytes": 8 * 1024 * 1024, "estimated_deferred_read_bytes": 7 * 4 * 1024 * 1024 * 1024, "cwd": str(PRIMARY / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY), "command": command, "input_files": input_files, "input_sha256": input_sha, "deferred_input_files": sorted(deferred_paths), "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]}, "source_read_cost": manifest["resource_policy"], "claim_boundary": manifest["claim_boundary"], "launch_allowed": bool(proof_ref), "execution_allowed": bool(proof_ref), "launch_owner": "root", "request_note": "ROOT245 terminal proof is mandatory; native PartOut/RunPARTs content is opened only after parent reservation. No solver, no H5 content, and no fate/flux credit."}
     _atomic(request_out, root_request)
     return {"status": manifest["status"], "manifest": str(manifest_path), "manifest_sha256": _digest(manifest_path, "extract manifest", max_bytes=MAX_OUTPUT), "request": str(request_out), "request_sha256": _digest(request_out, "extract request", max_bytes=MAX_OUTPUT), "case_ids": list(ROOT245_CASES), "terminal_proof_bound": proof_ref is not None, "launch_allowed": bool(proof_ref), "payload_content_opened": False}
 
