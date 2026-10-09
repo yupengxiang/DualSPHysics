@@ -57,6 +57,41 @@ def _load_executor(path: Path | str) -> tuple[Path, dict[str, Any]]:
     return target, value
 
 
+def _repair_runtime_closure_paths(value: dict[str, Any], target_root: Path) -> None:
+    """Align V1 closure records with the V41/V45 materialization contract.
+
+    V1 wrote ``target_root / target_relative_path``.  The actual V41/V45
+    copier writes every ``runtime_sources`` row below
+    ``target_root / "runtime" / target_relative_path``.  This distinction is
+    material for V52: a row-relative ``runtime/native/foo.py`` therefore
+    becomes ``runtime/runtime/native/foo.py`` and must remain co-located with
+    the V38 ``worker.parent`` aliases.  Keep the row-relative value intact so
+    the copied request remains source-bound, and repair only the derived
+    materialization path in the new V2 output.
+    """
+    closure = value.get("runtime_closure")
+    if not isinstance(closure, dict):
+        raise PostterminalV2Error("V1 runtime closure is missing")
+    roles = closure.get("roles")
+    if not isinstance(roles, list) or not roles:
+        raise PostterminalV2Error("V1 runtime closure roles are missing")
+    for index, row in enumerate(roles):
+        if not isinstance(row, dict):
+            raise PostterminalV2Error(f"runtime closure role {index} is malformed")
+        relative = row.get("target_relative_path")
+        if not isinstance(relative, str) or not relative or relative.startswith("/"):
+            raise PostterminalV2Error(f"runtime closure role {index} has an unsafe relative path")
+        if ".." in Path(relative).parts:
+            raise PostterminalV2Error(f"runtime closure role {index} escapes runtime root")
+        row["target_path"] = str(target_root / "runtime" / relative)
+        row["materialization_path_policy"] = (
+            "V41_V45_TARGET_ROOT_RUNTIME_PREFIX"
+        )
+    closure["materialization_path_policy"] = (
+        "target_root/runtime/<target_relative_path>"
+    )
+
+
 def build_request(*, executor_request: Path | str, parent_request: Path | str,
                   v50_preflight: Path | str, output: Path | str,
                   target_root: Path | str, output_root: Path | str) -> dict[str, Any]:
@@ -80,6 +115,11 @@ def build_request(*, executor_request: Path | str, parent_request: Path | str,
     if not isinstance(value, dict):
         raise PostterminalV2Error("V1 hand-off is not an object")
     module_plan = V52.module_rebinding_plan(executor, Path(target_root))
+    # V1's generic closure was emitted before the V52 worker-parent rebinding
+    # existed and used target_root/<relative>.  The V41/V45 copier has a
+    # runtime prefix; make the V2 closure point at the paths that the actual
+    # relocated worker will open.
+    _repair_runtime_closure_paths(value, Path(target_root))
     value["schema"] = SCHEMA
     value["request_id"] = str(value.get("request_id", "")) + "-v52-worker-parent"
     value["forward_v52_postterminal"] = {

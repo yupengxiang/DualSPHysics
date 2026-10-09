@@ -59,6 +59,16 @@ def test_v2_handoff_uses_worker_parent_module_paths(tmp_path: Path) -> None:
     assert value["schema"] == V.SCHEMA
     plan = value["forward_v52_postterminal"]["module_rebinding"]
     assert all(row["target_relative_path"].startswith("runtime/native/") for row in plan.values())
+    target_root = tmp_path / "new-target"
+    roles = value["runtime_closure"]["roles"]
+    assert value["runtime_closure"]["materialization_path_policy"] == \
+        "target_root/runtime/<target_relative_path>"
+    for row in roles:
+        assert row["target_path"] == str(target_root / "runtime" / row["target_relative_path"])
+    copied_v14 = next(row for row in roles if row["role"] == "copied_module_v14_operator")
+    assert copied_v14["target_path"] == str(
+        target_root / "runtime/runtime/native/ds_data02_stage2_f2_replay_v14.py"
+    )
     assert value["copied_module_import_contract"]["source_path_fallback"] == "FORBIDDEN"
     assert value["artifacts"]["fresh_v10_proof"]["status"] == "PENDING"
     assert value["qualification"] == V.V1.UNKNOWN
