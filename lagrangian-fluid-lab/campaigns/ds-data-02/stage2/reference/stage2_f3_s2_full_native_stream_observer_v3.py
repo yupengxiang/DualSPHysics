@@ -66,6 +66,18 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _stable_sha256(path: Path) -> str:
+    path = _regular(path, "stable hash input")
+    before = path.stat()
+    digest = _sha256(path)
+    after = path.stat()
+    before_tuple = (before.st_size, before.st_mtime_ns, before.st_ctime_ns, before.st_dev, before.st_ino)
+    after_tuple = (after.st_size, after.st_mtime_ns, after.st_ctime_ns, after.st_dev, after.st_ino)
+    if before_tuple != after_tuple:
+        raise ValueError(f"stable hash input changed while reading: {path}")
+    return digest
+
+
 def _load_json(path: Path, label: str) -> dict[str, Any]:
     value = json.loads(_regular(path, label).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -93,7 +105,7 @@ def _request_binding(value: dict[str, Any], request_path: Path, request_sha: str
     if bound_sha != request_sha:
         raise ValueError(f"{label} request SHA mismatch")
     bound_path = binding.get("path") or binding.get("request_path")
-    if bound_path is not None and _path(str(bound_path)) != request_path:
+    if bound_path is None or _path(str(bound_path)) != request_path:
         raise ValueError(f"{label} request path mismatch")
 
 
@@ -122,21 +134,24 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("terminal request is not a completed external-v5 source request")
     _identity(request, "terminal request")
     request_sha = _sha256(request_path)
-    if not _terminal_status(receipt.get("status")) or _returncode(receipt) not in (0, None):
+    if not _terminal_status(receipt.get("status")) or _returncode(receipt) != 0:
         raise ValueError("terminal receipt is not completed with zero return code")
     _request_binding(receipt, request_path, request_sha, "terminal receipt")
     if proof.get("schema") not in {"ds02.stage2.root-actual-verification.v1", "ds02.stage2.root-actual-external-solver-verification.v1"} or "ACTUAL" not in str(proof.get("status", "")):
         raise ValueError("terminal proof is not an actual verification")
     _identity(proof, "terminal proof")
-    if proof.get("request_sha256") not in (None, request_sha):
+    if proof.get("request_sha256") != request_sha:
         raise ValueError("terminal proof request SHA mismatch")
-    if proof.get("receipt") is not None and _path(str(proof["receipt"])) != receipt_path:
+    if proof.get("receipt") is None or _path(str(proof["receipt"])) != receipt_path:
         raise ValueError("terminal proof receipt path mismatch")
-    if proof.get("receipt_sha256") not in (None, _sha256(receipt_path)):
+    if proof.get("receipt_sha256") != _sha256(receipt_path):
         raise ValueError("terminal proof receipt SHA mismatch")
     run_summary = proof.get("RunPARTs_summary")
     if not isinstance(run_summary, dict) or int(run_summary.get("rows", 0) or 0) < 2:
         raise ValueError("terminal proof lacks RunPARTs summary")
+    runparts_sha = run_summary.get("sha256")
+    if not isinstance(runparts_sha, str) or len(runparts_sha) != 64:
+        raise ValueError("terminal proof lacks RunPARTs SHA")
 
     requested_root = request.get("storage_scope", {}).get("output_root")
     if not requested_root:
@@ -152,6 +167,13 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("raw root is not request.output_root/solver_output/data")
     if _path(args.runparts) != expected_runparts:
         raise ValueError("RunPARTs is not request.output_root/solver_output/RunPARTs.csv")
+    if int(run_summary.get("rows", 0)) != int(args.expected_frame_count):
+        raise ValueError("terminal proof RunPARTs rows differ from requested frame count")
+    proof_final_time = run_summary.get("final_time_s")
+    if proof_final_time is None or abs(float(proof_final_time) - float(args.expected_final_time_s)) > float(args.final_time_tolerance_s):
+        raise ValueError("terminal proof final time differs from requested terminal time")
+    if _stable_sha256(_path(args.runparts)) != runparts_sha:
+        raise ValueError("RunPARTs SHA differs from terminal proof")
 
     source = request.get("source_provenance") if isinstance(request.get("source_provenance"), dict) else {}
     expected_xml = source.get("generated_xml")
@@ -164,7 +186,7 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
     expected_xml_sha = request.get("input_sha256", {}).get(str(generated_xml))
     if not expected_xml_sha or _sha256(generated_xml) != expected_xml_sha:
         raise ValueError("generated XML SHA differs from request binding")
-    if run_summary.get("path") is not None and _path(str(run_summary["path"])) != _path(args.runparts):
+    if run_summary.get("path") is None or _path(str(run_summary["path"])) != _path(args.runparts):
         raise ValueError("terminal proof RunPARTs path mismatch")
 
     snapshot_binding = request.get("bi4_snapshot_binding")
@@ -176,7 +198,7 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
     if not expected_snapshot_proof or snapshot_proof_path != _path(str(expected_snapshot_proof)):
         raise ValueError("source snapshot proof path differs from request binding")
     actual_snapshot_proof_sha = _sha256(snapshot_proof_path)
-    if snapshot_binding.get("proof_sha256") not in (None, actual_snapshot_proof_sha):
+    if snapshot_binding.get("proof_sha256") != actual_snapshot_proof_sha:
         raise ValueError("source snapshot proof SHA differs from request binding")
     snapshot_proof = _load_json(snapshot_proof_path, "source snapshot proof")
     if snapshot_proof.get("schema") != "ds02.stage2.root-actual-verification.v1" or "ACTUAL" not in str(snapshot_proof.get("status", "")):
@@ -187,10 +209,10 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
     if snapshot_proof.get("parent_actual_prepost_content_hashes_equal") is not True or snapshot_proof.get("native_particle_fields_decoded") is not False:
         raise ValueError("source snapshot proof exceeds its source-only contract")
     snapshot_report_path = _path(args.source_snapshot_report)
-    if snapshot_proof.get("report") is not None and _path(str(snapshot_proof["report"])) != snapshot_report_path:
+    if snapshot_proof.get("report") is None or _path(str(snapshot_proof["report"])) != snapshot_report_path:
         raise ValueError("source snapshot report path mismatch")
     snapshot_report_sha = _sha256(snapshot_report_path)
-    if snapshot_proof.get("report_sha256") not in (None, snapshot_report_sha):
+    if snapshot_proof.get("report_sha256") != snapshot_report_sha:
         raise ValueError("source snapshot report SHA mismatch")
     return {
         "request": request,
@@ -277,7 +299,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         value["scope"] = dict(value.get("scope", {}))
         value["scope"].update({"strict_terminal_source_join": True, "expected_dp_m": float(args.expected_dp_m), "expected_initial_fluid_count": int(args.expected_initial_fluid_count), "later_fluid_counts_are_observed": True})
         value["strict_source_binding"] = {"terminal_request_sha256": context["request_sha256"], "output_root": str(context["output_root"]), "raw_root": str(_path(args.raw_root)), "runparts": str(_path(args.runparts)), "generated_xml_sha256": context["generated_xml_sha256"], "source_snapshot_proof_sha256": context["snapshot_proof_sha256"], "source_snapshot_report_sha256": context["snapshot_report_sha256"], "bi4_sha256": context["bi4_sha256"], "bi4_bytes": context["bi4_bytes"], "xml_gate": xml_gate}
-        value["scientific_qualification"] = {"QI": "PASS_LIMITED_FULL_NATIVE_FIELDS_STRICT_SOURCE_JOIN", "QN": "UNKNOWN", "QE": "UNKNOWN", "scope_note": "full native finite/identity/header/time stream only; continuum equivalence, dynamics, output/integration error, event and spatial truth remain unknown"}
+        value["scientific_qualification"] = {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "scope_note": "full native finite/identity/header/time stream diagnostic only; continuum equivalence, dynamics, output/integration error, event and spatial truth remain unknown"}
         V2.atomic_json(_path(args.output), value)
         return value
     finally:

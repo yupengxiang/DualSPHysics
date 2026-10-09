@@ -92,6 +92,21 @@ def _small_record(path: Path, label: str, expected_sha: str | None = None, *, ma
     }
 
 
+def _literal_record(path: Path, label: str) -> dict[str, Any]:
+    path = path.expanduser()
+    if not path.is_file():
+        raise FileNotFoundError(f"{label}: {path}")
+    resolved = path.resolve()
+    if not resolved.is_file() or resolved.is_symlink():
+        raise FileNotFoundError(f"{label} resolved target: {resolved}")
+    pyvenv = path.parent.parent / "pyvenv.cfg"
+    if not pyvenv.is_file() or pyvenv.is_symlink():
+        raise FileNotFoundError(f"{label} has no stable pyvenv.cfg: {pyvenv}")
+    stat = resolved.stat()
+    digest = _sha256(resolved)
+    return {"path": str(path), "resolved_path": str(resolved), "label": label, "bytes": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns), "ctime_ns": int(stat.st_ctime_ns), "st_dev": int(stat.st_dev), "st_ino": int(stat.st_ino), "sha256": digest, "resolved_sha256": digest, "pyvenv_cfg_path": str(pyvenv), "pyvenv_cfg_sha256": _sha256(pyvenv), "content_scope": "literal_venv_interpreter_path_with_resolved_binary_and_pyvenv_binding"}
+
+
 def _payload_record(path: Path, label: str, expected_sha: str, expected_bytes: int | None = None) -> dict[str, Any]:
     """Record only stat for a payload; do not open or hash it."""
 
@@ -337,7 +352,7 @@ def build_request(args: argparse.Namespace) -> dict[str, Any]:
     if args.forcing_sha256 != FORCING_SHA:
         raise ValueError("forcing SHA must be the frozen current-control SHA")
     worker = _regular(MATERIALIZER, "external v5 materializer")
-    python_record = _small_record(PYTHON, "literal venv interpreter", max_bytes=16 * 1024 * 1024)
+    python_record = _literal_record(PYTHON, "literal venv interpreter")
     materializer_record = _small_record(worker, "external v5 materializer")
     overlay_record = _small_record(args.overlay_xml, "new XML overlay")
     input_records = {python_record["path"]: python_record, materializer_record["path"]: materializer_record, overlay_record["path"]: overlay_record}

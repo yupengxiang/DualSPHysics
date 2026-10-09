@@ -71,6 +71,18 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _stable_sha256(path: Path) -> tuple[str, dict[str, int], dict[str, int]]:
+    path = _regular(path, "stable hash input")
+    before = path.stat()
+    digest = _sha256(path)
+    after = path.stat()
+    before_fields = {"bytes": int(before.st_size), "mtime_ns": int(before.st_mtime_ns), "ctime_ns": int(before.st_ctime_ns), "st_dev": int(before.st_dev), "st_ino": int(before.st_ino)}
+    after_fields = {"bytes": int(after.st_size), "mtime_ns": int(after.st_mtime_ns), "ctime_ns": int(after.st_ctime_ns), "st_dev": int(after.st_dev), "st_ino": int(after.st_ino)}
+    if before_fields != after_fields:
+        raise ValueError(f"stable hash input changed while reading: {path}")
+    return digest, before_fields, after_fields
+
+
 def _load_json(path: Path, label: str) -> dict[str, Any]:
     value = json.loads(_regular(path, label).read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -82,9 +94,9 @@ def _request_binding(value: dict[str, Any], request_path: Path, request_sha: str
     binding = value.get("request")
     if not isinstance(binding, dict):
         raise ValueError(f"{label} lacks request provenance")
-    if binding.get("sha256") not in (None, request_sha):
+    if binding.get("sha256") != request_sha:
         raise ValueError(f"{label} request SHA does not match ROOT170 request")
-    if binding.get("path") is not None and _path(Path(str(binding["path"]))) != request_path:
+    if binding.get("path") is None or _path(Path(str(binding["path"]))) != request_path:
         raise ValueError(f"{label} request path does not match ROOT170 request")
 
 
@@ -103,20 +115,23 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
     request_sha = _sha256(request_path)
     execution = receipt.get("execution") if isinstance(receipt.get("execution"), dict) else {}
     filesystem = receipt.get("filesystem") if isinstance(receipt.get("filesystem"), dict) else {}
-    if not str(receipt.get("status", "")).lower().startswith("completed") or execution.get("returncode", receipt.get("returncode", 0)) not in (0, None):
+    if not str(receipt.get("status", "")).lower().startswith("completed") or execution.get("returncode", receipt.get("returncode")) != 0:
         raise ValueError("ROOT170 receipt is not completed successfully")
     _request_binding(receipt, request_path, request_sha, "ROOT170 receipt")
     if proof.get("schema") != "ds02.stage2.root-actual-verification.v1" or "ACTUAL" not in str(proof.get("status", "")):
         raise ValueError("ROOT170 proof is not an actual terminal proof")
-    if proof.get("request_sha256") not in (None, request_sha):
+    if proof.get("request_sha256") != request_sha:
         raise ValueError("ROOT170 proof request SHA mismatch")
-    if proof.get("receipt") is not None and _path(Path(str(proof["receipt"]))) != receipt_path:
+    if proof.get("receipt") is None or _path(Path(str(proof["receipt"]))) != receipt_path:
         raise ValueError("ROOT170 proof receipt path mismatch")
-    if proof.get("receipt_sha256") not in (None, _sha256(receipt_path)):
+    if proof.get("receipt_sha256") != _sha256(receipt_path):
         raise ValueError("ROOT170 proof receipt SHA mismatch")
     run_summary = proof.get("RunPARTs_summary")
     if not isinstance(run_summary, dict) or int(run_summary.get("rows", 0) or 0) < 2:
         raise ValueError("ROOT170 proof lacks terminal RunPARTs summary")
+    runparts_sha = run_summary.get("sha256")
+    if not isinstance(runparts_sha, str) or len(runparts_sha) != 64:
+        raise ValueError("ROOT170 proof lacks a RunPARTs SHA")
     request_output_root = request.get("storage_scope", {}).get("output_root")
     if not request_output_root:
         raise ValueError("ROOT170 request has no storage_scope.output_root")
@@ -134,6 +149,14 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("fine raw root is not ROOT170 storage_scope.output_root/solver_output/data")
     if _path(args.runparts) != expected_runparts:
         raise ValueError("fine RunPARTs path is not ROOT170 solver_output/RunPARTs.csv")
+    if int(run_summary.get("rows", 0)) != int(args.expected_frame_count):
+        raise ValueError("ROOT170 RunPARTs row count differs from the requested frame contract")
+    proof_final_time = run_summary.get("final_time_s")
+    if proof_final_time is None or abs(float(proof_final_time) - float(args.expected_final_time_s)) > float(args.final_time_tolerance_s):
+        raise ValueError("ROOT170 RunPARTs final time differs from the requested terminal contract")
+    actual_runparts_sha, _, _ = _stable_sha256(_path(args.runparts))
+    if actual_runparts_sha != runparts_sha:
+        raise ValueError("ROOT170 RunPARTs SHA differs from terminal proof")
     generated_xml = _path(args.generated_xml)
     expected_xml = request.get("source_provenance", {}).get("generated_xml")
     if isinstance(expected_xml, dict):
@@ -151,7 +174,7 @@ def _terminal_context(args: argparse.Namespace) -> dict[str, Any]:
     if actual_xml_sha != expected_xml_sha:
         raise ValueError("ROOT170 generated XML SHA differs from the request binding")
     summary_path = run_summary.get("path")
-    if summary_path is not None and _path(Path(str(summary_path))) != _path(args.runparts):
+    if summary_path is None or _path(Path(str(summary_path))) != _path(args.runparts):
         raise ValueError("ROOT170 proof RunPARTs path does not match supplied RunPARTs")
     return {"request": request, "receipt": receipt, "proof": proof, "request_sha256": request_sha, "output_root": output_root, "request_output_root": request_output_root, "generated_xml_sha256": actual_xml_sha}
 
@@ -190,8 +213,10 @@ def _root169_join(args: argparse.Namespace, request: dict[str, Any]) -> dict[str
     if not expected_proof or proof_path != _path(Path(str(expected_proof))):
         raise ValueError("ROOT169 proof path does not match ROOT170 bi4_snapshot_binding")
     expected_proof_sha = binding.get("proof_sha256")
+    if not isinstance(expected_proof_sha, str) or len(expected_proof_sha) != 64:
+        raise ValueError("ROOT169 binding lacks a proof SHA")
     actual_proof_sha = _sha256(proof_path)
-    if expected_proof_sha not in (None, actual_proof_sha):
+    if expected_proof_sha != actual_proof_sha:
         raise ValueError("ROOT169 proof SHA differs from ROOT170 binding")
     proof = _load_json(proof_path, "ROOT169 snapshot proof")
     if proof.get("schema") != "ds02.stage2.root-actual-verification.v1" or "ACTUAL" not in str(proof.get("status", "")):
@@ -201,10 +226,10 @@ def _root169_join(args: argparse.Namespace, request: dict[str, Any]) -> dict[str
         raise ValueError("ROOT169 proof does not bind fine BI4 SHA/bytes")
     if proof.get("parent_actual_prepost_content_hashes_equal") is not True or proof.get("native_particle_fields_decoded") is not False:
         raise ValueError("ROOT169 proof scope/closure is not the source snapshot contract")
-    if proof.get("report") is not None and _path(Path(str(proof["report"]))) != report_path:
+    if proof.get("report") is None or _path(Path(str(proof["report"]))) != report_path:
         raise ValueError("ROOT169 report path does not match proof")
     report_sha = _sha256(report_path)
-    if proof.get("report_sha256") not in (None, report_sha):
+    if proof.get("report_sha256") != report_sha:
         raise ValueError("ROOT169 report SHA does not match proof")
     return {"proof_path": str(proof_path), "proof_sha256": actual_proof_sha, "report_path": str(report_path), "report_sha256": report_sha, "bi4_sha256": ROOT169_BI4_SHA}
 
@@ -308,7 +333,10 @@ def self_test() -> dict[str, Any]:
             "request_sha256": request_sha,
             "receipt": str(receipt_path),
             "receipt_sha256": _sha256(receipt_path),
-            "RunPARTs_summary": {"rows": 2},
+            # The production contract requires a producer-computed digest.  A
+            # deliberately wrong digest is enough for this fixture because
+            # the raw-root path rejection must happen before RunPARTs is read.
+            "RunPARTs_summary": {"rows": 2, "sha256": "0" * 64, "final_time_s": 1.0},
         }
         proof_path.write_text(json.dumps(proof), encoding="utf-8")
         args = argparse.Namespace(

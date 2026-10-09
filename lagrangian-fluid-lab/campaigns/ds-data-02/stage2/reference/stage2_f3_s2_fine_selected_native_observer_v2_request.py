@@ -86,19 +86,29 @@ def record(path: Path, label: str) -> dict[str, Any]:
 
 def record_literal(path: Path, label: str) -> dict[str, Any]:
     path = path.expanduser()
-    if not path.is_file() or path.is_symlink():
+    if not path.is_file():
         raise FileNotFoundError(f"{label}: {path}")
-    stat = path.stat()
+    resolved = path.resolve()
+    if not resolved.is_file() or resolved.is_symlink():
+        raise FileNotFoundError(f"{label} resolved target: {resolved}")
+    pyvenv = path.parent.parent / "pyvenv.cfg"
+    if not pyvenv.is_file() or pyvenv.is_symlink():
+        raise FileNotFoundError(f"{label} has no stable pyvenv.cfg: {pyvenv}")
+    stat = resolved.stat()
     return {
         "path": str(path),
+        "resolved_path": str(resolved),
         "label": label,
         "bytes": int(stat.st_size),
         "mtime_ns": int(stat.st_mtime_ns),
         "ctime_ns": int(stat.st_ctime_ns),
         "st_dev": int(stat.st_dev),
         "st_ino": int(stat.st_ino),
-        "sha256": sha256(path),
-        "content_scope": "literal_venv_interpreter_hash",
+        "sha256": sha256(resolved),
+        "resolved_sha256": sha256(resolved),
+        "pyvenv_cfg_path": str(pyvenv),
+        "pyvenv_cfg_sha256": sha256(pyvenv),
+        "content_scope": "literal_venv_interpreter_path_with_resolved_binary_and_pyvenv_binding",
     }
 
 
@@ -131,7 +141,7 @@ def _request_binding(value: dict[str, Any], request_path: Path, request_sha: str
     if bound_sha != request_sha:
         raise ValueError(f"{label} request SHA does not match ROOT170 request")
     bound_path = binding.get("path") or binding.get("request_path")
-    if bound_path is not None and Path(str(bound_path)).expanduser().resolve() != request_path:
+    if bound_path is None or Path(str(bound_path)).expanduser().resolve() != request_path:
         raise ValueError(f"{label} request path does not match ROOT170 request")
 
 
@@ -351,10 +361,10 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "max_memory_bytes": 2 * 1024**3,
         "estimated_storage_bytes": 128 * 1024**2,
         "estimated_peak_memory_bytes": 2 * 1024**3,
-        "estimated_input_read_bytes": sum(item["bytes"] for item in records.values()),
-        "estimated_native_read_bytes": int(args.estimated_native_bytes),
+        "estimated_input_read_bytes": sum(item["bytes"] for item in records.values()) + int(args.estimated_native_bytes) * 3,
+        "estimated_native_read_bytes": int(args.estimated_native_bytes) * 3,
         "estimated_native_read_passes": 3,
-        "estimated_native_read_budget_note": "10 selected frames are charged at the supplied per-pass estimate across three guarded source/decoder passes; this is a planning bound, not a measured terminal cost",
+        "estimated_native_read_budget_note": "10 selected frames are charged at the supplied per-pass estimate across three guarded source/decoder passes (prehash, decoder input, posthash); this is a planning bound, not a measured terminal cost",
         "max_decoder_scratch_bytes": 256 * 1024**2,
         "estimated_hdf5_read_bytes": 0,
         "execution_allowed": True,

@@ -31,19 +31,20 @@ TIME_TOLERANCE_S = 1.0e-10
 
 REPORT_CONTRACTS: dict[str, dict[str, set[str]]] = {
     "coarse": {
-        "schemas": {"ds02.stage2.f3-s2.full-native-stream-observer.v2"},
-        "statuses": {"PASS_FULL_NATIVE_STREAM_V2"},
+        "schemas": {"ds02.stage2.f3-s2.full-native-stream-observer.v2", "ds02.stage2.f3-s2.full-native-stream-observer.v3"},
+        "statuses": {"PASS_FULL_NATIVE_STREAM_V2", "PASS_F3_FULL_NATIVE_STREAM_STRICT_SOURCE_JOIN"},
     },
     "middle": {
-        "schemas": {"ds02.stage2.f3-s2.middle-selected-native-observer.v1"},
-        "statuses": {"PASS_MIDDLE_SELECTED_NATIVE_FIELDS"},
+        "schemas": {"ds02.stage2.f3-s2.middle-selected-native-observer.v1", "ds02.stage2.f3-s2.full-native-stream-observer.v3"},
+        "statuses": {"PASS_MIDDLE_SELECTED_NATIVE_FIELDS", "PASS_F3_FULL_NATIVE_STREAM_STRICT_SOURCE_JOIN"},
     },
     "fine": {
         "schemas": {
             "ds02.stage2.f3-s2.fine-selected-native-observer.v1",
             "ds02.stage2.f3-s2.fine-selected-native-observer.v2",
+            "ds02.stage2.f3-s2.full-native-stream-observer.v3",
         },
-        "statuses": {"PASS_FINE_SELECTED_NATIVE_FIELDS", "PASS_FINE_SELECTED_NATIVE_FIELDS_STRICT_SOURCE_JOIN"},
+        "statuses": {"PASS_FINE_SELECTED_NATIVE_FIELDS", "PASS_FINE_SELECTED_NATIVE_FIELDS_STRICT_SOURCE_JOIN", "PASS_F3_FULL_NATIVE_STREAM_STRICT_SOURCE_JOIN"},
     },
 }
 
@@ -121,10 +122,10 @@ def _proof_binding(proof_path: Path, report_path: Path, report_sha: str, label: 
     if "ACTUAL" not in str(proof.get("status", "")):
         raise ValueError(f"{label} proof is not an actual terminal proof")
     proof_report = proof.get("report")
-    if proof_report is not None and Path(str(proof_report)).expanduser().resolve() != report_path:
+    if proof_report is None or Path(str(proof_report)).expanduser().resolve() != report_path:
         raise ValueError(f"{label} proof report path does not match supplied report")
     expected = proof.get("report_sha256")
-    if expected not in (None, report_sha):
+    if not isinstance(expected, str) or len(expected) != 64 or expected != report_sha:
         raise ValueError(f"{label} proof report SHA does not match supplied report")
     return {"proof": proof_record, "status": proof.get("status"), "proof_schema": proof.get("schema")}
 
@@ -209,6 +210,14 @@ def _validate_report(path: Path, proof_path: Path, label: str) -> tuple[dict[str
             raise ValueError("fine v2 report lacks the strict .003/540000 source gate")
         if not isinstance(strict_binding, dict) or not strict_binding.get("ROOT170") or not strict_binding.get("ROOT169"):
             raise ValueError("fine v2 report lacks ROOT170/ROOT169 strict source binding")
+    if report.get("schema") == "ds02.stage2.f3-s2.full-native-stream-observer.v3":
+        scope = report.get("scope") if isinstance(report.get("scope"), dict) else {}
+        binding = report.get("strict_source_binding")
+        if scope.get("full_native_window") is not True or not isinstance(binding, dict):
+            raise ValueError(f"{label} full v3 report lacks full-window strict source binding")
+        for key in ("terminal_request_sha256", "generated_xml_sha256", "source_snapshot_proof_sha256", "bi4_sha256"):
+            if not isinstance(binding.get(key), str) or len(binding[key]) != 64:
+                raise ValueError(f"{label} full v3 report lacks {key}")
     observations = report.get("observations")
     if not isinstance(observations, list) or not observations:
         raise ValueError(f"{label} report has no observations")

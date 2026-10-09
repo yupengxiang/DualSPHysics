@@ -36,6 +36,36 @@ RUNTIME_V8 = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v8.p
 DISPATCH = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_stage2_dispatch_v8.py"
 STRICT = PRIMARY_REPO / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 
+# ROOT150 measured 14,825,462 bytes for 24,264 native IDs.  The full-window
+# adapter first materializes the consumed v2 report and then atomically writes
+# the v3 report, so the reservation must cover the report plus a transient
+# second JSON copy.  These are planning floors, not measured scientific
+# output costs: the middle run is expected to be about 179k IDs and the fine
+# run about 976k IDs.
+MIB = 1024**2
+GIB = 1024**3
+FULL_REPORT_STORAGE_FLOOR_MIDDLE = 512 * MIB
+FULL_REPORT_STORAGE_FLOOR_FINE = 2 * GIB
+FULL_REPORT_MEMORY_FLOOR_MIDDLE = 4 * GIB
+FULL_REPORT_MEMORY_FLOOR_FINE = 8 * GIB
+
+
+def _resource_policy(initial_fluid_count: int) -> dict[str, Any]:
+    """Return conservative report/scratch floors for a full-window run."""
+    if int(initial_fluid_count) >= 500_000:
+        return {
+            "grid_class": "fine_or_larger",
+            "minimum_storage_bytes": FULL_REPORT_STORAGE_FLOOR_FINE,
+            "memory_bytes": FULL_REPORT_MEMORY_FLOOR_FINE,
+            "reason": "ROOT150 24,264-ID report scales to roughly 600MB at ~976k IDs; v2 and v3 JSON coexist briefly",
+        }
+    return {
+        "grid_class": "middle_or_smaller",
+        "minimum_storage_bytes": FULL_REPORT_STORAGE_FLOOR_MIDDLE,
+        "memory_bytes": FULL_REPORT_MEMORY_FLOOR_MIDDLE,
+        "reason": "ROOT150 24,264-ID report scales to roughly 110MB at ~179k IDs; reserve transient v2/v3 JSON copies",
+    }
+
 
 def _worker_path(name: str) -> Path:
     primary = PRIMARY_REPO / f"lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/{name}"
@@ -86,10 +116,17 @@ def _record(path: Path, label: str, *, max_bytes: int = 32 * 1024 * 1024) -> dic
 
 def _record_literal(path: Path, label: str) -> dict[str, Any]:
     path = path.expanduser()
-    if path.is_symlink() or not path.is_file():
+    if not path.is_file():
         raise FileNotFoundError(f"{label}: {path}")
-    stat = path.stat()
-    return {"path": str(path), "label": label, "bytes": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns), "ctime_ns": int(stat.st_ctime_ns), "st_dev": int(stat.st_dev), "st_ino": int(stat.st_ino), "sha256": _sha256(path), "content_scope": "literal_venv_interpreter_hash"}
+    resolved = path.resolve()
+    if not resolved.is_file() or resolved.is_symlink():
+        raise FileNotFoundError(f"{label} resolved target: {resolved}")
+    pyvenv = path.parent.parent / "pyvenv.cfg"
+    if not pyvenv.is_file() or pyvenv.is_symlink():
+        raise FileNotFoundError(f"{label} has no stable pyvenv.cfg: {pyvenv}")
+    stat = resolved.stat()
+    resolved_sha = _sha256(resolved)
+    return {"path": str(path), "resolved_path": str(resolved), "label": label, "bytes": int(stat.st_size), "mtime_ns": int(stat.st_mtime_ns), "ctime_ns": int(stat.st_ctime_ns), "st_dev": int(stat.st_dev), "st_ino": int(stat.st_ino), "sha256": resolved_sha, "resolved_sha256": resolved_sha, "pyvenv_cfg_path": str(pyvenv), "pyvenv_cfg_sha256": _sha256(pyvenv), "content_scope": "literal_venv_interpreter_path_with_resolved_binary_and_pyvenv_binding"}
 
 
 def _payload_record(path: Path, label: str, expected_sha: str, expected_bytes: int) -> dict[str, Any]:
@@ -114,6 +151,13 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("expected source dp/count must be positive")
     if args.estimated_native_bytes <= 0 or args.estimated_storage_bytes <= 0:
         raise ValueError("native read and output storage estimates must be positive")
+    resource_policy = _resource_policy(int(args.expected_initial_fluid_count))
+    if int(args.estimated_storage_bytes) < int(resource_policy["minimum_storage_bytes"]):
+        raise ValueError(
+            "estimated storage reservation is below the full-report floor: "
+            f"{args.estimated_storage_bytes} < {resource_policy['minimum_storage_bytes']} "
+            f"for {resource_policy['grid_class']}"
+        )
     worker_module = _load_worker()
     context_args = argparse.Namespace(**vars(args))
     context = worker_module._terminal_context(context_args)
@@ -152,11 +196,11 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     command = [str(PYTHON), str(worker), "--solver-request", str(_path(args.solver_request)), "--terminal-receipt", str(_path(args.terminal_receipt)), "--terminal-proof", str(_path(args.terminal_proof)), "--source-snapshot-proof", str(_path(args.source_snapshot_proof)), "--source-snapshot-report", str(_path(args.source_snapshot_report)), "--raw-root", str(raw_root), "--runparts", str(_path(args.runparts)), "--generated-xml", str(_path(args.generated_xml)), "--decoder", str(DECODER), "--decoder-source", str(DECODER_SOURCE), "--calibration-contract", str(_path(args.calibration_contract)), "--output", output_path, "--scratch-root", "{attempt_root}/scratch/bi4_decode", "--expected-frame-count", str(args.expected_frame_count), "--expected-final-time-s", repr(float(args.expected_final_time_s)), "--expected-dp-m", repr(float(args.expected_dp_m)), "--expected-initial-fluid-count", str(args.expected_initial_fluid_count), "--query-times", *(repr(value) for value in query_times), "--decoder-timeout-s", "300", "--max-decoder-log-bytes", "65536", "--max-decoder-scratch-bytes", str(256 * 1024 * 1024)]
     input_files = sorted(records)
     hashes = {path: records[path]["sha256"] for path in input_files if records[path].get("sha256") is not None}
-    deferred = {"raw_root": {"path": str(raw_root), "content_scope": "all native Part files read only after parent reservation", "estimated_bytes": int(args.estimated_native_bytes), "estimated_passes": 1, "native_payload_read_by_builder": False}, "bi4": {"path": deferred_bi4["path"], "expected_sha256": bi4, "bytes": bi4_bytes, "content_scope": "parent after-reservation source binding"}}
+    deferred = {"raw_root": {"path": str(raw_root), "content_scope": "all native Part files read only after parent reservation", "estimated_bytes": int(args.estimated_native_bytes), "estimated_passes": 3, "native_payload_read_by_builder": False}, "bi4": {"path": deferred_bi4["path"], "expected_sha256": bi4, "bytes": bi4_bytes, "content_scope": "parent after-reservation source binding"}}
     if forcing_record is not None:
         deferred["forcing"] = {"path": forcing_record["path"], "expected_sha256": forcing_record["sha256"], "bytes": forcing_record["bytes"], "content_scope": "parent after-reservation source binding"}
     value: dict[str, Any] = {
-        "schema": SCHEMA, "variant_schema": VARIANT, "status": "READY_FOR_PARENT_V8_F3_FULL_NATIVE_STREAM_V3", "kind": "cpu", "cpu_task_kind": "audit", "family_id": "F3", "sentinel_id": "F3-S2", "physical_case_id": PHYSICAL_CASE_ID, "case_id": args.case_id, "attempt_id": args.attempt_id, "launch_commit": args.launch_commit, "cwd": str(PRIMARY_REPO / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY_REPO), "command": command, "input_files": input_files, "input_hashes": hashes, "input_sha256": hashes, "input_records": records, "deferred_input_files": [str(raw_root), deferred_bi4["path"]] + ([forcing_record["path"]] if forcing_record else []), "deferred_input_records": deferred, "deferred_input_policy": "parent v8 reserves the actual attempt then verifies each native Part and source payload with complete SHA/stat boundaries", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 10800, "max_memory_bytes": 4 * 1024**3, "estimated_peak_memory_bytes": 4 * 1024**3, "max_decoder_scratch_bytes": 256 * 1024**2, "estimated_storage_bytes": int(args.estimated_storage_bytes), "estimated_input_read_bytes": int(args.estimated_native_bytes) + sum(item["bytes"] for item in records.values()), "estimated_native_read_bytes": int(args.estimated_native_bytes), "estimated_native_read_passes": 1, "estimated_hdf5_read_bytes": 0, "execution_allowed": True, "launch_disabled": False, "solver_started": False, "solver_launch": False, "gencase_launch": False, "native_payload_read": True, "hdf5_read": False, "raw_directory_scan": True, "output_root": "{attempt_root}", "output": {"atomic": True, "refuse_overwrite": True, "path": output_path}, "source_binding": {"terminal_request_sha256": context["request_sha256"], "terminal_output_root": str(context["output_root"]), "raw_root_contract": str(context["output_root"] / "solver_output" / "data"), "runparts_contract": str(context["output_root"] / "solver_output" / "RunPARTs.csv"), "generated_xml_sha256": context["generated_xml_sha256"], "source_snapshot_proof_sha256": context["snapshot_proof_sha256"], "source_snapshot_report_sha256": context["snapshot_report_sha256"], "bi4_sha256": bi4, "bi4_bytes": bi4_bytes, "xml_gate": xml_gate, "expected_dp_m": float(args.expected_dp_m), "expected_initial_fluid_count": int(args.expected_initial_fluid_count), "later_fluid_counts": "observed; no all-frame initial-count assertion"}, "resource_guard": {"owner": "stage2-reference-preparation", "runner": "parent-v8-audit", "fresh_uuid_lease": True, "payload_read": "full native Part stream only after parent reservation", "solver_launch": "forbidden"}, "qualification_stage": "stage2_f3_s2_full_native_stream_pending_parent_guard", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "reason": "full native fields/identity/header/time audit only; no interpolation, spatial truth, dynamics, continuum equivalence, or event qualification"},
+        "schema": SCHEMA, "variant_schema": VARIANT, "status": "READY_FOR_PARENT_V8_F3_FULL_NATIVE_STREAM_V3", "kind": "cpu", "cpu_task_kind": "audit", "family_id": "F3", "sentinel_id": "F3-S2", "physical_case_id": PHYSICAL_CASE_ID, "case_id": args.case_id, "attempt_id": args.attempt_id, "launch_commit": args.launch_commit, "cwd": str(PRIMARY_REPO / "lagrangian-fluid-lab"), "worktree_root": str(PRIMARY_REPO), "command": command, "input_files": input_files, "input_hashes": hashes, "input_sha256": hashes, "input_records": records, "deferred_input_files": [str(raw_root), deferred_bi4["path"]] + ([forcing_record["path"]] if forcing_record else []), "deferred_input_records": deferred, "deferred_input_policy": "parent v8 reserves the actual attempt then verifies each native Part and source payload with complete SHA/stat boundaries", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 10800, "max_memory_bytes": int(resource_policy["memory_bytes"]), "estimated_peak_memory_bytes": int(resource_policy["memory_bytes"]), "max_decoder_scratch_bytes": 256 * 1024**2, "estimated_storage_bytes": int(args.estimated_storage_bytes), "estimated_input_read_bytes": int(args.estimated_native_bytes) * 3 + sum(item["bytes"] for item in records.values()), "estimated_native_read_bytes": int(args.estimated_native_bytes) * 3, "estimated_native_read_passes": 3, "estimated_hdf5_read_bytes": 0, "execution_allowed": True, "launch_disabled": False, "solver_started": False, "solver_launch": False, "gencase_launch": False, "native_payload_read": True, "hdf5_read": False, "raw_directory_scan": True, "output_root": "{attempt_root}", "output": {"atomic": True, "refuse_overwrite": True, "path": output_path}, "source_binding": {"terminal_request_sha256": context["request_sha256"], "terminal_output_root": str(context["output_root"]), "raw_root_contract": str(context["output_root"] / "solver_output" / "data"), "runparts_contract": str(context["output_root"] / "solver_output" / "RunPARTs.csv"), "generated_xml_sha256": context["generated_xml_sha256"], "source_snapshot_proof_sha256": context["snapshot_proof_sha256"], "source_snapshot_report_sha256": context["snapshot_report_sha256"], "bi4_sha256": bi4, "bi4_bytes": bi4_bytes, "xml_gate": xml_gate, "expected_dp_m": float(args.expected_dp_m), "expected_initial_fluid_count": int(args.expected_initial_fluid_count), "later_fluid_counts": "observed; no all-frame initial-count assertion", "native_read_estimate": "three source/decoder passes: prehash, decoder input, posthash"}, "resource_estimate": {**resource_policy, "requested_storage_bytes": int(args.estimated_storage_bytes), "requested_memory_bytes": int(resource_policy["memory_bytes"]), "output_report_scope": "full native finite/identity/header/time report; no scientific qualification"}, "resource_guard": {"owner": "stage2-reference-preparation", "runner": "parent-v8-audit", "fresh_uuid_lease": True, "payload_read": "full native Part stream only after parent reservation", "solver_launch": "forbidden"}, "qualification_stage": "stage2_f3_s2_full_native_stream_pending_parent_guard", "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "reason": "full native fields/identity/header/time audit only; no interpolation, spatial truth, dynamics, continuum equivalence, or event qualification"},
     }
     value["sha256"] = _canonical(value)
     return value
@@ -180,13 +224,15 @@ def self_test() -> dict[str, Any]:
     worker = _load_worker().self_test()
     if worker.get("status") != "PASS":
         raise AssertionError(worker)
-    return {"status": "PASS", "schema": SCHEMA, "parameterized_grid": True, "memory_bytes": 4 * 1024**3, "scratch_bytes": 256 * 1024**2, "payload_read": False, "solver_started": False}
+    middle = _resource_policy(67_500)
+    fine = _resource_policy(540_000)
+    return {"status": "PASS", "schema": SCHEMA, "parameterized_grid": True, "middle_storage_floor_bytes": middle["minimum_storage_bytes"], "fine_storage_floor_bytes": fine["minimum_storage_bytes"], "middle_memory_floor_bytes": middle["memory_bytes"], "fine_memory_floor_bytes": fine["memory_bytes"], "scratch_bytes": 256 * 1024**2, "native_read_passes": 3, "payload_read": False, "solver_started": False}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True); mode.add_argument("--self-test", action="store_true"); mode.add_argument("--build-request", action="store_true")
-    parser.add_argument("--solver-request", type=Path); parser.add_argument("--terminal-receipt", type=Path); parser.add_argument("--terminal-proof", type=Path); parser.add_argument("--source-snapshot-proof", type=Path); parser.add_argument("--source-snapshot-report", type=Path); parser.add_argument("--raw-root", type=Path); parser.add_argument("--runparts", type=Path); parser.add_argument("--generated-xml", type=Path); parser.add_argument("--calibration-contract", type=Path, default=CALIBRATION); parser.add_argument("--expected-frame-count", type=int); parser.add_argument("--expected-final-time-s", type=float); parser.add_argument("--expected-dp-m", type=float); parser.add_argument("--expected-initial-fluid-count", type=int); parser.add_argument("--estimated-native-bytes", type=int); parser.add_argument("--estimated-storage-bytes", type=int); parser.add_argument("--launch-commit"); parser.add_argument("--case-id", default="F3_S2_FULL_NATIVE_STREAM_ROOT177_OR_ROOT178"); parser.add_argument("--attempt-id", default="f3-s2-full-native-stream-root177-or-root178-001"); parser.add_argument("--output", type=Path, default=LOCAL_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-full-native-stream-observer-v3-root177-or-root178-001.json")
+    parser.add_argument("--solver-request", type=Path); parser.add_argument("--terminal-receipt", type=Path); parser.add_argument("--terminal-proof", type=Path); parser.add_argument("--source-snapshot-proof", type=Path); parser.add_argument("--source-snapshot-report", type=Path); parser.add_argument("--raw-root", type=Path); parser.add_argument("--runparts", type=Path); parser.add_argument("--generated-xml", type=Path); parser.add_argument("--calibration-contract", type=Path, default=CALIBRATION); parser.add_argument("--expected-frame-count", type=int); parser.add_argument("--expected-final-time-s", type=float); parser.add_argument("--expected-dp-m", type=float); parser.add_argument("--expected-initial-fluid-count", type=int); parser.add_argument("--final-time-tolerance-s", type=float, default=1.0e-9); parser.add_argument("--estimated-native-bytes", type=int); parser.add_argument("--estimated-storage-bytes", type=int); parser.add_argument("--launch-commit"); parser.add_argument("--case-id", default="F3_S2_FULL_NATIVE_STREAM_ROOT177_OR_ROOT178"); parser.add_argument("--attempt-id", default="f3-s2-full-native-stream-root177-or-root178-001"); parser.add_argument("--output", type=Path, default=LOCAL_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-full-native-stream-observer-v3-root177-or-root178-001.json")
     args = parser.parse_args()
     if args.self_test:
         print(json.dumps(self_test(), ensure_ascii=False, indent=2)); return 0

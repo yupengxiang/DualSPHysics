@@ -63,19 +63,29 @@ def _record(path: Path, label: str) -> dict[str, Any]:
 
 def _record_literal(path: Path, label: str) -> dict[str, Any]:
     path = path.expanduser()
-    if path.is_symlink() or not path.is_file():
+    if not path.is_file():
         raise FileNotFoundError(f"{label}: {path}")
-    stat = path.stat()
+    resolved = path.resolve()
+    if not resolved.is_file() or resolved.is_symlink():
+        raise FileNotFoundError(f"{label} resolved target: {resolved}")
+    pyvenv = path.parent.parent / "pyvenv.cfg"
+    if not pyvenv.is_file() or pyvenv.is_symlink():
+        raise FileNotFoundError(f"{label} has no stable pyvenv.cfg: {pyvenv}")
+    stat = resolved.stat()
     return {
         "path": str(path),
+        "resolved_path": str(resolved),
         "label": label,
         "bytes": int(stat.st_size),
         "mtime_ns": int(stat.st_mtime_ns),
         "ctime_ns": int(stat.st_ctime_ns),
         "st_dev": int(stat.st_dev),
         "st_ino": int(stat.st_ino),
-        "sha256": _sha256(path),
-        "content_scope": "literal_venv_interpreter_hash",
+        "sha256": _sha256(resolved),
+        "resolved_sha256": _sha256(resolved),
+        "pyvenv_cfg_path": str(pyvenv),
+        "pyvenv_cfg_sha256": _sha256(pyvenv),
+        "content_scope": "literal_venv_interpreter_path_with_resolved_binary_and_pyvenv_binding",
     }
 
 
@@ -93,9 +103,9 @@ def _proof_binding(proof_path: Path, report_path: Path, expected_report_sha: str
     if "ACTUAL" not in str(proof.get("status", "")):
         raise ValueError(f"{label} proof is not an actual verification")
     bound_report = proof.get("report")
-    if bound_report is not None and Path(str(bound_report)).expanduser().resolve() != report_path.expanduser().resolve():
+    if bound_report is None or Path(str(bound_report)).expanduser().resolve() != report_path.expanduser().resolve():
         raise ValueError(f"{label} proof report path mismatch")
-    if proof.get("report_sha256") not in (None, expected_report_sha):
+    if proof.get("report_sha256") != expected_report_sha:
         raise ValueError(f"{label} proof report SHA differs from the supplied deferred SHA")
     return proof
 
