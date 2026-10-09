@@ -251,9 +251,17 @@ def _prepare_inputs(*, executor_request: Path | str, parent_request: Path | str,
     if pg.get("schema") != "ds02.stage2.f2-v50-postterminal-parent-guard-request.v3" \
             or pg.get("status") != "READY_FOR_PARENT_POSTTERMINAL_GUARD":
         raise ContractError("post-terminal request is not a ready V3 hand-off")
-    for value, name in ((executor, "V53 executor"), (parent, "parent request"),
+    for value, name in ((executor, "V55 executor"), (parent, "parent request"),
                         (preflight_value, "metadata preflight"), (pg, "post-terminal request")):
-        if value.get("sha256") != canonical_sha(value):
+        if name == "metadata preflight" and value.get("sha256") is None:
+            # The parent validator emits an evidence JSON rather than a
+            # request.  Its immutable binding is the actual parent/executor
+            # physical SHA pair; requiring a synthetic canonical field would
+            # reject the real ROOT145 preflight artifact.
+            if value.get("request_sha256") != parent_physical \
+                    or value.get("executor_request_sha256") != executor_physical:
+                raise ContractError("metadata preflight is not bound to actual parent/executor")
+        elif value.get("sha256") != canonical_sha(value):
             raise ContractError(f"{name} canonical SHA differs")
     source_inputs = pg.get("source_inputs")
     if not isinstance(source_inputs, Mapping):
@@ -341,9 +349,16 @@ def _prepare_inputs(*, executor_request: Path | str, parent_request: Path | str,
 
 
 def _binding(path: Path, value: Mapping[str, Any], physical: str) -> dict[str, Any]:
-    return {"path": str(path), "canonical_sha256": value["sha256"],
-            "physical_sha256": physical, "schema": value.get("schema"),
-            "status": value.get("status")}
+    result = {"path": str(path), "canonical_sha256": value.get("sha256"),
+              "physical_sha256": physical, "schema": value.get("schema"),
+              "status": value.get("status")}
+    # Parent preflight evidence is intentionally not a canonical request;
+    # retain its independently checked request/executor bindings instead of
+    # inventing a canonical digest.
+    if value.get("sha256") is None:
+        result["request_sha256"] = value.get("request_sha256")
+        result["executor_request_sha256"] = value.get("executor_request_sha256")
+    return result
 
 
 def _actual_launch_inputs(*, parent_request: Path | str, metadata_preflight: Path | str,
@@ -374,7 +389,11 @@ def _actual_launch_inputs(*, parent_request: Path | str, metadata_preflight: Pat
             or evidence.get("root_array_content_read") is not False \
             or evidence.get("namespace_absent_before_run") is not True:
         raise ContractError("actual metadata evidence claims payload access or an existing namespace")
-    if evidence.get("ROOT122_copied_partial_reused") is not False:
+    copied_partial = evidence.get(
+        "ROOT122_copied_partial_reused",
+        evidence.get("ROOT122_ROOT140_partial_copy_reused"),
+    )
+    if copied_partial is not False:
         raise ContractError("actual metadata evidence permits ROOT122 copied-partial reuse")
     executor_binding = parent.get("executor_request")
     if not isinstance(executor_binding, Mapping) \
