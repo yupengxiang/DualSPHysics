@@ -1,0 +1,55 @@
+{
+  "schema": "ds02.stage2.f1-s2.query-endpoint-followup-plan.v1",
+  "status": "PRE_REGISTERED_LAUNCH_DISABLED",
+  "sentinel_id": "F1-S2",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "purpose": "Independent axis-free component-space reader for the existing F1-S2 native rows nearest query time 1 s; ROOT225 remains an immutable failed attempt.",
+  "queries": {
+    "times_s": [1.0],
+    "selection": "nearest actual RunPARTs row at or below and at or above 1 s",
+    "exact_query_uses_one_frame": true,
+    "bracket_query_uses_two_frames": true,
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN",
+    "row_index_is_native_frame_id": false,
+    "maximum_deferred_part_records": 6,
+    "actual_record_count": "UNKNOWN_UNTIL_RUNPARTS_METADATA_IS_BOUND"
+  },
+  "grids": [
+    {"label": "coarse", "source_case_label": "F1_S2_DP0225_COARSE", "control_receipt_required": true},
+    {"label": "medium", "source_case_label": "F1_S2_DP020_MEDIUM", "control_receipt_required": true},
+    {"label": "fine", "source_case_label": "F1_S2_DP017_FINE", "control_receipt_required": true}
+  ],
+  "per_query_fields": [
+    "RunPARTs native frame id",
+    "actual saved time",
+    "native MassFluid and MassBound when exposed",
+    "native Dp",
+    "Idp identity/type/Mk role summary",
+    "fluid-only finite weighted centroid/velocity/KE"
+  ],
+  "source_controls": {
+    "request_receipt_command_tout_is_authoritative": true,
+    "generated_xml_TimeOut_is_provenance_only": true,
+    "missing_Run_txt_or_Run_out_remains_unknown": true,
+    "same_control_or_override_must_be_recorded_per_grid": true
+  },
+  "resource_guard": {
+    "solver_launch": false,
+    "gpu": false,
+    "h5_vtk_read": false,
+    "full_native_tree_scan": false,
+    "one_parent_reserved_batch": true,
+    "native_part_scratch_cap_bytes": 536870912,
+    "log_cap_bytes": 524288,
+    "memory_max_bytes": 2147483648,
+    "native_source_hashes": "UNKNOWN_UNTIL_PARENT_RESERVATION"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "Query-1 native endpoint fields are component-space diagnostics only; no interpolation, output-resolution, integration, spatial-truth, event-time, or external-validation credit."
+  }
+}
