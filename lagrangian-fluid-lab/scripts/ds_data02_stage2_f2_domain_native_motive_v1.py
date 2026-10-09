@@ -456,6 +456,10 @@ def audit(manifest_path: Path, output_path: Path) -> dict[str, Any]:
     if not csv_path.is_file() or not resume_path.is_file():
         raise NativeQaError("official PartVTKOut did not produce CSV/resume")
     runparts = parse_runparts(paths["runparts"])
+    if runparts["last_time_s"] != ROOT130_EXPECTED_LAST_TIME_S:
+        raise NativeQaError(
+            f"ROOT130 RunPARTs final saved time differs: {runparts['last_time_s']} != {ROOT130_EXPECTED_LAST_TIME_S}"
+        )
     native_rows = parse_native_csv(csv_path, generated["fluid_blocks"])
     attach_saved_brackets(native_rows, runparts)
     for row in native_rows:
