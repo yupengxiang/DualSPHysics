@@ -360,6 +360,41 @@ def _copy_rows(v57: Mapping[str, Any], bundle: Path, target: Path) -> list[dict[
     return rows
 
 
+def _copy_binding_rows(bindings: Sequence[Mapping[str, Any]], target_root: Path) -> list[dict[str, Any]]:
+    """Materialize only the request's explicit small code overlay.
+
+    Runtime does not need to import or read the frozen V57 JSON.  This is
+    intentional: the new request is self-contained and every actionable code
+    input is bound by ``runtime.code_overlay_bindings``.
+    """
+    rows: list[dict[str, Any]] = []
+    if not bindings:
+        raise PortableV58Error("code_overlay_bindings are missing")
+    for item in bindings:
+        if not isinstance(item, Mapping):
+            raise PortableV58Error("malformed code overlay binding")
+        source_value = item.get("source_path")
+        target_value = item.get("target_path")
+        role = str(item.get("role", ""))
+        if not isinstance(source_value, str) or not isinstance(target_value, str):
+            raise PortableV58Error(f"code overlay binding has no source/target: {role}")
+        source = _regular_code(source_value, role, executable=bool(item.get("required_executable")))
+        destination = _absolute(target_value, f"target for {role}")
+        try:
+            destination.relative_to(target_root.resolve())
+        except ValueError as error:
+            raise PortableV58Error(f"code target escapes fresh target root: {role}") from error
+        _copy_code(source, destination, executable=bool(item.get("required_executable")))
+        expected = item.get("sha256")
+        actual = _sha(destination)
+        if expected is not None and actual != expected:
+            raise PortableV58Error(f"code overlay binding SHA differs after copy: {role}")
+        rows.append({"role": role, "source": str(source), "target": str(destination),
+                     "sha256": actual, "mode_bits": stat.S_IMODE(destination.stat().st_mode),
+                     "payload_copied": False})
+    return rows
+
+
 def _planned_code_bindings(v57: Mapping[str, Any], bundle: Path, target: Path,
                            embedded: Mapping[str, Any]) -> list[dict[str, Any]]:
     """Return explicit source/target bindings for the small direct overlay.
@@ -645,7 +680,6 @@ def run(request_path: Path | str, *, io_slot_approved: bool,
         # Normally copy the immutable code from ROOT145.  Tests may provide a
         # bounded worker stub, but it is still copied and launched by this
         # exact direct-recovery path.
-        frozen_v57 = _load_json(request["v57_provenance"]["path"], "frozen V57 request")
         if worker_override is not None:
             source = _regular_code(worker_override, "worker override")
             worker_path = native / "ds_data02_stage2_f2_native_raw_to_typed_label_v2.py"
@@ -653,7 +687,10 @@ def run(request_path: Path | str, *, io_slot_approved: bool,
             code_rows.append({"role": "worker_override", "source": str(source), "target": str(worker_path),
                               "payload_copied": False})
         else:
-            code_rows = _copy_rows(frozen_v57, bundle, target)
+            bindings = request.get("runtime", {}).get("code_overlay_bindings")
+            if not isinstance(bindings, list):
+                raise PortableV58Error("runtime code overlay bindings are missing")
+            code_rows = _copy_binding_rows(bindings, target)
             worker_path = native / "ds_data02_stage2_f2_native_raw_to_typed_label_v2.py"
         if worker_path != Path(str(request["runtime"]["worker_target"])):
             raise PortableV58Error("worker target differs from request runtime binding")
