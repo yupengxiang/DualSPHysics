@@ -1,0 +1,21 @@
+{
+  "schema": "ds02.stage2.f1-s2.root310-selected-native-source-snapshot-contract.v1",
+  "status": "SOURCE_PREPARED_PARENT_GUARD_REQUIRED",
+  "purpose": "Hash exactly ten selected ROOT277/ROOT278 Part_*.bi4 files after parent reservation.",
+  "inputs": {
+    "observer_source": "ROOT279 additive v2 request with exact ROOT277/278 receipt joins",
+    "selected_files": 10,
+    "groups": {"same_cfl": 5, "half_cfl": 5},
+    "source_scope": "selected paths only; no directory walk, H5, VTK, or decode"
+  },
+  "worker": {
+    "implementation": "stage2_native_source_snapshot_v2.py",
+    "content_passes": 1,
+    "stat_policy": "pre-stat -> streaming SHA256 -> post-stat; reject bytes/mtime/ctime/device/inode changes",
+    "mutation_status": "FAIL",
+    "output": "immutable native_selected_source_snapshot_v2.json"
+  },
+  "resource_plan": {"cpu_threads": 1, "max_wall_seconds": 1800, "memory_bytes": 1073741824, "estimated_storage_bytes": 67108864, "gpu": "none"},
+  "scientific_scope": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0},
+  "forbidden": ["solver launch", "BI4 decode", "H5 read", "full raw-tree hash", "interpolation", "neighbor-grid truth"]
+}
