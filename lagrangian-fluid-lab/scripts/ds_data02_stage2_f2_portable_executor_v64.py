@@ -47,9 +47,11 @@ SCRIPT = Path(__file__).resolve()
 SCRIPT_DIR = SCRIPT.parent
 WORKER_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_native_raw_to_typed_label_v64.py"
 BOOTSTRAP_SCRIPT = SCRIPT_DIR / "ds_data02_stage2_f2_v64_bootstrap.py"
-# V63's adapter V2 is the consumed terminal-delta contract.  V64 records it
-# as an immutable dependency; it does not create a competing ledger owner.
-TERMINAL_DELTA_ADAPTER = SCRIPT_DIR / "ds_data02_stage2_f2_v63_terminal_cpu_delta_adapter_v2.py"
+# V64 uses the additive terminal-delta adapter V3.  The consumed V63 adapter
+# remains immutable and is not treated as a V64 dependency.  V3 preserves the
+# same-parent, opaque-charge contract while explicitly accepting V64
+# request/report schemas.
+TERMINAL_DELTA_ADAPTER = SCRIPT_DIR / "ds_data02_stage2_f2_v64_terminal_cpu_delta_adapter_v3.py"
 PARENT_V3_PATH = SCRIPT_DIR / "ds_data02_stage2_f2_portable_executor_parent_v3.py"
 V21_PATH = SCRIPT_DIR / "ds_data02_stage2_f2_external_supervisor_v21.py"
 RUNTIME_V6_DEFAULT = SCRIPT_DIR / "ds_data02_runtime_v6.py"
@@ -884,7 +886,7 @@ def _make_static_bindings(request: Mapping[str, Any], v62: Mapping[str, Any]) ->
                                      ("shared_v21_accounting", V21_PATH)]
     runtime = _pinned_path(request["runtime_binding"]["path"], "runtime v6")
     paths.append(("shared_runtime_v6", runtime))
-    paths.append(("terminal_cpu_delta_adapter_v2", TERMINAL_DELTA_ADAPTER))
+    paths.append(("terminal_cpu_delta_adapter_v3", TERMINAL_DELTA_ADAPTER))
     for item in request.get("runtime", {}).get("code_overlay_bindings", []):
         if isinstance(item, Mapping):
             paths.append((str(item.get("role", "overlay")), _pinned_path(item.get("source_path"), "overlay source")))
@@ -1120,7 +1122,7 @@ def build_request(*, v62_request: Path | str, output_request: Path | str,
                             "apis": ["_reserve", "_charge", "_release", "ledger_locked"],
                             "same_parent_ledger": True},
         "terminal_cpu_delta_contract": {
-            "schema": "ds02.stage2.systemd-terminal-cpu-delta.v2",
+            "schema": "ds02.stage2.systemd-terminal-cpu-delta.v3",
             "adapter": {"path": str(TERMINAL_DELTA_ADAPTER),
                          "sha256": _sha(TERMINAL_DELTA_ADAPTER),
                          "inspect_cli": "inspect --request ... --report ... --receipt ... --evidence ... --ledger ...",
@@ -1246,7 +1248,7 @@ def _validate_request(path: Path, *, verify_static: bool = False) -> dict[str, A
     delta_contract = request.get("terminal_cpu_delta_contract")
     adapter = delta_contract.get("adapter") if isinstance(delta_contract, Mapping) else None
     if (not isinstance(delta_contract, Mapping) or
-            delta_contract.get("schema") != "ds02.stage2.systemd-terminal-cpu-delta.v2" or
+            delta_contract.get("schema") != "ds02.stage2.systemd-terminal-cpu-delta.v3" or
             delta_contract.get("same_parent_ledger") is not True or
             delta_contract.get("append_once") is not True or
             delta_contract.get("no_reservation") is not True or
