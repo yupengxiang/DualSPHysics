@@ -1,3 +1,11 @@
+最新实际复核（2026-10-09T03:19:55.407669+00:00）：完整长期目标 ACTIVE，原资源边界保持。
+
+- ROOT147 F3十帧原生头/字段审计 actual completed/rc0，65037B report。native MassFluid/MassBound .003375000087544322、decoded binary64 view00000060e3a56b3f；4320fluid sample14.580000378191471kg，XML14.58kg分开。十帧24264IDs unique/allPosVelRhopfinite，sourcepre/post全SHA/stat稳定。2/4/6/8s查询仍BRACKETED，没有插值/连续到达/数值Q信用。fullCPU1.701718s闭账幂等、unit停；reference准备ROOT150 full836实际ten-probe门控forward request。
+- ROOT148 F7 source-only selector/aggregate诊断 actual completed/rc0。coarse极值face violation1.1102230246251565e-16m，是2×ulp(.35)，不能重构或解释810逐粒子计数。四fluid selector slab保留original .020 cell-center坐标，三档只换dp；source declaration equality不能当continuous owner/actual lattice等价。fullCPU1.411486s闭账幂等、unit停；forensics准备ROOT149三BI4逐点face/lattice诊断，科学门限不变。
+- ROOT145新的V55cold仍未启动；consumer前向修正真实inode/mode、有界owned import scratch及所有新namespace派生绑定。旧V54源合同测试失败和ROOT140/122 actual失败保留。ROOT144 schema拒绝不是header数据失败；147使用distinctadapter实际成功，不能覆盖144收据。
+- F3 full836 V2人造SIGTERM/进程组回收/日志和scratch caps root tests PASS，仅源码信用。保留legacy -I文件模式 sibling-import失败说明；真实worker命令literalvenv无-I，outerisolatedruntime明确sys.path bootstrap。
+- 最新已记CPU 704.5137592380531 core h/GPU 137.96668911670722 h；无active reservations/CFD/native任务。Home free 693428383744 B，外部 /var/tmp 192627908608 B；启动时重新核对。原512GPUh/3840CPUh/qualification1024/production720/Home536870912000B/deadline2026-10-14T07:23:48Z不重置。
+
 最新实际复核（2026-10-09T03:06:54Z）：完整七项长期目标 ACTIVE，阶段未完成，原额度/期限/Home floor不重置。
 
 - ROOT139 F3十选定原生帧实际单次全SHA/stat快照闭合，10,695,950B；无字段decode或全部836审计。旧builder字节已在source-code-archive/root139-native-audit-builder保全，更新后的当前builder不能替代旧源哈希。fullCPU1.488614s闭账幂等、unit停。
