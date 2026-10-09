@@ -496,7 +496,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         # The lifecycle H5 is already source-closed by ROOT232 and is only an
         # identity edge here.  It is deliberately absent from deferred
         # payload files so this native audit cannot trigger a second H5 read.
-        deferred.extend([contract["root232_deferred"]["records"], contract["native_deferred"]["native_report"], contract["native_deferred"]["partout_obi4"], contract["native_deferred"]["runparts_csv"]])
+        deferred.extend([contract["root232_deferred"]["summary"], contract["root232_deferred"]["records"], contract["native_deferred"]["native_report"], contract["native_deferred"]["partout_obi4"], contract["native_deferred"]["runparts_csv"]])
     request = {
         "schema": REQUEST_SCHEMA, "shared_runtime_version": "v8", "family_id": "F4", "case_id": "ROOT238_F4_UNLOCATED_NATIVE_EVIDENCE_V1", "physical_case_ids": sorted(selected), "kind": "cpu", "cpu_task_kind": "audit", "cpu_threads": 1, "omp_threads": 1, "max_wall_seconds": 3600, "max_memory_bytes": 4 * 1024 * 1024 * 1024, "estimated_storage_bytes": MAX_OUTPUT_BYTES, "estimated_cpu_core_hours": 1.0, "estimated_gpu_seconds": 0,
         "cwd": str(LAB_ROOT), "worktree_root": str(LAB_ROOT.parent), "command": command, "input_files": sorted(set(input_paths)), "input_sha256": dict(sorted(input_sha.items())), "deferred_input_files": sorted({str(item["path"]) for item in deferred}), "deferred_input_records": deferred, "output_files": ["{attempt_root}/f4-unlocated-native-evidence-v1.json", "{attempt_root}/cases/*.json"], "manifest_contract": {"path": str(manifest_path), "sha256": input_sha[str(manifest_path)]},
