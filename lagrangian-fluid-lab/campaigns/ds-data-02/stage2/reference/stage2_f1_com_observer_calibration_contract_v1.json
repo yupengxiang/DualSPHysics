@@ -1,0 +1,63 @@
+{
+  "schema": "ds02.stage2.f1-com-observer-calibration-contract.v1",
+  "status": "PREREGISTERED_DIAGNOSTIC_ONLY",
+  "identity": {
+    "family_id": "F1",
+    "sentinel_ids": ["F1-S1", "F1-S2"],
+    "physical_case_ids": [
+      "F1_ECC_THICK_DBC_LOWER_HEAD_V1",
+      "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1"
+    ]
+  },
+  "coordinate_contract": {
+    "frame": "world_cartesian_right_handed",
+    "axis_labels": ["x", "y", "z"],
+    "position_unit": "m",
+    "velocity_unit": "m/s",
+    "mass_unit": "kg",
+    "time_unit": "s",
+    "rotation_to_world": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    "producer_axis_orientation_metadata_required": true,
+    "current_producer_status": "MISSING_FROM_EXISTING_NATIVE_OBSERVER_V2_SIDEcars; external convention remains unverified"
+  },
+  "group_contract": {
+    "fluid": {
+      "com": "groups.fluid.weighted_centroid_m",
+      "velocity": "groups.fluid.weighted_velocity_m_per_s",
+      "kinetic_energy": "groups.fluid.kinetic_energy_j",
+      "mass": "groups.fluid.sample_mass_kg",
+      "role": "native per-particle sample sum only"
+    },
+    "fixed": "counted separately and excluded from fluid aggregates",
+    "moving": "counted separately and excluded from fluid aggregates",
+    "mixed_group_policy": "reject"
+  },
+  "mass_contract": {
+    "native_header_mass": "required for a future native-header task; absent fields remain UNKNOWN",
+    "continuum_mass": "never derived from particle sums",
+    "rigid_body_mass": "never inferred from particle sums",
+    "xml_mass_fallback": "forbidden",
+    "f1_s1_owner_mass_kg": 40.2,
+    "f1_s2_continuum_mass": "UNKNOWN; 340 kg is the discrete source sample target"
+  },
+  "time_contract": {
+    "source": "actual observer decoded_s and RunPARTs_s",
+    "frame_index_as_time": "forbidden",
+    "interpolation": "not performed",
+    "event_characteristic_time": "UNKNOWN",
+    "cross_case_alignment": "UNKNOWN when saved times differ"
+  },
+  "manufactured_cli_checks": [
+    "translation/quadratic trajectory time axis",
+    "right-handed coordinate rotation and left-handed rejection",
+    "fixed-wall contamination excluded from fluid COM",
+    "millimetre/gram unit rejection",
+    "nonfinite/duplicate identity rejection"
+  ],
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reason": "source-bound observable integrity only; no continuum truth, integration truth, or output-error bound"
+  }
+}
