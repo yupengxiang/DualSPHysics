@@ -15,7 +15,6 @@ SPEC.loader.exec_module(MODULE)
 
 
 F6_REMAINDER = [
-    "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0375_YAWM12_DP025",
     "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0625_YAWM06_DP025",
     "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0375_YAWM12_DP025",
     "F6_STAGE1_ANGULAR_RELEASE_DYZX_S0625_YAWM06_DP025",
@@ -43,7 +42,7 @@ def test_default_remainder_is_four_family_specific_cases() -> None:
 def test_remainder_contracts_have_exact_family_fluid_counts_and_no_fixed_three_id_rule() -> None:
     contracts, gaps = MODULE._build_contracts(F6_REMAINDER)
     assert not gaps
-    assert [item["family_id"] for item in contracts] == ["F6"] * 4
+    assert [item["family_id"] for item in contracts] == ["F6"] * 3
     assert all(item["launchable"] for item in contracts)
     assert {item["expected_fluid_initial_count"] for item in contracts} == {327680}
     assert {item["first_disappearance_count"] for item in contracts} == {3, 4}
@@ -56,12 +55,24 @@ def test_batch_size_is_variable_but_bounded() -> None:
     contracts, gaps = MODULE._build_contracts(F6_REMAINDER[:3])
     assert len(contracts) == 3 and not gaps
     with pytest.raises(MODULE.CauseBatchError, match="one through eight"):
-        MODULE._build_contracts(F6_REMAINDER + ["F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0875_YAWP06_DP025"] * 5)
+        MODULE._build_contracts(F6_REMAINDER + [
+            "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0875_YAWP06_DP025",
+            "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S1125_YAWP12_DP025",
+            "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S1375_YAWP18_DP025",
+            "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S1625_YAWM18_DP025",
+            "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0625_YAWM06_DP025",
+            "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0875_YAWP06_DP025",
+        ])
 
 
 def test_consumed_case_cannot_be_reintroduced() -> None:
     with pytest.raises(MODULE.CauseBatchError, match="overlaps a consumed"):
         MODULE._build_contracts([F6_CONSUMED])
+
+
+def test_root212_case_cannot_be_reintroduced() -> None:
+    with pytest.raises(MODULE.CauseBatchError, match="overlaps a consumed"):
+        MODULE._build_contracts(["F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0375_YAWM12_DP025"])
 
 
 def test_f4_zero_target_is_source_gap_and_never_empty_match_credit() -> None:

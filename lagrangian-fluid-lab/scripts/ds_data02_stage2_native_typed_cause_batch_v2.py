@@ -52,8 +52,11 @@ PROOF_SHA256 = {
 }
 ROOT220_PROOF = STAGE2 / "checkpoints/F6_TYPED_NATIVE_CAUSE_BATCH_V1_ACTUAL_ROOT_VERIFICATION_220.json"
 ROOT220_PROOF_SHA256 = "5234b72328de3e662eb1a2f590bd792eb5919c4bdab3870e5e986e976179be82"
+ROOT212_PROOF = STAGE2 / "checkpoints/F6_DXYZ_TYPED_NATIVE_CROSSCHECK_V3_ACTUAL_ROOT_VERIFICATION_212.json"
+ROOT212_PROOF_SHA256 = "6a562b36a26472fc459068751c29627db1fa6420b3b6f5a35f8110b36ff2a60e"
 ROOT216_CASE = "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0625_YAWM06_DP025"
 ROOT219_CASE = "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0875_YAWP06_DP025"
+ROOT212_CASE = "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0375_YAWM12_DP025"
 
 MAX_SMALL_BYTES = 8 * 1024 * 1024
 MAX_CONTRACT_BYTES = 512 * 1024
@@ -424,11 +427,10 @@ def _contract(case_id: str, current_row: dict[str, Any], scope_row: dict[str, An
 
 def _default_case_ids(proofs: dict[str, dict[str, Any]], consumed: set[str]) -> list[str]:
     candidates = [cid for cid, case in proofs.items() if case.get("family_id") == "F6" and cid not in consumed]
-    # The first four are the only current typed F6 cases not represented by
-    # ROOT216/219/220.  Keep this explicit so future proof batches cannot
-    # silently enlarge ROOT226.
+    # ROOT212 already closed DXYZ_S0375.  These three are the only current
+    # typed F6 cases not represented by ROOT212/216/219/220.  Keep this
+    # explicit so future proof batches cannot silently enlarge ROOT226.
     expected = [
-        "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0375_YAWM12_DP025",
         "F6_STAGE1_ANGULAR_RELEASE_DXYZ_S0625_YAWM06_DP025",
         "F6_STAGE1_ANGULAR_RELEASE_DYXZ_S0375_YAWM12_DP025",
         "F6_STAGE1_ANGULAR_RELEASE_DYZX_S0625_YAWM06_DP025",
@@ -440,6 +442,20 @@ def _default_case_ids(proofs: dict[str, dict[str, Any]], consumed: set[str]) -> 
 
 def _consumed_cases() -> set[str]:
     consumed = {ROOT216_CASE, ROOT219_CASE}
+    # ROOT212 is a completed single-case typed/native join outside the
+    # ROOT220 batch.  Keep its physical case out of every ROOT226 selection.
+    if ROOT212_PROOF.is_file():
+        proof = _load_verified_json(ROOT212_PROOF, "ROOT212 actual cause proof", ROOT212_PROOF_SHA256)
+        case_id = proof.get("physical_case_id")
+        if not isinstance(case_id, str):
+            case_rows = proof.get("case_verifications")
+            if isinstance(case_rows, list) and len(case_rows) == 1 and isinstance(case_rows[0], dict):
+                case_id = case_rows[0].get("physical_case_id")
+        if not isinstance(case_id, str):
+            raise CauseBatchError("ROOT212 actual proof has no physical case identity")
+        if case_id != ROOT212_CASE:
+            raise CauseBatchError(f"ROOT212 case identity changed: {case_id}")
+        consumed.add(case_id)
     if ROOT220_PROOF.is_file():
         consumed.update(_root220_cases())
     return consumed
@@ -598,7 +614,7 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
         "case_ids": [item["physical_case_id"] for item in contract_items],
         "contracts": contract_items,
         "source_gap_cases": gaps,
-        "candidate_scope": {"root220_consumed_cases": sorted(_root220_cases()), "root216_case": ROOT216_CASE, "root219_case": ROOT219_CASE, "f4_root201_cases": f4_root201},
+        "candidate_scope": {"root212_case": ROOT212_CASE, "root220_consumed_cases": sorted(_root220_cases()), "root216_case": ROOT216_CASE, "root219_case": ROOT219_CASE, "f4_root201_cases": f4_root201},
         "resource_policy": {"cpu_threads": 1, "max_wall_seconds": 3600, "memory_max_bytes": 4 * 1024 * 1024 * 1024, "max_cases_per_batch": MAX_BATCH_CASES, "case_count": len(contract_items), "launchable_case_count": len(launchable), "max_deferred_source_bytes": MAX_BATCH_SOURCE_BYTES, "estimated_deferred_source_bytes": deferred_bytes, "one_sequential_case_at_a_time": True, "case_output_cap_bytes": 8 * 1024 * 1024, "batch_output_cap_bytes": 64 * 1024 * 1024, "h5_content_read": False, "native_bi4_read": False, "solver_launch": False},
         "claim_boundary": {"native_cause": "prior source-bound report only; new join pending guarded run", "typed_native_saved_frame_join": "DIAGNOSTIC_ONLY", "target_identity_is_not_physical_case": True, "physical_fate": "UNKNOWN", "legal_flux": "UNKNOWN", "dynamics": "UNKNOWN", "QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
         "source_policy": "Read bounded proofs/source JSON and stat-only deferred files at prepare. H5, typed JSONL, PartOut, RunPARTs and BI4 content are not opened; no solver or PartVTKOut is launched.",
