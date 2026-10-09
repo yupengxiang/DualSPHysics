@@ -108,6 +108,26 @@ def args_for(root: Path, source: tuple[Path, Path, str, str, list[Path]], output
     )
 
 
+def prepare_cli(args: SimpleNamespace, *, output: Path, current_sha: str | None = None, case_ids: list[str] | None = None) -> list[str]:
+    command = [
+        "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+        str(request_builder.SCRIPT), "prepare",
+        "--current", str(args.current), "--audit-verification", str(args.audit_verification),
+        "--expected-current-sha256", current_sha or str(args.expected_current_sha256),
+        "--expected-audit-sha256", str(args.expected_audit_sha256), "--family", str(args.family),
+        "--max-cases", str(args.max_cases), "--max-group-bytes", str(args.max_group_bytes),
+        "--output-dir", str(output), "--v4-worker", str(args.v4_worker), "--batch-worker", str(args.batch_worker),
+        "--python", str(args.python), "--runtime-config", str(args.runtime_config),
+    ]
+    for flag, value in (("--runtime-v2", args.runtime_v2), ("--runtime-v6", args.runtime_v6), ("--runtime-v8", args.runtime_v8), ("--dispatch-v8", args.dispatch_v8), ("--strict-v8", args.strict_v8), ("--cwd", args.cwd), ("--worktree-root", args.worktree_root)):
+        command.extend([flag, str(value)])
+    for case_id in args.exclude_case or []:
+        command.extend(["--exclude-case", str(case_id)])
+    for case_id in case_ids if case_ids is not None else args.case_id or []:
+        command.extend(["--case-id", str(case_id)])
+    return command
+
+
 class BatchTests(unittest.TestCase):
     def test_self_tests(self) -> None:
         self.assertEqual(request_builder.self_test()["status"], "PASS")
@@ -166,6 +186,34 @@ class BatchTests(unittest.TestCase):
             self.assertIn("stat", failure["error_message"].lower())
             self.assertFalse((second / "typed-lifecycle-v4-summary.json").exists())
             self.assertFalse((second / "typed-lifecycle-v4-records.jsonl").exists())
+
+    def test_real_prepare_cli_success_alias_rejection_and_current_sha_rejection(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = make_source(root)
+            args = args_for(root, source, root / "unused")
+            success = subprocess.run(
+                prepare_cli(args, output=root / "cli-success"),
+                cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(success.returncode, 0, success.stderr or success.stdout)
+            result = json.loads(success.stdout)
+            self.assertEqual(result["exact_join_count"], 335)
+            self.assertEqual(result["historical_alias_count"], 1)
+            self.assertTrue(Path(result["manifest"]).is_file())
+            alias = request_builder.ALIAS_CASE
+            alias_result = subprocess.run(
+                prepare_cli(args, output=root / "cli-alias", case_ids=[alias]),
+                cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertNotEqual(alias_result.returncode, 0)
+            self.assertIn("exact eligible", alias_result.stderr)
+            bad_sha_result = subprocess.run(
+                prepare_cli(args, output=root / "cli-bad-sha", current_sha="0" * 64),
+                cwd=root, capture_output=True, text=True, check=False,
+            )
+            self.assertNotEqual(bad_sha_result.returncode, 0)
+            self.assertIn("CURRENT SHA differs", bad_sha_result.stderr)
 
 
 if __name__ == "__main__":
