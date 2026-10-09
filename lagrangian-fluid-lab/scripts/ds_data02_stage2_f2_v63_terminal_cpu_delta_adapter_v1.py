@@ -217,7 +217,10 @@ def inspect_binding(*, request_path: Path | str, report_path: Path | str,
     if report.get("schema") not in REPORT_SCHEMAS:
         raise ReconciliationError("unsupported returned parent report schema")
     _terminal(report.get("status"), "returned parent report")
-    if report.get("request_sha256") != request_sha:
+    report_request_sha = report.get("request_sha256")
+    if report_request_sha is None and isinstance(report.get("request"), Mapping):
+        report_request_sha = report["request"].get("sha256")
+    if report_request_sha != request_sha:
         raise ReconciliationError("returned report request SHA differs")
     report_path_value = report.get("report_path")
     if report_path_value is not None and not (_same(report_path_value, receipt_file) or _same(report_path_value, report_file)):
