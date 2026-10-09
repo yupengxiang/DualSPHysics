@@ -32,8 +32,13 @@ def _fixture(tmp_path: Path):
     v12 = _load()
     result = _write(tmp_path / "producer" / "products" / "v16-result.json", b"opaque V16 fixture")
     current = _write(tmp_path / "CURRENT336.json", b"frozen CURRENT fixture")
-    nested = {"path": str(tmp_path / "producer" / "products" / "nested-report.json"),
-              "sha256": "a" * 64, "schema": "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2"}
+    nested_value = {"schema": "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2",
+                    "status": "COMPLETE_DEVELOPMENT_UNKNOWN", "metadata_only": True}
+    nested_value["report_sha256"] = v12.report_canonical_sha(nested_value)
+    nested_path = _write(tmp_path / "producer" / "products" / "nested-report.json", nested_value)
+    nested = {"path": str(nested_path), "sha256": v12.sha256_file(nested_path),
+              "schema": nested_value["schema"],
+              "report_canonical_sha256": nested_value["report_sha256"]}
     sidecar = {
         "schema": v12.SIDECAR_SCHEMA,
         "status": "SOURCE_BOUND_SEMANTIC_CONTRACT",

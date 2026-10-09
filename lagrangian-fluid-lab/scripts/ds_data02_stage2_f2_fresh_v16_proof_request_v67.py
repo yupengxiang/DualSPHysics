@@ -51,6 +51,7 @@ REQUIRED_STATUS_VOCABULARY = sorted({
 HEX64 = set("0123456789abcdef")
 MAX_JSON_BYTES = 32 * 1024 * 1024
 MAX_SCOPE_SOURCE_BYTES = 4 * 1024 * 1024
+MAX_NESTED_REPORT_BYTES = 4 * 1024 * 1024
 
 
 class V67RequestError(RuntimeError):
@@ -137,6 +138,77 @@ def _mapping(value: Any, role: str) -> Mapping[str, Any]:
     return value
 
 
+def _report_canonical_sha(value: Mapping[str, Any]) -> str:
+    body = {key: item for key, item in value.items()
+            if key not in {"sha256", "report_sha256"}}
+    return hashlib.sha256(json.dumps(
+        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        allow_nan=False, default=str).encode("utf-8")).hexdigest()
+
+
+def _static_bindings(value: Any) -> list[Mapping[str, Any]]:
+    """Collect declared static bindings from the real producer request.
+
+    The V66 proof request intentionally keeps the parent request as a small
+    path/SHA provenance record.  Reopening that bounded parent request here
+    is how V67 proves that the scope source was one of its actual static
+    inputs; a file merely containing the same literal is insufficient.
+    """
+    found: list[Mapping[str, Any]] = []
+
+    def visit(item: Any) -> None:
+        if isinstance(item, Mapping):
+            rows = item.get("static_bindings")
+            if isinstance(rows, list):
+                found.extend(row for row in rows if isinstance(row, Mapping))
+            for child in item.values():
+                visit(child)
+        elif isinstance(item, list):
+            for child in item:
+                visit(child)
+
+    visit(value)
+    return found
+
+
+def _nested_report_binding(parent_binding: Mapping[str, Any], *, parent_request: Mapping[str, Any]) -> dict[str, Any]:
+    nested = _mapping(parent_binding.get("nested_worker_report"), "source V66 nested report")
+    nested_path = _file(nested.get("path"), "source V66 nested report")
+    declared_sha = _sha(nested.get("sha256"), "source V66 nested report SHA")
+    nested_file, nested_value = _json(nested_path, "actual V2 nested report",
+                                      max_bytes=MAX_NESTED_REPORT_BYTES)
+    observed_sha = sha256_file(nested_file, max_bytes=MAX_NESTED_REPORT_BYTES)
+    if observed_sha != declared_sha:
+        raise V67RequestError("actual V2 nested report SHA differs from V66 binding")
+    if nested_value.get("schema") != "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2":
+        raise V67RequestError("actual V2 nested report schema differs")
+    report_sha = nested_value.get("report_sha256")
+    if not isinstance(report_sha, str) or report_sha != _report_canonical_sha(nested_value):
+        raise V67RequestError("actual V2 nested report canonical SHA differs")
+
+    parent_request_path = _file(parent_binding.get("request", {}).get("path"),
+                                "V66 producer parent request")
+    parent_declared_sha = _sha(parent_binding.get("request", {}).get("file_sha256"),
+                               "V66 producer parent request SHA")
+    if sha256_file(parent_request_path, max_bytes=MAX_JSON_BYTES) != parent_declared_sha:
+        raise V67RequestError("V66 producer parent request SHA differs")
+    parent_canonical = parent_request.get("sha256")
+    if not isinstance(parent_canonical, str) or parent_canonical != canonical_sha(parent_request):
+        raise V67RequestError("V66 producer parent request canonical SHA differs")
+    bindings = _static_bindings(parent_request)
+    if not bindings:
+        raise V67RequestError("V66 producer parent request has no static_bindings")
+    return {
+        "path": str(nested_file), "sha256": observed_sha,
+        "schema": str(nested_value["schema"]),
+        "report_canonical_sha256": report_sha,
+        "parent_request": {"path": str(parent_request_path),
+                            "file_sha256": parent_declared_sha,
+                            "canonical_sha256": parent_canonical},
+        "static_bindings": bindings,
+    }
+
+
 def _validate_v66_source(path: Path, source: Mapping[str, Any]) -> dict[str, Any]:
     if source.get("schema") != REQUEST_SCHEMA or source.get("sha256") != canonical_sha(source):
         raise V67RequestError("source request is not a canonical V8 request")
@@ -156,10 +228,16 @@ def _validate_v66_source(path: Path, source: Mapping[str, Any]) -> dict[str, Any
     producer_request = _mapping(parent.get("request"), "source.v66_parent_binding.request")
     _sha(producer_request.get("file_sha256"), "source producer request file SHA")
     _sha(producer_request.get("canonical_sha256"), "source producer request canonical SHA")
-    nested = _mapping(parent.get("nested_worker_report"), "source V66 nested report")
-    _sha(nested.get("sha256"), "source V66 nested report SHA")
-    if nested.get("schema") != "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2":
-        raise V67RequestError("source V66 nested report is not V2")
+    # The V66 proof request has only path/SHA for this provenance edge.  Read
+    # the bounded actual report and its bounded parent request to recover the
+    # schema and the real static source edge; do not trust a missing schema
+    # field or an arbitrary source file containing the same literal.
+    producer_parent_request_path = _file(
+        _mapping(parent.get("request"), "source V66 parent request").get("path"),
+        "source V66 parent request")
+    _, producer_parent_request = _json(producer_parent_request_path,
+                                       "source V66 parent request")
+    nested = _nested_report_binding(parent, parent_request=producer_parent_request)
     result = _mapping(source.get("result"), "source V66 result")
     _sha(result.get("sha256"), "source V66 result SHA")
     if isinstance(result.get("bytes"), bool) or not isinstance(result.get("bytes"), int) or result.get("bytes") <= 0:
@@ -183,7 +261,11 @@ def _validate_v66_source(path: Path, source: Mapping[str, Any]) -> dict[str, Any
         "source_request_canonical_sha256": source["sha256"],
         "producer_case_id": producer_case,
         "producer_attempt_id": producer_attempt,
-        "producer_nested_report": dict(nested),
+        "producer_nested_report": {
+            key: nested[key] for key in
+            ("path", "sha256", "schema", "report_canonical_sha256", "parent_request")
+        },
+        "producer_static_bindings": nested["static_bindings"],
         "result": dict(result),
         "current": dict(current),
         "expected": dict(expected),
@@ -192,28 +274,39 @@ def _validate_v66_source(path: Path, source: Mapping[str, Any]) -> dict[str, Any
 
 def build_semantic_sidecar(*, source_request: Path, scope_source: Path, output: Path) -> dict[str, Any]:
     source_path, source = _json(source_request, "V66 source request")
-    binding = _validate_v66_source(source_path, source)
+    source_binding = _validate_v66_source(source_path, source)
     code_path = _file(str(scope_source), "scope source")
     if code_path.stat().st_size > MAX_SCOPE_SOURCE_BYTES:
         raise V67RequestError("scope source exceeds bounded code limit")
     code = code_path.read_text(encoding="utf-8")
     if MISSING_SCOPE not in code:
         raise V67RequestError("scope source does not contain the exact producer missing_scope literal")
+    static_match = None
+    for static_binding in source_binding["producer_static_bindings"]:
+        candidate = static_binding.get("path", static_binding.get("source_path"))
+        candidate_sha = static_binding.get("sha256", static_binding.get("file_sha256"))
+        if candidate == str(code_path):
+            static_match = (static_binding, candidate_sha)
+            break
+    if static_match is None:
+        raise V67RequestError("scope source is not an actual V66 producer static binding")
+    if static_match[1] != sha256_file(code_path, max_bytes=MAX_SCOPE_SOURCE_BYTES):
+        raise V67RequestError("scope source SHA differs from the producer static binding")
     sidecar: dict[str, Any] = {
-        "schema": SIDECAR_SCHEMA,
+            "schema": SIDECAR_SCHEMA,
         "status": "SOURCE_BOUND_SEMANTIC_CONTRACT",
         "role": "DEVELOPMENT",
         "producer_v66_request": {
-            "path": binding["source_request_path"],
-            "file_sha256": binding["source_request_file_sha256"],
-            "canonical_sha256": binding["source_request_canonical_sha256"],
-            "producer_case_id": binding["producer_case_id"],
-            "producer_attempt_id": binding["producer_attempt_id"],
+            "path": source_binding["source_request_path"],
+            "file_sha256": source_binding["source_request_file_sha256"],
+            "canonical_sha256": source_binding["source_request_canonical_sha256"],
+            "producer_case_id": source_binding["producer_case_id"],
+            "producer_attempt_id": source_binding["producer_attempt_id"],
         },
-        "producer_nested_report": binding["producer_nested_report"],
-        "v16_result": binding["result"],
+        "producer_nested_report": source_binding["producer_nested_report"],
+        "v16_result": source_binding["result"],
         "current_manifest": {
-            "path": binding["current"].get("path"),
+            "path": source_binding["current"].get("path"),
             "sha256": ACTUAL_CURRENT_SHA,
             "identity": "EXACT_CURRENT_SOURCE_IDENTITY_DF7E",
         },
@@ -223,6 +316,7 @@ def build_semantic_sidecar(*, source_request: Path, scope_source: Path, output: 
             "path": str(code_path),
             "sha256": sha256_file(code_path, max_bytes=MAX_SCOPE_SOURCE_BYTES),
             "missing_scope_literal": MISSING_SCOPE,
+            "producer_static_role": static_match[0].get("role", static_match[0].get("name")),
             "verification": "pinned producer source contains exact V2 spelling; no result bytes read",
         },
         "expected": {
@@ -242,8 +336,8 @@ def build_semantic_sidecar(*, source_request: Path, scope_source: Path, output: 
     target = _write_new(output, sidecar)
     return {"schema": SIDECAR_SCHEMA, "status": "SOURCE_BOUND_SEMANTIC_CONTRACT",
             "path": str(target), "sha256": sha256_file(target),
-            "producer_request_sha256": binding["source_request_file_sha256"],
-            "result_sha256": binding["result"]["sha256"], "payload_read": False}
+            "producer_request_sha256": source_binding["source_request_file_sha256"],
+            "result_sha256": source_binding["result"]["sha256"], "payload_read": False}
 
 
 def _validate_sidecar_for_request(source_path: Path, source: Mapping[str, Any],
@@ -259,6 +353,19 @@ def _validate_sidecar_for_request(source_path: Path, source: Mapping[str, Any],
     nested = _mapping(sidecar.get("producer_nested_report"), "sidecar nested report")
     if nested.get("path") != binding["producer_nested_report"].get("path") or nested.get("sha256") != binding["producer_nested_report"].get("sha256"):
         raise V67RequestError("semantic sidecar nested report differs from V66")
+    if nested.get("schema") != binding["producer_nested_report"].get("schema") or nested.get("report_canonical_sha256") != binding["producer_nested_report"].get("report_canonical_sha256"):
+        raise V67RequestError("semantic sidecar nested report schema/canonical SHA differs")
+    scope = _mapping(sidecar.get("scope_source"), "sidecar scope source")
+    scope_path = scope.get("path")
+    scope_sha = scope.get("sha256")
+    if not isinstance(scope_path, str) or not isinstance(scope_sha, str):
+        raise V67RequestError("sidecar scope source path/SHA is missing")
+    if not any(item.get("path", item.get("source_path")) == scope_path and
+               item.get("sha256", item.get("file_sha256")) == scope_sha
+               for item in binding["producer_static_bindings"]):
+        raise V67RequestError("sidecar scope source is not an actual V66 static binding")
+    if scope.get("missing_scope_literal") != MISSING_SCOPE:
+        raise V67RequestError("sidecar scope source literal differs")
     if sidecar.get("missing_scope") != MISSING_SCOPE or sidecar.get("denominator_semantics") != SCOPE_SEMANTICS:
         raise V67RequestError("semantic sidecar denominator contract differs")
     result = _mapping(sidecar.get("v16_result"), "sidecar V16 result")

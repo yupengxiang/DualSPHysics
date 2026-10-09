@@ -57,6 +57,7 @@ REQUIRED_STATUS_VOCABULARY = {
 UNKNOWN = {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
 HEX64 = set("0123456789abcdef")
 MAX_SIDECAR_BYTES = 2 * 1024 * 1024
+MAX_NESTED_REPORT_BYTES = 4 * 1024 * 1024
 
 
 class V12ProofConsumerError(RuntimeError):
@@ -81,6 +82,14 @@ _ACTIVE_SCOPE: dict[str, Any] | None = None
 
 def canonical_sha(value: Mapping[str, Any]) -> str:
     body = {key: item for key, item in value.items() if key != "sha256"}
+    return hashlib.sha256(json.dumps(
+        body, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+        allow_nan=False, default=str).encode("utf-8")).hexdigest()
+
+
+def report_canonical_sha(value: Mapping[str, Any]) -> str:
+    body = {key: item for key, item in value.items()
+            if key not in {"sha256", "report_sha256"}}
     return hashlib.sha256(json.dumps(
         body, sort_keys=True, separators=(",", ":"), ensure_ascii=True,
         allow_nan=False, default=str).encode("utf-8")).hexdigest()
@@ -188,6 +197,8 @@ def _validate_sidecar(request: Mapping[str, Any], sidecar_path: Path,
     _sha(nested.get("sha256"), "sidecar.producer_nested_report.sha256")
     if nested.get("schema") != "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2":
         raise V12ProofConsumerError("sidecar producer report is not the real V2 schema")
+    _sha(nested.get("report_canonical_sha256"),
+         "sidecar.producer_nested_report.report_canonical_sha256")
     request_nested = _binding(producer.get("nested_worker_report"),
                               "request.v66_parent_binding.nested_worker_report")
     if nested.get("path") != request_nested.get("path") or nested.get("sha256") != request_nested.get("sha256"):
@@ -261,6 +272,28 @@ def _validate_sidecar(request: Mapping[str, Any], sidecar_path: Path,
     }
 
 
+def _verify_nested_report(contract: Mapping[str, Any]) -> None:
+    """Verify the same bounded V2 report that V67 used to build the sidecar.
+
+    This is intentionally called from the V8 result validator, after V8 has
+    entered its parent-approved timer.  It is a bounded metadata read and is
+    never a fallback to the V16/HDF5/raw payload.
+    """
+    nested = contract["producer_nested_report"]
+    path = _absolute_file(nested.get("path"), "producer V2 nested report")
+    if path.stat().st_size > MAX_NESTED_REPORT_BYTES:
+        raise V12ProofConsumerError("producer V2 nested report exceeds the bounded metadata limit")
+    observed_sha = sha256_file(path, max_bytes=MAX_NESTED_REPORT_BYTES)
+    if observed_sha != nested.get("sha256"):
+        raise V12ProofConsumerError("producer V2 nested report SHA differs during proof run")
+    _, value = _json(path, "producer V2 nested report", max_bytes=MAX_NESTED_REPORT_BYTES)
+    if value.get("schema") != nested.get("schema"):
+        raise V12ProofConsumerError("producer V2 nested report schema differs during proof run")
+    actual_report_sha = value.get("report_sha256")
+    if actual_report_sha != nested.get("report_canonical_sha256") or actual_report_sha != report_canonical_sha(value):
+        raise V12ProofConsumerError("producer V2 nested report canonical SHA differs during proof run")
+
+
 def _load_marker(request_path: Path | str) -> tuple[Path, dict[str, Any], dict[str, Any]]:
     request_file = Path(request_path).expanduser().resolve()
     try:
@@ -283,6 +316,7 @@ def _validate_result_v12(result: Mapping[str, Any], bound: Mapping[str, Any],
     contract = _ACTIVE_SCOPE
     if contract is None:
         raise V12ProofConsumerError("V12 validator was called without a semantic sidecar")
+    _verify_nested_report(contract)
     mass = result.get("initial_mass_denominator")
     if not isinstance(mass, Mapping) or mass.get("missing_scope") != ACCEPTED_MISSING_SCOPE:
         raise V12ProofConsumerError("result missing_scope is not the exact source-bound V2 spelling")

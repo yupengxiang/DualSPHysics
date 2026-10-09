@@ -37,6 +37,20 @@ def _source(tmp_path: Path):
     target = tmp_path / "producer" / "bundle-target"
     output = tmp_path / "producer" / "products"
     target.mkdir(parents=True)
+    scope_source = _write(tmp_path / "pinned-producer.py",
+                           (v67.MISSING_SCOPE + "\n# producer source\n").encode())
+    parent = {
+        "schema": "ds02.stage2.f2-root145-parent-request.fixture.v1",
+        "status": "READY_FOR_PARENT_GUARD",
+        "static_bindings": [{"role": "replay_v14", "path": str(scope_source),
+                              "sha256": v67.sha256_file(scope_source)}],
+    }
+    parent["sha256"] = v67.canonical_sha(parent)
+    parent_path = _write(tmp_path / "producer-parent-request.json", parent)
+    nested_value = {"schema": "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2",
+                    "status": "COMPLETE_DEVELOPMENT_UNKNOWN", "metadata_only": True}
+    nested_value["report_sha256"] = v67._report_canonical_sha(nested_value)
+    nested_path = _write(output / "nested.json", nested_value)
     source = {
         "schema": v67.REQUEST_SCHEMA, "status": "READY_FOR_PARENT_GUARD",
         "role": "DEVELOPMENT", "model_invoked": False, "cfd_invoked": False,
@@ -69,15 +83,15 @@ def _source(tmp_path: Path):
         "v66_parent_binding": {
             "producer_case_id": "STAGE2_F2_ROOT145_V66_RECOVERY_ROOT_179C",
             "producer_attempt_id": "f2-v66-root179c-003",
-            "request": {"file_sha256": "b" * 64, "canonical_sha256": "c" * 64},
-            "nested_worker_report": {"path": str(output / "nested.json"), "sha256": "a" * 64,
-                                      "schema": "ds02.stage2.f2-native-raw-to-typed-to-label-report.v2"},
+            "request": {"path": str(parent_path), "file_sha256": v67.sha256_file(parent_path),
+                        "canonical_sha256": parent["sha256"]},
+            # The real V66 proof map carries only path/SHA here.  V67 obtains
+            # schema/canonical SHA from this bounded actual nested report.
+            "nested_worker_report": {"path": str(nested_path), "sha256": v67.sha256_file(nested_path)},
         },
     }
     source["sha256"] = v67.canonical_sha(source)
     source_path = _write(tmp_path / "v66-proof-request.json", source)
-    scope_source = _write(tmp_path / "pinned-producer.py",
-                           (v67.MISSING_SCOPE + "\n# producer source\n").encode())
     return v67, source_path, scope_source, result
 
 
