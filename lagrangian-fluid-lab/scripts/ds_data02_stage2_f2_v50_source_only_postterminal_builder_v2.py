@@ -135,6 +135,11 @@ ALIASES: dict[str, tuple[str, ...]] = {
     "proof_consumer_v8": ("fresh_v16_proof_consumer_v8",),
     "v47_terminal_sealer_v1": ("terminal_sealer_v1",),
     "v47_fresh_product_interface_v1": ("fresh_product_interface_v1",),
+    # Parent/runtime roles are named semantically in the closure but retain
+    # their concrete V50 registry names here.
+    "parent_v3": ("parent_executor_v3",),
+    "runtime_v6": ("shared_runtime_v6",),
+    "runtime_supervisor_v21": ("shared_v21_accounting",),
 }
 
 
