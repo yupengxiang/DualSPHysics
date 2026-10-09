@@ -1,0 +1,87 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-contract.v1",
+  "status": "PREREGISTERED_SOURCE_BOUND_DIAGNOSTIC_ONLY",
+  "identity": {
+    "family_id": "F1",
+    "sentinel_ids": ["F1-S1", "F1-S2"],
+    "selected_cases": [
+      "F1_S1_DP010_SAME_CFL",
+      "F1_S1_DP010_HALF_CFL",
+      "F1_S2_DP0225_COARSE",
+      "F1_S2_DP020_MEDIUM",
+      "F1_S2_DP017_FINE"
+    ]
+  },
+  "native_header": {
+    "MassFluid": {
+      "required": true,
+      "unit": "kg",
+      "source": "official BI4 decoder metadata",
+      "xml_fallback": "forbidden"
+    },
+    "MassBound": {
+      "required": false,
+      "unit": "kg",
+      "absent_semantics": "UNKNOWN_NOT_EXPOSED_BY_DECODER"
+    },
+    "Dp": {
+      "required": true,
+      "unit": "m",
+      "source": "official BI4 decoder metadata",
+      "XML_or_filename_fallback": "forbidden"
+    },
+    "Idp": {
+      "required": true,
+      "source": "decoded native identity array",
+      "checks": ["finite", "unique", "dtype", "min", "max", "digest"]
+    }
+  },
+  "observables": {
+    "fluid_weight": "native MassFluid",
+    "fluid_weighted_centroid": "sum(MassFluid * Pos_fluid) / sum(MassFluid)",
+    "fluid_weighted_velocity": "sum(MassFluid * Vel_fluid) / sum(MassFluid)",
+    "fluid_kinetic_energy": "0.5 * MassFluid * sum(Vel_fluid^2)",
+    "fixed_and_moving": "counted separately and excluded from fluid aggregates",
+    "mkfluid_relative_and_mk_absolute": "reported as separate label spaces",
+    "continuum_mass": "UNKNOWN_NOT_DERIVED_FROM_PARTICLE_SUM",
+    "rigid_body_mass_inertia": "UNKNOWN_NOT_INFERRED_FROM_PARTICLE_SAMPLE"
+  },
+  "coordinate_contract": {
+    "frame": "world_cartesian_right_handed",
+    "axis_labels": ["x", "y", "z"],
+    "position_unit": "m",
+    "velocity_unit": "m/s",
+    "mass_unit": "kg",
+    "time_unit": "s",
+    "rotation_to_world": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+    "producer_axis_orientation_metadata": "required; existing F1 producer sidecars do not expose it",
+    "calibration_status": "UNKNOWN"
+  },
+  "time": {
+    "source": "RunPARTs and decoded native TimeStep",
+    "frame_index_as_time": "forbidden",
+    "interpolation": "not performed",
+    "event_characteristic_time": "UNKNOWN"
+  },
+  "guard": {
+    "native_payload": "parent after-reservation first SHA/stat and post-child SHA/stat",
+    "source_change": "FAIL",
+    "full_native_tree_scan": false,
+    "hdf5_read": false,
+    "vtk_read": false,
+    "solver_launch": false
+  },
+  "manufactured_cli_checks": [
+    "quadratic trajectory and native-mass weighted COM/velocity/KE",
+    "right-handed rotation and left-handed rejection",
+    "SI unit mismatch rejection for mm/g fixtures",
+    "fixed-wall contamination exclusion",
+    "duplicate/non-finite Idp rejection"
+  ],
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reason": "native selected-field integrity only; no continuum truth, integration/output error bound, or axis calibration"
+  }
+}
