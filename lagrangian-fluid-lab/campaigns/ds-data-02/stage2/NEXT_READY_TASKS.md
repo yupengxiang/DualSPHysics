@@ -1,3 +1,14 @@
+最新恢复入口（2026-10-09，ROOT215运行期间）：完整七项长期目标 ACTIVE，以下状态优先于后面的历史记录。所有资源、期限、原始产物与历史收据边界保持。
+
+- 336例已有流式科学字段审计；新增 typed 保存帧生命周期终态覆盖55例。ROOT210的7个F6案例均实际完成，新增首次缺失数为3/3/4/3/2/4/3；原因未定位不因此转为已定位。原118例中42例有该生命周期诊断，53例有逐流体原生原因证据，65例原因仍未定位。这些计数属于不同证据层。
+- 唯一实际重IO：`ds02-typed-lifecycle-batch-v1-f3-root-215.service`，同一父进程 PID2790400；首批8个F3案例仍待终态核验。恢复先查询该unit及其实际execution-receipt；不得从超时或旧快照重启同一attempt。严格pending plan为`checkpoints/CURRENT336_TYPED_LIFECYCLE_ROOT215_PENDING_V4.json`，55实际/8pending/272未排队/1历史alias；pending不给完成信用。
+- ROOT209 F6 V2已实际失败并完整核销：官方`NpAlloc [X]` allocation ratio被误判为整数；新增V3源与15项测试通过，ROOT212新请求`requests/f6-dxyz-typed-native-crosscheck-v3-root-forward-212-001.json`已准备。ROOT211官方制造校准V2在编译前因未定义WORKER失败，费用闭合；新增V3真实入口负例及完整source manifest preflight已通过，ROOT214新请求`requests/official-writer-calibration-v3-root-forward-214-001.json`已准备。旧失败与consumed源码保留。
+- ROOT215终态后，先核对小报告/request/receipt/source声明与当前stat，再补齐完整systemd CPU费用、验证幂等、确认unit dead及无reservation；随后逐个实际运行ROOT212/ROOT214，不能并发重IO。制造读写校准只给其实际证明的组件/角色/质量算术信用，不给生产世界定向或Q资格。
+- Portable V2真实隔离V8/V12/scorer测试通过；ROOT213 metadata contract已主构造，62MB V16仅stat未读取。该分支仍缺actual source-copy/overlay/执行入口，consumer代理正在落实；metadata READY字段不是launch或portable产品验收。F6未定位S0625的3粒子ROOT210 source gap已绑定，forensics代理准备ROOT216最小排除取证；reference代理推进F1可独立检验的组件空间任务范围，外部世界定向未知不作为所有观测的共同硬前置。
+- 14哨点当前registry的48个唯一source/proof SHA已小元数据复核；`reference/stage2_fourteen_registry_scope_correction_v1.json`澄清ROOT195仅同dp baseline/half-CFL/half-output，不领空间三档信用。全部科学Q仍按实际证据与冻结任务合同判定。当前主恢复快照：`checkpoints/ROOT215_RUNNING_ACTUAL55_CONTINUATION_V1.json`；其as-of已冻结，恢复始终再核对真实unit、账本与设备/存储，不重置预算。
+
+以下为保留的历史执行记录：
+
 最新实际增量（2026-10-09T04:06:49.226561+00:00）：完整长期目标 ACTIVE，原边界保持。
 
 - ROOT155/156/157/158 F4四组24missing native fields actual completed/rc0，共96新选帧；pre/decode/post全SHA/stat与当前stat稳定，活跃Idp/Pos/Vel/Rhopfinite、Idpunique、实际decoderTimeStep=RunPARTs，scratch已清理。nativeMassFluid粗.001860867021605372/half和same.001000000047497451/fine.0005119999987073243各24稳定；fluid counts31824/59072/59072/114880。root独立MK质量/加权COM/速度/KE与Jensen下界重算，未读hash数组；各fullCPU3.385664/4.036702/5.142336/6.088249s闭账幂等/unit停。原9nativeframes未重解码，旧observer仅metadata SHA访问，不改旧XML加权字段。
