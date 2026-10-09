@@ -40,6 +40,7 @@ def test_v5_request_binds_new_worker_and_first_frame_only_manifest():
     manifest_path = MANIFEST.resolve()
     assert request["request_schema"] == "ds02.stage2.f2.coarse-active-stream.v5-request.v1"
     assert request["attempt_id"] == "f2-coarse-active-stream-v5-root-forward-116-001"
+    assert request["cpu_task_kind"] == "audit"
     assert request["command"][1] == str(worker)
     assert request["command"][3] == str(manifest_path)
     assert manifest["schema"] == "ds02.stage2.f2.coarse-active-stream.manifest.v5"
