@@ -258,7 +258,12 @@ def _validate_source_catalog(current_path: Path, audit_path: Path, scan_path: Pa
     if str(receipt.get("status", "")).lower() != "completed" or receipt.get("returncode", 0) not in (0, None):
         raise LifecycleError("scientific scan receipt is not completed")
     if isinstance(receipt.get("request"), dict):
-        request_case = receipt["request"].get("physical_case_id") or receipt["request"].get("case_id")
+        # ``case_id`` in the scientific-scan receipt is the batch/product
+        # owner (for example STAGE2_CURRENT336_SCIENCE), not the physical
+        # CURRENT case.  Only an explicitly supplied physical_case_id can
+        # constrain this row; otherwise the audit/current/scan identity
+        # joins above are the authority.
+        request_case = receipt["request"].get("physical_case_id")
         if request_case not in (None, case_id):
             raise LifecycleError("scientific scan receipt case differs")
     if audit_row.get("scan") != str(scan_path) or audit_row.get("receipt") != str(receipt_path):
