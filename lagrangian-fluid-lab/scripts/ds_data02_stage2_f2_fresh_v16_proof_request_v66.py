@@ -387,6 +387,7 @@ def build_requests(*, parent_request: Path, parent_report: Path, parent_receipt:
                    producer_output_root: Path, original_roots: Sequence[Path],
                    output_source_contract: Path, output_proof: Path,
                    output_evaluator: Path, case_id: str, attempt_id: str,
+                   fresh_output_root: Path | None = None,
                    terminal_evidence: Path | None = None,
                    terminal_delta: Path | None = None,
                    max_wall_seconds: float = 900.0,
@@ -411,6 +412,21 @@ def build_requests(*, parent_request: Path, parent_report: Path, parent_receipt:
         summary_path=worker_summary, nested_path=nested_report,
         producer_target=producer_target_root, producer_output=producer_output_root,
         original_roots=original_roots)
+    producer_target_root = producer_target_root.resolve()
+    producer_output_root = producer_output_root.resolve()
+    proof_output_root = producer_output_root
+    if fresh_output_root is not None:
+        proof_output_root = Path(fresh_output_root).expanduser().resolve()
+        if proof_output_root in {producer_target_root, producer_output_root}:
+            raise V66FreshProofError("ROOT190 output namespace must differ from producer roots")
+        if (_under(proof_output_root, producer_target_root) or
+                _under(producer_target_root, proof_output_root) or
+                _under(proof_output_root, producer_output_root) or
+                _under(producer_output_root, proof_output_root)):
+            raise V66FreshProofError("ROOT190 output namespace overlaps producer namespace")
+        for root in original_roots:
+            if _under(proof_output_root, root) or _under(root, proof_output_root):
+                raise V66FreshProofError("ROOT190 output namespace overlaps an original root")
     evidence = _check_terminal_file(terminal_evidence, "terminal systemd evidence",
                                     request_file=parent_request, report_file=parent["file"],
                                     receipt_file=parent["receipt_file"])
@@ -456,9 +472,18 @@ def build_requests(*, parent_request: Path, parent_report: Path, parent_receipt:
         "attempt_id": fresh_attempt, "model_invoked": False, "cfd_invoked": False,
         "ledger_mutated": False, "quality": dict(UNKNOWN),
         "result": result, "expected": expected,
-        "relocation": {"target_root": str(producer_target_root.resolve()),
-                        "output_root": str(producer_output_root.resolve()),
+        # The V66 result remains in the immutable producer output namespace;
+        # a fresh ROOT190 proof/output namespace can be supplied for the V8
+        # proof file.  V8 accepts both explicit roots, so it never needs an
+        # implicit source fallback or a pre-reservation result copy.
+        "relocation": {"target_root": str(producer_output_root),
+                        "output_root": str(proof_output_root),
                         "original_roots": [str(root.resolve()) for root in original_roots]},
+        "producer_namespace": {"target_root": str(producer_target_root),
+                                "output_root": str(producer_output_root)},
+        "fresh_proof_namespace": {"root": str(proof_output_root),
+                                   "is_new": fresh_output_root is not None,
+                                   "content_copy_performed": False},
         "producer_report": {"path": str(parent_report), "sha256": parent["sha256"],
                              "schema": PARENT_REPORT_SCHEMA, "content_read": True,
                              "worker_summary": {"path": str(worker_summary), "sha256": sha256_file(worker_summary)},
@@ -580,6 +605,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output-evaluator", type=Path, required=True)
     parser.add_argument("--case-id", required=True)
     parser.add_argument("--attempt-id", required=True)
+    parser.add_argument("--fresh-output-root", type=Path,
+                        help="new ROOT190 proof-output namespace; producer result remains explicitly bound")
     parser.add_argument("--terminal-evidence", type=Path)
     parser.add_argument("--terminal-delta", type=Path)
     parser.add_argument("--python-executable")
@@ -596,6 +623,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             original_roots=[item.absolute() for item in args.original_root],
             output_source_contract=args.output_source_contract.absolute(), output_proof=args.output_proof.absolute(),
             output_evaluator=args.output_evaluator.absolute(), case_id=args.case_id, attempt_id=args.attempt_id,
+            fresh_output_root=args.fresh_output_root.absolute() if args.fresh_output_root else None,
             terminal_evidence=args.terminal_evidence.absolute() if args.terminal_evidence else None,
             terminal_delta=args.terminal_delta.absolute() if args.terminal_delta else None,
             max_wall_seconds=args.max_wall_seconds, max_result_bytes=args.max_result_bytes,

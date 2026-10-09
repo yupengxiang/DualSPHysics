@@ -166,6 +166,7 @@ def _build(module, f, tmp_path):
         output_evaluator=tmp_path / "root190-evaluator-request.json",
         case_id="STAGE2_F2_ROOT190_V66_PROOF_FIXTURE",
         attempt_id="f2-root190-v66-proof-fixture-001",
+        fresh_output_root=tmp_path / "root190-proof-output",
     )
 
 
@@ -179,6 +180,9 @@ def test_real_v64_shape_builds_and_passes_v8_metadata_validation(tmp_path):
     assert validated["status"] == "V8_METADATA_VALIDATED_READY_FOR_PARENT_PROOF"
     assert validated["producer_case_id"] != validated["case_id"]
     assert validated["result"]["content_sha_verified"] is False
+    proof_value = json.loads(proof_path.read_text(encoding="utf-8"))
+    assert proof_value["fresh_proof_namespace"]["is_new"] is True
+    assert proof_value["relocation"]["output_root"] == str(tmp_path / "root190-proof-output")
     expected_source = json.loads(proof_path.read_text(encoding="utf-8"))["expected"]["source_binding"]
     assert "relocated_current_view_sha256" not in expected_source
     # Exercise the actual V8 source/result comparison entry point with the
