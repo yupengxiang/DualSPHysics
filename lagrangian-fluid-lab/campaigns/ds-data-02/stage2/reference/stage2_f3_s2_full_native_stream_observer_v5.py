@@ -648,6 +648,12 @@ def self_test() -> dict[str, Any]:
     base = V3.self_test()
     if base.get("status") != "PASS":
         raise AssertionError(base)
+    producer_bracket = V3.V2.base.time_bracket(
+        [{"part": 0, "time_s": 0.0}, {"part": 5, "time_s": 1.0}],
+        0.5,
+    )
+    if producer_bracket.get("lower_frame") != 0 or producer_bracket.get("upper_frame") != 5 or "lower_index" in producer_bracket:
+        raise AssertionError("actual v2 producer time_bracket schema is not frame-based")
     tiny = {
         "scope": {"frame_count": 2},
         "time_window": {"first_saved_time_s": 0.0, "last_saved_time_s": 1.0, "query_brackets": [{"query_time_s": 0.0, "status": "EXACT", "lower_frame": 0, "upper_frame": 0}]},
