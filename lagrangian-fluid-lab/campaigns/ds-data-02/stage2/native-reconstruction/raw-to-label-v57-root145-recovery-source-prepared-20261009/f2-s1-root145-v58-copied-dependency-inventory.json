@@ -1,0 +1,172 @@
+{
+  "bundle_root": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target",
+  "executed_binary_and_interface_scope": {
+    "decoder": {
+      "bound_executable": true,
+      "executed": false,
+      "mode_bits": 509,
+      "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0023-bi4_dump",
+      "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+    },
+    "executed_by_this_report": [
+      "V57 bounded source/path/inode/SHA checks",
+      "Python source-token interface checks"
+    ],
+    "interpretation": "The copied Python import graph and interfaces are identified; this report grants no native conversion, HDF5, label, or PartVTK credit.",
+    "not_executed": [
+      "native BI4 decoder binary",
+      "converter.convert_direct",
+      "converter.decode_frame",
+      "h5py.File payload reads",
+      "v15.replay_trajectory_v15",
+      "v16.forward_result",
+      "PartVTK executable"
+    ],
+    "payload_read": false,
+    "source_only_cli": "inventory"
+  },
+  "four_overlay_sibling_aliases": [
+    {
+      "bytes": 57041,
+      "parent": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources",
+      "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0025-ds_data02_f5_bi4.py",
+      "role": "raw_converter",
+      "sha256": "8ec204edb5ac20f2d83e2b9a3b5e70eb45cf1104fe0ee4bd8c3413a241c10ccd"
+    },
+    {
+      "bytes": 180237,
+      "parent": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources",
+      "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0026-ds_data02_stage2_f2_replay_v14.py",
+      "role": "v14_operator",
+      "sha256": "0ebe9ff848c6d2aeea5939c307b877775ba6268b8a6d316e5426bee4f645715a"
+    },
+    {
+      "bytes": 24864,
+      "parent": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources",
+      "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0027-ds_data02_stage2_f2_replay_v15.py",
+      "role": "v15_operator",
+      "sha256": "e769ca85d2af81ad886d9e6035a98469729f33dce6a9ba8dd350319d4da9276e"
+    },
+    {
+      "bytes": 16970,
+      "parent": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources",
+      "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0028-ds_data02_stage2_f2_flux_v16.py",
+      "role": "v16_operator",
+      "sha256": "3744114e2b8fb3c2ba53737aad07ba03d55daad8bf179ccbaecb122d84d4a910"
+    }
+  ],
+  "libraries": {
+    "abi_source": "pinned literal venv argv0; do not resolve symlink to system Python",
+    "standalone_environment": false,
+    "top_level_python_imports": [
+      "h5py",
+      "numpy"
+    ]
+  },
+  "module_interfaces": {
+    "plain_worker_v2": {
+      "converter_interface": {
+        "call": "converter.convert_direct",
+        "decoder_argument": "decoder",
+        "partvtk_argument": "None",
+        "run_partvtk": false
+      },
+      "hdf5_interfaces": [
+        "_validate_and_load_typed -> h5py.File(path, 'r')"
+      ],
+      "label_interfaces": [
+        "v15.replay_trajectory_v15",
+        "v16.forward_result"
+      ],
+      "module_load_imports": [
+        "h5py",
+        "numpy"
+      ],
+      "module_load_only": true,
+      "module_load_opens_hdf5": false
+    },
+    "raw_converter": {
+      "convert_direct_defined": true,
+      "decoder_process_interface": true,
+      "hdf5_output_interface": true,
+      "module_load_imports": [
+        "h5py",
+        "numpy"
+      ],
+      "partvtk_is_optional_converter_interface": true
+    },
+    "v14_operator": {
+      "approved_read_entrypoints": [
+        "read_hdf5_initial_frame",
+        "read_hdf5_window"
+      ],
+      "hdf5_import_deferred": true,
+      "hdf5_open_interface": true,
+      "module_load_imports": [
+        "numpy"
+      ]
+    },
+    "v15_operator": {
+      "delegates_hdf5_reads_to_v14": true,
+      "label_entrypoint": true,
+      "module_load_imports": [
+        "numpy"
+      ]
+    },
+    "v16_operator": {
+      "hdf5_import_present": false,
+      "json_forward_entrypoint": true,
+      "module_load_imports": [],
+      "scope": "JSON/result post-processing; no trajectory HDF5 read in this operator"
+    },
+    "v4_wrapper": {
+      "plain_worker_load": "_load_worker() uses importlib.spec_from_file_location",
+      "source_sha": "8783296e21f2069dd3c2e1f11ea41a97cd58afceff251cf8249bfce8b21836f5",
+      "worker_lookup": "_worker_path() -> bundle/runtime/native/WORKER_NAME",
+      "wrapper_contract_tokens_present": true
+    }
+  },
+  "native_decoder": {
+    "mode_bits": 509,
+    "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0023-bi4_dump",
+    "required_executable": true,
+    "sha256": "b8ac8cf4aff68ffd089da6cf3ef19dfd0c6473121475f4c198b720a0ddaa8b2e"
+  },
+  "partvtk": {
+    "initial_csv_and_initial_stats": "precomputed evidence roles only",
+    "partvtk_executable_opened_by_this_worker": false,
+    "scientific_partvtk_crosscheck": "not credited by this native label worker",
+    "worker_partvtk_argument": null,
+    "worker_run_partvtk": false
+  },
+  "payload_read": false,
+  "plain_worker": {
+    "lazy_load_graph": true,
+    "parent": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/runtime/runtime/native",
+    "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/runtime/runtime/native/ds_data02_stage2_f2_native_raw_to_typed_label_v2.py",
+    "sha256": "d533d3b6828852f839c1780a5a2e33fa9d5b7ac7be3681ea5fdb7e582e4abd66"
+  },
+  "qualification": {
+    "QE": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN"
+  },
+  "required_contract_checks": {
+    "partvtk_disabled_in_label_worker": true,
+    "plain_h5py_import": true,
+    "plain_load_module": true,
+    "plain_numpy_import": true,
+    "plain_v15_lazy_role": true,
+    "plain_v16_lazy_role": true,
+    "wrapper_load_worker": true,
+    "wrapper_worker_path_contract": true
+  },
+  "schema": "ds02.stage2.f2-copied-dependency-inventory-v58.v1",
+  "source_path_fallback": "FORBIDDEN",
+  "status": "PASS_SOURCE_ONLY_COPIED_DEPENDENCY_INVENTORY",
+  "v4_wrapper": {
+    "lookup": "target/runtime/native/ds_data02_stage2_f2_native_raw_to_typed_label_v2.py",
+    "path": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target/sources/0029-ds_data02_stage2_f2_native_raw_to_typed_label_v2.py",
+    "sha256": "8783296e21f2069dd3c2e1f11ea41a97cd58afceff251cf8249bfce8b21836f5"
+  }
+}
