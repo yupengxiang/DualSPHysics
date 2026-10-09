@@ -1,0 +1,93 @@
+{
+  "schema": "ds02.stage2.f1-s2.continuous-owner-audit-contract.v2",
+  "status": "PRE_REGISTERED_SOURCE_OWNER_AND_CONTROL_AUDIT",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "scope": "Close the continuous initial owner geometry and controls from the canonical owner JSON, the exact source Def, and the three already generated XML files. The native samples remain discrete diagnostics; no production BI4, H5, VTK, solver, or ledger is read or changed.",
+  "owner_authority": {
+    "schema": "ds02.root.lower-head-fallback-owner.v1",
+    "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+    "fluid_low_m": [2.2, 0.0, 0.0],
+    "fluid_size_m": [1.0, 1.0, 0.34],
+    "density_kg_m3": 1000.0,
+    "continuum_volume_m3": 0.34,
+    "continuum_mass_kg": 340.0,
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "fluid_velocity_m_s": [0.0, 0.0, 0.0],
+    "mkfluid_relative": 0,
+    "controls": {
+      "Boundary": "1",
+      "StepAlgorithm": "1",
+      "VerletSteps": "40",
+      "Kernel": "1",
+      "ViscoTreatment": "1",
+      "Visco": "0.1",
+      "ViscoBoundFactor": "1",
+      "DensityDT": "2",
+      "DensityDTvalue": "0.1",
+      "Shifting": "0",
+      "RigidAlgorithm": "1",
+      "CoefDtMin": "0.05",
+      "DtIni": "0",
+      "DtMin": "0",
+      "DtFixed": "0",
+      "DtAllParticles": "0",
+      "TimeMax": "4.0",
+      "TimeOut": "0.01",
+      "MinFluidStop": "0",
+      "RhopOutMin": "700",
+      "RhopOutMax": "1300"
+    },
+    "source_policy": "The owner JSON is the continuous geometry authority. Its mass is computed from the closed reservoir box and density; native sample mass is not substituted or rescaled."
+  },
+  "source_geometry_rule": {
+    "source_fluid_comment": "v1 fallback controlled fluid cell centres",
+    "medium_dp_m": 0.02,
+    "medium_cell_center_inset_m": [0.01, 0.01, 0.01],
+    "medium_drawbox_relation": "source fluid drawbox equals owner box inset by dp/2 on each face",
+    "other_grid_policy": "The three source fluid drawbox primitives are byte-level equal in geometry; changing definition dp changes only the discrete lattice resolution. Effective selected-particle support remains a separate native-position validation gate.",
+    "tank_low_m": [0.0, 0.0, 0.0],
+    "tank_size_m": [3.2, 1.0, 0.8],
+    "divider_low_m": [1.2, 0.34, 0.0],
+    "divider_size_m": [0.8, 0.06, 0.7],
+    "divider_fluid_overlap_expected": false
+  },
+  "grids": [
+    {"label": "coarse", "dp_m": 0.0225, "fluid_count": 29700, "sample_mass_kg": 338.30154966563003, "xml_sha256": "80a75b35936bf80499b80bc27bd6b0313fc490f6c214ff81d1adfce47a45f65a"},
+    {"label": "medium", "dp_m": 0.02, "fluid_count": 42500, "sample_mass_kg": 340.00001614913344, "xml_sha256": "8c7f3c5de54c3dfa5dbc521e1536d0663f0075632f77733400869bfee8bbe18f"},
+    {"label": "fine", "dp_m": 0.017, "fluid_count": 69620, "sample_mass_kg": 342.04305472783744, "xml_sha256": "e21ede50d7e34ac864f9ea5153fdcb3af1bdaa17aaaeb16891ed4f11fca7970f"}
+  ],
+  "proof_edges": {
+    "root207_schema": "ds02.stage2.root-actual-verification.v1",
+    "root207_sha256": "c2016d5a36922230eafc57c49baadaeff3a2bc920bb953b5fef215eb9fda30ab",
+    "root217_schema": "ds02.stage2.root-actual-verification.v1",
+    "root217_sha256": "7df9b02c339e3b3eb8bae8f108c16d5db0fd2b6cb3f03d192c4edc827ae1bdf0",
+    "content_join_required": true,
+    "sha_only_proof_reference_is_insufficient": true
+  },
+  "minimum_next_native_validation": {
+    "status": "PREPARED_NOT_RUN",
+    "purpose": "Validate the effective initial selected-particle support against the closed owner box without interpreting neighboring-grid differences as truth.",
+    "frames": [0],
+    "per_grid_fields": ["Idp", "role/Type/Mk", "position", "native MassFluid", "native Dp"],
+    "required_checks": [
+      "all fluid positions finite and within owner box with a separately recorded binary/position tolerance",
+      "no fluid position overlaps the disjoint divider interval",
+      "fluid role and native MK mapping agree with the generated XML ranges",
+      "native mass and count are reported separately from the 340 kg continuous owner mass",
+      "source pre/post SHA and complete stat remain stable after the parent reservation"
+    ],
+    "payload_policy": "One frame per grid only; no solver launch, no full native tree, no H5/VTK, no mass rescale.",
+    "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "read_scope": {
+    "small_json_xml_only": true,
+    "production_native_payload_read": false,
+    "production_h5_vtk_read": false,
+    "solver_launch": false,
+    "ledger_mutation": false,
+    "max_input_bytes": 16777216
+  }
+}
