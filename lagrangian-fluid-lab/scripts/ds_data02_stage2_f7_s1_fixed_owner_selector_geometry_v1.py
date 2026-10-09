@@ -178,7 +178,13 @@ def parse_control_xml(path: Path, *, expected_dp: str | None = None) -> dict[str
         raise GeometryError("source control XML lacks gravity/rhop0")
     close_vec(_xml_vec(gravity, "gravity"), (0.0, 0.0, -9.81), "source gravity")
     expect(finite(rhop0.get("value"), "rhop0"), RHO_KG_M3, "source density")
-    return {"tank_low": boxes["0"][0][0], "tank_high": boxes["0"][0][1], "paddle_low": boxes["2"][0][0], "paddle_high": boxes["2"][0][1]}
+    return {
+        "definition_dp": definition.get("dp"),
+        "tank_low": boxes["0"][0][0],
+        "tank_high": boxes["0"][0][1],
+        "paddle_low": boxes["2"][0][0],
+        "paddle_high": boxes["2"][0][1],
+    }
 
 
 def validate_current(current: dict[str, Any]) -> dict[str, Any]:
@@ -365,6 +371,14 @@ def derive(manifest_path: Path) -> dict[str, Any]:
             "owner_mass_kg": owner["owner_mass_kg"],
             "density_kg_m3": RHO_KG_M3,
             "paddle_intersection_rule": "positive-volume intersection",
+        },
+        "dp_declarations": {
+            "source_control_xml_dp": control["definition_dp"],
+            "preflight_coarse_def_dp": coarse_def["definition_dp"],
+            "lattice_dp": DP_M,
+            "source_and_lattice_dp_equal": control["definition_dp"] == format(DP_M, "g"),
+            "preflight_and_lattice_dp_equal": coarse_def["definition_dp"] == format(DP_M, "g"),
+            "dp_mismatch_is_not_mass_or_science_credit": True,
         },
         "lattice": lattice,
         "comparison": {
