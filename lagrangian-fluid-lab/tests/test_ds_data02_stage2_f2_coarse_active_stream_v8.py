@@ -5,6 +5,7 @@ import importlib.util
 import json
 import struct
 import sys
+import types
 from pathlib import Path
 
 
@@ -12,11 +13,20 @@ ROOT = Path(__file__).parents[1]
 SCRIPT = ROOT / "scripts/ds_data02_stage2_f2_coarse_active_stream_v8.py"
 CONTRACT = ROOT / "campaigns/ds-data-02/stage2/contracts/f2-coarse-active-stream-v8-full-stream-contract.json"
 DIRECT_CONVERTER = ROOT / "scripts/ds_data02_direct_convert.py"
+BUILDER = ROOT / "scripts/build_f2_coarse_active_stream_v8_request.py"
 CASE_KEY = "F2_S1_OWNER_CENTERED_CELL_SELECTOR_DP0088_T4_COARSE_CANARY_ROOT_095"
 
 
 def module():
     spec = importlib.util.spec_from_file_location("f2_coarse_active_stream_v8_test", SCRIPT)
+    assert spec and spec.loader
+    loaded = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(loaded)
+    return loaded
+
+
+def builder_module():
+    spec = importlib.util.spec_from_file_location("build_f2_coarse_active_stream_v8_request_test", BUILDER)
     assert spec and spec.loader
     loaded = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(loaded)
@@ -163,3 +173,52 @@ def test_v8_registers_dataclass_backend_before_import(tmp_path):
 def test_v8_keeps_real_converter_as_a_bound_source():
     assert DIRECT_CONVERTER.is_file()
     assert "class DecodedFrame" in DIRECT_CONVERTER.read_text(encoding="utf-8")
+
+
+def test_v8_builder_keeps_frames_deferred_and_binds_actual_v7(tmp_path):
+    build = builder_module()
+    report = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COARSE_RAW_HEADER_V7_ROOT_125/f2-coarse-raw-header-v7-root-125-001-root-forward-030-001/f2-coarse-raw-header-v7.json")
+    source_contract = Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-coarse-raw-header-v7-root-prepared-125-001/f2-coarse-raw-header-v7-source-contract-root-125.json")
+    receipt = report.parent / "execution-receipt.json"
+    template = ROOT / "campaigns/ds-data-02/stage2/requests/f2-coarse-active-stream-v4-root-forward-111-001/f2-coarse-active-stream-v4-manifest.json"
+    args = types.SimpleNamespace(
+        template=template,
+        v7_report=report,
+        v7_source_contract=source_contract,
+        v7_receipt=receipt,
+        worker=SCRIPT,
+        v8_contract=CONTRACT,
+        output_dir=tmp_path,
+    )
+    manifest_path, request_path = build.build(args)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    request = json.loads(request_path.read_text(encoding="utf-8"))
+    assert len(manifest["frames"]) == 401
+    assert all(frame["sha256"] == "PARENT_GUARD_COMPUTED" for frame in manifest["frames"])
+    assert manifest["expected"]["native_massfluid_bits_hex"] == "000000009a54463f"
+    assert manifest["inputs"]["v7_execution_receipt"]["sha256"] != "PARENT_GUARD_COMPUTED"
+    assert request["hdf5_read"] is False and request["solver_launch"] is False
+    assert request["estimated_input_read_bytes"] == 28615302010
+
+
+def test_v8_builder_rejects_noncompleted_v7_without_touching_frames(tmp_path):
+    build = builder_module()
+    report = Path("/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F2/F2_COARSE_RAW_HEADER_V7_ROOT_125/f2-coarse-raw-header-v7-root-125-001-root-forward-030-001/f2-coarse-raw-header-v7.json")
+    source_contract = Path("/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f2-coarse-raw-header-v7-root-prepared-125-001/f2-coarse-raw-header-v7-source-contract-root-125.json")
+    receipt = report.parent / "execution-receipt.json"
+    bad_report = tmp_path / "bad-v7.json"
+    value = json.loads(report.read_text(encoding="utf-8"))
+    value["status"] = "RAW_HEADER_SCALAR_PROOF_FAILED"
+    bad_report.write_text(json.dumps(value), encoding="utf-8")
+    args = types.SimpleNamespace(
+        template=ROOT / "campaigns/ds-data-02/stage2/requests/f2-coarse-active-stream-v4-root-forward-111-001/f2-coarse-active-stream-v4-manifest.json",
+        v7_report=bad_report,
+        v7_source_contract=source_contract,
+        v7_receipt=receipt,
+        worker=SCRIPT,
+        v8_contract=CONTRACT,
+        output_dir=tmp_path / "out",
+    )
+    import pytest
+    with pytest.raises(build.BuildError, match="not completed raw-scalar proof"):
+        build.build(args)
