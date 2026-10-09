@@ -42,6 +42,25 @@ def _paths() -> dict[str, Path]:
     }
 
 
+def _declared_source_paths(p: dict[str, Path]) -> dict[str, Path]:
+    """Read only the frozen postterminal provenance rows."""
+    postterminal = json.loads(p["postterminal"].read_text(encoding="utf-8"))
+    inputs = postterminal["source_inputs"]
+    return {
+        role: Path(inputs[role]["path"])
+        for role in ("executor_request", "parent_request", "preflight")
+    }
+
+
+def _root_source_overlays(p: dict[str, Path]) -> dict[str, Path]:
+    """Explicitly map each declared role to this checkout's actual file."""
+    return {
+        "executor_request": p["executor"],
+        "parent_request": p["parent"],
+        "preflight": p["preflight"],
+    }
+
+
 def test_prepare_binds_actual_forward_parent_and_keeps_postterminal_artifacts_pending(tmp_path: Path) -> None:
     p = _paths()
     assert all(path.is_file() for path in p.values())
@@ -50,6 +69,7 @@ def test_prepare_binds_actual_forward_parent_and_keeps_postterminal_artifacts_pe
         executor_request=p["executor"], parent_request=p["parent"],
         preflight=p["preflight"], postterminal_request=p["postterminal"],
         actual_parent_request=p["actual_parent"], actual_preflight=p["actual_preflight"],
+        source_overlays=_root_source_overlays(p),
         output=output)
     value = json.loads(output.read_text(encoding="utf-8"))
     assert result["status"] == B.PREPARED_STATUS
@@ -94,7 +114,7 @@ def test_prepare_records_explicit_relocated_source_overlays(tmp_path: Path) -> N
     assert set(recorded) == set(overlays)
     for role, path in overlays.items():
         assert recorded[role]["actual_path"] == str(path)
-        assert recorded[role]["declared_path"] == str(p[source_keys[role]])
+        assert recorded[role]["declared_path"] == str(_declared_source_paths(p)[role])
         assert recorded[role]["actual_physical_sha256"] == _sha(path)
 
 
@@ -104,11 +124,13 @@ def test_source_overlay_same_size_wrong_content_is_rejected(tmp_path: Path) -> N
     data = bytearray(p["parent"].read_bytes())
     data[-1] ^= 1
     wrong.write_bytes(data)
+    overlays = _root_source_overlays(p)
+    overlays["parent_request"] = wrong
     with pytest.raises(B.ContractError, match="source overlay parent_request SHA differs"):
         B._prepare_inputs(
             executor_request=p["executor"], parent_request=p["parent"],
             preflight=p["preflight"], postterminal_request=p["postterminal"],
-            source_overlays={"parent_request": wrong})
+            source_overlays=overlays)
 
 
 def test_actual_metadata_evidence_cannot_be_rebound_to_another_parent(tmp_path: Path) -> None:
@@ -131,6 +153,7 @@ def test_bind_requires_completed_terminal_records(tmp_path: Path) -> None:
         executor_request=p["executor"], parent_request=p["parent"],
         preflight=p["preflight"], postterminal_request=p["postterminal"],
         actual_parent_request=p["actual_parent"], actual_preflight=p["actual_preflight"],
+        source_overlays=_root_source_overlays(p),
         output=prepared)
     # Do not fabricate a receipt or a product: the contract must fail closed
     # before any terminal binding is attempted.
