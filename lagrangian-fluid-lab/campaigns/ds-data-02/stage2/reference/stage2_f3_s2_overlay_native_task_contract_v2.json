@@ -1,0 +1,37 @@
+{
+  "schema": "ds02.stage2.f3-s2.overlay-native-task-contract.v2",
+  "status": "FROZEN_SOURCE_ONLY_ADAPTER_CONTRACT",
+  "purpose": "Additive observer adapter for terminal V8 overlay requests whose BI4 snapshot binding is carried by source_provenance.root161_snapshot_proof.",
+  "terminal_request_schema": "ds02.stage2.external-solver-request.v5",
+  "accepted_overlay_labels": [
+    "same_cfl_baseline",
+    "half_cfl",
+    "half_output"
+  ],
+  "accepted_changed_variables": [
+    "none",
+    "CFLnumber",
+    "TimeOut"
+  ],
+  "snapshot_binding_adapter": {
+    "input": "terminal_request.source_provenance.root161_snapshot_proof plus terminal_request.source_provenance.generated_bi4 and input_sha256",
+    "proof_path": "root161_snapshot_proof.path",
+    "proof_sha256": "root161_snapshot_proof.sha256",
+    "bi4_path": "generated_bi4.path",
+    "bi4_sha256": "terminal_request.input_sha256[generated_bi4.path]",
+    "bi4_bytes": "generated_bi4.bytes",
+    "source_payload_read_by_request_builder": false,
+    "source_payload_read_by_observer_before_parent_guard": false
+  },
+  "native_mass_source": "decoded native header MassFluid",
+  "xml_mass_fallback": false,
+  "time_alignment": "actual saved native times only; no interpolation",
+  "neighbor_grid_as_truth": false,
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "solver_launch": "forbidden_by_observer_request",
+  "source_bytes": "additive_v2_only; consumed_v1_contract_is_immutable"
+}
