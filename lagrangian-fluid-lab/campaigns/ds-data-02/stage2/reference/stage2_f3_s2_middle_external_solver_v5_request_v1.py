@@ -70,6 +70,7 @@ ROOT153_PROOF = PRIMARY_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2
 ROOT153_REPORT = DATA_ROOT / "families/F3/F3_S2_MATCHED_MIDDLE_CONTROL_COST_QA_V1_ROOT_153/f3-s2-matched-middle-control-cost-qa-v1-root-153-001-root-forward-030-001/report/f3_s2_matched_middle_control_cost_qa_v1.json"
 ROOT153_REQUEST = PRIMARY_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-matched-middle-control-cost-qa-v1-root-forward-153-001.json"
 ROOT133_COST_RECEIPT = DATA_ROOT / "families/F3/F3_S2_OWNER_CENTERED_DP015_FULL_CFD_CANARY_ROOT_133/f3-s2-owner-centered-dp015-full-cfd-canary-v8-root-133-001/execution-receipt.json"
+DEFAULT_SOURCE_CARD = LOCAL_REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-middle-external-v5-source-card-v1.json"
 
 V5_REQUEST = Path(__file__).with_name("stage2_f3_s2_external_solver_v5_request.py")
 V5_MATERIALIZER = Path(__file__).with_name("stage2_f3_s2_external_solver_v5_materialize.py")
@@ -441,6 +442,14 @@ def build_request(args: argparse.Namespace) -> dict[str, Any]:
         "forcing_sha256_source": "ROOT086_receipt_and_frozen_current_control",
         "old_root120_labels_in_delegate": "forward adapter uses middle ROOT086 producer; no ROOT120 producer is claimed",
     })
+    source_card_path = args.source_card
+    if source_card_path is not None:
+        source_card_path = _regular(source_card_path, "F3 middle source card")
+        source_card_record = _small_record(source_card_path, "F3 middle source card")
+        request["source_provenance"]["source_card"] = source_card_record
+        request.setdefault("input_files", []).append(source_card_record["path"])
+        request.setdefault("input_sha256", {})[source_card_record["path"]] = source_card_record["sha256"]
+        request.setdefault("input_content_scope", {})[source_card_record["path"]] = source_card_record["content_scope"]
     for key, label in (("generated_bi4", "ROOT086 generated BI4"), ("generated_xml", "ROOT086 generated XML")):
         if isinstance(request["source_provenance"].get(key), dict):
             request["source_provenance"][key]["label"] = label
@@ -513,6 +522,7 @@ def main() -> int:
     parser.add_argument("--source-control", type=Path, default=MIDDLE_CONTROL)
     parser.add_argument("--forcing-sha256", default=SOURCE_CONTROL_SHA)
     parser.add_argument("--support-report", type=Path, default=MIDDLE_SUPPORT)
+    parser.add_argument("--source-card", type=Path, default=DEFAULT_SOURCE_CARD)
     parser.add_argument("--cost-basis-receipt", type=Path, default=ROOT133_COST_RECEIPT)
     parser.add_argument("--launch-commit", default=None)
     parser.add_argument("--case-id", default="F3_S2_MATCHED_MIDDLE_SAME_CFL_FULL_WINDOW")
