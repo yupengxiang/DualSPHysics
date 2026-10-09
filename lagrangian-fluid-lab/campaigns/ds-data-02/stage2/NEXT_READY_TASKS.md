@@ -1,3 +1,13 @@
+## 2026-10-10：87例实际生命周期；F1控制差异、F3粗档compact与F6刚体质量已实际核验
+
+恢复入口：`checkpoints/ROOT246_CLOSED_ACTUAL87_CAUSE65_JOIN18_F1_CONTROL_F3_COMPACT_F4_FAILURE_CONTINUATION_V1.json`。全部父费用已闭合、无payload任务或reservation。CURRENT仍87实际/248未调度/1alias；原118仍65原因/53未定位/18actual typed-native对账。
+
+ROOT239 F1S1仅t0严格共时，其余四时刻异步UNKNOWN；ROOT246 F1S2实际tout粗细.005/中.01，不能冒充统一output控制；CFL/dt源闭合待248。ROOT247粗F3全部836帧紧凑副本和五query实际PASS，等待240 V2三网格consumer；ROOT244 F6两个哨点physical massbody128kg与floating sample256kg明确分开。
+
+ROOT243 CLI写出后错误、ROOT238目录类型错误和ROOT249默认工具位置错误均完整保留/计费，无新增cause或产品信用。下一actual250绑定V4真实官方工具，245 next7 F6 lifecycle及241全336/242portable分支继续准备。全部科学Q仍UNKNOWN，完整七项目标ACTIVE，预算与期限不重置。
+
+以下为历史记录。
+
 ## 2026-10-10：87例实际生命周期，18例typed/native对账；F1初态与query1/234端点已实际闭合
 
 恢复入口：`checkpoints/ROOT234_CLOSED_ACTUAL87_CAUSE65_JOIN18_F1_SUPPORT_ENDPOINTS_PORTABLE230_FAILURE_CONTINUATION_V1.json`。ROOT232八例F4全部核验并结清fullCPU514.748989秒；生命周期87实际/248未调度/1alias。ROOT235三case五个fluid Id首次缺失帧与原生密度数值排除一致，新增3对账但0原因，原118仍65原因/53未定位，actualjoin18。
