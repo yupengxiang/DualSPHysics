@@ -34,7 +34,6 @@ from stage2_f1_s2_query_endpoint_observer_v1 import (
     MAX_SMALL_BYTES,
     _build_v1_manifest,
     _command_tout,
-    _failure_report,
     _nearest,
     _parse_runparts,
     _read_json,
@@ -51,6 +50,30 @@ MANIFEST_SCHEMA = "ds02.stage2.f1-s2.query-endpoint-manifest.v2"
 PASS_STATUS = "COMPLETE_QUERY234_NATIVE_COMPONENT_DIAGNOSTICS_NO_SCIENTIFIC_Q"
 FAIL_STATUS = "FAILED_QUERY234_NATIVE_ENDPOINT_GUARD"
 QUERY_TIMES_S = (2.0, 3.0, 4.0)
+
+
+def _failure_report_v2(output: Path, reason: str) -> None:
+    """Write a correctly versioned bounded failure artifact.
+
+    The consumed V1 helper writes a V1 schema even when called by a forward
+    worker.  Keeping that helper untouched is required for provenance, but a
+    ROOT231 failure must identify itself as V2 so the parent cannot mistake an
+    axis-independent attempt for the old ROOT225 product.
+    """
+    output = output.expanduser().absolute()
+    if output.exists():
+        return
+    output.parent.mkdir(parents=True, exist_ok=True)
+    value = {
+        "schema": SCHEMA,
+        "status": FAIL_STATUS,
+        "reason": reason,
+        "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0},
+        "scope": {"native_payload_read": "UNKNOWN_OR_PARTIAL", "interpolation": "NOT_PERFORMED", "solver_launch": False},
+    }
+    temporary = output.with_name(f".{output.name}.{os.getpid()}.tmp")
+    temporary.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    temporary.replace(output)
 
 
 def _records_for_grid(manifest: dict[str, Any], label: str) -> list[dict[str, Any]]:
@@ -275,7 +298,7 @@ def main() -> int:
     try:
         result = run(args)
     except Exception as exc:
-        _failure_report(args.output.expanduser().absolute(), str(exc))
+        _failure_report_v2(args.output.expanduser().absolute(), str(exc))
         print(f"FAIL_F1_S2_QUERY234_ENDPOINT_OBSERVER: {exc}")
         return 2
     print(json.dumps({"status": result["status"], "output": str(args.output.expanduser().absolute())}, sort_keys=True))
