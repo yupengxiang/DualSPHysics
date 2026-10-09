@@ -304,8 +304,23 @@ def validate_middle_terminal(receipt_path: Path, proof_path: Path, observer_path
     if int(receipt.get("bytes", 0) or 0) <= 0:
         raise ValueError("ROOT162 receipt has no positive terminal charge bytes")
     proof_status = str(proof.get("status", ""))
-    if proof.get("schema") != "ds02.stage2.root-actual-verification.v1" or "ACTUAL" not in proof_status or proof.get("solver_started") is not True:
+    allowed_proof_schema = {
+        "ds02.stage2.root-actual-verification.v1",
+        "ds02.stage2.root-actual-external-solver-verification.v1",
+    }
+    runparts_summary = proof.get("RunPARTs_summary")
+    if proof.get("schema") not in allowed_proof_schema or "ACTUAL" not in proof_status or int(proof.get("actual_output_bytes", 0) or 0) <= 0:
         raise ValueError("ROOT162 proof is not an actual solver terminal proof")
+    if not isinstance(runparts_summary, dict) or int(runparts_summary.get("rows", 0) or 0) < 2:
+        raise ValueError("ROOT162 proof has no terminal RunPARTs evidence")
+    if proof.get("parent_source_prepost_full_sha_equal") is not True:
+        raise ValueError("ROOT162 proof does not close materialized source pre/post SHA")
+    proof_receipt_path = proof.get("receipt")
+    if proof_receipt_path is not None and Path(str(proof_receipt_path)).expanduser().resolve() != receipt_path.expanduser().resolve():
+        raise ValueError("ROOT162 proof receipt path does not match the supplied terminal receipt")
+    proof_receipt_sha = proof.get("receipt_sha256")
+    if proof_receipt_sha is not None and proof_receipt_sha != sha256(receipt_path):
+        raise ValueError("ROOT162 proof receipt SHA does not match the supplied terminal receipt")
     observer_status = str(observer.get("status", ""))
     if not observer_status.startswith("PASS_MIDDLE_SELECTED_NATIVE_FIELDS"):
         raise ValueError("ROOT167 selected observer is not a successful native-field report")
