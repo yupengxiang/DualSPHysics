@@ -64,10 +64,11 @@ def test_v5_mass_contract_confirms_observed_float32_bits():
         {"xml_value_kg": source_value, "manifest_value_kg": source_value},
         {"MassFluid": field("MassFluid", "float", observed)},
     )
-    assert result["status"] == "TYPE_SERIALIZATION_CONFIRMED"
+    assert result["status"] == "TYPED_HEADER_MATCHES_EXPECTED_ENCODING_NO_RAW_SERIALIZATION_PROOF"
     assert result["observed_encoding"] == "float32"
     assert result["bits_match"] is True
-    assert result["gate"] == "binary type-derived equality only; no decimal tolerance widening"
+    assert result["raw_header_bytes_observed"] is False
+    assert result["float32_precision_correction"] == "NOT_APPLIED"
 
 
 def test_v5_mass_contract_rejects_float32_value_claimed_as_binary64():
@@ -107,6 +108,16 @@ def test_v5_dynamic_header_contract_rejects_nonstatic_stream():
     }
     with pytest.raises(loaded.StreamHeaderError, match="ReuseIds=1"):
         loaded._validate_dynamic_contract(fields)
+
+
+def test_v5_rejects_ambiguous_real_mass_type():
+    loaded = module()
+    source_value = 0.000681472
+    with pytest.raises(loaded.StreamHeaderError, match="ambiguous 'real'"):
+        loaded._mass_contract(
+            {"xml_value_kg": source_value, "manifest_value_kg": source_value},
+            {"MassFluid": field("MassFluid", "real", source_value)},
+        )
 
 
 def test_v5_source_contract_closes_without_opening_raw_frame():

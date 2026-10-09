@@ -234,9 +234,11 @@ def _encoding_bits(value: float, tag: str) -> tuple[str, str]:
     if normalized == "float":
         packed = struct.pack("<f", value)
         return "float32", packed.hex()
-    if normalized in {"double", "real"}:
+    if normalized == "double":
         packed = struct.pack("<d", value)
         return "binary64", packed.hex()
+    if normalized == "real":
+        raise StreamHeaderError("MassFluid decoder uses ambiguous 'real' type; official bit width is not bound")
     raise StreamHeaderError(f"MassFluid decoder type is not a supported floating type: {tag!r}")
 
 
@@ -251,7 +253,7 @@ def _mass_contract(source: dict[str, Any], fields: dict[str, dict[str, Any]]) ->
     float64_value = struct.unpack("<d", struct.pack("<d", source["xml_value_kg"]))[0]
     bits_match = observed_bits == expected_bits
     return {
-        "status": "TYPE_SERIALIZATION_CONFIRMED" if bits_match else "MASS_SERIALIZATION_MISMATCH_NO_FULL_STREAM",
+        "status": "TYPED_HEADER_MATCHES_EXPECTED_ENCODING_NO_RAW_SERIALIZATION_PROOF" if bits_match else "MASS_SERIALIZATION_MISMATCH_NO_FULL_STREAM",
         "source_xml_value_kg": source["xml_value_kg"],
         "manifest_value_kg": source["manifest_value_kg"],
         "official_header": {key: header.get(key) for key in ("name", "tag", "raw", "value")},
@@ -262,7 +264,10 @@ def _mass_contract(source: dict[str, Any], fields: dict[str, dict[str, Any]]) ->
         "float64_round_value_kg": float64_value,
         "absolute_difference_from_xml_kg": abs(observed - source["xml_value_kg"]),
         "bits_match": bits_match,
-        "gate": "binary type-derived equality only; no decimal tolerance widening",
+        "raw_header_bytes_observed": False,
+        "serialization_proof": "typed official decoder value only; raw BI4 header bytes are not exposed by this header XML",
+        "float32_precision_correction": "NOT_APPLIED",
+        "gate": "binary type-derived equality only; no decimal tolerance widening; no precision correction without raw-byte proof",
         "scientific_credit": "NONE",
     }
 
