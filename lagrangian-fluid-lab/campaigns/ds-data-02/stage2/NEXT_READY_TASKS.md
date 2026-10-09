@@ -1,3 +1,12 @@
+最新实际增量（2026-10-09T04:06:49.226561+00:00）：完整长期目标 ACTIVE，原边界保持。
+
+- ROOT155/156/157/158 F4四组24missing native fields actual completed/rc0，共96新选帧；pre/decode/post全SHA/stat与当前stat稳定，活跃Idp/Pos/Vel/Rhopfinite、Idpunique、实际decoderTimeStep=RunPARTs，scratch已清理。nativeMassFluid粗.001860867021605372/half和same.001000000047497451/fine.0005119999987073243各24稳定；fluid counts31824/59072/59072/114880。root独立MK质量/加权COM/速度/KE与Jensen下界重算，未读hash数组；各fullCPU3.385664/4.036702/5.142336/6.088249s闭账幂等/unit停。原9nativeframes未重解码，旧observer仅metadata SHA访问，不改旧XML加权字段。
+- 仅选帧字段完整性检查通过；QI-schema limited selectednativefields不等于QI-dynamics，all2401lifecycle/退出质量账、连续owner/刚体完整状态、output/integration error/QN/QE仍未知。旧9XML质量与新nativeMF不能静默混合KE/mass；reference准备有界empiricaloutputconsumer，明确实际时间差和质量口径。
+- V57非递归hook5tests PASS已集成27261ad8a，但root158A发现reuse只是metadata marker：run仍V55→V34 fullsourceverify/freshcopy_overlay，不消费reused_immutable_copy；source_copy_bytes=0不符合执行路径。未launchV57/未新payloadcopy。consumer必须additive真实existing-copy执行器，新小code/outputnamespace与新reserve、旧145raw显式readonlysource、复制payload禁用实测，旧失败保全；freshcold信用仍无。
+- forensics已交corrected rollup（2e6af63f）/fixedowner（e37fc617c,19b4c1cc3,efa388f49），待root集成实际ROOT159/160；其prepared155/156命名是源版本，不冒充上述F4实际attempt。固定owner .025 midpoint44×28×17预测19924/311.3125kg仍>2%masshardfail；不盲跑GenCase/CFD，不用裁剪质量拟合替代continuousinitial等价。继续F7几何相位/新配方理由及F6fluidowner gap。
+- reference已交F3middle external V5 builder/sourcecard（92f2553fb→53e7829d4），待rootreview；ROOT086BI4全SHA仍须独立guarded snapshot（下一ROOT161准备中）后才能构造实际middle .006sameCFL请求。窗口8.350016881886734/tout.01、exactforcing9a776... physicalstage+SHAafterreserve，12GiB external仅建议待实际父guard；无middle/fine solver运行。
+- 最新CPU704.5542523669418core h/GPU137.96668911670722h，无active reservations/native/CFD/GPU任务；三名既有代理继续source-only分支。原CPU3840h/GPU512h/资格1024/生产720/Home536870912000B/deadline2026-10-14T07:23:48Z保持，未完成阶段不标达成。
+
 最新实际增量（2026-10-09T03:54:13.768394+00:00）：完整七项长期目标 ACTIVE，原资源边界保持。
 
 - ROOT153 F3 middle staging metadata audit actual completed/rc0；root独立XML middle67500fluid/111708fixed/MF.000216、fine540000/436104/MF.000027均sample14.58kg，nativecoarse14.580000378191471kg分开。sourceendpoint8.350016881886734s为[834,835]BRACKETED，不插值/外推。报告coarseCPU202.995439仅basecharge，fullsystemd203.232353及delta.236914在独立proof分清；未来6.15/33.5GiB仅planningproxy。未启动middle/fine solver，control物理staging+资源guard仍必需，allQunknown。

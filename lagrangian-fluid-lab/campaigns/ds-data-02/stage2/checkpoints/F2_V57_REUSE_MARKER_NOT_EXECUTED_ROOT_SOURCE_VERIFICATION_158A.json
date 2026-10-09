@@ -1,0 +1,31 @@
+{
+  "schema": "ds02.stage2.root-v57-reuse-marker-source-review.v1",
+  "status": "REAL_ZERO_PAYLOAD_COPY_RECOVERY_NOT_IMPLEMENTED_IN_V57_RUN_NO_ACTUAL_LAUNCH",
+  "executor": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v57.py",
+  "executor_sha256": "3642906a10d5018828c1a53c6a4ed2b1facf59778827093c0160ab64a80f81c2",
+  "prepared_request": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/native-reconstruction/raw-to-label-v57-root145-recovery-source-prepared-20261009/f2-s1-root145-v57-copied-recovery-parent-request.json",
+  "prepared_request_sha256": "4846802590fddf718a7ee995dd9d6b6cbcf42d6dda741c92b85181782bc3a74b",
+  "declared_source_copy_bytes": 0,
+  "declared_reused_bundle_root": "/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT145_V55_RELOCATED_COLD_20261009/bundle-target",
+  "actual_run_delegates": "V55.run with alias/importhooks only; reused_immutable_copy marker not read byrun",
+  "run_source_text": "def run(request_path: Path | str, *, io_slot_approved: bool,\n        parent_pid: int | None = None, evaluator_proof: Path | None = None,\n        max_wall_seconds: float | None = None) -> dict[str, Any]:\n    \"\"\"Run V55/V54 with V57's non-recursive hooks.\"\"\"\n    global _ACTIVE_REQUEST\n    _, request = V56._request_v55(request_path)\n    marker = request.get(\"forward_v57\")\n    if not isinstance(marker, Mapping) or marker.get(\"schema\") != V57_SCHEMA:\n        raise PortableV57Error(\"V57 forward marker is missing\")\n    _ACTIVE_REQUEST = request\n\n    def aliases(bindings: Mapping[str, Mapping[str, Any]], worker_dir: Path | str):\n        records = _ORIGINAL_V55_ALIAS(bindings, worker_dir)\n        V56._materialize_worker_compatibility(request, worker_dir)\n        return records\n\n    def imports(python: Path | str, records: Sequence[Mapping[str, Any]]):\n        result = _ORIGINAL_V55_IMPORT(python, records)\n        result[\"worker_path_smoke\"] = V56._smoke_worker(python, request, records)\n        result[\"plain_worker_lazy_import_graph\"] = smoke_plain_worker_graph(\n            python, request, records)\n        return result\n\n    previous_alias = V55._materialize_aliases_in_worker_parent\n    previous_import = V55._import_four_modules\n    V55._materialize_aliases_in_worker_parent = aliases\n    V55._import_four_modules = imports\n    try:\n        return V55.run(request_path, io_slot_approved=io_slot_approved,\n                       parent_pid=parent_pid, evaluator_proof=evaluator_proof,\n                       max_wall_seconds=max_wall_seconds)\n    finally:\n        V55._materialize_aliases_in_worker_parent = previous_alias\n        V55._import_four_modules = previous_import\n        # V57 calls the V55 boundary directly rather than V56.run.  Clear\n        # V56's compatibility singleton as V56.run would, so a failed or\n        # repeated parent attempt cannot inherit a prior copied target.\n        if hasattr(V56, \"_ACTIVE_REQUEST\"):\n            V56._ACTIVE_REQUEST = None\n        if hasattr(V56, \"_ACTIVE_COMPATIBILITY\"):\n            V56._ACTIVE_COMPATIBILITY = None\n        _ACTIVE_REQUEST = None",
+  "delegated_V34": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v34.py",
+  "delegated_V34_sha256": "506477a0feb24a9e6b58af82499bf242f37a3cd768bc39cd6dbaa73d1dead989",
+  "delegated_source_operations": [
+    "fullsourceentry contentverification",
+    "fresh target/outputroots",
+    "overlay fromtemplate",
+    "copy_overlay stage"
+  ],
+  "reused_old_copy_not_bound_to_real_execution": true,
+  "source_review_only_no_run": true,
+  "native_payload_read_or_hash": false,
+  "parent_reservation_or_ledger_mutation": false,
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "next": "additive actual reserve-guarded recovery path with new smallcode/outputnamespace, explicit immutable145 rawsource and copyingpayloadforbidden integration test",
+  "goal_complete": false
+}
