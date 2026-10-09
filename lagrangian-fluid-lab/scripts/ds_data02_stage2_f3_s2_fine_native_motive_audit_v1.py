@@ -322,6 +322,11 @@ def prepare(
     request_data, checkpoint_data, root170_binding = _validate_root170(root170_request, root170_checkpoint)
     current_row, current_meta = _current_row(current)
     scan_meta = _validate_historic_scan(current, current_row, scan, scan_receipt, detail_card)
+    declared_source_xml = request_data.get("source_provenance", {}).get("source_xml")
+    if not isinstance(declared_source_xml, dict) or declared_source_xml.get("path") != str(source_xml):
+        raise FineMotiveError("source XML path differs from ROOT170 source provenance")
+    if declared_source_xml.get("sha256") != sha256_file(source_xml):
+        raise FineMotiveError("source XML SHA differs from ROOT170 source provenance")
     tool_ref = stat_ref(PARTVTKOUT, "official_partvtkout")
     config_ref = stat_ref(DSPH_CONFIG, "official_dsph_config")
     if tool_ref["sha256"] != PARTVTKOUT_SHA256:
