@@ -1,3 +1,10 @@
+最新实际进展（2026-10-09T00:56:07.902669+00:00）：完整目标 ACTIVE。
+
+- ROOT126 V8实际completed/returncode0，401全原生帧0→4.000013929480705s，27750→27597活跃流体，all401 exact MassFluid bits000000009a54463f；153个position原因Idp/MK/首次missing/删失括号与原生QA逐一一致。root从2.3MB新报告独立重算401×MK质量/计数/加权诊断、缺失ID digest及所有401 file stat，未读数组。XMLwhole18.910848kg/nativewhole18.91084830276668kg分开，未知质量分数.005513513601786032>.003，仍FAIL；QI/QN/QE及物理去向/dynamics未知。full systemd CPU118.39121s已补账且unit停，scratchpeak23791755B、清理完毕。V8 decoder继承worker pgid；后续V9异常/真实SIGTERM清理与输出上限修复进行中，不改已消费V8证据。
+- ROOT123 F5 dp005全局y=0 GenCase实际completed：2234975fluid、4431001fixed、107253moving、总6773229、离散初始279.371875kg，连续287.736kg偏差约-2.907%，既定>2% HARDFAIL。source/candidate/generated casedef语义相同（格式字节不同），候选相对q107仅pointref.y变化；motion复制警告缺失，任何solver必须另做guard内控制staging。实际证据/完整CPU费用已保存且unit停；ROOT124全shape geometry待guard，不启动CFD。
+- ROOT122 V50 cold replay于2026-10-09T00:55:10Z实际managed启动，unit ds02-f2-cold-parent-v50-root-122.service、父PID2315886、入口6000s/outer6030s/单线程/MemoryMax8GiB，atomic同父12GiB external+65536B Home reservation已确认。当前占用主IO槽，尚无terminal/复制完成/typed/label成功信用。真实V45→V41→V38→V34 graph验证通过；V36完整nested stat validator是未执行兼容接口，独立失败保留，不当实际启动门。full内容SHA留给parent预留后验证；sealer接口不能要求预留前伪造full-static=true，consumer前向修复并准备独立postterminal源码闭包/实际evaluator-v4适配。
+- ROOT121 F3 coarse support builder仍需forcing14MB SHA继承实际父receipt+stat；实际root120输出及14.58kg已闭合，support/控制staging/动态参考仍待。三名既有代理运行原分支，GPU6外来进程保护，当前无CFD。
+
 最新增量（2026-10-09 00:48 UTC）：完整七项目标 ACTIVE，原资源边界不变。
 
 - ROOT125 V7原始MassFluid scalar实际完成：DatDouble enum12、offset983、little-endian原始8字节000000009a54463f；与V6 typed header及官方float→double源码路径一致。源码语义与实际字节闭合，但solver binary build provenance未证明。完整systemd CPU1.351404s已同父补账且unit停止；只读头前缀，不读取粒子数组。V8全401帧严格bits消费者已集成，8项测试通过，待新ROOT126请求/manifest及预留；XML/native质量分母分开，不扩大.003阈值。
