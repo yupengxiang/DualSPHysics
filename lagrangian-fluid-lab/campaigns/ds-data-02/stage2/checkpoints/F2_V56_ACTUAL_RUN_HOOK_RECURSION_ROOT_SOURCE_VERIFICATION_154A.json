@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.root-v56-source-hook-regression.v1",
+  "status": "CONFIRMED_MANUFACTURED_ACTUAL_RUN_HOOK_RECURSION_NO_ACTUAL_V56_TASK",
+  "source": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_stage2_f2_portable_executor_v56.py",
+  "source_sha256": "a6eb41f9908b92f3967193989702cefe005ea5652aa0c024f2c1956ebff571b6",
+  "checks": [
+    {
+      "hook": "_materialize_aliases_in_worker_parent",
+      "actual_run_monkeypatch_delegation_result": "RecursionError",
+      "source_hook_restored": true,
+      "synthetic_request_only": true
+    },
+    {
+      "hook": "_import_four_modules",
+      "actual_run_monkeypatch_delegation_result": "RecursionError",
+      "source_hook_restored": true,
+      "synthetic_request_only": true
+    }
+  ],
+  "scope": "V56.run hook installation and delegation exercised with manufactured V55.run and synthetic request; no real request or native source touched; V56 source and previous output bytes unchanged",
+  "original_five_tests": "PASS but did not cover this run-hook integration path",
+  "source_fix": "additive forward version required, save original delegated callables before replacing hooks",
+  "native_array_read": false,
+  "solver_or_converter_invoked": false,
+  "ledger_mutated": false,
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "goal_complete": false
+}
