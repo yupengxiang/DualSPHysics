@@ -56,6 +56,7 @@ CHUNK = 1024 * 1024
 EXPECTED_DEFERRED_COUNT = 25
 SCRATCH_CAP_BYTES = 256 * 1024 * 1024
 DEFAULT_MAX_LOG_BYTES = 1024 * 1024
+MAX_LOG_BYTES = 8 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 1800.0
 MAX_CHILD_RESULT_BYTES = 64 * 1024 * 1024
 
@@ -474,6 +475,7 @@ def _child_result(path: Path) -> dict[str, Any] | None:
 
 
 def run_guard(args: argparse.Namespace) -> dict[str, Any]:
+    runtime_parent_pid = os.getppid()
     manifest_path = args.manifest.expanduser().resolve()
     manifest = _json_load(manifest_path)
     records = _load_deferred(manifest)
@@ -492,6 +494,8 @@ def run_guard(args: argparse.Namespace) -> dict[str, Any]:
     child_output = _under(attempt_root, attempt_root / "observer" / ".v1-result.json", "V1 child output")
     try:
         before = _precheck(records)
+        if os.getppid() != runtime_parent_pid:
+            raise GuardFailure("runtime parent died before V1 child start")
         v1_manifest = _make_v1_manifest(manifest, attempt_root)
         python = args.python.expanduser().resolve()
         worker = args.v1_worker.expanduser().resolve()
@@ -505,6 +509,7 @@ def run_guard(args: argparse.Namespace) -> dict[str, Any]:
             scratch_cap_bytes=int(args.max_scratch_bytes),
             log_limit=int(args.max_log_bytes),
             timeout_seconds=float(args.timeout_seconds),
+            parent_pid=runtime_parent_pid,
         )
         Path(log_path).parent.mkdir(parents=True, exist_ok=True)
         # _run_child owns a bounded tail in memory; write it only after the
@@ -716,6 +721,8 @@ def main() -> int:
     # a parent-reviewed fixture; increasing it at runtime is forbidden.
     if args.max_scratch_bytes > SCRATCH_CAP_BYTES or args.max_scratch_bytes <= 0:
         parser.error("--max-scratch-bytes must be in (0, 256MiB]")
+    if args.max_log_bytes <= 0 or args.max_log_bytes > MAX_LOG_BYTES:
+        parser.error("--max-log-bytes must be in (0, 8MiB]")
     try:
         result = run_guard(args)
     except Exception as exc:
