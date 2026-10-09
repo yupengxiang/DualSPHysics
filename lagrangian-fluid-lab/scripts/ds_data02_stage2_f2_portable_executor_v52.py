@@ -4,9 +4,11 @@
 V38's real alias guard calls ``_materialize_aliases(bindings, worker.parent)``.
 V51 corrected stale worktree paths but left the bindings in ``target/sources``;
 that is still outside the copied worker directory when the worker lives under
-``target/runtime/native``.  V52 keeps the V51 request and source provenance,
-and adds four parent-guarded, SHA-identical module copies under
-``target/runtime/native``.  The new paths are the only executable module paths;
+the runtime registry's actual ``target/runtime/runtime/native`` directory.
+V52 keeps the V51 request and source provenance, and adds four parent-guarded,
+SHA-identical module copies with runtime-row relative paths
+``runtime/native/*``.  V41/V45 materialize those rows as
+``target/runtime/runtime/native/*``.  The new paths are the only executable module paths;
 the original and ``sources/*`` paths remain provenance/registry evidence.
 
 This file only builds metadata and delegates a future run to V51 with its
@@ -120,10 +122,14 @@ def module_rebinding_plan(request: Mapping[str, Any], target_root: Path | str) -
             "source_path_provenance": row.get("source_path_provenance"),
             "source_entry_target_relative_path": source_relative,
             "target_relative_path": relative,
-            "target_path": str(target / relative),
+            # Runtime rows are materialized by V41/V45 as target_root/runtime/
+            # + target_relative_path.  Keep the row-relative path separate
+            # from the actual path used by V38's worker.parent check.
+            "target_path": str(target / "runtime" / relative),
             "expected_sha256": expected,
             "expected_bytes": row.get("expected_bytes"),
-            "worker_parent": str(target / "runtime/native"),
+            "copied_target_relative_path": str(Path("runtime") / relative),
+            "worker_parent": str(target / "runtime/runtime/native"),
             "content_verification_phase": "AFTER_ATOMIC_PARENT_RESERVATION",
             "source_path_fallback": "FORBIDDEN",
             "copy_reason": "V38_materialize_aliases_requires_worker_parent_co_location",
@@ -195,7 +201,7 @@ def build_forward(*, v51_request: Path | str, output_request: Path | str,
         raise PortableV52Error("V51 command does not contain one executor_v51 operand")
     command[matches[0]] = "<target_root>/runtime/executor/ds_data02_stage2_f2_portable_executor_v52.py"
     execution["command"] = command
-    execution["copied_module_directory"] = "<target_root>/runtime/native"
+    execution["copied_module_directory"] = "<target_root>/runtime/runtime/native"
     execution["module_alias_policy"] = "all four V38 module bindings must be under worker.parent"
     execution["source_path_fallback"] = "FORBIDDEN"
     value["execution"] = execution
@@ -207,7 +213,7 @@ def build_forward(*, v51_request: Path | str, output_request: Path | str,
                               "canonical_sha256": source["sha256"]},
         "module_rebinding": plan,
         "runtime_alias_roles": [item["role"] for item in aliases],
-        "worker_parent_relative_directory": "runtime/native",
+        "worker_parent_relative_directory": "runtime/runtime/native",
         "v38_alias_guard": "_materialize_aliases(bindings, worker.parent)",
         "source_path_fallback": "FORBIDDEN",
         "content_verification_phase": "AFTER_ATOMIC_PARENT_RESERVATION",

@@ -73,7 +73,7 @@ def test_build_puts_all_native_modules_under_worker_parent(tmp_path: Path) -> No
     value = json.loads(output.read_text(encoding="utf-8"))
     plan = value["forward_v52"]["module_rebinding"]
     assert all(row["target_relative_path"].startswith("runtime/native/") for row in plan.values())
-    assert all(row["worker_parent"] == str(tmp_path / "new-target/runtime/native") for row in plan.values())
+    assert all(row["worker_parent"] == str(tmp_path / "new-target/runtime/runtime/native") for row in plan.values())
     assert set(value["forward_v52"]["runtime_alias_roles"]) == {"copied_module_raw_converter", "copied_module_v14_operator", "copied_module_v15_operator", "copied_module_v16_operator"}
     assert value["execution"]["command"][3].endswith("ds_data02_stage2_f2_portable_executor_v52.py")
 
@@ -84,7 +84,7 @@ def test_v38_materialize_aliases_accepts_exact_copied_worker_parent(tmp_path: Pa
     V.build_forward(v51_request=source, output_request=v52,
                     target_root=tmp_path / "new-target", output_root=tmp_path / "new-products")
     value = json.loads(v52.read_text(encoding="utf-8"))
-    worker_parent = tmp_path / "new-target/runtime/native"
+    worker_parent = tmp_path / "new-target/runtime/runtime/native"
     worker_parent.mkdir(parents=True)
     bindings = {}
     payloads = {"raw_converter": b"raw-converter", "v14_operator": b"v14-operator",

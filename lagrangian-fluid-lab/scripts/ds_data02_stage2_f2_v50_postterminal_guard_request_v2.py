@@ -88,13 +88,13 @@ def build_request(*, executor_request: Path | str, parent_request: Path | str,
                                   "physical_sha256": V1.sha256_file(executor_path, limit=V1.MAX_JSON_BYTES),
                                   "canonical_sha256": executor["sha256"]},
         "module_rebinding": module_plan,
-        "worker_parent_relative_directory": "runtime/native",
+        "worker_parent_relative_directory": "runtime/runtime/native",
         "source_path_fallback": "FORBIDDEN",
         "payload_read_during_build": False,
         "old_v1_postterminal_request": {"schema": V1.SCHEMA, "path": str(output_path)},
     }
     contract = dict(value.get("copied_module_import_contract", {}))
-    contract.update({"schema": FORWARD_SCHEMA, "worker_parent_alias_directory": str(Path(target_root) / "runtime/native"),
+    contract.update({"schema": FORWARD_SCHEMA, "worker_parent_alias_directory": str(Path(target_root) / "runtime/runtime/native"),
                      "module_paths": module_plan, "source_path_fallback": "FORBIDDEN"})
     value["copied_module_import_contract"] = contract
     value["runtime_closure"]["schema"] = "ds02.stage2.f2-postterminal-runtime-closure.v2"
