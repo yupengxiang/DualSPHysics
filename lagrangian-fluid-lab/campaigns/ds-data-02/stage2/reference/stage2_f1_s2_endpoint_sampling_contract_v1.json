@@ -1,0 +1,54 @@
+{
+  "schema": "ds02.stage2.f1-s2.endpoint-sampling-manifest.v1",
+  "status": "PREPARED_NOT_RUN_F1_S2_ENDPOINT_SAMPLING_CONSUMER",
+  "registered_query_times_s": [
+    1.0,
+    2.0,
+    3.0,
+    4.0
+  ],
+  "producer_roles": {
+    "required_labels": [
+      "coarse",
+      "medium",
+      "fine"
+    ],
+    "report_schema_prefix": "ds02.stage2.f1-s2.query",
+    "report_source": "ROOT231/ROOT232 bounded native endpoint observer reports after parent guard",
+    "proof_request_receipt": "optional at preparation; if supplied, each SHA/stat and proof.report_sha256 join is mandatory"
+  },
+  "observable_scope": {
+    "fields": [
+      "weighted_centroid_m",
+      "weighted_velocity_m_per_s",
+      "kinetic_energy_j"
+    ],
+    "mass": "native MassFluid weighting in producer report; continuous owner mass remains separate",
+    "axis": "component-space only; producer world-axis remains UNKNOWN",
+    "saved_time": "RunPARTs-derived actual saved time",
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "error_bound_status": "NOT_IDENTIFIABLE_FROM_ENDPOINTS",
+    "task_tolerances": {
+      "position_m": "UNKNOWN_UNREGISTERED",
+      "velocity_m_per_s": "UNKNOWN_UNREGISTERED",
+      "kinetic_energy_j": "UNKNOWN_UNREGISTERED"
+    },
+    "event_time": "UNKNOWN_UNREGISTERED",
+    "neighbor_grid_truth": false
+  },
+  "read_policy": {
+    "max_report_bytes": 33554432,
+    "native_payload_read": false,
+    "hdf5_read": false,
+    "vtk_read": false,
+    "solver_launch": false,
+    "full_native_tree_scan": false
+  }
+}
