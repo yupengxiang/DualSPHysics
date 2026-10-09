@@ -197,16 +197,33 @@ def canonical_sha(value: dict[str, Any]) -> str:
 
 def build(args: argparse.Namespace) -> dict[str, Any]:
     proof_binding = validate_proof(args.snapshot_proof, args.bi4_snapshot, args.gencase_request, args.receipt)
+    # Reuse the consumed V5 writer directly.  The old V6->V5 and V7->V6
+    # wrappers each create a staging name and expect the delegated layer to
+    # write the outer name, which leaves a nested staging file and fails before
+    # a request is emitted.  Calling V5 once here preserves its byte/source
+    # checks while this adapter supplies the already validated V6 support gate
+    # and ROOT132 proof.  No payload is opened by this path.
+    support = V7.V6.validate_support_report(args.support_report, args.gencase_request, args.receipt)
+    staged = args.output.with_name(f".{args.output.name}.{os.getpid()}.v8-v5-staging.json")
     adapted = argparse.Namespace(**vars(args))
-    # v7 requires the snapshot JSON and delegates all existing runner/input
-    # checks to V6/V5.  It still never opens the BI4 payload.
-    staged = args.output.with_name(f".{args.output.name}.{os.getpid()}.v8-staging.json")
     adapted.output = staged
-    request = V7.build(adapted)
-    if staged.exists():
-        staged.unlink()
-    if request.get("schema") != REQUEST_SCHEMA:
-        raise ValueError("delegated v7 request schema changed")
+    adapted.generated_bi4_sha256 = proof_binding["source_sha256"]
+    V7.V6.V5.build(adapted)
+    request = V7.V6.V5.load_json(staged, "staged external solver v5 request")
+    staged.unlink(missing_ok=True)
+    if request.get("schema") != REQUEST_SCHEMA or request.get("status") != "READY_FOR_PARENT_GUARD":
+        raise ValueError("delegated v5 request schema/status changed")
+    v6_record = V7.V6.code_record(V7.V6_REQUEST, "F3 V6 forward request builder")
+    request["input_files"] = sorted(set(list(request.get("input_files", [])) + [v6_record["path"]]))
+    request["input_sha256"] = dict(request.get("input_sha256", {}))
+    request["input_sha256"][v6_record["path"]] = v6_record["sha256"]
+    request["input_content_scope"] = dict(request.get("input_content_scope", {}))
+    request["input_content_scope"][v6_record["path"]] = v6_record["content_scope"]
+    request["forward_builder_binding"] = v6_record
+    request["materialization_contract"] = V7.V6._pair_contract(request)
+    request["source_provenance"] = dict(request.get("source_provenance", {}))
+    request["source_provenance"]["root128_support_report"] = support
+    request["source_provenance"]["root120_q_receipt_exact_join_required"] = True
 
     proof_record = small_record(args.snapshot_proof, "ROOT132 actual verification proof")
     request["request_variant_schema"] = VARIANT_SCHEMA
