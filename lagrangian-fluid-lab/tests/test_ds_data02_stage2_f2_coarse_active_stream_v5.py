@@ -45,6 +45,7 @@ def test_v5_request_binds_new_worker_and_first_frame_only_manifest():
     assert manifest["schema"] == "ds02.stage2.f2.coarse-active-stream.manifest.v5"
     assert manifest["probe_mode"] == "first_frame_header_only"
     assert request["input_hashes"][str(worker)] == digest(worker)
+    assert request["input_sha256"] == request["input_hashes"]
     assert request["input_hashes"][str(manifest_path)] == digest(manifest_path)
     deferred_paths = [entry["path"] for entry in request["deferred_input_files"]]
     assert any(path.endswith("Part_0000.bi4") for path in deferred_paths)
