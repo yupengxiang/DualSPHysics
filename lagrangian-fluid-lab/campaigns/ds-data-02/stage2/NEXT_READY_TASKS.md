@@ -1,3 +1,5 @@
+最新权威恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT253_PENDING_ACTUAL94_CAUSE70_JOIN23_REFERENCE240252254_FULL_GOAL_CONTINUATION_V1.json`（SHA256 007bb6c3cc32e81ac3d45f813977c5600d7a197406d4effca2f2a941d94f8065）。完整七项目标 ACTIVE；实际94，ROOT253 pending8不计完成，原118原因70/未知48/实际join23。先核对ROOT253终态、完整CPU与重复结算及unit停止，再顺序执行后续父作业。
+
 ## 2026-10-10：ROOT250实际新增5例原因；ROOT245下一7例F6已启动
 
 恢复入口：`checkpoints/ROOT245_PENDING_ACTUAL87_CAUSE70_JOIN23_F4_ACTUAL250_FULL_GOAL_CONTINUATION_V1.json`。ROOT250五个F4共17 fluid Id官方数值排除与typed首次缺失saved bracket逐Id一致；fullCPU7.993384秒结清且unit dead。原118更新为70原因/48未定位/23实际对账，物理fate/flux/dynamics/Q仍UNKNOWN。
