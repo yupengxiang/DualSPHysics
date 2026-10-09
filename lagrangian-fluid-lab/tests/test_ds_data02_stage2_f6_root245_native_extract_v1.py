@@ -100,6 +100,9 @@ def test_prepare_binds_actual_inventory_and_defers_all_native_payloads(tmp_path:
     request = json.loads(request_output.read_text(encoding="utf-8"))
     assert len(request["physical_case_ids"]) == 7
     assert len(request["deferred_input_files"]) == 42
+    contract_paths = [entry["path"] for entry in manifest["cases"]]
+    assert set(contract_paths).issubset(set(request["input_files"]))
+    assert all(path in request["input_sha256"] for path in contract_paths)
     assert request["launch_allowed"] is False
     assert request["execution_allowed"] is False
 

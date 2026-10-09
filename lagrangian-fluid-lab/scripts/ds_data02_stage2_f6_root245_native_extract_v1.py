@@ -320,7 +320,10 @@ def prepare(args: argparse.Namespace) -> dict[str, Any]:
     manifest_path = output_root / "f6-root245-native-extract-manifest.json"
     _atomic(manifest_path, manifest)
     command = [str(VENV), str(SCRIPT), "audit", "--manifest", str(manifest_path), "--output", "{attempt_root}/f6-root245-native-extract.json"]
-    input_refs = [request_edges["request"], request_edges["manifest"], plan_ref, inventory_ref, tool_refs["partvtkout"], tool_refs["config"], _small_ref(INTAKE_SCRIPT, "ROOT245 intake parser"), _small_ref(SCRIPT, "ROOT245 extract worker"), _small_ref(manifest_path, "ROOT245 extract manifest")]
+    # The worker opens each case contract after the parent reservation.  Bind
+    # those small JSON files explicitly; a manifest entry alone would leave
+    # a mutable source edge outside the request's input SHA closure.
+    input_refs = [request_edges["request"], request_edges["manifest"], plan_ref, inventory_ref, tool_refs["partvtkout"], tool_refs["config"], _small_ref(INTAKE_SCRIPT, "ROOT245 intake parser"), _small_ref(SCRIPT, "ROOT245 extract worker"), _small_ref(manifest_path, "ROOT245 extract manifest"), *entries]
     if proof_ref:
         input_refs.append(proof_ref)
     input_files = sorted({item["path"] for item in input_refs})
