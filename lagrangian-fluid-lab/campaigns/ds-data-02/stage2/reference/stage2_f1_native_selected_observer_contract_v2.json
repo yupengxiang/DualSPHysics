@@ -1,0 +1,59 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-contract.v2",
+  "status": "SOURCE_ONLY_CONTRACT_PENDING_PARENT_GUARD",
+  "worker_bytes": "V1 worker remains immutable; this additive contract fixes request-side closure/accounting",
+  "selected_frame_count": 25,
+  "native_read_accounting": {
+    "passes_per_native_frame": 4,
+    "pass_semantics": [
+      "parent_v8_pre_decode_full_sha256_and_stat",
+      "official_bi4_decoder_input_read",
+      "V1_worker_base_sha256_file_after_decode",
+      "parent_v8_post_decode_full_sha256_and_stat"
+    ],
+    "estimated_native_read_bytes_is": "selected Part bytes multiplied by four; conservative transfer proxy, not measured device I/O",
+    "decoded_scratch_arrays": "not included in source-byte estimate",
+    "output_json_hashing": "separate from native source-byte estimate"
+  },
+  "v1_worker_read_audit": {
+    "decode_frame_calls": "one per selected frame",
+    "official_decoder_source_input_read": "one per selected frame",
+    "worker_source_sha256_file_pass": "one per selected frame after decode",
+    "pre_hash_in_v1_worker": false,
+    "post_hash_in_v1_worker": false,
+    "decoded_array_reads": "Idp, Pos/Posd, Vel, Rhop are decoder scratch files, not production Part files"
+  },
+  "scratch_policy": {
+    "concurrency": 1,
+    "temporary_directory_per_frame": true,
+    "cleanup_on_success_or_exception": "Python TemporaryDirectory",
+    "scratch_root_may_remain_empty": true,
+    "worker_hard_cap": false,
+    "parent_cap_bytes": 268435456,
+    "parent_post_child_empty_or_removed_check": true
+  },
+  "memory_policy": {
+    "one_frame_at_a_time": true,
+    "peak_is_measured": false,
+    "conservative_numpy_formula_bytes_per_particle": 128,
+    "parent_process_cap_bytes": 2147483648,
+    "reason": "temporary decoded arrays, reordered arrays, and decoder scratch are released before the next selected frame"
+  },
+  "deferred_native_policy": {
+    "producer_sha_source": "existing selected_part_records report metadata",
+    "builder_hashes_native_payload": false,
+    "builder_stat_only": true,
+    "parent_before_child_full_sha_and_stat": true,
+    "parent_after_child_full_sha_and_stat": true,
+    "required_stat_fields": ["bytes", "mtime_ns", "ctime_ns", "device", "inode"],
+    "replacement_or_change": "FAIL",
+    "full_tree_hash": "NOT_REQUESTED"
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "axis_calibration": "UNKNOWN",
+    "interpolation": "NOT_USED"
+  }
+}
