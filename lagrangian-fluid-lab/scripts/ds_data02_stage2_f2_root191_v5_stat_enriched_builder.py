@@ -39,7 +39,7 @@ DEFAULT_OUTPUT = AGENT_STAGE2 / (
     "native-reconstruction/root191-v5-stat-enriched-20261009/"
     "f2-s1-root191-v5-stat-enriched-request.json"
 )
-DEFAULT_FRESH_ROOT = Path("/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT191_V5_STAT_ENRICHED_20261009")
+DEFAULT_FRESH_ROOT = Path("/var/tmp/ds02-stage2/F2/STAGE2_F2_ROOT191_V3_V5_STAT_ENRICHED_20261009")
 DEFAULT_CASE = "f2-s1-root191-v5-stat-enriched-root200-001"
 DEFAULT_ATTEMPT = "f2-s1-root191-v5-stat-enriched-root200-001-root-forward-030-001"
 
