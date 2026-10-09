@@ -1,3 +1,11 @@
+## 2026-10-09：71例实际生命周期，63例原生原因已定位；ROOT227费用核对待适配
+
+恢复入口：`checkpoints/ROOT227_OWNER_SUCCESS_FEE_PENDING_ACTUAL71_CAUSE63_CONTINUATION_V1.json`。ROOT218的8个F5案例完成，当前71例实际/264例未调度/1例历史别名未解决。原118案例中63例逐fluid Id原因已绑定、55例未定位；12个物理案例完成typed/native首次缺失对账。ROOT213/222可迁移执行实际失败，ROOT221输入绑定错误失败，ROOT223三网格所选分量诊断完成，动态时刻异步，Q仍UNKNOWN。
+
+ROOT227连续owner340kg审计实际成功，主进程独立small metadata核对通过，但generic audit schema暂未被费用核对器接受，必须使用新增严格adapter结清完整CPU、验证幂等并停止unit后才启动下一请求。目前无正在读取payload的任务，也无资源预约。ROOT224 F7首8例已metadata准备；ROOT225实际控制/近邻原生保存帧、ROOT226下一缺失原因、ROOT228 portable新版本与七族产品缺口继续由既有代理落实。长期完整七项目标ACTIVE。
+
+以下为历史记录。
+
 ## 2026-10-09：ROOT218 F5 正在运行；ROOT216 原因定位、ROOT217 校准实际完成
 
 恢复入口：`checkpoints/ROOT218_RUNNING_ACTUAL63_ROOT216_CAUSE54_ROOT217_CALIBRATION_CONTINUATION_V1.json`。63 例实际生命周期记录，8 例 ROOT218 F5 已启动但尚无完成信用，264 例尚未调度，1 例别名未解决。原118遗漏案例54例逐fluid Id原生原因已绑定、64例未定位，3个物理案例有实际typed/native首次缺失对账。ROOT217真实制造六粒子校准正例及六反例通过，原容差保留，真实生产Q及world orientation未授予。
