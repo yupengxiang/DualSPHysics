@@ -189,7 +189,7 @@ def self_test() -> dict[str, Any]:
         "schema": REQUEST_SCHEMA,
         "request_variant_schema": REQUEST_VARIANT_SCHEMA,
         "forcing_csv_builder_read": False,
-        "forcing_csv_sha_authority": "ROOT120_execution_receipt_input_hashes",
+        "forcing_csv_sha_authority": "ROOT120_execution_receipt_input_hashes_at_launch_and_after_run",
         "forcing_csv_parent_pre_post_hash_required": True,
         "vtk_payload_read_by_builder": False,
         "solver_started": False,
