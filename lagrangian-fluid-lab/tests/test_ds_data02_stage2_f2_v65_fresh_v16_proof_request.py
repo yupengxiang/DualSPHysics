@@ -232,6 +232,61 @@ def test_emitted_request_passes_actual_v8_validator_and_staging_preflight(tmp_pa
     assert staging["next_guard"]["old_proof_reuse"] is False
 
 
+def test_v65_accepts_v66_worker_owned_receipt_and_bound_adapter_bootstrap(tmp_path):
+    """The V66 protocol is additive to the V64 report/request schemas.
+
+    V66 deliberately retains the V64 wire schemas so the fresh-proof stage
+    can consume a successful worker-owned-output run.  This fixture adds the
+    actual V66 protocol/static-role fields and the real adapter bootstrap
+    command shape, then runs the production V65 builder and production V8
+    metadata validator.  It remains metadata-only: all result files are tiny
+    placeholders and no native payload is opened.
+    """
+    module, f = _make_fixture(tmp_path)
+    request = json.loads(f["request"].read_text(encoding="utf-8"))
+    request.setdefault("runtime", {})["output_creation_protocol"] = "WORKER_ATOMIC_MKDIR_V66"
+    request.setdefault("storage_scope", {}).update({
+        "output_creation_protocol": "WORKER_ATOMIC_MKDIR_V66",
+        "output_creator": "copied_worker_atomic_mkdir",
+    })
+    bootstrap = ROOT / "scripts" / "ds_data02_stage2_f2_v64_terminal_adapter_bootstrap_v1.py"
+    request["static_bindings"] = [
+        {"role": "portable_executor_v66", "path": str(ROOT / "scripts" / "ds_data02_stage2_f2_portable_executor_v66.py")},
+        {"role": "terminal_adapter_bootstrap_v1", "path": str(bootstrap),
+         "sha256": module.sha256_file(bootstrap)},
+    ]
+    request["sha256"] = _canonical(module, request)
+    _write(f["request"], request)
+
+    report = json.loads(f["report"].read_text(encoding="utf-8"))
+    report["output_creation_protocol"] = "WORKER_ATOMIC_MKDIR_V66"
+    report["request"]["sha256"] = module.sha256_file(f["request"])
+    report["request"]["canonical_sha256"] = request["sha256"]
+    summary = report["executor"]["result"]
+    summary["output_creation_protocol"] = "WORKER_ATOMIC_MKDIR_V66"
+    summary["terminal_adapter_bootstrap"] = {
+        "path": str(bootstrap), "sha256": module.sha256_file(bootstrap),
+        "invocation": "-B -I bootstrap --scripts-root <bound> --adapter <bound> -- <inspect/apply>",
+    }
+    _write(f["report"], report)
+
+    proof = tmp_path / "v66-fresh-proof-v8.json"
+    evaluator = tmp_path / "v66-fresh-evaluator-v1.json"
+    result = module._build(
+        v64_report=f["report"], v64_request=f["request"],
+        source_contract=f["contract"], current_manifest=f["current"],
+        target_root=f["target"], output_root=f["products"],
+        original_roots=[f["original"]], output_proof=proof,
+        output_evaluator=evaluator, case_id=f["case"], attempt_id=f["attempt"],
+        parent_guard_record=None, trace_audit_request=None,
+        max_wall_seconds=900.0, max_result_bytes=100_000_000,
+        python_executable=None)
+    assert result["status"] == "READY_FOR_PARENT_V8_PROOF"
+    v8 = module.validate_emitted_v8_request(proof, verify_result_stat=True)
+    assert v8["status"] == "V8_METADATA_VALIDATED_READY_FOR_PARENT_PROOF"
+    assert json.loads(proof.read_text(encoding="utf-8"))["fresh_cold_credit"] is False
+
+
 @pytest.mark.parametrize("mutation", ["case", "current", "relocated"])
 def test_v65_provenance_wrapper_rejects_cross_bound_v8_mutations(tmp_path, mutation):
     module, f = _make_fixture(tmp_path)
