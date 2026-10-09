@@ -1,0 +1,102 @@
+{
+  "schema": "ds02.stage2.f3-s2.overlay-native-task-contract.v1",
+  "status": "SOURCE_BOUND_OBSERVER_AND_ERROR_SEPARATION_PREPARED",
+  "family_id": "F3",
+  "sentinel_id": "F3-S2",
+  "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
+  "source_identity": {
+    "continuous_owner_mass_kg": 14.58,
+    "grid_dp_m": 0.006,
+    "initial_fluid_count": 67500,
+    "initial_mass_role": "source discrete sample diagnostic; native MassFluid is read from each decoded BI4 header",
+    "owner_and_control": "ROOT153/ROOT161 source-bound owner, generated XML, BI4 and CaseSloshingAccData.csv; no overlay may change them"
+  },
+  "overlay_runs": [
+    {
+      "label": "same_cfl_baseline",
+      "role": "integration_and_output_reference",
+      "overlay_variable": "none",
+      "cflnumber": 0.05,
+      "tout_s": 0.01,
+      "source_attempt": "ROOT162 terminal same-CFL middle run"
+    },
+    {
+      "label": "half_cfl",
+      "role": "single-variable CFL diagnostic",
+      "overlay_variable": "CFLnumber",
+      "cflnumber": 0.025,
+      "tout_s": 0.01,
+      "source_attempt": "ROOT173 terminal overlay run"
+    },
+    {
+      "label": "half_output",
+      "role": "single-variable output-cadence diagnostic",
+      "overlay_variable": "TimeOut",
+      "cflnumber": 0.05,
+      "tout_s": 0.005,
+      "source_attempt": "ROOT174 terminal overlay run"
+    }
+  ],
+  "registered_query_times_s": [
+    0.0,
+    2.0,
+    4.0,
+    6.0,
+    8.0,
+    8.350016881886734
+  ],
+  "observation_contract": {
+    "full_window_or_registered_brackets": true,
+    "maximum_registered_query_count": 6,
+    "native_saved_time_source": "terminal RunPARTs.csv and decoded native TimeStep",
+    "native_mass_source": "decoded native BI4 header MassFluid only",
+    "xml_mass_fallback": false,
+    "time_interpolation": false,
+    "particle_field_interpolation": false,
+    "extrapolation": false,
+    "neighbor_grid_as_truth": false,
+    "event_time": {
+      "status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+      "characteristic_time_s": null,
+      "window_or_control_duration_is_not_event_time": true
+    }
+  },
+  "frozen_scales_and_gates": {
+    "position": {
+      "scale_L_m": 0.894,
+      "allowed_abs_m": 0.01788,
+      "allowed_fraction": 0.02
+    },
+    "velocity": {
+      "scale_m_per_s": 0.9077664897978995,
+      "allowed_abs_m_per_s": 0.04538832449,
+      "allowed_fraction": 0.05
+    },
+    "kinetic_energy": {
+      "scale_J": 6.0072516,
+      "allowed_abs_J": 0.30036258,
+      "allowed_fraction": 0.05
+    },
+    "time_and_output": {
+      "maximum_fraction_of_corresponding_task_tolerance": 0.25,
+      "semantics": "budget share only; not a saved-time bracket pass/fail rule and not a field-error bound"
+    },
+    "qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN",
+      "reason": "field readings and asynchronous endpoint diagnostics remain scoped evidence; integration, output, spatial and event errors are not inferred"
+    }
+  },
+  "source_only_execution_policy": {
+    "solver_launch": false,
+    "native_payload_read_before_parent_reservation": false,
+    "full_report_read_before_parent_reservation": false,
+    "required_after_terminal": [
+      "actual solver request, receipt and independent terminal proof for each run",
+      "bounded native observer summary with stable pre/post source records",
+      "same physical case and source/control binding",
+      "actual query bracket frame IDs and saved times"
+    ]
+  }
+}
