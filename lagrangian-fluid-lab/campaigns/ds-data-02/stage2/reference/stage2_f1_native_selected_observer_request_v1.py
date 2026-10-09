@@ -126,7 +126,7 @@ def _source_record_from_report(value: Any, label: str) -> dict[str, Any]:
     return _declared_record(Path(value["path"]), label, value)
 
 
-def _selected_frames(report: dict[str, Any], label: str) -> tuple[list[int], list[float], int, float, list[dict[str, Any]]]:
+def _selected_frames(report: dict[str, Any], label: str) -> tuple[list[int], list[float], int, float, int, list[dict[str, Any]]]:
     observations = report.get("observations")
     if not isinstance(observations, list) or len(observations) < len(SELECTED_OBSERVATION_INDICES):
         raise ValueError(f"{label} has too few producer observations")
@@ -147,7 +147,24 @@ def _selected_frames(report: dict[str, Any], label: str) -> tuple[list[int], lis
     window = report.get("time_window", {})
     frame_count = int(scope["runparts_frame_count"])
     final_time = float(window["last_saved_time_s"])
-    return frames, times, frame_count, final_time, selected
+    source_records = report.get("source", {}).get("selected_part_records", [])
+    record_by_frame: dict[int, dict[str, Any]] = {}
+    for item in source_records:
+        if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+            continue
+        stem = Path(item["path"]).stem
+        if stem.startswith("Part_"):
+            try:
+                record_by_frame[int(stem.split("_", 1)[1])] = item
+            except ValueError:
+                continue
+    selected_bytes = 0
+    for frame in frames:
+        item = record_by_frame.get(frame)
+        if not isinstance(item, dict) or not isinstance(item.get("bytes"), int):
+            raise ValueError(f"{label} lacks a stat record for selected native frame {frame}")
+        selected_bytes += int(item["bytes"])
+    return frames, times, frame_count, final_time, selected_bytes, selected
 
 
 def _axis_source_record_paths(cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -194,7 +211,7 @@ def build_manifest() -> tuple[dict[str, Any], list[Path]]:
             decoder_source = _declared_record(DECODER_SOURCE_FALLBACK, f"{spec['label']} decoder source fallback")
         else:
             decoder_source = _source_record_from_report(decoder_source_value, f"{spec['label']} decoder source")
-        frames, times, frame_count, final_time, selected_observations = _selected_frames(report, spec["label"])
+        frames, times, frame_count, final_time, selected_native_read_bytes, selected_observations = _selected_frames(report, spec["label"])
         solver_request = bound_case.get("solver_evidence", {}).get("request", {}).get("path")
         solver_receipt = bound_case.get("solver_evidence", {}).get("receipt", {}).get("path")
         case = {
@@ -212,6 +229,7 @@ def build_manifest() -> tuple[dict[str, Any], list[Path]]:
             "decoder_source": decoder_source["path"],
             "expected_frame_count": frame_count,
             "expected_final_time_s": final_time,
+            "selected_native_read_bytes": selected_native_read_bytes,
             "selected_frames": frames,
             "query_times": times,
             "scratch_root": "{attempt_root}/scratch/native_f1_selected/" + spec["label"],
@@ -345,7 +363,7 @@ def build_request(manifest_path: Path, input_paths: list[Path], *, case_id: str,
             "selected_frame_count": selected_count,
         },
         "max_wall_seconds": 1800,
-        "estimated_native_read_bytes": "PARENT_GUARD_SELECTED_FRAME_STAT_SUM_ONLY",
+        "estimated_native_read_bytes": sum(int(case["selected_native_read_bytes"]) for case in manifest_value["cases"]),
         "estimated_hdf5_read_bytes": 0,
         "estimated_storage_bytes": 128 * 1024 * 1024,
         "estimated_peak_memory_bytes": 2 * 1024 * 1024 * 1024,
