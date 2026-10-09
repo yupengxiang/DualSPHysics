@@ -432,6 +432,16 @@ def _build(*, v64_report: Path, v64_request: Path, source_contract: Path,
         if root == target or root == products or _under(target, root) or _under(products, root):
             raise V65FreshProofError("fresh namespace overlaps an original root")
     request = _validate_v64_request(v64_request, case, attempt)
+    request_storage = request.get("storage_scope")
+    if isinstance(request_storage, Mapping) and request_storage.get("external_output_root") is not None:
+        declared_output = _path(request_storage.get("external_output_root"), "V64 request output root")
+        if declared_output.resolve() != products.resolve():
+            raise V65FreshProofError("V64 request output root differs from the fresh output namespace")
+    request_runtime = request.get("runtime")
+    if isinstance(request_runtime, Mapping) and request_runtime.get("worker_target") is not None:
+        declared_worker = _path(request_runtime.get("worker_target"), "V64 request worker target")
+        if not _under(declared_worker, target):
+            raise V65FreshProofError("V64 request worker target is outside the fresh target namespace")
     report, summary = _validate_v64_parent_report(v64_report, v64_request, request, case, attempt)
     if str(report.get("request", {}).get("path", "")).lower().find("root060") >= 0:
         raise V65FreshProofError("V64 report actionable request path is historical ROOT060")
