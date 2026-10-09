@@ -202,4 +202,5 @@ def test_v7_prepared_request_is_first_frame_only_and_source_bound():
     assert deferred[0]["path"].endswith("Part_0000.bi4")
     assert "Part_0001.bi4" not in json.dumps(request)
     assert request["probe_contract"]["type_enum"] == 12
+    assert request["probe_contract"]["target_item_path"] == ["JPartDataBi4"]
     assert request["probe_contract"]["offset_recorded_in_output"] is True
