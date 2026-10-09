@@ -149,6 +149,9 @@ def bind_frame_stat(ref: dict[str, Any], raw_root: Path, label: str) -> tuple[Pa
     # first frame is the only native payload opened by this worker; all other
     # frame references remain metadata-only inventory entries.
     content_sha = sha256(path)
+    expected_sha = ref.get("sha256")
+    if expected_sha not in (None, "PARENT_GUARD_COMPUTED") and content_sha != str(expected_sha):
+        raise StreamHeaderError(f"{label} content SHA differs: {path}")
     return path, {
         "path": str(path),
         "bytes": stat.st_size,
