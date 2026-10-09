@@ -250,6 +250,36 @@ class TypedNativeFirstMissingV4Tests(unittest.TestCase):
             with self.assertRaises(subject.CrosscheckError):
                 subject.audit(contract_path, root / "duplicate-unaffected.json")
 
+    def test_v4_header_requires_real_producer_record_fields_string(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = fixture(root)
+            contract_path = root / "contract.json"
+            subject.prepare(prepare_args(source, contract_path))
+            records = Path(source["records"])
+            lines = records.read_text().splitlines()
+            header = json.loads(lines[0])
+            header.pop("record_fields")
+            lines[0] = json.dumps(header, sort_keys=True, separators=(",", ":"))
+            records.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            with self.assertRaises(subject.CrosscheckError):
+                subject.audit(contract_path, root / "missing-header-contract.json")
+
+    def test_v4_header_population_cannot_be_a_nonmatching_whole_stream_proxy(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = fixture(root)
+            contract_path = root / "contract.json"
+            subject.prepare(prepare_args(source, contract_path))
+            records = Path(source["records"])
+            lines = records.read_text().splitlines()
+            header = json.loads(lines[0])
+            header["record_population"] = 421566
+            lines[0] = json.dumps(header, sort_keys=True, separators=(",", ":"))
+            records.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            with self.assertRaises(subject.CrosscheckError):
+                subject.audit(contract_path, root / "population-mismatch.json")
+
     def test_same_content_replacement_is_rejected_by_deferred_stat_identity(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
