@@ -229,9 +229,13 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     prior_failure, prior_failure_rec = _small(PRIOR_FAILURE_DEFAULT, "ROOT263 V3 failure proof", parse_json=True)
     if prior_failure.get("schema") != "ds02.stage2.root-actual-verification.v1" or "FAIL" not in str(prior_failure.get("status", "")):
         raise BuildFailure("ROOT263 prior failure proof is not an actual failure proof")
+    prior_request_path = Path(str(prior_failure.get("request", ""))).expanduser().absolute()
+    prior_request, prior_request_rec = _small(prior_request_path, "ROOT263 V3 consumed request", parse_json=True)
+    if prior_failure.get("request_sha256") != prior_request_rec["sha256"]:
+        raise BuildFailure("ROOT263 failure proof/request SHA join failed")
     records: dict[str, dict[str, Any]] = {proof_rec["path"]: proof_rec, report_rec["path"]: report_rec,
                                            owner_proof_rec["path"]: owner_proof_rec, owner_report_rec["path"]: owner_report_rec,
-                                           prior_failure_rec["path"]: prior_failure_rec}
+                                           prior_failure_rec["path"]: prior_failure_rec, prior_request_rec["path"]: prior_request_rec}
     deferred: list[dict[str, Any]] = []
     cases = [_case_manifest(sentinel, grid, report, records, deferred) for sentinel in ("F6-S1", "F6-S2") for grid in ("source_current", "coarse", "fine")]
     py = _python_binding()
@@ -245,7 +249,8 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     manifest = {"schema": MANIFEST_SCHEMA, "status": "PREPARED_NOT_RUN_ROOT267_F6_INITIAL_NATIVE_SUPPORT_AUDIT_V4",
                 "root244_proof": proof.get("status"), "proof": proof_rec, "report": report_rec,
                 "root252_owner_proof": owner_proof.get("status"), "owner_proof": owner_proof_rec,
-                "owner_report": owner_report_rec, "prior_v3_failure_proof": prior_failure_rec, "cases": cases,
+                "owner_report": owner_report_rec, "prior_v3_failure_proof": prior_failure_rec,
+                "prior_v3_failure_request": prior_request_rec, "cases": cases,
                 "deferred_input_records": deferred,
                 "source_binding": {"continuous_owner_mass_kg": 4851.988676250775, "continuous_owner_basis": "explicit XML fluid drawbox volume times rhop0",
                                     "physical_massbody_kg": 128.0, "legacy_source_sample_mass_kg": 5120.0,
@@ -275,6 +280,7 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
                "command": [str(PYTHON), "-B", str(WORKER), "--manifest", "{attempt_root}/inputs/f6_initial_native_support_manifest_v4.json", "--attempt-root", "{attempt_root}", "--output", "{attempt_root}/observer/f6_initial_native_support_audit_v4.json"],
                "literal_venv_invocation": {"path": str(PYTHON), "argv0_literal": True, "resolved_target": str(PYTHON_TARGET), "pyvenv_cfg": str(PYVENV_CFG), "resolved_sha256": py["resolved"]["sha256"]},
                "input_files": static_paths, "input_sha256": static_hashes, "input_records": records, "manifest": manifest_rec,
+               "prior_failure_proof": prior_failure_rec, "prior_failure_request": prior_request_rec,
                "deferred_input_files": sorted(item["path"] for item in deferred), "deferred_input_records": deferred,
                "deferred_input_policy": {"parent_after_reservation_first_sha_and_stat": True, "worker_post_sha_and_stat": True,
                                           "required_stat_fields": list(STAT_FIELDS), "known_sha_checked_when_present": True,
