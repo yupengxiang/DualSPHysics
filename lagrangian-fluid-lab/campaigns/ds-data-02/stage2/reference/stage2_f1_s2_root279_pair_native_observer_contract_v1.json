@@ -1,0 +1,63 @@
+{
+  "schema": "ds02.stage2.f1-s2.root279-pair-native-observer-contract.v1",
+  "status": "SOURCE_BOUND_PARENT_GUARD_REQUIRED",
+  "purpose": "Read selected native MassFluid/MassBound/Dp/Idp/Pos/Vel/Rhop fields and per-step time brackets for the actual ROOT277 same-CFL and ROOT278 half-CFL pair.",
+  "terminal_sources": {
+    "same_cfl": "ROOT277 proof/request/receipt/RunPARTs.csv",
+    "half_cfl": "ROOT278 proof/request/receipt/RunPARTs.csv",
+    "intake": "ROOT271 actual terminal intake",
+    "query_times_s": [0.0, 0.25, 0.5],
+    "selected_policy": "frame 0 plus actual lower/upper Part IDs for each query; actual final frame retained; selected array index is never a native Part ID"
+  },
+  "native_read_scope": {
+    "selected_part_count": 10,
+    "same_cfl_selected_ids": [0, 49, 50, 99, 100],
+    "half_cfl_selected_ids": [0, 49, 50, 99, 100],
+    "full_native_tree_scan": false,
+    "hdf5_vtk_read": false,
+    "parent_pre_sha_stat": true,
+    "child_post_sha_stat": true,
+    "source_replace_or_stat_change": "FAIL",
+    "unknown_source_sha": "BLOCKS_CHILD; never guessed"
+  },
+  "observables": {
+    "native_required": ["Idp", "Pos", "Vel", "Rhop", "MassFluid", "Dp"],
+    "native_optional": ["MassBound", "typed role/MK counts"],
+    "weighted_fields": "fluid-only native MassFluid weighted COM/velocity/KE; fixed/moving excluded",
+    "xml_mass_fallback": "FORBIDDEN",
+    "time": "RunPARTs actual time and decoder TimeStep; no interpolation or extrapolation",
+    "dt": "DtAllInfo/RunPARTs metadata remains a separate step-time diagnostic; no saved-time bracket is an error bound"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "same/half saved times are asynchronous except t=0; no producer world-axis proof; neighboring grids are not truth"
+  },
+  "resources": {
+    "cpu_threads": 1,
+    "max_wall_seconds": 1800,
+    "memory_bytes": 2147483648,
+    "scratch_bytes": 268435456,
+    "log_bytes": 1048576,
+    "estimated_native_passes": 4,
+    "parent_selects_gpu": false
+  },
+  "source_closure": {
+    "worker": "stage2_f1_s2_root279_pair_native_observer_guarded_v1.py",
+    "guard_dependency": "stage2_f1_native_selected_observer_guarded_v4.py",
+    "v1_worker": "stage2_f1_native_selected_observer_v1.py",
+    "physical_observer": "stage2_native_physical_observer_v2.py",
+    "literal_python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "resolved_target_provenance_only": "/usr/bin/python3.10",
+    "payload_hash_policy": "parent source snapshot after reservation"
+  },
+  "preconditions": [
+    "ROOT277 and ROOT278 receipt/proof/request/RunPARTs exact joins pass",
+    "ten selected Part source records have concrete SHA and full stat from a parent snapshot",
+    "same/half output roots remain the actual terminal roots",
+    "source XML/decoder/observer small records remain stable",
+    "parent V8 reservation and child wrapper enforce cancellation, log, scratch, and post-source checks"
+  ]
+}
