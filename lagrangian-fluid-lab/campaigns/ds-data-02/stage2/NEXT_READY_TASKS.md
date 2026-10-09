@@ -1,3 +1,12 @@
+最新实际进展（2026-10-09T01:48:48.338166+00:00）：完整七项目标 ACTIVE，以下为恢复入口；后文历史记录保留，原期限、额度及500GiB Home floor不重置。
+
+- ROOT136 汇总实际 completed/rc0；root 独立检查 v27/v29/v30 全部336例、七族各48例、118例原生遗漏及1328 IDs。ROOT126 新参考153 IDs 不并入原目录；ROOT134/128/123的有限任务信用与全部科学 Q UNKNOWN 分开。full systemd CPU1.495286s已同父闭账、重复幂等、unit已停。汇总只绑定所列旧来源，不暗含后来的ROOT124/132/122事实。
+- ROOT122 V50 cold replay 已实际 FAILED：2270.157s wall、复制目标467 files、8,670,279,125 B external tree；v14_operator路径仍指向旧consumer工作树，真实V38复制worker闭包拒绝。七个metadata JSON不构成typed/label成功。完整systemd CPU93.080486s及metadata增量已同父闭合、unit已停；复制字节全保留。consumer准备实际复制图的前向修复及distinct guarded recovery；利用既有copied raw恢复不能授予fresh cold信用，禁止修改ROOT122 q/receipt/output。
+- ROOT132 F3 generated BI4 snapshot实际 completed/rc0；1,308,397B 单次完整fd用户态流 SHA10ee6bed613198491ed950682317e940593e24597478abb33bc66d572fc026e7，path/fd前后stat稳定。没有第二次完整post hash或粒子decode；CPU1.373772s闭账、unit停。ROOT128支持4320fluid/19944fixed、14.58kg；科学连续等价/接触/通量/动力学 UNKNOWN。reference准备ROOT133 .015 coarse外部solver，forcing必须guard内physical copy+SHA，literal venv argv0、有限8.350016881886734s window及0.01s output；未运行CFD。
+- ROOT124 F5 yzero .005 geometry V10 实际 completed/rc0：fluid2234975，全部boundary4538254，声明盒与裁剪面容差外0，精确float32坐标重合0。boundary ties600；无接触/穿透或全shape信用。离散279.371875kg相对owner287.736kg偏差-2.9069%，>2% HARDFAIL保持，不启动CFD。full CPU13.256394s闭账、unit停；reference准备ROOT135与旧ROOT117的JSON-only相位比较，per-MK boundary及owner仍UNKNOWN。
+- ROOT134 F2 card实际completed，401帧/153原生身份、未知质量0.55135%>.003 FAIL；all Q UNKNOWN。CPU1.612708s闭账，root侧修正producer F3拼字、ROOT129状态层级及typed字样，不修改已消费字节。ROOT130数值域六面唯一变化的source-bound对照已前向准备，尚未运行；compiled binary/source link UNKNOWN。
+- reference代理推进ROOT133/135；consumer推进冷重放闭包修复；forensics转向F7-S1实际初态QA的有界请求准备，扩展14哨点任务图的实际分支。当前无CFD/GPU任务、无active parent reservation；GPU6外来进程须实时保护。共享已记CPU704.370737683core h/GPU137.881374219h，Home当前free 696700592128B；任何launch重新核对真实inventory、atomic UUID lease及parent budget，运行成功不自动赋科学资格。
+
 最新实际进展（2026-10-09T01:22:18.753035+00:00）：完整七项目标 ACTIVE，原期限与额度不重置。
 
 - ROOT128 F3 support V6 实际 completed/rc0；4320fluid/19944fixed、60×12×6、14.58kg，声明初态owner盒外0；actual ROOT120 q/receipt/output root、forcing SHA、worker Fluid/Bound VTK full pre/post SHA+stat 精确绑定。root仅核对小JSON/XML/stat，exact parser-consumed SHA未算；continuous equivalence/contact/flux/dynamics与QI/QN/QE UNKNOWN。完整systemd CPU1.616426s同父补账、重复幂等、unit已停。ROOT121标签比较失败与源字节保留不变。下一为forcing guard内物理复制后的有限coarse external solver V5请求审查，待冷重放释放主IO。
