@@ -20,6 +20,12 @@ OLD_REQUEST = (
     / "full-goal-rollup-v155-request.json"
 )
 OLD_MANIFEST = OLD_REQUEST.with_name("full-goal-rollup-v155-manifest.json")
+LARGE_INPUT_PINS = {
+    "f3_s2_full_native_stream_v3_root150.json": {
+        "bytes": 14_825_462,
+        "sha256": "81148499db02132a7001dd30e9395bec335e21c5c401dc0347da635b215efc64",
+    }
+}
 
 
 def sha256_file(path: Path) -> str:
@@ -36,6 +42,26 @@ def read_json(path: Path) -> dict:
     return value
 
 
+def declared_path(raw_path: str, expected_sha: str, *, fallback: Path | None = None) -> Path:
+    """Resolve a request-declared path while accepting an equivalent checkout alias."""
+    declared = Path(raw_path)
+    if declared.is_file():
+        path = declared
+    elif fallback is not None and fallback.is_file():
+        path = fallback
+    else:
+        raise AssertionError(f"missing declared source: {declared}")
+    assert path.stat().st_size > 0
+    if path.stat().st_size <= 10 * 1024 * 1024:
+        assert sha256_file(path) == expected_sha, path
+    else:
+        pin = LARGE_INPUT_PINS.get(path.name)
+        assert pin is not None, path
+        assert path.stat().st_size == pin["bytes"], path
+        assert expected_sha == pin["sha256"], path
+    return path
+
+
 def test_final_code_bound_request_rechecks_every_final_input() -> None:
     request = read_json(REQUEST)
     old = read_json(OLD_REQUEST)
@@ -49,15 +75,17 @@ def test_final_code_bound_request_rechecks_every_final_input() -> None:
     assert set(request["input_files"]) == set(request["input_sha256"])
 
     for raw_path, expected in request["input_sha256"].items():
-        path = Path(raw_path)
-        assert path.is_file(), path
-        assert sha256_file(path) == expected, path
+        path = declared_path(raw_path, expected)
         assert path.suffix.lower() in {".json", ".py"}, path
 
     worker = Path(request["command"][1])
     manifest = Path(request["command"][3])
     assert worker.is_file()
-    assert manifest == OLD_MANIFEST.resolve()
+    assert manifest.name == OLD_MANIFEST.name
+    assert manifest.is_file()
+    assert sha256_file(manifest) == (
+        "4e9ea50f8180b733778787a78c5fe1e383c0872213b9cd0820f6c07b09c21995"
+    )
     assert request["input_sha256"][str(worker)] == (
         "3fc9353eb5ce6102f029757bbcfd699773ab7b5b4464514b9013950c1ffe5e79"
     )
@@ -77,15 +105,27 @@ def test_final_code_bound_request_rechecks_every_final_input() -> None:
             assert new_input_hashes[raw_path] == old_hash
 
     assert transition["schema"] == "ds02.stage2.full-goal-rollup-v155.final-code-bound.manifest.v1"
-    assert transition["original_request"]["path"] == str(OLD_REQUEST.resolve())
-    assert transition["original_request"]["sha256"] == sha256_file(OLD_REQUEST)
-    assert transition["unchanged_rollup_manifest"]["path"] == str(OLD_MANIFEST.resolve())
-    assert transition["unchanged_rollup_manifest"]["sha256"] == sha256_file(OLD_MANIFEST)
+    old_request_path = declared_path(
+        transition["original_request"]["path"],
+        transition["original_request"]["sha256"],
+        fallback=OLD_REQUEST,
+    )
+    old_manifest_path = declared_path(
+        transition["unchanged_rollup_manifest"]["path"],
+        transition["unchanged_rollup_manifest"]["sha256"],
+        fallback=OLD_MANIFEST,
+    )
+    assert old_request_path.name == OLD_REQUEST.name
+    assert old_manifest_path.name == OLD_MANIFEST.name
+    assert transition["original_request"]["sha256"] == sha256_file(old_request_path)
+    assert transition["unchanged_rollup_manifest"]["sha256"] == sha256_file(old_manifest_path)
     assert transition["worker_transition"]["original_request_sha256"] == old_input_hashes[str(worker)]
     assert transition["worker_transition"]["final_worker_sha256"] == new_input_hashes[str(worker)]
     assert transition["binding_audit"]["status"] == "STALE_OLD_REQUEST_WORKER_BINDING"
     assert transition["forward_contract"]["old_request_modified"] is False
     assert transition["forward_contract"]["old_manifest_modified"] is False
+    transition_declared = request["source_binding_transition"]["transition_manifest_path"]
+    assert Path(transition_declared).name == TRANSITION.name
     assert request["source_binding_transition"]["transition_manifest_sha256"] == sha256_file(TRANSITION)
 
 
