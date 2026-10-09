@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import stat
@@ -27,6 +28,7 @@ from typing import Any, Mapping, Sequence
 
 
 SCRIPT = Path(__file__).resolve()
+V8_SCRIPT = SCRIPT.parent / "ds_data02_stage2_f2_fresh_v16_proof_consumer_v8.py"
 V64_REPORT_SCHEMA = "ds02.stage2.f2-root145-copied-recovery-report.v64"
 V64_REQUEST_SCHEMA = "ds02.stage2.f2-root145-copied-recovery-parent-request.v64"
 V64_SUMMARY_SCHEMA = "ds02.stage2.f2-native-raw-to-typed-to-label-worker-summary.v64"
@@ -208,8 +210,17 @@ def _validate_v64_parent_report(path: Path, request_path: Path, request: Mapping
         raise V65FreshProofError("V64 report request binding is missing")
     if _path(binding.get("path"), "V64 report request path").resolve() != request_path.resolve():
         raise V65FreshProofError("V64 report points at a different parent request")
-    if _sha(binding.get("sha256"), "V64 report request SHA") != request.get("sha256"):
-        raise V65FreshProofError("V64 report request SHA differs from the parent request")
+    # V64's report stores the SHA of the request *file*.  The request's own
+    # ``sha256`` field is its canonical-body digest, so these are deliberately
+    # two different bindings.  Older fixtures mirrored the canonical digest
+    # into the report and therefore hid this production interface distinction.
+    report_request_file_sha = _sha(binding.get("sha256"), "V64 report request file SHA")
+    actual_request_file_sha = sha256_file(request_path)
+    if report_request_file_sha != actual_request_file_sha:
+        raise V65FreshProofError("V64 report request file SHA differs from the parent request file")
+    declared_canonical = binding.get("canonical_sha256")
+    if declared_canonical is not None and _sha(declared_canonical, "V64 report request canonical SHA") != request.get("sha256"):
+        raise V65FreshProofError("V64 report request canonical SHA differs from the parent request")
     parent = report.get("parent")
     if not isinstance(parent, Mapping) or parent.get("attempt_id") != attempt_id:
         raise V65FreshProofError("V64 report parent attempt differs")
@@ -497,7 +508,13 @@ def _build(*, v64_report: Path, v64_request: Path, source_contract: Path,
                                                        "sha256": sha256_file(nested_path)}},
         "v64_parent_binding": {
             "report_path": str(v64_report), "report_sha256": sha256_file(v64_report),
-            "request_path": str(v64_request), "request_sha256": request["sha256"],
+            # Keep the two request identities explicit.  V64 report.request
+            # uses the file digest, while the request object's sha256 field is
+            # the canonical-body digest.
+            "request_path": str(v64_request),
+            "request_file_sha256": sha256_file(v64_request),
+            "request_canonical_sha256": request["sha256"],
+            "request_sha256": request["sha256"],
             "case_id": case, "attempt_id": attempt,
             "nested_worker_report_path": str(nested_path),
             "nested_worker_report_sha256": sha256_file(nested_path),
@@ -530,7 +547,8 @@ def _build(*, v64_report: Path, v64_request: Path, source_contract: Path,
                        "result_content_verification": "AFTER_PARENT_RESERVATION",
                        "builder_content_read": "SMALL_JSON_AND_STAT_ONLY"},
         "parent_guard_record": guard, "trace_audit": audit,
-        "v8_consumer": {"path": str(SCRIPT.parent / "ds_data02_stage2_f2_fresh_v16_proof_consumer_v8.py"),
+        "v8_consumer": {"path": str(V8_SCRIPT),
+                         "sha256": sha256_file(V8_SCRIPT),
                          "schema": PROOF_REQUEST_SCHEMA},
         "case_provenance": {"historical_v62_case_id": request["v62_provenance"]["case_id"],
                              "historical_reuse": False},
@@ -581,6 +599,172 @@ def _build(*, v64_report: Path, v64_request: Path, source_contract: Path,
             "case_id": case, "attempt_id": attempt, "payload_read": False,
             "hdf5_bi4_result_content_read": False, "old_proof_reuse": False,
             "qualification": dict(UNKNOWN)}
+
+
+def _load_v8_consumer() -> Any:
+    """Load the actual V8 validator without importing it during build.
+
+    The V65 builder remains metadata-only.  This lazy loader is used by the
+    post-build preflight so the exact consumer source is exercised instead of
+    a copied validator or a test-only schema mirror.
+    """
+    if V8_SCRIPT.is_symlink() or not V8_SCRIPT.is_file():
+        raise V65FreshProofError(f"V8 proof consumer is missing: {V8_SCRIPT}")
+    spec = importlib.util.spec_from_file_location("ds02_bound_f2_fresh_v16_consumer_v8", V8_SCRIPT)
+    if spec is None or spec.loader is None:
+        raise V65FreshProofError(f"cannot load V8 proof consumer: {V8_SCRIPT}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_emitted_v8_request(proof_request: Path | str,
+                                 *, verify_result_stat: bool = True) -> dict[str, Any]:
+    """Run the real V8 metadata validator plus the V65 provenance joins.
+
+    V8 intentionally validates only the standard proof-request contract; it
+    does not know the V64 case/attempt or the distinction between the exact
+    CURRENT identity and a relocated runtime view.  This wrapper checks those
+    producer joins before delegating to ``v8._validate_request``.  It stats the
+    declared result but never reads or hashes its content, so it is safe before
+    the parent proof reservation.
+    """
+    proof_path, proof = _load_json(proof_request, "V65 V8 proof request")
+    if proof.get("schema") != PROOF_REQUEST_SCHEMA:
+        raise V65FreshProofError("emitted proof request is not V8-shaped")
+    if proof.get("sha256") != canonical_sha(proof):
+        raise V65FreshProofError("emitted V8 proof request canonical SHA differs")
+    case = _require_new_id(proof.get("case_id"), "emitted V8 case_id")
+    attempt = _require_new_id(proof.get("attempt_id"), "emitted V8 attempt_id")
+    parent = proof.get("v64_parent_binding")
+    if not isinstance(parent, Mapping):
+        raise V65FreshProofError("emitted V8 request lacks V64 parent binding")
+    if parent.get("case_id") != case or parent.get("attempt_id") != attempt:
+        raise V65FreshProofError("emitted V8 case/attempt differs from V64 parent binding")
+    request_file_sha = _sha(parent.get("request_file_sha256"), "V64 parent request file SHA")
+    request_canonical_sha = _sha(parent.get("request_canonical_sha256"), "V64 parent request canonical SHA")
+    if parent.get("request_sha256") != request_canonical_sha:
+        raise V65FreshProofError("V64 parent request_sha256 is not its canonical-body SHA")
+
+    exact = _sha(parent.get("current_identity_sha256"), "V64 exact CURRENT identity")
+    if exact != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("emitted V8 exact CURRENT identity is not df7e...c62b")
+    current = proof.get("current_manifest_binding")
+    metadata = proof.get("source_metadata")
+    if not isinstance(current, Mapping) or not isinstance(metadata, Mapping):
+        raise V65FreshProofError("emitted V8 CURRENT metadata binding is incomplete")
+    if current.get("identity") != "EXACT_CURRENT_SOURCE_IDENTITY_DF7E":
+        raise V65FreshProofError("emitted V8 CURRENT identity label is not exact df7e")
+    if _sha(current.get("sha256"), "current manifest binding SHA") != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("emitted V8 current manifest SHA differs from exact df7e identity")
+    current_manifest = metadata.get("current_manifest")
+    if not isinstance(current_manifest, Mapping) or _sha(current_manifest.get("sha256"), "source current manifest SHA") != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("emitted V8 source metadata is not bound to exact df7e CURRENT")
+    expected = proof.get("expected")
+    source = expected.get("source_binding") if isinstance(expected, Mapping) else None
+    if not isinstance(source, Mapping):
+        raise V65FreshProofError("emitted V8 expected source binding is missing")
+    if _sha(source.get("current_catalog_sha256"), "expected current catalog SHA") != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("emitted V8 expected source is not exact df7e CURRENT")
+    source_files = source.get("source_files")
+    if not isinstance(source_files, Mapping) or source_files.get("current_catalog") != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("emitted V8 source_files.current_catalog is not exact df7e CURRENT")
+
+    relocated = _sha(parent.get("relocated_current_view_sha256"), "relocated CURRENT view SHA")
+    if relocated in {ACTUAL_CURRENT_SHA, HISTORICAL_CURRENT_SHA}:
+        raise V65FreshProofError("relocated CURRENT view must remain distinct from exact/historical identity")
+    if current.get("runtime_view_sha256") != relocated:
+        raise V65FreshProofError("current manifest runtime view differs from V64 relocated view")
+    result = proof.get("result")
+    nested_result = parent.get("nested_v16_result")
+    if not isinstance(result, Mapping) or not isinstance(nested_result, Mapping):
+        raise V65FreshProofError("emitted V8 result binding is incomplete")
+    for key in ("path", "sha256", "bytes"):
+        if result.get(key) != nested_result.get(key):
+            raise V65FreshProofError(f"emitted V8 result.{key} differs from V64 nested V16 result")
+    if result.get("content_sha_verified") is not False:
+        raise V65FreshProofError("emitted V8 result must defer content verification to the parent")
+
+    v8_binding = proof.get("v8_consumer")
+    if not isinstance(v8_binding, Mapping) or _path(v8_binding.get("path"), "V8 consumer path").resolve() != V8_SCRIPT.resolve():
+        raise V65FreshProofError("emitted V8 consumer path differs from the actual validator")
+    if _sha(v8_binding.get("sha256"), "V8 consumer SHA") != sha256_file(V8_SCRIPT):
+        raise V65FreshProofError("emitted V8 consumer SHA differs from the actual validator")
+
+    v8 = _load_v8_consumer()
+    try:
+        bound = v8._validate_request(proof, verify_result_stat=verify_result_stat)
+    except Exception as error:
+        raise V65FreshProofError(f"actual V8 validator rejected emitted request: {error}") from error
+    return {
+        "schema": "ds02.stage2.f2-v65-v8-metadata-preflight.v1",
+        "status": "V8_METADATA_VALIDATED_READY_FOR_PARENT_PROOF",
+        "request": {"path": str(proof_path), "sha256": sha256_file(proof_path)},
+        "v8_validator": {"path": str(V8_SCRIPT), "sha256": sha256_file(V8_SCRIPT),
+                          "schema": PROOF_REQUEST_SCHEMA},
+        "case_id": case, "attempt_id": attempt,
+        "v64_parent_request": {"file_sha256": request_file_sha,
+                                "canonical_sha256": request_canonical_sha},
+        "current_identity_sha256": exact,
+        "relocated_current_view_sha256": relocated,
+        "result": {"path": str(bound["result_path"]), "sha256": bound["result_sha256"],
+                   "bytes": bound["result_bytes"], "content_sha_verified": False,
+                   "stat_verified": bool(verify_result_stat)},
+        "parent_reservation_required": True,
+        "payload_read": False, "hdf5_or_bi4_content_read": False,
+        "quality": dict(UNKNOWN),
+    }
+
+
+def validate_evaluator_staging(proof_request: Path | str,
+                               evaluator_request: Path | str) -> dict[str, Any]:
+    """Validate the deferred evaluator descriptor without making it runnable.
+
+    The V65 evaluator descriptor is deliberately not the existing typed-only
+    parent request schema.  This function proves its exact fresh-proof link
+    and reports the remaining dependency: a successful V8 proof must be
+    produced first, then the existing evaluator-parent builder must receive a
+    fresh producer/frozen-request graph.  No evaluator process is launched.
+    """
+    proof_path, proof = _load_json(proof_request, "V65 proof request")
+    evaluator_path, evaluator = _load_json(evaluator_request, "V65 evaluator staging request")
+    if evaluator.get("schema") != EVALUATOR_REQUEST_SCHEMA:
+        raise V65FreshProofError("evaluator staging schema differs")
+    if evaluator.get("sha256") != canonical_sha(evaluator):
+        raise V65FreshProofError("evaluator staging canonical SHA differs")
+    if evaluator.get("status") != "DEFERRED_UNTIL_FRESH_PROOF_SUCCESS":
+        raise V65FreshProofError("evaluator staging is not deferred")
+    if evaluator.get("case_id") != proof.get("case_id"):
+        raise V65FreshProofError("evaluator staging case differs from proof request")
+    if not str(evaluator.get("attempt_id", "")).startswith(str(proof.get("attempt_id", "")) + "::evaluator"):
+        raise V65FreshProofError("evaluator staging attempt differs from proof request")
+    link = evaluator.get("proof_request")
+    if not isinstance(link, Mapping) or _path(link.get("path"), "evaluator proof path").resolve() != proof_path.resolve():
+        raise V65FreshProofError("evaluator staging proof path differs")
+    if _sha(link.get("sha256"), "evaluator proof file SHA") != sha256_file(proof_path):
+        raise V65FreshProofError("evaluator staging proof file SHA differs")
+    if link.get("canonical_sha256") != proof.get("sha256"):
+        raise V65FreshProofError("evaluator staging proof canonical SHA differs")
+    if evaluator.get("old_proof_reuse") is not False or evaluator.get("fresh_cold_credit") is not False:
+        raise V65FreshProofError("evaluator staging reuses old proof or grants cold credit")
+    source = evaluator.get("source_binding")
+    if not isinstance(source, Mapping) or source.get("current_manifest_sha256") != ACTUAL_CURRENT_SHA:
+        raise V65FreshProofError("evaluator staging current identity is not exact df7e")
+    if source.get("relocated_current_view_sha256") != proof["v64_parent_binding"]["relocated_current_view_sha256"]:
+        raise V65FreshProofError("evaluator staging relocated view differs from proof")
+    return {
+        "schema": "ds02.stage2.f2-v65-evaluator-staging-preflight.v1",
+        "status": "DEFERRED_UNTIL_FRESH_V8_PROOF_SUCCESS",
+        "request": {"path": str(evaluator_path), "sha256": sha256_file(evaluator_path)},
+        "proof_request": {"path": str(proof_path), "file_sha256": sha256_file(proof_path),
+                           "canonical_sha256": proof["sha256"]},
+        "next_guard": {
+            "required": "actual V8 run proof with FRESH_V16_RESULT_VERIFIED_DEVELOPMENT_UNKNOWN",
+            "then": "build existing typed-only evaluator-parent request from fresh proof, producer report, source contract, and frozen request",
+            "old_proof_reuse": False,
+        },
+        "payload_read": False, "evaluator_launched": False, "quality": dict(UNKNOWN),
+    }
 
 
 def main(argv: Sequence[str] | None = None) -> int:

@@ -145,7 +145,11 @@ def _make_fixture(tmp_path: Path):
     report = {
         "schema": module.V64_REPORT_SCHEMA,
         "status": "COMPLETED_PARENT_EXECUTOR_RAW_TYPED_LABEL_UNKNOWN",
-        "request": {"path": str(request_path), "sha256": request["sha256"]},
+        # The V64 runtime stores the request *file* SHA here.  The request's
+        # own sha256 field is its canonical-body SHA and is carried separately
+        # to exercise the real report/request interface.
+        "request": {"path": str(request_path), "sha256": module.sha256_file(request_path),
+                     "canonical_sha256": request["sha256"]},
         "parent": {"attempt_id": attempt},
         "executor": {"result": summary},
         "raw_source": {"full_prepost_equal": True},
@@ -193,9 +197,87 @@ def test_v64_nested_report_builds_fresh_v8_and_evaluator_metadata(tmp_path):
     assert proof_value["expected"]["source_binding"]["binding_status"] == "EXACT_CURRENT_SOURCE_BOUND"
     assert "runtime_view_sha256" not in proof_value["expected"]["source_binding"]
     assert proof_value["v64_parent_binding"]["relocated_current_view_sha256"] == f["runtime_sha"]
+    assert proof_value["v8_consumer"]["sha256"] == module.sha256_file(
+        module.V8_SCRIPT)
     assert eval_value["proof_request"]["canonical_sha256"] == proof_value["sha256"]
     assert eval_value["old_proof_reuse"] is False
     assert eval_value["status"] == "DEFERRED_UNTIL_FRESH_PROOF_SUCCESS"
+
+
+def test_emitted_request_passes_actual_v8_validator_and_staging_preflight(tmp_path):
+    module, f = _make_fixture(tmp_path)
+    proof = tmp_path / "fresh-proof-v8.json"
+    evaluator = tmp_path / "fresh-evaluator-v1.json"
+    module._build(
+        v64_report=f["report"], v64_request=f["request"],
+        source_contract=f["contract"], current_manifest=f["current"],
+        target_root=f["target"], output_root=f["products"],
+        original_roots=[f["original"]], output_proof=proof,
+        output_evaluator=evaluator, case_id=f["case"], attempt_id=f["attempt"],
+        parent_guard_record=None, trace_audit_request=None,
+        max_wall_seconds=900.0, max_result_bytes=100_000_000,
+        python_executable=None)
+
+    # This calls the production V8 validator, not a copied test schema.  V8
+    # only stats the tiny placeholder result; it does not read its content.
+    v8_preflight = module.validate_emitted_v8_request(proof, verify_result_stat=True)
+    assert v8_preflight["status"] == "V8_METADATA_VALIDATED_READY_FOR_PARENT_PROOF"
+    assert v8_preflight["case_id"] == f["case"]
+    assert v8_preflight["attempt_id"] == f["attempt"]
+    assert v8_preflight["current_identity_sha256"] == f["current_sha"]
+    assert v8_preflight["relocated_current_view_sha256"] == f["runtime_sha"]
+    assert v8_preflight["payload_read"] is False
+    staging = module.validate_evaluator_staging(proof, evaluator)
+    assert staging["status"] == "DEFERRED_UNTIL_FRESH_V8_PROOF_SUCCESS"
+    assert staging["next_guard"]["old_proof_reuse"] is False
+
+
+@pytest.mark.parametrize("mutation", ["case", "current", "relocated"])
+def test_v65_provenance_wrapper_rejects_cross_bound_v8_mutations(tmp_path, mutation):
+    module, f = _make_fixture(tmp_path)
+    proof = tmp_path / "fresh-proof-v8.json"
+    evaluator = tmp_path / "fresh-evaluator-v1.json"
+    module._build(
+        v64_report=f["report"], v64_request=f["request"],
+        source_contract=f["contract"], current_manifest=f["current"],
+        target_root=f["target"], output_root=f["products"],
+        original_roots=[f["original"]], output_proof=proof,
+        output_evaluator=evaluator, case_id=f["case"], attempt_id=f["attempt"],
+        parent_guard_record=None, trace_audit_request=None,
+        max_wall_seconds=900.0, max_result_bytes=100_000_000,
+        python_executable=None)
+    value = json.loads(proof.read_text(encoding="utf-8"))
+    if mutation == "case":
+        value["v64_parent_binding"]["case_id"] = "STAGE2_F2_OTHER_CASE"
+    elif mutation == "current":
+        value["v64_parent_binding"]["current_identity_sha256"] = module.HISTORICAL_CURRENT_SHA
+    else:
+        value["v64_parent_binding"]["relocated_current_view_sha256"] = f["current_sha"]
+    value["sha256"] = module.canonical_sha(value)
+    proof.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(module.V65FreshProofError):
+        module.validate_emitted_v8_request(proof, verify_result_stat=True)
+
+
+def test_v65_rejects_canonical_digest_in_v64_file_sha_slot(tmp_path):
+    module, f = _make_fixture(tmp_path)
+    report = json.loads(f["report"].read_text(encoding="utf-8"))
+    # Deliberately put the request canonical SHA in the file-SHA slot.  The
+    # strict V65 interface must reject this even though the fixture's request
+    # is otherwise canonical.
+    request = json.loads(f["request"].read_text(encoding="utf-8"))
+    report["request"]["sha256"] = request["sha256"]
+    bad = _write(tmp_path / "bad-report.json", report)
+    with pytest.raises(module.V65FreshProofError, match="file SHA"):
+        module._build(
+            v64_report=bad, v64_request=f["request"],
+            source_contract=f["contract"], current_manifest=f["current"],
+            target_root=f["target"], output_root=f["products"],
+            original_roots=[f["original"]], output_proof=tmp_path / "bad-p.json",
+            output_evaluator=tmp_path / "bad-e.json", case_id=f["case"],
+            attempt_id=f["attempt"], parent_guard_record=None,
+            trace_audit_request=None, max_wall_seconds=900.0,
+            max_result_bytes=100_000_000, python_executable=None)
 
 
 def test_v65_rejects_stale_current_and_historical_result(tmp_path):
