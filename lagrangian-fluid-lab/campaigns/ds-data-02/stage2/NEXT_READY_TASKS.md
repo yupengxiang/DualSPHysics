@@ -1,3 +1,10 @@
+最新增量（2026-10-09 00:32 UTC）：完整目标 ACTIVE。
+
+- ROOT118 V6首帧probe实际完成，full systemd CPU 1.575733s费用闭合且unit已停。首帧worker pre/post完整SHA/stat一致；其余400帧payload未读。官方decoder MassFluid tag double、值0.000681472010910511；XML .000681472，绝对差1.0910510992931388e-11kg，observed binary64 bits000000009a54463f。该值恰等于float32(XML)再转double，但raw header bytes/write path尚未观测，严格状态MASS_SERIALIZATION_MISMATCH_NO_FULL_STREAM；不放宽容差，不给全stream/科学资格。V7原始scalar字节/官方source合同探针是下一依赖。
+- F2 V49新root-side executor/overlay/sourceclosure已元数据构造在 native-reconstruction/raw-to-label-v49-root-prepared-122-001/，仅stat/小JSON/代码。新target/products/supervisor namespace仍不存在。parent-v49新实现未实际运行，root复核发现旧parent-v3必须的status/schema/storage/command字段未保持，consumer前向修复中；不能启动大复制。root parent-v49 focused tests2通过1失败（未交terminal sealer依赖）；V5/V6 12项通过，opledger-v1 4项通过。
+- F3 coarse .015 launch-disabled XML/q已接入；middle .006明确复用ROOT086/093不重跑。下一root120须核对GenCase真实_Def.xml/argv规则，再运行有限官方GenCase，root121为独立guarded初态support。F5 y-zero plan源SHA和ROOT116/117实际坐标摘要已对齐；只改phase的候选仍未实际生成，所有未知资格保持。
+- 四个停止RG的1213.36s已形成独立operational-only ledger；尚需 additive同父budget reconciliation，使真实runner预算含已知CPU。不要把独立operational文件当同父费用已闭合；祖先/teardown CPU未知，qualification attempts不增加。
+
 最新执行入口（2026-10-09 00:31 UTC）：以下记录为保留历史，恢复时以本段及实际收据为准。完整七项目标 ACTIVE；所有原始/失败/恢复产物保持不可变。
 
 | 分支 | 最新实际状态 | 下一依赖 |
