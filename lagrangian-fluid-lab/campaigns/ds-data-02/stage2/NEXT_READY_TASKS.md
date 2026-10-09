@@ -1,3 +1,9 @@
+最新实际增量（2026-10-09T03:41:08.390264+00:00）：完整长期目标 ACTIVE，原额度/期限不变。
+
+- ROOT151 guarded JSON rollup actual completed/rc0，fullCPU1.651771s闭账幂等/unit停。root独立CURRENT336身份及7×48、118遗漏case/1328身份核对通过，14哨点及allQunknown保留。局限：pending133/140是历史launch记录而非当前运行；ROOT138 edge实际绑定ROOT142 motive proof，ROOT150_PHASE_RECOVERY alias绑定旧phase-recovery而非新150native audit。独立proof明确限定，后续additive rollup修正，不改已消费151字节。
+- ROOT152 F4 four-run common-time/output readiness actual completed/rc0，fullCPU1.577459s闭账幂等/unit停。独立CSV重算每组2401时刻和全部16query brackets，0.3/.6/.9/1.2均BRACKETED；每组需24新native frames、共96，九原选帧不够empirical output field/error calibration。没有插值/数组读取/动力学或科学Q。reference准备source-bound selectednative补读，在原guard内实际执行后另作outputcomparison。
+- 最新ledger CPU704.5483041591641core h/GPU137.96668911670722h，无active reservation/CFD/GPU/native任务。三名既有代理继续F2copied-worker closure、F3matchedQA/F4补读准备、F7coarse候选/后续目录修正。下次launch重新核对资源和真实源绑定；阶段未完成。
+
 最新实际复核（2026-10-09T03:38:07.013801+00:00）：完整七项长期目标 ACTIVE，原资源边界保持。
 
 - ROOT150 F3全部836原生帧实际V2 audit completed/rc0；24264IDs全部836保留，4320fluid/19944fixed由XML范围赋类，活跃Pos/Vel/Rhop全部finite；native MassFluid/MassBound .003375000087544322、sample14.580000378191471kg，全836pre/post SHA/stat稳定，与ROOT147十帧field digest一致。查询2/4/6/8s仍BRACKETED，不赋连续事件/数值Q。42.825099s fullCPU闭账幂等，scratch清理；实际peak未记录为UNKNOWN。
