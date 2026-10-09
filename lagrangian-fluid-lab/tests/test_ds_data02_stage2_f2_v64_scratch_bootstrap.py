@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 import types
 import shutil
 import tempfile
+import time
 
 import pytest
 
@@ -236,6 +238,134 @@ def test_decoder_pipe_is_drained_and_only_bounded_tail_is_retained(worker, tmp_p
     assert set(report["decoder_stderr_tail"]) == {"x"}
     assert report["cleaned_frames"] == 1
     shutil.rmtree(scratch_root.parent)
+
+
+def _script(path: Path, body: str) -> Path:
+    path.write_text("#!/usr/bin/env python3\n" + body, encoding="utf-8")
+    path.chmod(0o755)
+    return path
+
+
+def _decoder_contract(external: Path, *, max_frame: int = 1024 * 1024,
+                      timeout: float = 2.0) -> dict:
+    return {
+        "root": external / "attempt" / "decoder-scratch",
+        "external_root": external,
+        "max_frame_bytes": max_frame,
+        "timeout_seconds": timeout,
+        "attempt_id": "decoder-lifecycle",
+    }
+
+
+def _run_script_decoder(worker, script: Path, contract: dict, output: Path,
+                        *, index: int = 0):
+    fake = types.SimpleNamespace()
+    fake.tempfile = __import__("tempfile")
+    fake.subprocess = __import__("subprocess")
+
+    def decode(_frame, decoder_path, frame_scratch, frame_index):
+        frame_dir = Path(frame_scratch) / f"frame_{frame_index:04d}"
+        frame_dir.mkdir(parents=True, exist_ok=True)
+        fake.subprocess.run(
+            [str(decoder_path), str(_frame), str(frame_dir)],
+            check=True, stdout=fake.subprocess.DEVNULL,
+            stderr=fake.subprocess.PIPE, text=True, timeout=contract["timeout_seconds"],
+        )
+        return object()
+
+    fake.decode_frame = decode
+    worker._configure_converter_scratch(fake, contract, output)
+    private = contract["root"] / "decoder-child"
+    private.mkdir(parents=True)
+    started = time.monotonic()
+    try:
+        fake.decode_frame(Path("frame.bi4"), script, private, index)
+    finally:
+        elapsed = time.monotonic() - started
+        report = worker._restore_converter_scratch(fake, contract)
+    return elapsed, report, contract["root"]
+
+
+def _assert_pid_gone(pid: int) -> None:
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline:
+        proc_stat = Path(f"/proc/{pid}/stat")
+        if not proc_stat.exists():
+            return
+        try:
+            state = proc_stat.read_text(encoding="ascii").split()[2]
+        except (FileNotFoundError, ProcessLookupError):
+            return
+        if state == "Z":
+            return
+        time.sleep(0.02)
+    raise AssertionError(f"owned decoder PID remains alive: {pid}")
+
+
+def test_decoder_timeout_kills_owned_session_and_cleans_frame(worker, tmp_path):
+    external = tmp_path / "external"
+    output = external / "products"
+    output.mkdir(parents=True)
+    pid_file = tmp_path / "timeout.pid"
+    decoder = _script(
+        tmp_path / "sleep-decoder.py",
+        "import os, pathlib, time\n"
+        f"pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid()))\n"
+        "time.sleep(10)\n",
+    )
+    contract = _decoder_contract(external, timeout=0.15)
+    with pytest.raises(subprocess.TimeoutExpired):
+        _run_script_decoder(worker, decoder, contract, output)
+    pid = int(pid_file.read_text(encoding="utf-8"))
+    _assert_pid_gone(pid)
+    assert contract["root"].is_dir()
+    assert not any(item.is_file() for item in contract["root"].rglob("*"))
+
+
+def test_decoder_live_scratch_cap_kills_owned_session(worker, tmp_path):
+    external = tmp_path / "external"
+    output = external / "products"
+    output.mkdir(parents=True)
+    pid_file = tmp_path / "cap.pid"
+    decoder = _script(
+        tmp_path / "cap-decoder.py",
+        "import os, pathlib, sys, time\n"
+        f"pathlib.Path({str(pid_file)!r}).write_text(str(os.getpid()))\n"
+        "pathlib.Path(sys.argv[2], 'payload').write_bytes(b'x' * 64)\n"
+        "time.sleep(10)\n",
+    )
+    contract = _decoder_contract(external, max_frame=8, timeout=5.0)
+    with pytest.raises(worker.V64WorkerError, match="hard cap"):
+        _run_script_decoder(worker, decoder, contract, output)
+    pid = int(pid_file.read_text(encoding="utf-8"))
+    _assert_pid_gone(pid)
+    assert contract["root"].is_dir()
+    assert not any(item.is_file() for item in contract["root"].rglob("*"))
+
+
+def test_decoder_leader_exit_with_pipe_holder_is_reaped(worker, tmp_path):
+    external = tmp_path / "external"
+    output = external / "products"
+    output.mkdir(parents=True)
+    child_pid_file = tmp_path / "holder.pid"
+    decoder = _script(
+        tmp_path / "holder-decoder.py",
+        "import os, pathlib, sys, time\n"
+        "child = os.fork()\n"
+        "if child == 0:\n"
+        f"    pathlib.Path({str(child_pid_file)!r}).write_text(str(os.getpid()))\n"
+        "    time.sleep(10)\n"
+        "    os._exit(0)\n"
+        "os._exit(0)\n",
+    )
+    contract = _decoder_contract(external, timeout=5.0)
+    elapsed, report, root = _run_script_decoder(worker, decoder, contract, output)
+    child_pid = int(child_pid_file.read_text(encoding="utf-8"))
+    _assert_pid_gone(child_pid)
+    assert elapsed < worker.DECODER_POST_EXIT_DRAIN_SECONDS + 1.0
+    assert report["decoder_stderr_bytes"] == 0
+    assert root.is_dir()
+    assert not any(item.is_file() for item in root.rglob("*"))
 
 
 def test_fresh_v16_builder_uses_only_new_v64_metadata_and_rejects_stale_proof(tmp_path):

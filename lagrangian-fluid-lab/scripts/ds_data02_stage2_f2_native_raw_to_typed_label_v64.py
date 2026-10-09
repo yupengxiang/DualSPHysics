@@ -21,6 +21,7 @@ import json
 import os
 from pathlib import Path
 import selectors
+import signal
 import shutil
 import stat
 import subprocess
@@ -259,8 +260,13 @@ def _configure_converter_scratch(converter: ModuleType, contract: dict[str, Any]
                 if process.poll() is not None and not terminated:
                     # A descendant may have inherited the pipe.  Give the
                     # selector a finite drain window, then close it rather
-                    # than waiting forever on an orphaned descriptor.
+                    # than waiting forever on an orphaned descriptor.  The
+                    # decoder owns its own session, so this also terminates
+                    # a pipe-holding descendant rather than trusting the
+                    # leader's exited state as completion.
+                    _signal_decoder_group(process, signal.SIGTERM)
                     terminated = True
+                    stop_requested = True
                     drain_deadline = now + DECODER_POST_EXIT_DRAIN_SECONDS
                 if not streams:
                     if process.poll() is not None or terminated:
