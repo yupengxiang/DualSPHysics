@@ -1,0 +1,55 @@
+{
+  "schema": "ds02.stage2.f1-s2.initial-support-contract.v1",
+  "status": "PRE_REGISTERED_INITIAL_NATIVE_SUPPORT_DIAGNOSTIC",
+  "sentinel_id": "F1-S2",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "purpose": "Read exactly native frame 0 for the existing coarse, medium, and fine F1-S2 runs to check finite fluid support, typed roles, divider disjointness, and native header semantics against the separately defined 340 kg continuous owner.",
+  "selected_frames": [0],
+  "owner_continuum": {
+    "low_m": [2.2, 0.0, 0.0],
+    "high_m": [3.2, 1.0, 0.34],
+    "volume_m3": 0.34,
+    "density_kg_m3": 1000.0,
+    "mass_kg": 340.0,
+    "mass_semantics": "continuous closed axis-aligned owner box; native particle mass remains a separate discrete diagnostic"
+  },
+  "position_support_tolerance": {
+    "value_m": 1.0e-6,
+    "purpose": "bounded binary position/support comparison only",
+    "task_error_tolerance": false,
+    "scientific_QN_credit": false,
+    "reason": "This tolerance records finite-precision containment at the source support boundary and is not a position, integration, or spatial-truth task tolerance."
+  },
+  "required_checks": [
+    "all decoded native fields are finite and Idp is unique",
+    "fluid positions are inside the continuous owner box within the separately registered binary support tolerance",
+    "fluid positions do not overlap the source XML asymmetric divider drawbox within that diagnostic tolerance",
+    "XML typed ranges assign every decoded identity and preserve mkfluid-relative versus absolute-mk roles",
+    "native MassFluid and Dp are reported from the decoder; native sample mass is not substituted for 340 kg",
+    "selected Part source SHA/stat are stable before and after the parent-reserved decode"
+  ],
+  "source_join": {
+    "root227_owner_proof_report": true,
+    "root207_native_child_generated_XML_and_receipt": true,
+    "root217_manufactured_decoder_calibration": true,
+    "solver_receipt_status_returncode": "completed/0 required",
+    "native_part_sha_policy": "PARENT_AFTER_RESERVATION_PRE_AND_POST_SHA_STAT"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "Initial finite/support and header diagnostics do not establish spatial truth, temporal/integration error, producer world-axis calibration, or external validation."
+  },
+  "read_scope": {
+    "preparation": "small proof/report/XML/RunPARTs/receipt/decoder metadata only",
+    "guarded_execution": "three selected Part_0000.bi4 files only",
+    "production_h5_vtk_read": false,
+    "full_native_tree_scan": false,
+    "solver_launch": false,
+    "mass_rescale": false,
+    "max_preparation_file_bytes": 16777216,
+    "max_selected_native_file_bytes": 536870912
+  }
+}
