@@ -391,6 +391,10 @@ def build_request(*, source_contract: Path | str, source_request: Path | str,
                               str(primary_root / script_rel), "{root242_v8_contract}", str(fresh_root_path)],
         "no_h5_bi4_native_read_by_source_builder": True,
         "typed_only_result_read_after_reservation_bytes": next((int((item.get("source_stat_provenance") or {}).get("bytes", 0)) for item in selected if item.get("logical_role") == "root179c_v16_result_deferred"), 0),
+        "deferred_payload_copy_and_posthash_bytes": deferred,
+        "scientific_json_read_after_reservation_bytes": next((int((item.get("source_stat_provenance") or {}).get("bytes", 0)) for item in selected if item.get("logical_role") == "root179c_v16_result_deferred"), 0),
+        "scientific_hdf5_parser_read_bytes": 0,
+        "scientific_native_or_bi4_read_bytes": 0,
     })
     contract["v2_interface"] = interface
     contract["sha256"] = _canonical(contract)
@@ -424,9 +428,15 @@ def build_request(*, source_contract: Path | str, source_request: Path | str,
             "sparse_placeholders_for_deferred_payloads": False,
         },
         "estimated_storage_bytes": 12 * 1024**3,
-        "estimated_result_JSON_read_bytes": interface["typed_only_result_read_after_reservation_bytes"],
-        "estimated_deferred_read_bytes": interface["typed_only_result_read_after_reservation_bytes"],
-        "estimated_hdf5_read_bytes": 0, "estimated_native_read_bytes": 0,
+        # The parent must account for the full post-reservation copy/hash
+        # stream.  The child/scorer scientific read is only the V16 JSON;
+        # these are intentionally separate fields so a small JSON read is
+        # never mistaken for zero H5 copy/hash cost.
+        "estimated_result_JSON_read_bytes": interface["scientific_json_read_after_reservation_bytes"],
+        "estimated_deferred_read_bytes": deferred,
+        "estimated_deferred_copy_and_posthash_bytes": deferred,
+        "estimated_hdf5_read_bytes": next((int((item.get("source_stat_provenance") or {}).get("bytes", 0)) for item in selected if str(item.get("source_path_provenance", "")).lower().endswith("typed-reconstructed-v2.h5")), 0),
+        "estimated_native_read_bytes": 0,
         "estimated_bi4_read_bytes": 0,
         "scope": {"no_raw_H5_BI4_read_by_builder": True, "model_invoked": False,
                   "cfd_invoked": False, "original_path_fallback": "REJECT",
