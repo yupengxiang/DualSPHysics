@@ -167,11 +167,15 @@ def test_v64_source_only_builder_and_parent_metadata_preflight():
             home_receipt=base / "home-receipt.json",
             supervisor_root=base / "supervisor",
             attempt_id="v64-source-only-test",
+            case_id="STAGE2_F2_ROOT179_V64_SOURCE_ONLY_TEST",
         )
         assert result["payload_read"] is False
         assert result["raw_copy_bytes"] == 0
         request = json.loads((base / "parent-request.json").read_text(encoding="utf-8"))
         bound = executor._validate_request(base / "parent-request.json", verify_static=False)
+        assert request["case_id"] == "STAGE2_F2_ROOT179_V64_SOURCE_ONLY_TEST"
+        assert request["v62_provenance"]["case_id"] == v62["case_id"]
+        assert request["case_id"] != request["v62_provenance"]["case_id"]
         assert bound["bootstrap_target"].name == "ds_data02_stage2_f2_v64_bootstrap.py"
         command = request["execution"]["command"]
         assert command[3] == str(bound["bootstrap_target"])
@@ -181,6 +185,27 @@ def test_v64_source_only_builder_and_parent_metadata_preflight():
         assert scratch["default_tmp_forbidden"] is True
         assert request["storage_scope"]["source_copy_bytes"] == 0
         assert request["fresh_cold_credit"] is False
+        roles = {item["role"] for item in request["static_bindings"]}
+        assert {"shared_runtime_v2", "shared_runtime_v6",
+                "pinned_python_resolved_binary", "pinned_python_pyvenv_cfg"} <= roles
+        assert request["execution"]["command"][0] == executor.PINNED_PYTHON
+        assert request["python_binding"]["argv_path"] == executor.PINNED_PYTHON
+        assert request["runtime_binding"]["base_import"] == "ds_data02_runtime_v2"
+
+        # The positive V62C metadata graph is followed by strict negative
+        # checks for each newly required closure edge.  Recanonicalizing the
+        # mutated request keeps this a binding failure, rather than a stale
+        # outer-request-SHA failure.
+        for missing_role in ("shared_runtime_v2", "pinned_python_pyvenv_cfg"):
+            bad = json.loads((base / "parent-request.json").read_text(encoding="utf-8"))
+            bad["static_bindings"] = [
+                item for item in bad["static_bindings"] if item["role"] != missing_role
+            ]
+            bad["sha256"] = executor._canonical(bad)
+            bad_path = base / f"bad-{missing_role}.json"
+            bad_path.write_text(json.dumps(bad, sort_keys=True), encoding="utf-8")
+            with pytest.raises(executor.PortableV64Error, match="static closure"):
+                executor._validate_request(bad_path, verify_static=False)
     finally:
         shutil.rmtree(base, ignore_errors=True)
 

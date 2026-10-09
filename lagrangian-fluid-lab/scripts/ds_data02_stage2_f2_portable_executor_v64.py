@@ -55,7 +55,17 @@ TERMINAL_DELTA_ADAPTER = SCRIPT_DIR / "ds_data02_stage2_f2_v64_terminal_cpu_delt
 PARENT_V3_PATH = SCRIPT_DIR / "ds_data02_stage2_f2_portable_executor_parent_v3.py"
 V21_PATH = SCRIPT_DIR / "ds_data02_stage2_f2_external_supervisor_v21.py"
 RUNTIME_V6_DEFAULT = SCRIPT_DIR / "ds_data02_runtime_v6.py"
+# ``runtime_v6`` imports this module as ``base``.  Keep the import dependency
+# explicit in the request instead of relying on an ambient PYTHONPATH or on a
+# copied runtime directory happening to contain the sibling.
+RUNTIME_V2_DEFAULT = SCRIPT_DIR / "ds_data02_runtime_v2.py"
 PINNED_PYTHON = "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python"
+# The venv path is deliberately retained literally for argv[0].  These two
+# paths are only the immutable provenance/content bindings for the external
+# interpreter selected by that literal invocation.
+PINNED_PYTHON_PATH = Path(PINNED_PYTHON)
+PINNED_PYTHON_RESOLVED = PINNED_PYTHON_PATH.resolve()
+PINNED_PYVENV_CFG = PINNED_PYTHON_PATH.parent.parent / "pyvenv.cfg"
 SCHEMA = "ds02.stage2.f2-root145-copied-recovery-parent-request.v64"
 REPORT_SCHEMA = "ds02.stage2.f2-root145-copied-recovery-report.v64"
 WORKER_SCHEMA = "ds02.stage2.f2-root145-copied-worker-request.v64"
@@ -883,7 +893,18 @@ def _make_static_bindings(request: Mapping[str, Any], v62: Mapping[str, Any]) ->
     paths: list[tuple[str, Path]] = [("portable_executor_v64", SCRIPT),
                                      ("v64_private_bootstrap", BOOTSTRAP_SCRIPT),
                                      ("parent_executor_v3", PARENT_V3_PATH),
-                                     ("shared_v21_accounting", V21_PATH)]
+                                     ("shared_v21_accounting", V21_PATH),
+                                     # runtime_v6 imports runtime_v2 as its
+                                     # accounting base; both are actionable
+                                     # runtime sources and must be sealed.
+                                     ("shared_runtime_v2", RUNTIME_V2_DEFAULT),
+                                     # The command keeps PINNED_PYTHON as a
+                                     # literal venv argv path.  Bind the
+                                     # resolved interpreter and pyvenv.cfg as
+                                     # content dependencies without replacing
+                                     # that argv path with /usr/bin/python3.10.
+                                     ("pinned_python_resolved_binary", PINNED_PYTHON_RESOLVED),
+                                     ("pinned_python_pyvenv_cfg", PINNED_PYVENV_CFG)]
     runtime = _pinned_path(request["runtime_binding"]["path"], "runtime v6")
     paths.append(("shared_runtime_v6", runtime))
     paths.append(("terminal_cpu_delta_adapter_v3", TERMINAL_DELTA_ADAPTER))
@@ -937,13 +958,23 @@ def build_request(*, v62_request: Path | str, output_request: Path | str,
                   max_wall_seconds: float = 6000.0,
                   external_bytes: int = 12 * 1024**3,
                   external_min_free_bytes: int = 20 * 1024**3,
-                  attempt_id: str | None = None) -> dict[str, Any]:
+                  attempt_id: str | None = None,
+                  case_id: str | None = None) -> dict[str, Any]:
     v62_path = _pinned_path(v62_request, "V62 request")
     v62 = _load_json(v62_path, "V62 request")
     if v62.get("schema") != "ds02.stage2.f2-root145-copied-recovery-parent-request.v62":
         raise PortableV64Error("input is not the frozen V62 request")
     if v62.get("sha256") != _canonical(v62):
         raise PortableV64Error("V62 request canonical SHA differs")
+    # A fresh ROOT namespace must never silently inherit the old V38 case
+    # identity.  The old identity remains in v62_provenance below, while all
+    # actionable request/attempt/receipt paths use this explicit new case.
+    if not isinstance(case_id, str) or not case_id.strip():
+        raise PortableV64Error("V64 build requires an explicit --case-id for the new namespace")
+    new_case_id = case_id.strip()
+    old_case_id = v62.get("case_id")
+    if not isinstance(old_case_id, str) or not old_case_id:
+        raise PortableV64Error("V62 provenance case_id is missing")
     target = _absolute(target_root, "target root")
     output = _absolute(output_root, "output root")
     if target.exists() or output.exists() or target == output or _under(target, output) or _under(output, target):
@@ -1113,9 +1144,14 @@ def build_request(*, v62_request: Path | str, output_request: Path | str,
     if int(external_bytes) <= 0 or int(external_min_free_bytes) < 0:
         raise PortableV64Error("external reservation is invalid")
     runtime_path = _pinned_path(RUNTIME_V6_DEFAULT, "shared runtime v6")
+    runtime_v2_path = _pinned_path(RUNTIME_V2_DEFAULT, "shared runtime v2")
+    resolved_python_path = _pinned_path(PINNED_PYTHON_RESOLVED, "resolved pinned Python")
+    pyvenv_cfg_path = _pinned_path(PINNED_PYVENV_CFG, "pinned Python pyvenv.cfg")
+    if not PINNED_PYTHON_PATH.is_file():
+        raise PortableV64Error(f"literal pinned Python path is missing: {PINNED_PYTHON}")
     request: dict[str, Any] = {
         "schema": SCHEMA, "status": "READY_FOR_PARENT_GUARD", "role": "DEVELOPMENT",
-        "family_id": "F2", "case_id": v62.get("case_id"), "request_id": attempt,
+        "family_id": "F2", "case_id": new_case_id, "request_id": attempt,
         "attempt_id": attempt, "worktree_root": str(SCRIPT_DIR.parent.parent),
         "parent_adapter": {"schema": "ds02.stage2.f2-portable-executor-parent-request.v3",
                             "implementation": str(PARENT_V3_PATH),
@@ -1136,7 +1172,19 @@ def build_request(*, v62_request: Path | str, output_request: Path | str,
             "scientific_status": "operational_accounting_only",
         },
         "v62_provenance": {"path": str(v62_path), "sha256": _sha(v62_path),
-                           "schema": v62.get("schema"), "immutable": True},
+                           "schema": v62.get("schema"), "case_id": old_case_id,
+                           "immutable": True},
+        "python_binding": {
+            # This literal string is the actual argv[0] and must not be
+            # replaced by its resolved /usr/bin/python3.10 path.
+            "argv_path": PINNED_PYTHON,
+            "argv_path_kind": "literal_venv_invocation",
+            "resolved_path": str(resolved_python_path),
+            "resolved_sha256": _sha(resolved_python_path),
+            "pyvenv_cfg_path": str(pyvenv_cfg_path),
+            "pyvenv_cfg_sha256": _sha(pyvenv_cfg_path),
+            "source_fallback": "FORBIDDEN",
+        },
         "run_out_binding": run_out_binding,
         "raw_source": {
             "root": str(raw_root), "tree_sha256": str(v62["raw_source"].get("tree_sha256", "")),
@@ -1188,7 +1236,11 @@ def build_request(*, v62_request: Path | str, output_request: Path | str,
             "external_filesystem": str(external),
         },
         "runtime_binding": {"path": str(runtime_path), "sha256": _sha(runtime_path),
-                            "role": "shared_runtime_v6", "immutable": True},
+                            "role": "shared_runtime_v6", "immutable": True,
+                            "base_import": "ds_data02_runtime_v2",
+                            "base_path": str(runtime_v2_path),
+                            "base_sha256": _sha(runtime_v2_path),
+                            "base_role": "shared_runtime_v2"},
         "storage_scope": {
             "external_filesystem": str(external), "external_output_root": str(output),
             "supervisor_output_root": str(supervisor), "home_receipt_path": str(receipt),
@@ -1243,6 +1295,14 @@ def _validate_request(path: Path, *, verify_static: bool = False) -> dict[str, A
         raise PortableV64Error("V64 request canonical SHA differs")
     if request.get("role") != "DEVELOPMENT" or request.get("qualification") != UNKNOWN:
         raise PortableV64Error("V64 must remain DEVELOPMENT/UNKNOWN")
+    case_id = request.get("case_id")
+    provenance = request.get("v62_provenance")
+    if not isinstance(case_id, str) or not case_id.strip():
+        raise PortableV64Error("V64 case_id must identify the new namespace")
+    if not isinstance(provenance, Mapping) or not isinstance(provenance.get("case_id"), str):
+        raise PortableV64Error("V62 provenance case_id is required")
+    if case_id == provenance.get("case_id"):
+        raise PortableV64Error("new V64 case_id may not inherit the V62 provenance case")
     if request.get("model_invoked") is not False or request.get("cfd_invoked") is not False:
         raise PortableV64Error("V64 model/CFD invocation is forbidden")
     delta_contract = request.get("terminal_cpu_delta_contract")
@@ -1474,11 +1534,29 @@ def _validate_request(path: Path, *, verify_static: bool = False) -> dict[str, A
                                "--worker", str(worker_target), "--"]
     if command[:len(expected_command_prefix)] != expected_command_prefix:
         raise PortableV64Error("worker command does not use the copied V64 bootstrap")
-    if not command or command[0] != str(_absolute(execution.get("python"), "pinned Python")):
-        # A literal venv path is required.  _absolute does not resolve the symlink
-        # in the value used for argv[0] because this is only a string comparison.
-        if not command or command[0] != str(execution.get("python")):
-            raise PortableV64Error("worker command does not preserve literal interpreter path")
+    # Never normalize argv[0] through Path.resolve(): that would turn the
+    # bound venv invocation into /usr/bin/python3.10 and reintroduce the
+    # system NumPy/h5py ABI.  The resolved binary and pyvenv.cfg are checked
+    # as separate static dependencies below.
+    python_binding = request.get("python_binding")
+    if (not isinstance(python_binding, Mapping) or
+            python_binding.get("argv_path") != PINNED_PYTHON or
+            python_binding.get("argv_path_kind") != "literal_venv_invocation" or
+            execution.get("python") != PINNED_PYTHON or
+            runtime.get("pinned_python") != PINNED_PYTHON or
+            not command or command[0] != PINNED_PYTHON):
+        raise PortableV64Error("worker command must preserve the literal pinned venv interpreter")
+    resolved_python = _pinned_path(python_binding.get("resolved_path"),
+                                    "resolved pinned Python")
+    pyvenv_cfg = _pinned_path(python_binding.get("pyvenv_cfg_path"),
+                              "pinned Python pyvenv.cfg")
+    if resolved_python != PINNED_PYTHON_RESOLVED or pyvenv_cfg != PINNED_PYVENV_CFG:
+        raise PortableV64Error("pinned Python resolver/cfg paths differ from the literal venv")
+    if (_require_sha(python_binding.get("resolved_sha256"), "resolved pinned Python SHA") !=
+            _sha(resolved_python) or
+            _require_sha(python_binding.get("pyvenv_cfg_sha256"), "pyvenv.cfg SHA") !=
+            _sha(pyvenv_cfg)):
+        raise PortableV64Error("pinned Python resolver/cfg content differs")
     max_wall = float(execution.get("max_wall_seconds", 0.0) or 0.0)
     if not math.isfinite(max_wall) or max_wall <= 0:
         raise PortableV64Error("max wall is invalid")
@@ -1492,17 +1570,56 @@ def _validate_request(path: Path, *, verify_static: bool = False) -> dict[str, A
         raise PortableV64Error("bounded log limit is missing")
     runtime_path = _pinned_path(runtime_binding.get("path"), "shared runtime v6")
     runtime_sha = _require_sha(runtime_binding.get("sha256"), "shared runtime SHA")
+    runtime_v2_path = _pinned_path(runtime_binding.get("base_path"), "shared runtime v2")
+    runtime_v2_sha = _require_sha(runtime_binding.get("base_sha256"), "shared runtime v2 SHA")
+    if (runtime_binding.get("role") != "shared_runtime_v6" or
+            runtime_binding.get("base_role") != "shared_runtime_v2" or
+            runtime_binding.get("base_import") != "ds_data02_runtime_v2" or
+            runtime_v2_path != RUNTIME_V2_DEFAULT or
+            runtime_v2_sha != _sha(runtime_v2_path)):
+        raise PortableV64Error("runtime_v6 to runtime_v2 dependency binding is incomplete")
     static = request.get("static_bindings")
     if not isinstance(static, list) or not static:
         raise PortableV64Error("static source closure is missing")
+    static_by_role: dict[str, Mapping[str, Any]] = {}
     for item in static:
         if not isinstance(item, Mapping):
             raise PortableV64Error("static binding is malformed")
-        source = _pinned_path(item.get("path"), str(item.get("role", "static")))
+        role = str(item.get("role", "static"))
+        if role in static_by_role:
+            raise PortableV64Error(f"duplicate static binding role: {role}")
+        static_by_role[role] = item
+        source = _pinned_path(item.get("path"), role)
         if int(item.get("bytes", -1)) != source.stat().st_size:
             raise PortableV64Error(f"static byte stat differs: {source}")
-        if verify_static and _sha(source) != _require_sha(item.get("sha256"), "static binding SHA"):
+        declared_sha = _require_sha(item.get("sha256"), f"{role} static binding SHA")
+        if verify_static and _sha(source) != declared_sha:
             raise PortableV64Error(f"static source SHA differs: {source}")
+    required_static_roles = {
+        "shared_runtime_v2", "shared_runtime_v6",
+        "pinned_python_resolved_binary", "pinned_python_pyvenv_cfg",
+    }
+    missing_static = sorted(required_static_roles.difference(static_by_role))
+    if missing_static:
+        raise PortableV64Error(
+            "V64 static closure is missing required runtime/interpreter roles: "
+            + ", ".join(missing_static))
+    if static_by_role["shared_runtime_v2"].get("path") != str(runtime_v2_path):
+        raise PortableV64Error("shared runtime v2 static binding differs from runtime dependency")
+    if static_by_role["shared_runtime_v2"].get("sha256") != runtime_v2_sha:
+        raise PortableV64Error("shared runtime v2 static SHA differs from runtime dependency")
+    if static_by_role["shared_runtime_v6"].get("path") != str(runtime_path):
+        raise PortableV64Error("shared runtime v6 static binding differs from runtime dependency")
+    if static_by_role["shared_runtime_v6"].get("sha256") != runtime_sha:
+        raise PortableV64Error("shared runtime v6 static SHA differs from runtime dependency")
+    if static_by_role["pinned_python_resolved_binary"].get("path") != str(resolved_python):
+        raise PortableV64Error("resolved pinned Python is not in the static closure")
+    if static_by_role["pinned_python_resolved_binary"].get("sha256") != python_binding.get("resolved_sha256"):
+        raise PortableV64Error("resolved pinned Python static SHA differs from python binding")
+    if static_by_role["pinned_python_pyvenv_cfg"].get("path") != str(pyvenv_cfg):
+        raise PortableV64Error("pyvenv.cfg is not in the static closure")
+    if static_by_role["pinned_python_pyvenv_cfg"].get("sha256") != python_binding.get("pyvenv_cfg_sha256"):
+        raise PortableV64Error("pyvenv.cfg static SHA differs from python binding")
     if runtime_path.stat().st_size <= 0:
         raise PortableV64Error("runtime is empty")
     limits = _load_json(ledger, "parent ledger").get("limits", {})
@@ -2005,6 +2122,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     build.add_argument("--external-bytes", type=int, default=12 * 1024**3)
     build.add_argument("--external-min-free-bytes", type=int, default=20 * 1024**3)
     build.add_argument("--attempt-id")
+    build.add_argument("--case-id", required=True,
+                       help="explicit new case identity; the V62 case is provenance only")
     preflight = sub.add_parser("preflight")
     preflight.add_argument("--request", type=Path, required=True)
     run_parser = sub.add_parser("run")
@@ -2022,7 +2141,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                                    max_wall_seconds=args.max_wall_seconds,
                                    external_bytes=args.external_bytes,
                                    external_min_free_bytes=args.external_min_free_bytes,
-                                   attempt_id=args.attempt_id)
+                                   attempt_id=args.attempt_id,
+                                   case_id=args.case_id)
         elif args.command == "preflight":
             path = _absolute(args.request, "V64 request")
             result = _validate_request(path, verify_static=False)
