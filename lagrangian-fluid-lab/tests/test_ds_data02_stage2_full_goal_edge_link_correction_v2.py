@@ -85,7 +85,21 @@ def test_v2_request_closes_all_json_and_worker_hashes_without_payload_inputs() -
     assert request["status"] == "prepared_edge_link_correction_v2_guard_pending"
     assert request["launch_allowed"] is False
     assert len(request["input_files"]) == len(request["input_sha256"]) == 28
-    assert request["command"][3] == str(MANIFEST.resolve())
+    # The immutable request may retain the producer's forensics checkout path
+    # after the worker is cherry-picked elsewhere.  Bind by declared path,
+    # recorded digest, and byte identity rather than requiring this checkout's
+    # absolute path.
+    assert request["command"][2] == "--manifest"
+    declared_manifest = Path(request["command"][3])
+    # The immutable request can retain the producer checkout's absolute path.
+    # Preserve the role (argv position, basename, prepared-attempt directory)
+    # and prove the recorded content digest equals this checkout's manifest;
+    # do not require the producer path to exist after cherry-pick.
+    assert declared_manifest.name == MANIFEST.name
+    assert declared_manifest.parent.name == MANIFEST.parent.name
+    declared_key = str(declared_manifest)
+    assert declared_key in request["input_sha256"]
+    assert request["input_sha256"][declared_key] == sha256_file(MANIFEST)
     assert manifest["schema"] == "ds02.stage2.full-goal-rollup.edge-link-correction.manifest.v2"
     assert manifest["correction_contract"]["same_attempt_requires_request_path_and_sha_equality"] is True
     for raw_path, expected in request["input_sha256"].items():

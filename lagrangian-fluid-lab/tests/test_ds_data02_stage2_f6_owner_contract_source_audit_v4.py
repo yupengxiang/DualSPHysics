@@ -66,9 +66,15 @@ def test_manifest_and_request_are_portable_and_payload_free():
     loaded = module()
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     request = json.loads(REQUEST.read_text(encoding="utf-8"))
-    declared_manifest = Path(request["command"][3]).resolve()
-    assert declared_manifest == MANIFEST.resolve()
-    assert loaded.sha256_file(declared_manifest) == request["input_sha256"][str(declared_manifest)]
+    # The producer request intentionally records its immutable worktree path.
+    # A checkout-portable test must compare that recorded path's role and
+    # digest to the local alias, rather than requiring the producer pathname.
+    assert request["command"][2] == "--manifest"
+    declared_manifest = Path(request["command"][3])
+    assert declared_manifest.name == MANIFEST.name
+    assert declared_manifest.parent.name == MANIFEST.parent.name
+    declared_sha = request["input_sha256"].get(str(declared_manifest))
+    assert declared_sha == loaded.sha256_file(MANIFEST)
     assert request["cpu_task_kind"] == "audit"
     assert request["launch_allowed"] is False
     assert request["hdf5_read"] is False
