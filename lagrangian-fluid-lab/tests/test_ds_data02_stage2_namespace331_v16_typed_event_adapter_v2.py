@@ -126,7 +126,7 @@ def test_real_v3_request_is_metadata_admissible_without_typed_read() -> None:
 
 def test_guarded_mapping_uses_strict_event_consumer_and_no_credit_for_unknown_role() -> None:
     request = _request(unknown_role="region_owner")
-    document = A.build_event_stream_from_request(_typed_result(), request)
+    document = A.build_event_stream_from_request(_typed_result(), request, allow_fixture=True)
     assert document["schema"] == A.EVENT_SCHEMA
     assert document["adapter"]["schema"] == A.ADAPTER_SCHEMA
     assert document["adapter"]["event_credit"] == "NONE_ROLE_PROOF_UNKNOWN"
@@ -137,12 +137,18 @@ def test_guarded_mapping_uses_strict_event_consumer_and_no_credit_for_unknown_ro
 
 def test_all_known_fixture_is_still_development_unknown_and_not_scientific_credit() -> None:
     request = _request()
-    context = A.validate_request_v3(request)
+    context = A.validate_request_v3(request, allow_fixture=True)
     assert context["all_roles_known"] is True
-    document = A.build_event_stream_from_request(_typed_result(), request)
+    document = A.build_event_stream_from_request(_typed_result(), request, allow_fixture=True)
     assert document["adapter"]["event_credit"] == "DEVELOPMENT_UNKNOWN"
     assert document["adapter"]["fixture_role_proof_credit"] is True
+    assert document["adapter"]["production_eligible"] is False
     assert all(value == "UNKNOWN" for value in document["qualification"].values())
+
+
+def test_fixture_closure_is_rejected_by_default_for_production_admission() -> None:
+    with pytest.raises(A.TypedEventAdapterV2Error, match="not production eligible"):
+        A.validate_request_v3(_request())
 
 
 def test_request_sha_and_schema_are_strict() -> None:

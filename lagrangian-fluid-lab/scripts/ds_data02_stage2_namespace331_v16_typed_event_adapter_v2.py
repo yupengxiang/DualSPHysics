@@ -120,7 +120,9 @@ def _request_roles(request: Mapping[str, Any]) -> tuple[dict[str, dict[str, Any]
     return by_role, str(request.get("status"))
 
 
-def validate_request_v3(request: Mapping[str, Any]) -> dict[str, Any]:
+def validate_request_v3(
+    request: Mapping[str, Any], *, allow_fixture: bool = False,
+) -> dict[str, Any]:
     """Validate the small V3 request without reading the deferred typed file."""
     if not isinstance(request, Mapping) or request.get("schema") != REQUEST_SCHEMA:
         raise TypedEventAdapterV2Error(f"request schema must be {REQUEST_SCHEMA}")
@@ -150,6 +152,14 @@ def validate_request_v3(request: Mapping[str, Any]) -> dict[str, Any]:
     if declared_status not in {"READY_FOR_PARENT_GUARD_ROLE_PROOFS", "ROLE_PROOF_METADATA_PARTIAL_UNKNOWN"}:
         raise TypedEventAdapterV2Error("request status is not an admissible V3 role-proof status")
     all_known = all(item.get("status") == "KNOWN" for item in roles.values())
+    fixture_roles = [role for role, item in roles.items()
+                     if isinstance(item.get("producer_source_closure"), Mapping)
+                     and item["producer_source_closure"].get("credit_boundary") ==
+                     "MANUFACTURED_FIXTURE_ONLY"]
+    if fixture_roles and not allow_fixture:
+        raise TypedEventAdapterV2Error(
+            "fixture role proof is not production eligible; pass allow_fixture=True only for a manufactured test"
+        )
     return {
         "schema": REQUEST_SCHEMA,
         "case_identity": {"family_id": identity["family_id"],
@@ -158,6 +168,9 @@ def validate_request_v3(request: Mapping[str, Any]) -> dict[str, Any]:
         "event_contract": dict(contract), "execution": dict(execution),
         "roles": roles, "declared_status": declared_status,
         "all_roles_known": all_known,
+        "fixture_roles": fixture_roles,
+        "production_eligible": not fixture_roles,
+        "fixture_execution_allowed": bool(allow_fixture and fixture_roles),
         "qualification": dict(UNKNOWN_QUALIFICATION),
     }
 
@@ -190,9 +203,10 @@ def _source_bindings(context: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 def build_event_stream_from_request(
     typed_result: Mapping[str, Any], request: Mapping[str, Any],
+    *, allow_fixture: bool = False,
 ) -> dict[str, Any]:
     """Convert a parent-guarded typed mapping through the strict V1/V2 path."""
-    context = validate_request_v3(request)
+    context = validate_request_v3(request, allow_fixture=allow_fixture)
     if not isinstance(typed_result, Mapping):
         raise TypedEventAdapterV2Error("guarded typed result must be a JSON object")
     contract = context["event_contract"]
@@ -214,6 +228,8 @@ def build_event_stream_from_request(
     document["adapter"]["event_credit"] = (
         "NONE_ROLE_PROOF_UNKNOWN" if not context["all_roles_known"] else "DEVELOPMENT_UNKNOWN"
     )
+    document["adapter"]["production_eligible"] = context["production_eligible"]
+    document["adapter"]["fixture_execution_allowed"] = context["fixture_execution_allowed"]
     document["adapter"]["fixture_role_proof_credit"] = any(
         item.get("producer_source_closure", {}).get("credit_boundary") == "MANUFACTURED_FIXTURE_ONLY"
         for item in context["roles"].values() if isinstance(item.get("producer_source_closure"), Mapping)
@@ -222,7 +238,9 @@ def build_event_stream_from_request(
     return document
 
 
-def convert_bounded_json(request: Mapping[str, Any], typed_path: Path | str) -> dict[str, Any]:
+def convert_bounded_json(
+    request: Mapping[str, Any], typed_path: Path | str, *, allow_fixture: bool = False,
+) -> dict[str, Any]:
     """Small-fixture CLI path; production uses the guarded mapping API above."""
     target = Path(typed_path).expanduser()
     if target.is_symlink() or not target.is_file() or target.stat().st_size > MAX_TYPED_JSON_BYTES:
@@ -231,7 +249,7 @@ def convert_bounded_json(request: Mapping[str, Any], typed_path: Path | str) -> 
         typed = json.loads(target.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise TypedEventAdapterV2Error(str(error)) from error
-    return build_event_stream_from_request(typed, request)
+    return build_event_stream_from_request(typed, request, allow_fixture=allow_fixture)
 
 
 def _write_json(path: Path | str, value: Mapping[str, Any]) -> None:
@@ -249,20 +267,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     validate = sub.add_parser("validate-request")
     validate.add_argument("--request", type=Path, required=True)
     validate.add_argument("--output", type=Path)
+    validate.add_argument("--allow-fixture", action="store_true",
+                          help="allow manufactured fixture role closure; never use for production")
     convert = sub.add_parser("convert")
     convert.add_argument("--request", type=Path, required=True)
     convert.add_argument("--typed-result", type=Path, required=True)
     convert.add_argument("--output", type=Path, required=True)
+    convert.add_argument("--allow-fixture", action="store_true",
+                         help="allow manufactured fixture role closure; never use for production")
     args = parser.parse_args(argv)
     try:
         request = _read_request(args.request)
         if args.command == "validate-request":
-            context = validate_request_v3(request)
+            context = validate_request_v3(request, allow_fixture=args.allow_fixture)
             result = {"schema": "ds02.stage2.namespace331.v16-typed-event-admission.v2",
                       "status": "READY_FOR_PARENT_GUARDED_TYPED_MAPPING",
                       "request_sha256": request["request_sha256"],
                       "case_identity": context["case_identity"],
                       "all_roles_known": context["all_roles_known"],
+                      "fixture_roles": context["fixture_roles"],
+                      "production_eligible": context["production_eligible"],
                       "event_credit": "NONE_ROLE_PROOF_UNKNOWN" if not context["all_roles_known"] else "DEVELOPMENT_UNKNOWN",
                       "qualification": dict(UNKNOWN_QUALIFICATION),
                       "typed_content_read": False}
@@ -270,7 +294,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 _write_json(args.output, result)
             print(json.dumps(result, sort_keys=True))
         else:
-            document = convert_bounded_json(request, args.typed_result)
+            document = convert_bounded_json(request, args.typed_result,
+                                            allow_fixture=args.allow_fixture)
             _write_json(args.output, document)
             print(json.dumps({"output": str(args.output), "schema": document["schema"],
                               "status": document["adapter"]["status"],
