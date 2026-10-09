@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.f1-s2.query1-endpoint-contract.v3",
+  "status": "PRE_REGISTERED_LAUNCH_DISABLED",
+  "query": {
+    "times_s": [1.0],
+    "selection": "nearest lower and upper actual RunPARTs saved rows",
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN"
+  },
+  "entry_contract": {
+    "deferred_records": 6,
+    "per_grid": "exactly lower/upper Part records for coarse, medium, fine",
+    "grid_keys": ["grid", "grid_label"],
+    "grid_key_semantics": "both must be present and equal",
+    "mismatch": "FAIL before native decoder"
+  },
+  "scope": {
+    "axis": "component-space only; producer world-axis orientation UNKNOWN",
+    "fields": ["MassFluid", "MassBound", "Dp", "Idp", "role counts", "weighted fluid centroid", "weighted fluid velocity", "kinetic energy"],
+    "native_mass": "decoder header only; no XML mass fallback",
+    "continuous_owner_mass": "separate diagnostic",
+    "neighbor_grid_truth": false,
+    "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0}
+  },
+  "read_policy": {
+    "native_payload": "six deferred Part files at the nearest one-second brackets",
+    "hdf5": false,
+    "vtk": false,
+    "full_native_tree_scan": false,
+    "solver_launch": false
+  }
+}
