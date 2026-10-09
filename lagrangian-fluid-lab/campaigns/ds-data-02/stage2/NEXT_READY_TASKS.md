@@ -555,3 +555,16 @@ ROOT170 live sameunit2474413/native2474487 at05:58UTC,671complete rows through6.
 - ROOT173/174 byte-preserving V6 one-variable overlays and requests integrated. Root canonical/input-key/actual byte-clone positive checks PASS and primary self-test PASS. Requests remain NOT_RUN and UNKNOWN scientific Q. Source-only shared strict-entry check requested before future native dispatch. Failed v5 remains historical evidence.
 - Actual ledger charged CPU 706.256061104 core-h and GPU 139.613687364 h; original hard limits/deadline/Home floor remain in force. Root source-only administration is not claimed as fully measured worker cost.
 - Next sequential native I/O: finish/verify/charge ROOT177; run small ROOT182 native motive audit; build/launch ROOT178 full fine audit from actual ROOT170 counts/time; comparator ROOT172 only after all three actual source reports. ROOT173/174 and F2 ROOT179B remain conditional queued branches. Full seven-item adopted goal remains active and incomplete.
+
+
+## Actual forward status 2026-10-09T06:37:41.832847+00:00
+
+ROOT177 and ROOT182 completed, independently verified, terminal CPU accounted idempotently and stopped. ROOT177 proof SHA d2706a1f0d62ffa317ce31ea64c8206d51d8d614d467e82f26db85d245b9b57c; native 836-frame identity counts stable, full report remains root stat-only. ROOT182 proof SHA46a33cca4f503bd3b3043cfc5f4aef4d5be093b54305aac88e4f95236156f4aa: 512 unique fluid Idp, native position motives, exact saved-record bracket joins; no physical fate/Q credit.
+
+ROOT178 actually running, unit ds02-f3-s2-fine-full-native-stream-v6-root-178, main2539519, q SHA3de16703f15b759f8f7978b81017bf965f643ee40c9ed701599e9355b9e7b0ec, actual identity `F3/F3_S2_FULL_NATIVE_STREAM_ROOT178_V6/f3-s2-full-native-stream-root178-v6-001-root-forward-030-001`. Only its reservation remains. No terminal/report credit. `/tmp/ds02-root-proof-f3-178.py` prepared/not invoked. Keep all27 declared inputs unchanged.
+
+ROOT185 actual small metadata index completed, proof SHA04855e2968ab7821e21213d0ccb61508198fde54348e3d8d213790dc97d49ef3. Exact/alias catalogs332 rows equal/4 F1 rows differ, the target F2 row canonically equal; historical producer binds alias at both boundaries and not exact CURRENT. No exact-CURRENT source credit. Six primary tests PASS; fees closed/idempotent/service stopped.
+
+V65 source tests3 PASS, but actual-interface root review found canonical-vs-file request SHA mismatch; repair requested before any downstream launch. F2 ROOT179B candidate002 file SHA d83e...570, canonical ccdd...29f (corrects earlier shorthand that conflated them); not run. ROOT184 V1 source review found unguarded finalize full-report hash and wrong compact proof binding. V2 correction pending; V1 not runnable/integrated. ROOT172 pending input card and173/174 actual sharedV5 source-only preflight integrated; no solver launch. Added venv/cfg strict forward closure requested for173/174.
+
+Latest measured charges CPU 706.256971430 core-h/GPU 139.613687364 h. Whole seven-item goal active/incomplete, original hard budgets/deadline/Home floor unchanged. This snapshot is a recovery point and does not replace further execution.
