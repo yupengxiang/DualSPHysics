@@ -13,6 +13,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 BUILDER_PATH = SCRIPTS / "ds_data02_stage2_f2_v50_source_only_postterminal_builder_v3.py"
+SEALER_PATH = SCRIPTS / "ds_data02_stage2_f2_v50_terminal_sealer_v2.py"
 
 
 def _load(path: Path, name: str):
@@ -24,6 +25,7 @@ def _load(path: Path, name: str):
 
 
 B = _load(BUILDER_PATH, "test_v50_source_only_builder_v2")
+S = _load(SEALER_PATH, "test_v50_sealer_v2_for_split_builder")
 
 
 def _sha(path: Path) -> str:
@@ -166,6 +168,11 @@ def test_split_parent_receipt_and_returned_report_are_cross_bound(tmp_path: Path
     assert static_value["derivation"]["home_receipt_charge_status_at_write"] == "pending_same_parent_charge"
     assert manifest_value["terminal"]["charge_closed"] is True
     assert manifest_value["parent_terminal_evidence"]["returned_charge"]["id"] == "charge-split"
+    verified = S._verify_static_receipt(
+        static, executor_path=f["executor_path"], parent_path=f["parent_path"],
+        parent_summary={"binding": {"physical_sha256": _sha(f["parent_path"])},
+                        "attempt_id": "attempt-split", "charge_id": "charge-split"})
+    assert verified["value"]["completed_parent_report"]["returned_ledger_mutated"] is True
 
 
 def test_split_builder_rejects_mixed_attempt_charge_report(tmp_path: Path) -> None:
