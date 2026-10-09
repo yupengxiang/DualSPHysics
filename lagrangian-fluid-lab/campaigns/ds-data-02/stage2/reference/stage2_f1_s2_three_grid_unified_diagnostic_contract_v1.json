@@ -1,0 +1,72 @@
+{
+  "schema": "ds02.stage2.f1-s2.three-grid-unified-diagnostic-contract.v1",
+  "status": "FROZEN_SOURCE_BOUND_DIAGNOSTIC_NO_SCIENTIFIC_Q",
+  "family_id": "F1",
+  "sentinel_id": "F1-S2",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "scope": {
+    "owner_mass_kg": 340.0,
+    "owner_mass_source": "ROOT227 closed axis-aligned owner box and density",
+    "grid_labels": ["coarse", "medium", "fine"],
+    "grid_dp_m": {
+      "coarse": 0.0225,
+      "medium": 0.02,
+      "fine": 0.017
+    },
+    "queries_s": [1.0, 2.0, 3.0, 4.0],
+    "query_policy": {
+      "saved_time_source": "RunPARTs-derived native saved time in producer reports",
+      "interpolation": "FORBIDDEN",
+      "extrapolation": "FORBIDDEN",
+      "selected_row_index_is_not_native_frame_id": true,
+      "common_query_times_are_not_common_native_times": true
+    },
+    "field_scope": [
+      "native MassFluid and MassBound headers",
+      "native Dp and Idp/typed role counts",
+      "fluid-only native-MassFluid weighted component centroid",
+      "fluid-only native-MassFluid weighted component velocity",
+      "fluid-only native-MassFluid kinetic energy"
+    ],
+    "world_orientation": "UNKNOWN",
+    "continuum_vs_discrete_mass": "native sample mass remains a discrete diagnostic; no rescaling and no neighboring-grid truth"
+  },
+  "control_gate": {
+    "generated_xml_timeout_is_provenance_only": true,
+    "receipt_command_timeout_is_authoritative": true,
+    "cfl_or_dt_parameter": "UNKNOWN_NOT_EXPLICIT_IN_BOUND_SMALL_REPORTS",
+    "recipe_identity": "must be checked from each actual report identity and receipt command; no string-only claim of identical controls",
+    "actual_expected_observation": "coarse and fine receipts override XML TimeOut .01 with -tout:.005; medium receipt matches .01",
+    "diagnostic_status": "CONTROL_VARIATION_MUST_REMAIN_EXPLICIT"
+  },
+  "time_step_output_separation": {
+    "status": "PRE_REGISTERED_SOURCE_READY_NEXT_TASK",
+    "output_cadence_isolation": {
+      "task_id": "F1-S2-OUTPUT-CADENCE-ISOLATION-V1",
+      "same_inputs": "per-grid generated XML, BI4, source controls, tmax and CFL/dt settings",
+      "only_change": "actual solver -tout value, with receipt command proving the value",
+      "required_common_tout_s": 0.005,
+      "required_queries_s": [1.0, 2.0, 3.0, 4.0],
+      "readout": "native saved rows and actual RunPARTs times; no interpolation",
+      "qualification": "UNKNOWN until an actual guarded run closes source, command, and saved-time evidence"
+    },
+    "time_step_isolation": {
+      "task_id": "F1-S2-TIME-STEP-ISOLATION-V1",
+      "same_inputs": "one selected grid/source, generated XML, BI4, forcing, tmax and common -tout",
+      "only_change": "one source-registered CFL/dt/CoefDtMin control; exact parameter and receipt command are currently unbound",
+      "required_common_tout_s": 0.005,
+      "required_queries_s": [1.0, 2.0, 3.0, 4.0],
+      "blocking_prerequisite": "bind the actual CFL/dt parameter from source XML/overlay and receipt; do not infer it from the label same_cfl",
+      "qualification": "UNKNOWN until an actual guarded pair closes the one-variable change"
+    },
+    "no_neighbor_grid_truth": true,
+    "no_posthoc_tolerance_widening": true
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "The four actual compact reports establish component-space source and endpoint diagnostics. Their saved times are asynchronous and their actual tout controls are nonuniform, so time-step, output, integration, spatial-truth, event-time, and external-validation bounds are not identified."
+  }
+}
