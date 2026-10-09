@@ -1,0 +1,125 @@
+{
+  "schema": "ds02.stage2.f1.world-axis-units-roles-authority-contract.v2",
+  "status": "SOURCE_ONLY_CONTRACT_NO_SCIENTIFIC_Q_CREDIT",
+  "purpose": "Record the narrow authority that can be closed from the small F1 generated XML/Def files and official BI4 storage source, while keeping producer world-axis calibration and numerical qualification unknown.",
+  "read_scope": {
+    "allowed": [
+      "small generated.xml and source Def.xml records for F1-S1 and F1-S2",
+      "small official C++ source/header records for JPartDataBi4 storage types",
+      "small observer/contract source records",
+      "the immutable fourteen-sentinel registry metadata"
+    ],
+    "forbidden": [
+      "production BI4/H5/VTK/native payload reads",
+      "large report reads",
+      "solver, GPU, or ledger launch",
+      "neighbor-grid truth claims"
+    ]
+  },
+  "authority_findings": {
+    "native_storage_component_order": {
+      "status": "PASS_SOURCE_CLOSED",
+      "meaning": "JPartDataBi4 stores Idp, Posd, Vel, and Rhop through the official source path; tdouble3/tfloat3 define ordered x,y,z components.",
+      "source_refs": [
+        "src/source/JPartDataBi4.cpp:375-390",
+        "src/source/JPartDataBi4.h:261-266",
+        "src/source/TypesDef.h:178-181",
+        "src/source/TypesDef.h:226-229",
+        "lagrangian-fluid-lab/scripts/native/bi4_dump.cpp:6-13"
+      ]
+    },
+    "position_unit": {
+      "status": "PASS_SOURCE_XML_BOUND",
+      "unit": "m",
+      "basis": "F1 source Def geometry definition declares metres (m); generated case geometry is the same source-bound geometry."
+    },
+    "gravity_unit": {
+      "status": "PASS_SOURCE_XML_BOUND",
+      "unit": "m/s^2",
+      "value": [0.0, 0.0, -9.81],
+      "basis": "Each generated F1 XML carries the source gravity vector and its m/s^2 unit comment."
+    },
+    "density_unit": {
+      "status": "PASS_SOURCE_XML_BOUND",
+      "unit": "kg/m^3",
+      "basis": "Generated XML rhop0 carries the kg/m^3 unit comment."
+    },
+    "mass_unit": {
+      "status": "PASS_SOURCE_XML_BOUND",
+      "unit": "kg",
+      "basis": "Generated XML massfluid/massbound carry the kg unit comment; ROOT207 independently verified native header mass fields for the selected records."
+    },
+    "velocity_unit": {
+      "status": "BOUND_SOLVER_CONVENTION_ONLY",
+      "unit": "m/s",
+      "basis": "The observer contract and solver convention use m/s, but the generated XML has no independent velocity unit attribute."
+    },
+    "time_unit": {
+      "status": "BOUND_RUNPARTS_DECODED_SECONDS_ONLY",
+      "unit": "s",
+      "basis": "RunPARTs/decoded_s are used as seconds by the existing observer contract; frame index is not time and no event characteristic T is supplied."
+    },
+    "producer_world_axis_orientation": {
+      "status": "UNKNOWN",
+      "basis": "The XML labels gravity components x,y,z and the registered contract uses an identity world rotation, but JPartDataBi4/bi4_dump carries no producer-to-world orientation record. Gravity alone cannot independently prove orientation."
+    }
+  },
+  "typed_role_authority": {
+    "status": "PASS_SOURCE_XML_ROLE_RANGES_WITH_NATIVE_ROOT207_JOIN",
+    "mapping": {
+      "mkfluid_relative": "fluid block mkfluid=0",
+      "mk_absolute": "fluid block mk=1 because mkfluidfirst=1",
+      "fixed_absolute": [10, 11],
+      "moving": "no moving/floating block in these static F1 generated XMLs"
+    },
+    "identity_rule": "Do not combine relative fluid MK with absolute MK. Fixed and fluid roles are disjoint XML ranges; ROOT207 proof supplies the selected native Idp/count identity join without this sidecar reading native payloads.",
+    "conditions": [
+      {"condition": "F1-S1 same-CFL", "fluid_count": 40200, "fixed_count": 101436, "native_proof": "ROOT207"},
+      {"condition": "F1-S1 half-CFL", "fluid_count": 40200, "fixed_count": 101436, "native_proof": "ROOT207"},
+      {"condition": "F1-S2 coarse", "fluid_count": 29700, "fixed_count": 68664, "native_proof": "ROOT207"},
+      {"condition": "F1-S2 medium", "fluid_count": 42500, "fixed_count": 87816, "native_proof": "ROOT207"},
+      {"condition": "F1-S2 fine", "fluid_count": 69620, "fixed_count": 149362, "native_proof": "ROOT207"}
+    ],
+    "mass_scope": "Native header mass and fluid weighted fields are discrete sample diagnostics. They do not establish a continuum-owner mass for F1-S2 or a physical Q."
+  },
+  "control_scope": {
+    "source_closed_parameters": [
+      "Boundary=1",
+      "SavePosDouble=1",
+      "StepAlgorithm=1",
+      "VerletSteps=40",
+      "Kernel=1",
+      "ViscoTreatment=1",
+      "Shifting=0",
+      "RigidAlgorithm=1",
+      "CoefDtMin=0.05",
+      "TimeOut=0.01",
+      "RhopOutMin=700",
+      "RhopOutMax=1300"
+    ],
+    "time_max": {"F1-S1": 1.6, "F1-S2": 4.0},
+    "motion": "No moving/floating control tag is present in the bound F1 generated XMLs; this is a static-control source fact, not a claim that all physical numerical effects are absent.",
+    "gravity": [0.0, 0.0, -9.81]
+  },
+  "root207_binding": {
+    "root_id": "ROOT207",
+    "proof_path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_NATIVE_SELECTED_OBSERVER_V5_ACTUAL_ROOT_VERIFICATION_207.json",
+    "proof_sha256": "c2016d5a36922230eafc57c49baadaeff3a2bc920bb953b5fef215eb9fda30ab",
+    "allowed_scope": "Five selected native-header/role/mass/weighted-observation conditions; producer world-axis calibration remains UNKNOWN; no QI/QN/QE credit."
+  },
+  "minimum_next_gate": {
+    "smallest_information_gain": "Find and bind an actual producer writer/case source record that declares how solver x,y,z map to the physical world, with exact source SHA/stat and the existing ROOT207 asymmetric selected-frame join. Do not infer this mapping from gravity or from the identity contract alone.",
+    "if_no_axis_record_exists": "Keep world-axis calibration UNKNOWN and restrict any F1 sidecar to component-space, typed-role, native-header, mass, and saved-time diagnostics.",
+    "numerical_error": "Existing ROOT207 selected fields and XML control closure do not identify integration, output, or spatial error bounds. A neighboring-grid difference is not a truth estimate; saved-time brackets are not interpolation or exact common-time values. Use the already frozen F1 task contract without widening it before any future observation."
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "consumption": {
+    "immutable_inputs": [
+      "stage2_f1_com_observer_calibration_contract_v1.json",
+      "stage2_f1_native_selected_observer_v1.py",
+      "stage2_fourteen_evidence_status_v4.json"
+    ],
+    "sidecar_only": true,
+    "does_not_rewrite_consumed_bytes": true
+  }
+}
