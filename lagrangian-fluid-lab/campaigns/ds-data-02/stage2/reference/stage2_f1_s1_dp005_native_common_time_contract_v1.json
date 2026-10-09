@@ -1,0 +1,45 @@
+{
+  "schema": "ds02.stage2.f1-s1.dp005-native-common-time-contract.v1",
+  "scope": "F1-S1 DP005 existing same-CFL versus half-CFL selected native observer reports",
+  "producer_requirement": "Both terminal observer proofs, source requests, execution receipts, observer reports, source snapshot proofs and RunPARTs records must join by exact path and SHA; physical_case_id and producer case_id remain separate fields.",
+  "read_scope": {
+    "proof_json": true,
+    "request_json": true,
+    "execution_receipt_json": true,
+    "observer_report_json": true,
+    "runparts_csv": true,
+    "generated_xml": "path identity/stat only",
+    "native_bi4": false,
+    "vtk": false,
+    "hdf5": false,
+    "solver_launch": false
+  },
+  "pairing": {
+    "key": "native saved frame id",
+    "frame_ids": [0, 79, 80, 159, 160, 239, 240, 319, 320],
+    "time_policy": "Report each producer's actual decoded and RunPARTs times; exact common time requires numerical equality.",
+    "interpolation": false,
+    "neighbor_grid_truth": false
+  },
+  "observables": [
+    "native fluid count",
+    "native particle-sample mass",
+    "float64 mass-weighted fluid centroid",
+    "float64 mass-weighted fluid velocity",
+    "reported kinetic energy"
+  ],
+  "diagnostic_tolerances": {
+    "position_m": 0.01788,
+    "velocity_m_per_s": 0.04538832449,
+    "kinetic_energy_J": 0.30036258,
+    "quarter_budget_is_diagnostic_only": true
+  },
+  "scientific_status": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reason": "Asynchronous saved times and existing component-space/native-sample fields do not identify interpolation, integration, spatial-truth, event-time or continuum-mass error bounds."
+  },
+  "continuous_owner_mass_kg": 40.2,
+  "particle_sample_mass_is_separate_diagnostic": true
+}
