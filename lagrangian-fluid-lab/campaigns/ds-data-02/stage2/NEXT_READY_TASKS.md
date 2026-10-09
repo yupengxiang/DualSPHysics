@@ -1,3 +1,7 @@
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT294_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 853d135084dc2e64d6a0ae3ade680e0db460a5c522740c265479a6e21b785d40）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
+最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT293_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 429fcabbae46b08c36acda100b973283e75232b393a12e23ad937516c01494a2）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
+
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT293_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 9b8f10694686e1a60a76bc827dcae463d435a64eb3b9b0c193f5c447c47b09cc）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
 
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT292_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 f08b1091426734a57016d65a8a91ab287e59be354e6d547b600f97d1cc0aa448）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
