@@ -601,3 +601,7 @@ ROOT174 减半输出间隔已在共享 guard 内实际运行；28 个声明输�
 
 2026-10-09T10:21:34.359605+00:00 continuation: /home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT187_190_TERMINALS_ROOT188_RUNNING_CONTINUATION_V1.json
 ROOT188 running; terminal verification/fees first. ROOT193 real CLI fix, ROOT194 denominator contract fix and F3 producer-bound comparator V3 delegated. Full Stage2 goal ACTIVE.
+
+
+2026-10-09T10:40:02.342716+00:00 /home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT188_FAILURE_ROOT193_RUNNING_ROOT194_READY_CONTINUATION_V1.json
+ROOT193 RUNNING, ROOT194 READY after IO+fee closure. ROOT188 failed cap2MiB; preserve77.5MB full report for196 guarded recovery. ROOT195 comparison waits recovered actualproducer; ROOT191 waits actual194 proof. Stage2 full goal ACTIVE.
