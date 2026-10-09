@@ -1,0 +1,27 @@
+{
+  "schema": "ds02.stage2.f1-s2.cfl-dt-control-index-contract.v1",
+  "sentinel_id": "F1-S2",
+  "purpose": "source-bound execution-control provenance index",
+  "authority": {
+    "runtime": "completed receipt execution.launch_argv, joined to the exact request",
+    "xml": "generated/source XML parameter declarations only",
+    "labels": "diagnostic labels; never evidence of CFL, dt or output cadence"
+  },
+  "controls": ["CFL", "CoefDtMin", "DtIni", "DtMin", "DtFixed", "DtAllParticles", "TimeOut", "TimeMax", "tmax", "tout"],
+  "isolation_rules": {
+    "half_cfl": "same source/grid and output control; explicit runtime CFL/dt difference required",
+    "half_output": "same source/grid and timestep control; explicit runtime tout difference required",
+    "missing_runtime_token": "BLOCKED; XML declaration or variant label cannot prove actual execution control"
+  },
+  "scope": {
+    "read": "bounded JSON request/receipt and bounded generated XML",
+    "forbidden": ["BI4", "H5", "VTK", "RunPARTs", "native payload", "solver launch"],
+    "time_integration_error": "UNKNOWN",
+    "output_error": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "neighbor_grid_truth": false,
+    "interpolation": false
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.stage2.f3-s2.compact-spatial-lifecycle-contract.v2",
+  "sentinel_id": "F3-S2",
+  "producer_roles": [
+    "ROOT247 coarse V2 compact observer",
+    "ROOT177 middle V5 compact observer",
+    "ROOT178 fine V5 compact observer"
+  ],
+  "queries_s": [0.0, 2.0, 4.0, 6.0, 8.0],
+  "fields": [
+    "native weighted fluid centroid",
+    "native weighted fluid velocity",
+    "native weighted fluid kinetic energy",
+    "native fluid count",
+    "native MassFluid sample mass",
+    "selected-frame lifecycle counts"
+  ],
+  "source_join": {
+    "observer_proof_request_receipt": "required for every producer",
+    "solver_proof_request_receipt": "required for every producer",
+    "compact_summary_sha_and_stat": "required for every producer",
+    "summary_path_must_be_proof_bound": true,
+    "large_full_report": "stat/proof metadata only; content read forbidden"
+  },
+  "time_semantics": {
+    "source": "producer RunPARTs-derived saved times retained in compact summaries",
+    "brackets_retained": true,
+    "interpolation": "FORBIDDEN",
+    "bracket_width_is_field_error": false,
+    "event_time": "UNKNOWN",
+    "exact_common_time_required_for_field_delta": true
+  },
+  "lifecycle_semantics": {
+    "disappearance_is_physical_fate": false,
+    "physical_fate_or_flux": "UNKNOWN",
+    "native_type_or_MK_lifecycle": "diagnostic only unless explicitly present in summary"
+  },
+  "scientific_scope": {
+    "three_grid_spatial_error": "UNKNOWN_NO_TRUTH_REFERENCE",
+    "integration_error": "UNKNOWN",
+    "output_error": "UNKNOWN",
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
