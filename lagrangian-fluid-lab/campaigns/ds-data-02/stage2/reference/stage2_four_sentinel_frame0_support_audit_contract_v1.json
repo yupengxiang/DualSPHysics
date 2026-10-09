@@ -1,0 +1,18 @@
+{
+  "schema": "ds02.stage2.four-sentinel-frame0-support-audit-contract.v1",
+  "purpose": "Bound the exact CURRENT source XML, completed producer receipt, RunPARTs metadata and one native Part_0000 before a parent-reserved frame-0 decode.",
+  "cases": ["F2-S2", "F4-S2", "F5-S2", "F7-S1"],
+  "read_policy": {
+    "builder": ["quality JSON", "source XML", "completed receipt", "RunPARTs CSV", "small source/control files", "stat-only deferred Part_0000"],
+    "worker": ["source XML", "receipt and RunPARTs", "one deferred Part_0000 after parent reservation", "official bi4_dump scratch output"],
+    "forbidden": ["HDF5", "solver launch", "full native tree scan", "neighbor grid substitution", "mass rescale"]
+  },
+  "observables": {
+    "role_identity": "native Idp ranges joined to the exact source XML fixed/moving/floating/fluid ranges",
+    "sample_mass": "native fluid count times source XML massfluid; discrete sample diagnostic only",
+    "range_overlap": "XML Idp range overlap and uncovered IDs are hard failures",
+    "geometric_support": "UNKNOWN until exact Fluid/Bound support payload is supplied under a separate guarded task",
+    "continuous_owner_mass": "never inferred from native sample mass"
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0}
+}
