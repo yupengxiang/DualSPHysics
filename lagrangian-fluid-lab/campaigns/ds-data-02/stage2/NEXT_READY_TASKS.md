@@ -1,3 +1,11 @@
+最新实际复核（2026-10-09T03:38:07.013801+00:00）：完整七项长期目标 ACTIVE，原资源边界保持。
+
+- ROOT150 F3全部836原生帧实际V2 audit completed/rc0；24264IDs全部836保留，4320fluid/19944fixed由XML范围赋类，活跃Pos/Vel/Rhop全部finite；native MassFluid/MassBound .003375000087544322、sample14.580000378191471kg，全836pre/post SHA/stat稳定，与ROOT147十帧field digest一致。查询2/4/6/8s仍BRACKETED，不赋连续事件/数值Q。42.825099s fullCPU闭账幂等，scratch清理；实际peak未记录为UNKNOWN。
+- ROOT149 F7三档逐Idp face/lattice实际completed/rc0；coarse810全为y=.3500000000000001，exact yhigh差2ULP；4ULP仅representation诊断，不改810原计数或科学门。source literal selector未命中4242/220/3078，与GenCase机制或连续owner等价仍UNKNOWN。1.774279s fullCPU闭账幂等。forensics继续最小coarse source候选，不调整320.1984kg连续owner或既定质量门。
+- ROOT145 V55新cold实际FAILED childrc1，复制480target files、8674403097B external；四模块aliases通过先前入口后，实际copied overlay V2 _worker_path要求runtime/native规范worker文件名缺失。没有converter/typed/labels/cold成功。fullCPU76.533108s、delta.21436同父闭账幂等，unit停/noreserve；namespace/旧失败全保留。consumer先对完整copied调用链源码closure测试，再独立guarded现有copy恢复（非freshcold信用），避免盲目再复制。
+- ROOT151 full-goal JSON rollup与ROOT152 F4 common-time/output readiness已集成tests/source验证、distinct实际请求就绪未启动。151来源快照含旧pending boundary，不隐含145新终态；152只读observer JSON和RunPARTs，不解码native fields，缺相邻行保持UNKNOWN。reference继续F3 matched middle/control/cost准备。
+- ledger CPU704.5474071508308 core h/GPU137.96668911670722 h；qualification646/1024、production23/720、cpu4482。无active reservation/GPU/CFD任务。Home693298503680B、/var/tmp183956295680B为最近测量，任何launch重新核对。原512GPUh/3840CPUh/Home536870912000B/deadline2026-10-14T07:23:48Z不重置。
+
 最新实际复核（2026-10-09T03:19:55.407669+00:00）：完整长期目标 ACTIVE，原资源边界保持。
 
 - ROOT147 F3十帧原生头/字段审计 actual completed/rc0，65037B report。native MassFluid/MassBound .003375000087544322、decoded binary64 view00000060e3a56b3f；4320fluid sample14.580000378191471kg，XML14.58kg分开。十帧24264IDs unique/allPosVelRhopfinite，sourcepre/post全SHA/stat稳定。2/4/6/8s查询仍BRACKETED，没有插值/连续到达/数值Q信用。fullCPU1.701718s闭账幂等、unit停；reference准备ROOT150 full836实际ten-probe门控forward request。
