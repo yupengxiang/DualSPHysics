@@ -1,3 +1,9 @@
+最新实际增量（2026-10-09T01:55:22.108592+00:00）：完整七项目标 ACTIVE，原边界不变。
+
+- ROOT130 数值域六面微增对照实际 completed/rc0，401原生files，0→4.00002065943922s、27750→27683活跃fluid。RunPARTs逐输出区间 NpOut求和67，全position，rho/moving均0；末行NpOut=0仅表示末区间，不能当全窗零遗漏。原域153→margin域67说明数值域敏感，不赋物理去向/科学Q。DTsMin全0、boundary512883不变，root独立XML仅两节点六坐标改变、comment及其余结构一致。root未读/哈希native数组，身份与全场待ROOT138 guarded V10 stream。full systemd CPU101.528309s同父补账幂等，外部9539885702B、Home收据精确计费，unit停、UUID租约移除。
+- 主I/O槽释放；reference准备实际V5-compatible ROOT133 F3 coarse与ROOT135 F5 JSON对比。V7顶层status必须保持READY_FOR_PARENT_GUARD、派生说明另存，禁止为接口兼容制造ROOT120 receipt。forensics先准备ROOT137 F7-S1初态source QA，再ROOT138新F2原生字段审计。consumer当前V52前向源码闭包修复待集成；ROOT122失败不重写，不把copiedraw恢复当fresh cold。
+- 当前无active parent reservation，无CFD任务。共享已记CPU704.398939991core h/GPU137.910331866h，后续按实时父guard；GPU6外来进程不动。
+
 最新实际进展（2026-10-09T01:48:48.338166+00:00）：完整七项目标 ACTIVE，以下为恢复入口；后文历史记录保留，原期限、额度及500GiB Home floor不重置。
 
 - ROOT136 汇总实际 completed/rc0；root 独立检查 v27/v29/v30 全部336例、七族各48例、118例原生遗漏及1328 IDs。ROOT126 新参考153 IDs 不并入原目录；ROOT134/128/123的有限任务信用与全部科学 Q UNKNOWN 分开。full systemd CPU1.495286s已同父闭账、重复幂等、unit已停。汇总只绑定所列旧来源，不暗含后来的ROOT124/132/122事实。
