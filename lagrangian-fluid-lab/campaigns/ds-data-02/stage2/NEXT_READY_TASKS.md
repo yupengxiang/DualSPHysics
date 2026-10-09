@@ -1,3 +1,5 @@
+九GenCase候选输入尚未准入：ROOT_NINE_GENCASE_EXACT_CONTROL_PREFLIGHT_FAILED_V1.json 记录F3三个实际forcing copy与原source不等，入口已拒绝；6个motion copy匹配，无GenCase启动。等待additive同控制源修复，生命周期/native/质量串行继续，完整七项目标ACTIVE。
+
 严格原生对账后续等待进程已启动：ROOT_MISSING_NATIVE_JOIN_AFTER_MASS30_WAITER_STARTED_V1.json 绑定实际PID、冻结入口与单实例锁；仅等待ROOT326实际质量审计终态，312/315/317–321尚未启动。完整七项目标ACTIVE。
 
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT306_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 92fd7a31caae4a1213c9e6d18f6fcd950b4ba338fecedf0e3ba112b157d6a9dc）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
