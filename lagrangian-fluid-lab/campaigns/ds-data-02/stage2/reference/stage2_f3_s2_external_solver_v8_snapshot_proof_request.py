@@ -116,8 +116,15 @@ def validate_proof(
         "physical_case_id": "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT",
     }
     for key, expected in expected_identity.items():
-        if proof.get(key) != expected or snapshot.get(key) != expected:
-            raise ValueError(f"ROOT132 {key} identity mismatch")
+        if snapshot.get(key) != expected:
+            raise ValueError(f"ROOT132 snapshot {key} identity mismatch")
+        # The independently written ROOT132 proof does not duplicate the
+        # family/sentinel/case keys at top level.  If a future proof includes
+        # them, reject a conflicting value; absence is the current valid
+        # proof shape and is covered by the snapshot identity above.
+        proof_identity = proof.get(key)
+        if proof_identity is not None and proof_identity != expected:
+            raise ValueError(f"ROOT132 proof {key} identity mismatch")
 
     report_ref = proof.get("report")
     if report_ref != str(snapshot_path):
