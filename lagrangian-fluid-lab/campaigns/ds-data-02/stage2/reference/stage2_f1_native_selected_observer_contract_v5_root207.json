@@ -1,0 +1,48 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-contract.v5-root207",
+  "status": "SOURCE_ONLY_FORWARD_CONTRACT",
+  "supersedes": [
+    "ds02.stage2.f1.native-selected-observer-request.v4",
+    "ROOT204 actual failure proof is preserved and remains a dependency"
+  ],
+  "purpose": "Rebind axis_authority.source_records to the primary checkout's fresh filesystem stat after exact content SHA/bytes equality.",
+  "root204_failure": {
+    "status": "VERIFIED_ACTUAL_FAILURE_BEFORE_NATIVE_DECODER",
+    "failure_reason": "axis source record mtime changed after source binding",
+    "native_decoder_started": false,
+    "native_payload_read_by_root204": 321709770,
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "axis_stat_rebind": {
+    "old_path_remap": "agent checkout prefix to primary checkout prefix only",
+    "content_gate": ["sha256", "bytes"],
+    "fresh_stat_fields": ["bytes", "mtime_ns", "ctime_ns", "device", "inode"],
+    "source_change": "FAIL_AND_BLOCK",
+    "science_authority_replacement": false,
+    "same_bytes_different_mtime": "ACCEPT_AS_STAT_ONLY_TRANSITION",
+    "content_sha_change": "REJECT"
+  },
+  "source_scope": {
+    "small_axis_sources_hashed": true,
+    "maximum_source_file_bytes": 8388608,
+    "production_native_payload_read": false,
+    "deferred_native_records": 25,
+    "deferred_native_hashing": "PARENT_AFTER_RESERVATION_ONLY",
+    "hdf5_read": false
+  },
+  "blocked_output": {
+    "allow_blocked_builder_mode": true,
+    "execution_allowed": false,
+    "launch_disabled": true,
+    "status": "BLOCKED_ROOT207_AXIS_STAT_REBIND_DEPENDENCY"
+  },
+  "tests": [
+    "same-content cross-worktree files with different mtime are rebound",
+    "changed-content cross-worktree file is rejected",
+    "native payload suffix is never opened by the source-only helper"
+  ]
+}
