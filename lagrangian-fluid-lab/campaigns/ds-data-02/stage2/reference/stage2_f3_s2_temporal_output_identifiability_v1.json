@@ -1,0 +1,126 @@
+{
+  "schema": "ds02.stage2.f3-s2.temporal-output-identifiability.v1",
+  "status": "TERMINAL_GAP_UNIDENTIFIABLE_FROM_ROOT195",
+  "purpose": "Record the exact scientific limit of ROOT195 temporal/output diagnostics before moving to another sentinel.",
+  "source_evidence": {
+    "root195_proof": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F3_TEMPORAL_OUTPUT_THREE_WAY_COMPARISON_V4_ACTUAL_ROOT_VERIFICATION_195.json",
+      "sha256": "44cd74e4950dc3237bf5e61e137eb183dd238eb948914926e9f1c1a0eadc56bd"
+    },
+    "root195_request": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-overlay-task-error-compare-v4-root-forward-195-001.json",
+      "sha256": "2cd369440f9a129fdbf98eceabe17738689ebdc7f42ce712e0ceea8028da7a95"
+    },
+    "root195_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OVERLAY_TASK_ERROR_COMPARE_V4_ROOT195/f3-s2-overlay-task-error-compare-v4-root195-001-root-forward-030-001/execution-receipt.json",
+      "sha256": "114c48a621d0b8a564c5705ac83f4a72f1caf4b58eeae5a6dd0110dacb95e4d4"
+    },
+    "root195_report": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F3/F3_S2_OVERLAY_TASK_ERROR_COMPARE_V4_ROOT195/f3-s2-overlay-task-error-compare-v4-root195-001-root-forward-030-001/comparison/f3_s2_overlay_task_error_compare_v4.json",
+      "sha256": "f06d5a31da932f17a41fd0d9b3e39bd728b53e5ae60274b0ed59f61b22bd1e7"
+    },
+    "frozen_contract": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_overlay_native_task_contract_v1.json",
+      "sha256": "67152bf62a9bb023cfb1f7bfb3f4efe770c6bf8a6d9e3d2e3b02579122a2d5d9"
+    },
+    "calibration_contract": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_observer_calibration_contract_v1.json",
+      "sha256": "deba6765006c23eaaa7888d939cb88ab6d133cdff1c41a9d0473dd4ef4a91b0e"
+    }
+  },
+  "measured_diagnostics": {
+    "common_query_times_s": [0.0, 2.0, 4.0, 6.0, 8.0],
+    "half_cfl": {
+      "aligned_endpoint_count": 2,
+      "asynchronous_endpoint_count": 8,
+      "max_abs_saved_time_offset_s": 0.00001432071796791945,
+      "max_position_difference_m": 0.00013007956998351106,
+      "max_velocity_difference_m_per_s": 0.000818074326410652,
+      "max_kinetic_energy_difference_j": 0.0066299501283138
+    },
+    "half_output": {
+      "aligned_endpoint_count": 6,
+      "asynchronous_endpoint_count": 4,
+      "max_abs_saved_time_offset_s": 0.005005908169452233,
+      "max_position_difference_m": 0.0017303451676182115,
+      "max_velocity_difference_m_per_s": 0.009259680593912398,
+      "max_kinetic_energy_difference_j": 0.012086822813231868
+    },
+    "comparison_semantics": {
+      "native_saved_times_only": true,
+      "field_interpolation": false,
+      "neighbor_grid_as_truth": false,
+      "event_time_registered": false
+    }
+  },
+  "frozen_budget": {
+    "position_gate_m": 0.01788,
+    "velocity_gate_m_per_s": 0.04538832449,
+    "kinetic_energy_gate_j": 0.30036258,
+    "quarter_allocations": {
+      "position_m": 0.00447,
+      "velocity_m_per_s": 0.0113470811225,
+      "kinetic_energy_j": 0.075090645
+    },
+    "time_and_output_fraction": 0.25,
+    "event_time_fraction": 0.01,
+    "event_characteristic_time_s": null,
+    "budget_semantics": "allocation only; not a saved-time bracket rule or field-error bound"
+  },
+  "identifiability": {
+    "time_alignment_error_bound": {
+      "status": "UNKNOWN_MATHEMATICALLY_UNIDENTIFIABLE",
+      "reason": "The compared fields are sampled at different saved times. A timestamp offset becomes a field error only with a source-bound derivative or Lipschitz bound, which ROOT195 does not contain."
+    },
+    "output_reconstruction_error_bound": {
+      "status": "UNKNOWN_MATHEMATICALLY_UNIDENTIFIABLE",
+      "reason": "ROOT195 retains bracket endpoints and does no reconstruction. Bracket width alone cannot bound output error, and the half-output run changes only the save cadence without supplying an exact common-time field truth."
+    },
+    "integration_error_bound": {
+      "status": "UNKNOWN_MATHEMATICALLY_UNIDENTIFIABLE",
+      "reason": "The half-CFL comparison changes the numerical time-step regime and is asynchronous. Its field difference cannot be separated into integration and time-alignment components from these observations."
+    },
+    "event_time_bound": {
+      "status": "BLOCKED_UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+      "reason": "The forcing-table/control window is not an event characteristic time."
+    },
+    "scientific_qualification": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    }
+  },
+  "minimal_future_measurement_if_budget_evaluation_is_required": {
+    "status": "PLAN_ONLY_NOT_RUN",
+    "output_only_empirical_calibration": {
+      "method": "Read native fields at the local saved-frame neighborhoods around 2, 4, 6, and 8 s for each of ROOT177, ROOT187, and ROOT196; compare a preregistered 2x/4x same-run retained-row reconstruction against the intervening native rows.",
+      "required_inputs": "Existing terminal native trees and the already bound solver/producer proofs; no new solver run, H5, or neighboring grid.",
+      "result_scope": "Empirical output-resolution diagnostic only; it cannot become a rigorous integration or event-time bound without an independent derivative/reference proof.",
+      "time_interpolation_in_primary_comparison": false,
+      "scientific_qualification": {
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN",
+        "QE": "UNKNOWN"
+      }
+    },
+    "strict_time_or_integration_bound": {
+      "required_evidence": [
+        "source-bounded derivative/Lipschitz bounds for each observable over every compared interval, or",
+        "an independently justified exact/analytical reference sampled at the same physical times"
+      ],
+      "metadata_only_request_sufficient": false,
+      "current_status": "NOT_IDENTIFIED"
+    }
+  },
+  "next_scientific_branch": {
+    "sentinel": "F2-S1",
+    "evidence": {
+      "proof": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/TYPED_LIFECYCLE_BATCH_F2_ACTUAL_ROOT_VERIFICATION_198.json",
+      "proof_sha256": "a7d051dc1c4b844c1b90533160e11cbcc99ba4d6b3327148a624beb68d6e589e"
+    },
+    "current_scope": "Actual saved-mask lifecycle diagnostics only; QI/QN/QE remain UNKNOWN.",
+    "next_request_scope": "Exact non-overlap CURRENT continuation batches plus separate native-cause/fate evidence; retain saved brackets and do not infer physical fate or flux.",
+    "solver_launch": false,
+    "native_payload_read": false
+  }
+}
