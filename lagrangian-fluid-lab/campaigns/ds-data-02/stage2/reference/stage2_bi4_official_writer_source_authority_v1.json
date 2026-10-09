@@ -1,0 +1,46 @@
+{
+  "schema": "ds02.stage2.f1.bi4-official-writer-source-authority.v1",
+  "status": "STORAGE_COMPONENT_AUTHORITY_BOUND_WORLD_AXIS_UNKNOWN",
+  "scope": "Small source audit for the manufactured writer/reader calibration. It does not assert the physical world orientation of any production case.",
+  "evidence": [
+    {
+      "path": "src/source/JPartDataBi4.cpp",
+      "lines": "375-390",
+      "fact": "JPartDataBi4 writes Idp as DatUint or Ipd as DatUllong, Posd as DatDouble3 or Pos as DatFloat3, Vel as DatFloat3, and Rhop as DatFloat."
+    },
+    {
+      "path": "src/source/TypesDef.h",
+      "lines": "178-184,226-232",
+      "fact": "tfloat3 and tdouble3 are plain structs with fields x,y,z in that storage order."
+    },
+    {
+      "path": "src/source/JBinaryData.cpp",
+      "lines": "55-102",
+      "fact": "The official type names and element sizes are uint=4, float=4, double=8, float3=12, and double3=24 bytes on the compiled host."
+    },
+    {
+      "path": "lagrangian-fluid-lab/scripts/native/bi4_dump.cpp",
+      "lines": "6-15",
+      "fact": "The read-only adapter loads the BI4 with JBinaryData, writes metadata XML, and emits one binary file per decoded array; it does not assign physical roles or axes."
+    }
+  ],
+  "manufactured_contract": {
+    "component_labels": ["x", "y", "z"],
+    "position_unit": "m",
+    "velocity_unit": "m/s",
+    "mass_unit": "kg",
+    "density_unit": "kg/m^3",
+    "time_unit": "s",
+    "role_ranges_are_fixture_input": true,
+    "world_axis_orientation": "UNKNOWN_UNTIL_BOUND_TO_PRODUCER_XML_GRAVITY_CONTROL_OR_WRITER_CALLSITE"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0
+  },
+  "production_payload_read": false,
+  "solver_started": false,
+  "gpu": false
+}

@@ -1,0 +1,126 @@
+{
+  "schema": "ds02.stage2.f1.bi4-official-writer-calibration-contract.v1",
+  "status": "MANUFACTURED_SOURCE_CALIBRATION_ONLY_NO_SCIENTIFIC_QUALIFICATION",
+  "scope": {
+    "purpose": "Exercise the official JPartDataBi4 writer, the compiled repository bi4_dump reader, and the existing native observer on a six-particle manufactured BI4 fixture.",
+    "production_payloads": "forbidden",
+    "production_native_or_h5_reads": false,
+    "solver_or_gpu": false,
+    "scientific_credit": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN"
+    },
+    "axis_limit": "The fixture proves storage component order and SI-labelled test values only. JPartDataBi4 does not encode a producer world-axis orientation or a per-particle role tag; a real case still needs source XML/gravity/control authority for an axis calibration claim."
+  },
+  "official_writer_contract": {
+    "writer_class": "JPartDataBi4",
+    "writer_source": "src/source/JPartDataBi4.cpp",
+    "header_source": "src/source/JPartDataBi4.h",
+    "configuration_calls": [
+      "ConfigBasic",
+      "ConfigParticles",
+      "ConfigCtes",
+      "ConfigSimPeri(PERI_None)",
+      "ConfigSymmetry(false)",
+      "ConfigSplitting(false)",
+      "ConfigSimDiv(DIV_None)",
+      "AddPartInfo",
+      "AddPartData(unsigned, unsigned*, tdouble3*, tfloat3*, float*)",
+      "SaveFilePart"
+    ],
+    "stored_particle_arrays": {
+      "Idp": {"binary_type": "uint32", "components": 1, "unit": "identity"},
+      "Posd": {"binary_type": "double3", "components": 3, "unit": "m (fixture contract)"},
+      "Vel": {"binary_type": "float3", "components": 3, "unit": "m/s (fixture contract)"},
+      "Rhop": {"binary_type": "float", "components": 1, "unit": "kg/m^3 (fixture contract)"}
+    },
+    "header_scalars": {
+      "CaseNp": 6,
+      "CaseNfixed": 2,
+      "CaseNmoving": 1,
+      "CaseNfloat": 0,
+      "CaseNfluid": 3,
+      "Dp_m": 0.01,
+      "H_m": 0.02,
+      "MassBound_kg": 2.0,
+      "MassFluid_kg": 0.5,
+      "Rhop0_kg_m3": 1000.0,
+      "Gamma": 7.0,
+      "PeriMode": 0
+    }
+  },
+  "manufactured_particles": {
+    "order_is_part_of_fixture_contract": true,
+    "roles": {
+      "fixed": {"indices": [0, 1], "ids": [10, 11]},
+      "moving": {"indices": [2], "ids": [20]},
+      "fluid": {"indices": [3, 4, 5], "ids": [100, 101, 102]}
+    },
+    "ids": [10, 11, 20, 100, 101, 102],
+    "positions_m": [
+      [0.0, 0.0, 0.0],
+      [1.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0],
+      [1.0, 1.0, 0.0],
+      [0.0, 1.0, 1.0],
+      [1.0, 0.0, 1.0]
+    ],
+    "velocities_m_per_s": [
+      [0.0, 0.0, 0.0],
+      [0.0, 0.0, 0.0],
+      [0.25, 0.5, 0.75],
+      [1.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0],
+      [0.0, 0.0, 1.0]
+    ],
+    "density_kg_per_m3": [998.0, 999.0, 1000.0, 998.0, 999.0, 1000.0],
+    "expected_fluid_observables": {
+      "mass_kg": 1.5,
+      "weighted_com_m": [0.6666666666666666, 0.6666666666666666, 0.6666666666666666],
+      "weighted_velocity_m_per_s": [0.3333333333333333, 0.3333333333333333, 0.3333333333333333],
+      "kinetic_energy_j": 0.75
+    },
+    "expected_boundary_scalars": {
+      "fixed_particle_count": 2,
+      "moving_particle_count": 1,
+      "massbound_per_boundary_particle_kg": 2.0,
+      "aggregate_fixed_mass_kg_if_scalar_is_per_particle": 4.0,
+      "aggregate_moving_mass_kg_if_scalar_is_per_particle": 2.0
+    }
+  },
+  "numeric_tolerance": {
+    "header_double_abs_kg_or_m": 2.0e-15,
+    "header_double_rel": 2.0e-15,
+    "position_double_abs_m": 2.0e-15,
+    "velocity_float_abs_m_per_s": 2.0e-7,
+    "density_float_abs_kg_per_m3": 2.0e-4,
+    "weighted_com_abs_m": 3.0e-15,
+    "weighted_velocity_abs_m_per_s": 3.0e-7,
+    "kinetic_energy_abs_j": 8.0e-7,
+    "ids": "exact uint32 values, exact count, unique",
+    "finite": "all scalar and vector values must be finite",
+    "tolerance_basis": "These are pre-registered manufactured-reader tolerances based on the declared double3/float3/float storage. They do not become error bounds for a production solver or for a physical axis convention."
+  },
+  "negative_fixtures": [
+    {"name": "duplicate_id", "expected": "REJECT", "reason": "Idp uniqueness is an identity integrity gate"},
+    {"name": "wrong_units_mm_or_g", "expected": "REJECT", "reason": "declared SI fixture units are part of the test contract"},
+    {"name": "swapped_x_y_components", "expected": "REJECT", "reason": "storage component order is x,y,z even though physical world orientation remains unclaimed"},
+    {"name": "fixed_particle_in_fluid_slice", "expected": "REJECT", "reason": "role ranges and fluid-only observables must not include boundary particles"},
+    {"name": "nonfinite_position_or_velocity", "expected": "REJECT", "reason": "NaN/Inf cannot enter observer arithmetic"},
+    {"name": "wrong_mass_fluid", "expected": "REJECT", "reason": "native header MassFluid must be read from the official decoder, not substituted from XML"}
+  ],
+  "read_accounting": {
+    "production_payload_read": false,
+    "manufactured_fixture_expected_max_bytes": 1048576,
+    "source_metadata_read_limit_bytes": 16777216,
+    "compile_timeout_seconds": 600,
+    "run_timeout_seconds": 120,
+    "scratch_cap_bytes": 268435456,
+    "log_cap_bytes": 1048576,
+    "one_cpu": true,
+    "gpu": false,
+    "parent_guard_required": true,
+    "qualification_credit": 0
+  }
+}
