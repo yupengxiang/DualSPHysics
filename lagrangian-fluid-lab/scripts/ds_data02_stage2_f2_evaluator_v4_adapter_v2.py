@@ -57,6 +57,8 @@ LEGACY = _load_legacy()
 # not a second contract; v1 remains the implementation for all other checks.
 REQUEST_SCHEMA = LEGACY.REQUEST_SCHEMA
 CLOSURE_SCHEMA = LEGACY.CLOSURE_SCHEMA
+CLOSURE_SCHEMA_V2 = "ds02.stage2.f2-postterminal-evaluator-runtime-closure.v2"
+CLOSURE_SCHEMAS = {CLOSURE_SCHEMA, CLOSURE_SCHEMA_V2}
 CLOSURE_STATUS = LEGACY.CLOSURE_STATUS
 UNKNOWN = LEGACY.UNKNOWN
 REQUIRED_CLOSURE_ROLES = set(LEGACY.REQUIRED_CLOSURE_ROLES) | {ABI_ROLE}
@@ -197,7 +199,7 @@ def _validate_abi_smoke(raw: Mapping[str, Any], interpreter: Mapping[str, Any],
 
 
 def _validate_closure_external(path: Path, value: Mapping[str, Any]) -> tuple[Path, list[dict[str, Any]]]:
-    if value.get("schema") != CLOSURE_SCHEMA or value.get("status") != CLOSURE_STATUS:
+    if value.get("schema") not in CLOSURE_SCHEMAS or value.get("status") != CLOSURE_STATUS:
         raise EvaluatorAdapterV2Error("post-terminal evaluator closure schema/status differs")
     if value.get("sha256") != canonical_sha(value):
         raise EvaluatorAdapterV2Error("post-terminal closure canonical SHA differs")
@@ -209,6 +211,11 @@ def _validate_closure_external(path: Path, value: Mapping[str, Any]) -> tuple[Pa
         raise EvaluatorAdapterV2Error(f"post-terminal runtime_root is missing: {root}")
     if value.get("original_path_fallback") != "FORBIDDEN":
         raise EvaluatorAdapterV2Error("post-terminal closure permits original fallback")
+    if value.get("schema") == CLOSURE_SCHEMA_V2:
+        source_closure = value.get("source_closure")
+        if not isinstance(source_closure, Mapping) \
+                or source_closure.get("original_path_fallback") != "FORBIDDEN":
+            raise EvaluatorAdapterV2Error("strict closure source registry is missing")
     rows = value.get("roles")
     if not isinstance(rows, list) or not rows:
         raise EvaluatorAdapterV2Error("post-terminal closure roles are missing")
@@ -231,6 +238,10 @@ def _validate_closure_external(path: Path, value: Mapping[str, Any]) -> tuple[Pa
         elif role == ABI_ROLE:
             output.append({"role": role, **_validate_abi_smoke(raw_roles[role], interpreter, root)})
         else:
+            if value.get("schema") == CLOSURE_SCHEMA_V2:
+                provenance = raw_roles[role].get("source_provenance")
+                if not isinstance(provenance, Mapping) or raw_roles[role].get("source_fallback") != "FORBIDDEN":
+                    raise EvaluatorAdapterV2Error(f"strict closure role {role} has no source provenance")
             output.append({"role": role, **_declared_noninterpreter(raw_roles[role], role, root)})
     return root, output
 

@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 BUILDER_PATH = SCRIPTS / "ds_data02_stage2_f2_v50_source_only_postterminal_builder_v1.py"
 ADAPTER_V2_PATH = SCRIPTS / "ds_data02_stage2_f2_evaluator_v4_adapter_v2.py"
+STRICT_BUILDER_PATH = SCRIPTS / "ds_data02_stage2_f2_v50_source_only_postterminal_builder_v2.py"
 
 
 def _load(path: Path, name: str):
@@ -30,6 +31,7 @@ def _load(path: Path, name: str):
 
 B = _load(BUILDER_PATH, "test_v50_source_only_builder")
 A = _load(ADAPTER_V2_PATH, "test_v50_evaluator_adapter_v2")
+SB = _load(STRICT_BUILDER_PATH, "test_v50_strict_source_builder_v2")
 
 
 def _sha(path: Path) -> str:
@@ -257,3 +259,52 @@ def test_v2_adapter_build_preserves_literal_venv_argv0(tmp_path: Path) -> None:
     assert built["interpreter_contract"]["literal_argv0"] == str(literal)
     assert built["interpreter_contract"]["resolved_path_provenance_only"] != str(literal)
     assert built["adapter"]["schema"].endswith("adapter.v2")
+
+
+def test_strict_source_builder_binds_registry_sha_and_v2_adapter(tmp_path: Path) -> None:
+    runtime = tmp_path / "runtime"
+    roles = sorted(B.REQUIRED_RUNTIME_ROLES - {"interpreter_abi_smoke"})
+    role_args: list[str] = []
+    runtime_sources: list[dict] = []
+    for index, role in enumerate(roles):
+        if role == "python_executable":
+            target = _write_bytes(runtime / "python-target", b"#!/bin/sh\n")
+            target.chmod(0o755)
+            literal = runtime / ".venv" / "bin" / "python"
+            literal.parent.mkdir(parents=True, exist_ok=True)
+            literal.symlink_to(target)
+            path = literal
+        else:
+            path = _write_bytes(runtime / "runtime" / f"{role}-{index}.py")
+        role_args.append(f"{role}={path}")
+        runtime_sources.append({"role": role, "path": str(path),
+                                "target_relative_path": f"runtime/{role}-{index}",
+                                "sha256": _sha(path), "bytes": path.stat().st_size})
+    executor = _canonical({
+        "schema": "ds02.stage2.f2-portable-executor-request.v34",
+        "runtime_sources": runtime_sources,
+        "execution": {"raw_tree_binding": {
+            "tree_sha256": B.RAW_TREE_SHA, "file_count": B.RAW_TREE_FILES,
+            "frame_count": B.RAW_TREE_FRAMES,
+        }},
+    })
+    executor_path = _write(tmp_path / "executor-strict.json", executor)
+    parent = _canonical({"schema": "ds02.stage2.f2-portable-executor-parent-request.v3",
+                         "static_bindings": []})
+    parent_path = _write(tmp_path / "parent-strict.json", parent)
+    abi_path = _write(runtime / "runtime" / "abi.json", {
+        "schema": B.ABI_SMOKE_SCHEMA, "status": B.ABI_SMOKE_STATUS,
+        "literal_argv0": str(literal),
+    })
+    output = tmp_path / "strict-closure.json"
+    result = SB.build_runtime_closure(
+        executor_request=executor_path, parent_request=parent_path, runtime_root=runtime,
+        output=output, role_bindings=role_args, pinned_sources=[], abi_smoke=abi_path)
+    closure = json.loads(output.read_text(encoding="utf-8"))
+    assert result["schema"] == SB.CLOSURE_SCHEMA
+    assert closure["source_closure"]["original_path_fallback"] == "FORBIDDEN"
+    assert all(row.get("source_provenance") for row in closure["roles"]
+               if row["role"] != "interpreter_abi_smoke")
+    root, rows = A._validate_closure_external(output, closure)
+    assert root == runtime.resolve()
+    assert next(row for row in rows if row["role"] == "python_executable")["path"] == str(literal)
