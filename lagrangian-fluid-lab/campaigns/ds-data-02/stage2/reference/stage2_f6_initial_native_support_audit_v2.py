@@ -493,6 +493,12 @@ def run(manifest_path: Path, attempt_root: Path, output: Path) -> dict[str, Any]
         raise AuditFailure("ROOT244 proof/report join failed")
     if report.get("schema") != "ds02.stage2.f6-owner-rigid-metadata-audit.v1":
         raise AuditFailure("ROOT244 report schema mismatch")
+    owner_proof, owner_proof_record = _stable_json(manifest["owner_proof"], "ROOT252 continuous-owner proof")
+    owner_report, owner_report_record = _stable_json(manifest["owner_report"], "ROOT252 continuous-owner report")
+    if owner_proof.get("report") != owner_report_record["path"] or owner_proof.get("report_sha256") != owner_report_record["sha256"]:
+        raise AuditFailure("ROOT252 proof/report join failed")
+    if owner_report.get("schema") != "ds02.stage2.f6-continuous-owner-geometry-audit.v1":
+        raise AuditFailure("ROOT252 continuous-owner report schema mismatch")
     outputs: list[dict[str, Any]] = []
     for case in manifest.get("cases", []):
         if not isinstance(case, dict) or not isinstance(case.get("deferred"), dict):
@@ -509,6 +515,7 @@ def run(manifest_path: Path, attempt_root: Path, output: Path) -> dict[str, Any]
         raise AuditFailure(f"ROOT255 expected six sentinel/grid cases, got {len(outputs)}")
     result = {"schema": SCHEMA, "status": PASS_STATUS, "manifest": manifest_record,
               "root244_proof": proof_record, "root244_report": report_record,
+              "root252_owner_proof": owner_proof_record, "root252_owner_report": owner_report_record,
               "cases": outputs, "mass_semantics": {"continuous_owner_mass_kg": 4851.988676250775,
               "physical_rigid_massbody_kg": 128.0, "legacy_source_fluid_sample_mass_kg": 5120.0,
               "legacy_sample_mass_is_not_continuous_owner": True, "no_rescale": True},

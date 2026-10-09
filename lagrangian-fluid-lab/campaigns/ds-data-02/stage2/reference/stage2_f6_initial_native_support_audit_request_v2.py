@@ -1,7 +1,7 @@
 #!/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python
 """Prepare the source-bound ROOT255 F6 frame-0 support audit.
 
-Only ROOT244's proof/report, receipts and small XML files are read while
+Only ROOT244's and ROOT252's proof/report, receipts and small XML files are read while
 building.  BI4 and VTK records are stat'ed but never hashed or opened here;
 the parent runtime must reserve the request and the worker then performs the
 pre/content/post checks.  Existing source/current and coarse/fine GenCase
@@ -34,6 +34,7 @@ RUNTIME_V2 = HERE.parents[3] / "scripts/ds_data02_runtime_v2.py"
 STRICT_V1 = HERE.parents[3] / "scripts/ds_data02_strict_dispatch_v1.py"
 BATCH = HERE.parents[3] / "scripts/ds_data02_batch_runner.py"
 PROOF_DEFAULT = PRIMARY / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F6_OWNER_RIGID_METADATA_V1_ACTUAL_ROOT_VERIFICATION_244.json"
+OWNER_PROOF_DEFAULT = PRIMARY / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F6_CONTINUOUS_OWNER_GEOMETRY_AUDIT_V1_ACTUAL_ROOT_VERIFICATION_252.json"
 MANIFEST_SCHEMA = "ds02.stage2.f6-initial-native-support-manifest.v2"
 REQUEST_SCHEMA = "ds02.request.v1"
 VARIANT_SCHEMA = "ds02.stage2.f6-initial-native-support-request.v2"
@@ -210,7 +211,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
     report, report_rec = _small(report_path, "ROOT244 report", parse_json=True)
     if proof.get("report_sha256") != report_rec["sha256"] or report.get("schema") != "ds02.stage2.f6-owner-rigid-metadata-audit.v1":
         raise BuildFailure("ROOT244 proof/report join failed")
-    records: dict[str, dict[str, Any]] = {proof_rec["path"]: proof_rec, report_rec["path"]: report_rec}
+    owner_proof, owner_proof_rec = _small(args.owner_proof, "ROOT252 continuous-owner proof", parse_json=True)
+    if owner_proof.get("schema") != "ds02.stage2.root-actual-verification.v1" or "ACTUAL" not in str(owner_proof.get("status", "")):
+        raise BuildFailure("ROOT252 proof is not an actual verification proof")
+    owner_report_path = Path(str(owner_proof.get("report", ""))).expanduser().absolute()
+    owner_report, owner_report_rec = _small(owner_report_path, "ROOT252 continuous-owner report", parse_json=True)
+    if owner_proof.get("report_sha256") != owner_report_rec["sha256"] or owner_report.get("schema") != "ds02.stage2.f6-continuous-owner-geometry-audit.v1":
+        raise BuildFailure("ROOT252 proof/report join failed")
+    records: dict[str, dict[str, Any]] = {proof_rec["path"]: proof_rec, report_rec["path"]: report_rec,
+                                           owner_proof_rec["path"]: owner_proof_rec, owner_report_rec["path"]: owner_report_rec}
     deferred: list[dict[str, Any]] = []
     cases = [_case_manifest(sentinel, grid, report, records, deferred) for sentinel in ("F6-S1", "F6-S2") for grid in ("source_current", "coarse", "fine")]
     py = _python_binding()
@@ -222,12 +231,15 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         _, rec = _small(path, label, parse_json=False)
         records[rec["path"]] = rec
     manifest = {"schema": MANIFEST_SCHEMA, "status": "PREPARED_NOT_RUN_ROOT255_F6_INITIAL_NATIVE_SUPPORT_AUDIT_V2",
-                "root244_proof": proof.get("status"), "proof": proof_rec, "report": report_rec, "cases": cases,
+                "root244_proof": proof.get("status"), "proof": proof_rec, "report": report_rec,
+                "root252_owner_proof": owner_proof.get("status"), "owner_proof": owner_proof_rec,
+                "owner_report": owner_report_rec, "cases": cases,
                 "deferred_input_records": deferred,
                 "source_binding": {"continuous_owner_mass_kg": 4851.988676250775, "continuous_owner_basis": "explicit XML fluid drawbox volume times rhop0",
                                     "physical_massbody_kg": 128.0, "legacy_source_sample_mass_kg": 5120.0,
                                     "sample_mass_is_not_continuous_owner": True, "no_rescale": True,
                                     "world_axis_calibration": "UNKNOWN", "fluid_initial_velocity": "MEASURED_ONLY_IF_NATIVE_FRAME_EXPOSES_IT",
+                                    "root252_continuous_owner_geometry_join": "actual XML drawbox owner diagnostic; native support remains to be measured by this worker",
                                     "native_integrity": "V2 pre-SHA/stat before decoder, decoder frame source SHA, post-SHA/stat after decoder; all three must agree"},
                 "read_scope": {"builder_reads": "ROOT244 proof/report/receipts/XML and stat-only deferred payload records",
                                "builder_native_payload_read": False, "builder_vtk_payload_read": False, "worker_native_frame_count": 6,
@@ -284,6 +296,7 @@ def main() -> int:
     group.add_argument("--self-test", action="store_true")
     group.add_argument("--build", action="store_true")
     parser.add_argument("--proof", type=Path, default=PROOF_DEFAULT)
+    parser.add_argument("--owner-proof", type=Path, default=OWNER_PROOF_DEFAULT)
     parser.add_argument("--manifest-output", type=Path)
     parser.add_argument("--output-request", type=Path)
     parser.add_argument("--case-id", default="F6_INITIAL_NATIVE_SUPPORT_AUDIT_ROOT255_V2")

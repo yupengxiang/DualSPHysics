@@ -158,10 +158,13 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     contract_record = _record(CONTRACT, "F1 CFL contract", MAX_JSON); records[contract_record["path"]] = contract_record
     py = _python_binding(); records[py["resolved"]["path"]] = py["resolved"]; records[py["pyvenv_cfg"]["path"]] = py["pyvenv_cfg"]
     files = sorted(records); hashes = {path: records[path]["sha256"] for path in files}
+    root_label = getattr(args, "root_label", "ROOT254")
+    if not root_label.startswith("ROOT") or not root_label[4:].replace("_", "").isalnum():
+        raise BuildFailure(f"invalid source request root label: {root_label}")
     request: dict[str, Any] = {
         "schema": SCHEMA,
         "variant_schema": "ds02.stage2.f1-s2.cfl-entrypoint-audit-request.v2",
-        "status": "READY_FOR_PARENT_V8_F1_CFL_ENTRYPOINT_AUDIT_ROOT254_V2",
+        "status": f"READY_FOR_PARENT_V8_F1_CFL_ENTRYPOINT_AUDIT_{root_label}_V2",
         "kind": "cpu", "cpu_task_kind": "audit", "family_id": "F1", "sentinel_id": "F1-S2",
         "case_id": args.case_id, "attempt_id": args.attempt_id, "launch_commit": args.launch_commit,
         "cwd": str(PRIMARY / "lagrangian-fluid-lab"),
@@ -173,7 +176,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "execution_allowed": True, "launch_disabled": False, "solver_started": False, "solver_launch": False, "gencase_launch": False,
         "native_payload_read": False, "hdf5_read": False, "vtk_read": False, "runparts_read": False, "raw_directory_scan": False,
         "output_root": "{attempt_root}", "output": {"atomic": True, "refuse_overwrite": True, "path": "{attempt_root}/control/f1_s2_cfl_entrypoint_audit_v2.json"},
-        "source_binding": {"receipt_launch_argv_authority": True, "xml_cflnumber_authority_when_no_-cfl": True, "execution_xml_authority": "JCaseCtes::ReadXmlRun plus actual receipt execution constants", "request_lineage_exact_source_sha": True, "labels_not_evidence": True, "half_cfl_overlay_status": "SOURCE_ONLY_PREPARED_NOT_RUN", "interpolation": False, "neighbor_grid_truth": False, "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}},
+        "source_binding": {"receipt_launch_argv_authority": True, "xml_cflnumber_authority_when_no_-cfl": True, "execution_xml_authority": "JCaseCtes::ReadXmlRun plus actual receipt execution constants", "request_lineage_exact_source_sha": True, "labels_not_evidence": True, "source_request_namespace": root_label, "half_cfl_overlay_status": "SOURCE_ONLY_PREPARED_NOT_RUN", "interpolation": False, "neighbor_grid_truth": False, "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}},
         "resource_guard": {"runner": "parent-v8-audit", "native_payload": "forbidden", "solver_launch": "forbidden", "large_report": "forbidden"},
     }
     request["sha256"] = _canonical(request); _write_once(args.output_request, request); return request
@@ -197,7 +200,7 @@ def _self_test() -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("--manifest", type=Path); parser.add_argument("--manifest-v2-output", type=Path); parser.add_argument("--output-request", type=Path); parser.add_argument("--case-id", default="F1_S2_CFL_ENTRYPOINT_AUDIT_ROOT254_V2"); parser.add_argument("--attempt-id", default="f1-s2-cfl-entrypoint-audit-v2-root-254-001"); parser.add_argument("--launch-commit", default="SOURCE_ONLY_ROOT254_V2"); parser.add_argument("--self-test", action="store_true"); args = parser.parse_args()
+    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("--manifest", type=Path); parser.add_argument("--manifest-v2-output", type=Path); parser.add_argument("--output-request", type=Path); parser.add_argument("--case-id", default="F1_S2_CFL_ENTRYPOINT_AUDIT_ROOT254_V2"); parser.add_argument("--attempt-id", default="f1-s2-cfl-entrypoint-audit-v2-root-254-001"); parser.add_argument("--launch-commit", default="SOURCE_ONLY_ROOT254_V2"); parser.add_argument("--root-label", default="ROOT254"); parser.add_argument("--self-test", action="store_true"); args = parser.parse_args()
     if args.self_test: _self_test(); return 0
     if args.manifest is None or args.manifest_v2_output is None or args.output_request is None: parser.error("--manifest, --manifest-v2-output and --output-request are required unless --self-test")
     try: request = build(args)

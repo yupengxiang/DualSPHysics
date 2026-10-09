@@ -249,10 +249,13 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     deferred_records = {path: record for path, record in sorted(deferred.items())}
     deferred_bytes = sum(int(record["bytes"]) for record in deferred_records.values())
     static_bytes = sum(int(record["bytes"]) for record in records.values())
+    root_label = getattr(args, "root_label", "ROOT239")
+    if not root_label.startswith("ROOT") or not root_label[4:].replace("_", "").isalnum():
+        raise BuildFailure(f"invalid source request root label: {root_label}")
     request: dict[str, Any] = {
         "schema": SCHEMA,
         "variant_schema": "ds02.stage2.f1-s1.dp005-native-common-time-request.v1",
-        "status": "READY_FOR_PARENT_V8_F1_DP005_NATIVE_COMMON_TIME_ROOT239_V1",
+        "status": f"READY_FOR_PARENT_V8_F1_DP005_NATIVE_COMMON_TIME_{root_label}_V1",
         "kind": "cpu", "cpu_task_kind": "audit", "family_id": "F1", "sentinel_id": "F1-S1",
         "physical_case_id": same_case["physical_case_id"],
         "case_id": args.case_id, "attempt_id": args.attempt_id,
@@ -283,6 +286,7 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
             "selected_frame_ids": list(QUERY_FRAMES),
             "observer_fields": "native observer weighted fluid aggregates and native particle sample mass only",
             "interpolation": False, "neighbor_grid_truth": False, "event_time": "UNKNOWN",
+            "source_request_namespace": root_label,
             "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
         },
         "resource_guard": {"runner": "parent-v8-audit", "native_payload": "forbidden", "hdf5": "forbidden",
@@ -314,6 +318,7 @@ def main() -> int:
     parser.add_argument("--output-request", type=Path)
     parser.add_argument("--case-id", default="F1_S1_DP005_NATIVE_COMMON_TIME_ROOT239_V1")
     parser.add_argument("--attempt-id", default="f1-s1-dp005-native-common-time-root239-001")
+    parser.add_argument("--root-label", default="ROOT239")
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
