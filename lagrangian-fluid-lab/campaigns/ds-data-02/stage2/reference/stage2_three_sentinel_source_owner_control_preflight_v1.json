@@ -1,0 +1,56 @@
+{
+  "schema": "ds02.stage2.three-sentinel.source-owner-control-contract.v1",
+  "status": "FROZEN_SOURCE_ONLY_PRECONDITION_NO_SCIENTIFIC_Q",
+  "sentinel_ids": [
+    "F2-S2",
+    "F3-S1",
+    "F5-S1"
+  ],
+  "source_scope": {
+    "required_small_inputs": [
+      "stage2_fourteen_source_control_audit_v5.json",
+      "stage2_continuum_geometry_bounds_v1.json",
+      "stage2_fourteen_source_status_v3.json",
+      "source XML",
+      "completed solver receipt",
+      "motion file when the source audit resolves one"
+    ],
+    "forbidden_inputs": [
+      "*.bi4",
+      "*.vtk",
+      "*.h5",
+      "*.hdf5",
+      "native Part files"
+    ],
+    "bounded_small_bytes": 16777216,
+    "stable_read": "stat before and after; SHA-256 over the same bounded bytes"
+  },
+  "checks": {
+    "source_xml_receipt_identity": "exact SHA/bytes/stat and family/physical_case_id/returncode join",
+    "declared_geometry": "parse fluid drawbox point/size, definition dp, and compare primitive volume/mass with the independent bounds report",
+    "control": "record source XML CFL/time-step/output controls, canonical control digest, receipt command/tmax/tout, and resolved motion SHA",
+    "owner": "do not import a neighboring sentinel owner; source primitive mass and discrete sample mass remain separate",
+    "support": "effective cell-centre crop, overlap, boundary ownership, generated support and native mass remain UNKNOWN"
+  },
+  "sentinel_policy": {
+    "F2-S2": "UNVERIFIED_CROSS_SENTINEL_TARGET until F2-S2 source geometry itself proves a continuous owner; 18.876 kg is a declared primitive only",
+    "F3-S1": "UNVERIFIED_SOURCE_CONTINUOUS_OWNER; declared 13.066704 kg and old 14.58 kg sample remain diagnostic",
+    "F5-S1": "UNVERIFIED_SOURCE_CONTINUOUS_OWNER; declared 363.888 kg and old sample/clip values remain diagnostic"
+  },
+  "guarded_followup": {
+    "kind": "INITIAL_GENERATED_SUPPORT_AUDIT",
+    "payloads_after_parent_reservation": [
+      "generated.xml",
+      "generated Fluid.vtk",
+      "generated Bound.vtk",
+      "optional generated.bi4"
+    ],
+    "solver_launch": false,
+    "quality": {
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN",
+      "QE": "UNKNOWN",
+      "credit": 0
+    }
+  }
+}
