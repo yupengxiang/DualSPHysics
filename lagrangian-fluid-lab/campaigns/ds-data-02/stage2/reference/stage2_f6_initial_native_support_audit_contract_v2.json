@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.f6-initial-native-support-contract.v2",
+  "status": "PREPARED_NOT_RUN_ROOT255_V2",
+  "purpose": "Guarded frame-0 support diagnostics for F6-S1 and F6-S2 products with a decoder-enclosing native integrity boundary.",
+  "native_integrity": {
+    "pre": "full BI4 SHA and dev/ino/bytes/mtime/ctime immediately before official decoder entry",
+    "decoder": "official decoder's source-file SHA and byte count must be exposed by the decoded frame",
+    "post": "full BI4 SHA and stat after decoder return, including decoder failure cleanup",
+    "acceptance": "pre SHA == decoder SHA == post SHA and pre stat == post stat; known producer SHA is checked at both boundaries",
+    "v1_limitation": "ROOT255 V1 pre/post hashes were both taken before decoder entry and are not reused as an integrity proof"
+  },
+  "source_authority": {
+    "continuous_owner_mass_kg": 4851.988676250775,
+    "continuous_owner_basis": "explicit XML fluid drawbox volume times rhop0",
+    "physical_rigid_massbody_kg": 128.0,
+    "legacy_source_fluid_sample_mass_kg": 5120.0,
+    "sample_mass_is_not_continuous_owner": true,
+    "mass_rescaling": "forbidden",
+    "world_axis_calibration": "UNKNOWN_PENDING_SOURCE_WRITER_ORIENTATION_RECORD"
+  },
+  "deferred_scope": {
+    "native_frame": 0,
+    "native_files_per_case": 1,
+    "vtk_files_per_case": 2,
+    "native_fields": ["Idp", "Pos/Posd", "Vel", "Rhop", "decoder MassFluid", "decoder MassBound", "decoder Dp"],
+    "vtk_fields": ["binary POINTS count", "finite POINTS summary"],
+    "hdf5_read": false,
+    "solver_launch": false,
+    "full_native_tree_scan": false
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0}
+}

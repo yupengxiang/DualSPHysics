@@ -1,0 +1,32 @@
+{
+  "schema": "ds02.stage2.f1-s2.cfl-entrypoint-audit-contract.v2",
+  "status": "PREPARED_NOT_RUN_ROOT254_V2",
+  "authority": {
+    "cfl_xml_definition": "JCaseCtes::ReadXmlDef reads the case definition constant",
+    "cfl_xml_execution": "JCaseCtes::ReadXmlRun reads the execution constants actually passed to the run",
+    "cfl_cli": "JSphCfgRun parses -cfl and JSph::LoadConfig applies the runtime override",
+    "timestep": "JSphCpu::DtVariable and JSphGpu::DtVariable multiply the limiting timestep by CFLnumber",
+    "output": "JSph::LoadConfigParameters reads TimeOut; JDsOutputTime/JDsSaveDt implement output scheduling",
+    "actual_argv_precedence": ["receipt.execution.launch_argv", "receipt.command", "request.command"]
+  },
+  "request_lineage": {
+    "direct": "A receipt request record may equal the source request path and SHA",
+    "forwarded": "A root-forward receipt request must carry root_canonical_binding.source_request and source_sha256 equal to the exact source request record",
+    "missing_or_wrong_binding": "FAIL; do not infer lineage from case labels or XML identity",
+    "actual_parent_request": "Retain embedded receipt request identity separately from source request identity"
+  },
+  "comparison": {
+    "half_cfl_requires": ["same source/grid and terminal receipt", "bound execution XML cflnumber difference or explicit receipt -cfl", "all other runtime controls equal"],
+    "half_output_requires": ["same source/grid and terminal receipt", "receipt -tout difference", "CFL and all timestep controls equal"],
+    "labels_are_evidence": false,
+    "interpolation": false,
+    "neighbor_grid_truth": false
+  },
+  "scope": {
+    "read": ["source request JSON", "terminal receipt JSON", "small solver XML", "bounded official source files"],
+    "forbidden": ["BI4", "H5", "VTK", "Part", "RunPARTs", "solver launch"],
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  }
+}
