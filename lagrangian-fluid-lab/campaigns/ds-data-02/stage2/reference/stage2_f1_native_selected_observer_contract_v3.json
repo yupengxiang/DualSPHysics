@@ -1,0 +1,74 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-contract.v3",
+  "status": "SOURCE_ONLY_V3_WRAPPER_READY_FOR_PARENT_ADMISSION",
+  "old_versions": {
+    "v1_worker": "immutable; invoked as a child",
+    "v2_request_and_manifest": "immutable; v2 is not launch-ready because runtime_v8 does not consume deferred records",
+    "v2_launch_status": "NOT_LAUNCH_READY_DEFERRED_RECORDS_UNCONSUMED_BY_RUNTIME_V8"
+  },
+  "actual_guard_owner": "stage2_f1_native_selected_observer_guarded_v3.py after runtime_v8 reservation",
+  "deferred_native": {
+    "count": 25,
+    "path_suffix": ".bi4",
+    "pre_child": {
+      "full_sha256": true,
+      "full_stat": ["bytes", "mtime_ns", "ctime_ns", "device", "inode"],
+      "known_producer_sha_and_stat_must_match": true,
+      "unknown_sha_or_failed_stat": "FAIL_BEFORE_V1_CHILD"
+    },
+    "post_child": {
+      "full_sha256": true,
+      "full_stat": ["bytes", "mtime_ns", "ctime_ns", "device", "inode"],
+      "exact_pre_post_sha_and_stat_required": true,
+      "replacement_or_change": "FAIL"
+    },
+    "v8_parent_behavior": "runtime_v8 hashes input_files only; its deferred fields are metadata and do not protect these Part files"
+  },
+  "child": {
+    "worker": "stage2_f1_native_selected_observer_v1.py",
+    "worker_source_is_immutable": true,
+    "manifest_adapter": "wrapper writes a temporary schema-v1 view inside attempt_root; consumed v1/v2 manifests are never edited",
+    "decoder_input_read_per_frame": 1,
+    "worker_sha256_file_pass_per_frame": 1,
+    "child_process_group": "new session; SIGTERM then bounded SIGKILL/reap",
+    "parent_death": "wrapper checks os.getppid during polling and terminates the child process group",
+    "cancellation": "SIGTERM/SIGINT and runtime deadline/cancellation terminate and reap the child group"
+  },
+  "native_read_accounting": {
+    "logical_passes_per_native_source": 4,
+    "pass_semantics": [
+      "wrapper_pre_sha256_and_full_stat",
+      "official_decoder_input_read_inside_v1",
+      "v1_base_sha256_file_after_decode",
+      "wrapper_post_sha256_and_full_stat"
+    ],
+    "outer_runtime_deferred_hashing": false,
+    "decoded_scratch_arrays_not_part_of_native_source_byte_estimate": true,
+    "estimate_is_conservative_transfer_proxy_not_measured_device_io": true
+  },
+  "scratch": {
+    "cap_bytes": 268435456,
+    "polling": "bounded recursive file-size sum while child is alive plus final post-exit check",
+    "over_cap": "terminate child group, mark FAILED_CHILD_CANCELLED, remove scratch roots",
+    "symlink": "reject",
+    "cleanup": "remove each case scratch root on success, failure, timeout, cancellation, or source mismatch"
+  },
+  "logging": {
+    "pipe": "stdout and stderr are drained continuously",
+    "retained_tail_cap_bytes": 1048576,
+    "backpressure": "child cannot block on an undrained pipe; only a bounded tail is persisted"
+  },
+  "source_only_validation": {
+    "production_native_payload_read": false,
+    "production_native_sha_computed": false,
+    "production_solver_or_guard_launch": false,
+    "manufactured_cli_tests": [
+      "unchanged source and child success",
+      "post-child source mutation rejection",
+      "unknown producer SHA rejection before child",
+      "scratch cap termination and cleanup",
+      "child timeout process-group reap and cleanup"
+    ],
+    "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  }
+}

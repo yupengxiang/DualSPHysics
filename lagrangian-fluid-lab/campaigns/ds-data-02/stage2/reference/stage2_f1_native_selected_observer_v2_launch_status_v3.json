@@ -1,0 +1,19 @@
+{
+  "schema": "ds02.stage2.f1.native-selected-observer-launch-status.v3",
+  "status": "V2_NOT_LAUNCH_READY",
+  "request_variant": "ds02.stage2.f1.native-selected-observer-request.v2",
+  "request_bytes_are_immutable": true,
+  "reason": {
+    "runtime": "ds_data02_runtime_v8.py validates and post-hashes input_files only",
+    "deferred_input_records": "not read or checked by runtime_v8",
+    "command": "V2 command directly invokes V1 worker; no child pre/post deferred source guard",
+    "scratch": "V2 JSON declares a cap but runtime_v8/V1 has no enforced 256 MiB cap"
+  },
+  "required_forward": {
+    "variant": "ds02.stage2.f1.native-selected-observer-request.v3",
+    "command": "stage2_f1_native_selected_observer_guarded_v3.py",
+    "wrapper_guard": "25 native pre-SHA/full-stat, immutable V1 child, post-SHA/full-stat, scratch/log/cancellation enforcement"
+  },
+  "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
+  "launch_authority": "parent must regenerate/admit a V3 request after integrating the wrapper; this sidecar is not an execution receipt"
+}
