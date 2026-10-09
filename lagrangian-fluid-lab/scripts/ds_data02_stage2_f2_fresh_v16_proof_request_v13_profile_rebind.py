@@ -270,8 +270,13 @@ def build_request(*, root194_request: Path | str, producer_worker_request: Path 
                                    "sha256": sha256_file(sidecar_path)}
     marker["source_request"] = {
         "path": str(v8_path), "schema": ROOT194_V8_SCHEMA,
-        "sha256": root_info["v8_canonical_sha256"],
+        # V12's legacy field names are asymmetric: ``sha256`` is the
+        # byte/file digest, while ``canonical_sha256`` is the request-object
+        # digest. Keep both so its real preflight can join the failed ROOT194
+        # provenance with the sidecar without confusing the two identities.
+        "sha256": root_info["v8_file_sha256"],
         "file_sha256": root_info["v8_file_sha256"],
+        "canonical_sha256": root_info["v8_canonical_sha256"],
         "role": "ROOT194_FAILED_PROFILE_SOURCE_PROVENANCE_ONLY",
     }
     fresh["v12_forward"] = marker
@@ -321,6 +326,14 @@ def validate_request(path: Path | str, sidecar: Path | str | None = None) -> dic
         raise ProfileRebindError("ROOT197 V12 sidecar path differs")
     if sidecar_binding.get("sha256") != sha256_file(sidecar_path):
         raise ProfileRebindError("ROOT197 V12 sidecar file SHA differs")
+    source_request = marker.get("source_request")
+    sidecar_request = sidecar_value.get("producer_v66_request")
+    if not isinstance(source_request, Mapping) or not isinstance(sidecar_request, Mapping):
+        raise ProfileRebindError("ROOT197 V12 source request/sidecar producer binding is missing")
+    if source_request.get("sha256") != sidecar_request.get("file_sha256"):
+        raise ProfileRebindError("ROOT197 V12 source request file SHA differs from sidecar")
+    if source_request.get("canonical_sha256") != sidecar_request.get("canonical_sha256"):
+        raise ProfileRebindError("ROOT197 V12 source request canonical SHA differs from sidecar")
     worker_binding = profile.get("producer_worker_request")
     if not isinstance(worker_binding, Mapping):
         raise ProfileRebindError("ROOT197 producer profile worker binding is missing")

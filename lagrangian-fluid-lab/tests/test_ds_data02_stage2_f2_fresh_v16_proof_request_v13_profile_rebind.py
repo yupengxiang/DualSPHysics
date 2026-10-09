@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "ds_data02_stage2_f2_fresh_v16_proof_request_v13_profile_rebind.py"
 ROOT191 = ROOT / "scripts" / "ds_data02_stage2_f2_root191_typed_only_no_model_evaluator_v1.py"
 V8_SCRIPT = ROOT / "scripts" / "ds_data02_stage2_f2_fresh_v16_proof_consumer_v8.py"
+V12_SCRIPT = ROOT / "scripts" / "ds_data02_stage2_f2_fresh_v16_proof_consumer_v12.py"
 
 ROOT194_REQUEST = Path(
     "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/"
@@ -81,6 +82,29 @@ def test_real_root194_profile_rebind_and_v8_metadata_preflight(tmp_path: Path):
     value = json.loads(request.read_text(encoding="utf-8"))
     checked = v8._validate_request(value, verify_result_stat=False)
     assert checked["expected"]["time"]["observer_profile_sha256"] == S.EXPECTED_PROFILE_SHA
+    # V8 acceptance is insufficient: the real V12 forward checks the
+    # file-SHA/canonical-SHA asymmetry of source_request against the sidecar.
+    # This preflight only stats the producer-declared result and reads bounded
+    # JSON metadata; it does not open the V16 payload content.
+    v12 = load_module(V12_SCRIPT, "root197_v12_metadata_preflight")
+    v12_checked = v12.preflight(request)
+    assert v12_checked["status"] == "READY_FOR_PARENT_V12_PROOF"
+    assert v12_checked["metadata_only"] is True
+    assert v12_checked["hdf5_or_bi4_content_read"] is False
+    source_binding = value["v12_forward"]["source_request"]
+    sidecar_value = json.loads(sidecar.read_text(encoding="utf-8"))
+    assert source_binding["sha256"] != source_binding["canonical_sha256"]
+    assert source_binding["sha256"] == sidecar_value["producer_v66_request"]["file_sha256"]
+    assert source_binding["canonical_sha256"] == sidecar_value["producer_v66_request"]["canonical_sha256"]
+    # The previous failure was exactly this legacy field mix-up.  Ensure the
+    # real V12 validator rejects the canonical digest placed in ``sha256``.
+    bad = json.loads(json.dumps(value))
+    bad["v12_forward"]["source_request"]["sha256"] = source_binding["canonical_sha256"]
+    bad["sha256"] = v8.canonical_sha(bad)
+    bad_path = tmp_path / "root197-v13-request-swapped-source-sha.json"
+    bad_path.write_text(json.dumps(bad, sort_keys=True) + "\n", encoding="utf-8")
+    with pytest.raises(v12.V12ProofConsumerError, match="sidecar and V12 source request SHA differ"):
+        v12.preflight(bad_path)
     assert not (tmp_path / "STAGE2_F2_ROOT197_FRESH_PROOF").exists()
 
 
