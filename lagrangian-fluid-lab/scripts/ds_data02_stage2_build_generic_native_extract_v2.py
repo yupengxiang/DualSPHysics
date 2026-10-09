@@ -58,6 +58,17 @@ HISTORICAL_CASES = (
     "F4_DROP_gap0p22000_xoffm0p08000_yoff0p04000_uz0p60000",
 )
 
+ROOT257_FULL_CASES = (
+    "F4_DROP_B08_gap0p20000_xoff0p00000_yoff0p00000_uz0p50000",
+    "F4_DROP_B08_gap0p21000_xoff0p00000_yoff0p00000_uz0p50000",
+    "F4_DROP_gap0p24000_xoff0p08000_yoffm0p04000_uz0p40000",
+    "F4_DROP_gap0p24000_xoff0p08000_yoffm0p04000_uz0p60000",
+    "F4_DROP_gap0p22000_xoff0p08000_yoffm0p04000_uz0p40000",
+    "F4_DROP_gap0p22000_xoff0p08000_yoffm0p04000_uz0p60000",
+    "F4_DROP_gap0p22000_xoffm0p08000_yoff0p04000_uz0p40000",
+    "F4_DROP_gap0p22000_xoffm0p08000_yoff0p04000_uz0p60000",
+)
+
 
 class GenericV2Error(ValueError):
     """Raised for stale source identity or an unsafe subset contract."""
@@ -413,8 +424,11 @@ def _audit(args: argparse.Namespace) -> dict[str, Any]:
     if not isinstance(full, dict) or full.get("case_ids") is None or not isinstance(selected, list) or selected != list(HISTORICAL_CASES):
         raise GenericV2Error("ROOT264 V2 manifest subset/full-proof edge is malformed")
     _FULL_CASE_IDS_FOR_AUDIT = tuple(full["case_ids"])
-    if len(_FULL_CASE_IDS_FOR_AUDIT) != FULL_PROOF_CASE_COUNT or int(full.get("completed", -1)) != FULL_PROOF_CASE_COUNT or int(full.get("failed", -1)) != 0:
+    if _FULL_CASE_IDS_FOR_AUDIT != ROOT257_FULL_CASES or int(full.get("completed", -1)) != FULL_PROOF_CASE_COUNT or int(full.get("failed", -1)) != 0:
         raise GenericV2Error("ROOT264 V2 manifest full proof count is not eight completed")
+    terminal = manifest.get("terminal_proof")
+    if not isinstance(terminal, dict) or terminal.get("path") != full.get("path") or terminal.get("sha256") != full.get("sha256"):
+        raise GenericV2Error("ROOT264 V2 terminal/full-proof edges differ")
     BASE.MANIFEST_SCHEMA = V2_MANIFEST_SCHEMA
     BASE.REPORT_SCHEMA = V2_REPORT_SCHEMA
     BASE._validate_proof = _validate_subset_proof
