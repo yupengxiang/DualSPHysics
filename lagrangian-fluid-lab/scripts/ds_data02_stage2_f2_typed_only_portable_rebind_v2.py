@@ -293,9 +293,13 @@ def _rewrite_request(value: Any, *, root: Path,
             output[key] = _rewrite_request(child, root=root, source_map=source_map,
                                            role_by_target=role_by_target, bindings=bindings,
                                            parts=parts + (key_text,))
-        # A copied inner request's own canonical SHA must describe its rebased
-        # bytes; nested artifact SHA values remain content bindings.
-        if "sha256" in output and isinstance(output.get("schema"), str):
+        # A copied contract's top-level canonical SHA must describe its
+        # rebased bytes.  Nested request bindings deliberately carry their
+        # producer *file* SHA (which is distinct from that request's
+        # canonical SHA); recalculating every nested ``sha256`` here would
+        # silently turn that file binding into a canonical digest and make
+        # the V12 source-request/producer join fail after relocation.
+        if (not parts) and "sha256" in output and isinstance(output.get("schema"), str):
             output["sha256"] = _canonical(output)
         return output
     if isinstance(value, list):
@@ -598,6 +602,44 @@ def _load_module(path: Path, name: str) -> Any:
     return module
 
 
+def _rebase_runtime_json(path: Path, *, root: Path,
+                         source_map: Mapping[str, tuple[Mapping[str, Any], Path]],
+                         label: str) -> tuple[Path, dict[str, Any], str]:
+    """Make a private, target-relative view of a copied JSON contract.
+
+    The V2 request itself is sealed before the child starts.  Some of the
+    source-bound contracts it points at (the V12 sidecar and the frozen V15
+    request) contain their own actionable ``path`` fields.  Leaving those
+    fields at their historical absolute locations would make a relocated
+    worker either fail after the source tree is removed or silently fall back
+    to it.  Rebase these *small* JSON contracts in the child, after the outer
+    request has been validated, and use the resulting file only for this
+    process.  The source bytes and their SHA/stat provenance remain recorded
+    by the outer V2 contract; the temporary view gets its own target path.
+
+    This helper never opens a deferred result/HDF5/BI4 payload.  The caller
+    supplies the sealed source-to-target map, so an absolute path without an
+    explicit role is rejected by ``_rewrite_request``.
+    """
+    source = _json(path, f"copied {label}")
+    local_bindings: list[dict[str, Any]] = []
+    rebased = _rewrite_request(
+        source, root=root, source_map=source_map, role_by_target={},
+        bindings=local_bindings, parts=())
+    if not isinstance(rebased, dict):
+        raise PortableRebindV2Error(f"copied {label} is not a JSON object")
+    target = root / "runtime" / f".v2-rebased-{label}-{os.getpid()}.json"
+    if target.exists() or target.is_symlink():
+        raise PortableRebindV2Error(f"refusing existing private {label} view: {target}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(rebased, indent=2, sort_keys=True,
+                                ensure_ascii=True, allow_nan=False) + "\n",
+                      encoding="utf-8")
+    # The source SHA is useful in the report, but the temporary target SHA is
+    # intentionally not substituted for the sealed source binding.
+    return target, rebased, _sha(path)
+
+
 def _set_pdeathsig() -> None:
     try:
         libc = ctypes.CDLL(None)
@@ -618,7 +660,37 @@ def _worker_run(overlay_path: Path, output_path: Path, parent_pid: int) -> dict[
     v8 = _load_module(runtime["v8_consumer"], "ds02_relocated_v8_v2")
     v12 = _load_module(runtime["v12_consumer"], "ds02_relocated_v12_v2")
     evaluator = _load_module(runtime["typed_scorer"], "ds02_relocated_typed_scorer_v2")
+    _root_from_contract, _by_role, by_source = _role_maps(checked["contract"])
+    source_map = _source_to_target(root, by_source)
+    # Rebase the small contracts nested below the sealed V8 request before
+    # loading them.  This is the point where the copied worker is allowed to
+    # consume target-side metadata; no source/provenance path is opened.
+    sidecar_path = runtime["v12_sidecar"]
+    rebased_sidecar, _sidecar_value, sidecar_source_sha = _rebase_runtime_json(
+        sidecar_path, root=root, source_map=source_map, label="v12-sidecar")
+    frozen_path = _target(root, _safe_relative(
+        request["scorer_frozen_request"]["target_relative_path"], "scorer frozen request"))
+    rebased_frozen, frozen_value, frozen_source_sha = _rebase_runtime_json(
+        frozen_path, root=root, source_map=source_map, label="frozen-v15")
     inner = v8._load_object(inner_path)
+    # Keep the generated request immutable as an audit artifact.  The private
+    # execution view changes only the nested sidecar location and receives a
+    # fresh canonical SHA; all other bindings remain those validated above.
+    effective_inner = json.loads(json.dumps(inner))
+    marker = effective_inner.get("v12_forward")
+    if not isinstance(marker, dict) or not isinstance(marker.get("semantic_sidecar"), dict):
+        raise PortableRebindV2Error("V12 forward marker lacks a semantic sidecar binding")
+    marker["semantic_sidecar"]["path"] = str(rebased_sidecar)
+    marker["semantic_sidecar"]["sha256"] = _sha(rebased_sidecar)
+    effective_inner["sha256"] = _canonical(effective_inner)
+    effective_inner_path = root / "runtime" / f".v2-rebased-inner-{os.getpid()}.json"
+    if effective_inner_path.exists() or effective_inner_path.is_symlink():
+        raise PortableRebindV2Error("refusing existing private V8 request view")
+    effective_inner_path.write_text(
+        json.dumps(effective_inner, indent=2, sort_keys=True,
+                   ensure_ascii=True, allow_nan=False) + "\n", encoding="utf-8")
+    inner_path_for_run = effective_inner_path
+    inner = effective_inner
     bound = v8._validate_request(inner, verify_result_stat=True)
     result_path = Path(bound["result_path"])
     if not _under(result_path, root) or result_path.is_symlink():
@@ -634,26 +706,33 @@ def _worker_run(overlay_path: Path, output_path: Path, parent_pid: int) -> dict[
     mode = str(request.get("semantic_mode", "strict_v12"))
     if mode != "strict_v12":
         raise PortableRebindV2Error("production V2 run requires strict_v12 semantic mode")
-    _marker_file, _marker_request, scope = v12._load_marker(inner_path)
+    _marker_file, _marker_request, scope = v12._load_marker(inner_path_for_run)
     old_scope = v12._ACTIVE_SCOPE
     try:
         v12._ACTIVE_SCOPE = scope
         summary = v12._validate_result_v12(result, bound, result_sha, result_bytes)
     finally:
         v12._ACTIVE_SCOPE = old_scope
-    frozen_path = _target(root, _safe_relative(request["scorer_frozen_request"]["target_relative_path"], "scorer frozen request"))
-    frozen = _json(frozen_path, "copied frozen V15 request")
-    score = evaluator._score_typed_result(result, frozen)
+    score = evaluator._score_typed_result(result, frozen_value)
     report: dict[str, Any] = {
         "schema": REPORT_SCHEMA, "status": "PASS_RELOCATED_V8_V12_TYPED_SCORER",
         "request": {"path": str(overlay_path), "file_sha256": _sha(overlay_path)},
         "inner_request": {"target_relative_path": str(inner_path.relative_to(root)),
-                          "file_sha256": _sha(inner_path), "canonical_sha256": inner.get("sha256")},
+                          "effective_target_relative_path": str(inner_path_for_run.relative_to(root)),
+                          "file_sha256": _sha(inner_path),
+                          "effective_file_sha256": _sha(inner_path_for_run),
+                          "canonical_sha256": inner.get("sha256")},
         "result_source": {"target_relative_path": str(result_path.relative_to(root)),
                            "sha256": result_sha, "bytes": result_bytes,
                            "pre_stat": pre, "post_stat": post, "pre_post_stat_equal": True,
                            "read_phase": "AFTER_PARENT_GUARD"},
         "v12_summary": summary, "typed_operator_score": score,
+        "rebased_contract_views": {
+            "v12_sidecar": {"target_relative_path": str(rebased_sidecar.relative_to(root)),
+                             "source_sha256": sidecar_source_sha, "target_sha256": _sha(rebased_sidecar)},
+            "frozen_v15": {"target_relative_path": str(rebased_frozen.relative_to(root)),
+                            "source_sha256": frozen_source_sha, "target_sha256": _sha(rebased_frozen)},
+        },
         "runtime_modules": {
             role: {"path": str(path), "module_file": str(path), "sha256": _sha(path)}
             for role, path in runtime.items()
@@ -683,6 +762,7 @@ def _drain_child(child: subprocess.Popen[bytes], *, max_wall: float,
                  stdout_path: Path, stderr_path: Path) -> tuple[int, dict[str, Any]]:
     selector = selectors.DefaultSelector()
     streams: dict[int, tuple[Any, bytearray, int, Path]] = {}
+    finished: dict[int, tuple[bytearray, int, Path]] = {}
     for stream, path in ((child.stdout, stdout_path), (child.stderr, stderr_path)):
         if stream is None:
             continue
@@ -702,6 +782,12 @@ def _drain_child(child: subprocess.Popen[bytes], *, max_wall: float,
             if not chunk:
                 selector.unregister(stream)
                 stream.close()
+                current, tail, total, path = streams[fd]
+                finished[fd] = (tail, total, path)
+                # Remove the closed pipe from the live set.  Keeping the
+                # descriptor in ``streams`` would make the selector loop
+                # wait until the deadline even after the child has exited.
+                del streams[fd]
                 continue
             current, tail, total, path = streams[fd]
             total += len(chunk)
@@ -725,13 +811,16 @@ def _drain_child(child: subprocess.Popen[bytes], *, max_wall: float,
     else:
         child.wait(timeout=max(1.0, max_wall))
     totals: dict[str, int] = {}
-    for fd, (stream, tail, total, path) in list(streams.items()):
+    completed: list[tuple[bytearray, int, Path]] = list(finished.values())
+    for _fd, (stream, tail, total, path) in list(streams.items()):
         try:
             selector.unregister(stream)
         except Exception:
             pass
         stream.close()
-        # Keep only a bounded terminal tail and record total bytes separately.
+        completed.append((tail, total, path))
+    # Keep only a bounded terminal tail and record total bytes separately.
+    for tail, total, path in completed:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(bytes(tail))
         totals["stdout_bytes" if path == stdout_path else "stderr_bytes"] = total
@@ -753,7 +842,11 @@ def run_guard(*, request_path: Path | str, output_relative: str,
     _set_pdeathsig()
     checked = validate_request_overlay(request_path)
     root = checked["root"]
-    overlay = checked["request"]
+    # ``checked["request"]`` is the decoded mapping.  The child CLI needs
+    # the sealed file path so it can validate the exact bytes again; passing
+    # the mapping through ``str()`` would turn it into an invalid filename
+    # (and, worse, lose the request-file binding at the process boundary).
+    overlay = checked["request_path"]
     output = _target(root, _safe_relative(output_relative, "V2 output"), required=False)
     if output.exists() or output.is_symlink():
         raise PortableRebindV2Error(f"refusing existing V2 output: {output}")
