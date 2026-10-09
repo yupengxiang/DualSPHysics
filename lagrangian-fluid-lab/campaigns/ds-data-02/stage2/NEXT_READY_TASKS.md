@@ -1,3 +1,11 @@
+## 2026-10-09：ROOT218 F5 正在运行；ROOT216 原因定位、ROOT217 校准实际完成
+
+恢复入口：`checkpoints/ROOT218_RUNNING_ACTUAL63_ROOT216_CAUSE54_ROOT217_CALIBRATION_CONTINUATION_V1.json`。63 例实际生命周期记录，8 例 ROOT218 F5 已启动但尚无完成信用，264 例尚未调度，1 例别名未解决。原118遗漏案例54例逐fluid Id原生原因已绑定、64例未定位，3个物理案例有实际typed/native首次缺失对账。ROOT217真实制造六粒子校准正例及六反例通过，原容差保留，真实生产Q及world orientation未授予。
+
+先等 ROOT218 终态，做独立证据核对和完整CPU费用闭合，再运行下一重I/O请求。ROOT213实际portable executor、ROOT219下一未定位原因和F1-S2可比空间研究正由既有代理准备。保持长期七项目标 active。
+
+以下为历史状态。
+
 ## 2026-10-09：ROOT215 已终结，63 例实际生命周期记录
 
 最新恢复依据是 `checkpoints/ROOT215_SUCCESS_ACTUAL63_ROOT212_JOIN_ROOT214_FAILURE_CONTINUATION_V1.json`。63 例实际完成、272 例尚未调度、1 例历史身份别名未解决；没有正在运行的重 I/O 或资源预约。ROOT212 三个 F6 目标 Id 的原生与 typed 首次缺失对账实际成功。ROOT214 已完成制造 BI4 的编译、写入和解码，但因 XML 根节点假设错误终止，完整计费且保留失败证据。
