@@ -156,6 +156,8 @@ def _exact_rows(current_path: Path, audit_path: Path, expected_current_sha256: s
         receipt_hash_match = _sha256_file(receipt_path) == receipt_sha
         audit_clean = audit_row.get("scan_status") == "SCANNED" and audit_row.get("field_failures") == [] and audit_row.get("exact_CURRENT_path_and_declared_sha_match") is True
         exact = bool(path_match and sha_match and bytes_match and scan_hash_match and receipt_hash_match and audit_clean)
+        historical_alias = "HISTORICAL_ALIAS_REVIEW_REQUIRED" if case_id == ALIAS_CASE else "NONE"
+        source_join_status = "SEPARATE_HISTORICAL_ALIAS_UNRESOLVED" if historical_alias != "NONE" else ("EXACT_CURRENT_AUDIT_METADATA_JOIN" if exact else "INCOMPLETE_OR_MISMATCHED")
         rows.append({
             "current_index": index,
             "physical_case_id": case_id,
@@ -170,13 +172,13 @@ def _exact_rows(current_path: Path, audit_path: Path, expected_current_sha256: s
             "scan_sha256": scan_sha,
             "receipt_path": str(receipt_path),
             "receipt_sha256": receipt_sha,
-            "source_join_status": "EXACT_CURRENT_AUDIT_METADATA_JOIN" if exact else "INCOMPLETE_OR_MISMATCHED",
-            "historical_alias": "HISTORICAL_ALIAS_REVIEW_REQUIRED" if case_id == ALIAS_CASE else "NONE",
+            "source_join_status": source_join_status,
+            "historical_alias": historical_alias,
         })
     counts = {
         "current_cases": len(rows),
         "exact_current_audit_metadata_joins": sum(row["source_join_status"] == "EXACT_CURRENT_AUDIT_METADATA_JOIN" for row in rows),
-        "incomplete_or_mismatched": sum(row["source_join_status"] != "EXACT_CURRENT_AUDIT_METADATA_JOIN" for row in rows),
+        "incomplete_or_mismatched": sum(row["source_join_status"] == "INCOMPLETE_OR_MISMATCHED" for row in rows),
         "historical_alias_rows": sum(row["historical_alias"] != "NONE" for row in rows),
     }
     return current, audit, rows, {"current_sha256": current_sha, "audit_sha256": audit_sha, "counts": counts, "current_path": str(current_path), "audit_path": str(audit_path)}

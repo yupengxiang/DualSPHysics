@@ -119,7 +119,7 @@ class BatchTests(unittest.TestCase):
             source = make_source(root)
             result = request_builder.prepare(args_for(root, source, root / "prepared"))
             self.assertEqual(result["case_count"], 2)
-            self.assertEqual(result["exact_join_count"], 336)
+            self.assertEqual(result["exact_join_count"], 335)
             self.assertEqual(result["historical_alias_count"], 1)
             self.assertFalse(result["trajectory_content_opened"])
             self.assertFalse(result["trajectory_content_hashed"])
