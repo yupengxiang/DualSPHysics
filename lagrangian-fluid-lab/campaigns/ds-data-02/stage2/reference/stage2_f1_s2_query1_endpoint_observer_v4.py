@@ -15,6 +15,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import stage2_f1_native_selected_observer_v1 as calibrated
 import stage2_f1_s2_query_endpoint_observer_v2 as _reader
 
 
@@ -102,7 +103,44 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     manifest, _ = _reader._read_json(manifest_path, "ROOT234 query-1 manifest")
     validate_manifest_entry(manifest)
     _configure()
-    return _reader.run(args)
+    # Do not call _reader.run(): its consumed ROOT231 implementation has a
+    # hard-coded ROOT231 status string.  Reusing its verified grid decoder
+    # helpers while owning this small entry/result envelope keeps ROOT234's
+    # status separate and prevents ROOT225/ROOT231 namespace confusion.
+    manifest, manifest_record = _reader._read_json(manifest_path, "ROOT234 query-1 manifest")
+    _reader._verify_static_sources(manifest)
+    joins = _reader._verify_producer_joins(manifest)
+    grids = manifest.get("grids")
+    if not isinstance(grids, list) or len(grids) != 3:
+        raise ValueError("ROOT234 requires exactly three grids")
+    attempt_root = args.attempt_root.expanduser().absolute()
+    outputs = [_reader._run_grid(joins["child"], manifest, grid, attempt_root) for grid in grids]
+    result = {
+        "schema": SCHEMA,
+        "status": PASS_STATUS,
+        "manifest": manifest_record,
+        "producer_join": {key: value for key, value in joins.items() if key != "child"},
+        "query": {"query_times_s": [1.0], "interpolation": "FORBIDDEN", "extrapolation": "FORBIDDEN"},
+        "grids": outputs,
+        "read_scope": {
+            "native_payload_read_count": sum(int(item["native_payload_read_count"]) for item in outputs),
+            "native_payload_read": "nearest lower/upper Part files for query 1 second only",
+            "hdf5_read": False,
+            "vtk_read": False,
+            "full_native_tree_scan": False,
+            "solver_launch": False,
+        },
+        "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0},
+        "qualification_limits": [
+            "component-space native endpoint fields only; producer world-axis remains UNKNOWN",
+            "query frame IDs are native frame IDs; selected row indices are not substituted",
+            "no interpolation or extrapolation",
+            "one-second brackets are not output intervals or error bounds",
+            "integration, spatial truth, event-time, and external-validation qualifications remain UNKNOWN",
+        ],
+    }
+    calibrated.base.atomic_json(args.output.expanduser().absolute(), result)
+    return result
 
 
 def self_test() -> None:

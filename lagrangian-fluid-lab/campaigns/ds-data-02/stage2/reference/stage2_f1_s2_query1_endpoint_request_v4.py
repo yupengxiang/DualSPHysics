@@ -114,8 +114,18 @@ def _decorate_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def _records(values: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    return {str(item["path"]): item for item in values if isinstance(item, dict) and isinstance(item.get("path"), str)}
+def _records(values: Any) -> dict[str, dict[str, Any]]:
+    # The inherited V3 builder stores input_records as a mapping.  Iterating
+    # that mapping directly returns path keys and silently drops every source
+    # record; accept both representations and always consume the records.
+    if isinstance(values, dict):
+        values = list(values.values())
+    elif not isinstance(values, list):
+        raise BuildError("query-1 base input_records must be a dict or list")
+    records = [item for item in values if isinstance(item, dict) and isinstance(item.get("path"), str)]
+    if len(records) < 20:
+        raise BuildError(f"query-1 source closure unexpectedly short: {len(records)}")
+    return {str(item["path"]): item for item in records}
 
 
 def build(output_manifest: Path, output_request: Path) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -145,6 +155,11 @@ def build(output_manifest: Path, output_request: Path) -> tuple[dict[str, Any], 
     ):
         record = stable_hash(path, label)
         records[record["path"]] = record
+    required_labels = ("ROOT223 proof", "ROOT207 child report", "ROOT217 calibration proof", "coarse RunPARTs", "medium RunPARTs", "fine RunPARTs", "coarse generated XML", "medium generated XML", "fine generated XML", "fine official decoder")
+    labels = {str(item.get("label")) for item in records.values()}
+    missing = [label for label in required_labels if label not in labels]
+    if missing:
+        raise BuildError(f"ROOT234 query-1 source closure missing required records: {missing}")
     manifest["static_source_records"] = list(records.values())
     write_once(output_manifest, manifest)
     manifest_record = stable_hash(output_manifest, "ROOT234 final manifest")
@@ -208,6 +223,8 @@ def build(output_manifest: Path, output_request: Path) -> tuple[dict[str, Any], 
 
 
 def self_test() -> None:
+    values = {f"key{index}": {"path": f"path{index}"} for index in range(20)}
+    assert len(_records(values)) == 20
     # Use the same shape emitted by build() and the same entry validator used
     # by the worker.  This catches a builder/reader mismatch before guard.
     grids = []
