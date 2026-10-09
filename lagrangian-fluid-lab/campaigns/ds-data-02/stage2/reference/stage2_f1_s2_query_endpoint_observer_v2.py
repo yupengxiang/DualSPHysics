@@ -131,7 +131,7 @@ def _run_grid(child: dict[str, Any], manifest: dict[str, Any], grid: dict[str, A
             or request.get("physical_case_id") != identity.get("physical_case_id")
         ):
             raise GuardFailure(f"{label} historical runner-v2 solver request identity mismatch")
-        identity_status = "HISTORICAL_RUNNER_V2_EXACT_F1_CASE_ID_PHYSICAL_IDENTITY_ABSENT"
+        identity_status = "HISTORICAL_RUNNER_V2_EXACT_F1_CASE_ID_SENTINEL_ABSENT_PHYSICAL_IDENTITY_BOUND"
 
     runparts_payload, runparts_record = _read_stable(Path(grid["runparts"]["path"]), f"{label} RunPARTs")
     if runparts_record["sha256"] != grid["runparts"]["sha256"]:

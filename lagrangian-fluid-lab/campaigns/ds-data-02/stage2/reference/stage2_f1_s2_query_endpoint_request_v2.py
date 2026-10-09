@@ -136,7 +136,7 @@ def _case_grid(case: dict[str, Any], label: str) -> tuple[dict[str, Any], list[d
     else:
         if request.get("family_id") != "F1" or request.get("case_id") != "F1_STAGE1_DUAL_H340_DP020" or request.get("sentinel_id") is not None or request.get("physical_case_id") != physical:
             raise BuildError(f"{label} historical request identity mismatch")
-        identity_status = "HISTORICAL_RUNNER_V2_EXACT_F1_CASE_ID_PHYSICAL_IDENTITY_ABSENT"
+        identity_status = "HISTORICAL_RUNNER_V2_EXACT_F1_CASE_ID_SENTINEL_ABSENT_PHYSICAL_IDENTITY_BOUND"
     runparts_rec = stable_hash(runparts, f"{label} RunPARTs")
     xml_rec = stable_hash(generated_xml, f"{label} generated XML")
     decoder_rec = stable_hash(decoder, f"{label} official decoder")
