@@ -51,6 +51,14 @@ def load_module(name: str, path: Path):
 
 V7 = load_module("stage2_f3_external_solver_v7_for_snapshot_proof_v8", V7_PATH)
 
+# The consumed V6 adapter delegates its support join to the V6 worker module,
+# while the actual strict helper lives in that worker's frozen V5 module.  Do
+# this narrow in-memory compatibility binding here instead of changing the
+# already reviewed V6/V7 source bytes.  The helper still performs the exact
+# q/request-SHA/receipt/output-root checks before any dynamic payload step.
+if not hasattr(V7.V6.V6, "strict_q_receipt_join"):
+    V7.V6.V6.strict_q_receipt_join = V7.V6.V6.V5.strict_q_receipt_join
+
 
 def regular(path: Path, label: str) -> Path:
     path = path.expanduser().resolve()
