@@ -1,3 +1,5 @@
+严格原生对账后续等待进程已启动：ROOT_MISSING_NATIVE_JOIN_AFTER_MASS30_WAITER_STARTED_V1.json 绑定实际PID、冻结入口与单实例锁；仅等待ROOT326实际质量审计终态，312/315/317–321尚未启动。完整七项目标ACTIVE。
+
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT306_LIFECYCLE_SERIAL_PENDING_FULL_GOAL_CONTINUATION_V1.json`（SHA256 92fd7a31caae4a1213c9e6d18f6fcd950b4ba338fecedf0e3ba112b157d6a9dc）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
 
 最新串行实际恢复检查点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT305_LIFECYCLE_SERIAL_ACTUAL_FULL_GOAL_CONTINUATION_V1.json`（SHA256 54679ddd2a480563874d1b6c99fc03e948e0e7ece415aa11380038747e67c190）。完整七项目标 ACTIVE；覆盖以该检查点绑定的实际registry/plan为准，运行批次不记完成；科学Q仍UNKNOWN。每批终态必须完成独立核验、完整CPU重复结账、release和unitdead，才调度下一批。
