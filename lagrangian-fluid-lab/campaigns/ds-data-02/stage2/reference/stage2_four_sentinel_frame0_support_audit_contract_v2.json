@@ -1,0 +1,24 @@
+{
+  "schema": "ds02.stage2.four-sentinel-frame0-support-audit-contract.v2",
+  "purpose": "Bound one parent-reserved frame-zero BI4 decode while accepting GenCase position-only arrays and reporting absent dynamic fields explicitly.",
+  "cases": ["F2-S2", "F4-S2", "F5-S2", "F7-S1"],
+  "decoder_source_contract": {
+    "official_decoder": "bi4_dump",
+    "required_arrays": ["Idp or Ipd", "Pos or Posd"],
+    "optional_arrays": ["Vel", "Rhop", "Mass"],
+    "optional_missing_policy": "UNKNOWN_MISSING_ARRAY; no zero fill, XML mass substitution, or fabricated velocity/density"
+  },
+  "read_policy": {
+    "builder": ["quality JSON", "source XML", "completed receipt", "RunPARTs CSV", "decoder/source code", "stat-only deferred Part_0000"],
+    "worker": ["source XML", "receipt", "one deferred Part_0000 after parent reservation", "official decoder output arrays under bounded scratch"],
+    "forbidden": ["HDF5", "solver launch", "full native tree scan", "neighbor grid substitution", "mass rescale"]
+  },
+  "observables": {
+    "identity_position": "Idp/Idpd and Pos/Posd are required; stable finite values and XML Idp range assignment are independently checked",
+    "velocity_density_mass": "Each optional array has independent presence, length, finite, and output stat/SHA records; absent means UNKNOWN",
+    "sample_mass": "native Mass array sum only when Mass is present; XML massfluid is a separate source constant and never native mass proof",
+    "geometric_support": "UNKNOWN until exact Fluid/Bound support payload is supplied under a separate guarded task",
+    "continuous_owner_mass": "never inferred from native sample or source constant"
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "credit": 0}
+}
