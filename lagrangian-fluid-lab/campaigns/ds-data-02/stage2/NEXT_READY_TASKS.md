@@ -1,3 +1,10 @@
+最新执行复核（2026-10-09T02:27:56.479867+00:00）：完整目标ACTIVE，尚无新实际任务启动。
+
+- ROOT141 F7初态空间QA v1源码已集成a12c98e01。root代码复核发现final postSHA/stat先于实际Pos/Idp/Type/Mk/Mass数组memmap读取，未覆盖完整解码；由forensics准备不可变v2前向修复后再启动。两源仅prepared初始BI4/native Part_0000，旧产品不改，不新增CFD。safe scanner本身真实fd pre/post全SHA，不等于之后array-reader exact consumed SHA。
+- ROOT139 F3源请求目前十选定帧快照与有界观测，不能称全部836帧原生字段审计。旧观察器group_observable使用XML质量常量，native MassFluid编码尚待guarded first-frame probe，不能以native加权质量措辞替代此缺口。reference代理补实际编码接口，allQI/QN/QE仍UNKNOWN。
+- consumer继续ROOT140 V53实际冻结executor/parent与真实postterminal CLI handoff；没有新cold actual成功，ROOT122失败字节仍保留。
+- 最新资源账CPU704.489950749core h/GPU137.966689117h、资格646/1024、生产23/720，无active reservations/managed ds02运行；Home最近free695491358720B。GPU6外来PID601689保留；其他设备外来任务动态变化，每次solver启动重新inventory/UUID lease。原deadline/额度/Home500GiB floor不重置。
+
 最新实际增量（2026-10-09T02:17:27.620034+00:00）：完整目标 ACTIVE；所有新原生实际产物、旧失败与新qualified-source诊断保留。
 
 - ROOT138全401 native field audit实际completed/rc0，27750→27683，67真实missing IDs，MK1/2/3分别30/28/9；全部active finite、native MassFluid binary64 bits000000009a54463f精确、XML范围赋type/MK不是独立native type字段。worker afterreserve全401 full pre/postSHA/stat稳定，exact parser-consumed SHA未计算；9,539,227,658B decoder用户态input，scratchpeak23,791,814B、已清理。full systemdCPU121.578649s同父增量闭账幂等、unit停，无active reservation。
