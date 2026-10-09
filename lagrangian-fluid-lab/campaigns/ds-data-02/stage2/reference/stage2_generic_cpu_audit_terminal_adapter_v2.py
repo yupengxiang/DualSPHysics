@@ -97,8 +97,15 @@ def _stat_signature(value: os.stat_result) -> tuple[int, int, int, int, int, int
 def _load_json(path_value: str | Path, *, max_bytes: int) -> tuple[Dict[str, Any], str, os.stat_result, int]:
     path = Path(path_value)
     digest, info, size = _sha_file(path, max_bytes=max_bytes)
+    # Parse the bytes whose stable stat was just checked.  This second
+    # bounded read closes the small metadata race between hashing and JSON
+    # decoding; it never applies to deferred native payloads.
+    payload = path.read_bytes()
+    after = path.stat()
+    _require(_stat_signature(info) == _stat_signature(after), f"JSON changed after hash: {path}")
+    _require(_sha_bytes(payload) == digest, f"JSON bytes changed after hash: {path}")
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(payload.decode("utf-8"))
     except Exception as exc:  # pragma: no cover - message is part of guard output
         _fail(f"invalid JSON {path}: {exc}")
     _require(isinstance(value, dict), f"JSON root must be an object: {path}")
@@ -540,7 +547,8 @@ def self_test() -> None:
             raise AssertionError("schema mutation was accepted")
         request.write_bytes(_canonical(original) + b"\n")
 
-        bad_evidence = json.loads(evidence.read_text())
+        original_evidence = json.loads(evidence.read_text())
+        bad_evidence = copy.deepcopy(original_evidence)
         bad_evidence["systemd_properties"]["MemoryMax"] = str(2 * 1024 * 1024)
         evidence.write_bytes(_canonical(bad_evidence) + b"\n")
         try:
@@ -549,6 +557,30 @@ def self_test() -> None:
             pass
         else:  # pragma: no cover
             raise AssertionError("memory mutation was accepted")
+        evidence.write_bytes(_canonical(original_evidence) + b"\n")
+        # Receipt SHA and identity are separate joins; exercise both rather
+        # than relying on the schema and memory checks above.
+        original_receipt = json.loads(receipt.read_text())
+        bad_receipt = copy.deepcopy(original_receipt)
+        bad_receipt["request_sha256"] = "0" * 64
+        receipt.write_bytes(_canonical(bad_receipt) + b"\n")
+        try:
+            inspect(str(request), str(receipt), str(evidence), str(ledger))
+        except AdapterFailure:
+            pass
+        else:  # pragma: no cover
+            raise AssertionError("receipt request SHA mutation was accepted")
+        receipt.write_bytes(_canonical(original_receipt) + b"\n")
+
+        bad_identity = copy.deepcopy(original_evidence)
+        bad_identity["identity"]["case_id"] = "wrong-case"
+        evidence.write_bytes(_canonical(bad_identity) + b"\n")
+        try:
+            inspect(str(request), str(receipt), str(evidence), str(ledger))
+        except AdapterFailure:
+            pass
+        else:  # pragma: no cover
+            raise AssertionError("evidence identity mutation was accepted")
     print("PASS_GENERIC_CPU_AUDIT_TERMINAL_ADAPTER_V2_SELFTEST")
 
 
