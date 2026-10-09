@@ -20,17 +20,24 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import selectors
 import shutil
 import stat
 import subprocess
 import sys
 import tempfile
+import time
 from types import ModuleType
 from typing import Any, Callable, Iterable, Mapping
 
 
 class V64WorkerError(RuntimeError):
     pass
+
+
+DECODER_LOG_TAIL_BYTES = 64 * 1024
+DECODER_POST_EXIT_DRAIN_SECONDS = 2.0
+DECODER_READ_CHUNK_BYTES = 64 * 1024
 
 
 def _tree_bytes(root: Path) -> int:
@@ -136,8 +143,39 @@ def _configure_converter_scratch(converter: ModuleType, contract: dict[str, Any]
     peak_total = 0
     decoded_frames = 0
     cleaned_frames = 0
+    decoder_counts = {"stdout": 0, "stderr": 0}
+    decoder_discarded = {"stdout": 0, "stderr": 0}
+    decoder_tails = {"stdout": bytearray(), "stderr": bytearray()}
+
+    def _record_decoder_output(role: str, data: bytes) -> None:
+        if not data:
+            return
+        decoder_counts[role] += len(data)
+        tail = decoder_tails[role]
+        tail.extend(data)
+        if len(tail) > DECODER_LOG_TAIL_BYTES:
+            del tail[:-DECODER_LOG_TAIL_BYTES]
+        decoder_discarded[role] = max(0, decoder_counts[role] - len(tail))
+
+    def _signal_decoder_group(process: subprocess.Popen[Any], sig: int) -> None:
+        # The decoder is launched in an owned session below.  Signal the
+        # process group so a helper that inherited stderr cannot keep the pipe
+        # open after the decoder leader exits.
+        try:
+            os.killpg(process.pid, sig)
+        except ProcessLookupError:
+            pass
+        except PermissionError as error:
+            raise V64WorkerError(f"cannot signal owned decoder process group: {error}") from error
+
+    def _decode_output(data: bytes, *, text_mode: bool, encoding: str | None,
+                       errors: str | None) -> str | bytes:
+        if not text_mode:
+            return data
+        return data.decode(encoding or "utf-8", errors or "replace")
 
     def bounded_subprocess_run(*args: Any, **kwargs: Any) -> Any:
+        nonlocal decoder_counts, decoder_discarded, decoder_tails
         requested = kwargs.get("timeout")
         effective_timeout = timeout if requested is None else min(float(requested), timeout)
         command = args[0] if args else kwargs.get("args")
@@ -155,34 +193,128 @@ def _configure_converter_scratch(converter: ModuleType, contract: dict[str, Any]
         if frame_root is None:
             kwargs["timeout"] = effective_timeout
             return original_subprocess_run(*args, **kwargs)
+        capture_output = kwargs.pop("capture_output", False)
+        if capture_output:
+            raise V64WorkerError(
+                "decoder capture_output=True is unsupported; bind explicit stdout/stderr pipes")
+        if "input" in kwargs:
+            raise V64WorkerError("decoder input= is unsupported by the bounded pipe adapter")
         check = bool(kwargs.pop("check", False))
         kwargs.pop("timeout", None)
         popen_kwargs = dict(kwargs)
+        # The original pinned decoder uses stdout=DEVNULL, stderr=PIPE,
+        # text=True.  Keep those semantics, but drain by fd ourselves so a
+        # noisy decoder cannot fill stderr's kernel pipe before it exits.
+        if popen_kwargs.get("start_new_session") is False:
+            raise V64WorkerError("bounded decoder requires an owned process session")
+        popen_kwargs["start_new_session"] = True
+        text_mode = bool(popen_kwargs.get("text") or popen_kwargs.get("universal_newlines"))
+        encoding = popen_kwargs.get("encoding")
+        errors = popen_kwargs.get("errors")
         process = subprocess.Popen(command, **popen_kwargs)
+        streams: dict[int, tuple[str, Any]] = {}
+        if process.stdout is not None:
+            streams[process.stdout.fileno()] = ("stdout", process.stdout)
+        if process.stderr is not None:
+            fd = process.stderr.fileno()
+            # stderr=STDOUT has the same fd; keep the single stream under the
+            # stdout accounting role, matching subprocess.run semantics.
+            streams.setdefault(fd, ("stderr", process.stderr))
+        selector = selectors.DefaultSelector()
+        for fd in streams:
+            os.set_blocking(fd, False)
+            selector.register(fd, selectors.EVENT_READ)
         started = time.monotonic()
         limit_error: BaseException | None = None
+        terminated = False
+        stop_requested = False
+        killed = False
+        drain_deadline: float | None = None
         try:
-            while process.poll() is None:
-                if time.monotonic() - started >= effective_timeout:
+            while True:
+                now = time.monotonic()
+                if not terminated and process.poll() is None and now - started >= effective_timeout:
                     limit_error = subprocess.TimeoutExpired(command, effective_timeout)
-                    process.terminate()
+                    _signal_decoder_group(process, signal.SIGTERM)
+                    terminated = True
+                    stop_requested = True
+                    drain_deadline = now + DECODER_POST_EXIT_DRAIN_SECONDS
+                if not terminated and process.poll() is None:
+                    live_bytes = _tree_bytes(frame_root)
+                    if live_bytes > max_frame:
+                        limit_error = V64WorkerError(
+                            f"decoder frame scratch exceeded hard cap while decoding: {live_bytes} > {max_frame}")
+                        _signal_decoder_group(process, signal.SIGTERM)
+                        terminated = True
+                        stop_requested = True
+                        drain_deadline = now + DECODER_POST_EXIT_DRAIN_SECONDS
+                if (terminated and stop_requested and drain_deadline is not None and
+                        now >= drain_deadline and not killed):
+                    _signal_decoder_group(process, signal.SIGKILL)
+                    killed = True
+                    drain_deadline = now + 0.5
+                if (terminated and drain_deadline is not None and now >= drain_deadline and
+                        (killed or not stop_requested)):
                     break
-                live_bytes = _tree_bytes(frame_root)
-                if live_bytes > max_frame:
-                    limit_error = V64WorkerError(
-                        f"decoder frame scratch exceeded hard cap while decoding: {live_bytes} > {max_frame}")
-                    process.terminate()
-                    break
-                time.sleep(0.02)
-            try:
-                stdout, stderr = process.communicate(timeout=1.0)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                stdout, stderr = process.communicate()
+                if process.poll() is not None and not terminated:
+                    # A descendant may have inherited the pipe.  Give the
+                    # selector a finite drain window, then close it rather
+                    # than waiting forever on an orphaned descriptor.
+                    terminated = True
+                    drain_deadline = now + DECODER_POST_EXIT_DRAIN_SECONDS
+                if not streams:
+                    if process.poll() is not None or terminated:
+                        break
+                    time.sleep(0.02)
+                    continue
+                wait_for = 0.02
+                if drain_deadline is not None:
+                    wait_for = min(wait_for, max(0.001, drain_deadline - now))
+                for key, _ in selector.select(timeout=wait_for):
+                    fd = int(key.fd)
+                    role, _stream = streams[fd]
+                    try:
+                        data = os.read(fd, DECODER_READ_CHUNK_BYTES)
+                    except BlockingIOError:
+                        continue
+                    if not data:
+                        try:
+                            selector.unregister(fd)
+                        except Exception:
+                            pass
+                        try:
+                            streams[fd][1].close()
+                        except OSError:
+                            pass
+                        del streams[fd]
+                        continue
+                    _record_decoder_output(role, data)
         finally:
             if process.poll() is None:
-                process.kill()
-                process.wait()
+                try:
+                    _signal_decoder_group(process, signal.SIGKILL)
+                except V64WorkerError:
+                    process.kill()
+                try:
+                    process.wait(timeout=1.0)
+                except subprocess.TimeoutExpired:
+                    pass
+            try:
+                selector.close()
+            finally:
+                for _role, stream in streams.values():
+                    try:
+                        stream.close()
+                    except OSError:
+                        pass
+        if process.poll() is None:
+            process.wait(timeout=1.0)
+        stdout_data = bytes(decoder_tails["stdout"])
+        stderr_data = bytes(decoder_tails["stderr"])
+        stdout = _decode_output(stdout_data, text_mode=text_mode,
+                                encoding=encoding, errors=errors) if process.stdout is not None else None
+        stderr = _decode_output(stderr_data, text_mode=text_mode,
+                                encoding=encoding, errors=errors) if process.stderr is not None else None
         if limit_error is not None:
             raise limit_error
         completed = subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
@@ -230,6 +362,12 @@ def _configure_converter_scratch(converter: ModuleType, contract: dict[str, Any]
         "peak_external_bytes": lambda: peak_total,
         "decoded_frames": lambda: decoded_frames,
         "cleaned_frames": lambda: cleaned_frames,
+        "decoder_stdout_bytes": lambda: decoder_counts["stdout"],
+        "decoder_stderr_bytes": lambda: decoder_counts["stderr"],
+        "decoder_stdout_discarded_bytes": lambda: decoder_discarded["stdout"],
+        "decoder_stderr_discarded_bytes": lambda: decoder_discarded["stderr"],
+        "decoder_stdout_tail": lambda: bytes(decoder_tails["stdout"]),
+        "decoder_stderr_tail": lambda: bytes(decoder_tails["stderr"]),
     }
 
 
@@ -258,6 +396,12 @@ def _restore_converter_scratch(converter: ModuleType, contract: dict[str, Any]) 
         "peak_external_bytes": int(stats.get("peak_external_bytes", lambda: 0)()),
         "decoded_frames": int(stats.get("decoded_frames", lambda: 0)()),
         "cleaned_frames": int(stats.get("cleaned_frames", lambda: 0)()),
+        "decoder_stdout_bytes": int(stats.get("decoder_stdout_bytes", lambda: 0)()),
+        "decoder_stderr_bytes": int(stats.get("decoder_stderr_bytes", lambda: 0)()),
+        "decoder_stdout_discarded_bytes": int(stats.get("decoder_stdout_discarded_bytes", lambda: 0)()),
+        "decoder_stderr_discarded_bytes": int(stats.get("decoder_stderr_discarded_bytes", lambda: 0)()),
+        "decoder_stdout_tail": bytes(stats.get("decoder_stdout_tail", lambda: b"")()).decode("utf-8", "replace"),
+        "decoder_stderr_tail": bytes(stats.get("decoder_stderr_tail", lambda: b"")()).decode("utf-8", "replace"),
         "per_frame_cleanup": True,
         "default_tmp_forbidden": True,
     }

@@ -149,9 +149,8 @@ def test_v64_source_only_builder_and_parent_metadata_preflight():
     )
     v62_path = (ROOT / "campaigns/ds-data-02/stage2/native-reconstruction/"
                 "raw-to-label-v62-root145-runout-20261009/"
-                "f2-s1-root145-v62-runout-parent-request.json")
-    if not v62_path.is_file():
-        pytest.skip("frozen V62 source graph is unavailable in this checkout")
+                "f2-s1-root145-v62c-runout-parent-request.json")
+    assert v62_path.is_file(), f"frozen V62C source graph is unavailable: {v62_path}"
     v62 = json.loads(v62_path.read_text(encoding="utf-8"))
     base = Path(tempfile.mkdtemp(prefix="v64-source-only-builder-"))
     try:
@@ -182,6 +181,61 @@ def test_v64_source_only_builder_and_parent_metadata_preflight():
         assert request["fresh_cold_credit"] is False
     finally:
         shutil.rmtree(base, ignore_errors=True)
+
+
+def test_decoder_pipe_is_drained_and_only_bounded_tail_is_retained(worker, tmp_path):
+    """A noisy decoder cannot block on stderr and its full byte count is kept."""
+    external = tmp_path / "external"
+    output = external / "products"
+    output.mkdir(parents=True)
+    scratch_root = external / "attempt" / "decoder-scratch"
+    decoder = tmp_path / "noisy-decoder.py"
+    decoder.write_text(
+        "#!/usr/bin/env python3\n"
+        "import sys\n"
+        "sys.stderr.write('x' * (256 * 1024))\n"
+        "sys.stderr.flush()\n",
+        encoding="utf-8",
+    )
+    decoder.chmod(0o755)
+    contract = {
+        "root": scratch_root,
+        "external_root": external,
+        "max_frame_bytes": 1024 * 1024,
+        "timeout_seconds": 5.0,
+        "attempt_id": "noisy-decoder",
+    }
+    fake = types.SimpleNamespace()
+    fake.tempfile = __import__("tempfile")
+    fake.subprocess = __import__("subprocess")
+
+    def decode(_frame, decoder_path, frame_scratch, index):
+        frame_dir = Path(frame_scratch) / f"frame_{index:04d}"
+        frame_dir.mkdir(parents=True, exist_ok=True)
+        fake.subprocess.run(
+            [str(decoder_path), str(_frame), str(frame_dir)],
+            check=True, stdout=fake.subprocess.DEVNULL,
+            stderr=fake.subprocess.PIPE, text=True, timeout=2.0,
+        )
+        return object()
+
+    fake.decode_frame = decode
+    worker._configure_converter_scratch(fake, contract, output)
+    private = scratch_root / "decoder-child"
+    private.mkdir(parents=True)
+    with pytest.raises(worker.V64WorkerError, match="capture_output"):
+        fake.subprocess.run(
+            [str(decoder), "frame.bi4", str(private / "frame_0000")],
+            capture_output=True,
+        )
+    fake.decode_frame(Path("frame.bi4"), decoder, private, 0)
+    report = worker._restore_converter_scratch(fake, contract)
+    assert report["decoder_stderr_bytes"] == 256 * 1024
+    assert report["decoder_stderr_discarded_bytes"] == 256 * 1024 - worker.DECODER_LOG_TAIL_BYTES
+    assert len(report["decoder_stderr_tail"].encode("utf-8")) == worker.DECODER_LOG_TAIL_BYTES
+    assert set(report["decoder_stderr_tail"]) == {"x"}
+    assert report["cleaned_frames"] == 1
+    shutil.rmtree(scratch_root.parent)
 
 
 def test_fresh_v16_builder_uses_only_new_v64_metadata_and_rejects_stale_proof(tmp_path):
