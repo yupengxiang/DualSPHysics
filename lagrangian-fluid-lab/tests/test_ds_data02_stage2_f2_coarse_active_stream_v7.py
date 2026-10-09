@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import hashlib
 import struct
 from pathlib import Path
 
@@ -9,6 +11,9 @@ import pytest
 
 ROOT = Path(__file__).parents[1]
 SCRIPT = ROOT / "scripts/ds_data02_stage2_f2_coarse_active_stream_v7.py"
+REQUEST_DIR = ROOT / "campaigns/ds-data-02/stage2/requests/f2-coarse-active-stream-v7-root-forward-119-001"
+MANIFEST = REQUEST_DIR / "f2-coarse-active-stream-v7-manifest.json"
+REQUEST = REQUEST_DIR / "f2-coarse-active-stream-v7-request.json"
 
 
 def module():
@@ -26,6 +31,10 @@ def jstr(value: str) -> bytes:
 
 def jvalue(name: str, type_enum: int, payload: bytes) -> bytes:
     return jstr(name) + struct.pack("<i", type_enum) + payload
+
+
+def digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def synthetic_bi4(*, mass_type: int = 12, mass_value: float = 0.000681472010910511) -> tuple[bytes, int]:
@@ -168,3 +177,29 @@ def test_v7_source_target_contract_requires_serialized_discovery():
             {"source_files": {}},
             Path("/dev/null"),
         )
+
+
+def test_v7_prepared_request_is_first_frame_only_and_source_bound():
+    request = json.loads(REQUEST.read_text(encoding="utf-8"))
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    assert request["request_schema"] == "ds02.stage2.f2.coarse-active-stream.v7-request.v1"
+    assert request["cpu_task_kind"] == "audit"
+    assert request["input_sha256"] == request["input_hashes"]
+    declared_worker = Path(request["command"][1]).resolve()
+    declared_manifest = Path(request["command"][3]).resolve()
+    assert declared_worker.is_file()
+    assert declared_manifest.is_file()
+    assert request["input_hashes"][str(declared_worker)] == digest(declared_worker)
+    assert request["input_hashes"][str(declared_manifest)] == digest(declared_manifest)
+    assert manifest["schema"] == "ds02.stage2.f2.coarse-active-stream.manifest.v7"
+    assert manifest["probe_mode"] == "first_frame_raw_massfluid_scalar_only"
+    assert manifest["guard_policy"]["remaining_frames_not_opened"] is True
+    assert request["estimated_hdf5_read_bytes"] == 0
+    assert request["hdf5_read"] is False
+    assert request["solver_launch"] is False
+    deferred = request["deferred_input_files"]
+    assert len(deferred) == 1
+    assert deferred[0]["path"].endswith("Part_0000.bi4")
+    assert "Part_0001.bi4" not in json.dumps(request)
+    assert request["probe_contract"]["type_enum"] == 12
+    assert request["probe_contract"]["offset_recorded_in_output"] is True
