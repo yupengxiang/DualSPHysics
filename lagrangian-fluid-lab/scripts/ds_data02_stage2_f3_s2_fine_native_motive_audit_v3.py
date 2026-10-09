@@ -347,7 +347,10 @@ def build_parent_request(
     _check_id(attempt_id, "attempt_id")
     worktree_root = Path(worktree_root).expanduser().resolve()
     cwd = Path(cwd).expanduser().resolve()
-    raw_estimate = int(raw_ref["bytes"]) * 2
+    # V1 hashes the payload once before invoking PartVTKOut and once after it;
+    # the official decoder necessarily reads it at least once in between.
+    # Extra decoder passes are implementation-dependent and remain UNKNOWN.
+    raw_estimate = int(raw_ref["bytes"]) * 3
     runtime_binding = {
         "runtime_v2_base": closure["runtime_v2_base"],
         "runtime_v6_root": closure["runtime_v6_root"],
@@ -383,7 +386,7 @@ def build_parent_request(
         "runtime6_closure": {"schema": RUNTIME6_CLOSURE_SCHEMA, **closure},
         "guarded_payload_binding": {**raw_ref, "sha256": PARENT_GUARD_COMPUTED, "content_opened_by_parent": False, "first_content_sha_owner": "guarded_worker_after_reservation", "post_content_sha_required": True},
         "manifest_contract": {"path": str(final_manifest), "sha256": sha256_file(final_manifest), "raw_partout_sha256": PARENT_GUARD_COMPUTED, "raw_partout_excluded_from_parent_inputs": True, "raw_pre_post_sha_required": True},
-        "source_read_cost": {"h5_bytes_read": 0, "trajectory_bytes_read": 0, "part_frame_bytes_read": 0, "raw_partout_content_read_by_parent": 0, "raw_partout_stat_bytes": raw_ref["bytes"], "raw_partout_estimate_bytes": raw_estimate, "raw_partout_estimate_basis": "stat_size_times_two_guarded_passes; actual worker receipt is authoritative", "small_source_bytes_read": sum(inputs[path]["bytes"] for path in input_paths), "runtime_pre_post_hash_bytes": 2 * sum(inputs[path]["bytes"] for path in input_paths), "estimated_output_bytes": estimated_storage_bytes},
+        "source_read_cost": {"h5_bytes_read": 0, "trajectory_bytes_read": 0, "part_frame_bytes_read": 0, "raw_partout_content_read_by_parent": 0, "raw_partout_stat_bytes": raw_ref["bytes"], "raw_partout_estimate_bytes": raw_estimate, "raw_partout_estimate_minimum_passes": 3, "raw_partout_estimate_basis": "stat_size_times_two_guarded_sha_passes_plus_one_official_decoder_pass; extra decoder reads UNKNOWN; actual worker receipt is authoritative", "raw_partout_additional_decoder_reads": "UNKNOWN", "small_source_bytes_read": sum(inputs[path]["bytes"] for path in input_paths), "runtime_pre_post_hash_bytes": 2 * sum(inputs[path]["bytes"] for path in input_paths), "estimated_output_bytes": estimated_storage_bytes},
         "source_scope": {"terminal_and_source_refs_explicit": True, "raw_partout_parent_content_read": False, "h5_content_read": False, "part_frames_opened": False, "solver_started": False, "physical_fate": "UNKNOWN", "dynamical_impact": "UNKNOWN", "QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"},
         "status": "prepared_parent_v8_guard_pending_native_decoder",
         "canonical_ready": True,

@@ -107,6 +107,9 @@ def test_build_parent_request_is_light_validated_and_excludes_raw_payload(tmp_pa
     assert str(raw.resolve()) not in request["input_files"]
     assert str(raw.resolve()) not in request["input_sha256"]
     assert request["guarded_payload_binding"]["sha256"] == MODULE.PARENT_GUARD_COMPUTED
+    assert request["estimated_native_read_bytes"] == raw.stat().st_size * 3
+    assert request["source_read_cost"]["raw_partout_estimate_minimum_passes"] == 3
+    assert request["source_read_cost"]["raw_partout_additional_decoder_reads"] == "UNKNOWN"
     assert request["runtime6_closure"]["schema"] == MODULE.RUNTIME6_CLOSURE_SCHEMA
     assert request["cwd"] == str(SCRIPT.parent.resolve())
     assert request["worktree_root"] == str(SCRIPT.parents[2].resolve())
