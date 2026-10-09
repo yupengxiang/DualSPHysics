@@ -568,3 +568,12 @@ ROOT185 actual small metadata index completed, proof SHA04855e2968ab7821e21213d0
 V65 source tests3 PASS, but actual-interface root review found canonical-vs-file request SHA mismatch; repair requested before any downstream launch. F2 ROOT179B candidate002 file SHA d83e...570, canonical ccdd...29f (corrects earlier shorthand that conflated them); not run. ROOT184 V1 source review found unguarded finalize full-report hash and wrong compact proof binding. V2 correction pending; V1 not runnable/integrated. ROOT172 pending input card and173/174 actual sharedV5 source-only preflight integrated; no solver launch. Added venv/cfg strict forward closure requested for173/174.
 
 Latest measured charges CPU 706.256971430 core-h/GPU 139.613687364 h. Whole seven-item goal active/incomplete, original hard budgets/deadline/Home floor unchanged. This snapshot is a recovery point and does not replace further execution.
+
+
+## Actual terminal continuation 2026-10-09T06:55:50.848099+00:00
+
+ROOT178 completed and verified all836 native frame boundaries, counts and exact producer identity. Proof SHA 21a66e9bc5b062918a2b876f87efef5107cf2e31b4ff9b44de011112a6cf3bb0. Native512 lost/no new/no reappeared; full report361859842B SHA ca16c911b1ce93ebbda60fb35ac282b5af479b9deb9774142e59d2cac6f23228 remains root stat-only. Current full-report stat exactly joins both worker stable-read snapshots. FullCPU1524.398518s fee closed/idempotent/service stopped; no reservations or actual task currently running. QI/QN/QE and physical fate UNKNOWN.
+
+ROOT184 V2 actual finalize failed before request/reservation: expected compact.stat, but true producer uses stable_read/stat_before/stat_after. AdditiveV3 compatibility, summary binding and literal venv/cfg closure delegated; do not launch V2. ROOT173/174 V7 source-only actual gate positive, but validator module is not declared and its actual SHA unchecked; additiveV8 repair pending, no solver. V65 actual V8 proof contract/file-versus-canonical SHA fixed, 8primary tests PASS; ROOT179B candidate002 still NOTRUN. Existing earlier checkpoint states are historical.
+
+Current chargedCPU 706.680415462775coreh/GPU 139.61368736436228h; full seven-item goal remains ACTIVE/incomplete, all hard limits/deadline/Homefloor unchanged. Next ROOT184→ROOT172→conditional temporal controls/F2 recovery; original336 typed lifecycle pilot source preparing.
