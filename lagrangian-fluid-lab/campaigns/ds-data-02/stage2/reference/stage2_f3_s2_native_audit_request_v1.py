@@ -213,9 +213,8 @@ def build(output: Path, *, case_id: str, attempt_id: str, launch_commit: str) ->
     records[str(FORCING.resolve())] = known_record(FORCING, FORCING_SHA, 14377599, "parent_after_reservation_pre_post_hash", "ROOT133 forcing copy")
     input_files = sorted(records)
     input_sha256 = {path: records[path]["sha256"] for path in input_files}
-    observer_template = output.parent / "f3-s2-coarse-native-audit-root139-001-observer-template.json"
     command = [
-        str(PYTHON), str(SNAPSHOT_WORKER), "--observer-request", str(observer_template),
+        str(PYTHON), str(SNAPSHOT_WORKER), "--observer-request", str(output.expanduser().resolve()),
         "--output", "{attempt_root}/native_selected_source_snapshot_v2.json",
     ]
     request = {
@@ -354,7 +353,6 @@ def main() -> int:
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--prepare", action="store_true")
     parser.add_argument("--output", type=Path, default=REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f3-s2-coarse-native-audit-root139-001.json")
-    parser.add_argument("--observer-template", type=Path, default=None)
     parser.add_argument("--case-id", default="F3_S2_COARSE_NATIVE_AUDIT_ROOT139")
     parser.add_argument("--attempt-id", default="f3-s2-coarse-native-audit-root139-001")
     parser.add_argument("--launch-commit", default=None)
@@ -366,13 +364,8 @@ def main() -> int:
         parser.error("use --prepare")
     launch_commit = args.launch_commit or subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, check=True, capture_output=True, text=True).stdout.strip()
     value = build(args.output, case_id=args.case_id, attempt_id=args.attempt_id, launch_commit=launch_commit)
-    # The snapshot worker needs the observer-template file.  It is exactly the
-    # same request metadata and is written as a separate immutable path so the
-    # parent can consume the snapshot before producing a decoder request.
-    template = args.observer_template or args.output.with_name(args.output.stem + "-observer-template.json")
-    write_new(template, value)
     write_new(args.output, value)
-    print(json.dumps({"status": "PREPARED_F3_NATIVE_AUDIT_SOURCE_SNAPSHOT", "request": str(args.output.resolve()), "observer_template": str(template.resolve()), "native_payload_read_by_builder": False, "solver_started": False}, ensure_ascii=False, indent=2))
+    print(json.dumps({"status": "PREPARED_F3_NATIVE_AUDIT_SOURCE_SNAPSHOT", "request": str(args.output.resolve()), "native_payload_read_by_builder": False, "solver_started": False}, ensure_ascii=False, indent=2))
     return 0
 
 
