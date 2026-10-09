@@ -641,7 +641,11 @@ def _verify_source_closure(closure: Sequence[Mapping[str, Any]], *, phase: str) 
     """Hash every actionable copied metadata/motion source at one phase."""
     rows: list[dict[str, Any]] = []
     for item in closure:
-        path = _absolute(item.get("path"), str(item.get("role", "source closure")))
+        role = str(item.get("role", "source closure"))
+        literal = Path(str(item.get("path", ""))).expanduser()
+        if literal.is_symlink() or literal.absolute() != literal.resolve():
+            raise PortableV61Error(f"source closure path uses a symlink: {role}")
+        path = _absolute(literal, role)
         expected = _require_sha(item.get("expected_sha256"), str(item.get("role", "source closure")))
         observed = _sha(path)
         if observed != expected:
@@ -1048,7 +1052,10 @@ def _validate_request(path: Path, *, verify_static: bool = False) -> dict[str, A
         if not isinstance(item, Mapping):
             raise PortableV61Error("source closure entry is malformed")
         role = str(item.get("role", "source closure"))
-        source_path = _absolute(item.get("path"), role)
+        literal_source_path = Path(str(item.get("path", ""))).expanduser()
+        if literal_source_path.is_symlink() or literal_source_path.absolute() != literal_source_path.resolve():
+            raise PortableV61Error(f"source closure path uses a symlink: {role}")
+        source_path = _absolute(literal_source_path, role)
         _require_sha(item.get("expected_sha256"), f"{role} expected SHA")
         if item.get("verification_phase") != "AFTER_ATOMIC_PARENT_RESERVATION_PRE_AND_POST":
             raise PortableV61Error(f"source closure phase is not after-reservation: {role}")
@@ -1371,7 +1378,12 @@ def run(request_path: Path | str, *, io_slot_approved: bool,
                            "full_prepost_equal": bool(before and after and before["files"] == after["files"])},
             "source_closure": {"declared": list(bound["source_closure"]),
                                "before": source_before, "after": source_after,
-                               "prepost_equal": bool(source_before and source_after and source_before == source_after),
+                               "prepost_equal": bool(
+                                   source_before and source_after and
+                                   [{k: row.get(k) for k in ("role", "path", "source_kind", "bytes", "mtime_ns", "mode_bits", "sha256")}
+                                    for row in source_before] ==
+                                   [{k: row.get(k) for k in ("role", "path", "source_kind", "bytes", "mtime_ns", "mode_bits", "sha256")}
+                                    for row in source_after]),
                                "verification_phase": "AFTER_ATOMIC_PARENT_RESERVATION_PRE_AND_POST"},
             "copy_contract": {"raw_copy_attempts": raw_copy_attempts, "raw_source_copy_bytes": 0,
                               "new_code_overlay": code_rows, "old_namespace_write": "FORBIDDEN"},
