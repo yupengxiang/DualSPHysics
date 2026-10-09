@@ -347,7 +347,31 @@ def validate_stream_proof(report_path: Path, proof_path: Path, receipt_path: Pat
         raise EvidenceError("ROOT126 proof does not bind 401 frames/153 joins")
     if proof.get("root_raw_or_h5_read_or_hash") is not False or proof.get("parent_actual_prepost_content_hashes_equal") is not True:
         raise EvidenceError("ROOT126 proof read/stability policy differs")
-    return {"report": binding(report_path), "proof": binding(proof_path), "receipt": binding(receipt_path), "proof_status": proof["status"], "report_status": report["status"]}
+    active = report.get("active_fluid_stream")
+    mass = report.get("mass_and_material")
+    if not isinstance(active, dict) or not isinstance(mass, dict):
+        raise EvidenceError("ROOT126 stream report lacks active/mass summaries")
+    if active.get("frame_count") != 401 or mass.get("native_excluded_count_by_mk") != {"1": 49, "2": 69, "3": 35}:
+        raise EvidenceError("ROOT126 stream frame or native-count summary differs")
+    try:
+        stream_mass_summary = {
+            "xml_whole_initial_fluid_mass_kg": float(active["xml_whole_initial_fluid_mass_kg"]),
+            "native_whole_initial_fluid_mass_kg": float(active["native_whole_initial_fluid_mass_kg"]),
+            "native_massfluid_kg": float(active["native_massfluid_kg"]),
+            "native_excluded_mass_lower_bound_kg": float(mass["native_excluded_mass_lower_bound_kg"]),
+            "native_excluded_mass_fraction_whole_initial": float(mass["native_excluded_mass_fraction_whole_initial"]),
+            "native_excluded_mass_fraction_native_whole_initial": float(mass["native_excluded_mass_fraction_native_whole_initial"]),
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise EvidenceError("ROOT126 stream mass summary is malformed") from exc
+    return {
+        "report": binding(report_path),
+        "proof": binding(proof_path),
+        "receipt": binding(receipt_path),
+        "proof_status": proof["status"],
+        "report_status": report["status"],
+        "stream_mass_summary": stream_mass_summary,
+    }
 
 
 def point_inside(point: list[float], low: list[float], high: list[float]) -> bool:
@@ -599,6 +623,8 @@ def diagnose(
             "whole_initial_mass_basis": "XML fluid count × XML MassFluid",
             "frozen_unknown_fraction_max": 0.003,
             "root105_observed_native_fraction": 0.005513513513513513,
+            "root126_observed_stream_fraction": stream["stream_mass_summary"]["native_excluded_mass_fraction_whole_initial"],
+            "root126_native_whole_initial_mass_kg": stream["stream_mass_summary"]["native_whole_initial_fluid_mass_kg"],
             "result": "FAIL_OVER_FROZEN_0P003",
             "domain_semantics_do_not_change_this_gate": True,
         },
