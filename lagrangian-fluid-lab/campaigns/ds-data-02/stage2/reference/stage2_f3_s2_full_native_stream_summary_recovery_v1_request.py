@@ -34,6 +34,7 @@ SCHEMA = "ds02.request.v1"
 VARIANT = "ds02.stage2.f3-s2.full-native-stream-summary-recovery-request.v1"
 PHYSICAL_CASE = "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT"
 QUERY_TIMES_S = (0.0, 2.0, 4.0, 6.0, 8.0)
+RECOVERY_MEMORY_BYTES = 2 * 1024 * 1024 * 1024
 
 
 def _load_worker():
@@ -119,6 +120,23 @@ def _json_record(path: Path, label: str, max_bytes: int = 32 * 1024 * 1024) -> t
     return record, value
 
 
+def _receipt_returncode(receipt: dict[str, Any]) -> int | None:
+    value = receipt.get("returncode")
+    if value is None and isinstance(receipt.get("execution"), dict):
+        value = receipt["execution"].get("returncode", receipt["execution"].get("return_code"))
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _require_zero_returncode(receipt: dict[str, Any], label: str) -> None:
+    if _receipt_returncode(receipt) != 0:
+        raise ValueError(f"{label} does not prove returncode 0")
+
+
 def _literal_python() -> dict[str, Any]:
     path = PYTHON.expanduser()
     if not path.is_file():
@@ -170,10 +188,8 @@ def _validate_failed_receipt(paths: dict[str, Path]) -> tuple[dict[str, Any], di
     status = str(receipt.get("status", "")).lower()
     if not (status.startswith("failed") or status in {"error", "aborted"}):
         raise ValueError(f"ROOT188 receipt is not preserved failed evidence: {receipt.get('status')!r}")
-    returncode = receipt.get("returncode")
-    if returncode is None and isinstance(receipt.get("execution"), dict):
-        returncode = receipt["execution"].get("returncode", receipt["execution"].get("return_code"))
-    if returncode is None or int(returncode) == 0:
+    returncode = _receipt_returncode(receipt)
+    if returncode is None or returncode == 0:
         raise ValueError("ROOT188 failed receipt lacks nonzero returncode")
     # The ds02 execution receipt stores the original request SHA at the
     # receipt top level, while ``request`` is the expanded runtime payload
@@ -205,6 +221,7 @@ def _validate_solver(paths: dict[str, Path]) -> dict[str, dict[str, Any]]:
         raise ValueError("ROOT174 solver proof receipt join failed")
     if not str(receipt.get("status", "")).lower().startswith(("completed", "complete", "success")):
         raise ValueError("ROOT174 solver receipt is not completed")
+    _require_zero_returncode(receipt, "ROOT174 solver receipt")
     return {"request": request_record, "proof": proof_record, "receipt": receipt_record}
 
 
@@ -212,9 +229,13 @@ def _source_closure() -> list[dict[str, Any]]:
     rels = [
         f"lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/{WORKER_NAME}",
         f"lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/{CONTRACT_NAME}",
+        f"lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/{Path(__file__).name}",
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_full_native_stream_observer_v1.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_full_native_stream_observer_v5.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_full_native_stream_observer_v3.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_full_native_stream_observer_v2.py",
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_native_header_observer_v1.py",
+        "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_native_physical_observer_v2.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_overlay_task_error_compare_v1.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_overlay_task_error_compare_v2.py",
         "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_overlay_task_error_compare_v3.py",
@@ -293,7 +314,12 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "retained_full_report_stat_only": full_report_stat,
         "input_records": sorted(by_path.values(), key=lambda item: item["path"]),
         "input_sha256": {path: record["sha256"] for path, record in sorted(by_path.items())},
-        "source_closure": {"records": source_records, "v5_v3_v2_v1": True, "literal_venv": True},
+        "source_closure": {
+            "records": source_records,
+            "v5_v3_v2_v1": True,
+            "recursive_local_imports_bound": True,
+            "literal_venv": True,
+        },
         "query_times_s": list(QUERY_TIMES_S),
         "summary_max_bytes": 4 * 1024 * 1024,
         "native_payload_read": False,
@@ -343,10 +369,10 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "cpu_threads": 1,
         "omp_threads": 1,
         "max_wall_seconds": 300,
-        "max_memory_bytes": 1024 * 1024 * 1024,
+        "max_memory_bytes": RECOVERY_MEMORY_BYTES,
         "max_decoder_scratch_bytes": 8 * 1024 * 1024,
         "estimated_input_read_bytes": sum(record["bytes"] for record in all_records.values()) + full_report_stat["bytes"],
-        "estimated_peak_memory_bytes": 512 * 1024 * 1024,
+        "estimated_peak_memory_bytes": RECOVERY_MEMORY_BYTES,
         "estimated_storage_bytes": 8 * 1024 * 1024,
         "estimated_native_read_bytes": 0,
         "estimated_hdf5_read_bytes": 0,
@@ -354,7 +380,14 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
         "output": {"atomic": True, "refuse_overwrite": True, "path": output, "max_bytes": 4 * 1024 * 1024},
         "source_binding": {"failed_observer_evidence": "failure only", "retained_report": full_report_stat, "underlying_solver": solver_records, "summary_schema": "ds02.stage2.f3-s2.full-native-stream-observer.v5", "source_failure_preserved": True},
         "source_closure": manifest["source_closure"],
-        "resource_guard": {"owner": "stage2-reference-preparation", "runner": "parent-v8-audit", "payload_read": "retained JSON report only after reservation", "solver_launch": "forbidden"},
+        "resource_guard": {
+            "owner": "stage2-reference-preparation",
+            "runner": "parent-v8-audit",
+            "payload_read": "retained JSON report only after reservation",
+            "solver_launch": "forbidden",
+            "max_memory_bytes": RECOVERY_MEMORY_BYTES,
+            "memory_estimate_reason": "77MB retained JSON plus decoded 179208-record report and compact serialization",
+        },
         "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "reason": "operational recovery from a failed compact-summary write; no scientific qualification"},
     }
     _write_once(request_path, request)
@@ -382,6 +415,13 @@ def self_test() -> dict[str, Any]:
         _validate_failed_receipt({"observer_request": q, "failed_observer_receipt": receipt})
         if not _stat_only(q, "fixture stat")["content_sha256"].startswith("UNKNOWN"):
             raise AssertionError("stat-only record unexpectedly claimed content SHA")
+        _require_zero_returncode({"returncode": 0}, "zero solver returncode fixture")
+        try:
+            _require_zero_returncode({"returncode": 1}, "nonzero solver returncode fixture")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("nonzero solver returncode fixture was accepted")
         missing_proof = root / "missing-proof.json"
         return {"status": "PASS", "schema": VARIANT, "failed_receipt_nonzero": True, "missing_failure_proof_blocks": not missing_proof.exists(), "full_report_content_sha_at_builder": "UNKNOWN_BY_CONTRACT", "native_payload_read": False, "hdf5_read": False}
 

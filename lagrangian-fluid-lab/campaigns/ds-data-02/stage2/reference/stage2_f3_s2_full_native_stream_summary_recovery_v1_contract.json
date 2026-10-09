@@ -18,6 +18,12 @@
     "hdf5_read": false,
     "full_report_content_is_not_rewritten": true
   },
+  "preserved_output_join": {
+    "required_before_read": true,
+    "required_after_read": true,
+    "fields": ["path", "bytes", "mtime_ns", "ctime_ns", "st_ino", "st_dev"],
+    "source_replacement_or_stat_change": "reject"
+  },
   "summary": {
     "schema": "ds02.stage2.f3-s2.full-native-stream-observer.v5",
     "max_output_bytes": 4194304,
@@ -27,6 +33,10 @@
     "interpolation": false,
     "bracket_width_as_error_bound": false,
     "lifecycle_fate_or_flux": "UNKNOWN_NOT_INFERRED"
+  },
+  "resource_guard": {
+    "max_memory_bytes": 2147483648,
+    "estimate_reason": "77MB retained JSON plus 179208-record decoded report and compact serialization; bounded 2GiB guard"
   },
   "underlying_solver": {
     "required_root": "ROOT174",

@@ -34,6 +34,7 @@ PHYSICAL_CASE = "F3_TWOAXIS_P1200_AY0750_STAGE1_FIRST48_PITCH_VARIANT"
 QUERY_TIMES_S = (0.0, 2.0, 4.0, 6.0, 8.0)
 SUMMARY_MAX_BYTES = 4 * 1024 * 1024
 REPORT_MAX_BYTES = 256 * 1024 * 1024
+STAT_JOIN_FIELDS = ("bytes", "mtime_ns", "ctime_ns", "st_ino", "st_dev")
 
 
 def _load(path: Path, name: str):
@@ -51,11 +52,17 @@ V3 = _load(V3_PATH, "stage2_f3_s2_summary_recovery_v3_dependency")
 
 
 def _path(value: Path | str) -> Path:
-    return Path(value).expanduser().resolve()
+    # Keep the pre-resolve object long enough for _regular() to reject a
+    # symlink replacement.  Resolving first would turn a changed symlink into
+    # an apparently ordinary file and defeat the preserved-output join.
+    return Path(value).expanduser()
 
 
 def _regular(path: Path, label: str, *, max_bytes: int | None = None) -> Path:
     path = _path(path)
+    if path.is_symlink() or not path.is_file():
+        raise FileNotFoundError(f"{label} must be a regular file: {path}")
+    path = path.resolve()
     if path.is_symlink() or not path.is_file():
         raise FileNotFoundError(f"{label} must be a regular file: {path}")
     if max_bytes is not None and path.stat().st_size > max_bytes:
@@ -75,9 +82,54 @@ def _stat(path: Path) -> dict[str, int]:
     }
 
 
-def _read_json_stable(path: Path, label: str, *, max_bytes: int = REPORT_MAX_BYTES) -> tuple[dict[str, Any], dict[str, Any]]:
+def _assert_expected_stat(path: Path, expected: dict[str, Any], label: str) -> dict[str, int]:
+    """Join a retained source to the parent's exact pre/post stat record."""
+    actual = _stat(path)
+    expected_path = expected.get("path")
+    if expected_path is not None and Path(str(expected_path)).expanduser().resolve() != _path(path).resolve():
+        raise RuntimeError(f"{label} path differs from preserved proof: {path}")
+    for field in STAT_JOIN_FIELDS:
+        if field not in expected:
+            raise RuntimeError(f"{label} is missing preserved stat field {field}")
+        try:
+            expected_value = int(expected[field])
+        except (TypeError, ValueError) as exc:
+            raise RuntimeError(f"{label} has non-integer preserved stat field {field}") from exc
+        if actual[field] != expected_value:
+            raise RuntimeError(
+                f"{label} stat mismatch for {field}: expected {expected_value}, actual {actual[field]}"
+            )
+    return actual
+
+
+def _receipt_returncode(receipt: dict[str, Any]) -> int | None:
+    value = receipt.get("returncode")
+    if value is None and isinstance(receipt.get("execution"), dict):
+        value = receipt["execution"].get("returncode", receipt["execution"].get("return_code"))
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _require_zero_returncode(receipt: dict[str, Any], label: str) -> None:
+    if _receipt_returncode(receipt) != 0:
+        raise ValueError(f"{label} does not prove returncode 0")
+
+
+def _read_json_stable(
+    path: Path,
+    label: str,
+    *,
+    max_bytes: int = REPORT_MAX_BYTES,
+    expected_stat: dict[str, Any] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     path = _regular(path, label, max_bytes=max_bytes)
     before = _stat(path)
+    if expected_stat is not None:
+        _assert_expected_stat(path, expected_stat, f"{label} pre-read preserved join")
     digest = hashlib.sha256()
     chunks: list[bytes] = []
     with path.open("rb") as handle:
@@ -87,6 +139,8 @@ def _read_json_stable(path: Path, label: str, *, max_bytes: int = REPORT_MAX_BYT
     after = _stat(path)
     if before != after:
         raise RuntimeError(f"{label} changed during one guarded read: {path}")
+    if expected_stat is not None:
+        _assert_expected_stat(path, expected_stat, f"{label} post-read preserved join")
     try:
         value = json.loads(b"".join(chunks).decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -138,6 +192,7 @@ def _validate_failed_observer(
     request_path: Path,
     receipt_path: Path,
     proof_path: Path,
+    retained_report_path: Path,
 ) -> dict[str, Any]:
     request_record, request = _record_json(request_path, "ROOT188 observer request", max_bytes=8 * 1024 * 1024)
     receipt_record, receipt = _record_json(receipt_path, "ROOT188 failed observer receipt", max_bytes=32 * 1024 * 1024)
@@ -147,12 +202,8 @@ def _validate_failed_observer(
     receipt_status = str(receipt.get("status", "")).lower()
     if not (receipt_status.startswith("failed") or receipt_status in {"error", "aborted"}):
         raise ValueError(f"ROOT188 receipt is not preserved failure evidence: {receipt.get('status')!r}")
-    returncode = receipt.get("returncode")
-    if returncode is None:
-        execution = receipt.get("execution")
-        if isinstance(execution, dict):
-            returncode = execution.get("returncode", execution.get("return_code"))
-    if returncode is None or int(returncode) == 0:
+    returncode = _receipt_returncode(receipt)
+    if returncode is None or returncode == 0:
         raise ValueError("ROOT188 failed observer receipt lacks nonzero returncode")
     # ds02 execution receipts keep the immutable request-file join at the
     # receipt top level.  ``request`` is the expanded runtime payload and has
@@ -178,7 +229,28 @@ def _validate_failed_observer(
         raise ValueError("ROOT188 failure proof receipt path differs")
     if proof.get("receipt_sha256") != receipt_record["sha256"]:
         raise ValueError("ROOT188 failure proof receipt SHA differs")
-    return {"request": request_record, "receipt": receipt_record, "proof": proof_record, "proof_value": proof}
+    retained = proof.get("preserved_outputs_stat_only")
+    if not isinstance(retained, list):
+        raise ValueError("ROOT188 failure proof lacks preserved_outputs_stat_only")
+    normalized_report = _regular(retained_report_path, "retained ROOT188 full observer report")
+    matching = [
+        entry
+        for entry in retained
+        if isinstance(entry, dict)
+        and entry.get("path") is not None
+        and Path(str(entry["path"])).expanduser().resolve() == normalized_report
+    ]
+    if len(matching) != 1:
+        raise ValueError("ROOT188 failure proof does not bind exactly one retained full report path")
+    retained_stat = matching[0]
+    _assert_expected_stat(normalized_report, retained_stat, "ROOT188 retained full report pre-read")
+    return {
+        "request": request_record,
+        "receipt": receipt_record,
+        "proof": proof_record,
+        "proof_value": proof,
+        "retained_report_stat": retained_stat,
+    }
 
 
 def _validate_solver(
@@ -206,6 +278,7 @@ def _validate_solver(
     status = str(receipt.get("status", "")).lower()
     if not status.startswith(("completed", "complete", "success")):
         raise ValueError("ROOT174 solver receipt is not completed")
+    _require_zero_returncode(receipt, "ROOT174 solver receipt")
     return {"request": request_record, "receipt": receipt_record, "proof": proof_record}
 
 
@@ -234,9 +307,18 @@ def _validate_report(value: dict[str, Any], report_record: dict[str, Any], solve
 
 
 def recover(args: argparse.Namespace) -> dict[str, Any]:
-    failed = _validate_failed_observer(args.observer_request, args.failed_observer_receipt, args.failed_observer_proof)
+    failed = _validate_failed_observer(
+        args.observer_request,
+        args.failed_observer_receipt,
+        args.failed_observer_proof,
+        args.full_report,
+    )
     solver = _validate_solver(args.solver_request, args.solver_receipt, args.solver_proof)
-    report_record, report = _read_json_stable(args.full_report, "retained ROOT188 full observer report")
+    report_record, report = _read_json_stable(
+        args.full_report,
+        "retained ROOT188 full observer report",
+        expected_stat=failed["retained_report_stat"],
+    )
     _validate_report(report, report_record, solver["request"])
     request_binding = V5._request_binding(args.solver_request)
     summary = V5._compact_summary(report, args.full_report, request_binding)
@@ -252,6 +334,7 @@ def recover(args: argparse.Namespace) -> dict[str, Any]:
         "underlying_solver_receipt": solver["receipt"],
         "underlying_solver_proof": solver["proof"],
         "retained_full_report": report_record,
+        "retained_full_report_preserved_stat_join": failed["retained_report_stat"],
         "full_report_read_passes": 1,
         "native_payload_read_by_recovery": False,
         "hdf5_read_by_recovery": False,
@@ -319,7 +402,43 @@ def self_test() -> dict[str, Any]:
             exception_rejected = False
         if not exception_rejected:
             raise AssertionError("invalid JSON exception fixture was accepted")
-        return {"status": "PASS", "schema": SCHEMA, "frames": 1680, "summary_bytes": len(encoded), "overflow_rejected": overflow_rejected, "exception_rejected": exception_rejected, "native_payload_read": False, "hdf5_read": False, "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
+        stat_source = root / "stat-source.json"
+        stat_source.write_text("{}", encoding="utf-8")
+        expected_stat = _stat(stat_source)
+        _read_json_stable(stat_source, "stat fixture", expected_stat=expected_stat)
+        stat_source.write_text('{"changed":true}', encoding="utf-8")
+        try:
+            _assert_expected_stat(stat_source, expected_stat, "stat-change negative")
+        except RuntimeError:
+            stat_change_rejected = True
+        else:
+            stat_change_rejected = False
+        if not stat_change_rejected:
+            raise AssertionError("stat-change replacement was accepted")
+        replaced = root / "replacement.json"
+        replaced.write_text("{}", encoding="utf-8")
+        replacement_stat = _stat(replaced)
+        replacement = root / "replacement-new.json"
+        replacement.write_text('{"replacement":true}', encoding="utf-8")
+        os.replace(replacement, replaced)
+        try:
+            _assert_expected_stat(replaced, replacement_stat, "source-replacement negative")
+        except RuntimeError:
+            source_replacement_rejected = True
+        else:
+            source_replacement_rejected = False
+        if not source_replacement_rejected:
+            raise AssertionError("source replacement was accepted")
+        _require_zero_returncode({"returncode": 0}, "zero returncode fixture")
+        try:
+            _require_zero_returncode({"returncode": 1}, "nonzero returncode fixture")
+        except ValueError:
+            solver_nonzero_rejected = True
+        else:
+            solver_nonzero_rejected = False
+        if not solver_nonzero_rejected:
+            raise AssertionError("nonzero solver returncode was accepted")
+        return {"status": "PASS", "schema": SCHEMA, "frames": 1680, "summary_bytes": len(encoded), "overflow_rejected": overflow_rejected, "exception_rejected": exception_rejected, "stat_change_rejected": stat_change_rejected, "source_replacement_rejected": source_replacement_rejected, "solver_nonzero_rejected": solver_nonzero_rejected, "native_payload_read": False, "hdf5_read": False, "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}}
 
 
 def main() -> int:
