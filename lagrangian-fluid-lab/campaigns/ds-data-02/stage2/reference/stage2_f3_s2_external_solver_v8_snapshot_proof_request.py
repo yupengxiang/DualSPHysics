@@ -216,18 +216,23 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     snapshot_binding = V7.validate_snapshot(args.bi4_snapshot, args.gencase_request, args.receipt, args.generated_bi4)
     v6_record = V7.V6.code_record(V7.V6_REQUEST, "F3 V6 forward request builder")
     v8_record = small_record(Path(__file__), "F3 V8 snapshot-proof request builder")
+    v7_record = small_record(V7_PATH, "F3 V7 snapshot request dependency")
+    v5_request_record = V7.V6.code_record(V7.V6.V5_REQUEST, "F3 V5 request builder dependency")
+    v6_support_record = V7.V6.code_record(V7.V6.V6_SUPPORT_WORKER, "F3 V6 support worker dependency")
     snapshot_record = V7.small_record(args.bi4_snapshot, "F3 generated BI4 source snapshot")
-    request["input_files"] = sorted(set(list(request.get("input_files", [])) + [v6_record["path"], v8_record["path"], snapshot_record["path"]]))
+    dependency_records = [v6_record, v8_record, v7_record, v5_request_record, v6_support_record, snapshot_record]
+    request["input_files"] = sorted(set(list(request.get("input_files", [])) + [item["path"] for item in dependency_records]))
     request["input_sha256"] = dict(request.get("input_sha256", {}))
-    request["input_sha256"][v6_record["path"]] = v6_record["sha256"]
-    request["input_sha256"][v8_record["path"]] = v8_record["sha256"]
-    request["input_sha256"][snapshot_record["path"]] = snapshot_record["sha256"]
+    request["input_sha256"].update({item["path"]: item["sha256"] for item in dependency_records})
     request["input_content_scope"] = dict(request.get("input_content_scope", {}))
-    request["input_content_scope"][v6_record["path"]] = v6_record["content_scope"]
-    request["input_content_scope"][v8_record["path"]] = v8_record["content_scope"]
-    request["input_content_scope"][snapshot_record["path"]] = snapshot_record["content_scope"]
+    request["input_content_scope"].update({item["path"]: item["content_scope"] for item in dependency_records})
     request["forward_builder_binding"] = v6_record
     request["proof_adapter_binding"] = v8_record
+    request["snapshot_request_dependency_bindings"] = {
+        "v7_snapshot_request_builder": v7_record,
+        "v5_request_builder": v5_request_record,
+        "v6_support_worker": v6_support_record,
+    }
     request["materialization_contract"] = V7.V6._pair_contract(request)
     request["source_provenance"] = dict(request.get("source_provenance", {}))
     request["source_provenance"]["root128_support_report"] = support
