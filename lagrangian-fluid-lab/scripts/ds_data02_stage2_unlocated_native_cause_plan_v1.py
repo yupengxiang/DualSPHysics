@@ -54,6 +54,7 @@ DEFAULT_CURRENT = STAGE2 / "CURRENT336.json"
 DEFAULT_TYPED_PROOFS = tuple(
     CHECKPOINTS / name
     for name in (
+        "TYPED_LIFECYCLE_V4_ACTUAL_SINGLE_CASE_ROOT_VERIFICATION_192.json",
         "TYPED_LIFECYCLE_BATCH_F1_ACTUAL_ROOT_VERIFICATION_208.json",
         "TYPED_LIFECYCLE_BATCH_F2_ACTUAL_ROOT_VERIFICATION_193.json",
         "TYPED_LIFECYCLE_BATCH_F2_ACTUAL_ROOT_VERIFICATION_198.json",
@@ -249,6 +250,17 @@ def _extract_typed_cases(proofs: Iterable[dict[str, Any]]) -> tuple[dict[str, di
         if not isinstance(status, str) or not status.startswith("VERIFIED_ACTUAL"):
             continue
         rows = proof.get("case_verifications")
+        # ROOT192 predates the batch proof wrapper and records its one exact
+        # physical case at the proof root.  Normalize that shape here; it is
+        # still a completed saved-mask diagnostic, not physical credit.
+        if rows is None and isinstance(proof.get("physical_case_id"), str):
+            rows = [
+                {
+                    **proof,
+                    "family_id": proof["physical_case_id"].split("_", 1)[0],
+                    "status": "VERIFIED_SAVED_MASK_DIAGNOSTIC_ONLY",
+                }
+            ]
         if not isinstance(rows, list):
             raise PlanError(f"typed proof case_verifications is not a list: {path}")
         for row in rows:
