@@ -78,10 +78,12 @@ def write_new(path: Path, value: dict[str, Any]) -> None:
             handle.write(payload)
             handle.flush()
             os.fsync(handle.fileno())
+    except Exception:
+        temporary.unlink(missing_ok=True)
+        raise
     finally:
         if fd >= 0:
             os.close(fd)
-        temporary.unlink(missing_ok=True)
     os.replace(temporary, path)
 
 
