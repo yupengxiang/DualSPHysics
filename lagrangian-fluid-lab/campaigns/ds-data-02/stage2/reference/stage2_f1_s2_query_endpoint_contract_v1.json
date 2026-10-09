@@ -1,0 +1,56 @@
+{
+  "schema": "ds02.stage2.f1-s2.query-endpoint-contract.v1",
+  "status": "PRE_REGISTERED_NEAREST_NATIVE_QUERY_ENDPOINT_DIAGNOSTIC",
+  "sentinel_id": "F1-S2",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "purpose": "Read only the actual native saved frames immediately below and above query time 1.0 s for the existing coarse, medium, and fine same-control runs.",
+  "query": {
+    "query_time_s": 1.0,
+    "selection": "nearest actual RunPARTs lower and upper rows containing the query",
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN",
+    "selected_row_index_is_not_native_frame_id": true,
+    "endpoint_or_outside_window": "UNKNOWN_IF_NOT_PRESENT"
+  },
+  "required_fields": [
+    "native MassFluid",
+    "native MassBound when exposed",
+    "native Dp",
+    "Idp identity summary",
+    "fluid/fixed/moving role counts",
+    "fluid weighted centroid",
+    "fluid weighted velocity",
+    "fluid kinetic energy",
+    "actual saved time",
+    "RunPARTs native frame id"
+  ],
+  "runtime_control_rule": {
+    "generated_xml_TimeOut_is_not_actual_solver_output_control": true,
+    "request_receipt_command_and_RunPARTs_are_authoritative_for_actual_run": true,
+    "record_missing_Run_txt_or_Run_out_without_inference": true,
+    "control_override_must_be_reported_per_grid": true
+  },
+  "source_join": {
+    "root223_proof_to_report_to_root207_child": true,
+    "root217_manufactured_calibration_proof": true,
+    "solver_receipt_status_and_returncode": "completed/0 required",
+    "RunPARTs_sha_and_stat": "stable before/after guarded read",
+    "native_part_sha_and_stat": "parent-reservation pre/post worker gate; SHA unknown during preparation"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "Endpoint field readings do not establish interpolation error, integration error, spatial truth, or physical event time."
+  },
+  "read_scope": {
+    "preparation": "small JSON/XML/RunPARTs/receipt/log metadata only",
+    "guarded_execution": "six selected native Part files, two per grid",
+    "production_h5_vtk_read": false,
+    "full_native_tree_scan": false,
+    "solver_launch": false,
+    "mass_rescale": false,
+    "max_preparation_file_bytes": 16777216
+  }
+}
