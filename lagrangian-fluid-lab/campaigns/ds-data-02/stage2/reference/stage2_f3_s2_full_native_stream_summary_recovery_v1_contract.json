@@ -1,0 +1,43 @@
+{
+  "schema": "ds02.stage2.f3-s2.full-native-stream-summary-recovery-contract.v1",
+  "status": "FROZEN_ROOT196_METADATA_ONLY_RECOVERY",
+  "purpose": "Recover ROOT188 compact observer metadata from the retained full v3 report after the original v5 2MiB summary-cap failure.",
+  "source_failure": {
+    "producer_request": "ROOT188 observer request",
+    "producer_receipt": "must remain a nonzero failed receipt",
+    "producer_proof": "parent-generated failure proof must bind the exact request and failed receipt",
+    "failure_is_not_scientific_pass": true
+  },
+  "retained_report": {
+    "read_after_parent_reservation": true,
+    "stable_stat_and_sha_before_after": true,
+    "read_passes": 1,
+    "max_input_bytes": 268435456,
+    "native_part_read": false,
+    "bi4_read": false,
+    "hdf5_read": false,
+    "full_report_content_is_not_rewritten": true
+  },
+  "summary": {
+    "schema": "ds02.stage2.f3-s2.full-native-stream-observer.v5",
+    "max_output_bytes": 4194304,
+    "selected_observation_limit": 12,
+    "queries_s": [0.0, 2.0, 4.0, 6.0, 8.0],
+    "actual_saved_times_only": true,
+    "interpolation": false,
+    "bracket_width_as_error_bound": false,
+    "lifecycle_fate_or_flux": "UNKNOWN_NOT_INFERRED"
+  },
+  "underlying_solver": {
+    "required_root": "ROOT174",
+    "solver_proof_must_be_actual": true,
+    "solver_receipt_must_be_completed": true,
+    "request_receipt_proof_path_and_sha_join": true
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "reason": "operational summary recovery only; no scientific qualification"
+  }
+}
