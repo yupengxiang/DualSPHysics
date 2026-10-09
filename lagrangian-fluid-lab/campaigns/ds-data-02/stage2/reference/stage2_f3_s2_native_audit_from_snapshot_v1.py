@@ -47,6 +47,7 @@ from stage2_f3_s2_native_audit_request_v1 import (
     OBSERVER_WORKER,
     RAW_ROOT,
     REPO,
+    RUNPARTS,
     ROOT120_RECEIPT,
     ROOT120_RECEIPT_SHA,
     ROOT120_REQUEST,
@@ -73,6 +74,11 @@ from stage2_f3_s2_native_audit_request_v1 import (
     sha256_file,
     small_record,
 )
+
+
+HEADER_OBSERVER = REPO / "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f3_s2_native_header_observer_v1.py"
+JPART_BI4_HEADER = Path("/home/jade/Projects/DualSPHysics/src/source/JPartDataBi4.h")
+JPART_BI4_SOURCE = Path("/home/jade/Projects/DualSPHysics/src/source/JPartDataBi4.cpp")
 
 
 REQUEST_SCHEMA = "ds02.request.v1"
@@ -140,7 +146,8 @@ def build(manifest_path: Path, output: Path, *, case_id: str, attempt_id: str, l
     for path, label in (
         (manifest_path, "ROOT139 snapshot manifest"),
         (SNAPSHOT_WORKER, "snapshot worker"),
-        (OBSERVER_WORKER, "observer worker"),
+        (OBSERVER_WORKER, "base observer worker"),
+        (HEADER_OBSERVER, "native header observer worker"),
         (ENFORCER_V1, "enforcer v1 dependency"),
         (ENFORCER_V2, "enforcer v2"),
         (DECODER, "official decoder"),
@@ -159,17 +166,20 @@ def build(manifest_path: Path, output: Path, *, case_id: str, attempt_id: str, l
         (ROOT132_SNAPSHOT, "ROOT132 snapshot"),
         (ROOT128_REPORT, "ROOT128 support report"),
         (CALIBRATION_CONTRACT, "F3 calibration contract"),
+        (JPART_BI4_HEADER, "official JPartDataBi4 header source"),
+        (JPART_BI4_SOURCE, "official JPartDataBi4 implementation source"),
     ):
         if not path.is_file():
             raise FileNotFoundError(f"{label}: {path}")
 
     records: dict[str, dict[str, Any]] = {}
     small_paths = [
-        Path(__file__), manifest_path, SNAPSHOT_WORKER, OBSERVER_WORKER,
+        Path(__file__), manifest_path, SNAPSHOT_WORKER, OBSERVER_WORKER, HEADER_OBSERVER,
         ENFORCER_V1, ENFORCER_V2, DECODER, DECODER_SOURCE, RUNTIME_V8,
         RUNTIME_V6, RUNTIME_V2, STRICT_V8, ACTUAL_REQUEST, ACTUAL_PROOF,
         ACTUAL_RECEIPT, ROOT132_PROOF, ROOT128_PROOF, ROOT120_REQUEST,
         ROOT120_RECEIPT, ROOT132_SNAPSHOT, ROOT128_REPORT, CALIBRATION_CONTRACT,
+        JPART_BI4_HEADER, JPART_BI4_SOURCE,
     ]
     for path in small_paths:
         record = small_record(path, "bounded audit source or manifest")
@@ -194,7 +204,7 @@ def build(manifest_path: Path, output: Path, *, case_id: str, attempt_id: str, l
     command = [
         str(Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python")),
         str(ENFORCER_V2),
-        "--observer-worker", str(OBSERVER_WORKER),
+        "--observer-worker", str(HEADER_OBSERVER),
         "--expected-source-manifest", str(manifest_path),
         "--raw-root", str(RAW_ROOT.resolve()),
         "--runparts", str(RUNPARTS.resolve()),
@@ -281,7 +291,8 @@ def build(manifest_path: Path, output: Path, *, case_id: str, attempt_id: str, l
         "field_contract": {
             "finite_checks": ["Idp", "Pos_or_Posd", "Vel", "Rhop"],
             "identity": "decoded Idp must map exactly to generated XML typed ranges; mkfluid_relative and mk_absolute remain separate",
-            "sample_mass": "native particle mass summed in XML fluid ranges; diagnostic only",
+            "sample_mass": "native BI4 header MassFluid multiplied by decoded fluid count; XML mass is not substituted",
+            "native_header_fields": ["MassFluid", "MassBound", "Rhop0", "Dp", "H", "PeriMode"],
             "continuous_owner_mass": "ROOT128 owner mass 14.58 kg remains separate; XML/native sample mass does not prove continuum equivalence",
             "observables": ["weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_j", "finite_stats", "actual_RunPARTs_time_brackets"],
             "pressure_eos": "UNKNOWN_NOT_DECODED_BY_WORKER",

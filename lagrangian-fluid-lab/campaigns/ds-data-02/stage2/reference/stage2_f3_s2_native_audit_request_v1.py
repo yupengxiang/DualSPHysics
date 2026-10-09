@@ -62,7 +62,7 @@ RUNTIME_V2 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
 STRICT_V8 = MAIN / "lagrangian-fluid-lab/scripts/ds_data02_strict_dispatch_v8.py"
 
 FRAMES = [0, 199, 200, 399, 400, 599, 600, 799, 800, 835]
-QUERY_TIMES = [0.0, 2.0, 4.0, 6.0, 8.0, 8.35]
+QUERY_TIMES = [0.0, 2.0, 4.0, 6.0, 8.0, 8.350023358431661]
 FINAL_TIME_S = 8.350023358431661
 EXPECTED_FRAME_COUNT = 836
 ACTUAL_REQUEST_SHA = "0441462c5e8ed9198e10648d31f75bcdc844742abcf883478c2d02fa5a5de624"
@@ -270,7 +270,8 @@ def build(output: Path, *, case_id: str, attempt_id: str, launch_commit: str) ->
         "field_contract": {
             "finite_checks": ["Idp", "Pos_or_Posd", "Vel", "Rhop"],
             "identity": "decoded Idp must map exactly to generated XML typed ranges; mkfluid_relative and mk_absolute remain separate",
-            "sample_mass": "native particle mass summed in XML fluid ranges; diagnostic only",
+            "sample_mass": "UNKNOWN_UNTIL_NATIVE_HEADER_OBSERVER; snapshot does not decode native fields",
+            "native_header_mass": "UNKNOWN_UNTIL_NATIVE_HEADER_OBSERVER; XML mass is not substituted",
             "continuous_owner_mass": "ROOT128 owner mass 14.58 kg remains separate; XML/native sample mass does not prove continuum equivalence",
             "observables": ["weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_j", "finite_stats", "actual_RunPARTs_time_brackets"],
             "pressure_eos": "UNKNOWN_NOT_DECODED_BY_WORKER",
