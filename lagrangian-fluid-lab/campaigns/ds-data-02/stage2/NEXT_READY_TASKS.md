@@ -1,3 +1,20 @@
+最新执行入口（2026-10-09 00:31 UTC）：以下记录为保留历史，恢复时以本段及实际收据为准。完整七项目标 ACTIVE；所有原始/失败/恢复产物保持不可变。
+
+| 分支 | 最新实际状态 | 下一依赖 |
+|---|---|---|
+| F5 geometry V8 ROOT116/117 | 两档实际完成，完整 CPU 2.905277s/18.810582s，费用差额一次补账且重复幂等，units 已停；298/600 越界均仅 y、最大约 .005/.0025m；clip 外与 exact float32 boundary tuple 重合均0 | source-preserving 相位/selector 前向修复，保持连续owner、控制、质量阈值；无CFD或第三档资格 |
+| F2 additive card V2 ROOT115 | 同父 JSON-only 实际完成，1325→1328 三个确切新增ID独立set join，无移除；CPU1.419671s闭合；ROOT111流式失败不给科学信用 | 新产品/新源对应的卡片与任务资格，历史1325报告不改 |
+| F3 matched plan ROOT119 | 小元数据独立核对 q086/102→实际receipt/XML、同forcing full836成本锚点及文件stat；dp003全native约33.5GiB为proxy，coarse .015尚无实际GenCase | coarse有限GenCase与guarded support；middle复用086/093前置，不无信息重跑 |
+| F2 V47 cold ROOT082 | 实际 overlay source closure失败，完整CPU43.404404s已收口；部分小复制，未转换 | V49 builder/V4 scratch wrapper已接入，root制造tests6通过；新namespace/源闭包/复制预算/sealer/proof接口后才启动 |
+| F2 coarse stream ROOT111 V4 | 实际首帧 MassFluid 合同失败，完整CPU13.930209s闭合 | V5 header probe历史实现已接入但不执行；前向 V6一帧pre/post SHA、终态scratch检查和自有decoder收口，实际root118待依赖 |
+| 四个历史无界RG任务 | 已核对精确argv/cwd/PID+starttime、采样并停止；1213.36s为已知 sampled process CPU，祖先/采样后CPU UNKNOWN | operational-only 严格补账helper；不计qualification attempt，不改历史行，不授予内容扫描科学信用 |
+
+ROOT116/117 独立proof仅核对小JSON/XML和源stat，root未读/哈希VTK/BI4/H5。worker首个VTK完整SHA在预留后，pre/post内容与stat字段稳定；exact parser-consumed bytes SHA未计算。producer 的 broad parent dynamic payload不哈希措辞已由root纠正：generated XML实际在parent闭包，只有Fluid/Bound VTK为worker-owned首个哈希。几何AABB及坐标重合诊断不证明接触、穿透、所有权或通量。
+
+F2 V5 root测试7通过/1失败：历史producer请求绑定forensics绝对路径，测试要求root路径；原q不改，代理正前向修正跨worktree绑定测试。V49/V4资源反例6项通过；代码/tests不是实际冷重放证明。当前无CFD/GPU或大数组任务运行，三名既有代理继续前向任务。
+
+父ledger仍沿用原512GPUh/3840CPUcoreh、500GiB Home floor及2026-10-14T07:23:48Z截止；已记CPU703.9663coreh/GPU137.8814h，已知四RG采样CPU待补 .3370coreh，不重置预算。启动以实时原子guard为准。
+
 最新执行入口（2026-10-09 00:09 UTC）：以下长记录为保留的历史检查点，恢复时以这段与实际收据为准。完整目标ACTIVE。
 
 | 分支 | 实际状态 | 下一依赖 |
