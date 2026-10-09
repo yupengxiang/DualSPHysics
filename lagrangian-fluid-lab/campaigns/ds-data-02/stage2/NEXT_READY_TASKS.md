@@ -1,3 +1,11 @@
+最新增量（2026-10-09 00:48 UTC）：完整七项目标 ACTIVE，原资源边界不变。
+
+- ROOT125 V7原始MassFluid scalar实际完成：DatDouble enum12、offset983、little-endian原始8字节000000009a54463f；与V6 typed header及官方float→double源码路径一致。源码语义与实际字节闭合，但solver binary build provenance未证明。完整systemd CPU1.351404s已同父补账且unit停止；只读头前缀，不读取粒子数组。V8全401帧严格bits消费者已集成，8项测试通过，待新ROOT126请求/manifest及预留；XML/native质量分母分开，不扩大.003阈值。
+- ROOT120 F3 dp=.015官方GenCase实际完成：4320fluid、19944fixed、24264total、初始14.58kg、输出3423018B；完整systemd CPU1.497844s已同父补账且unit停止。forcing CSV未复制至生成目录，任何CFD之前必须guard内复制/SHA/argv闭合。ROOT121有限VTK support已接入，builder将大CSV SHA改为实际父收据继承后构造；尚无support/CFD资格。
+- ROOT127四个停止搜索已知1213.36s CPU已实际一次补入共享父ledger，重复幂等且既有charges/attempts/limits/reservations保持；祖先/teardown CPU未知，无科学信用。当前已知CPU约704.3045 core h，GPU137.8814h。
+- ROOT122 V50新executor/parent已构造在 native-reconstruction/raw-to-label-v50-root-prepared-122-001/，实际parent-v3 metadata validator通过。8,645,897,167B是declared deduplicated closure，非physical I/O测量；12GiB external预算另含512MiB逐帧scratch、2GiB typed及余量。新namespace尚不存在，完成复制成本/实际加载图核验后启动有限6000s同父cold replay；不能用旧ROOT060证明新产品。
+- F5 .005 yzero仅源码候选/全形状审计入口已接入；pointref为全局phase，保留控制、连续owner及质量阈值。ROOT123 GenCase与ROOT124实际geometry尚未运行。三名既有代理继续；无CFD/大数组任务运行。
+
 最新增量（2026-10-09 00:32 UTC）：完整目标 ACTIVE。
 
 - ROOT118 V6首帧probe实际完成，full systemd CPU 1.575733s费用闭合且unit已停。首帧worker pre/post完整SHA/stat一致；其余400帧payload未读。官方decoder MassFluid tag double、值0.000681472010910511；XML .000681472，绝对差1.0910510992931388e-11kg，observed binary64 bits000000009a54463f。该值恰等于float32(XML)再转double，但raw header bytes/write path尚未观测，严格状态MASS_SERIALIZATION_MISMATCH_NO_FULL_STREAM；不放宽容差，不给全stream/科学资格。V7原始scalar字节/官方source合同探针是下一依赖。
