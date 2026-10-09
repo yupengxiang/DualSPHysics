@@ -81,8 +81,12 @@ def test_actual_manifest_derives_source_only_f7_s1_scope() -> None:
 
 def test_request_binds_current_worker_and_forbids_payload_inputs() -> None:
     request = json.loads(REQUEST.read_text(encoding="utf-8"))
-    script_path = str(SCRIPT.resolve())
-    assert request["input_sha256"][script_path] == _sha256(SCRIPT)
+    # The producer request intentionally retains its forensic-worktree path;
+    # a root clone may use a different absolute path.  Bind by the declared
+    # request role and require byte identity with this checked-in worker,
+    # rather than assuming a portable absolute path.
+    declared_script = str(Path(request["command"][1]).resolve())
+    assert request["input_sha256"][declared_script] == _sha256(SCRIPT)
     assert request["source_binding"]["script_sha256"] == _sha256(SCRIPT)
     assert set(request["input_files"]) == set(request["input_sha256"])
     assert request["hdf5_read"] is False
