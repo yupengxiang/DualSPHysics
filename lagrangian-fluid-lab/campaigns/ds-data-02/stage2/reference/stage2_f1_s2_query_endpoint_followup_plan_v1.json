@@ -1,0 +1,61 @@
+{
+  "schema": "ds02.stage2.f1-s2.query-endpoint-followup-plan.v1",
+  "status": "PRE_REGISTERED_LAUNCH_DISABLED",
+  "sentinel_id": "F1-S2",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "purpose": "Bounded follow-up to ROOT225: read only the nearest actual native saved frames around query times 2, 3, and 4 seconds for the existing coarse, medium, and fine runs.",
+  "source_prerequisite": {
+    "producer": "ROOT225 source-only manifest/request",
+    "required_status": "PREPARED_NOT_RUN_ROOT225_SOURCE_AND_ENDPOINT_AUDIT",
+    "native_payload_sha_policy": "PARENT_AFTER_RESERVATION_PRE_AND_POST_SHA_STAT",
+    "no_redecode_of_ROOT225_frame1s": true
+  },
+  "queries": {
+    "times_s": [2.0, 3.0, 4.0],
+    "selection": "nearest actual RunPARTs row at or below and at or above each query",
+    "exact_query_uses_one_frame": true,
+    "bracket_query_uses_two_frames": true,
+    "interpolation": "FORBIDDEN",
+    "extrapolation": "FORBIDDEN",
+    "row_index_is_native_frame_id": false,
+    "maximum_deferred_part_records": 18,
+    "actual_record_count": "UNKNOWN_UNTIL_RUNPARTS_METADATA_IS_BOUND"
+  },
+  "grids": [
+    {"label": "coarse", "source_case_label": "F1_S2_DP0225_COARSE", "control_receipt_required": true},
+    {"label": "medium", "source_case_label": "F1_S2_DP020_MEDIUM", "control_receipt_required": true},
+    {"label": "fine", "source_case_label": "F1_S2_DP017_FINE", "control_receipt_required": true}
+  ],
+  "per_query_fields": [
+    "RunPARTs native frame id",
+    "actual saved time",
+    "native MassFluid and MassBound when exposed",
+    "native Dp",
+    "Idp identity/type/Mk role summary",
+    "fluid-only finite weighted centroid/velocity/KE"
+  ],
+  "source_controls": {
+    "request_receipt_command_tout_is_authoritative": true,
+    "generated_xml_TimeOut_is_provenance_only": true,
+    "missing_Run_txt_or_Run_out_remains_unknown": true,
+    "same_control_or_override_must_be_recorded_per_grid": true
+  },
+  "resource_guard": {
+    "solver_launch": false,
+    "gpu": false,
+    "h5_vtk_read": false,
+    "full_native_tree_scan": false,
+    "one_parent_reserved_batch": true,
+    "native_part_scratch_cap_bytes": 536870912,
+    "log_cap_bytes": 524288,
+    "memory_max_bytes": 2147483648,
+    "native_source_hashes": "UNKNOWN_UNTIL_PARENT_RESERVATION"
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0,
+    "reason": "Additional endpoint fields do not establish interpolation, output-resolution, integration, spatial-truth, or event-time error bounds; no neighboring-grid value is treated as truth."
+  }
+}
