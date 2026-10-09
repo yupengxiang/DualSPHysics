@@ -110,6 +110,27 @@ def _axis_value(case: Mapping[str, Any], axis: str) -> Mapping[str, Any]:
     return {"status": "UNKNOWN_UNASSIGNED", "key": None, "reason": "axis_missing"}
 
 
+def _physical_payload(value: Any) -> Any:
+    """Remove observations that V26 intentionally assigns to subgroups.
+
+    V26 embeds generated XML attributes in the geometry/control payloads.
+    Those attributes contain ``dp`` and time/control declarations, so using
+    the V26 axis digest verbatim would still split a physical condition by
+    resolution.  Geometry/control declarations that are not XML observations
+    remain part of the physical key; missing declarations remain unknown.
+    """
+    if isinstance(value, Mapping):
+        return {
+            str(key): cleaned
+            for key, item in value.items()
+            if str(key) != "generated_xml_condition_attributes"
+            and (cleaned := _physical_payload(item)) is not None
+        }
+    if isinstance(value, list):
+        return [_physical_payload(item) for item in value]
+    return value
+
+
 def _physical_key(case: Mapping[str, Any]) -> tuple[str, bool, dict[str, Any]]:
     family = str(case.get("family_id", "UNKNOWN_FAMILY"))
     axes: dict[str, Any] = {}
@@ -117,12 +138,13 @@ def _physical_key(case: Mapping[str, Any]) -> tuple[str, bool, dict[str, Any]]:
     for axis in PHYSICAL_AXES:
         value = _axis_value(case, axis)
         status = str(value.get("status", "UNKNOWN_UNASSIGNED"))
-        key = value.get("key")
-        if not isinstance(key, str) or not key or status.startswith("UNKNOWN"):
+        payload = _physical_payload(value.get("payload"))
+        if not isinstance(payload, Mapping) or not payload or status.startswith("UNKNOWN"):
             unknown.append(axis)
             axes[axis] = {"status": "UNKNOWN", "key": None}
         else:
-            axes[axis] = {"status": status, "key": key}
+            key = hashlib.sha256(canonical(payload).encode()).hexdigest()
+            axes[axis] = {"status": status, "key": key, "payload": payload}
     payload = {"family_id": family, "physical_axes": axes}
     if unknown:
         payload["unknown_physical_axes"] = sorted(unknown)

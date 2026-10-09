@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -21,8 +20,12 @@ def _load():
     return module
 
 
-def _axis(key: str | None, status: str = "SOURCE_BOUND_SEMANTIC"):
-    return {"key": key, "status": status}
+def _axis(key: str | None, status: str = "SOURCE_BOUND_SEMANTIC", *, stable=None):
+    return {
+        "key": key, "status": status,
+        "payload": {"stable": stable if stable is not None else key,
+                     "generated_xml_condition_attributes": [{"dp": key}]},
+    }
 
 
 def _case(*, geometry="g", control="c", initial="i", resolution="r1",
@@ -30,8 +33,10 @@ def _case(*, geometry="g", control="c", initial="i", resolution="r1",
     return {
         "family_id": "F1",
         "effective_condition": {"axes": {
-            "geometry": _axis(geometry), "control": _axis(control),
-            "initial_state": _axis(initial), "resolution": _axis(resolution),
+            "geometry": _axis(geometry, stable=geometry),
+            "control": _axis(control, stable="same-control"),
+            "initial_state": _axis(initial, stable="same-initial"),
+            "resolution": _axis(resolution),
             "window": _axis(window), "recovery": _axis(recovery),
         }},
     }
@@ -44,6 +49,15 @@ def test_physical_union_keeps_resolution_window_recovery_together():
     assert module._physical_key(base)[0] == module._physical_key(changed_detail)[0]
     assert module._physical_key(base)[1] is False
     assert module._physical_key(_case(geometry="different"))[0] != module._physical_key(base)[0]
+
+
+def test_xml_observations_do_not_reintroduce_resolution_split():
+    module = _load()
+    left = _case(resolution="dp-001")
+    right = _case(resolution="dp-002")
+    # The synthetic XML declaration changes, while the stable geometry,
+    # control and initial-state payloads remain identical.
+    assert module._physical_key(left)[0] == module._physical_key(right)[0]
 
 
 def test_unknown_physical_axis_is_explicitly_unsafe():
