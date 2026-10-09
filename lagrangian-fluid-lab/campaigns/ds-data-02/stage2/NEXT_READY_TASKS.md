@@ -1,3 +1,19 @@
+## 2026-10-09：79例实际生命周期，65例原生原因绑定，15例实际typed/native对账
+
+恢复入口：`checkpoints/ROOT226_CLOSED_ACTUAL79_CAUSE65_JOIN15_FULL_GOAL_CONTINUATION_V2.json`。ROOT226三案例实际成功，新增2例原生原因和3例物理案例对账；完整CPU12.063038秒已结清、重复核销幂等、unit dead。原118为65原因绑定/53未定位，生命周期79实际/256未调度/1历史alias。当前无payload任务和资源预约。
+
+下一步依次执行已集成ROOT229三档初态支持、ROOT231查询2/3/4秒端点、ROOT232 F4下一8例生命周期；ROOT230可迁移执行器完整嵌套依赖修复、F4原生对账和336语义泄漏组由既有代理继续。ROOT225 query1失败保留，新的query1修复另命名空间；所有科学Q仍UNKNOWN。完整七项目标ACTIVE，预算与截止不重置。
+
+以下为历史记录。
+
+## 2026-10-09：79例实际生命周期，ROOT226三案例已启动；portable与endpoint失败完整保留
+
+恢复入口：`checkpoints/ROOT226_ACTUAL_PENDING_ACTUAL79_CAUSE63_PORTABLE228_ENDPOINT225_FAILURES_CONTINUATION_V1.json`。ROOT224 F7首8例实际全部完成且完整CPU173.884497秒结清；生命周期79实际/256未调度/1历史alias。ROOT227 owner340kg已fee闭合。原118当前仍63causebound/55unlocated/12actualtyped-native物理case，ROOT226三例已launch但pending不给新增信用（最多+2原因/+3对账）。
+
+先核真实ROOT226unit/receipt/report，独立小metadata/CSV验证+fullCPU/repeat/dead后再调度。ROOT228实际topoverlay成功，但private子图缺historical root194 sidecar路径失败；ROOT225实际旧观测器axis source记录门失败；两者均完整结清/旧源保留，无V8/scorer或endpoint观测信用。ROOT230 nestedportable与ROOT231 calibratedendpoint、ROOT229 initialsupport、F4真实适配器、336语义泄漏组由既有代理具体落实。完整七项目标保持ACTIVE。
+
+以下为历史记录。
+
 ## 2026-10-09：71例实际生命周期，63例原生原因已定位；ROOT227费用核对待适配
 
 恢复入口：`checkpoints/ROOT227_OWNER_SUCCESS_FEE_PENDING_ACTUAL71_CAUSE63_CONTINUATION_V1.json`。ROOT218的8个F5案例完成，当前71例实际/264例未调度/1例历史别名未解决。原118案例中63例逐fluid Id原因已绑定、55例未定位；12个物理案例完成typed/native首次缺失对账。ROOT213/222可迁移执行实际失败，ROOT221输入绑定错误失败，ROOT223三网格所选分量诊断完成，动态时刻异步，Q仍UNKNOWN。
