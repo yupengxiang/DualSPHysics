@@ -1,0 +1,49 @@
+{
+  "schema": "ds02.stage2.f6-initial-native-support-contract.v1",
+  "status": "PREPARED_NOT_RUN_ROOT255",
+  "purpose": "Guarded frame-0 support diagnostics for F6-S1 and F6-S2 source/current, coarse, and fine GenCase products.",
+  "source_authority": {
+    "continuous_owner_mass_kg": 4851.988676250775,
+    "continuous_owner_basis": "explicit XML fluid drawbox volume 4.851988676250775 m3 times XML rhop0 1000 kg/m3",
+    "physical_rigid_massbody_kg": 128.0,
+    "legacy_source_fluid_sample_mass_kg": 5120.0,
+    "sample_mass_is_not_continuous_owner": true,
+    "mass_rescaling": "forbidden",
+    "world_axis_calibration": "UNKNOWN_PENDING_SOURCE_WRITER_ORIENTATION_RECORD"
+  },
+  "producer_join": {
+    "root244_proof_report": "exact report path and report_sha256 required",
+    "producer_receipt": "status completed and returncode 0; output_root must equal generated XML parent",
+    "generated_xml": "small XML hash and path bound to receipt/report",
+    "deferred_payloads": "parent-after-reservation and worker pre/post full SHA/stat; no prepare-stage payload hash"
+  },
+  "deferred_scope": {
+    "native_frame": 0,
+    "native_files_per_case": 1,
+    "vtk_files_per_case": 2,
+    "native_fields": ["Idp", "Pos/Posd", "Vel", "Rhop", "decoder MassFluid", "decoder MassBound", "decoder Dp"],
+    "vtk_fields": ["binary POINTS count", "finite POINTS summary"],
+    "hdf5_read": false,
+    "solver_launch": false,
+    "full_native_tree_scan": false
+  },
+  "diagnostics": {
+    "typed_roles": ["fluid", "fixed", "moving", "floating", "UNKNOWN"],
+    "mk_semantics": "mkfluid relative labels and XML mk absolute labels remain separate",
+    "support": "finite typed ranges, explicit fluid drawbox containment, VTK/native count comparison",
+    "fluid_floating_gap": "component-space nearest-particle diagnostic only",
+    "initial_velocity": "native decoded fluid/floating velocity only; XML absence remains UNKNOWN",
+    "science_limits": [
+      "source/current and coarse/fine are GenCase initial products; no dynamic CFD evidence",
+      "no no-penetration, flux, contact, world-axis, spatial convergence, or QI/QN/QE credit",
+      "binary position tolerance 1e-6 m is an implementation support check, not a scientific task tolerance",
+      "native sample masses and physical massbody remain separate from continuous owner mass"
+    ]
+  },
+  "qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "credit": 0
+  }
+}
