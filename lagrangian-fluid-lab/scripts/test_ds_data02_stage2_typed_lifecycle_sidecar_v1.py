@@ -73,7 +73,12 @@ def write_fixture(root: Path) -> dict[str, Path | str]:
         "trajectory": str(h5_path), "source_bytes": h5_path.stat().st_size, "frames": frames, "scan_status": "SCANNED",
     })
     receipt_path = root / "execution-receipt.json"
-    receipt_sha = write_json(receipt_path, {"status": "completed", "returncode": 0, "request": {"physical_case_id": subject.PILOT_CASE_ID}})
+    # The producer receipt's case_id names the scan batch, not this physical
+    # CURRENT row.  A physical_case_id is optional and is tested separately.
+    receipt_sha = write_json(receipt_path, {
+        "status": "completed", "returncode": 0,
+        "request": {"case_id": "STAGE2_CURRENT336_SCIENCE"},
+    })
     audit_path = root / "SCIENTIFIC_AUDIT_VERIFICATION_023.json"
     write_json(audit_path, {
         "schema": "ds02.stage2.scientific-audit-independent-verification.v23",
@@ -191,6 +196,25 @@ class TypedLifecycleTests(unittest.TestCase):
             manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
             with self.assertRaises(subject.LifecycleError):
                 subject.audit(manifest_path, output / "bad-summary.json", output / "bad-records.jsonl", chunk=2)
+
+    def test_receipt_batch_case_is_allowed_but_explicit_physical_case_mismatch_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = write_fixture(root)
+            receipt = json.loads(Path(source["receipt"]).read_text())
+            receipt["request"]["physical_case_id"] = "F2_DIFFERENT_CURRENT_CASE"
+            receipt_sha = write_json(Path(source["receipt"]), receipt)
+            audit = json.loads(Path(source["audit"]).read_text())
+            audit["verified_cases"][0]["receipt_sha256"] = receipt_sha
+            write_json(Path(source["audit"]), audit)
+            output = root / "prepared"
+            old_current_sha = subject.EXPECTED_CURRENT_SHA256
+            subject.EXPECTED_CURRENT_SHA256 = str(source["current_sha"])
+            try:
+                with self.assertRaises(subject.LifecycleError):
+                    subject.prepare(prepare_args(root, source, output))
+            finally:
+                subject.EXPECTED_CURRENT_SHA256 = old_current_sha
 
 
 if __name__ == "__main__":
