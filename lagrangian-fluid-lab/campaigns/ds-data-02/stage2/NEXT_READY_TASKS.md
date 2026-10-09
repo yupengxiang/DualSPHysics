@@ -1,4 +1,4 @@
-最新执行入口（2026-10-09 00:00 UTC）：以下长记录为保留的历史检查点，恢复时以这段与实际收据为准。完整目标ACTIVE。
+最新执行入口（2026-10-09 00:09 UTC）：以下长记录为保留的历史检查点，恢复时以这段与实际收据为准。完整目标ACTIVE。
 
 | 分支 | 实际状态 | 下一依赖 |
 |---|---|---|
@@ -6,11 +6,13 @@
 | F2 401帧审计 ROOT111 V4 | 实际源哈希后首帧native MassFluid合同失败；CPU13.930209s已闭合；无科学报告 | 前向版本记录原生类型/值并核对官方序列化合同，不放宽科学阈值 |
 | F5初态 ROOT106/107及支撑ROOT109/110 | 两档guarded审计已完成；盒子外298/600点，clip外均0；HARDFAIL 2.2444% /MARGINAL 1.1420%；完整CPU闭合 | 有界坐标/Idp/axis与selector原因诊断；不启动第三档或CFD |
 | F2 additive card ROOT112 | 实际历史identity1325被错误要求1328，FAILED且CPU1.446381s已闭合 | 新V2绑定历史1325及后续3个实际补充来源；旧请求不重跑 |
-| F3/F6 additive card ROOT113 | 代码及真实源metadata dry-run已交付，root请求准备中 | 同父JSON-only运行及独立核对 |
+| F3/F6 additive card ROOT113 | 同父JSON-only实际完成，源SHA/stat及独立语义核对通过，CPU1.467112s完整闭合 | 继续七族任务范围/失败与产品目录增补，不赋科学Q |
 | F2旧ROOT108 V3 | 实际dataclass导入失败、CPU已闭合、unit已停 | 保留失败并使用新ROOT111，不重跑旧请求 |
 | F2旧V46 parent | 实际路径失败，CPU差额及6608B metadata已补齐 | 原q/receipt/trace不改，不能赋cold信用 |
 
 ROOT109 guarded receipt为completed且worker report有效；外层显示逻辑在其后KeyError returncode，unit failed。这两个终态分别保留，未重跑；ROOT110使用修正显示逻辑且unit成功。VTK只授予worker预留后完整pre/post SHA/stat闭合，exact parser-consumed byte SHA未计算。F5最细档全时窗native成本为TB级代理估计，不当作实际粒子数、资源预留或科学资格。两个长期遗留的本任务无界rg内容扫描已停止并记录，历史CPU未测量，不授予任何科学信用。当前无CFD或大数组任务运行；三名既有代理继续各自前向修复，完整goal ACTIVE。
+
+F5_PROJECTION_V2_AND_STORAGE_PROXY_ACTUAL_METADATA_ROOT_VERIFICATION_114.json 已独立核对实际q106/107→GenCase receipt→generated XML、801原生文件stat、RunPARTs数字行、既有completed父charge及13行成本公式。未读/哈希VTK、BI4或H5 payload，不给予第三档实际粒子数或科学信用。下一就绪依赖为consumer的cold overlay/scratch前向修复、forensics的F2 card身份合同/原生MassFluid类型诊断、reference的298/600盒外点有界原因诊断。
 
 # 下一就绪任务：检查点 024 及后续实际核验
 
