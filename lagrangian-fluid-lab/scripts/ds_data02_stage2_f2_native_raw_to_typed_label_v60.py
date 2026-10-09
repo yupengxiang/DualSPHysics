@@ -239,6 +239,14 @@ def run(request_path: Path, output_dir: Path, *, io_slot_approved: bool = False,
     if not isinstance(result, dict):
         raise V60WorkerError("V2 worker returned a non-object result")
     result = dict(result)
+    raw_to_typed = result.get("raw_to_typed")
+    evidence = raw_to_typed.get("raw_evidence") if isinstance(raw_to_typed, dict) else None
+    if isinstance(evidence, dict):
+        # Surface the producer-scope evidence for the parent guard without
+        # changing the pinned V2 report schema.
+        result["raw_tree_before_sha256"] = evidence.get("before_tree_sha256")
+        result["raw_tree_after_sha256"] = evidence.get("after_tree_sha256")
+        result["raw_tree_file_count"] = evidence.get("file_count")
     result["v60_raw_scope"] = {
         "file_count": len(scope_paths),
         "expected_tree_sha256": expected_tree,
