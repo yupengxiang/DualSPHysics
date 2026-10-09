@@ -161,3 +161,22 @@ def test_root191_v2_rejects_changed_inner_sha_binding(tmp_path: Path):
     bad = write_json(tmp_path / "bad-sha-wrapper.json", wrapper)
     with pytest.raises(S.Root191V2Error, match="inner file/canonical SHA"):
         S._load_pair(ROOT197_INNER, bad)
+
+
+def test_root191_v2_accepts_the_same_strict_join_after_root200_rebind(tmp_path: Path):
+    pair = real_pair()
+    inner = json.loads(pair["inner_path"].read_text(encoding="utf-8"))
+    inner["case_id"] = "STAGE2_F2_ROOT200_V14_PROFILE_OUTPUT_ROOT_20261009"
+    inner["attempt_id"] = "f2-s1-root200-v14-profile-output-001"
+    inner["sha256"] = S.canonical_sha(inner)
+    inner_path = write_json(tmp_path / "root200-inner.json", inner)
+    wrapper = json.loads(pair["wrapper_path"].read_text(encoding="utf-8"))
+    wrapper["case_id"] = inner["case_id"]
+    wrapper["attempt_id"] = inner["attempt_id"] + S.WRAPPER_SUFFIX
+    wrapper["consumer_request_binding"]["path"] = str(inner_path)
+    wrapper["consumer_request_binding"]["sha256"] = S.sha256_file(inner_path)
+    wrapper["consumer_request_binding"]["canonical_sha256"] = inner["sha256"]
+    wrapper_path = write_json(tmp_path / "root200-wrapper.json", wrapper)
+    joined = S._load_pair(inner_path, wrapper_path)
+    assert joined["source_root_marker"] == "ROOT200"
+    assert joined["outer_attempt"] == joined["inner_attempt"] + S.WRAPPER_SUFFIX

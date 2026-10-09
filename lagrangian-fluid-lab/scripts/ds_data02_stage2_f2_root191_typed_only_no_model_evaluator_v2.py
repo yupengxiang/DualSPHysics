@@ -72,6 +72,8 @@ def _load_module(path: Path, name: str) -> Any:
 V1 = _load_module(V1_SCRIPT, "ds02_bound_root191_v1_for_v2")
 V8 = _load_module(V8_SCRIPT, "ds02_bound_root191_v8_for_v2")
 
+SUPPORTED_SOURCE_ROOTS = ("ROOT197", "ROOT200")
+
 
 def canonical_sha(value: Mapping[str, Any]) -> str:
     return V1.canonical_sha(value)
@@ -232,8 +234,9 @@ def _load_pair(inner_path: Path | str, wrapper_path: Path | str) -> dict[str, An
         raise Root191V2Error("ROOT197 outer request is not ds02.request.v1")
     case_id = str(inner.get("case_id", ""))
     inner_attempt = str(inner.get("attempt_id", ""))
-    if not case_id.startswith("STAGE2_F2_ROOT197_") or "ROOT197" not in inner_attempt.upper():
-        raise Root191V2Error("ROOT197 inner case/attempt identity is not exact")
+    source_marker = next((item for item in SUPPORTED_SOURCE_ROOTS if item in case_id.upper()), None)
+    if source_marker is None or not case_id.startswith(f"STAGE2_F2_{source_marker}_") or source_marker not in inner_attempt.upper():
+        raise Root191V2Error("fresh ROOT197/ROOT200 inner case/attempt identity is not exact")
     binding = wrapper.get("consumer_request_binding")
     if not isinstance(binding, Mapping):
         raise Root191V2Error("ROOT197 wrapper consumer_request_binding is missing")
@@ -271,7 +274,7 @@ def _load_pair(inner_path: Path | str, wrapper_path: Path | str) -> dict[str, An
         "inner_canonical_sha": inner["sha256"], "wrapper_path": wrapper_file, "wrapper": wrapper,
         "wrapper_file_sha": sha256_file(wrapper_file), "sidecar_path": sidecar_path,
         "profile": dict(profile), "case_id": case_id, "inner_attempt": inner_attempt,
-        "outer_attempt": outer_attempt,
+        "outer_attempt": outer_attempt, "source_root_marker": source_marker,
     }
 
 
@@ -374,7 +377,7 @@ def _build_request(*, root197_inner: Path, root197_wrapper: Path,
         "root197_binding": {
             "inner_request": {"path": str(pair["inner_path"]), "file_sha256": pair["inner_file_sha"],
                               "canonical_sha256": pair["inner_canonical_sha"], "case_id": pair["case_id"],
-                              "attempt_id": pair["inner_attempt"]},
+                              "attempt_id": pair["inner_attempt"], "source_root_marker": pair["source_root_marker"]},
             "outer_wrapper": {"path": str(pair["wrapper_path"]), "file_sha256": pair["wrapper_file_sha"],
                               "case_id": pair["case_id"], "attempt_id": pair["outer_attempt"],
                               "suffix": WRAPPER_SUFFIX},
