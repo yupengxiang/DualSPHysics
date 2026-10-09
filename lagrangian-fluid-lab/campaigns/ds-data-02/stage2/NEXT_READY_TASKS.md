@@ -1,3 +1,11 @@
+## 2026-10-10：ROOT250实际新增5例原因；ROOT245下一7例F6已启动
+
+恢复入口：`checkpoints/ROOT245_PENDING_ACTUAL87_CAUSE70_JOIN23_F4_ACTUAL250_FULL_GOAL_CONTINUATION_V1.json`。ROOT250五个F4共17 fluid Id官方数值排除与typed首次缺失saved bracket逐Id一致；fullCPU7.993384秒结清且unit dead。原118更新为70原因/48未定位/23实际对账，物理fate/flux/dynamics/Q仍UNKNOWN。
+
+唯一payload父任务ROOT245 F6七案例（H5 19,557,244,116B，read上界58,671,732,348B）。CURRENT87实际/7pending无信用/241未调度/1alias。恢复先核unit、receipt、每case实际证据和fullCPU/repeat/dead；不得重复启动同attempt。之后240V2、248、241、242和F6原生取证按依赖继续。全部七项目标ACTIVE，预算和截止不重置。
+
+以下为历史记录。
+
 ## 2026-10-10：87例实际生命周期；F1控制差异、F3粗档compact与F6刚体质量已实际核验
 
 恢复入口：`checkpoints/ROOT246_CLOSED_ACTUAL87_CAUSE65_JOIN18_F1_CONTROL_F3_COMPACT_F4_FAILURE_CONTINUATION_V1.json`。全部父费用已闭合、无payload任务或reservation。CURRENT仍87实际/248未调度/1alias；原118仍65原因/53未定位/18actual typed-native对账。
