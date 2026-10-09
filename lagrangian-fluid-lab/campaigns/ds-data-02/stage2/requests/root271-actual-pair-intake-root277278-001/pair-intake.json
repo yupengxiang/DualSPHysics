@@ -1,0 +1,503 @@
+{
+  "schema": "ds02.stage2.f1-s2.root271-pair-native-intake.v1",
+  "request_schema": "ds02.request.v1",
+  "status": "SOURCE_PREPARED_PARENT_NATIVE_SNAPSHOT_REQUIRED",
+  "source_only": true,
+  "launch_disabled": true,
+  "solver_started": false,
+  "native_payload_read": false,
+  "hdf5_read": false,
+  "generated_at_utc": "2026-10-09T19:50:38.403425+00:00",
+  "sentinel_id": "F1-S2",
+  "family_id": "F1",
+  "physical_case_id": "F1_DUAL_HEAD_340_UNCHANGED_MOTHER_GEOMETRY_V1",
+  "root271_pair_source": {
+    "schema": "ds02.stage2.f1-s2.medium-savedt-cfl-pair-source-request.v1",
+    "same_member_terminal_receipt": "PARENT_ROOT273_SAME_CFL_TERMINAL_RECEIPT_REQUIRED",
+    "half_member_terminal_receipt": "PARENT_ROOT273_HALF_CFL_TERMINAL_RECEIPT_REQUIRED",
+    "same_member_cfl": [
+      "0.2",
+      "0.2"
+    ],
+    "half_member_cfl": [
+      "0.1",
+      "0.1"
+    ],
+    "common_savedt_s": 0.005,
+    "common_tout_s": 0.005,
+    "window_s": [
+      0.0,
+      0.5
+    ],
+    "source_copy": "ROOT273 parent must copy the original BI4/XML to new attempt inodes and prove pre/post SHA/stat"
+  },
+  "registered_queries_s": [
+    0.0,
+    0.25,
+    0.5
+  ],
+  "time_semantics": {
+    "native_frame_id_source": "actual terminal RunPARTs.csv Part column",
+    "selected_frame_policy": "frame zero, actual final frame, and both native endpoints of each exact/bracketed query",
+    "no_interpolation": true,
+    "no_extrapolation": true,
+    "async_same_half_is_unknown_until_actual_pair": true,
+    "selected_array_index_is_not_native_frame_id": true
+  },
+  "calibration_provenance": {
+    "ROOT207_native_header_selected": {
+      "proof_sha256": "c2016d5a36922230eafc57c49baadaeff3a2bc920bb953b5fef215eb9fda30ab",
+      "scope": "native header/MassFluid/MassBound/Dp/role arithmetic and storage calibration; not this pair's terminal evidence"
+    },
+    "ROOT217_official_writer": {
+      "proof_sha256": "7df9b02c339e3b3eb8bae8f108c16d5db0fd2b6cb3f03d192c4edc827ae1bdf0",
+      "scope": "manufactured writer/decoder six-particle calibration; does not assign producer world-axis Q"
+    },
+    "world_axis": "UNKNOWN",
+    "continuum_owner_mass": "340 kg owner contract; native sample mass remains separate"
+  },
+  "worker_contract": {
+    "worker": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f1_native_selected_observer_v1.py",
+      "label": "existing F1 native selected observer worker",
+      "bytes": 33397,
+      "sha256": "e7590a64e6ee3f536134a5a929689e4b3d5fd2d5c4d7b1febad5738dc19939b1",
+      "stat": {
+        "dev": 2081,
+        "ino": 328615395,
+        "mtime_ns": 1791545876316589564,
+        "ctime_ns": 1791545876316589564,
+        "bytes": 33397
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "physical_observer_dependency": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_native_physical_observer_v2.py",
+      "label": "existing native physical observer dependency",
+      "bytes": 36581,
+      "sha256": "01698e2b07497c17a5b784649a29a3c65ca39f8e4aaae787a787365d120e0a99",
+      "stat": {
+        "dev": 2081,
+        "ino": 328615059,
+        "mtime_ns": 1791434095353861171,
+        "ctime_ns": 1791434095353861171,
+        "bytes": 36581
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "literal_python": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "deferred_source_snapshot": "parent must supply selected BI4 SHA/stat after reservation, before decode, and after decode",
+    "decoded_fields": [
+      "Idp",
+      "Pos",
+      "Vel",
+      "Rhop",
+      "MassFluid",
+      "MassBound when exposed",
+      "typed role/MK counts",
+      "weighted COM/velocity/KE"
+    ],
+    "xml_mass_fallback": "FORBIDDEN",
+    "native_mass_scope": "native MassFluid/MassBound only; no continuum-owner rescale"
+  },
+  "resource_guard": {
+    "cpu_threads": 1,
+    "gpu": "parent-selected only; this request does not launch",
+    "memory_bytes": 2147483648,
+    "scratch_bytes": 268435456,
+    "max_wall_seconds": 1800,
+    "log_cap_bytes": 65536,
+    "source_read_scope": "selected Part files only after parent reservation; no full native tree/H5/VTK"
+  },
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN"
+  },
+  "qualification_limits": [
+    "A .5 s same/half pair is a bounded CFL/output diagnostic, not a full-window qualification.",
+    "Saved-time brackets are retained as observations and are not interpolated.",
+    "Different saved times do not receive time/integration credit.",
+    "Neighboring spatial grids are not truth references.",
+    "ROOT207/217 calibration evidence is not a producer world-axis proof for this pair."
+  ],
+  "same_cfl": {
+    "mode": "same_cfl",
+    "terminal_status": {
+      "status": "COMPLETED_DEVELOPMENT_UNKNOWN",
+      "returncode": 0,
+      "output_root": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001"
+    },
+    "terminal_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/execution-receipt.json",
+      "label": "same_cfl terminal receipt",
+      "bytes": 66942,
+      "sha256": "37e209e8d89bb29d6c663ea917f2a3914b3e4e4be14258b9892302f291801c6c",
+      "stat": {
+        "dev": 2081,
+        "ino": 322645802,
+        "mtime_ns": 1791572507892999575,
+        "ctime_ns": 1791572507892999575,
+        "bytes": 66942
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "terminal_proof": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_DP020_SAME_CFL_SAVEDT_BOUNDED_ACTUAL_ROOT_VERIFICATION_277.json",
+      "label": "same_cfl terminal proof",
+      "bytes": 29040,
+      "sha256": "026b2d326c2d65869dc16c6a0d062056ca31d720642dbb715bd3d13d787115d8",
+      "stat": {
+        "dev": 2081,
+        "ino": 328551853,
+        "mtime_ns": 1791572586210582063,
+        "ctime_ns": 1791572586210582063,
+        "bytes": 29040
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "terminal_proof_status": "VERIFIED_ACTUAL_F1_S2_DP020_SAME_CFL_SAVEDT_BOUNDED_NATIVE_WINDOW_NO_Q",
+    "runparts": {
+      "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/RunPARTs.csv",
+      "label": "RunPARTs.csv",
+      "bytes": 22850,
+      "sha256": "93e06a4239cf32b3d502ffb8116a3d2f104837a0caa24e4333a0dedfd6fc82e2",
+      "stat": {
+        "dev": 66306,
+        "ino": 41041118,
+        "mtime_ns": 1791572507501011695,
+        "ctime_ns": 1791572507501011695,
+        "bytes": 22850
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "raw_root": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data",
+    "runparts_first_time_s": 0.0,
+    "runparts_last_time_s": 0.5000911476109234,
+    "runparts_frame_count": 101,
+    "query_brackets": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.25,
+        "status": "BRACKETED",
+        "lower_frame": 49,
+        "upper_frame": 50,
+        "lower_time_s": 0.2450474065080047,
+        "upper_time_s": 0.2500516206878072,
+        "bracket_width_s": 0.005004214179802485
+      },
+      {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 99,
+        "upper_frame": 100,
+        "lower_time_s": 0.4951285004631816,
+        "upper_time_s": 0.5000911476109234,
+        "bracket_width_s": 0.004962647147741861
+      }
+    ],
+    "selected_native_frame_ids": [
+      0,
+      49,
+      50,
+      99,
+      100
+    ],
+    "selected_native_frames": [
+      {
+        "native_frame_id": 0,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data/Part_0000.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 49,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data/Part_0049.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 50,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data/Part_0050.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 99,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data/Part_0099.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 100,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/data/Part_0100.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      }
+    ],
+    "pair_manifest": null,
+    "actual_time_policy": {
+      "source": "this member's terminal RunPARTs.csv",
+      "native_frame_ids": true,
+      "selected_array_indices_are_not_native_ids": true,
+      "interpolation": "FORBIDDEN",
+      "extrapolation": "FORBIDDEN",
+      "bracket_width_is_not_an_error_bound": true
+    }
+  },
+  "half_cfl": {
+    "mode": "half_cfl",
+    "terminal_status": {
+      "status": "COMPLETED_DEVELOPMENT_UNKNOWN",
+      "returncode": 0,
+      "output_root": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001"
+    },
+    "terminal_receipt": {
+      "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/execution-receipt.json",
+      "label": "half_cfl terminal receipt",
+      "bytes": 66934,
+      "sha256": "a6db4af8e878db0f51b1e82926c23225b5a5c043ac37315c58d86f51c08b714f",
+      "stat": {
+        "dev": 2081,
+        "ino": 322645805,
+        "mtime_ns": 1791572609693858655,
+        "ctime_ns": 1791572609693858655,
+        "bytes": 66934
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "terminal_proof": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_DP020_HALF_CFL_SAVEDT_BOUNDED_ACTUAL_ROOT_VERIFICATION_278.json",
+      "label": "half_cfl terminal proof",
+      "bytes": 29033,
+      "sha256": "b357afa839d78bf8a8e14626e459f79c08afd77c739c078e2f13573ee3871629",
+      "stat": {
+        "dev": 2081,
+        "ino": 328551856,
+        "mtime_ns": 1791572638272979106,
+        "ctime_ns": 1791572638272979106,
+        "bytes": 29033
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "terminal_proof_status": "VERIFIED_ACTUAL_F1_S2_DP020_HALF_CFL_SAVEDT_BOUNDED_NATIVE_WINDOW_NO_Q",
+    "runparts": {
+      "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/RunPARTs.csv",
+      "label": "RunPARTs.csv",
+      "bytes": 22860,
+      "sha256": "b20fbfe1774283cf2cd576c19a47d109b637481a41f95149c9fe8e355b9ac97d",
+      "stat": {
+        "dev": 66306,
+        "ino": 41041234,
+        "mtime_ns": 1791572609314870325,
+        "ctime_ns": 1791572609314870325,
+        "bytes": 22860
+      },
+      "stable_read": true,
+      "payload_read_by_intake": false
+    },
+    "raw_root": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data",
+    "runparts_first_time_s": 0.0,
+    "runparts_last_time_s": 0.5000438319740897,
+    "runparts_frame_count": 101,
+    "query_brackets": [
+      {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      {
+        "query_time_s": 0.25,
+        "status": "BRACKETED",
+        "lower_frame": 49,
+        "upper_frame": 50,
+        "lower_time_s": 0.245041929041857,
+        "upper_time_s": 0.2500480290990646,
+        "bracket_width_s": 0.005006100057207585
+      },
+      {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 99,
+        "upper_frame": 100,
+        "lower_time_s": 0.4950762038111418,
+        "upper_time_s": 0.5000438319740897,
+        "bracket_width_s": 0.004967628162947935
+      }
+    ],
+    "selected_native_frame_ids": [
+      0,
+      49,
+      50,
+      99,
+      100
+    ],
+    "selected_native_frames": [
+      {
+        "native_frame_id": 0,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data/Part_0000.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 49,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data/Part_0049.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 50,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data/Part_0050.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 99,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data/Part_0099.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      },
+      {
+        "native_frame_id": 100,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/data/Part_0100.bi4",
+        "sha256": "PARENT_AFTER_RESERVATION_REQUIRED",
+        "bytes": "UNKNOWN_UNTIL_PARENT_SNAPSHOT",
+        "stat": "PARENT_PRE_DECODE_AND_POST_DECODE_FULL_STAT_REQUIRED",
+        "payload_read_by_intake": false,
+        "identity_semantics": "native Part ID from this member's RunPARTs.csv; never selected-array index"
+      }
+    ],
+    "pair_manifest": null,
+    "actual_time_policy": {
+      "source": "this member's terminal RunPARTs.csv",
+      "native_frame_ids": true,
+      "selected_array_indices_are_not_native_ids": true,
+      "interpolation": "FORBIDDEN",
+      "extrapolation": "FORBIDDEN",
+      "bracket_width_is_not_an_error_bound": true
+    }
+  },
+  "pair_time_alignment": [
+    {
+      "query_time_s": 0.0,
+      "same": {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      "half": {
+        "query_time_s": 0.0,
+        "status": "EXACT",
+        "lower_frame": 0,
+        "upper_frame": 0,
+        "lower_time_s": 0.0,
+        "upper_time_s": 0.0,
+        "bracket_width_s": 0.0
+      },
+      "alignment": "EXACT_SHARED_SAVED_TIME",
+      "interpolation": "NOT_PERFORMED"
+    },
+    {
+      "query_time_s": 0.25,
+      "same": {
+        "query_time_s": 0.25,
+        "status": "BRACKETED",
+        "lower_frame": 49,
+        "upper_frame": 50,
+        "lower_time_s": 0.2450474065080047,
+        "upper_time_s": 0.2500516206878072,
+        "bracket_width_s": 0.005004214179802485
+      },
+      "half": {
+        "query_time_s": 0.25,
+        "status": "BRACKETED",
+        "lower_frame": 49,
+        "upper_frame": 50,
+        "lower_time_s": 0.245041929041857,
+        "upper_time_s": 0.2500480290990646,
+        "bracket_width_s": 0.005006100057207585
+      },
+      "alignment": "ASYNC_TIME_ALIGNMENT_UNKNOWN",
+      "interpolation": "NOT_PERFORMED"
+    },
+    {
+      "query_time_s": 0.5,
+      "same": {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 99,
+        "upper_frame": 100,
+        "lower_time_s": 0.4951285004631816,
+        "upper_time_s": 0.5000911476109234,
+        "bracket_width_s": 0.004962647147741861
+      },
+      "half": {
+        "query_time_s": 0.5,
+        "status": "BRACKETED",
+        "lower_frame": 99,
+        "upper_frame": 100,
+        "lower_time_s": 0.4950762038111418,
+        "upper_time_s": 0.5000438319740897,
+        "bracket_width_s": 0.004967628162947935
+      },
+      "alignment": "ASYNC_TIME_ALIGNMENT_UNKNOWN",
+      "interpolation": "NOT_PERFORMED"
+    }
+  ],
+  "source_pair_terminal_join": {
+    "both_terminal_receipts": true,
+    "both_runparts_stable_metadata": true,
+    "native_source_sha_status": "PARENT_AFTER_RESERVATION_REQUIRED",
+    "same_half_control_comparison": "actual receipt argv and ReadXmlRun must be checked by parent; XML overlay alone is insufficient"
+  }
+}
