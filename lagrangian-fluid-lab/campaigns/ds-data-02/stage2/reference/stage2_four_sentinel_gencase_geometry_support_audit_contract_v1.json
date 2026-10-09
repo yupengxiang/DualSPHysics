@@ -1,0 +1,54 @@
+{
+  "schema": "ds02.stage2.four-sentinel-gencase-geometry-support-contract.v1",
+  "status": "SOURCE_PREPARED_PARENT_GUARDED_WORKER_REQUIRED",
+  "sentinels": ["F2-S2", "F4-S2", "F5-S2", "F7-S1"],
+  "scope": {
+    "reads_generated_xml": true,
+    "reads_fluid_vtk": true,
+    "reads_bound_vtk": true,
+    "reads_generated_bi4": false,
+    "reads_solver_hdf5": false,
+    "starts_solver": false,
+    "starts_gencase": false,
+    "scientific_qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+  },
+  "parent_guard": {
+    "vtk_payloads": "explicit input records after reservation; full SHA/stat before and after each VTK read",
+    "bi4": "stat-only pre/post check; never opened by this worker",
+    "source_replace_or_touch": "FAIL",
+    "small_metadata": "stable single-byte-image reads; XML and receipts must match manifest SHA",
+    "output": "atomic create-only report under attempt_root",
+    "payload_hash_passes_per_vtk": 2
+  },
+  "fluid_checks": [
+    "binary legacy VTK POINTS exists and every coordinate is finite",
+    "Fluid point count equals generated XML typed fluid count when XML publishes it",
+    "Idp/Idpd mapping is checked against XML particle ranges when present",
+    "fluid points are compared with the generated XML fluid drawbox envelope",
+    "XML massfluid is reported separately; no native or continuum mass is inferred"
+  ],
+  "bound_checks": [
+    "binary legacy VTK POINTS exists and every coordinate is finite",
+    "Idp/Idpd mapping is checked against XML bound/floating ranges when present",
+    "missing role arrays remain UNKNOWN",
+    "fixed/moving/floating counts are diagnostics only"
+  ],
+  "overlap_checks": {
+    "method": "quantized point-cloud exact/near contact diagnostic within max(dp*1e-4,1e-7)m",
+    "interpretation": "does not establish physical overlap, no-penetration, flux, or owner equivalence"
+  },
+  "owner_policy": {
+    "f2_s2": "F2-S1 18.876 kg target may be carried as an UNVERIFIED_CROSS_SENTINEL_TARGET only after a separate exact S2 geometry/control bridge; native 21.114 kg remains diagnostic",
+    "f4_s2": "continuous owner unknown until source geometry/CSG contract is bound",
+    "f5_s2": "continuous owner unknown; 16 s physical window remains distinct from XML TimeMax 26 s",
+    "f7_s1": "continuous owner unknown; producer physical_case_id absence remains partial identity",
+    "mass_rescale": false,
+    "neighbor_grid_truth": false
+  },
+  "admission": {
+    "support_payload_integrity_can_pass": true,
+    "continuous_owner_can_pass": false,
+    "three_grid_solver_admission": "blocked until owner/support/control evidence closes",
+    "numerical_credit": false
+  }
+}
