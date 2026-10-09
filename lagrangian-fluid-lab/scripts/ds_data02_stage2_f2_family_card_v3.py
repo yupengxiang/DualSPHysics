@@ -268,6 +268,9 @@ def validate_sidecar(products: dict[str, dict[str, Any]], paths: dict[str, Path]
     receipt_binding = product.get("execution_receipt") or {}
     if receipt_binding.get("path") != str(paths["root126_receipt"]) or receipt_binding.get("sha256") != sha256_file(paths["root126_receipt"]):
         raise CardError("ROOT129 sidecar receipt binding differs from ROOT126")
+    proof_binding = sidecar.get("verification_proof") or {}
+    if proof_binding.get("path") != str(paths["root126_proof"]) or proof_binding.get("sha256") != sha256_file(paths["root126_proof"]):
+        raise CardError("ROOT129 sidecar proof binding differs from ROOT126")
     return {
         "report": stat_ref(paths["root129_report"], "ROOT129 sidecar report"),
         "receipt": stat_ref(paths["root129_receipt"], "ROOT129 execution receipt"),
@@ -288,6 +291,10 @@ def validate_domain(products: dict[str, dict[str, Any]], paths: dict[str, Path])
         raise CardError("ROOT131 domain proof schema differs")
     if proof.get("status") != "VERIFIED_ACTUAL153_NATIVE_COORDINATES_AGAINST_LOGGED_NUMERICAL_DOMAIN":
         raise CardError("ROOT131 domain proof status differs")
+    proof_source_path = require_file(proof.get("source_report"), "ROOT131 source V1 proof path", json_only=True)
+    proof_source_sha = proof.get("source_report_sha256")
+    if proof_source_sha != sha256_file(proof_source_path) or proof_source_sha != sha256_file(paths["domain_v1_evidence"]):
+        raise CardError("ROOT131 source V1 evidence binding differs")
     if proof.get("exact153_native_id_position_density_bracket_joins") is not True:
         raise CardError("ROOT131 lacks exact native ID/domain joins")
     if proof.get("root126_proof_sha256") != sha256_file(paths["root126_proof"]):
@@ -308,9 +315,19 @@ def validate_domain(products: dict[str, dict[str, Any]], paths: dict[str, Path])
         raise CardError("F2 domain source commit differs")
     if official.get("compiled_binary_source_link") != "UNKNOWN_UNPROVEN":
         raise CardError("F2 domain diagnostic overstates compiled GPU linkage")
-    gpu = (((official.get("files") or {}).get("gpu_position_predicate") or {}).get("binding") or {})
-    if gpu.get("path") != str(paths["gpu_predicate_source"]) or gpu.get("sha256") != sha256_file(paths["gpu_predicate_source"]):
-        raise CardError("F2 GPU predicate source is not bound to the diagnostic")
+    source_bindings = official.get("files") or {}
+    source_roles = {
+        "position_predicate": "cpu_predicate_source",
+        "gpu_position_predicate": "gpu_predicate_source",
+        "map_initialization_and_log": "map_source",
+        "motive_encoding": "motive_source",
+        "motive_definition": "motive_header_source",
+        "partout_header_and_arrays": "partout_source",
+    }
+    for role, source_key in source_roles.items():
+        binding = (source_bindings.get(role) or {}).get("binding") or {}
+        if binding.get("path") != str(paths[source_key]) or binding.get("sha256") != sha256_file(paths[source_key]):
+            raise CardError(f"F2 official source binding differs for {role}")
     interpretation = domain_v2.get("interpretation") or {}
     if interpretation.get("physical_fate") != "UNKNOWN" or interpretation.get("dynamical_impact") != "UNKNOWN":
         raise CardError("F2 domain V2 diagnostic grants physical fate or dynamics")
