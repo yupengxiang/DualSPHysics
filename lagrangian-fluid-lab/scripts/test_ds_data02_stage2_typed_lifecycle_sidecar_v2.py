@@ -149,6 +149,13 @@ class TypedLifecycleTests(unittest.TestCase):
             metadata, _ = subject._lifecycle_records(Path(source["h5"]), expected_frames=4, chunk=2)
             self.assertEqual(metadata["metadata"]["units_status"], "NOT_DECLARED")
             self.assertEqual(metadata["metadata"]["units"], {})
+            self.assertEqual(metadata["metadata"]["identity_key_status"], "EXPLICIT_MATCH")
+            with h5py.File(source["h5"], "r+") as handle:
+                del handle.attrs["identity_key"]
+                del handle.attrs["coordinate_frame"]
+            metadata, _ = subject._lifecycle_records(Path(source["h5"]), expected_frames=4, chunk=2)
+            self.assertEqual(metadata["metadata"]["identity_key_status"], "NOT_DECLARED")
+            self.assertEqual(metadata["metadata"]["coordinate_frame_status"], "NOT_DECLARED")
             with h5py.File(source["h5"], "r+") as handle:
                 handle.attrs["units_json"] = json.dumps({**subject.FIELD_UNITS_DEFAULT, "mass": "g"})
             with self.assertRaises(subject.LifecycleError):
