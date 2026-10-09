@@ -274,10 +274,29 @@ def _owner_source_records(v6_manifest: dict[str, Any]) -> dict[str, dict[str, An
         value = v6_manifest.get(key)
         if not isinstance(value, dict) or not isinstance(value.get("path"), str) or not isinstance(value.get("sha256"), str):
             raise BuildFailure(f"{label} record with path and SHA is required")
-        _, actual = _read_json(Path(value["path"]), label)
+        proof_value, actual = _read_json(Path(value["path"]), label)
         if actual["sha256"] != value["sha256"]:
             raise BuildFailure(f"{label} SHA changed")
-        result[key] = actual
+        status = str(proof_value.get("status", ""))
+        if key == "proof":
+            if not status.startswith("VERIFIED_ACTUAL_F6_TWO_SENTINEL_XML_RIGID") or proof_value.get("H5_BI4_read_by_root") is not False or proof_value.get("independent_XML_and_sample_mass_arithmetic_verified") is not True:
+                raise BuildFailure("ROOT244 proof does not close the rigid XML/source scope")
+            scope = "ROOT244 rigid XML/body scope; continuous owner remains separate"
+        else:
+            if not status.startswith("VERIFIED_ACTUAL_F6_XML_CONTINUOUS_DRAWBOX_OWNER") or proof_value.get("source_5120_kg_discrete_sample_is_not_continuous_owner_mass") is not True:
+                raise BuildFailure("ROOT252 proof does not close the continuous-owner source scope")
+            owner_scope = proof_value.get("continuous_owner_scope")
+            if not isinstance(owner_scope, str) or "source XML" not in owner_scope or "drawbox" not in owner_scope:
+                raise BuildFailure("ROOT252 continuous-owner physical scope is not explicit")
+            scope = owner_scope
+        report_path = proof_value.get("report")
+        report_sha = proof_value.get("report_sha256")
+        if not isinstance(report_path, str) or not isinstance(report_sha, str):
+            raise BuildFailure(f"{label} lacks report SHA/path")
+        _, report_record = _read_json(Path(report_path), f"{label} report")
+        if report_record["sha256"] != report_sha:
+            raise BuildFailure(f"{label} report SHA changed")
+        result[key] = {"proof": actual, "report": report_record, "scope": scope}
     return result
 
 
@@ -426,8 +445,11 @@ def build(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any]]:
         if isinstance(rec, dict) and isinstance(rec.get("path"), str):
             static[rec["path"]] = rec
     for rec in owner_records.values():
-        if isinstance(rec, dict) and isinstance(rec.get("path"), str):
-            static[rec["path"]] = rec
+        if not isinstance(rec, dict):
+            continue
+        for nested in (rec.get("proof"), rec.get("report")):
+            if isinstance(nested, dict) and isinstance(nested.get("path"), str):
+                static[nested["path"]] = nested
     for case in cases:
         for key in ("producer_receipt_v6", "xml"):
             rec = case.get(key)
