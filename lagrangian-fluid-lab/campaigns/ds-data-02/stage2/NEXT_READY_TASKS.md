@@ -1,3 +1,10 @@
+最新实际增量（2026-10-09T02:17:27.620034+00:00）：完整目标 ACTIVE；所有新原生实际产物、旧失败与新qualified-source诊断保留。
+
+- ROOT138全401 native field audit实际completed/rc0，27750→27683，67真实missing IDs，MK1/2/3分别30/28/9；全部active finite、native MassFluid binary64 bits000000009a54463f精确、XML范围赋type/MK不是独立native type字段。worker afterreserve全401 full pre/postSHA/stat稳定，exact parser-consumed SHA未计算；9,539,227,658B decoder用户态input，scratchpeak23,791,814B、已清理。full systemdCPU121.578649s同父增量闭账幂等、unit停，无active reservation。
+- 未知身份质量下界0.04565862473100424kg/XMLwhole18.910848=.0024144144530697004，<.003仅SCREEN PASS。全部QI/QN/QE、physicalfate、合法flux/contact/dynamics仍UNKNOWN，per-IDmotive未读PartOut也UNKNOWN；RunPARTs aggregate全67 position仅日志scope。原域153、新域67仅27common：oldonly126/newonly40，新missing集合不是旧集合子集，不可将数量差86解释为简单恢复86或物理修复。
+- forensics准备ROOT141 F7-S1 initial空间QA，再ROOT142 actualROOT130 PartOut身份/数值原因/保存括号审计；reference准备ROOT139 F3原生字段/观測；consumer准备ROOT140新V53 cold source+parent+postterminal真实CLI。主I/O槽已释放，source准备不授予actual/资格信用。
+- 共享已记CPU704.489950749core h/GPU137.966689117h；原3840/512额度、Home500GiB floor及2026-10-14T07:23:48Z不变。GPU6外来任务不动，后续启动必须fresh inventory+atomic lease/parentreserve。
+
 最新实际增量（2026-10-09T02:13:22.007927+00:00）：完整目标 ACTIVE。
 
 - ROOT133 F3 .015 full-window native canary实际completed/rc0：836 files，0→8.350023358431661s、4320fluid全窗保留，RunPARTs全部排除计数与DTsMin夹紧为0。ROOT120 generatedXML/BI4/forcing在共享预留后复制到attempt-owned solver-inputs，三文件独立inode、full copy SHA及parent full pre/post sourceSHA闭合，literal venv shebang与actual argv/environment入账。full systemdCPU203.232353s已同父补账幂等、unit停、GPU UUID lease移除；输出912592711B，实际GPU fee 202.88610091200098s。root只小JSON/XML/CSV/stat，原生粒子字段及科学Q未审计/未通过；reference准备ROOT139完整源字段与有界观测，不盲跑最细档。
