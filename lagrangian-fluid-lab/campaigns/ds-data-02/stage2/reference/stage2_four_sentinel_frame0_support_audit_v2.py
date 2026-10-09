@@ -150,6 +150,25 @@ def _expected_stat(record: dict[str, Any]) -> dict[str, int]:
     return result
 
 
+def _assert_source_xml_input_join(receipt: dict[str, Any], source_xml: Path,
+                                  source_xml_sha256: str, label: str) -> dict[str, Any]:
+    """Close the source XML to the nested producer input hash maps."""
+    request = receipt.get("request")
+    if not isinstance(request, dict):
+        raise AuditFailure(f"{label} receipt has no nested request for source XML join")
+    xml_path = str(source_xml.expanduser().absolute())
+    if not isinstance(request.get("input_files"), list) or xml_path not in request["input_files"]:
+        raise AuditFailure(f"{label} nested request does not list source XML exactly")
+    if not isinstance(request.get("input_sha256"), dict) or request["input_sha256"].get(xml_path) != source_xml_sha256:
+        raise AuditFailure(f"{label} nested request source XML SHA join failed")
+    for map_name in ("input_hashes_at_launch", "input_hashes_after_run"):
+        hashes = receipt.get(map_name)
+        if not isinstance(hashes, dict) or hashes.get(xml_path) != source_xml_sha256:
+            raise AuditFailure(f"{label} receipt {map_name} source XML SHA join failed")
+    return {"status": "PASS_SOURCE_XML_REQUEST_RECEIPT_HASH_JOIN", "path": xml_path,
+            "sha256": source_xml_sha256}
+
+
 def _check_stat(expected: dict[str, int], actual: dict[str, int], label: str) -> None:
     for key, value in expected.items():
         if actual.get(key) != value:
@@ -288,11 +307,16 @@ def _case_run(case: dict[str, Any], attempt_root: Path, observer: Any) -> dict[s
     _assert_receipt_identity(case, receipt, receipt_record)
     source_xml = Path(case["source_xml"]["path"]).expanduser().absolute()
     xml_stat = _regular(source_xml, f"{sentinel} source XML")
+    source_xml_sha = case["source_xml"].get("sha256")
     if case["source_xml"].get("sha256"):
         xml_sha, xml_after = _sha_stat(source_xml, f"{sentinel} source XML")
         if xml_sha != case["source_xml"]["sha256"]:
             raise AuditFailure(f"{sentinel} source XML SHA changed")
         xml_stat = xml_after
+        source_xml_sha = xml_sha
+    if not isinstance(source_xml_sha, str):
+        raise AuditFailure(f"{sentinel} source XML has no bound SHA")
+    source_xml_join = _assert_source_xml_input_join(receipt, source_xml, source_xml_sha, sentinel)
     raw = Path(case["frame0"]["path"]).expanduser().absolute()
     expected = _expected_stat(case["frame0"])
     before_sha, before_stat = _sha_stat(raw, f"{sentinel} frame-0 BI4")
@@ -302,10 +326,33 @@ def _case_run(case: dict[str, Any], attempt_root: Path, observer: Any) -> dict[s
         raise AuditFailure(f"{sentinel} frame-0 BI4 SHA differs from parent declaration")
     scratch = attempt_root / "scratch" / sentinel.replace("-", "_")
     scratch.mkdir(parents=True, exist_ok=True)
-    decoded = _decode_position_aware(raw, Path(case["decoder"]["path"]), scratch, 0, observer)
-    after_sha, after_stat = _sha_stat(raw, f"{sentinel} frame-0 BI4 post-decode")
-    if before_sha != after_sha or before_stat != after_stat:
-        raise AuditFailure(f"{sentinel} frame-0 BI4 changed across decode")
+    # Always close the native source with a post-decode SHA/stat pass.  If the
+    # official decoder rejects a position-only product, preserve that decoder
+    # exception while retaining any independent post-guard failure context;
+    # the cleanup/guard error must not mask the actual interface diagnosis.
+    decoded: dict[str, Any] | None = None
+    decode_error: Exception | None = None
+    try:
+        decoded = _decode_position_aware(raw, Path(case["decoder"]["path"]), scratch, 0, observer)
+    except Exception as exc:
+        decode_error = exc
+    after_sha: str | None = None
+    after_stat: dict[str, int] | None = None
+    post_error: Exception | None = None
+    try:
+        after_sha, after_stat = _sha_stat(raw, f"{sentinel} frame-0 BI4 post-decode")
+        if before_sha != after_sha or before_stat != after_stat:
+            raise AuditFailure(f"{sentinel} frame-0 BI4 changed across decode")
+    except Exception as exc:
+        post_error = exc
+    if decode_error is not None:
+        if post_error is not None:
+            raise AuditFailure(f"{sentinel} decoder failure preserved: {decode_error!r}; post-guard failure: {post_error!r}") from decode_error
+        raise decode_error
+    if post_error is not None:
+        raise post_error
+    if decoded is None or after_sha is None or after_stat is None:
+        raise AuditFailure(f"{sentinel} decoder produced no result")
     source = observer.parse_source_xml(source_xml)
     kind, mkfluid, mk_absolute = observer.assign_particle_ranges(decoded["ids"], source["blocks"])
     role_counts: dict[str, int] = {}
@@ -330,7 +377,8 @@ def _case_run(case: dict[str, Any], attempt_root: Path, observer: Any) -> dict[s
     decoded_time = decoded.get("decoded_time_s")
     return {
         "sentinel_id": sentinel, "status": "PASS_FRAME0_POSITION_IDENTITY_DIAGNOSTIC",
-        "source_xml": {"path": str(source_xml), "stat": xml_stat, "sha256": case["source_xml"].get("sha256")},
+        "source_xml": {"path": str(source_xml), "stat": xml_stat, "sha256": source_xml_sha},
+        "source_xml_receipt_join": source_xml_join,
         "receipt": receipt_record, "receipt_identity": {"status": "PASS_CASE_ATTEMPT_PHYSICAL" if not case.get("receipt_identity_missing_fields") else "PARTIAL_SENTINEL_FIELD_ABSENT", "missing_fields": case.get("receipt_identity_missing_fields", [])},
         "native": {"path": str(raw), "sha256": before_sha, "stat_pre": before_stat, "stat_post": after_stat, "post_equal": True},
         "decoded_time_s": decoded_time, "decoded_time_status": decoded["time_status"],

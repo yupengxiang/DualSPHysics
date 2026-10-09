@@ -70,11 +70,56 @@ def _record(path: Path, label: str, *, read_content: bool = True) -> dict[str, A
 
 
 def _json(path: Path, label: str) -> tuple[dict[str, Any], dict[str, Any]]:
-    rec = _record(path, label, read_content=True)
-    value = json.loads(path.read_text(encoding="utf-8"))
+    # Hash and parse one immutable byte image.  Calling _record() and then
+    # read_text() would make the metadata hash and JSON parse two independent
+    # opens, allowing a producer to replace the file between them.
+    path = _regular(path, label)
+    stat_before = _stat(path)
+    if stat_before["bytes"] > MAX_SMALL_BYTES:
+        raise BuildFailure(f"{label} exceeds bounded metadata input: {path}")
+    raw = path.read_bytes()
+    stat_after = _stat(path)
+    if stat_before != stat_after or len(raw) != stat_before["bytes"]:
+        raise BuildFailure(f"{label} changed while reading: {path}")
+    rec = {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(),
+           "hash_status": "BOUND", "stat": stat_after,
+           "payload_read_by_builder": True}
+    try:
+        value = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BuildFailure(f"{label} is not JSON: {path}") from exc
     if not isinstance(value, dict):
         raise BuildFailure(f"{label} is not an object")
     return value, rec
+
+
+def _assert_receipt_source_xml_join(receipt: dict[str, Any], source_xml: Path,
+                                    source_xml_sha256: str, label: str) -> dict[str, Any]:
+    """Require the actual source XML in request and terminal hash maps.
+
+    A receipt/request can be completed while pointing at a different Def or
+    generated XML.  The quality row's path and the parsed source must therefore
+    be joined to the nested request input map and to both terminal source hash
+    maps.  This is metadata-only; no native payload is opened here.
+    """
+    request = receipt.get("request")
+    if not isinstance(request, dict):
+        raise BuildFailure(f"{label} receipt has no nested request for XML join")
+    xml_path = str(source_xml.expanduser().absolute())
+    request_files = request.get("input_files")
+    request_hashes = request.get("input_sha256")
+    if not isinstance(request_files, list) or xml_path not in request_files:
+        raise BuildFailure(f"{label} nested request does not list source XML exactly")
+    if not isinstance(request_hashes, dict) or request_hashes.get(xml_path) != source_xml_sha256:
+        raise BuildFailure(f"{label} nested request source XML SHA join failed")
+    checked_maps = []
+    for map_name in ("input_hashes_at_launch", "input_hashes_after_run"):
+        hashes = receipt.get(map_name)
+        if not isinstance(hashes, dict) or hashes.get(xml_path) != source_xml_sha256:
+            raise BuildFailure(f"{label} receipt {map_name} source XML SHA join failed")
+        checked_maps.append(map_name)
+    return {"status": "PASS_SOURCE_XML_REQUEST_RECEIPT_HASH_JOIN", "path": xml_path,
+            "sha256": source_xml_sha256, "checked_maps": checked_maps}
 
 
 def _write_once(path: Path, value: Any) -> None:
@@ -134,6 +179,7 @@ def _source_case(row: dict[str, Any], quality_record: dict[str, Any], *, worker:
     runparts = output_root / "solver_output" / "RunPARTs.csv"
     frame_record = _record(frame0, f"{sid} deferred frame-0", read_content=False)
     runparts_record = _record(runparts, f"{sid} RunPARTs", read_content=True)
+    source_xml_join = _assert_receipt_source_xml_join(receipt, source_xml, xml_record["sha256"], sid)
     # The decoder is a small static executable dependency, so bind its actual
     # bytes in the parent input closure.  Only the native Part_0000 payloads
     # remain stat-only deferred inputs.
@@ -147,7 +193,8 @@ def _source_case(row: dict[str, Any], quality_record: dict[str, Any], *, worker:
         "case_id": actual_identity.get("case_id"), "attempt_id": actual_identity.get("attempt_id"),
         "receipt_identity_expected": expected_identity,
         "receipt_identity_missing_fields": missing_identity,
-        "source_xml": xml_record, "receipt": receipt_record, "receipt_sha256": receipt_record["sha256"],
+        "source_xml": xml_record, "source_xml_receipt_join": source_xml_join,
+        "receipt": receipt_record, "receipt_sha256": receipt_record["sha256"],
         "terminal_output_root": str(output_root), "frame0": {**frame_record, "known_sha256": "PARENT_AFTER_RESERVATION_REQUIRED"},
         "runparts": runparts_record, "decoder": decoder_record, "decoder_source": decoder_source_record,
         "source_control": {"command": request.get("command"), "tmax_s": row.get("source_solver_controls", {}).get("tmax_s"), "tout_s": row.get("source_solver_controls", {}).get("tout_s"), "request_sha256": receipt.get("request_sha256")},
