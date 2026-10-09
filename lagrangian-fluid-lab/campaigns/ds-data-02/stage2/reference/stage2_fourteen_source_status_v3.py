@@ -84,7 +84,6 @@ SENTINELS: list[dict[str, Any]] = [
             proof("F2_S1_COARSE_FULL_CFD_VERIFICATION_001.json", "actual coarse 401-frame full-window development run"),
             proof("F2_FINE_FULL4S_NATIVE_INDEPENDENT_VERIFICATION_001.json", "actual fine 801-frame full-window run and per-MK diagnostic"),
             proof("F2_S1_CONTINUUM_SOURCE_MASS_MISMATCH_ROOT_VERIFICATION_001.json", "finite owner mass closure and hard mismatch"),
-            proof("F2_S1_COARSE_FULL_CFD_VERIFICATION_001.json", "actual dt evidence is saved-window summary only"),
         ],
         "next_guarded_task": {
             "kind": "SOURCE_OWNER_SUPPORT_AND_PER_MATERIAL_AUDIT",
