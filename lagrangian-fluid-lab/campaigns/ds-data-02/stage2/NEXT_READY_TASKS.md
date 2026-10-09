@@ -605,3 +605,7 @@ ROOT188 running; terminal verification/fees first. ROOT193 real CLI fix, ROOT194
 
 2026-10-09T10:40:02.342716+00:00 /home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT188_FAILURE_ROOT193_RUNNING_ROOT194_READY_CONTINUATION_V1.json
 ROOT193 RUNNING, ROOT194 READY after IO+fee closure. ROOT188 failed cap2MiB; preserve77.5MB full report for196 guarded recovery. ROOT195 comparison waits recovered actualproducer; ROOT191 waits actual194 proof. Stage2 full goal ACTIVE.
+
+
+2026-10-09T11:14:14.834918+00:00 authoritative continuation: /home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT195_198_200_TERMINALS_ROOT201_RUNNING_CONTINUATION_V1.json
+Actual ROOT198 8/8 closed; total17 saved-mask diagnostic cases,318 exact pending +1alias unresolved. ROOT197 output containment failure preserved; actualROOT200 fresh JSON proof SUCCESS/full fees closed. ROOT195 strict three-way diagnostics SUCCESS/full fees closed, asynchronous error bounds UNKNOWN. ROOT201 F4 eight-case batch RUNNING only heavy IO; no coverage until terminal. ROOT191 V2 sourcebound200 metadata preparation, ROOT199 additiveV2 whole-record parser fix, plannerV3 registry and F1ROOT202 calibration source preparation next. Full seven-item dataset-only goal ACTIVE/incomplete; all original hard limits/deadline/Homefloor preserved.
