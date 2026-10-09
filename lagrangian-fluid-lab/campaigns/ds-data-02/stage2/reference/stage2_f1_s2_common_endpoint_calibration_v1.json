@@ -1,0 +1,601 @@
+{
+  "actual_pair_controls": {
+    "common_output_contract": {
+      "extrapolation": false,
+      "interpolation": false,
+      "output_interval_s": 0.005,
+      "query_times_s": [
+        0.0,
+        0.25,
+        0.5
+      ]
+    },
+    "half_cfl": {
+      "SaveDt_logging_active": true,
+      "TimeMax_s": 0.5,
+      "effective_cfl": 0.1,
+      "rows": 101
+    },
+    "same_cfl": {
+      "SaveDt_logging_active": true,
+      "TimeMax_s": 0.5,
+      "effective_cfl": 0.2,
+      "rows": 101
+    }
+  },
+  "admission": {
+    "initial_support": "ROOT233 frame-0 limited support diagnostic; dynamic selected fields still require ROOT279",
+    "next_gate": "ROOT310 must produce exact ten selected Part path/SHA/stat records before ROOT279 can run",
+    "owner": "ROOT227 340 kg source-owner closure is bound; discrete/native sample mass remains separate",
+    "runtime_controls": "ROOT277/278 terminal pair proves .2/.1 CFL and common .5 s SaveDt metadata"
+  },
+  "frozen_tolerances": {
+    "event_time_fraction_of_registered_T": {
+      "measured": false,
+      "scope": "event T remains UNKNOWN unless source event is registered",
+      "value": 0.01
+    },
+    "position_fraction_of_registered_L": {
+      "measured": false,
+      "scope": "registered task tolerance only",
+      "value": 0.02
+    },
+    "time_and_output_each_fraction_of_task_tolerance": {
+      "measured": false,
+      "scope": "calibration gate, not a reported error",
+      "value": 0.25
+    },
+    "velocity_and_ke_fraction_of_registered_nonzero_scale": {
+      "measured": false,
+      "scope": "registered task tolerance only",
+      "value": 0.05
+    },
+    "whole_initial_fluid_mass_hard_upper_pct": {
+      "measured": false,
+      "scope": "hard upper gate",
+      "value": 2.0
+    },
+    "whole_initial_fluid_mass_target_pct": {
+      "measured": false,
+      "scope": "initial owner mass gate",
+      "value": 1.0
+    }
+  },
+  "interpretation": {
+    "event_time": "UNKNOWN; no event characteristic T is registered",
+    "position_velocity_ke": "compare only after native fields are guarded; no QN until source axis/unit and task scales are closed",
+    "same_half_difference": "diagnostic CFL difference; not a truth/reference error",
+    "scientific_qualification": {
+      "QE": "UNKNOWN",
+      "QI": "UNKNOWN",
+      "QN": "UNKNOWN"
+    },
+    "time_bracket_width": "observed saved-output bracket metadata only; not a measured output error bound"
+  },
+  "observation_plan": {
+    "fields": [
+      "Idp",
+      "role/Type/Mk",
+      "position",
+      "velocity",
+      "Rhop",
+      "native MassFluid",
+      "native Dp"
+    ],
+    "fluid_aggregates": [
+      "native-MassFluid weighted COM",
+      "native-MassFluid weighted velocity",
+      "native-MassFluid KE"
+    ],
+    "guard": {
+      "no_bi4_h5_vtk_reopen_by_builder": true,
+      "no_interpolation": true,
+      "post_decode_sha_stat": true,
+      "pre_sha_stat": true
+    },
+    "next_parent_namespace": "ROOT279",
+    "selected_native_file_count": 10,
+    "selected_part_indices_per_run": [
+      0,
+      49,
+      50,
+      99,
+      100
+    ],
+    "source_calibration": "ROOT217 official writer/decoder fixture; storage calibration does not assert production world-axis equivalence",
+    "source_snapshot_namespace": "ROOT310"
+  },
+  "observed_brackets": {
+    "half_cfl": [
+      {
+        "exact": true,
+        "interpolation": false,
+        "left_part": 0,
+        "left_time_s": 0.0,
+        "query_s": 0,
+        "right_part": 0,
+        "right_time_s": 0.0,
+        "width_s": 0.0
+      },
+      {
+        "exact": false,
+        "interpolation": false,
+        "left_part": 49,
+        "left_time_s": 0.245041929041857,
+        "query_s": 0.25,
+        "right_part": 50,
+        "right_time_s": 0.2500480290990646,
+        "width_s": 0.005006100057207585
+      },
+      {
+        "exact": false,
+        "interpolation": false,
+        "left_part": 99,
+        "left_time_s": 0.4950762038111418,
+        "query_s": 0.5,
+        "right_part": 100,
+        "right_time_s": 0.5000438319740897,
+        "width_s": 0.004967628162947935
+      }
+    ],
+    "same_cfl": [
+      {
+        "exact": true,
+        "interpolation": false,
+        "left_part": 0,
+        "left_time_s": 0.0,
+        "query_s": 0,
+        "right_part": 0,
+        "right_time_s": 0.0,
+        "width_s": 0.0
+      },
+      {
+        "exact": false,
+        "interpolation": false,
+        "left_part": 49,
+        "left_time_s": 0.2450474065080047,
+        "query_s": 0.25,
+        "right_part": 50,
+        "right_time_s": 0.2500516206878072,
+        "width_s": 0.005004214179802485
+      },
+      {
+        "exact": false,
+        "interpolation": false,
+        "left_part": 99,
+        "left_time_s": 0.4951285004631816,
+        "query_s": 0.5,
+        "right_part": 100,
+        "right_time_s": 0.5000911476109234,
+        "width_s": 0.004962647147741861
+      }
+    ]
+  },
+  "read_scope": {
+    "hdf5_read": false,
+    "native_payload_read": false,
+    "proof_json_read": true,
+    "request_receipt_json_read": true,
+    "solver_launch": false
+  },
+  "schema": "ds02.stage2.f1-s2.common-endpoint-calibration.v1",
+  "sentinel_id": "F1-S2",
+  "source_edges": {
+    "half_cfl": {
+      "RunPARTs": {
+        "clamped_dt_saved_intervals": 0,
+        "final_NpfSim": 42500.0,
+        "final_time_s": 0.5000438319740897,
+        "initial_NpfSim": 42500.0,
+        "initial_time_s": 0.0,
+        "last_row_counts_are_per_output_interval": true,
+        "native_files_stat_only_count": 101,
+        "particle_id_motive_or_fate_credit": "NONE_FROM_CSV_SUMMARY",
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/RunPARTs.csv",
+        "rows": 101,
+        "saved_window_new_exclusion_sums": {
+          "NpOut": 0.0,
+          "NpOutMov": 0.0,
+          "NpOutPos": 0.0,
+          "NpOutRho": 0.0
+        },
+        "sha256": "b20fbfe1774283cf2cd576c19a47d109b637481a41f95149c9fe8e355b9ac97d"
+      },
+      "Run_out": {
+        "SaveDt_logging_active": true,
+        "TimeMax_s": 0.5,
+        "effective_CFL": 0.1,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/solver_output/Run.out",
+        "sha256": "73094e40661ce4da06647e69b62cc5ce68f1e9644be16b898c594f8a88fd4c95"
+      },
+      "effective_cfl": 0.1,
+      "mode": "ROOT278 half-CFL",
+      "proof": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_DP020_HALF_CFL_SAVEDT_BOUNDED_ACTUAL_ROOT_VERIFICATION_278.json",
+        "sha256": "b357afa839d78bf8a8e14626e459f79c08afd77c739c078e2f13573ee3871629",
+        "stat": {
+          "bytes": 29033,
+          "ctime_ns": 1791572638272979106,
+          "device": 2081,
+          "inode": 328551856,
+          "mtime_ns": 1791572638272979106
+        }
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_DP020_SAVEDT_HALF_CFL_ROOT278/f1-s2-dp020-savedt-half_cfl-root278-001/execution-receipt.json",
+        "sha256": "a6db4af8e878db0f51b1e82926c23225b5a5c043ac37315c58d86f51c08b714f",
+        "stat": {
+          "bytes": 66934,
+          "ctime_ns": 1791572609693858655,
+          "device": 2081,
+          "inode": 322645805,
+          "mtime_ns": 1791572609693858655
+        }
+      },
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-dp020-savedt-half_cfl-external-v5-root-forward-278-001.json",
+        "sha256": "e32425d50c55163085bfe7d70762d4520e178219dd9ba085819b235db5f6fead",
+        "stat": {
+          "bytes": 99473,
+          "ctime_ns": 1791572490475538328,
+          "device": 2081,
+          "inode": 328551851,
+          "mtime_ns": 1791572490475538328
+        }
+      },
+      "saved_query_brackets": [
+        {
+          "exact": true,
+          "interpolation": false,
+          "left_part": 0,
+          "left_time_s": 0.0,
+          "query_s": 0,
+          "right_part": 0,
+          "right_time_s": 0.0
+        },
+        {
+          "exact": false,
+          "interpolation": false,
+          "left_part": 49,
+          "left_time_s": 0.245041929041857,
+          "query_s": 0.25,
+          "right_part": 50,
+          "right_time_s": 0.2500480290990646
+        },
+        {
+          "exact": false,
+          "interpolation": false,
+          "left_part": 99,
+          "left_time_s": 0.4950762038111418,
+          "query_s": 0.5,
+          "right_part": 100,
+          "right_time_s": 0.5000438319740897
+        }
+      ],
+      "status": "VERIFIED_ACTUAL_F1_S2_DP020_HALF_CFL_SAVEDT_BOUNDED_NATIVE_WINDOW_NO_Q"
+    },
+    "readiness": {
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_fourteen_scientific_readiness_v5.json",
+      "sha256": "151ac404cb6dc6fd2fb61e505bbf44c6538fc4860d0cd600db46c40600ce6b7f",
+      "stat": {
+        "bytes": 43085,
+        "ctime_ns": 1791573475885292358,
+        "device": 2081,
+        "inode": 328615517,
+        "mtime_ns": 1791573475885292358
+      }
+    },
+    "same_cfl": {
+      "RunPARTs": {
+        "clamped_dt_saved_intervals": 0,
+        "final_NpfSim": 42500.0,
+        "final_time_s": 0.5000911476109234,
+        "initial_NpfSim": 42500.0,
+        "initial_time_s": 0.0,
+        "last_row_counts_are_per_output_interval": true,
+        "native_files_stat_only_count": 101,
+        "particle_id_motive_or_fate_credit": "NONE_FROM_CSV_SUMMARY",
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/RunPARTs.csv",
+        "rows": 101,
+        "saved_window_new_exclusion_sums": {
+          "NpOut": 0.0,
+          "NpOutMov": 0.0,
+          "NpOutPos": 0.0,
+          "NpOutRho": 0.0
+        },
+        "sha256": "93e06a4239cf32b3d502ffb8116a3d2f104837a0caa24e4333a0dedfd6fc82e2"
+      },
+      "Run_out": {
+        "SaveDt_logging_active": true,
+        "TimeMax_s": 0.5,
+        "effective_CFL": 0.2,
+        "path": "/var/tmp/ds02-stage2/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/solver_output/Run.out",
+        "sha256": "0f4a83e957e98ccd0e035f5b44d599e75ff4c228a8975b9d6725897902672118"
+      },
+      "effective_cfl": 0.2,
+      "mode": "ROOT277 same-CFL",
+      "proof": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_DP020_SAME_CFL_SAVEDT_BOUNDED_ACTUAL_ROOT_VERIFICATION_277.json",
+        "sha256": "026b2d326c2d65869dc16c6a0d062056ca31d720642dbb715bd3d13d787115d8",
+        "stat": {
+          "bytes": 29040,
+          "ctime_ns": 1791572586210582063,
+          "device": 2081,
+          "inode": 328551853,
+          "mtime_ns": 1791572586210582063
+        }
+      },
+      "receipt": {
+        "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_DP020_SAVEDT_SAME_CFL_ROOT277/f1-s2-dp020-savedt-same_cfl-root277-001/execution-receipt.json",
+        "sha256": "37e209e8d89bb29d6c663ea917f2a3914b3e4e4be14258b9892302f291801c6c",
+        "stat": {
+          "bytes": 66942,
+          "ctime_ns": 1791572507892999575,
+          "device": 2081,
+          "inode": 322645802,
+          "mtime_ns": 1791572507892999575
+        }
+      },
+      "request": {
+        "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-dp020-savedt-same_cfl-external-v5-root-forward-277-001.json",
+        "sha256": "15fc81878f5fb6a747ae7f0184ede70cc5cfaf0cd3463f75ad61f99e0f821cfa",
+        "stat": {
+          "bytes": 99471,
+          "ctime_ns": 1791572490378541329,
+          "device": 2081,
+          "inode": 328551850,
+          "mtime_ns": 1791572490378541329
+        }
+      },
+      "saved_query_brackets": [
+        {
+          "exact": true,
+          "interpolation": false,
+          "left_part": 0,
+          "left_time_s": 0.0,
+          "query_s": 0,
+          "right_part": 0,
+          "right_time_s": 0.0
+        },
+        {
+          "exact": false,
+          "interpolation": false,
+          "left_part": 49,
+          "left_time_s": 0.2450474065080047,
+          "query_s": 0.25,
+          "right_part": 50,
+          "right_time_s": 0.2500516206878072
+        },
+        {
+          "exact": false,
+          "interpolation": false,
+          "left_part": 99,
+          "left_time_s": 0.4951285004631816,
+          "query_s": 0.5,
+          "right_part": 100,
+          "right_time_s": 0.5000911476109234
+        }
+      ],
+      "status": "VERIFIED_ACTUAL_F1_S2_DP020_SAME_CFL_SAVEDT_BOUNDED_NATIVE_WINDOW_NO_Q"
+    },
+    "support": {
+      "cfl_entry": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_CFL_ENTRYPOINT_V2_ACTUAL_ROOT_VERIFICATION_260.json",
+          "sha256": "8055b7c0709be67f227e43072cb06601e57c8c23002d29b68218da32a6407b4b",
+          "stat": {
+            "bytes": 27129,
+            "ctime_ns": 1791568822402391520,
+            "device": 2081,
+            "inode": 328551771,
+            "mtime_ns": 1791568822402391520
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_CFL_ENTRYPOINT_AUDIT_ROOT260_V2/f1-s2-cfl-entrypoint-audit-root260-source-001-root-forward-030-001/execution-receipt.json",
+          "sha256": "ed1912e4260a74ab17ee7b59705ed9c1b5657dc5f1c21263377c83b83ddbc8ce",
+          "stat": {
+            "bytes": 68418,
+            "ctime_ns": 1791568803917901380,
+            "device": 2081,
+            "inode": 322645781,
+            "mtime_ns": 1791568803704907253
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/reference-audit-root-forward-260-001.json",
+          "sha256": "e156fb079b90cd2e4d34cf0e05b55da8eb1e7f5841c1b70db2e941677dfa1abc",
+          "stat": {
+            "bytes": 44232,
+            "ctime_ns": 1791568081936418434,
+            "device": 2081,
+            "inode": 328551756,
+            "mtime_ns": 1791568081936418434
+          }
+        },
+        "status": "VERIFIED_ACTUAL_F1_XML_CFL_ENTRY_AND_LAUNCH_OUTPUT_AUTHORITY_DIAGNOSTIC_NO_Q"
+      },
+      "frame0_support": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_INITIAL_SUPPORT_V2_ACTUAL_ROOT_VERIFICATION_233.json",
+          "sha256": "9419c96cd18313f635a561592844e6ec21494cafbffa7f061aa52c48e2f19228",
+          "stat": {
+            "bytes": 19343,
+            "ctime_ns": 1791561921483751313,
+            "device": 2081,
+            "inode": 328551612,
+            "mtime_ns": 1791561921483751313
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_INITIAL_SUPPORT_AUDIT_ROOT233_V4/f1-s2-initial-support-audit-root233-v4-002-root-forward-030-001/execution-receipt.json",
+          "sha256": "e8db43dab8dff3872791419c386ade0eaae5b415dfef380554cc20c1110e58a0",
+          "stat": {
+            "bytes": 87270,
+            "ctime_ns": 1791561845977897659,
+            "device": 2081,
+            "inode": 322645725,
+            "mtime_ns": 1791561845908899620
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-initial-support-v2-root-forward-233-002.json",
+          "sha256": "d531a57bbd3a14aa394c3a427187df5f7b15ef8dfa241874d2f451b8e1ce7f2c",
+          "stat": {
+            "bytes": 62017,
+            "ctime_ns": 1791561475578431718,
+            "device": 2081,
+            "inode": 328551599,
+            "mtime_ns": 1791561475578431718
+          }
+        },
+        "status": "VERIFIED_ACTUAL_F1_S2_THREE_GRID_FRAME0_NATIVE_OWNER_SUPPORT_DIAGNOSTICS_NO_SCIENTIFIC_Q"
+      },
+      "owner": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_CONTINUOUS_OWNER_AUDIT_V2_ACTUAL_ROOT_VERIFICATION_227.json",
+          "sha256": "d0edf2364db892cbe16670992c22328354b6a3dcd19d6857c8d528dc17781e1a",
+          "stat": {
+            "bytes": 15481,
+            "ctime_ns": 1791558707220883596,
+            "device": 2081,
+            "inode": 328551552,
+            "mtime_ns": 1791558707220883596
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/STAGE2_F1_S2_CONTINUOUS_OWNER_SOURCE_AUDIT_ROOT227/f1-s2-continuous-owner-audit-v2-root-227-001-root-forward-030-001/execution-receipt.json",
+          "sha256": "405429f0e2d604450266c363d056d018c02ad574cd2d52d4bd7e92225580c30d",
+          "stat": {
+            "bytes": 46488,
+            "ctime_ns": 1791557208974780232,
+            "device": 2081,
+            "inode": 322645689,
+            "mtime_ns": 1791557208943780673
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-continuous-owner-audit-v2-root-forward-227-001.json",
+          "sha256": "c0381039cbec070c53cb0f0df809353ebb1382f895fa8270a46de00b8dfef4c3",
+          "stat": {
+            "bytes": 29200,
+            "ctime_ns": 1791557207096806949,
+            "device": 2081,
+            "inode": 328551528,
+            "mtime_ns": 1791557207096806949
+          }
+        },
+        "status": "VERIFIED_ACTUAL_F1_S2_CONTINUOUS_OWNER_340KG_SOURCE_METADATA_CLOSURE_NATIVE_SUPPORT_PENDING"
+      },
+      "query1": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_QUERY1_ENDPOINT_V4_ACTUAL_ROOT_VERIFICATION_234.json",
+          "sha256": "abdba9b3d4d4c3962e99a6c88692319d2448a7ec8eb41774d2ac7d8e81416e52",
+          "stat": {
+            "bytes": 18614,
+            "ctime_ns": 1791562478714916943,
+            "device": 2081,
+            "inode": 328551619,
+            "mtime_ns": 1791562478714916943
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_QUERY1_AXIS_INDEPENDENT_ENDPOINT_AUDIT_ROOT234/f1-s2-query1-axis-independent-endpoint-audit-root234-001-root-forward-030-001/execution-receipt.json",
+          "sha256": "f718cd91d3d99cf941e9d5e0327dbb21c4142f2f7c92885d71114f88339f86df",
+          "stat": {
+            "bytes": 95479,
+            "ctime_ns": 1791562426690394993,
+            "device": 2081,
+            "inode": 322645739,
+            "mtime_ns": 1791562426637396499
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-query1-endpoint-v4-root-forward-234-001.json",
+          "sha256": "eaaf4cda68d98b6c7f7cd47492198b432396b328b2f0b05bab008dcf62447f9f",
+          "stat": {
+            "bytes": 68051,
+            "ctime_ns": 1791562423206493974,
+            "device": 2081,
+            "inode": 328551613,
+            "mtime_ns": 1791562423206493974
+          }
+        },
+        "status": "VERIFIED_ACTUAL_F1_S2_QUERY1_SIX_NATIVE_COMPONENT_ENDPOINTS_NO_SCIENTIFIC_Q"
+      },
+      "query234": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F1_S2_QUERY234_ENDPOINT_V2_ACTUAL_ROOT_VERIFICATION_231.json",
+          "sha256": "e087fdef1332ea5bb004291f6295ce4861aeb993231dd000b95e36a682539f3c",
+          "stat": {
+            "bytes": 18468,
+            "ctime_ns": 1791560803447594287,
+            "device": 2081,
+            "inode": 328551584,
+            "mtime_ns": 1791560803447594287
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_S2_QUERY234_ENDPOINT_AUDIT_ROOT231/f1-s2-query234-endpoint-audit-root231-001-root-forward-030-001/execution-receipt.json",
+          "sha256": "047a7a831faa92213cbf483b0979f72e636d7dc0a1a1f83cdd8783a169abda7a",
+          "stat": {
+            "bytes": 96896,
+            "ctime_ns": 1791560599818426138,
+            "device": 2081,
+            "inode": 322645715,
+            "mtime_ns": 1791560599769427543
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/f1-s2-query-endpoint-v2-root-forward-231-001.json",
+          "sha256": "beb59ba601d5b3e4ca5788d0319dcc057a9fa8631b73edcf958a3bab8b3240d3",
+          "stat": {
+            "bytes": 72036,
+            "ctime_ns": 1791560594808569876,
+            "device": 2081,
+            "inode": 328551583,
+            "mtime_ns": 1791560594808569876
+          }
+        },
+        "status": "VERIFIED_ACTUAL_F1_S2_QUERY234_EIGHTEEN_NATIVE_COMPONENT_ENDPOINTS_NO_SCIENTIFIC_Q"
+      },
+      "reader_calibration": {
+        "proof": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/OFFICIAL_WRITER_CALIBRATION_V4_ACTUAL_ROOT_VERIFICATION_217.json",
+          "sha256": "7df9b02c339e3b3eb8bae8f108c16d5db0fd2b6cb3f03d192c4edc827ae1bdf0",
+          "stat": {
+            "bytes": 17705,
+            "ctime_ns": 1791554421289453296,
+            "device": 2081,
+            "inode": 328551488,
+            "mtime_ns": 1791554421289453296
+          }
+        },
+        "receipt": {
+          "path": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/STAGE2_F1_BI4_OFFICIAL_WRITER_CALIBRATION_ROOT217_V4/f1-bi4-official-writer-calibration-v4-root-217-001-root-forward-030-001/execution-receipt.json",
+          "sha256": "55bc0c25a3e936b440fd3ccdb7c1e80d339ee4cdac845f01222b6473b5d48f84",
+          "stat": {
+            "bytes": 58030,
+            "ctime_ns": 1791554354230576941,
+            "device": 2081,
+            "inode": 322645674,
+            "mtime_ns": 1791554354198577956
+          }
+        },
+        "request": {
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/requests/official-writer-calibration-v4-root-forward-217-001.json",
+          "sha256": "ebd5cc794bcc0a07971e7e74963f7bcc7ba5f035853cf5211e5d6a955b58d354",
+          "stat": {
+            "bytes": 40767,
+            "ctime_ns": 1791554323174562638,
+            "device": 2081,
+            "inode": 328551487,
+            "mtime_ns": 1791554323174562638
+          }
+        },
+        "status": "VERIFIED_ACTUAL_OFFICIAL_WRITER_DECODER_OBSERVER_V4_MANUFACTURED_CALIBRATION_ONLY"
+      }
+    }
+  },
+  "status": "SOURCE_PREPARED_WAITING_ROOT310_TEN_NATIVE_SNAPSHOT"
+}
