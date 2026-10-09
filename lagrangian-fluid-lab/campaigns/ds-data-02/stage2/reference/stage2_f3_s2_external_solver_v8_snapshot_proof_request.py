@@ -213,17 +213,26 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     staged.unlink(missing_ok=True)
     if request.get("schema") != REQUEST_SCHEMA or request.get("status") != "READY_FOR_PARENT_GUARD":
         raise ValueError("delegated v5 request schema/status changed")
+    snapshot_binding = V7.validate_snapshot(args.bi4_snapshot, args.gencase_request, args.receipt, args.generated_bi4)
     v6_record = V7.V6.code_record(V7.V6_REQUEST, "F3 V6 forward request builder")
-    request["input_files"] = sorted(set(list(request.get("input_files", [])) + [v6_record["path"]]))
+    v8_record = small_record(Path(__file__), "F3 V8 snapshot-proof request builder")
+    snapshot_record = V7.small_record(args.bi4_snapshot, "F3 generated BI4 source snapshot")
+    request["input_files"] = sorted(set(list(request.get("input_files", [])) + [v6_record["path"], v8_record["path"], snapshot_record["path"]]))
     request["input_sha256"] = dict(request.get("input_sha256", {}))
     request["input_sha256"][v6_record["path"]] = v6_record["sha256"]
+    request["input_sha256"][v8_record["path"]] = v8_record["sha256"]
+    request["input_sha256"][snapshot_record["path"]] = snapshot_record["sha256"]
     request["input_content_scope"] = dict(request.get("input_content_scope", {}))
     request["input_content_scope"][v6_record["path"]] = v6_record["content_scope"]
+    request["input_content_scope"][v8_record["path"]] = v8_record["content_scope"]
+    request["input_content_scope"][snapshot_record["path"]] = snapshot_record["content_scope"]
     request["forward_builder_binding"] = v6_record
+    request["proof_adapter_binding"] = v8_record
     request["materialization_contract"] = V7.V6._pair_contract(request)
     request["source_provenance"] = dict(request.get("source_provenance", {}))
     request["source_provenance"]["root128_support_report"] = support
     request["source_provenance"]["root120_q_receipt_exact_join_required"] = True
+    request["source_provenance"]["generated_bi4_snapshot"] = snapshot_binding
 
     proof_record = small_record(args.snapshot_proof, "ROOT132 actual verification proof")
     request["request_variant_schema"] = VARIANT_SCHEMA
@@ -240,6 +249,11 @@ def build(args: argparse.Namespace) -> dict[str, Any]:
     request["source_provenance"] = dict(request.get("source_provenance", {}))
     request["source_provenance"]["generated_bi4_snapshot_proof"] = proof_binding
     request["bi4_snapshot_binding"] = dict(request.get("bi4_snapshot_binding", {}))
+    request["bi4_snapshot_binding"]["snapshot_json"] = snapshot_record
+    request["bi4_snapshot_binding"]["source_path"] = snapshot_binding["source_path"]
+    request["bi4_snapshot_binding"]["source_sha256"] = snapshot_binding["source_sha256"]
+    request["bi4_snapshot_binding"]["worker_full_stream_and_stable_stat"] = True
+    request["bi4_snapshot_binding"]["bi4_payload_read_by_this_builder"] = False
     request["bi4_snapshot_binding"]["actual_verification_proof"] = proof_record
     request["bi4_snapshot_binding"]["proof_scope"] = {
         "report_sha256_joined": True,
