@@ -1,3 +1,11 @@
+最新实际原生取证恢复点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT310_AFTER_SERIAL_ACTUAL_NATIVE_FULL_GOAL_CONTINUATION_V1.json`（SHA256 c41bec3af36b3be69a795f28134de971a9f704de9d0dc48f0e98803157915822）。完整七项目标 ACTIVE；各项实际覆盖以绑定证据为准，科学Q仍UNKNOWN。
+
+最新实际原生取证恢复点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT309_AFTER_SERIAL_ACTUAL_NATIVE_FULL_GOAL_CONTINUATION_V1.json`（SHA256 925d40b1f1e738f553f85be1cf3840a2d037f9db282eb55e959f5c8794faaa45）。完整七项目标 ACTIVE；各项实际覆盖以绑定证据为准，科学Q仍UNKNOWN。
+
+最新实际原生取证恢复点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT308_AFTER_SERIAL_ACTUAL_NATIVE_FULL_GOAL_CONTINUATION_V1.json`（SHA256 a2a8c52cb9c5c45b5727e0692ff3d38d6b703e5b86d4004169ef801f1a9fe6a9）。完整七项目标 ACTIVE；各项实际覆盖以绑定证据为准，科学Q仍UNKNOWN。
+
+最新实际原生取证恢复点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT274_AFTER_SERIAL_ACTUAL_NATIVE_FULL_GOAL_CONTINUATION_V1.json`（SHA256 320339d3cd56169d476bfe48bb0f8a53c64d39e655d16460aae0f09c28167079）。完整七项目标 ACTIVE；各项实际覆盖以绑定证据为准，科学Q仍UNKNOWN。
+
 最新元数据核验：V35实际335 canonical目录、1 unresolved历史alias与七张family card已绑定V27 primary重绑及V29政策审计，仍336全split unsafe/Q UNKNOWN。8个串行continuation源SHA与实际PID/argv/cwd再次核对存活，ROOT274 8GiB实际运行无新完成信用。恢复入口：/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT274_RECOVERY_LIVE_PROCESSES_AND_V35_METADATA_PROGRESS_V2.json。V10和科学字段V3等新入口通过manufactured tests，但生产准入仍需source review中的取消/严格元数据/primary重绑门槛。完整七项目标ACTIVE。
 
 最新执行状态：ROOT274 原生批次 oomd 失败已完整入账；新8GiB attempt 实际运行中，七个后继等待进程存活。恢复点：`/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/ROOT274_OOMD_RECOVERY_ACTUAL_RUNNING_EIGHT_CONTINUATIONS_V1.json`（SHA256 19b445cb85d85502de4187797b9ef4488d0064cdc6484ea41866d5c667ed3ffc）。部分旧产物无本批完成信用；完整七项目标 ACTIVE。
