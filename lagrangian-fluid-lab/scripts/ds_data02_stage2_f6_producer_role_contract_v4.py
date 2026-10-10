@@ -64,7 +64,11 @@ def build_contract_v4(
     registry_path = Path(registry_path).expanduser()
     plan, _ = _V8._V7._metadata_ref({"path": str(plan_path), "sha256": _V8._V7._file_sha(plan_path)}, role="F6 V4 current plan")
     registry, _ = _V8._V7._metadata_ref({"path": str(registry_path), "sha256": _V8._V7._file_sha(registry_path)}, role="F6 V4 producer registry")
-    wanted = set(case_ids or result.get("cases", {}).keys())
+    lifecycle_cases = result.get("current_v4_lifecycle", {}).get("cases", {})
+    if case_ids is None:
+        wanted = set(lifecycle_cases.keys()) if isinstance(lifecycle_cases, Mapping) else set()
+    else:
+        wanted = set(case_ids)
     if not wanted:
         _fail("F6 V4 requires at least one selected case")
     joined = result.get("current_v4_lifecycle", {}).get("cases")
