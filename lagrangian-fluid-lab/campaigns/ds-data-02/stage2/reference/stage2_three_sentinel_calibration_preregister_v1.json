@@ -1,0 +1,338 @@
+{
+  "comparison_separation": {
+    "integration": {
+      "condition": "same grid/source/output cadence; CFL-only change",
+      "observable": "native field at exact saved times plus actual dt/clamp trace",
+      "truth_policy": "requires actual same-time pair; async brackets stay UNKNOWN"
+    },
+    "native_header": {
+      "condition": "decoder-produced native metadata joined to exact producer receipt",
+      "observable": "MassFluid/MassBound/Dp/Idp and typed role counts",
+      "truth_policy": "no XML mass fallback; missing fields UNKNOWN"
+    },
+    "output_sampling": {
+      "condition": "same grid/source/CFL/window; output cadence-only change",
+      "observable": "same native fields at exact saved rows and selected missing-row brackets",
+      "truth_policy": "no interpolation or cadence-to-field error inference"
+    },
+    "spatial": {
+      "condition": "same owner/control/window; three spatial resolutions",
+      "observable": "fluid-only native weighted COM/velocity/KE, role counts, support",
+      "truth_policy": "diagnostic only; no finest/neighbour truth"
+    }
+  },
+  "frozen_tolerances_before_results": {
+    "event_time": "1% registered characteristic time",
+    "position": "2% registered L; 5% near event",
+    "regional_mass": "3 percentage points of whole initial fluid mass",
+    "time_output": "each <= one quarter of its registered task gate",
+    "velocity_ke": "5% of registered nonzero scale",
+    "whole_initial_mass": "preferred <=1%; 1-2% marginal diagnostic; >2% hard fail"
+  },
+  "schema": "ds02.stage2.three-sentinel-calibration-preregister.v1",
+  "scientific_credit": 0,
+  "sentinels": [
+    {
+      "evidence_refs": [
+        {
+          "bytes": 47197,
+          "claim_scope": "exact source/control/motion closure only; no generated support or mass credit",
+          "kind": "small_source_record",
+          "mtime_ns": 1791497183629053912,
+          "name": null,
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f2_s2_source_control_ladder_audit_v4.json",
+          "scientific_credit": false,
+          "sha256": "6287570b8942d7ba8bbf050ba3f714c2c824a4f69289651c83f624f9e1b6d299",
+          "source_metadata_only": true
+        }
+      ],
+      "integration_gate": "not run in this parent; requires a later same-grid CFL pair",
+      "launch_disabled_in_source_contract": true,
+      "measurements": [
+        "native MassFluid/MassBound/Dp",
+        "Idp role counts",
+        "Fluid/Bound finite and support bounds",
+        "continuous-owner volume/mass separately"
+      ],
+      "output_gate": "not run in this parent; output cadence is not inferred from XML",
+      "parent_must_bind_actual_request_receipt_proof": true,
+      "parent_sequence": [
+        "GenCase original/coarse/fine",
+        "small XML/control audit",
+        "guarded Fluid/Bound/native-header verifier"
+      ],
+      "payload_read_by_builder": false,
+      "request_kind": "CPU_GENCASE_INITIAL_SUPPORT_QA",
+      "runtime_request_contract": {
+        "argv_cwd_policy": "Parent binds a fresh attempt-contained input directory and the official GenCase stem/threads:1 invocation; relative motion/forcing paths must resolve inside that directory.",
+        "cpu_threads": 1,
+        "execution_allowed_in_this_artifact": false,
+        "gpu": false,
+        "hash_and_stat_policy": "Parent establishes all dynamic output SHA/stat after reservation; staged auxiliary files are copied inside the attempt and checked against the exact source SHA/stat before GenCase. A large forcing file remains deferred until that parent and is never treated as a small metadata read.",
+        "input_roles": [
+          "CURRENT candidate Def/XML and exact source geometry/control files",
+          "official GenCase binary, DsphConfig.xml, and template/source code",
+          "forcing and motion auxiliary files, including any >10 MiB deferred source"
+        ],
+        "memory_bytes_upper_bound": 4294967296,
+        "output_roles": [
+          "generated.xml",
+          "generated_Fluid.vtk",
+          "generated_Bound.vtk",
+          "generated.bi4"
+        ],
+        "parent_normalization_required": true,
+        "solver_launch": false,
+        "source_prepared_kind": "gencase",
+        "wall_seconds_upper_bound": 900
+      },
+      "scientific_qualification": {
+        "QE": "UNKNOWN",
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN"
+      },
+      "sentinel_id": "F2-S2",
+      "source_contract": "stage2_f2_s2_source_control_ladder_audit_v4.json plus exact CURRENT Def/XML/forcing/motion paths",
+      "spatial_gate": "all three rungs use the same continuous source geometry/control; dp/count are resolution fields",
+      "status_if_missing": "UNKNOWN_OR_SOURCE_BLOCKED"
+    },
+    {
+      "evidence_refs": [
+        {
+          "bytes": 8212,
+          "claim_scope": "actual saved-frame spatial/region/event labels with moving/hidden-crossing limits",
+          "kind": "proof_json",
+          "mtime_ns": 1791460791970324385,
+          "name": "F3_ANCHOR_FAMILY_LABELS_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F3_ANCHOR_FAMILY_LABELS_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "scientific_credit": false,
+          "sha256": "b1a319372d8b61e4ea1891812aa17720c4dc7e6ca053440d19d31d9160ba822f",
+          "source_metadata_only": true
+        },
+        {
+          "bytes": 6333,
+          "claim_scope": "actual full836 source reconstruction and phase recovery",
+          "kind": "proof_json",
+          "mtime_ns": 1791461482374699757,
+          "name": "F3_FULL836_PHASE_RECOVERY_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F3_FULL836_PHASE_RECOVERY_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "scientific_credit": false,
+          "sha256": "72d606f407b95da6f2a9b7529043125408a9d94db76b6d527eebdf4ea63caa66",
+          "source_metadata_only": true
+        },
+        {
+          "bytes": 4894,
+          "claim_scope": "actual same-forcing cost anchor; no scientific qualification",
+          "kind": "proof_json",
+          "mtime_ns": 1791505536444050502,
+          "name": "F3_MATCHED_THREE_GRID_PLAN_AND_NATIVE_COST_METADATA_ROOT_VERIFICATION_119.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F3_MATCHED_THREE_GRID_PLAN_AND_NATIVE_COST_METADATA_ROOT_VERIFICATION_119.json",
+          "scientific_credit": false,
+          "sha256": "35d97b99103ef4c5da8cda2df473dafb6eb4b916777868a463623a1d11c7bbee",
+          "source_metadata_only": true
+        }
+      ],
+      "integration_gate": "requires same source/grid/output and an actual CFL-only pair with dt/clamp evidence",
+      "launch_disabled_in_source_contract": true,
+      "measurements": [
+        "native MassFluid/MassBound/Dp",
+        "fluid-only weighted COM/velocity/KE",
+        "role/region identity",
+        "exact or bracketed times"
+      ],
+      "output_gate": "requires same source/grid/CFL with a declared output-cadence-only change",
+      "parent_must_bind_actual_request_receipt_proof": true,
+      "parent_sequence": [
+        "selected RunPART-derived frames",
+        "native role/MK/header observer",
+        "small compact report and independent join"
+      ],
+      "payload_read_by_builder": false,
+      "request_kind": "BOUNDED_SELECTED_NATIVE_OBSERVER_AUDIT",
+      "runtime_request_contract": {
+        "cpu_threads": 1,
+        "execution_allowed_in_this_artifact": false,
+        "gpu": false,
+        "hash_and_stat_policy": "Selected native files are deferred payloads: parent reserves first, then the worker records stable pre/decode/post stat and SHA. Unknown historical SHA is reported as first-established-in-parent and never backfilled from XML.",
+        "input_roles": [
+          "terminal producer request/receipt/proof and exact CURRENT source/control closure",
+          "selected native frame paths with parent-established pre/immediate-post SHA/stat",
+          "RunPARTs/actual time metadata for each selected query or bracket",
+          "decoder/observer source closure and literal virtualenv/config records"
+        ],
+        "memory_bytes_upper_bound": 4294967296,
+        "output_roles": [
+          "bounded compact observer report",
+          "source/frame manifest",
+          "independent join record"
+        ],
+        "parent_normalization_required": true,
+        "query_policy": "Use exact saved rows where present; retain lower/upper RunPART brackets with their real times and never interpolate or call the bracket a field error bound.",
+        "solver_launch": false,
+        "source_prepared_kind": "audit",
+        "wall_seconds_upper_bound": 1800
+      },
+      "scientific_qualification": {
+        "QE": "UNKNOWN",
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN"
+      },
+      "sentinel_id": "F3-S1",
+      "source_contract": "F3-S1 anchor/phase proof records and exact CURRENT source/control/receipt",
+      "spatial_gate": "cross-grid comparisons are diagnostic only and never use a neighboring grid as truth",
+      "status_if_missing": "UNKNOWN_WITH_LOCAL_FIELDS_ONLY"
+    },
+    {
+      "evidence_refs": [
+        {
+          "bytes": 7105,
+          "claim_scope": "official clip/continuous mass hard failure",
+          "kind": "proof_json",
+          "mtime_ns": 1791491236168861208,
+          "name": "F5_SOURCE_CLIP_CONTINUOUS_MASS_ACTUAL_HARDFAIL_ROOT_VERIFICATION_091.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F5_SOURCE_CLIP_CONTINUOUS_MASS_ACTUAL_HARDFAIL_ROOT_VERIFICATION_091.json",
+          "scientific_credit": false,
+          "sha256": "c977412540f1652c3072aff656ee5d80f4f62b3c3704a9c30dfcee07f91ad9f3",
+          "source_metadata_only": true
+        },
+        {
+          "bytes": 10830,
+          "claim_scope": "actual DP010 support/mass diagnostic",
+          "kind": "proof_json",
+          "mtime_ns": 1791503590766347010,
+          "name": "F5_YHALF_DP010_V7_ACTUAL_INITIAL_SUPPORT_ROOT_VERIFICATION_109.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F5_YHALF_DP010_V7_ACTUAL_INITIAL_SUPPORT_ROOT_VERIFICATION_109.json",
+          "scientific_credit": false,
+          "sha256": "94fa1518d59230361791d7945d0aefbe04944e4ed49e876523e4d07ba765badc",
+          "source_metadata_only": true
+        },
+        {
+          "bytes": 10993,
+          "claim_scope": "actual DP005 support/mass diagnostic",
+          "kind": "proof_json",
+          "mtime_ns": 1791503635418026216,
+          "name": "F5_YHALF_DP005_V7_ACTUAL_INITIAL_SUPPORT_ROOT_VERIFICATION_110.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F5_YHALF_DP005_V7_ACTUAL_INITIAL_SUPPORT_ROOT_VERIFICATION_110.json",
+          "scientific_credit": false,
+          "sha256": "7af6375deab1e6601fa84fd1cce5a659d08e8f641ff7fe9f51d22197e2c4efb8",
+          "source_metadata_only": true
+        },
+        {
+          "bytes": 7090,
+          "claim_scope": "actual q/receipt/frame-size joins and cost proxy, not solver cost",
+          "kind": "proof_json",
+          "mtime_ns": 1791504284325885090,
+          "name": "F5_PROJECTION_V2_AND_STORAGE_PROXY_ACTUAL_METADATA_ROOT_VERIFICATION_114.json",
+          "path": "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/checkpoints/F5_PROJECTION_V2_AND_STORAGE_PROXY_ACTUAL_METADATA_ROOT_VERIFICATION_114.json",
+          "scientific_credit": false,
+          "sha256": "09ff8834e12337df379a583c4e89f32eb24c406d4a0d170a6746a87286505117",
+          "source_metadata_only": true
+        }
+      ],
+      "integration_gate": "not admitted while initial owner/support gate is unresolved",
+      "launch_disabled_in_source_contract": true,
+      "measurements": [
+        "native role counts/header where present",
+        "Fluid/Bound inside/outside/overlap",
+        "clip-plane assignment",
+        "continuous owner volume/mass"
+      ],
+      "output_gate": "not admitted while initial owner/support gate is unresolved",
+      "parent_must_bind_actual_request_receipt_proof": true,
+      "parent_sequence": [
+        "source/receipt XML join",
+        "Fluid/Bound all-shape support audit",
+        "clip/overlap/owner mass decision"
+      ],
+      "payload_read_by_builder": false,
+      "request_kind": "SOURCE_BOUND_GEOMETRY_DIAGNOSTIC",
+      "runtime_request_contract": {
+        "admission_policy": "A solver request remains blocked while clip/overlap/owner support is unresolved or the frozen continuous-mass gate is hard-failed.",
+        "cpu_threads": 1,
+        "execution_allowed_in_this_artifact": false,
+        "gpu": false,
+        "hash_and_stat_policy": "Generated XML may be joined as a small input; Fluid/Bound arrays remain deferred and are read only after parent reservation with stable pre/decode/post source records. No XML mass fallback, mass rescale, or deletion of out-of-owner points.",
+        "input_roles": [
+          "q123 request/terminal receipt/generated XML and exact source control closure",
+          "Fluid and Bound VTK paths with parent-established SHA/stat",
+          "official clip-plane source/binary evidence and continuous-owner definition"
+        ],
+        "memory_bytes_upper_bound": 2147483648,
+        "output_roles": [
+          "small geometry/support summary",
+          "per-MK role/count/inside-outside report",
+          "mass-gate decision"
+        ],
+        "parent_normalization_required": true,
+        "solver_launch": false,
+        "source_prepared_kind": "audit",
+        "wall_seconds_upper_bound": 900
+      },
+      "scientific_qualification": {
+        "QE": "UNKNOWN",
+        "QI": "UNKNOWN",
+        "QN": "UNKNOWN"
+      },
+      "sentinel_id": "F5-S1",
+      "source_contract": "ROOT091/109/110/114 proof metadata plus CURRENT q123 producer/receipt/control paths",
+      "spatial_gate": "only source-preserving geometry variants; no mass rescale or sample-relative normalization",
+      "status_if_missing": "HARDFAIL_OR_UNKNOWN_SOURCE_BRANCH"
+    }
+  ],
+  "source_inputs": {
+    "dimensions_v2": {
+      "bytes": 69726,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_fourteen_evidence_dimension_inventory_v2.json",
+      "read_scope": "small_metadata_only",
+      "sha256": "eb57e39b5a1246900a92d5ab68f045dbd5135659ee1b933ad0667651aff866af",
+      "stat": {
+        "bytes": 69726,
+        "ctime_ns": 1791587428026040360,
+        "device": 2081,
+        "inode": 329402816,
+        "mtime_ns": 1791587428026040360
+      }
+    },
+    "registry_scope_correction_v1": {
+      "bytes": 3886,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_fourteen_registry_scope_correction_v1.json",
+      "read_scope": "small_metadata_only",
+      "sha256": "6d38530ef43a3a846158c6b14766a64fb8dfc29f8057096587e40279b08747c3",
+      "stat": {
+        "bytes": 3886,
+        "ctime_ns": 1791552446579190221,
+        "device": 2081,
+        "inode": 329402445,
+        "mtime_ns": 1791552446579190221
+      }
+    },
+    "request_graph_v5": {
+      "bytes": 6667,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_fourteen_request_graph_v5.json",
+      "read_scope": "small_metadata_only",
+      "sha256": "a26b76ea824dc70dd6459fee68e1825d76ec7eb9137e4e0ca7ccf990b84c37bf",
+      "stat": {
+        "bytes": 6667,
+        "ctime_ns": 1791562147629324147,
+        "device": 2081,
+        "inode": 329402550,
+        "mtime_ns": 1791562147629324147
+      }
+    },
+    "status_v4": {
+      "bytes": 77872,
+      "path": "/home/jade/.codex/worktrees/ds-data-02-stage2-reference/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_fourteen_evidence_status_v4.json",
+      "read_scope": "small_metadata_only",
+      "sha256": "98176ae1c5d3f16d253cd7d3559834af7016b7267d568688969e4ff5775d5ccd",
+      "stat": {
+        "bytes": 77872,
+        "ctime_ns": 1791550666680675338,
+        "device": 2081,
+        "inode": 329402440,
+        "mtime_ns": 1791550666680675338
+      }
+    }
+  },
+  "status": "SOURCE_PREREGISTERED_THREE_SENTINEL_DIAGNOSTICS_NO_SCIENTIFIC_QUALIFICATION",
+  "unknown_policy": "A missing source join, field, exact time, or owner contract yields UNKNOWN for that subtask and does not block independent fields."
+}
