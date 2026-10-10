@@ -68,7 +68,10 @@ def _record(path: str | Path, label: str, *, read: bool = True) -> dict[str, Any
     if path.is_symlink() or not path.is_file():
         raise RoleMassFailure(f"{label} is not a regular file: {path}")
     before = _stat(path)
-    if before["bytes"] > CAP:
+    # A deferred forcing/control may legitimately exceed the 10 MiB read cap.
+    # It is allowed here only as stat-only metadata; any bounded byte read
+    # remains capped.
+    if read and before["bytes"] > CAP:
         raise RoleMassFailure(f"{label} exceeds the 10 MiB metadata cap: {path}")
     if read:
         raw = path.read_bytes()
