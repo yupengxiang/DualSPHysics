@@ -1,0 +1,197 @@
+{
+  "schema": "ds02.stage2.three-sentinel-calibration-scales.v2",
+  "status": "SOURCE_BOUND_NUMERICAL_SCALES_WITH_EXPLICIT_BLOCKERS_NO_Q",
+  "scientific_credit": 0,
+  "preregister_source": {
+    "path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_three_sentinel_calibration_preregister_v1.json",
+    "sha256": "7b2058a7c5fc6007a9019ce82f42ac3247a0d5a8d05554c54463807bcb999a38",
+    "scope": "frozen tolerances and dimension separation; numeric values below are additive sentinel-specific registrations"
+  },
+  "units": {
+    "position": "m",
+    "velocity": "m/s",
+    "mass": "kg",
+    "kinetic_energy": "J",
+    "time": "s"
+  },
+  "frozen_error_budget": {
+    "position_fraction_of_registered_L": 0.02,
+    "position_near_event_fraction_of_registered_L": 0.05,
+    "velocity_fraction_of_registered_nonzero_scale": 0.05,
+    "kinetic_energy_fraction_of_registered_nonzero_scale": 0.05,
+    "event_time_fraction_of_registered_T": 0.01,
+    "time_and_output_fraction_of_task_gate": 0.25,
+    "whole_initial_mass_preferred_fraction": 0.01,
+    "whole_initial_mass_marginal_upper_fraction": 0.02,
+    "whole_initial_mass_hard_upper_fraction": 0.02,
+    "regional_mass_fraction_of_whole_initial": 0.03,
+    "source": "stage2_three_sentinel_calibration_preregister_v1.json; numeric scales below are source-bound per sentinel"
+  },
+  "sentinels": [
+    {
+      "sentinel_id": "F2-S2",
+      "physical_case_id": "F2_STAGE1_OFFSET_P03_OPEN_RIM_RX065_RY014_FILL080",
+      "reference_scales": {
+        "L_position_m": 0.325,
+        "L_definition": "longest source-defined solid fluid-box extent (x); reused for all dp rows",
+        "source_geometry_volume_m3": 0.018876,
+        "source_declared_geometry_mass_kg": 18.876,
+        "source_declared_geometry_mass_authority": "three source fluid boxes x=.325,y=.22,z=.088 at rhop0=1000; this is a geometry derivation, not a measured native whole-mass gate",
+        "whole_initial_fluid_mass_kg": null,
+        "velocity_scale_m_per_s": null,
+        "kinetic_energy_scale_j": null,
+        "event_time_T_s": null,
+        "control_window_s": 4.0,
+        "output_cadence_s": 0.01
+      },
+      "uncertainty_or_gate": {
+        "position_abs_m": 0.0065,
+        "velocity_abs_m_per_s": null,
+        "kinetic_energy_abs_j": null,
+        "event_time_abs_s": null,
+        "whole_initial_mass_relative": null,
+        "regional_mass_relative": 0.03,
+        "time_output_gate_s": 1.0
+      },
+      "valid_window": {
+        "source_control_window_s": [0.0, 4.0],
+        "exact_query_times_s": [],
+        "event_query_status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+        "initial_support_only_until_native_products": true
+      },
+      "authority": [
+        {
+          "path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f2_s2_source_control_ladder_audit_v4.json",
+          "sha256": "6287570b8942d7ba8bbf050ba3f714c2c824a4f69289651c83f624f9e1b6d299",
+          "field_paths": [
+            "source_identity.source_xml_facts.drawboxes",
+            "source_identity.source_xml_facts.constants.rhop0",
+            "source_identity.source_xml_facts.parameters.TimeMax",
+            "source_identity.source_xml_facts.parameters.TimeOut"
+          ],
+          "read_scope": "small_metadata_only"
+        }
+      ],
+      "blockers": [
+        "native whole-initial mass is not measured until the guarded GenCase products are read",
+        "the current S2 source record does not register a source velocity scale or event landmark; F2-S1 scales cannot be inherited",
+        "continuous owner equivalence remains UNKNOWN even though the declared source-box volume can be computed"
+      ],
+      "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+    },
+    {
+      "sentinel_id": "F3-S1",
+      "physical_case_id": "F3_TWOAXIS_AY0P50_PITCH_NOMINAL",
+      "reference_scales": {
+        "L_position_m": null,
+        "source_geometry_volume_m3": null,
+        "source_declared_geometry_mass_kg": null,
+        "whole_initial_fluid_mass_kg": null,
+        "velocity_scale_m_per_s": null,
+        "kinetic_energy_scale_j": null,
+        "event_time_T_s": null,
+        "control_window_s": null,
+        "output_cadence_s": null
+      },
+      "uncertainty_or_gate": {
+        "position_abs_m": null,
+        "velocity_abs_m_per_s": null,
+        "kinetic_energy_abs_j": null,
+        "event_time_abs_s": null,
+        "whole_initial_mass_relative": null,
+        "regional_mass_relative": 0.03,
+        "time_output_gate_s": null
+      },
+      "valid_window": {
+        "source_control_window_s": null,
+        "exact_query_times_s": [],
+        "event_query_status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+        "initial_support_only_until_native_products": true
+      },
+      "authority": [
+        {
+          "path": "stage2/checkpoints/F3_ANCHOR_FAMILY_LABELS_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "sha256": "b1a319372d8b61e4ea1891812aa17720c4dc7e6ca053440d19d31d9160ba822f",
+          "field_paths": ["actual labels and family anchor scope"],
+          "read_scope": "small_metadata_only",
+          "does_not_supply": ["world-scale geometry", "native MassFluid", "event T", "continuous owner mass"]
+        },
+        {
+          "path": "stage2/checkpoints/F3_FULL836_PHASE_RECOVERY_ACTUAL_INDEPENDENT_VERIFICATION_001.json",
+          "sha256": "72d606f407b95da6f2a9b7529043125408a9d94db76b6d527eebdf4ea63caa66",
+          "field_paths": ["full-window phase recovery and cost scope"],
+          "read_scope": "small_metadata_only"
+        }
+      ],
+      "blockers": [
+        "the bound F3-S1 evidence contains labels/phase and cost scope but no current source XML/owner geometry record with numeric L",
+        "no source-bound velocity or kinetic-energy scale is registered for this S1 physical case; the F3-S2 scale is a different case and is not reused",
+        "no source event landmark or whole-initial owner mass is available before the current producer/GenCase lineage is joined"
+      ],
+      "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+    },
+    {
+      "sentinel_id": "F5-S1",
+      "physical_case_id": "F5_S1_CLIPPLANE_CONTINUOUS_OWNER",
+      "reference_scales": {
+        "L_position_m": 5.0,
+        "L_definition": "source tank-floor longitudinal extent; clipped-fluid extent remains separate",
+        "source_geometry_volume_m3": null,
+        "source_declared_geometry_mass_kg": null,
+        "whole_initial_fluid_mass_kg": null,
+        "old_discrete_sample_mass_kg": 253.264,
+        "raw_box_mass_kg": 363.888,
+        "raw_box_mass_authority": "FORBIDDEN_AS_CONTINUOUS_OWNER_MASS",
+        "velocity_scale_m_per_s": 0.07421403294122439,
+        "kinetic_energy_scale_j": 0.697453939097717,
+        "gravity_transport_velocity_scale_m_per_s": 1.9307511491644904,
+        "gravity_transport_time_scale_s": 1.7713313295087065,
+        "event_time_T_s": null,
+        "control_window_s": 14.4,
+        "xml_time_max_s": 26.0,
+        "output_cadence_s": null
+      },
+      "uncertainty_or_gate": {
+        "position_abs_m": 0.1,
+        "velocity_abs_m_per_s": 0.00371070164706122,
+        "kinetic_energy_abs_j": 0.03487269695488585,
+        "event_time_abs_s": null,
+        "whole_initial_mass_relative": null,
+        "regional_mass_relative": 0.03,
+        "time_output_gate_s": null
+      },
+      "valid_window": {
+        "source_control_window_s": [0.0, 14.4],
+        "exact_query_times_s": [],
+        "event_query_status": "UNKNOWN_NO_SOURCE_EVENT_DEFINITION",
+        "initial_support_only_until_clip_overlap_owner_gate": true
+      },
+      "authority": [
+        {
+          "path": "lagrangian-fluid-lab/campaigns/ds-data-02/stage2/reference/stage2_f5_s1_observer_calibration_contract_v1.json",
+          "sha256": "ceea4d5a1312b29d7309d84e078706b10383657f6c8a11958b7414bfca1bf5b5",
+          "field_paths": [
+            "reference_scales.L_position_reference_scalar_m",
+            "reference_scales.velocity_scale_m_per_s",
+            "reference_scales.fluid_kinetic_energy_scale_j",
+            "source_control.motion_table.time_start_s",
+            "source_control.motion_table.time_end_s"
+          ],
+          "read_scope": "small_metadata_only"
+        },
+        {
+          "path": "stage2/checkpoints/F5_SOURCE_CLIP_CONTINUOUS_MASS_ACTUAL_HARDFAIL_ROOT_VERIFICATION_091.json",
+          "sha256": "c977412540f1652c3072aff656ee5d80f4f62b3c3704a9c30dfcee07f91ad9f3",
+          "field_paths": ["official clip continuous-mass hard-fail"],
+          "read_scope": "small_metadata_only"
+        }
+      ],
+      "blockers": [
+        "continuous clipped-bed owner mass remains unresolved; neither the 253.264 kg discrete sample nor the 363.888 kg raw box is an owner authority",
+        "the motion duration and XML TimeMax are control coverage, not an event characteristic T",
+        "clip/overlap/support must pass in a guarded native product before any solver admission"
+      ],
+      "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN"}
+    }
+  ]
+}

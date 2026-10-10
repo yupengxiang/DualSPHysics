@@ -1,0 +1,54 @@
+{
+  "schema": "ds02.stage2.three-sentinel-calibration-worker-contract.v1",
+  "status": "SOURCE_PREPARED_RUNNABLE_AFTER_PARENT_GUARD_NO_SCIENTIFIC_Q",
+  "sentinels": ["F2-S2", "F3-S1", "F5-S1"],
+  "command": {
+    "builder": "stage2_three_sentinel_calibration_request_v1.py --build --source-manifest <owner-grid-manifest> --output-dir <new-dir>",
+    "worker": "<literal-venv-python> stage2_three_sentinel_calibration_worker_v1.py --run --manifest <manifest> --attempt-root {attempt_root} --output {attempt_root}/report/<sentinel>-calibration-v1.json",
+    "verifier": "stage2_three_sentinel_calibration_verify_v1.py --verify --manifest <manifest> --request <actual-request> --receipt <execution-receipt.json> --report <worker-report>",
+    "runtime_kind": "cpu",
+    "runtime_cpu_task_kind": "audit",
+    "source_artifact_launch_disabled": true
+  },
+  "input_policy": {
+    "static_cap_bytes": 10485760,
+    "static_roles": ["owner-grid source manifest", "source XML/Def", "candidate Def", "small motion/control metadata", "worker/verifier/frozen parser/runtime/venv closure", "calibration scale registry"],
+    "deferred_roles": ["generated XML", "GenCase receipt", "Fluid VTK", "Bound VTK", "generated BI4", "native header probe", "large forcing/motion"],
+    "deferred_sha_policy": "parent establishes first concrete pre/decode/post SHA/stat after reservation; builder never hashes payload",
+    "xml_mass_fallback": false,
+    "mass_rescale": false,
+    "hdf5_read": false
+  },
+  "manifest_contract": {
+    "schema": "ds02.stage2.three-sentinel-calibration-manifest.v1",
+    "rows": ["original", "coarse", "fine"],
+    "neighbor_grid_truth": false,
+    "interpolation": false,
+    "scientific_credit": 0,
+    "calibration_scales": "stage2_three_sentinel_calibration_scales_v2.json",
+    "native_header": "MassFluid/MassBound/Dp/Idp only when guarded native header is present; missing fields remain UNKNOWN"
+  },
+  "dimension_contract": {
+    "spatial": {"status": "SUPPORT_ONLY_NO_CROSS_GRID_TRUTH", "observable": "Fluid/Bound finite/support/role counts and native weighted fields when present"},
+    "integration": {"status": "NOT_IN_THIS_PARENT", "minimum_next_evidence": "same grid/source/output with CFL-only change, actual dt/clamp trace and exact saved rows"},
+    "output_sampling": {"status": "NOT_IN_THIS_PARENT", "minimum_next_evidence": "same grid/source/CFL with output-cadence-only change; exact rows/brackets retained without interpolation"},
+    "native_header": {"status": "PARTIAL_OR_UNKNOWN", "minimum_next_evidence": "guarded native header and exact producer receipt join; XML mass cannot substitute"}
+  },
+  "resources": {
+    "cpu_threads": 1,
+    "memory_max_bytes": 4294967296,
+    "max_wall_seconds": 900,
+    "scratch_max_bytes": 1073741824,
+    "gpu": "none",
+    "solver_launch": false,
+    "gencase_launch": false
+  },
+  "qualification": {"QI": "UNKNOWN", "QN": "UNKNOWN", "QE": "UNKNOWN", "scientific_credit": 0},
+  "failure_semantics": {
+    "row_failure": "retain status/reason in partial report; do not convert to PASS",
+    "missing_native_header": "UNKNOWN, not XML fallback",
+    "owner_mass": "use sentinel-specific source scale only; do not inherit another sentinel or fit mass to counts",
+    "f5_owner": "continuous clipped-bed owner mass remains UNKNOWN until clip/overlap/support closes; 253.264 kg discrete and 363.888 kg raw-box mass are diagnostic/non-authoritative",
+    "f3_s1_scales": "UNKNOWN until the S1 source XML/owner/control lineage supplies numeric L/T/v/KE; F3-S2 scales are not reused"
+  }
+}

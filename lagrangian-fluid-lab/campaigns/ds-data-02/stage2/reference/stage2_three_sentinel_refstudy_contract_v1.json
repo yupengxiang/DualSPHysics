@@ -1,0 +1,67 @@
+{
+  "schema": "ds02.stage2.three-sentinel.refstudy-contract.v1",
+  "status": "SOURCE_PREPARED_NO_SCIENTIFIC_Q",
+  "scientific_qualification": {
+    "QI": "UNKNOWN",
+    "QN": "UNKNOWN",
+    "QE": "UNKNOWN",
+    "scientific_credit": 0
+  },
+  "dimensions": {
+    "spatial": {
+      "records": 3,
+      "allowed_variable": "definition_dp_m",
+      "required_invariants": ["source_def_sha256", "source_xml_sha256", "control_sha256", "forcing_sha256", "physical_case_id", "cfl_number", "output_interval_s"],
+      "interpretation": "same source/control and three spatial definitions; differences are diagnostic and are not a neighboring-grid truth bound",
+      "next_solver_gate": "all three GenCase products pass owner/support/overlap/native-header QA; then one dp-only solver ladder may be admitted"
+    },
+    "integration": {
+      "records": 2,
+      "allowed_variable": "cfl_number",
+      "required_invariants": ["source_def_sha256", "source_xml_sha256", "control_sha256", "forcing_sha256", "physical_case_id", "grid_label", "definition_dp_m", "output_interval_s", "coef_dt_min"],
+      "required_trace": ["dt_rows", "clamped_count", "min_dt_s", "max_dt_s"],
+      "interpretation": "same grid/output recipe with CFL-only change and actual dt/clamp trace; deltas are diagnostics, not integration error bounds",
+      "next_solver_gate": "one matched grid has continuous-owner/support QA and a same-output baseline; the pair changes only cfl_number and records actual dt/clamp rows"
+    },
+    "output_sampling": {
+      "records": 2,
+      "allowed_variable": "output_interval_s",
+      "required_invariants": ["source_def_sha256", "source_xml_sha256", "control_sha256", "forcing_sha256", "physical_case_id", "grid_label", "definition_dp_m", "cfl_number", "coef_dt_min"],
+      "required_trace": ["saved_rows", "exact_saved_times_s"],
+      "interpretation": "same grid/CFL recipe with output-cadence-only change; only exact common saved times are compared",
+      "next_solver_gate": "one matched grid has support QA and a same-CFL baseline; the pair changes only output_interval_s and records exact saved-time rows"
+    }
+  },
+  "observer_sidecar": {
+    "schema": "ds02.stage2.three-sentinel.observer-sidecar.v1",
+    "required_native_fields": ["MassFluid_kg", "MassBound_kg", "Dp_m", "Idp_role_counts", "finite_native_fields"],
+    "required_fluid_observables": ["mass_kg", "weighted_centroid_m", "weighted_velocity_m_per_s", "kinetic_energy_j"],
+    "xml_mass_fallback": false,
+    "interpolation": false,
+    "neighbor_grid_truth": false
+  },
+  "frozen_gates": {
+    "position": "2% registered L; 5% near event",
+    "velocity_ke": "5% of registered nonzero scale",
+    "regional_mass": "3 percentage points of whole initial fluid mass",
+    "time_output": "each <= one quarter of registered task gate",
+    "event_time": "UNKNOWN until source event is registered"
+  },
+  "resource_class": {
+    "cpu_threads": 1,
+    "memory_bytes": 4294967296,
+    "max_wall_seconds": 1200,
+    "scratch_bytes": 2147483648,
+    "gpu": false,
+    "static_metadata_cap_bytes": 10485760
+  },
+  "read_policy": {
+    "source_metadata_only_before_reservation": true,
+    "observer_sidecars_after_parent_reservation": true,
+    "production_bi4": false,
+    "production_vtk": false,
+    "production_hdf5": false,
+    "solver_launch": false,
+    "gen_case_launch": false
+  }
+}
