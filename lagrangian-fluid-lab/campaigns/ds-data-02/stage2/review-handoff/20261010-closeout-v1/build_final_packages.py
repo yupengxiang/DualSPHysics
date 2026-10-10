@@ -42,6 +42,7 @@ def main():
                 row=by_path.get(path)
                 if not row or not path.endswith('.json'):continue
                 v=json.loads(source.read(row['member']))
+                if not isinstance(v,dict):continue
                 for k in ['report','receipt','request','manifest','static_manifest','systemd_evidence',
                         'terminal_cpu_reconciliation','independent_verification','output_manifest','output_evidence_manifest']:
                     item=v.get(k)
