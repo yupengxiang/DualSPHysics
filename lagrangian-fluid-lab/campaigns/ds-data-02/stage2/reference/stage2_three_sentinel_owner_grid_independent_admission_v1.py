@@ -287,7 +287,7 @@ def build_request(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, A
         "status": "READY_FOR_PARENT_V10_OWNER_GRID_GENCASE_INDEPENDENT_ROUTE",
         "kind": "cpu",
         "cpu_task_kind": "audit",
-        "request_id": "three-sentinel-owner-grid-independent-admission-v1-root371",
+        "request_id": "three-sentinel-owner-grid-independent-admission-v1-root372",
         "family_id": "infra",
         "sentinel_id": "F2-S2,F3-S1,F5-S1",
         "physical_case_id": "THREE_SENTINEL_OWNER_GRID_GENCASE_SOURCE_ROUTE",
@@ -345,7 +345,7 @@ def main() -> int:
     parser.add_argument("--source-manifest", type=Path, default=PRIMARY_STAGE2 / "requests/three-sentinel-owner-grid-gencase-v3-primary-admission-source-001/owner-grid-gencase-root-admission-manifest-v3.json")
     parser.add_argument("--output", type=Path, default=Path("/tmp/owner-grid-independent-admission-v1.json"))
     parser.add_argument("--request-output", type=Path, default=Path("/tmp/owner-grid-independent-admission-request-v1.json"))
-    parser.add_argument("--case-id", default="THREE_SENTINEL_OWNER_GRID_INDEPENDENT_ROUTE_ROOT371")
+    parser.add_argument("--case-id", default="THREE_SENTINEL_OWNER_GRID_INDEPENDENT_ROUTE_ROOT372")
     args = parser.parse_args()
     try:
         if args.self_test:
