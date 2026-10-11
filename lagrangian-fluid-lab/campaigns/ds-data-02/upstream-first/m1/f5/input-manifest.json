@@ -1,0 +1,94 @@
+{
+  "schema": "ds-data-02.upstream-first.f5-input.v1",
+  "family_id": "F5",
+  "case_id": "UF_F5_PISTON_REG",
+  "reference_role": "calibration_2d",
+  "upstream_case_id": "CasePistonBeach_REG",
+  "source_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/main/09_WavesPiston",
+  "immutable_inputs": {
+    "CasePistonBeach_REG_Def.xml": {
+      "path": "input/CasePistonBeach_REG_Def.xml",
+      "sha256": "79543b3f37e8bd18b2d6fd9ad27e76e080b82950f2de125f4f1e82dc4764210c",
+      "use": "GenCase definition; pass the base path without the .xml suffix"
+    },
+    "elevation.txt": {
+      "path": "input/elevation.txt",
+      "sha256": "739f22aba1f1d897eda5763158d312f07f0ba70ef885b043c45b30b6c74997c",
+      "use": "official MeasureTool surface probes at x=5,6,7 m"
+    },
+    "velocity.txt": {
+      "path": "input/velocity.txt",
+      "sha256": "558734c1386522a7bd6ddc034e15e0c20efcc2b5bbc10785fe0fc42b15c80395",
+      "use": "official MeasureTool velocity probe at x=6 m,z=0.4 m"
+    },
+    "CasePiston_SPHvsTheory.ods": {
+      "path": "input/CasePiston_SPHvsTheory.ods",
+      "sha256": "7c40adc731643e90b503bda01e349bd2f988b17c80343ca4db48b49250d65218",
+      "use": "REGULAR_BEACH second-order Stokes and official SPH comparison table"
+    },
+    "xCasePistonBeach_REG_linux64_GPU.sh": {
+      "path": "input/xCasePistonBeach_REG_linux64_GPU.sh",
+      "sha256": "00f0159da3ed92655c001b0c59467a6e9cfd7c62f34307a5efe041b6522e9bc8",
+      "use": "upstream command and postprocessing reference"
+    }
+  },
+  "upstream_executables": {
+    "GenCase_linux64": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/GenCase_linux64",
+      "sha256": "a1b6414e0f716669363d1a80a05e133085c04995e15716e3c1f0406e0d023226"
+    },
+    "solver": {
+      "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+      "hash": "record in the shared runner execution receipt before comparison"
+    }
+  },
+  "controls_from_official_xml": {
+    "dimension": "2D (Data2D=1 after GenCase)",
+    "dp_m": 0.02,
+    "wave_height_m": 0.15,
+    "period_s": 2.0,
+    "still_water_depth_m": 0.66,
+    "time_max_s": 30.0,
+    "time_out_s": 0.05,
+    "piston": {
+      "mkbound": 10,
+      "direction": "x+",
+      "ramp_periods": 1,
+      "phase": 0.0,
+      "savemotion_periods": 20,
+      "savemotion_period_steps": 20,
+      "savemotion_x_m": 6.0,
+      "savemotion_z_m": -0.26
+    }
+  },
+  "runner_storage": {
+    "gencase_attempt_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/gencase-002",
+    "gencase_actual": {
+      "receipt": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/gencase-002/execution-receipt.json",
+      "total_particles": 20732,
+      "fluid_particles": 19456,
+      "solver_dimension": 2,
+      "elapsed_seconds": 0.3059828500263393,
+      "output_bytes": 2670524,
+      "input_base": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/gencase-002/CasePistonBeach_REG"
+    },
+    "solver_attempt_root_pattern": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/<solver-attempt>",
+    "gencase_request_estimate_bytes": 536870912,
+    "gencase_request_wall_seconds": 180,
+    "solver_reservation_guidance": {
+      "basis": "completed official GenCase reports 20,732 total and 19,456 fluid particles in 0.306 s; 601 native saves are required for 30 s at 0.05 s",
+      "native_size_scaling_check": {
+        "comparison_case": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F5/F5_RUNUP_00/F5_RUNUP_00_QUALIFICATION_004/solver/data/Part_0000.bi4",
+        "comparison_case_bytes": 16969628,
+        "comparison_case_particles": 530239,
+        "comparison_case_frames": 801,
+        "scaled_f5_native_bytes_for_601_frames": 398764352,
+        "scaling_note": "linear particle-count estimate from an existing v5.4 F5 native frame; actual BI4 compression and solver lifecycle can differ"
+      },
+      "recommended_storage_bytes": 8589934592,
+      "recommended_wall_seconds": 1800,
+      "recommended_peak_gpu_mib": 4096,
+      "status": "reservation guidance; root must record the final request and solver receipt"
+    }
+  }
+}
