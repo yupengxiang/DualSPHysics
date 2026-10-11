@@ -1,0 +1,382 @@
+{
+  "candidate_only": true,
+  "cases": {
+    "UF_F1_MDBC_DP010_H052": {
+      "actual_gencase_binding": {
+        "depth_grid_index": 52,
+        "fluid_cohort_status": "verified_from_actual_completed_gencase_xml",
+        "generated_bi4": {
+          "bytes": 47465929,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/gencase-001/UF_F1_MDBC_DP010_H052.bi4",
+          "sha256": "a79df98538272f96c99ec540b7e5110f648542122314476b4f778b9cbba88142"
+        },
+        "generated_xml": {
+          "bytes": 15439,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/gencase-001/UF_F1_MDBC_DP010_H052.xml",
+          "sha256": "fc8c6b88d442c0088c0cc49c4072665f881e56133ec80cef102380ba7fae9cca"
+        },
+        "grid_aligned_actual_fluid_cohort_sha256": "1a8dae03001ef13eb420840f849d4f6a1ebe4e06f8c05a751053775b82f9285b",
+        "receipt": {
+          "bytes": 34346,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/gencase-001/execution-receipt.json",
+          "returncode": 0,
+          "sha256": "c93fb3d62591971ca74e0d1ee5dd4e5a73360b0c592220d8094283a41ecf6536",
+          "status": "completed"
+        }
+      },
+      "candidate_only": true,
+      "case_id": "UF_F1_MDBC_DP010_H052",
+      "concrete_blockers": [
+        {
+          "action": "Root must record the immutable later-batch admission under unchanged parent cumulative limits and bind its receipt before submission.",
+          "id": "immutable_later_batch_admission_missing",
+          "receipt_path": null,
+          "receipt_sha256": null,
+          "required_before": [
+            "solver submission",
+            "physical-condition credit"
+          ],
+          "severity": "blocking",
+          "status": "pending_immutable_later_batch_admission"
+        },
+        {
+          "action": "Submit only after admission and actual GenCase/cohort bindings; then bind the completed solver receipt SHA256.",
+          "id": "completed_solver_receipt_missing",
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/solver-001/execution-receipt.json",
+          "required_before": [
+            "native audits",
+            "postprocess handoff"
+          ],
+          "severity": "blocking",
+          "status": "pending_after_solver"
+        },
+        {
+          "action": "After the solver completes, run the frozen native integrity and full-frame auditors and bind their completed receipts.",
+          "id": "native_audit_bindings_missing",
+          "paths": [
+            "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/native-integrity-001/execution-receipt.json",
+            "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/native-frame-scan-001/execution-receipt.json"
+          ],
+          "required_before": [
+            "full 241-frame postprocess candidate"
+          ],
+          "severity": "blocking_for_postprocess",
+          "status": "pending_after_solver"
+        },
+        {
+          "action": "Enumerate and hash every regular native solver file from the actual receipt-bound attempt; do not synthesize paths or hashes.",
+          "id": "all_regular_native_solver_files_unbound",
+          "required_before": [
+            "postprocess request"
+          ],
+          "severity": "blocking_for_postprocess",
+          "status": "Enumerate every regular file in the completed receipt-bound solver attempt; bind actual paths and SHA256 values in the later postprocess request."
+        }
+      ],
+      "contract_status": "m4_additional_candidate_actual_gencase_bound_pending_root_admission",
+      "expected_frames": 241,
+      "later_batch_admission": {
+        "no_physical_condition_credit_before_admission": true,
+        "receipt_path": null,
+        "receipt_sha256": null,
+        "required": true,
+        "required_before_gencase_submission": true,
+        "required_before_solver_submission": true,
+        "scope": "M4 additional H052/H058 after M1-M3 first-batch evidence and unchanged parent cumulative limits",
+        "status": "pending_immutable_later_batch_admission",
+        "submission_forbidden_until_admitted": true
+      },
+      "native_audit_receipts": {
+        "full_frame_scan": {
+          "exists_at_inspection": false,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/native-frame-scan-001/execution-receipt.json",
+          "status": "pending_after_solver"
+        },
+        "integrity": {
+          "exists_at_inspection": false,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/native-integrity-001/execution-receipt.json",
+          "status": "pending_after_solver"
+        }
+      },
+      "no_launch_performed": true,
+      "physical_depth_m": 0.52,
+      "postprocess_handoff": {
+        "all_regular_native_solver_files": {
+          "binding": "Enumerate every regular file in the completed receipt-bound solver attempt; bind actual paths and SHA256 values in the later postprocess request.",
+          "paths": null,
+          "required": true,
+          "sha256": null
+        },
+        "expected_frames": 241,
+        "full_window_s": [
+          0.0,
+          6.0
+        ],
+        "no_native_file_fiction": true,
+        "solver_receipt": {
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/solver-001/execution-receipt.json",
+          "sha256": null,
+          "status": "pending_after_solver"
+        },
+        "static_runtime_inputs": {
+          "dsph_config": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml",
+            "sha256": "a2bc1f88c6ea95347187a64a991ebada177c6314de5c35ab078b06d78235eece"
+          },
+          "runtime_v2": {
+            "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+            "sha256": "76801b2ef91c6a01f512dd8b80f58a228b670193985d34544bf45154510b06e0"
+          },
+          "runtime_v6": {
+            "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+            "sha256": "e7fcfe6ddf441b9c643b8cb61600638fbc2d7497bcd043c6f23591f7c7a720f4"
+          }
+        },
+        "status": "deferred_until_completed_solver"
+      },
+      "read_only_inspection": true,
+      "requires_parent_nas_preflight": true,
+      "root_may_submit_initially": false,
+      "semantic_contract": {
+        "acceptance_threshold": null,
+        "mother_reference_only": true,
+        "no_experimental_credit": true,
+        "no_retime": true,
+        "only_physical_difference": {
+          "axis": "initial_fill_height_m",
+          "mother_value_m": 0.55,
+          "value_m": 0.52
+        },
+        "only_sampling_difference": {
+          "mother_time_out_s": 0.01,
+          "time_out_s": 0.025
+        }
+      },
+      "solver_launch_forbidden": true,
+      "solver_ready_candidate": {
+        "bytes": 31685,
+        "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/prepared/solver-ready/UF_F1_MDBC_DP010_H052-solver.ready.json",
+        "role": "frozen_solver_ready_candidate",
+        "sha256": "59fcc93d0bf7a847d62ea9910cdbad58814dd3851b239891d2ed197d2f7b5a52"
+      },
+      "solver_receipt_binding": {
+        "exists_at_inspection": false,
+        "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/solver-001/execution-receipt.json",
+        "required_before_postprocess": true,
+        "sha256": null,
+        "status": "pending_after_solver"
+      },
+      "solver_template": {
+        "bytes": 22055,
+        "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/requests/UF_F1_MDBC_DP010_H052-solver.template.json",
+        "role": "frozen_solver_template",
+        "sha256": "58df2c7b51194b1690dc2ed08e63753c4efbcaa9e5bea32c0157100b0a79089e"
+      },
+      "submission_forbidden": true,
+      "time_max_s": 6.0,
+      "time_out_s": 0.025
+    },
+    "UF_F1_MDBC_DP010_H058": {
+      "actual_gencase_binding": {
+        "depth_grid_index": 58,
+        "fluid_cohort_status": "verified_from_actual_completed_gencase_xml",
+        "generated_bi4": {
+          "bytes": 50654521,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/gencase-001/UF_F1_MDBC_DP010_H058.bi4",
+          "sha256": "d0db80e8b096d5a25cbb9265911e1e648038a7fdb26d5486e931440152752c0b"
+        },
+        "generated_xml": {
+          "bytes": 15435,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/gencase-001/UF_F1_MDBC_DP010_H058.xml",
+          "sha256": "a37bd5bf2ea20f25feab21d3c26e4752707618467b039bac10c91cc80dab4243"
+        },
+        "grid_aligned_actual_fluid_cohort_sha256": "4e2c8b23b021de963f5edc01572f682dc65c19964703149d4cb0479b0f75bbf0",
+        "receipt": {
+          "bytes": 34513,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/gencase-001/execution-receipt.json",
+          "returncode": 0,
+          "sha256": "416cf8a15a279de3e22a3e2abda7052659f5579de653c3ba86ed62de944e2e8f",
+          "status": "completed"
+        }
+      },
+      "candidate_only": true,
+      "case_id": "UF_F1_MDBC_DP010_H058",
+      "concrete_blockers": [
+        {
+          "action": "Root must record the immutable later-batch admission under unchanged parent cumulative limits and bind its receipt before submission.",
+          "id": "immutable_later_batch_admission_missing",
+          "receipt_path": null,
+          "receipt_sha256": null,
+          "required_before": [
+            "solver submission",
+            "physical-condition credit"
+          ],
+          "severity": "blocking",
+          "status": "pending_immutable_later_batch_admission"
+        },
+        {
+          "action": "Submit only after admission and actual GenCase/cohort bindings; then bind the completed solver receipt SHA256.",
+          "id": "completed_solver_receipt_missing",
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/solver-001/execution-receipt.json",
+          "required_before": [
+            "native audits",
+            "postprocess handoff"
+          ],
+          "severity": "blocking",
+          "status": "pending_after_solver"
+        },
+        {
+          "action": "After the solver completes, run the frozen native integrity and full-frame auditors and bind their completed receipts.",
+          "id": "native_audit_bindings_missing",
+          "paths": [
+            "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/native-integrity-001/execution-receipt.json",
+            "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/native-frame-scan-001/execution-receipt.json"
+          ],
+          "required_before": [
+            "full 241-frame postprocess candidate"
+          ],
+          "severity": "blocking_for_postprocess",
+          "status": "pending_after_solver"
+        },
+        {
+          "action": "Enumerate and hash every regular native solver file from the actual receipt-bound attempt; do not synthesize paths or hashes.",
+          "id": "all_regular_native_solver_files_unbound",
+          "required_before": [
+            "postprocess request"
+          ],
+          "severity": "blocking_for_postprocess",
+          "status": "Enumerate every regular file in the completed receipt-bound solver attempt; bind actual paths and SHA256 values in the later postprocess request."
+        }
+      ],
+      "contract_status": "m4_additional_candidate_actual_gencase_bound_pending_root_admission",
+      "expected_frames": 241,
+      "later_batch_admission": {
+        "no_physical_condition_credit_before_admission": true,
+        "receipt_path": null,
+        "receipt_sha256": null,
+        "required": true,
+        "required_before_gencase_submission": true,
+        "required_before_solver_submission": true,
+        "scope": "M4 additional H052/H058 after M1-M3 first-batch evidence and unchanged parent cumulative limits",
+        "status": "pending_immutable_later_batch_admission",
+        "submission_forbidden_until_admitted": true
+      },
+      "native_audit_receipts": {
+        "full_frame_scan": {
+          "exists_at_inspection": false,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/native-frame-scan-001/execution-receipt.json",
+          "status": "pending_after_solver"
+        },
+        "integrity": {
+          "exists_at_inspection": false,
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/native-integrity-001/execution-receipt.json",
+          "status": "pending_after_solver"
+        }
+      },
+      "no_launch_performed": true,
+      "physical_depth_m": 0.58,
+      "postprocess_handoff": {
+        "all_regular_native_solver_files": {
+          "binding": "Enumerate every regular file in the completed receipt-bound solver attempt; bind actual paths and SHA256 values in the later postprocess request.",
+          "paths": null,
+          "required": true,
+          "sha256": null
+        },
+        "expected_frames": 241,
+        "full_window_s": [
+          0.0,
+          6.0
+        ],
+        "no_native_file_fiction": true,
+        "solver_receipt": {
+          "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/solver-001/execution-receipt.json",
+          "sha256": null,
+          "status": "pending_after_solver"
+        },
+        "static_runtime_inputs": {
+          "dsph_config": {
+            "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml",
+            "sha256": "a2bc1f88c6ea95347187a64a991ebada177c6314de5c35ab078b06d78235eece"
+          },
+          "runtime_v2": {
+            "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+            "sha256": "76801b2ef91c6a01f512dd8b80f58a228b670193985d34544bf45154510b06e0"
+          },
+          "runtime_v6": {
+            "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+            "sha256": "e7fcfe6ddf441b9c643b8cb61600638fbc2d7497bcd043c6f23591f7c7a720f4"
+          }
+        },
+        "status": "deferred_until_completed_solver"
+      },
+      "read_only_inspection": true,
+      "requires_parent_nas_preflight": true,
+      "root_may_submit_initially": false,
+      "semantic_contract": {
+        "acceptance_threshold": null,
+        "mother_reference_only": true,
+        "no_experimental_credit": true,
+        "no_retime": true,
+        "only_physical_difference": {
+          "axis": "initial_fill_height_m",
+          "mother_value_m": 0.55,
+          "value_m": 0.58
+        },
+        "only_sampling_difference": {
+          "mother_time_out_s": 0.01,
+          "time_out_s": 0.025
+        }
+      },
+      "solver_launch_forbidden": true,
+      "solver_ready_candidate": {
+        "bytes": 31685,
+        "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/prepared/solver-ready/UF_F1_MDBC_DP010_H058-solver.ready.json",
+        "role": "frozen_solver_ready_candidate",
+        "sha256": "3ecc4d0c596796a62373ff80fab1223af26daf60b5a4dab54792918d91dcee1a"
+      },
+      "solver_receipt_binding": {
+        "exists_at_inspection": false,
+        "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H058/solver-001/execution-receipt.json",
+        "required_before_postprocess": true,
+        "sha256": null,
+        "status": "pending_after_solver"
+      },
+      "solver_template": {
+        "bytes": 22055,
+        "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/requests/UF_F1_MDBC_DP010_H058-solver.template.json",
+        "role": "frozen_solver_template",
+        "sha256": "1fa3ae2236241a39be6a5aba4041f429d007c0485696ed2de4e93d11ce51e1be"
+      },
+      "submission_forbidden": true,
+      "time_max_s": 6.0,
+      "time_out_s": 0.025
+    }
+  },
+  "common_policy": {
+    "acceptance_threshold": null,
+    "expected_frames": 241,
+    "full_window_s": [
+      0.0,
+      6.0
+    ],
+    "lineage_group_id": "F1_official_v54_mdbc_dambreak3d_v1",
+    "mother_reference_only": true,
+    "no_experimental_credit": true,
+    "no_retime": true,
+    "physical_depth_difference_is_labeled": true,
+    "sampling_difference_is_labeled": true,
+    "solver_reservation_bytes": 9663676416,
+    "solver_reservation_gib": 9,
+    "source_mother": "UF_F1_MDBC_DAMBREAK3D"
+  },
+  "inspection_scope": "H052/H058 frozen solver-ready candidates and templates only; no source mutation and no payload launch",
+  "no_launch_performed": true,
+  "root_next_launch_gate": [
+    "Record immutable later-batch admission and its exact receipt SHA256.",
+    "Retain the actual completed GenCase receipt, generated XML/BI4, and grid-aligned fluid-cohort hash already bound here.",
+    "Only then review/submit the 9 GiB solver candidates; after completion bind solver receipt and every regular native solver file before postprocess."
+  ],
+  "schema": "ds-data-02.upstream-first.m4-next-prepared.solver-ready-blockers.v1",
+  "status": "read_only_inspection_completed",
+  "submission_forbidden_by_frozen_contracts": true
+}
