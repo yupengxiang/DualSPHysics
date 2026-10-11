@@ -1,12 +1,13 @@
-# Continuation
+# Next continuation
 
-Read ADOPTION.json, STATUS.json, the shared ledger, live leases and actual processes first. The fixed deadline is 2026-10-25T03:11:02Z. Never reset inherited charges or the first tranche.
+Read ADOPTION.json, STATUS.json, the shared ledger, live leases and actual processes first. Deadline2026-10-25T03:11:02Z is fixed. Preserve historical charges and the first50GiB tranche.
 
-1. Finish bounded NAS runner hardening with regression checks; scope_catalog owns runtime source until its commit.
-2. Execute requests/f5-solver-001.json through runtime_v6. GenCase gencase-002 completed with 20,732 particles (19,456 fluid), actual 2D. Retain gencase-001 failed launch.
-3. Execute requests/lagrangebench-download-inspect-001.json through the same single heavy queue. The m2 request is a preparation template; the root request has valid infra/UF_ identity, CPU conversion kind, contained scratch and six GiB limit.
-4. After F5 success, run official postprocessing into a fresh nested attempt output, compare against frozen m1/observation-contract.md; no scientific acceptance from solver exit alone.
-5. F1 old 601-frame output is NOT the official mDBC physical case. Agent upstream_reference prepares unchanged official generation and mapped reference data.
-6. Agent data_product strengthens portable validation and source isolation; m3 336-case catalog is ready but derivatives remain unexecuted.
+Current completed: NASpreflight; runtime17regressionchecks; F5officialGenCase20,732particles; F5solver601frames0..30s,106.78GPUseconds,400,860,849bytes; F5officialpostprocess200.42CPUcoreseconds,730,434,042bytes; F1officialGenCase1,015,809particles(652,212fluid) actual3D;336-casecatalog.
 
-Continue each next ready authorized task. M1-M4 remain incomplete; do not resurrect old waiters or restart the 14-day clock.
+1. External LagrangeBench import is ACTIVE through runtime_v6, execsession78847. Request requests/lagrangebench-download-inspect-001.json. Output NASruns/infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-001. Inspect actualprocess/receipt before any second heavy launch. Download is slow; bounded1800s. Never duplicate it whileactive.
+2. Agent upstream_reference prepares F5comparisonworker/request; actualCSVnames are postprocess-001/observations/measuretool/_elevation_Elevation.csv and _velocity_Vel.csv. This smallCPUaudit can run alongside import. Preserve consumed script and erroneous legacy postprocessmanifest; use correction sidecar. Nativepostprocessingtools used16threads despiteOMP1; all200.42actualCPUcoresecondscharged. Future extraction shouldpass native threadflag.
+3. After currentheavyjob releasesqueue, launch requests/f1-solver-001.json through runtime_v6, originalofficial-mdbc command,22GiBreservation,1800seconds. Estimated raw18.19GiB based on actualparticles and32bytes/particle/frame. Check actualspace beforelaunch.
+4. Agent data_product fixes realportablebuild/relocation requests and selfcontained reader/evaluator code. Rootlaunch whenqueuefree, do not use old invalidm2templates(cpu kind/external scratch/nonUFidentity). External worker/loader/requestinputs are frozen duringcurrentimport.
+5. Agent scope_catalog builds sevenfamilymap with compact3DF3candidate. F1mother+2unchangedresolution601frame derivatives exceed first50GiB; do not launch blindly orresettranche. m3/derivative-design.json remains candidate design only. Evaluate accepted compact3Dmother or justified commonnumerical adaptation with separatevalidation.
+
+M1-M4 are incomplete. Continue nextready task without userconfirmation; no oldwaiters, no modelwork, no sourcepath-dependent replay claim.

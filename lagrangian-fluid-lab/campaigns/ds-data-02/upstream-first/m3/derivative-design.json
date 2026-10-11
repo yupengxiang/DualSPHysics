@@ -1,0 +1,44 @@
+{
+  "schema": "ds-data-02.upstream-first.derivative-design.v1",
+  "status": "planned_not_admitted_not_executed",
+  "mother": "UF_F1_MDBC_DAMBREAK3D",
+  "physical_axis": "initial_fill_height_m",
+  "mother_value": 0.55,
+  "m3_values": [
+    0.5,
+    0.6
+  ],
+  "m4_additional_candidate_values": [
+    0.45,
+    0.65
+  ],
+  "xml_edit": "casedef/geometry/commands/mainlist/fillbox/size@z",
+  "fixed_controls": [
+    "tank geometry",
+    "obstacle geometry",
+    "initial reservoir x/y extent",
+    "dp=0.01m",
+    "mDBC SlipMode1",
+    "kernel",
+    "viscosity",
+    "time step policy",
+    "gravity",
+    "output schedule"
+  ],
+  "dependent_numerics_to_record": [
+    "actual GenCase fluid particle count",
+    "initial hydrostatic density",
+    "auto hswl",
+    "auto speedsystem and speedsound",
+    "actual timestep distribution"
+  ],
+  "admission_prerequisites": [
+    "M1 actual3D mother results and applicable acceptance evidence",
+    "explicit declared intended diagnostic or numerical-reference use",
+    "shared ledger measured storage and compute feasibility within currenttranche",
+    "one XML physical parameter difference verified against immutable mother definition"
+  ],
+  "storage_policy": "Do not launch if mother and two derivatives plus required products cannot fit remaining first50GiB. Reuse verified outputs and reduce optional previews or normalized temporal window only with explicit scope; retain all spatial particles and required event evidence. Never reset tranche after failure.",
+  "lineage_policy": "mother remains reference-only; same physical condition windows/repeats/resolutions remain in one development group; four distinct modified physical values are candidates, never claimed complete from this design",
+  "backup": "If F1 lacks applicable acceptance or bounded storage feasibility, assess complete F3 upstream backup and alternate scientifically justified small scope before any derivative launch"
+}
