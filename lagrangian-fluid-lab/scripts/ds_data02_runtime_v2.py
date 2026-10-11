@@ -197,6 +197,67 @@ def parse_gencase_output(text):
     return result
 
 
+def _is_f5_calibration_request(request):
+    return (
+        request.get('kind') == 'qualification'
+        and request.get('family_id') == 'F5'
+        and request.get('case_id') == 'UF_F5_PISTON_REG'
+        and request.get('reference_role') == 'calibration_2d'
+        and request.get('upstream_case_id') == 'CasePistonBeach_REG'
+    )
+
+
+def _validate_f5_calibration_binding(request, preflight):
+    """Bind the F5 2D exception to its immutable GenCase output identity."""
+    receipt_value = request.get('gencase_receipt')
+    expected_hash = request.get('gencase_receipt_sha256')
+    if not receipt_value or not expected_hash:
+        raise ValueError('F5 calibration requires a hashed GenCase receipt')
+    receipt_path = Path(receipt_value).resolve()
+    input_paths = {str(Path(value).resolve()) for value in request.get('input_files', [])}
+    if str(receipt_path) not in input_paths:
+        raise ValueError('F5 calibration GenCase receipt must be listed in input_files')
+    if sha256(receipt_path) != expected_hash:
+        raise ValueError('GenCase receipt hash differs from the registered request')
+
+    bound_request = preflight.get('request')
+    if not isinstance(bound_request, dict):
+        raise ValueError('F5 calibration GenCase receipt lacks its bound request')
+    for key, expected in (
+        ('family_id', 'F5'),
+        ('case_id', 'UF_F5_PISTON_REG'),
+        ('kind', 'cpu'),
+        ('cpu_task_kind', 'gencase'),
+        ('reference_role', 'calibration_2d'),
+        ('upstream_case_id', 'CasePistonBeach_REG'),
+    ):
+        if bound_request.get(key) != expected:
+            raise ValueError(f'F5 calibration GenCase receipt {key} binding differs')
+    bound_command = bound_request.get('command')
+    if (
+        not isinstance(bound_command, list)
+        or len(bound_command) < 3
+        or bound_command[2] != '{attempt_root}/CasePistonBeach_REG'
+    ):
+        raise ValueError('F5 calibration GenCase generated prefix is not registered')
+
+    actual_command = preflight.get('command')
+    output_root = preflight.get('output_root')
+    if not isinstance(actual_command, list) or len(actual_command) < 3 or not output_root:
+        raise ValueError('F5 calibration GenCase receipt lacks its actual generated prefix')
+    actual_prefix = Path(actual_command[2]).resolve()
+    if actual_prefix.name != 'CasePistonBeach_REG':
+        raise ValueError('F5 calibration generated prefix has the wrong case identity')
+    if not actual_prefix.is_relative_to(Path(output_root).resolve()):
+        raise ValueError('F5 calibration generated prefix escapes its GenCase attempt root')
+
+    solver_command = request.get('command')
+    if not isinstance(solver_command, list) or len(solver_command) < 3:
+        raise ValueError('F5 calibration solver command lacks its generated prefix')
+    if Path(solver_command[2]).resolve() != actual_prefix:
+        raise ValueError('F5 calibration solver prefix differs from the GenCase receipt')
+
+
 def git_launch_state(root):
     def query(args):
         return subprocess.run(['git', *args], cwd=root, capture_output=True, text=True, check=True).stdout.strip()
@@ -238,15 +299,12 @@ def validate_request(request, *, approval_context=None):
         fluid_count = preflight.get('fluid_particles')
         if not isinstance(fluid_count, int) or fluid_count <= 0 or fluid_count > count:
             raise ValueError('GenCase must contain a positive actual fluid particle count')
-        calibration_2d = (
-            preflight.get('solver_dimension_from_gencase') == 2
-            and request['kind'] == 'qualification'
-            and request['family_id'] == 'F5'
-            and request['case_id'] == 'UF_F5_PISTON_REG'
-            and request.get('reference_role') == 'calibration_2d'
-            and request.get('upstream_case_id') == 'CasePistonBeach_REG'
-        )
-        if preflight.get('solver_dimension_from_gencase') != 3 and not calibration_2d:
+        calibration_2d = _is_f5_calibration_request(request)
+        if calibration_2d:
+            if preflight.get('solver_dimension_from_gencase') != 2:
+                raise ValueError('F5 calibration requires actual 2D GenCase evidence')
+            _validate_f5_calibration_binding(request, preflight)
+        elif preflight.get('solver_dimension_from_gencase') != 3:
             raise ValueError('DS-DATA-02 core requires actual 3D GenCase evidence')
         expected_hash = request.get('gencase_receipt_sha256')
         if expected_hash and sha256(request['gencase_receipt']) != expected_hash:

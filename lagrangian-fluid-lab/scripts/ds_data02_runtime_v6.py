@@ -37,11 +37,73 @@ _base_check_reservation = base.check_reservation
 _base_atomic_json = base.atomic_json
 
 UPSTREAM_NAS = Path('/data/nas/jade/Simulation/DualSPHysics/upstream-first')
+NAS_HEADROOM_FLOOR_BYTES = 2 * 1024 ** 3
+UPSTREAM_BATCH_STORAGE_BYTES = 50 * 1024 ** 3
+HISTORICAL_EXTERNAL_SCRATCH_ATTEMPT = 'infra/UF_NAS_PREFLIGHT/check-001'
+HISTORICAL_EXTERNAL_SCRATCH = UPSTREAM_NAS / 'scratch'
 
 
 def _upstream_id(value):
     parts = str(value).split('/')
     return len(parts) == 3 and parts[1].startswith('UF_')
+
+
+def _attempt_id(request):
+    return f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
+
+
+def _is_nas_request(request):
+    return request.get('output_storage') == 'upstream_nas'
+
+
+def _row_nas_storage_bytes(row):
+    """Return bytes reserved on NAS by a ledger row.
+
+    New rows carry ``output_storage`` explicitly.  A legacy upstream
+    reservation without that field is treated as NAS-backed conservatively;
+    otherwise a concurrent old launcher could bypass the NAS floor.
+    """
+    storage = row.get('output_storage')
+    if storage == 'home':
+        return 0
+    if storage == 'upstream_nas' or (
+        storage is None and _upstream_id(row.get('id'))
+    ):
+        return row.get('new_storage_bytes', 0)
+    return 0
+
+
+def _nas_reserved_bytes(ledger, *, exclude_id=None):
+    return sum(
+        _row_nas_storage_bytes(row)
+        for row in ledger.get('reservations', [])
+        if row.get('id') != exclude_id
+    )
+
+
+def _is_historical_external_scratch(request):
+    external_scratch = request.get('external_scratch')
+    if not isinstance(external_scratch, str):
+        return False
+    return (
+        _attempt_id(request) == HISTORICAL_EXTERNAL_SCRATCH_ATTEMPT
+        and request.get('family_id') == 'infra'
+        and request.get('case_id') == 'UF_NAS_PREFLIGHT'
+        and request.get('attempt_id') == 'check-001'
+        and request.get('kind') == 'cpu'
+        and request.get('cpu_task_kind') == 'audit'
+        and Path(external_scratch).resolve() == HISTORICAL_EXTERNAL_SCRATCH.resolve()
+    )
+
+
+def _validate_storage_request(request):
+    if 'external_scratch' not in request:
+        return
+    if _is_historical_external_scratch(request):
+        return
+    raise ValueError(
+        'external_scratch is not supported; place temporary files under the attempt root'
+    )
 
 
 def _nas_available():
@@ -53,8 +115,20 @@ def _nas_available():
     return stat.f_bavail * stat.f_frsize
 
 
+def _assert_nas_path_live(path):
+    """Check the mount and device immediately before an NAS write/scan."""
+    _nas_available()
+    root = UPSTREAM_NAS.resolve()
+    target = Path(path).expanduser().resolve()
+    if not target.is_relative_to(root):
+        raise RuntimeError('upstream output escapes NAS root')
+    probe = target if target.exists() else target.parent
+    if probe.exists() and probe.stat().st_dev != root.stat().st_dev:
+        raise RuntimeError('upstream NAS device changed; no local fallback')
+
+
 def _output_path(request, data_root):
-    attempt = f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
+    attempt = _attempt_id(request)
     storage = request.get('output_storage', 'home')
     if storage == 'home':
         return data_root / 'families' / attempt
@@ -62,8 +136,7 @@ def _output_path(request, data_root):
         raise ValueError('unapproved output storage or upstream namespace')
     _nas_available()
     output = UPSTREAM_NAS / 'runs' / attempt
-    if not output.resolve().is_relative_to(UPSTREAM_NAS.resolve()):
-        raise ValueError('upstream output escapes NAS root')
+    _assert_nas_path_live(output)
     return output
 
 
@@ -74,7 +147,7 @@ def _check_upstream_batch(ledger, reservation, request):
             if _upstream_id(row.get('id'))]
     for key, cap in [('gpu_seconds', 24 * 3600),
                      ('cpu_core_seconds', 96 * 3600),
-                     ('new_storage_bytes', 50 * 1024 ** 3)]:
+                     ('new_storage_bytes', UPSTREAM_BATCH_STORAGE_BYTES)]:
         if sum(row.get(key, 0) for row in rows) + reservation[key] > cap:
             raise RuntimeError('upstream first-batch allocation exhausted: ' + key)
     solvers = [row for row in ledger['attempts'] if _upstream_id(row.get('id'))
@@ -84,9 +157,155 @@ def _check_upstream_batch(ledger, reservation, request):
     heavy = lambda row: row.get('kind') in {'qualification', 'production'} or row.get('cpu_task_kind') == 'conversion'
     if heavy(reservation) and any(heavy(row) for row in ledger['reservations']):
         raise RuntimeError('upstream single heavy-task queue is occupied')
-    if request.get('output_storage') == 'upstream_nas':
-        if _nas_available() < reservation['new_storage_bytes'] + 2 * 1024 ** 3:
+    if _is_nas_request(request):
+        reserved = _nas_reserved_bytes(ledger, exclude_id=reservation['id'])
+        if _nas_available() - reserved < reservation['new_storage_bytes'] + NAS_HEADROOM_FLOOR_BYTES:
             raise RuntimeError('insufficient upstream NAS headroom')
+
+
+def _terminal_upstream_overrun(
+    ledger,
+    reservation,
+    *,
+    gpu_seconds,
+    cpu_core_seconds,
+    storage_bytes,
+):
+    """Compare measured terminal usage with the upstream batch caps.
+
+    The admission reservation is excluded because the measured charge replaces
+    it.  Returning details instead of raising lets the receipt retain a true
+    failed/overrun status while the ledger still records the measured charge.
+    """
+    if not _upstream_id(reservation['id']):
+        return None
+    rows = [
+        row for row in ledger['charges'] + ledger['reservations']
+        if _upstream_id(row.get('id')) and row.get('id') != reservation['id']
+    ]
+    measured = {
+        'gpu_seconds': gpu_seconds,
+        'cpu_core_seconds': cpu_core_seconds,
+        'new_storage_bytes': storage_bytes,
+    }
+    caps = {
+        'gpu_seconds': 24 * 3600,
+        'cpu_core_seconds': 96 * 3600,
+        'new_storage_bytes': UPSTREAM_BATCH_STORAGE_BYTES,
+    }
+    overrun = {}
+    for key, cap in caps.items():
+        used_before = sum(row.get(key, 0) for row in rows)
+        total = used_before + measured[key]
+        if total > cap:
+            overrun[key] = {
+                'used_before': used_before,
+                'measured': measured[key],
+                'cap': cap,
+                'excess': total - cap,
+            }
+    return overrun or None
+
+
+def _apply_terminal_upstream_guard(ledger, reservation, receipt, measured_cpu):
+    """Attach a measured batch overrun after the exact receipt byte fixed point."""
+    storage_bytes = receipt.get('bytes')
+    if not isinstance(storage_bytes, int):
+        return None
+    overrun = _terminal_upstream_overrun(
+        ledger,
+        reservation,
+        gpu_seconds=receipt.get('gpu_seconds', 0),
+        cpu_core_seconds=measured_cpu,
+        storage_bytes=storage_bytes,
+    )
+    if overrun:
+        receipt['status'] = 'failed'
+        receipt['upstream_batch_overrun'] = overrun
+        if not receipt.get('termination_reason'):
+            receipt['termination_reason'] = 'upstream_batch_limit_exceeded_after_run'
+    return overrun
+
+
+def _unresolved_storage_reservation_bytes(ledger, reservation):
+    """Reserve the remaining upstream storage budget when NAS bytes are unknown."""
+    used_before = sum(
+        row.get('new_storage_bytes', 0)
+        for row in ledger['charges'] + ledger['reservations']
+        if _upstream_id(row.get('id')) and row.get('id') != reservation['id']
+    )
+    remaining_cap = max(0, UPSTREAM_BATCH_STORAGE_BYTES - used_before)
+    return max(reservation['new_storage_bytes'], remaining_cap)
+
+
+def _retain_unresolved_nas_reservation(ledger, reservation, error):
+    """Keep the reservation until an operator can inspect the lost NAS output."""
+    conservative_bytes = _unresolved_storage_reservation_bytes(ledger, reservation)
+    reservation.update(
+        output_storage='upstream_nas',
+        storage_unresolved=True,
+        storage_unresolved_reason=str(error),
+        storage_unresolved_at_utc=base.now(),
+        estimated_storage_bytes=reservation['new_storage_bytes'],
+        new_storage_bytes=conservative_bytes,
+    )
+    for row in ledger['reservations']:
+        if row.get('id') == reservation['id']:
+            row.update(reservation)
+            break
+    return conservative_bytes
+
+
+def _control_receipt_path(data_root, attempt):
+    safe_attempt = attempt.replace('/', '__')
+    return Path(data_root) / 'runtime' / 'upstream-control' / f'{safe_attempt}.json'
+
+
+def _write_unresolved_control_receipt(data_root, attempt, output, reservation, error):
+    """Write only a small Home control record after NAS finalization is lost."""
+    path = _control_receipt_path(data_root, attempt)
+    value = {
+        'schema': 'ds02.upstream-control-receipt.v1',
+        'attempt_id': attempt,
+        'status': 'failed',
+        'observed_at_utc': base.now(),
+        'output_root': str(output),
+        'error': str(error),
+        'nas_write_skipped': True,
+        'storage': {
+            'status': 'unresolved',
+            'reservation_retained': True,
+            'conservative_reservation_bytes': reservation['new_storage_bytes'],
+            'reason': 'NAS unavailable during finalization; manual reconciliation required',
+        },
+    }
+    try:
+        base.atomic_json(path, value)
+    except OSError:
+        return None
+    return path
+
+
+def _set_unresolved_storage_fields(value, error, reservation_bytes):
+    value['status'] = 'failed'
+    value['storage_unresolved'] = True
+    value['storage_unresolved_reason'] = str(error)
+    value['bytes'] = None
+    value['terminal_storage_guard'] = {
+        'status': 'unresolved',
+        'actual_bytes': None,
+        'reservation_bytes': reservation_bytes,
+        'measurement': 'NAS unavailable; output tree could not be measured safely',
+    }
+
+
+def _prepare_attempt_tmpdir(output, request):
+    """Contain process temporary files inside the registered attempt root."""
+    tmpdir = Path(output) / '.tmp'
+    tmpdir.mkdir(parents=True, exist_ok=True)
+    if _is_nas_request(request):
+        _assert_nas_path_live(tmpdir)
+    return tmpdir
 
 
 def _finite_number(value, name, *, minimum=0, integer=False):
@@ -103,6 +322,7 @@ def validate_request(request, *, approval_context=None):
     if request.get('kind') in {'qualification', 'production'}:
         _finite_number(request.get('estimated_peak_gpu_mib'), 'estimated_peak_gpu_mib', minimum=1e-9)
     actual = _base_validate(request, approval_context=approval_context)
+    _validate_storage_request(request)
     if BASE_RUNTIME_PATH not in actual:
         raise ValueError('Stage2 v4 runtime must bind consumed runtime v2')
     return actual
@@ -209,10 +429,14 @@ def _prepare_terminal_receipt(path, value):
 def _write_terminal_receipt(path, value):
     """Write and verify the exact final directory byte count."""
     for _ in range(16):
+        if Path(path).resolve().is_relative_to(UPSTREAM_NAS.resolve()):
+            _assert_nas_path_live(path)
         predicted = _prepare_terminal_receipt(path, value)
         if predicted is None:
             return _base_atomic_json(path, value)
         _base_atomic_json(path, value)
+        if Path(path).resolve().is_relative_to(UPSTREAM_NAS.resolve()):
+            _assert_nas_path_live(path)
         actual = base.tree_bytes(Path(path).parent)
         if actual == value['bytes'] == predicted:
             return
@@ -221,6 +445,8 @@ def _write_terminal_receipt(path, value):
 
 def _guarded_atomic_json(path, value):
     path = Path(path)
+    if path.resolve().is_relative_to(UPSTREAM_NAS.resolve()):
+        _assert_nas_path_live(path)
     if path.name == 'execution-receipt.json' and isinstance(value, dict):
         if value.get('schema') == 'ds02.execution-receipt.v1':
             value['runner_source'] = RUNTIME_PATH
@@ -265,7 +491,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
     request = json.loads(Path(request_path).read_text())
     approval_context = {}
     hashes = validate_request(request, approval_context=approval_context)
-    attempt = f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
+    attempt = _attempt_id(request)
     output = _output_path(request, data_root)
     if output.exists():
         raise FileExistsError(f'attempt output already exists: {output}')
@@ -273,7 +499,9 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                        cpu_threads=request['cpu_threads'],
                        cpu_core_seconds=request['cpu_threads'] * request['max_wall_seconds'],
                        gpu_seconds=request['max_wall_seconds'] if request['kind'] in {'qualification', 'production'} else 0,
-                       new_storage_bytes=request['estimated_storage_bytes'], reserved_at_utc=base.now(),
+                       new_storage_bytes=request['estimated_storage_bytes'],
+                       output_storage=request.get('output_storage', 'home'),
+                       reserved_at_utc=base.now(),
                        launcher_pid=os.getpid(), host=base.socket.gethostname())
     device = None
     lease_path = None
@@ -322,6 +550,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             ledger['attempts'].append(dict(id=attempt, kind=request['kind'], status='reserved', started_at_utc=base.now()))
             registered = True
         output.mkdir(parents=True, exist_ok=False)
+        tmpdir = _prepare_attempt_tmpdir(output, request)
         command = request['command'][:]
         if request.get('cpu_task_kind') == 'gencase' and Path(command[0]).resolve() == (base.BIN_ROOT / 'GenCase_linux64').resolve():
             command = [arg for arg in command if not arg.startswith('-threads:')]
@@ -334,8 +563,11 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             receipt['cuda_logical_device'] = 0
         for name in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS'):
             env[name] = str(request['cpu_threads'])
+        for name in ('TMPDIR', 'TMP', 'TEMP'):
+            env[name] = str(tmpdir)
         env['LD_LIBRARY_PATH'] = str(base.BIN_ROOT) + ':' + env.get('LD_LIBRARY_PATH', '')
         receipt['command'] = command
+        receipt['tmpdir'] = str(tmpdir)
         receipt['binary_sha256'] = base.sha256(command[0])
         receipt['started_at_utc'] = base.now()
         child_started = time.monotonic()
@@ -343,6 +575,8 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             proc = base.subprocess.Popen(command, cwd=request['cwd'], env=env, stdout=log,
                                          stderr=base.subprocess.STDOUT, start_new_session=True)
             receipt['pid'] = proc.pid
+            if _is_nas_request(request):
+                _assert_nas_path_live(output / 'execution-receipt.json')
             _base_atomic_json(output / 'execution-receipt.json', dict(receipt, status='running'))
             last_check = 0.0
             reason = None
@@ -354,7 +588,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                     reason = 'campaign_deadline_reached'
                 if elapsed - last_check >= 5:
                     last_check = elapsed
-                    if request.get('output_storage') == 'upstream_nas' and _nas_available() < 2 * 1024 ** 3:
+                    if _is_nas_request(request) and _nas_available() < NAS_HEADROOM_FLOOR_BYTES:
                         reason = 'upstream_nas_headroom_reached'
                     live_limits = json.loads((data_root / 'runtime/resource-ledger.json').read_text())['limits']
                     if live_limits.get('storage_policy') == 'home_free_floor':
@@ -372,6 +606,8 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                         _base_atomic_json(lease_path, dict(uuid=device['uuid'], device_index=device['index'],
                                                            attempt_id=attempt, launcher_pid=os.getpid(), pid=proc.pid,
                                                            process_group=proc.pid, host=base.socket.gethostname(), heartbeat_utc=base.now()))
+                    if _is_nas_request(request):
+                        _assert_nas_path_live(output)
                     if tree_bytes(output) > request['estimated_storage_bytes']:
                         reason = 'reserved_storage_exceeded'
                     if base.cpu_usage() - entry_cpu + base.live_group_cpu_seconds(proc.pid) > reservation['cpu_core_seconds']:
@@ -399,11 +635,35 @@ def run_request(request_path, *, data_root=DATA_ROOT):
         # approval revalidation before taking the accounting cutoff.  v2/v5
         # measured before this comprehension, which omitted large post-run
         # source hashes from both the receipt and the parent charge.
-        input_hashes_after_run = {
-            path: base.sha256(path) if Path(path).is_file() else None for path in hashes
-        }
-        output_bytes = tree_bytes(output)
-        stdout_hash = base.sha256(output / 'stdout.log') if (output / 'stdout.log').is_file() else None
+        nas_unavailable_error = None
+        try:
+            input_hashes_after_run = {
+                path: base.sha256(path) if Path(path).is_file() else None for path in hashes
+            }
+        except OSError as error:
+            input_hashes_after_run = {}
+            if _is_nas_request(request):
+                nas_unavailable_error = error
+            else:
+                raise
+        output_bytes = None
+        stdout_hash = None
+        if nas_unavailable_error is None:
+            try:
+                if _is_nas_request(request):
+                    _assert_nas_path_live(output)
+                output_bytes = tree_bytes(output)
+                if _is_nas_request(request):
+                    _assert_nas_path_live(output)
+                stdout_hash = (
+                    base.sha256(output / 'stdout.log')
+                    if (output / 'stdout.log').is_file() else None
+                )
+            except (OSError, RuntimeError) as error:
+                if _is_nas_request(request):
+                    nas_unavailable_error = error
+                else:
+                    raise
         if input_hashes_after_run != hashes:
             receipt['status'] = 'failed'
             receipt['provenance_error'] = 'input_mutated_during_run'
@@ -424,20 +684,88 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                        input_hashes_after_run=input_hashes_after_run)
         receipt['timing_scope']['cpu_cutoff'] = 'after_source_posthash_output_bytes_stdout_hash_and_approval_revalidation'
         receipt['timing_scope']['wall_cutoff'] = 'after_source_posthash_output_bytes_stdout_hash_and_approval_revalidation'
-        _guarded_atomic_json(output / 'execution-receipt.json', receipt)
         if registered:
             with ledger_locked(data_root) as ledger:
-                ledger['reservations'] = [row for row in ledger['reservations'] if row['id'] != attempt]
-                ledger['charges'].append(dict(id=attempt, gpu_seconds=receipt['gpu_seconds'],
-                                              cpu_core_seconds=measured_cpu, new_storage_bytes=receipt['bytes'],
-                                              status=receipt['status'], finished_at_utc=receipt['finished_at_utc']))
+                unresolved = nas_unavailable_error is not None
+                control_path = None
+                if unresolved:
+                    conservative_bytes = _retain_unresolved_nas_reservation(
+                        ledger, reservation, nas_unavailable_error
+                    )
+                    _set_unresolved_storage_fields(receipt, nas_unavailable_error, conservative_bytes)
+                    control_path = _write_unresolved_control_receipt(
+                        data_root, attempt, output, reservation, nas_unavailable_error
+                    )
+                else:
+                    try:
+                        _guarded_atomic_json(output / 'execution-receipt.json', receipt)
+                        # The terminal writer changes receipt['bytes'] to the
+                        # exact fixed-point tree size.  Recheck the upstream
+                        # cap against that value and rewrite until the added
+                        # overrun details themselves are included in the
+                        # final fixed point.
+                        for _ in range(8):
+                            prior_overrun = receipt.get('upstream_batch_overrun')
+                            overrun = _apply_terminal_upstream_guard(
+                                ledger, reservation, receipt, measured_cpu
+                            )
+                            if not overrun or prior_overrun == overrun:
+                                break
+                            _guarded_atomic_json(output / 'execution-receipt.json', receipt)
+                        else:
+                            raise RuntimeError('terminal upstream batch guard did not converge')
+                    except (OSError, RuntimeError) as error:
+                        if _is_nas_request(request):
+                            unresolved = True
+                            conservative_bytes = _retain_unresolved_nas_reservation(
+                                ledger, reservation, error
+                            )
+                            _set_unresolved_storage_fields(receipt, error, conservative_bytes)
+                            control_path = _write_unresolved_control_receipt(
+                                data_root, attempt, output, reservation, error
+                            )
+                        else:
+                            receipt['status'] = 'failed'
+                            receipt['finalization_error'] = f'{type(error).__name__}: {error}'
+                    if unresolved:
+                        # The NAS receipt was never safely committed; retain
+                        # the conservative reservation and do not charge an
+                        # unknown output tree as zero bytes.
+                        pass
+                    else:
+                        ledger['reservations'] = [
+                            row for row in ledger['reservations'] if row['id'] != attempt
+                        ]
+                        ledger['charges'].append(dict(
+                            id=attempt,
+                            gpu_seconds=receipt['gpu_seconds'],
+                            cpu_core_seconds=measured_cpu,
+                            new_storage_bytes=receipt['bytes'],
+                            output_storage=reservation.get('output_storage', 'home'),
+                            status=receipt['status'],
+                            finished_at_utc=receipt['finished_at_utc'],
+                        ))
+                if control_path:
+                    receipt['control_receipt'] = str(control_path)
                 for row in ledger['attempts']:
                     if row['id'] == attempt:
                         row.update(status=receipt['status'], finished_at_utc=receipt['finished_at_utc'])
+                        if unresolved:
+                            row['storage_unresolved'] = True
                 if lease_path and (proc is None or proc.poll() is not None):
                     lease_path.unlink(missing_ok=True)
         elif lease_path:
             lease_path.unlink(missing_ok=True)
+        elif nas_unavailable_error is None:
+            try:
+                _guarded_atomic_json(output / 'execution-receipt.json', receipt)
+            except (OSError, RuntimeError) as error:
+                receipt['status'] = 'failed'
+                receipt['finalization_error'] = f'{type(error).__name__}: {error}'
+        else:
+            _write_unresolved_control_receipt(
+                data_root, attempt, output, reservation, nas_unavailable_error
+            )
         _ACTIVE_DATA_ROOT = previous_data_root
     return receipt
 
