@@ -4,7 +4,7 @@ Activegoal fixeddeadline2026-10-25T03:11:02Z; adopted2026-10-11T03:11:02Z. AllM1
 
 ## Live work
 
-H050productqueue session45793 was actuallylaunched via run_h050_product_queue.py. Fullstate m4-direct-conversion-001 completed normally; consumed session48834 terminal. Queue currentlyenrichment thenportablebuild. Poll actualreceipt/PIDs, no duplicateheavylaunch. Directtrajectory.h5 ~4.9GiB, all241frames. Code and sourceHDFimmutable. Actualrelocatedreplay and productnegatives stillpending; agentm4_product owns NEW m4/actual_validation only.
+H050directconversion+enrichment+portablebuild actuallycompleted. Previousqueue45793 terminalconsumed. NEW actualrelocationqueue session86545 actuallylaunched via run_m4_relocation_queue.py: charged actualpreparation COMPLETED then relocatedpositive+two rehashedHDFsemanticnegatives ACTUALLYRUNNING. Onlythisheavyqueue maylaunch untilterminal. Workerfix15c6c30e8 masks WHOLE originalNAScaseroot thenprobes originalchildren/files; relocatedbundle mounted/srv first. Fixture4passed includingrealbubblewrap outside/tmp; actualH050replaypending. Frozenworker/adapter/producer/runtime mustnotchangewhilebound. Pollrealreceipts/reservations/PIDs.
 
 ## Actual phase evidence
 
@@ -18,9 +18,11 @@ Wrapperactualhistoryvalidation found4.6566e-10CPUresummationroundoff; math.isclo
 
 ## Next available work
 
-1. FinishH050productqueue, inspect actualenrichedinterface+portableevaluator. Agentm4_product preparing source-denied actualrelocation+tamperworker, rootlaunchonly. No existingM4caseis creditedyet.
+1. Finishsession86545 actualrelocationqueue; inspect positiveactualfullstate/evaluator and bothactualrehashedpayloadnegatives beforefirstcredit. H050955419nodes/241frames,766nativepositioncensored. Allstates3Dlabelsunknownfate. No existingM4caseis creditedyet. Agentm4_product owns NEW m4/release only, assembler/datacard actualreceiptgated.
 2. H052/H058GenCaseactualcompleted; 4conditionshavefluidcounts591822,615978,688446,712602 withsame363597boundaries. See M4_INITIAL_CONDITIONS.json. Onlyinitialconditionevidence; remainingtwo needsolvers/audits/fullproduct. Solver-readycandidates m4-additional-definitions/prepared/solver-ready. Rootreview&newgrant needed, launchaftercurrentheavyqueue finishes andfirstproductisusable.
 3. H060alreadyfullsolved/audited/comparison; prepareactualdepthowner andfullstateconversionnext. ReusefrozenM4producer/batch2 sameasH050; neverreuse.50metadata for.60. H052/H058compatiblemanifests+semanticdiff/helper commitdd0546874.
 4. Four physicalconditionsshareoneupstreammotherlineage: keepallin development partition, validation empty, no randomwindowsplit/generalizationclaim. Motherreferenceonly nativepack; optionalmotherfullHDFconversionnotallocated.
 
 Do not amend/reset sharedHEAD. Commit --only exactownedfiles; preserve two pre-existing m2/upstream_conversion modifications (notneededbycurrentpipeline). Neveredit boundruntime/converter/producer inputs duringactivejobs.
+
+Rootreviewed immutableUNLAUNCHED requests+grants nowready forH060 m4-direct-conversion-001 andH052/H058 solver-001. Root m3agentpreparing receipt-gatedgeneric conditionproductqueue inm4-next-prepared. Do notoverwritealreadywritten rootrequests orgrants.
