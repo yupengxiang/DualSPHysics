@@ -1,0 +1,105 @@
+{
+  "schema": "ds-data-02.upstream-first.f1-label-mapping-audit.v1",
+  "analysis_date": "2026-10-11",
+  "purpose": "Verify H1/H3 identity from primary SPHERIC diagram, literal workbook labels, and official MeasureTool point metadata without fitting or applying a label swap.",
+  "primary_diagram_evidence": [
+    {
+      "artifact": "reference/source/test_case_2_v1p1.pdf",
+      "sha256": "36b56e3ad3348efcf845852393f5d5cb0edbe5e46a002346693aa40f29d9e01a",
+      "pdf_page_one_based": 2,
+      "printed_page": 1,
+      "figure": "Figure 1",
+      "observation": "The perspective measurement diagram labels the three tank probes from the obstacle-side probe outward as H1, H2, H3, and labels the reservoir probe H4. H1 is the leftmost tank probe in the displayed x direction; H3 is the third probe; H4 is in the reservoir."
+    },
+    {
+      "artifact": "reference/source/test_case_2_v1p1.pdf",
+      "sha256": "36b56e3ad3348efcf845852393f5d5cb0edbe5e46a002346693aa40f29d9e01a",
+      "pdf_page_one_based": 5,
+      "printed_page": 4,
+      "figure": "Figure 6",
+      "observation": "Both top and side views label the height probes left-to-right as H1, H2, H3, H4. H1 is before the box, H2 and H3 are downstream tank probes, and H4 is the reservoir probe. The figure text states that Hi are the vertical wave probes and dimensions are in metres."
+    }
+  ],
+  "workbook_literal_evidence": {
+    "artifact": "reference/source/test_case_2_exp_data.xls",
+    "sha256": "8126f8c8f6effb9e8bfb245a2d098186e9ebee2ef6e75fcb1b3166af17883d8c",
+    "sheet": "Experimental_data",
+    "range": "A1:N7396",
+    "header_cells": {
+      "A1": "Time (s)",
+      "J1": null,
+      "K1": "H1 (m)",
+      "L1": "H2 (m)",
+      "M1": "H3 (m)",
+      "N1": "H4 (m)"
+    },
+    "height_column_order": [
+      {"label": "H1", "column": "K", "first_row_value_m": 0.000266666666666667},
+      {"label": "H2", "column": "L", "first_row_value_m": 0.000533333333333333},
+      {"label": "H3", "column": "M", "first_row_value_m": 0.0004},
+      {"label": "H4", "column": "N", "first_row_value_m": 0.546666666666667}
+    ],
+    "graph_sheet_series_bindings": {
+      "H1_graph": "Experimental_data!$K$1; time Experimental_data!$A$2:$A$7396; values Experimental_data!$K$2:$K$7396",
+      "H2_graph": "Experimental_data!$L$1; time Experimental_data!$A$2:$A$7396; values Experimental_data!$L$2:$L$7396",
+      "H3_graph": "Experimental_data!$M$1; time Experimental_data!$A$2:$A$7396; values Experimental_data!$M$2:$M$7396",
+      "H4_graph": "Experimental_data!$N$1; time Experimental_data!$A$2:$A$7396; values Experimental_data!$N$2:$N$7396"
+    },
+    "interpretation": "The blank J column is between pressure columns and the height block; literal headers and each graph sheet independently bind H1 to K and H3 to M. There is no sparse-column or positional extraction basis for exchanging H1 and H3."
+  },
+  "official_measuretool_evidence": {
+    "point_input": {
+      "artifact": "input/elevation.txt",
+      "sha256": "3faf00390819c0a441479ed843012d064b71ddab58b5de3ac464061c4c700ba3",
+      "blocks": [
+        {"label": "H1", "xyz_m": [0.496, 0.5, 0.0]},
+        {"label": "H2", "xyz_m": [0.992, 0.5, 0.0]},
+        {"label": "H3", "xyz_m": [1.488, 0.5, 0.0]},
+        {"label": "H4", "xyz_m": [2.638, 0.5, 0.0]}
+      ],
+      "observation": "The official point blocks are ordered and labelled H1, H2, H3, H4 at increasing x; H1 and H3 are not interchangeable by the input labels or coordinates."
+    },
+    "actual_csv": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/postprocess-001/observations/measuretool/_elevation_Elevation.csv",
+      "sha256": "2a06978432a1adee57d87cb8dd80f480be53258621a29cb8d0d19d832228a784",
+      "metadata_coordinates_m": {
+        "Elevation_0": [0.496, 0.5, 0.0],
+        "Elevation_1": [0.992, 0.5, 0.0],
+        "Elevation_2": [1.488, 0.5, 0.0],
+        "Elevation_3": [2.638, 0.5, 0.545]
+      },
+      "exact_value_headers": [
+        "Elevation_0 [m]",
+        "Elevation_1 [m]",
+        "Elevation_2 [m]",
+        "Elevation_3 [m]"
+      ],
+      "binding": {
+        "H1": "Elevation_0 at XY (0.496, 0.5)",
+        "H2": "Elevation_1 at XY (0.992, 0.5)",
+        "H3": "Elevation_2 at XY (1.488, 0.5)",
+        "H4": "Elevation_3 at XY (2.638, 0.5); measured PosZ 0.545 retained as metadata"
+      }
+    }
+  },
+  "raw_history_sanity": {
+    "source_first_nonbaseline": {
+      "H1": {"time_s": 0.00102890562286451, "value_m": 0.0002},
+      "H3": {"time_s": 0.00903307120502639, "value_m": 0.000333333333333333}
+    },
+    "native_first_nonbaseline": {
+      "H1": {"time_s": 0.690043, "value_m": 0.748984},
+      "H3": {"time_s": 0.25001, "value_m": 0.0438828}
+    },
+    "interpretation": "These values are read from the literal K/M workbook columns and the exact-coordinate MeasureTool bindings. The different onset ordering therefore persists under the source-supported labels; it is not evidence for an H1/H3 exchange."
+  },
+  "conclusion": {
+    "diagram_supports_preserved_h1_h3_order": true,
+    "workbook_supports_preserved_h1_h3_order": true,
+    "official_input_and_csv_support_preserved_h1_h3_order": true,
+    "h1_h3_swap_supported_by_primary_evidence": false,
+    "fitted_or_curve_based_swap_performed": false,
+    "old_reports_preserved": true,
+    "diagnosis_effect": "The H1/H3 onset reversal remains a real discrepancy under the primary source labels. It must not be repaired by relabelling; any alternative mapping would require a separately justified, frozen source interpretation audit."
+  }
+}
