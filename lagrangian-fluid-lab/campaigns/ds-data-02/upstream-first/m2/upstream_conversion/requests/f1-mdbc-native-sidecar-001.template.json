@@ -1,0 +1,44 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "status": "template_after_existing_native_motive_audit",
+  "family_id": "F1",
+  "case_id": "UF_F1_MDBC_DAMBREAK3D",
+  "attempt_id": "m4-native-lifecycle-sidecar-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native_sidecar_from_audit.py",
+    "--audit",
+    "{native_audit_root}/native-motive-audit.json",
+    "--output",
+    "{attempt_root}/native-lifecycle-records.json",
+    "--zone",
+    "0",
+    "--event-start-s",
+    "0.0",
+    "--event-end-s",
+    "1.6"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "max_wall_seconds": 120,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 1048576,
+  "output_storage": "upstream_nas",
+  "external_scratch": false,
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native_sidecar_from_audit.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native-lifecycle-records.schema.json",
+    "{native_audit_root}/native-motive-audit.json"
+  ],
+  "acceptance": {
+    "source_audit": "existing official PartVTKOut/RunPARTs source-closed audit only",
+    "identity_key": "(Zone,Idp)",
+    "zone_binding": 0,
+    "selected_event_window_s": [0.0, 1.6],
+    "physical_fate": "UNKNOWN",
+    "no_new_decoder": true
+  },
+  "request_note": "JSON projection only. The existing official native motive audit performs the PartOut/RunPARTs decoding; this request preserves its reasons in the M4 sidecar without opening payloads or claiming physical fate."
+}

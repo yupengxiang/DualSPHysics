@@ -42,7 +42,13 @@ selects particle samples, changes `(Zone,Idp)`, or infers a material trajectory.
    transient missing ledgers. Official PartVTK checks remain enabled at the
    first, middle, and final selected frames.
 4. Root obtains a producer-native lifecycle sidecar from the existing official
-   PartOut/RunPARTs path. The sidecar follows
+   PartOut/RunPARTs path. The checked-in
+   `scripts/ds_data02_stage2_f1_dp0025_native_motive_audit_v2.py` is the closest
+   existing source-closed PartVTKOut/RunPARTs auditor; its manifest is
+   DP0025-specific, so it must be parent-bound or generalized by root for this
+   official case. Once that existing audit emits its small JSON result,
+   [`native_sidecar_from_audit.py`](native_sidecar_from_audit.py) projects the
+   result without opening any payload. The sidecar follows
    [`native-lifecycle-records.schema.json`](native-lifecycle-records.schema.json)
    and carries the native `reason`/`motive` for each `(Zone,Idp,time)` record.
    The route keeps those reasons as numerical-node censoring evidence. It never
@@ -90,7 +96,8 @@ complete-validity M2 artifact.
 
 The direct converter has no PartOut/RunPARTs argument. The native sidecar is
 therefore a deliberate post-conversion binding point for the existing official
-producer record path. Until it is present, the report audit status is
+producer record path. The projection request is
+`requests/f1-mdbc-native-sidecar-001.template.json`. Until it is present, the report audit status is
 `blocked_missing_native_partout_binding`; no scientific or portable-package
 claim is granted.
 
