@@ -49,6 +49,65 @@ class ConditionProductQueueTests(unittest.TestCase):
         self.assertIn("product-queue", path.name)
         self.assertTrue(path.is_relative_to(QUEUE.PREP))
 
+    def test_receipt_status_rejects_wrong_case_even_when_completed(self) -> None:
+        case = "UF_F1_MDBC_DP010_H060"
+        attempt = "m4-enrichment-001"
+        with tempfile.TemporaryDirectory(prefix="m4-receipt-case-") as temporary:
+            run = Path(temporary) / case
+            receipt_path = run / attempt / "execution-receipt.json"
+            receipt_path.parent.mkdir(parents=True)
+            receipt_path.write_text(json.dumps({
+                "schema": "ds02.execution-receipt.v1",
+                "status": "completed",
+                "returncode": 0,
+                "request": {"case_id": "UF_F1_MDBC_DP010_H052", "attempt_id": attempt},
+            }), encoding="utf-8")
+            status, actual_path, detail = QUEUE._receipt_status(run, attempt, case=case)
+            self.assertEqual(status, "invalid")
+            self.assertEqual(actual_path, receipt_path)
+            self.assertEqual(detail["validation_error"], "receipt_case_id_missing_or_mismatch")
+
+    def test_receipt_status_rejects_completed_nonzero_return(self) -> None:
+        case = "UF_F1_MDBC_DP010_H060"
+        attempt = "m4-enrichment-001"
+        with tempfile.TemporaryDirectory(prefix="m4-receipt-return-") as temporary:
+            run = Path(temporary) / case
+            receipt_path = run / attempt / "execution-receipt.json"
+            receipt_path.parent.mkdir(parents=True)
+            receipt_path.write_text(json.dumps({
+                "schema": "ds02.execution-receipt.v1",
+                "status": "completed",
+                "returncode": 1,
+                "request": {"case_id": case, "attempt_id": attempt},
+            }), encoding="utf-8")
+            status, _, detail = QUEUE._receipt_status(run, attempt, case=case)
+            self.assertEqual(status, "invalid")
+            self.assertEqual(detail["validation_error"], "completed_returncode_not_zero")
+
+    def test_completed_receipt_requires_exact_request_hash(self) -> None:
+        case = "UF_F1_MDBC_DP010_H060"
+        attempt = "m4-enrichment-001"
+        with tempfile.TemporaryDirectory(prefix="m4-receipt-hash-") as temporary:
+            root = Path(temporary)
+            run = root / case
+            receipt_path = run / attempt / "execution-receipt.json"
+            request_path = root / "request.json"
+            receipt_path.parent.mkdir(parents=True)
+            request_path.write_text(json.dumps({
+                "schema": "ds-data-02.runner.request.v1",
+                "case_id": case,
+                "attempt_id": attempt,
+            }), encoding="utf-8")
+            receipt_path.write_text(json.dumps({
+                "schema": "ds02.execution-receipt.v1",
+                "status": "completed",
+                "returncode": 0,
+                "request": {"case_id": case, "attempt_id": attempt},
+            }), encoding="utf-8")
+            status, _, detail = QUEUE._receipt_status(run, attempt, case=case, request_path=request_path)
+            self.assertEqual(status, "invalid")
+            self.assertEqual(detail["validation_error"], "missing_request_sha256")
+
     def test_h058_remains_fail_closed_without_solver_and_native_audits(self) -> None:
         case = "UF_F1_MDBC_DP010_H058"
         paths = QUEUE._case_paths(case)

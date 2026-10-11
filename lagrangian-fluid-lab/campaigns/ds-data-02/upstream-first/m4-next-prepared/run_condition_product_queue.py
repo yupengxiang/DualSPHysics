@@ -255,6 +255,31 @@ def _prepare_owner(case: str, paths: Mapping[str, Path]) -> dict[str, Any]:
     return {"record": owner, "binding": _binding(existing, "immutable child owner metadata")}
 
 
+def _receipt_identity_value(receipt: Mapping[str, Any], key: str) -> tuple[Any, bool]:
+    """Return one unambiguous identity value from a receipt and its request."""
+    request = receipt.get("request")
+    values: list[Any] = []
+    for container in (receipt, request if isinstance(request, Mapping) else {}):
+        if key in container and container[key] is not None:
+            values.append(container[key])
+    if not values or any(value != values[0] for value in values[1:]):
+        return None, False
+    return values[0], True
+
+
+def _receipt_identity_error(receipt: Mapping[str, Any], case: str, attempt: str) -> str | None:
+    for key, expected in (("case_id", case), ("attempt_id", attempt)):
+        actual, present = _receipt_identity_value(receipt, key)
+        if not present or actual != expected:
+            return f"receipt_{key}_missing_or_mismatch"
+    return None
+
+
+def _completed_returncode_is_zero(receipt: Mapping[str, Any]) -> bool:
+    value = receipt.get("returncode")
+    return isinstance(value, int) and not isinstance(value, bool) and value == 0
+
+
 def _receipt_gate(path: Path, case: str, attempt: str) -> dict[str, Any]:
     if not path.is_file() or path.is_symlink():
         return {"status": "missing", "path": str(path), "reason": f"missing_{attempt.replace('-', '_')}_receipt"}
@@ -264,14 +289,14 @@ def _receipt_gate(path: Path, case: str, attempt: str) -> dict[str, Any]:
         return {"status": "invalid", "path": str(path), "reason": str(exc)}
     if receipt.get("schema") != "ds02.execution-receipt.v1":
         return {"status": "invalid", "path": str(path), "reason": "unexpected_receipt_schema"}
-    request = receipt.get("request")
-    request_case = receipt.get("case_id") or (request.get("case_id") if isinstance(request, Mapping) else None)
-    request_attempt = receipt.get("attempt_id") or (request.get("attempt_id") if isinstance(request, Mapping) else None)
-    if request_case not in (None, case) or request_attempt not in (None, attempt):
-        return {"status": "invalid", "path": str(path), "reason": "receipt_case_or_attempt_mismatch"}
+    identity_error = _receipt_identity_error(receipt, case, attempt)
+    if identity_error is not None:
+        return {"status": "invalid", "path": str(path), "reason": identity_error}
     status = receipt.get("status")
     if status != "completed":
         return {"status": str(status or "unknown"), "path": str(path), "reason": f"receipt_not_completed_{status or 'unknown'}"}
+    if not _completed_returncode_is_zero(receipt):
+        return {"status": "invalid", "path": str(path), "reason": "completed_returncode_not_zero"}
     return {"status": "completed", "binding": _binding(path, f"completed {attempt} receipt"), "receipt": receipt}
 
 
@@ -683,12 +708,52 @@ def _validate_root_direct(case: str, paths: Mapping[str, Path], candidate: Mappi
     return request, grant
 
 
-def _receipt_status(run: Path, attempt: str) -> tuple[str, Path | None, dict[str, Any] | None]:
+def _receipt_status(
+    run: Path,
+    attempt: str,
+    *,
+    case: str | None = None,
+    request_path: Path | None = None,
+) -> tuple[str, Path | None, dict[str, Any] | None]:
+    """Read a stage receipt without allowing an unbound receipt to count.
+
+    ``request_path`` is supplied for product stages.  A completed receipt for
+    such a stage must bind the exact immutable request bytes.  Invalid JSON or
+    an invalid binding is represented as ``invalid`` with a diagnostic object,
+    so callers never dereference ``None`` while deciding whether to launch.
+    """
     path = run / attempt / "execution-receipt.json"
     if not path.is_file() or path.is_symlink():
         return "absent", None, None
-    receipt = _load(path, f"{attempt} execution receipt")
+    try:
+        receipt = _load(path, f"{attempt} execution receipt")
+    except QueueError as exc:
+        return "invalid", path, {"validation_error": str(exc)}
+    expected_case = case if case is not None else run.name
+    if receipt.get("schema") != "ds02.execution-receipt.v1":
+        return "invalid", path, {"validation_error": "unexpected_receipt_schema", "receipt": receipt}
+    identity_error = _receipt_identity_error(receipt, expected_case, attempt)
+    if identity_error is not None:
+        return "invalid", path, {"validation_error": identity_error, "receipt": receipt}
     status = str(receipt.get("status", "unknown"))
+    if status == "completed":
+        if not _completed_returncode_is_zero(receipt):
+            return "invalid", path, {"validation_error": "completed_returncode_not_zero", "receipt": receipt}
+        if request_path is not None:
+            try:
+                request = _load(request_path, "root stage request")
+            except QueueError as exc:
+                return "invalid", path, {"validation_error": f"completed_request_invalid: {exc}", "receipt": receipt}
+            request_sha256 = receipt.get("request_sha256")
+            if not isinstance(request_sha256, str) or not request_sha256:
+                return "invalid", path, {"validation_error": "missing_request_sha256", "receipt": receipt}
+            expected_sha256 = _request_hash(request_path)
+            if request_sha256 != expected_sha256:
+                return "invalid", path, {"validation_error": "completed_request_hash_mismatch", "receipt": receipt}
+            # Keep this lightweight check here; _require_completed_stage_binding
+            # below performs the full request/grant validation before reuse.
+            if request.get("case_id") != expected_case or request.get("attempt_id") != attempt:
+                return "invalid", path, {"validation_error": "completed_request_case_or_attempt_mismatch", "receipt": receipt}
     return status, path, receipt
 
 
@@ -740,21 +805,59 @@ def _materialize_post_request(case: str, paths: Mapping[str, Path], stage: str, 
     return request_path, grant_path
 
 
+def _stage_request_paths(case: str, paths: Mapping[str, Path], stage: str) -> tuple[Path, Path]:
+    if stage == "direct":
+        return paths["root_direct_request"], paths["root_direct_grant"]
+    attempt = {"enrichment": ENRICH_ATTEMPT, "portable_build": PORTABLE_ATTEMPT}.get(stage)
+    if attempt is None:
+        raise QueueError(f"unsupported stage for request binding: {stage}")
+    return BASE / "requests" / f"{case}-{attempt}.json", BASE / "batch2-runtime/grants" / f"{case}-{attempt}.json"
+
+
+def _require_completed_stage_binding(
+    case: str,
+    attempt: str,
+    receipt: Mapping[str, Any] | None,
+    request_path: Path,
+    grant_path: Path,
+) -> None:
+    if not isinstance(receipt, Mapping):
+        raise QueueError(f"{case}/{attempt} completed without a readable receipt")
+    if receipt.get("status") != "completed" or not _completed_returncode_is_zero(receipt):
+        raise QueueError(f"{case}/{attempt} completed binding has a nonzero return code")
+    request = _load(request_path, f"completed {attempt} root request")
+    if request.get("schema") != "ds-data-02.runner.request.v1":
+        raise QueueError(f"completed {attempt} root request has an unexpected schema")
+    if request.get("case_id") != case or request.get("attempt_id") != attempt:
+        raise QueueError(f"completed {attempt} root request case/attempt mismatch")
+    expected_sha256 = _request_hash(request_path)
+    if receipt.get("request_sha256") != expected_sha256:
+        raise QueueError(f"completed {attempt} receipt request hash mismatch")
+    _load_grant(grant_path, request_path)
+
+
 def _run_stage(case: str, paths: Mapping[str, Path], stage: str, source: Mapping[str, Any]) -> None:
     attempt = {"direct": paths["direct_attempt"], "enrichment": ENRICH_ATTEMPT, "portable_build": PORTABLE_ATTEMPT}[stage]
-    status, receipt_path, receipt = _receipt_status(paths["run"], attempt)
+    request_path, grant_path = _stage_request_paths(case, paths, stage)
+    status, receipt_path, receipt = _receipt_status(paths["run"], attempt, case=case, request_path=request_path)
     if status == "completed":
+        _require_completed_stage_binding(case, attempt, receipt, request_path, grant_path)
         return
     if status not in {"absent"}:
-        raise QueueError(f"{case}/{attempt} is {status}; refusing duplicate or failed launch")
+        reason = receipt.get("validation_error") if isinstance(receipt, Mapping) else None
+        detail = f": {reason}" if reason else ""
+        raise QueueError(f"{case}/{attempt} is {status}{detail}; refusing duplicate or failed launch")
     if stage == "direct":
         request_path, grant_path = _promote_candidate(case, paths, source["direct"]["record"])
     else:
         request_path, grant_path = _materialize_post_request(case, paths, stage, source)
     _run_shared(request_path, grant_path, summary_name=f"{case}-{attempt}-runner-summary.json")
-    final_status, _, _ = _receipt_status(paths["run"], attempt)
+    final_status, _, final_receipt = _receipt_status(paths["run"], attempt, case=case, request_path=request_path)
     if final_status != "completed":
-        raise QueueError(f"{case}/{attempt} did not complete: {final_status}")
+        reason = final_receipt.get("validation_error") if isinstance(final_receipt, Mapping) else None
+        detail = f": {reason}" if reason else ""
+        raise QueueError(f"{case}/{attempt} did not complete: {final_status}{detail}")
+    _require_completed_stage_binding(case, attempt, final_receipt, request_path, grant_path)
 
 
 def _launch(case: str, plan: Mapping[str, Any]) -> None:
