@@ -434,6 +434,136 @@ def test_optional_candidate_recipe_copy_must_match_bound_recipe(
         QUEUE._validate_native_candidate(candidate, manifest, "UF_F1_MDBC_DP010_H052", "exclusions")
 
 
+def _completed_preparation_fixture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> dict[str, Path]:
+    """Create a completed v2-shaped preparation using metadata only."""
+
+    case = "UF_F1_MDBC_DP010_H052"
+    attempt = "native-preparation-integrity-001"
+    root = tmp_path / "campaign-root"
+    additional = tmp_path / "additional"
+    helper = _write(additional / "prepare_m4_additional_audits.py", "helper metadata\n")
+    current = _write(tmp_path / "run_solver_native_audit_queue_v2.py", "v2 queue metadata\n")
+    legacy = _write(tmp_path / "run_solver_native_audit_queue.py", "v1 queue metadata\n")
+    helper_output = additional / "prepared"
+    runs = tmp_path / "runs"
+    request_dir = tmp_path / "requests"
+    grant_dir = tmp_path / "grants"
+    request_path = request_dir / f"{case}-{attempt}.json"
+    grant_path = grant_dir / f"{case}-{attempt}.json"
+    receipt_path = runs / case / attempt / "execution-receipt.json"
+    candidate_path = (
+        helper_output / "native-exclusions" / f"{case}-native-integrity-001-request.json"
+    )
+    input_files = [helper, current]
+    request = {
+        "schema": QUEUE.REQUEST_SCHEMA,
+        "status": "root_review_candidate_pending_preparation",
+        "family_id": "F1",
+        "case_id": case,
+        "attempt_id": attempt,
+        "kind": "cpu",
+        "cpu_task_kind": "conversion",
+        "cpu_threads": 1,
+        "max_wall_seconds": 3600,
+        "estimated_storage_bytes": QUEUE.PREPARATION_STORAGE,
+        "estimated_temp_peak_bytes": QUEUE.PREPARATION_TEMP,
+        "estimated_deferred_read_bytes": 0,
+        "output_storage": "upstream_nas",
+        "cwd": str(root),
+        "worktree_root": str(root),
+        "command": [
+            str(QUEUE.PYTHON),
+            str(helper),
+            "native-exclusions",
+            "--case",
+            case,
+            "--output-dir",
+            str(helper_output),
+        ],
+        "input_files": [str(path) for path in input_files],
+        "gpu_reservation": {
+            "required": False,
+            "gpu_seconds": 0,
+            "runner_owns_gpu_leases": True,
+        },
+    }
+    request_path.parent.mkdir(parents=True, exist_ok=True)
+    request_path.write_text(json.dumps(request, sort_keys=True) + "\n", encoding="utf-8")
+    grant = {
+        "schema": QUEUE.GRANT_SCHEMA,
+        "status": "granted",
+        "issuer": "root",
+        "immutable": True,
+        "request_path": str(request_path.resolve()),
+        "request_sha256": QUEUE._sha256(request_path),
+        "attempt_id": f"F1/{case}/{attempt}",
+    }
+    grant["payload_sha256"] = QUEUE._payload_hash(grant)
+    grant_path.parent.mkdir(parents=True, exist_ok=True)
+    grant_path.write_text(json.dumps(grant, sort_keys=True) + "\n", encoding="utf-8")
+    input_hashes = {
+        str(path.resolve()): QUEUE._sha256(path)
+        for path in input_files
+    }
+    receipt = {
+        "schema": QUEUE.RECEIPT_SCHEMA,
+        "status": "completed",
+        "returncode": 0,
+        "case_id": case,
+        "attempt_id": attempt,
+        "request": {"case_id": case, "attempt_id": attempt},
+        "request_sha256": QUEUE._sha256(request_path),
+        "input_hashes_at_launch": dict(input_hashes),
+        "input_hashes_after_run": dict(input_hashes),
+    }
+    receipt_path.parent.mkdir(parents=True, exist_ok=True)
+    receipt_path.write_text(json.dumps(receipt, sort_keys=True) + "\n", encoding="utf-8")
+    _write(candidate_path, "candidate metadata\n")
+
+    monkeypatch.setattr(QUEUE, "ROOT", root)
+    monkeypatch.setattr(QUEUE, "ADDITIONAL", additional)
+    monkeypatch.setattr(QUEUE, "HELPER", helper)
+    monkeypatch.setattr(QUEUE, "HELPER_OUTPUT", helper_output)
+    monkeypatch.setattr(QUEUE, "SCRIPT", current)
+    monkeypatch.setattr(QUEUE, "LEGACY_SCRIPT", legacy)
+    monkeypatch.setattr(QUEUE, "RUNS", runs)
+    monkeypatch.setattr(QUEUE, "REQUESTS", request_dir)
+    monkeypatch.setattr(QUEUE, "GRANTS", grant_dir)
+    return {
+        "request": request_path,
+        "grant": grant_path,
+        "receipt": receipt_path,
+        "script": current,
+    }
+
+
+def test_completed_v2_preparation_is_reused_with_current_script_binding(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _completed_preparation_fixture(tmp_path, monkeypatch)
+    before = (paths["request"].read_bytes(), paths["grant"].read_bytes())
+    reused = QUEUE._reuse_completed_preparation(
+        "UF_F1_MDBC_DP010_H052", "exclusions"
+    )
+    assert reused == (paths["request"], paths["grant"])
+    assert (paths["request"].read_bytes(), paths["grant"].read_bytes()) == before
+
+
+def test_completed_v2_preparation_rejects_stale_script_after_run_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _completed_preparation_fixture(tmp_path, monkeypatch)
+    receipt = json.loads(paths["receipt"].read_text(encoding="utf-8"))
+    receipt["input_hashes_after_run"][str(paths["script"].resolve())] = "0" * 64
+    paths["receipt"].write_text(json.dumps(receipt) + "\n", encoding="utf-8")
+    with pytest.raises(QUEUE.QueueError, match="current bytes"):
+        QUEUE._reuse_completed_preparation(
+            "UF_F1_MDBC_DP010_H052", "exclusions"
+        )
+
+
 def test_completed_h052_preparation_is_reused_without_duplicate_or_mutation() -> None:
     case = "UF_F1_MDBC_DP010_H052"
     request_path = QUEUE._root_request_path(case, "native-preparation-integrity-001")

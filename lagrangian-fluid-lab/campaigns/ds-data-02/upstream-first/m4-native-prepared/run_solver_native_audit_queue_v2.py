@@ -722,13 +722,60 @@ def _validate_preparation_request(request: Mapping[str, Any], case: str, mode: s
         _regular(Path(value), "preparation input")
 
 
+def _assert_completed_preparation_script_binding(
+    request: Mapping[str, Any], receipt: Mapping[str, Any], case: str, attempt: str
+) -> None:
+    """Bind a completed preparation to this v2 file or the consumed v1 file.
+
+    The preparation runner records hashes for every request input both before
+    and after execution.  Reuse is therefore allowed only when the immutable
+    request names the exact current v2 script or the preserved v1 script and
+    both receipt maps carry that script's current digest.  A queue-looking
+    path from any other location is rejected instead of being treated as
+    equivalent provenance.
+    """
+
+    inputs = request.get("input_files")
+    if not isinstance(inputs, list):
+        raise QueueError(f"{case}/{attempt} preparation input_files is not a list")
+    allowed = {SCRIPT.resolve(), LEGACY_SCRIPT.resolve()}
+    bound: set[Path] = set()
+    for value in inputs:
+        if not isinstance(value, str):
+            raise QueueError(f"{case}/{attempt} preparation input file is not a string")
+        path = Path(value).expanduser().resolve()
+        if path.name.startswith("run_solver_native_audit_queue") and path not in allowed:
+            raise QueueError(f"{case}/{attempt} preparation binds an unexpected queue script: {path}")
+        if path in allowed:
+            bound.add(path)
+    if not bound:
+        raise QueueError(
+            f"{case}/{attempt} completed preparation does not bind the current or preserved queue script"
+        )
+
+    launch = receipt.get("input_hashes_at_launch")
+    after_run = receipt.get("input_hashes_after_run")
+    if not isinstance(launch, Mapping) or not isinstance(after_run, Mapping):
+        raise QueueError(
+            f"{case}/{attempt} completed preparation receipt lacks input launch/after-run hashes"
+        )
+    for path in sorted(bound, key=str):
+        expected = _sha256(_regular(path, f"{case}/{attempt} queue script") or path)
+        key = str(path)
+        if launch.get(key) != expected or after_run.get(key) != expected:
+            raise QueueError(
+                f"{case}/{attempt} completed preparation receipt does not bind the current bytes of {path}"
+            )
+
+
 def _reuse_completed_preparation(case: str, mode: str) -> tuple[Path, Path] | None:
     """Reuse an already completed preparation without changing its bytes.
 
     H052's integrity preparation was consumed by the v1 queue before this v2
     shape fix.  Its request/grant/receipt and old queue-script input are an
-    immutable historical stage.  A v2 launch may consume that stage, but it
-    must never regenerate it with this file's path in the input list.
+    immutable historical stage.  A v2 launch may consume that stage, while a
+    preparation created by this file may bind the current v2 script.  Neither
+    case is regenerated or accepted without receipt-bound script hashes.
     """
 
     p = _paths(case)
@@ -751,8 +798,7 @@ def _reuse_completed_preparation(case: str, mode: str) -> tuple[Path, Path] | No
     request = _load(request_path, "existing completed preparation request")
     _validate_preparation_request(request, case, mode)
     command = request.get("command")
-    if not isinstance(command, list) or str(LEGACY_SCRIPT) not in [str(item) for item in request.get("input_files", [])]:
-        raise QueueError("completed preparation does not bind the consumed v1 queue script")
+    _assert_completed_preparation_script_binding(request, receipt, case, attempt)
     if command != [
         str(PYTHON), str(HELPER),
         "native-exclusions" if mode == "exclusions" else "native-frames",

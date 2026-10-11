@@ -20,8 +20,10 @@ The sequence for a case is:
    completed receipt to bind the exact request hash.
 2. Run or reuse the one-thread, 3600-second, 64 MiB native-preparation stage
    through `ds_data02_runtime_v6_batch2.py`, with no GPU reservation. A
-   completed preparation request from the consumed v1 queue is reused
-   byte-for-byte; it is never regenerated with this v2 launcher path.
+   completed preparation request from the consumed v1 queue, or a completed
+   preparation created by this v2 launcher, is reused byte-for-byte. Reuse
+   requires the exact v1/v2 queue-script binding and matching launch and
+   after-run input hashes; no preparation is regenerated.
 3. Promote the frozen-worker native-integrity candidate and run the small
    exclusion audit through the same batch-2 runner.
 4. After verified exclusions, run the second charged preparation and promote
