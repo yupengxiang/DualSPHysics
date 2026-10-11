@@ -1,10 +1,12 @@
 # M4 normalized upstream adapter
 
-This subtree is an M4 consumer of the existing data-product native conversion
-interface. It packages a normalized HDF5 case and verifies its identity,
-validity, and numerical endpoint labels. It does not decode BI4, inspect
-PartOut, invoke a solver, or replace the converter owned by
-`m2/upstream_conversion`.
+This subtree owns the M4 handoff producer and consumer. The producer consumes a
+completed standard HDF5 and report from `scripts/ds_data02_direct_convert.py`,
+the generated XML and owner metadata, and verified native-integrity/full-frame
+scan receipts. It creates a separate enriched HDF5 copy with `/native` and
+`/transport` datasets. It opens the direct-converter artifact read-only and
+never patches it, decodes BI4, inspects PartOut, invokes a solver, or replaces
+the converter owned by `m2/upstream_conversion`.
 
 The handoff contract is
 [`native-conversion-interface.schema.json`](native-conversion-interface.schema.json).
@@ -42,6 +44,15 @@ rejects duplicate typed identities, mask/hash disagreement, endpoint identity
 permutations, label/mask mismatches, fabricated fate labels, and finite
 displacements for missing endpoint pairs.
 
+For the M3 depth children, the producer derives a child owner record before
+direct conversion. It binds the evaluated generated XML, M3 case manifest, and
+semantic diff to a depth-specific `physical_binding` hash. The generated XML's
+obstacle and fillbox values replace the legacy mother-card separator range;
+the rounded fillbox is retained as explicit generated evidence. H050 and H060
+request templates are in [`requests/`](requests/), and both remain
+`prepared_not_run` until the root-controlled solver, native audits, and storage
+gates are complete.
+
 `m4-condition-template.json` records the bounded F1 mapping. It preserves the
 known native exclusion counts of **657** for the official mother and **382**
 for the DP015 numerical bridge. DP010 H050/H060 remain `pending_audit` with
@@ -51,6 +62,35 @@ All four rows are prepared templates and carry `not_credited`; preparation is
 not an M4 product acceptance claim.
 
 ## Commands
+
+Prepare a child owner record before invoking the direct converter:
+
+```sh
+/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python \
+  m4_direct_enrich.py prepare-owner \
+  --owner-metadata /path/to/official-mother-owner.json \
+  --generated-xml /data/nas/.../UF_F1_MDBC_DP010_H050.xml \
+  --case-manifest /path/to/UF_F1_MDBC_DP010_H050.json \
+  --semantic-diff /path/to/semantic-diff.json \
+  --output /data/nas/.../child-owner-metadata.json
+```
+
+After the direct converter and both native audits have completed, create the
+new enriched copy and interface:
+
+```sh
+/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python \
+  m4_direct_enrich.py enrich \
+  --trajectory /path/to/direct/trajectory.h5 \
+  --report /path/to/direct/direct-conversion-report.json \
+  --generated-xml /data/nas/.../generated-child.xml \
+  --owner-metadata /data/nas/.../child-owner-metadata.json \
+  --native-integrity /data/nas/.../native-integrity-001/integrity.json \
+  --frame-scan /data/nas/.../native-frame-scan-001/frame-identity-scan.json \
+  --case-manifest /path/to/child-case-manifest.json \
+  --semantic-diff /path/to/semantic-diff.json \
+  --output-dir /data/nas/.../m4-enriched
+```
 
 Validate a producer handoff, without creating a bundle:
 

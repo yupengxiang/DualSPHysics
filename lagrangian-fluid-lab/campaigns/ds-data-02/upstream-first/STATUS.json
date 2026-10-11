@@ -14,7 +14,7 @@
     "M0": "passed",
     "M1": "two_actual_diagnostic_reference_packs_complete_no_calibration_or_convergence_credit",
     "M2": "completed_diagnostic_external_reader_and_self_contained_3d_portable_package",
-    "M3": "H050_solver_completed_H060_solver_running_child_audits_and_comparisons_pending",
+    "M3": "both_depth_solvers_completed_H050_exclusions_verified_frame_audit_running_comparisons_pending",
     "M4": "pending"
   },
   "agents": {
@@ -23,9 +23,9 @@
     "m4_product": "GPT5.6Luna Max"
   },
   "running_attempts": [
-    "F1/UF_F1_MDBC_DP010_H060/solver-001"
+    "F1/UF_F1_MDBC_DP010_H050/native-frame-scan-001"
   ],
-  "next": "Poll H060 session44780 and auditqueue18738; do not launch parallel heavywork. Prepare actual CSV post/comparison requests while waiting.",
+  "next": "Poll auditqueue18738; then sharedrunner H050 postprocess, finalized comparison; prepare H060 postprocess/comparison.",
   "nas_preflight_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/UF_NAS_PREFLIGHT/check-001/execution-receipt.json",
   "runtime_regression": {
     "commit": "45ed7af9f",
@@ -49,7 +49,6 @@
     "bytes": 29500166968
   },
   "active_sessions": {
-    "H060_dependency_then_solver": 44780,
     "derivative_native_audit_queue": 18738
   },
   "F5_comparison": {
@@ -76,7 +75,7 @@
   },
   "F1_comparison_veto": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/F1_COMPARISON_001_VETO.json",
   "usage_note": "NAS terminal receipts, includes failed attempts; authoritative parent ledger also retains preflight and active reservations.",
-  "updated_at_utc": "2026-10-11T04:52:01.149445+00:00",
+  "updated_at_utc": "2026-10-11T04:57:26.332741+00:00",
   "F1_comparison": {
     "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-002/comparison/spheric-comparison-report.json",
     "water_height_rmse_m": [
@@ -118,7 +117,7 @@
     "source_unchanged": true
   },
   "M3_fine_derivatives": {
-    "status": "H050_solver_completed_H060_solver_running",
+    "status": "both_solvers_completed_native_audits_running",
     "cases": [
       "UF_F1_MDBC_DP010_H050",
       "UF_F1_MDBC_DP010_H060"
@@ -149,7 +148,7 @@
   "derivative_native_audit_queue": {
     "pid": 3691651,
     "session": 18738,
-    "status": "waiting_H060_completed_receipt",
+    "status": "H050_exclusions_verified_H050_frame_scan_running",
     "sequence": [
       "H050 native-integrity",
       "H050 native-frame-scan",
@@ -170,5 +169,11 @@
     "credit_count": 0
   },
   "H050_postprocess_request": "root reviewed actual receipt-bound request; wait for auditqueue18738 completion",
-  "batch2_runtime_review": "draft correction requested: parent home_free_floor policy, cumulative terminal accounting, actual evidence gate and finite necessary storage"
+  "batch2_runtime_review": "draft correction requested: parent home_free_floor policy, cumulative terminal accounting, actual evidence gate and finite necessary storage",
+  "H060_solver": {
+    "status": "completed",
+    "gpu_seconds": 681.080445850268,
+    "cpu_core_seconds": 754.630702,
+    "bytes": 8327516332
+  }
 }
