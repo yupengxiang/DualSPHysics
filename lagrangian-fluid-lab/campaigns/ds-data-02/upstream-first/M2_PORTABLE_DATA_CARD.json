@@ -1,0 +1,104 @@
+{
+  "schema": "ds-data-02.m2.data-card.v1",
+  "case_id": "UF_PORTABLE_F1",
+  "source_case_id": "F1_REF_ECC_NOMINAL_FINE",
+  "role": "existing_3d_diagnostic_portability_demonstrator",
+  "not_new_physical_condition": true,
+  "dimension": 3,
+  "time_window_s": [
+    0,
+    1.6
+  ],
+  "save_interval_s": 0.01,
+  "particles": 110468,
+  "fluid_particles": 79200,
+  "boundary_particles": 31268,
+  "frames": 161,
+  "identity": "(Zone,Idp) numerical particle identity; no experimental material trajectory claim",
+  "fields": {
+    "available": [
+      "time",
+      "particle_id",
+      "particle_zone",
+      "valid",
+      "position",
+      "velocity",
+      "density",
+      "mass",
+      "pressure",
+      "type",
+      "mk",
+      "initial_type",
+      "initial_mk",
+      "initial_mass"
+    ],
+    "label_fields": [
+      "particle_id",
+      "particle_zone",
+      "source_position_m",
+      "destination_position_m",
+      "displacement_m",
+      "source_type",
+      "source_mk",
+      "destination_type",
+      "destination_mk",
+      "valid_source",
+      "valid_destination",
+      "observed_all_frames",
+      "destination_region"
+    ],
+    "unavailable": [
+      "source_solver_paths",
+      "raw_bi4_path",
+      "decoder_path"
+    ],
+    "validity_contract": "closed fixed identity axis; expected complete for F1 reference"
+  },
+  "labels": "native typed-identity endpoint displacement, validity and final-region membership; no physical escape classification",
+  "build_path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1",
+  "relocated_path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-validate-001/m2-relocated/UF_PORTABLE_F1",
+  "loader_command": [
+    "python",
+    "/absolute/relocated/bundle/runtime/portable_bundle.py",
+    "validate",
+    "--bundle-root",
+    "/absolute/relocated/bundle"
+  ],
+  "dependencies": [
+    "Python",
+    "numpy",
+    "h5py"
+  ],
+  "verification": {
+    "source_hdf5_bound_to_conversion_report": true,
+    "all_frame_numerical_fields_scanned_finite": true,
+    "full_identity_and_endpoint_label_recomputation": true,
+    "original_paths_denied_in_bubblewrap": true,
+    "real_copied_artifact_negative_test": "pending"
+  },
+  "qualification": {
+    "data_engineering": "isolated_replay_passed_negative_artifact_audit_pending",
+    "experimental_validation": "not_claimed",
+    "numerical_convergence": "not_claimed",
+    "event_timing": "not_qualified_at_0.01_s",
+    "M3_mother_acceptance": "not_established_by_portability"
+  },
+  "evidence": [
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/manifest.json",
+      "sha256": "da74989ac240b5f36ed92f5fd71eee71ba1d6b46a2da2dfc4ab6c9537eb2ed72"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-validate-001/m2-relocated/UF_PORTABLE_F1-isolated-validation.json",
+      "sha256": "44080b9cc01d5b68aa049ac6339f6f8a0e181a9cf1b88d9ed4dda044cf057146"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/execution-receipt.json",
+      "sha256": "05e91845ca5d059364ab8aec2507cf6895bf36585d2a3ab71dc9007c8fd7a19e"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-validate-001/execution-receipt.json",
+      "sha256": "6a47dd30c8dae51e8d2e2c789ebcf6e47c9e69b587a7fce67b733e1f5e58d2a0"
+    }
+  ]
+}
