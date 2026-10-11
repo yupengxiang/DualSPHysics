@@ -295,6 +295,23 @@ def read_elevation_csv(path: Path) -> Tuple[Dict[str, List[Tuple[float, float]]]
     body = rows[header_row + 1 :]
     time_index = time_column(headers)
     indices, warnings = choose_elevation_columns(headers, body)
+    # Official MeasureTool elevation exports include a PosX metadata row before
+    # the Part/Time header.  Bind columns to those stated positions when it is
+    # available, rather than relying on a positional fallback.
+    metadata_positions: Dict[str, int] = {}
+    metadata_row: Optional[Sequence[str]] = None
+    for row in rows[:header_row]:
+        if not any("posx" in normalize(cell) for cell in row):
+            continue
+        metadata_row = row
+        for index, cell in enumerate(row):
+            x = number(cell)
+            if x in (5.0, 6.0, 7.0) and index < len(headers):
+                metadata_positions[f"x{int(x)}"] = index
+    if all(key in metadata_positions for key in ("x5", "x6", "x7")):
+        indices = metadata_positions
+        warnings = [warning for warning in warnings if "positional" not in warning]
+        warnings.append("elevation_point_mapping=official_PosX_metadata")
     series = parse_wide_columns(body, time_index, indices)
     if any(not series[key] for key in ("x5", "x6", "x7")):
         raise ValueError(f"one or more elevation columns contain no numeric data: {indices}")
@@ -304,6 +321,12 @@ def read_elevation_csv(path: Path) -> Tuple[Dict[str, List[Tuple[float, float]]]
         "header_row_zero_based": header_row,
         "headers": list(headers),
         "column_indices_zero_based": indices,
+        "metadata_point_positions_m": {
+            key: number(metadata_row[index])
+            for key, index in metadata_positions.items()
+        }
+        if metadata_positions and metadata_row is not None
+        else {},
         "warnings": warnings,
         "row_count_after_header": len(body),
     }
