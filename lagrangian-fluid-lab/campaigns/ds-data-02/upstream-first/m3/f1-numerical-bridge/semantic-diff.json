@@ -1,0 +1,111 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-numerical-bridge.semantic-diff.v1",
+  "status": "verified_prepared_definitions",
+  "source_mother": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+  "source_mother_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+  "comparisons": [
+    {
+      "name": "official_mother_to_dp015_bridge",
+      "left": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "right": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_BASE_Def.xml",
+      "allowed_changes": [
+        {
+          "path": "casedef/geometry/definition/@dp",
+          "before": "0.01",
+          "after": "0.015"
+        }
+      ],
+      "changed_paths": [
+        {
+          "path": "casedef/geometry/definition/@dp",
+          "kind": "attribute",
+          "before": "0.01",
+          "after": "0.015"
+        }
+      ],
+      "unexpected_changes": [],
+      "all_non_allowed_semantics_equal": true,
+      "left_canonical_sha256": "19da30daa1d1eb6b10ebccc227c734cf6dced444ab4fc02d9fe5858f522d55d8",
+      "right_canonical_sha256": "4548db07545c3275fefa6be23c85e69e2321578d383cfe2d7df8f28749e4533d"
+    },
+    {
+      "name": "dp015_bridge_to_H050",
+      "left": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_BASE_Def.xml",
+      "right": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_H050_Def.xml",
+      "allowed_changes": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "before": "0.55",
+          "after": "0.50"
+        }
+      ],
+      "changed_paths": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.50"
+        }
+      ],
+      "unexpected_changes": [],
+      "all_non_allowed_semantics_equal": true,
+      "left_canonical_sha256": "4548db07545c3275fefa6be23c85e69e2321578d383cfe2d7df8f28749e4533d",
+      "right_canonical_sha256": "703d30fdb5d70ce9c8b884dfc4d27d1b842d797e942e32f0cf8644a936748ea0"
+    },
+    {
+      "name": "dp015_bridge_to_H060",
+      "left": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_BASE_Def.xml",
+      "right": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_H060_Def.xml",
+      "allowed_changes": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "before": "0.55",
+          "after": "0.60"
+        }
+      ],
+      "changed_paths": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.60"
+        }
+      ],
+      "unexpected_changes": [],
+      "all_non_allowed_semantics_equal": true,
+      "left_canonical_sha256": "4548db07545c3275fefa6be23c85e69e2321578d383cfe2d7df8f28749e4533d",
+      "right_canonical_sha256": "b08146500944bebc8c244ade238cf8dbff25772648e7563c84910ec8b77f5fc5"
+    }
+  ],
+  "all_comparisons_pass": true,
+  "physics_control_sha256": {
+    "official_mother": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "bridge_base": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "H050": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "H060": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503"
+  },
+  "timing": {
+    "TimeMax": "6",
+    "TimeOut": "0.01"
+  },
+  "physical_axis": {
+    "name": "initial_fill_height_m",
+    "mother_reference_value_m": 0.55,
+    "candidate_values_m": [
+      0.5,
+      0.6
+    ],
+    "path": "casedef/geometry/commands/mainlist/fillbox/size/@z"
+  },
+  "numerical_bridge": {
+    "path": "casedef/geometry/definition/@dp",
+    "mother_dp_m": 0.01,
+    "bridge_dp_m": 0.015,
+    "same_physical_mother": true,
+    "new_physical_condition": false
+  },
+  "acceptance": {
+    "status": "not_assessed",
+    "claim": "No M1 mother acceptance, bridge equivalence, or derivative acceptance is claimed by this metadata package."
+  }
+}

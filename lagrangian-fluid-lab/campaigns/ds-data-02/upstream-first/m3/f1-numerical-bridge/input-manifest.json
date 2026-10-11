@@ -1,0 +1,468 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-numerical-bridge.input-manifest.v1",
+  "status": "prepared_not_submitted",
+  "source_mother": {
+    "case_id": "UF_F1_MDBC_DAMBREAK3D",
+    "official_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "official_definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "role": "reference_only; immutable source; no derivative acceptance credit"
+  },
+  "recipes": {
+    "bridge_base": {
+      "case_id": "UF_F1_MDBC_DP015_BASE",
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_BASE_Def.xml",
+      "sha256": "9270a3ec246de036402fa94fe18c17c4ba919c952d14902cd0a5f54b8bf00f04",
+      "geometry": {
+        "definition_dp_m": "0.015",
+        "fillbox_size_x_m": "1.4",
+        "fillbox_size_y_m": "1",
+        "fillbox_size_z_m": "0.55"
+      },
+      "edit_contract": "only casedef/geometry/definition@dp changes from official mother 0.01 to 0.015",
+      "physical_condition": "same official F1 mother; numerical resolution recipe only"
+    },
+    "H050": {
+      "case_id": "UF_F1_MDBC_DP015_H050",
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_H050_Def.xml",
+      "sha256": "e7a2faff92403de52f216338f199278a1fa670121bdac54113fd923d5fb10da9",
+      "geometry": {
+        "definition_dp_m": "0.015",
+        "fillbox_size_x_m": "1.4",
+        "fillbox_size_y_m": "1",
+        "fillbox_size_z_m": "0.50"
+      },
+      "edit_contract": "only casedef/geometry/commands/mainlist/fillbox/size@z changes from bridge 0.55 to 0.50",
+      "physical_condition": "candidate initial fill-height derivative; no equivalence/acceptance claim"
+    },
+    "H060": {
+      "case_id": "UF_F1_MDBC_DP015_H060",
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_H060_Def.xml",
+      "sha256": "8eb18894d6807d8b7b892fc875f5bef85ad4ad832826e7fe1d107e97e87f000b",
+      "geometry": {
+        "definition_dp_m": "0.015",
+        "fillbox_size_x_m": "1.4",
+        "fillbox_size_y_m": "1",
+        "fillbox_size_z_m": "0.60"
+      },
+      "edit_contract": "only casedef/geometry/commands/mainlist/fillbox/size@z changes from bridge 0.55 to 0.60",
+      "physical_condition": "candidate initial fill-height derivative; no equivalence/acceptance claim"
+    }
+  },
+  "physics_controls": {
+    "shared_control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "snapshots": {
+      "official_mother": {
+        "constants_values": {
+          "gravity": {
+            "comment": "Gravitational acceleration",
+            "units_comment": "m/s^2",
+            "x": "0",
+            "y": "0",
+            "z": "-9.81"
+          },
+          "rhop0": {
+            "comment": "Reference density of the fluid",
+            "units_comment": "kg/m^3",
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "comment": "Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)",
+            "value": "2"
+          },
+          "hswl": {
+            "auto": "true",
+            "comment": "Maximum still water level to calculate speedofsound using coefsound",
+            "units_comment": "metres (m)",
+            "value": "0"
+          },
+          "gamma": {
+            "comment": "Polytropic constant for water used in the state equation",
+            "value": "7"
+          },
+          "speedsystem": {
+            "auto": "true",
+            "comment": "Maximum system speed (by default the dam-break propagation is used)",
+            "value": "0"
+          },
+          "coefsound": {
+            "comment": "Coefficient to multiply speedsystem",
+            "value": "20"
+          },
+          "speedsound": {
+            "auto": "true",
+            "comment": "Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)",
+            "value": "0"
+          },
+          "hdp": {
+            "comment": "Alternative option to calculate the smoothing length (h=hdp*dp)",
+            "value": "2"
+          },
+          "cflnumber": {
+            "comment": "Coefficient to multiply dt",
+            "value": "0.2"
+          }
+        },
+        "parameter_values": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "NoPenetration": "0",
+          "StepAlgorithm": "2",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "ShiftCoef": "-2",
+          "ShiftTFS": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0.0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtFixedFile": "NONE",
+          "DtAllParticles": "0",
+          "TimeMax": "6",
+          "TimeOut": "0.01",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300",
+          "WrnPartsOut": "1",
+          "MinFluidStop": "0"
+        },
+        "control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+        "time_max_s": "6",
+        "time_out_s": "0.01"
+      },
+      "bridge_base": {
+        "constants_values": {
+          "gravity": {
+            "comment": "Gravitational acceleration",
+            "units_comment": "m/s^2",
+            "x": "0",
+            "y": "0",
+            "z": "-9.81"
+          },
+          "rhop0": {
+            "comment": "Reference density of the fluid",
+            "units_comment": "kg/m^3",
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "comment": "Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)",
+            "value": "2"
+          },
+          "hswl": {
+            "auto": "true",
+            "comment": "Maximum still water level to calculate speedofsound using coefsound",
+            "units_comment": "metres (m)",
+            "value": "0"
+          },
+          "gamma": {
+            "comment": "Polytropic constant for water used in the state equation",
+            "value": "7"
+          },
+          "speedsystem": {
+            "auto": "true",
+            "comment": "Maximum system speed (by default the dam-break propagation is used)",
+            "value": "0"
+          },
+          "coefsound": {
+            "comment": "Coefficient to multiply speedsystem",
+            "value": "20"
+          },
+          "speedsound": {
+            "auto": "true",
+            "comment": "Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)",
+            "value": "0"
+          },
+          "hdp": {
+            "comment": "Alternative option to calculate the smoothing length (h=hdp*dp)",
+            "value": "2"
+          },
+          "cflnumber": {
+            "comment": "Coefficient to multiply dt",
+            "value": "0.2"
+          }
+        },
+        "parameter_values": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "NoPenetration": "0",
+          "StepAlgorithm": "2",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "ShiftCoef": "-2",
+          "ShiftTFS": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0.0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtFixedFile": "NONE",
+          "DtAllParticles": "0",
+          "TimeMax": "6",
+          "TimeOut": "0.01",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300",
+          "WrnPartsOut": "1",
+          "MinFluidStop": "0"
+        },
+        "control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+        "time_max_s": "6",
+        "time_out_s": "0.01"
+      },
+      "H050": {
+        "constants_values": {
+          "gravity": {
+            "comment": "Gravitational acceleration",
+            "units_comment": "m/s^2",
+            "x": "0",
+            "y": "0",
+            "z": "-9.81"
+          },
+          "rhop0": {
+            "comment": "Reference density of the fluid",
+            "units_comment": "kg/m^3",
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "comment": "Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)",
+            "value": "2"
+          },
+          "hswl": {
+            "auto": "true",
+            "comment": "Maximum still water level to calculate speedofsound using coefsound",
+            "units_comment": "metres (m)",
+            "value": "0"
+          },
+          "gamma": {
+            "comment": "Polytropic constant for water used in the state equation",
+            "value": "7"
+          },
+          "speedsystem": {
+            "auto": "true",
+            "comment": "Maximum system speed (by default the dam-break propagation is used)",
+            "value": "0"
+          },
+          "coefsound": {
+            "comment": "Coefficient to multiply speedsystem",
+            "value": "20"
+          },
+          "speedsound": {
+            "auto": "true",
+            "comment": "Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)",
+            "value": "0"
+          },
+          "hdp": {
+            "comment": "Alternative option to calculate the smoothing length (h=hdp*dp)",
+            "value": "2"
+          },
+          "cflnumber": {
+            "comment": "Coefficient to multiply dt",
+            "value": "0.2"
+          }
+        },
+        "parameter_values": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "NoPenetration": "0",
+          "StepAlgorithm": "2",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "ShiftCoef": "-2",
+          "ShiftTFS": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0.0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtFixedFile": "NONE",
+          "DtAllParticles": "0",
+          "TimeMax": "6",
+          "TimeOut": "0.01",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300",
+          "WrnPartsOut": "1",
+          "MinFluidStop": "0"
+        },
+        "control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+        "time_max_s": "6",
+        "time_out_s": "0.01"
+      },
+      "H060": {
+        "constants_values": {
+          "gravity": {
+            "comment": "Gravitational acceleration",
+            "units_comment": "m/s^2",
+            "x": "0",
+            "y": "0",
+            "z": "-9.81"
+          },
+          "rhop0": {
+            "comment": "Reference density of the fluid",
+            "units_comment": "kg/m^3",
+            "value": "1000"
+          },
+          "rhopgradient": {
+            "comment": "Initial density gradient 1:Rhop0, 2:Water column, 3:Max. water height (default=2)",
+            "value": "2"
+          },
+          "hswl": {
+            "auto": "true",
+            "comment": "Maximum still water level to calculate speedofsound using coefsound",
+            "units_comment": "metres (m)",
+            "value": "0"
+          },
+          "gamma": {
+            "comment": "Polytropic constant for water used in the state equation",
+            "value": "7"
+          },
+          "speedsystem": {
+            "auto": "true",
+            "comment": "Maximum system speed (by default the dam-break propagation is used)",
+            "value": "0"
+          },
+          "coefsound": {
+            "comment": "Coefficient to multiply speedsystem",
+            "value": "20"
+          },
+          "speedsound": {
+            "auto": "true",
+            "comment": "Speed of sound to use in the simulation (by default speedofsound=coefsound*speedsystem)",
+            "value": "0"
+          },
+          "hdp": {
+            "comment": "Alternative option to calculate the smoothing length (h=hdp*dp)",
+            "value": "2"
+          },
+          "cflnumber": {
+            "comment": "Coefficient to multiply dt",
+            "value": "0.2"
+          }
+        },
+        "parameter_values": {
+          "SavePosDouble": "0",
+          "Boundary": "2",
+          "SlipMode": "1",
+          "NoPenetration": "0",
+          "StepAlgorithm": "2",
+          "VerletSteps": "40",
+          "Kernel": "2",
+          "ViscoTreatment": "1",
+          "Visco": "0.01",
+          "ViscoBoundFactor": "1",
+          "DensityDT": "3",
+          "DensityDTvalue": "0.1",
+          "Shifting": "0",
+          "ShiftCoef": "-2",
+          "ShiftTFS": "0",
+          "RigidAlgorithm": "1",
+          "FtPause": "0.0",
+          "CoefDtMin": "0.05",
+          "DtIni": "0",
+          "DtMin": "0",
+          "DtFixed": "0",
+          "DtFixedFile": "NONE",
+          "DtAllParticles": "0",
+          "TimeMax": "6",
+          "TimeOut": "0.01",
+          "RhopOutMin": "700",
+          "RhopOutMax": "1300",
+          "WrnPartsOut": "1",
+          "MinFluidStop": "0"
+        },
+        "control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+        "time_max_s": "6",
+        "time_out_s": "0.01"
+      }
+    },
+    "required_timing": {
+      "TimeMax": "6",
+      "TimeOut": "0.01"
+    },
+    "proof": "All non-allowed XML semantic paths are equal in each machine diff; constants and execution control digests match."
+  },
+  "semantic_diff_file": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/semantic-diff.json",
+  "semantic_diff_sha256_after_write": "b6cbdad7a66bff58078594256e8cc6092794da01839cf4971ab33e535d7d427e",
+  "rough_estimates": {
+    "status": "rough_planning_only",
+    "official_mother": {
+      "dp_m": 0.01,
+      "total_particles": 1015809,
+      "fluid_particles": 652212,
+      "raw_frames": 601,
+      "raw_native_storage_gib": 18.19,
+      "source": "parent-provided completed official F1 GenCase/601-frame planning facts"
+    },
+    "bridge": {
+      "dp_ratio_mother_to_bridge": 0.6666666666666667,
+      "nominal_volume_ratio_mother_to_bridge": 0.2962962962962964,
+      "nominal_surface_area_ratio_mother_to_bridge": 0.44444444444444453,
+      "surface_note": "Boundary/surface storage follows dp^-2 only as a dimensional planning scale; geometry and compression can change the actual result."
+    },
+    "depth_candidates": {
+      "H050_volume_ratio_to_bridge": 0.9090909090909091,
+      "H060_volume_ratio_to_bridge": 1.0909090909090908,
+      "note": "Only fill volume is scaled for the depth candidates; no exact boundary-area estimate is asserted."
+    },
+    "cases": {
+      "BASE": {
+        "volume_ratio_to_official_mother": 0.2962962962962964,
+        "nominal_fill_volume_m3": 0.77,
+        "rough_total_particles": 300980,
+        "rough_fluid_particles": 193248,
+        "rough_601_frame_native_gib": 5.39,
+        "basis": "volume and particle-count scaling only; actual GenCase and solver receipts are authoritative"
+      },
+      "H050": {
+        "volume_ratio_to_official_mother": 0.2693602693602694,
+        "nominal_fill_volume_m3": 0.7,
+        "rough_total_particles": 273619,
+        "rough_fluid_particles": 175680,
+        "rough_601_frame_native_gib": 4.9,
+        "basis": "volume and particle-count scaling only; actual GenCase and solver receipts are authoritative"
+      },
+      "H060": {
+        "volume_ratio_to_official_mother": 0.3232323232323233,
+        "nominal_fill_volume_m3": 0.84,
+        "rough_total_particles": 328342,
+        "rough_fluid_particles": 210816,
+        "rough_601_frame_native_gib": 5.88,
+        "basis": "volume and particle-count scaling only; actual GenCase and solver receipts are authoritative"
+      }
+    },
+    "not_a_reservation": true,
+    "not_acceptance_evidence": true
+  },
+  "scope_policy": {
+    "numerical_bridge_is_not_a_new_physical_condition": true,
+    "children_wait_for_bridge_comparison_and_acceptance": true,
+    "root_launch_order": [
+      "UF_F1_MDBC_DP015_BASE",
+      "UF_F1_MDBC_DP015_H050",
+      "UF_F1_MDBC_DP015_H060"
+    ],
+    "root_initial_submission": "BASE GenCase only; no solver launch implied",
+    "acceptance_claim": "none"
+  }
+}
