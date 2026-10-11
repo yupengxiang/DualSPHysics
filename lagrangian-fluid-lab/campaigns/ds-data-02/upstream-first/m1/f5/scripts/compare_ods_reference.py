@@ -233,9 +233,15 @@ def choose_elevation_columns(
 def component_column(name: str, component: str) -> bool:
     compact = normalize(name).replace(" ", "")
     if component == "x":
-        return compact in {"vx", "velx", "velocityx", "u"} or compact.endswith("velx")
+        return bool(
+            re.search(r"(?:^|vel|velocity)[0-9]*x(?:ms)?$", compact)
+            or compact in {"vx", "velx", "velocityx", "u"}
+        )
     if component == "z":
-        return compact in {"vz", "velz", "velocityz", "w"} or compact.endswith("velz")
+        return bool(
+            re.search(r"(?:^|vel|velocity)[0-9]*z(?:ms)?$", compact)
+            or compact in {"vz", "velz", "velocityz", "w"}
+        )
     return False
 
 
@@ -658,18 +664,42 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parser.error("require simulation_start < startup_end <= simulation_end")
 
     try:
-        elevation_series, elevation_meta = read_elevation_csv(elevation)
+        elevation_raw, elevation_meta = read_elevation_csv(elevation)
         velocity_series, velocity_meta = read_velocity_csv(velocity)
         ods_series, ods_meta = read_ods_reference(ods)
     except (OSError, ValueError, zipfile.BadZipFile) as error:
         print(f"comparison input error: {error}", file=sys.stderr)
         return 2
 
+    # MeasureTool's elevation mode writes absolute z values (for this run the
+    # first sample is about 0.654357 m), while the official ODS columns are
+    # ETA relative to still water.  Use the first native sample at each point
+    # as the still-water baseline and record the transform; no time shift or
+    # curve retiming is involved.
+    elevation_baselines = {
+        key: values[0][1] for key, values in elevation_raw.items() if values
+    }
+    elevation_series = {
+        key: [(time, value - elevation_baselines[key]) for time, value in values]
+        for key, values in elevation_raw.items()
+    }
+    elevation_meta["value_transform"] = "eta = MeasureTool Elevation - first native sample per x"
+    elevation_meta["still_water_baselines_m"] = elevation_baselines
+
     windows = {
         "startup_0_2s": (args.simulation_start, args.startup_end),
         "primary_2_30s": (args.primary_start, args.simulation_end),
         "full_common_0_30s": (args.simulation_start, args.simulation_end),
     }
+    reference_start = ods_series["theory_eta"][0][0]
+    reference_end = ods_series["theory_eta"][-1][0]
+    actual_common_start = max(args.simulation_start, reference_start)
+    actual_common_end = min(args.simulation_end, reference_end)
+    if max(args.primary_start, actual_common_start) <= actual_common_end:
+        windows["actual_common_primary"] = (
+            max(args.primary_start, actual_common_start),
+            actual_common_end,
+        )
     comparisons = {
         "eta_x5": (elevation_series["x5"], ods_series["sph_eta_x5"], ods_series["theory_eta"]),
         "eta_x6": (elevation_series["x6"], ods_series["sph_eta_x6"], ods_series["theory_eta"]),
@@ -734,9 +764,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "primary_comparison_window_s": [args.primary_start, args.simulation_end],
             "ods_theory_window_s": [ods_series["theory_eta"][0][0], ods_series["theory_eta"][-1][0]],
             "actual_common_window_s": [
-                max(args.simulation_start, ods_series["theory_eta"][0][0]),
-                min(args.simulation_end, ods_series["theory_eta"][-1][0]),
+                actual_common_start,
+                actual_common_end,
             ],
+            "actual_common_primary_window_s": [
+                max(args.primary_start, actual_common_start),
+                actual_common_end,
+            ]
+            if max(args.primary_start, actual_common_start) <= actual_common_end
+            else None,
             "interpolation": "linear inside reference brackets only",
             "phase_shift_or_retiming": False,
         },
