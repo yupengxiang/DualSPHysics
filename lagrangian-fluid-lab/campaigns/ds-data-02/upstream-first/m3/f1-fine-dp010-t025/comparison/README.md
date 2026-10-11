@@ -30,10 +30,22 @@ reference is not read by this worker.
 The mother input is gated by
 `m3/fine-mother-acceptance-decision.json`, which records the all-601-frame
 native identity/finite scan and scoped internal numerical-use acceptance. The
-request templates remain `template_pending_actual_receipts` until each child
-solver and v2 extraction receipt is completed. At preparation time the H050
-solver was still running and H060 GenCase had completed; this directory does
-not launch or poll either task.
+request templates remain `template_pending_actual_receipts` and are immutable.
+`finalize_m3_requests_v1.py` reads a completed child solver receipt, checks the
+template hash, and writes review candidates only below `comparison/candidates/`.
+It never calls the shared runner and never writes the campaign request
+directory. The postprocess candidate includes runtime v2 and v6, official
+`DsphConfig.xml`, the extractor inputs, the exact solver receipt SHA256, and
+every non-hidden regular file in the completed native solver attempt.
+
+The helper materialized
+`candidates/UF_F1_MDBC_DP010_H050-postprocess.ready.json` after the H050 solver
+receipt reached `completed`; its receipt SHA256 is bound in the candidate. The
+comparison candidate remains absent until the child v2 postprocess receipt,
+manifest, and both H/P CSVs exist and agree with the completed mother sources
+and all-601 scoped acceptance decision. The sibling finalization report records
+this pending state. H060 remains receipt-gated in the same helper and is not
+launched here.
 
 Run order after root records the real child receipts:
 
