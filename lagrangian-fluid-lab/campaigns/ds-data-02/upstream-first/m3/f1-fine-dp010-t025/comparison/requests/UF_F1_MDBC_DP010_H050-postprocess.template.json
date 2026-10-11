@@ -1,0 +1,59 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "status": "template_pending_actual_receipts",
+  "submission_forbidden": true,
+  "family_id": "F1",
+  "case_id": "UF_F1_MDBC_DP010_H050",
+  "attempt_id": "postprocess-001",
+  "kind": "cpu",
+  "cpu_task_kind": "conversion",
+  "output_storage": "upstream_nas",
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "command": [
+    "/usr/bin/bash",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f1/scripts/extract_reference_observations_v2.sh",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H050/solver-001",
+    "{attempt_root}/observations",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux",
+    "UF_F1_MDBC_DP010_H050",
+    "CaseDamBreak3D",
+    "F1"
+  ],
+  "max_wall_seconds": 1800,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 67108864,
+  "readiness": "requires_completed_child_solver_receipt",
+  "requires_completed_solver_receipt": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H050/solver-001/execution-receipt.json",
+  "solver_receipt_sha256": null,
+  "generated_observation_manifest": "{attempt_root}/observations/postprocess-manifest.json",
+  "generated_observations": {
+    "elevation": "{attempt_root}/observations/measuretool/_elevation_Elevation.csv",
+    "pressure": "{attempt_root}/observations/measuretool/_pressure_Press.csv",
+    "window_s": [0.0, 6.0]
+  },
+  "reference_role": "m3_internal_numerical_mother_depth_diagnostic",
+  "upstream_case_id": "CaseDamBreak3D",
+  "source_mother": "UF_F1_MDBC_DAMBREAK3D",
+  "physical_axis": {
+    "name": "initial_fill_height_m",
+    "mother_value_m": 0.55,
+    "child_value_m": 0.5,
+    "child_minus_mother_m": -0.05,
+    "credit_role": "physical water-depth difference"
+  },
+  "numerical_output_sampling": {
+    "mother_time_out_s": 0.01,
+    "child_time_out_s": 0.025,
+    "role": "separate output-sampling difference; no equivalence credit"
+  },
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f1/scripts/extract_reference_observations_v2.sh",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f1/input/elevation.txt",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f1/input/pressure.txt",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/MeasureTool_linux64",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H050/solver-001/execution-receipt.json"
+  ],
+  "launch_authorization": "root-controlled; template only; no postprocess launch is implied",
+  "request_note": "Run only after the shared runner records a completed H050 solver receipt. The v2 extractor writes a new postprocess attempt and does not alter native raw output."
+}
