@@ -44,4 +44,3 @@ The pair estimate is 14.610 GiB for `.025 s` or 12.185 GiB for `.03 s`. Adding e
 ## Decision
 
 Do not launch the failed `dp=.015` children. If the root establishes a valid 3D mother acceptance path without changing the frozen bridge threshold, the `.025 s` full-event fine pair is the smallest defensible next recipe; `.03 s` is a higher-margin contingency. Both must be labelled as new numerical/output-sampling recipes and revalidated from their own native receipts and H/P products. If the mother remains diagnostic only, retain the existing fine and bridge outputs as diagnostic evidence and report the M3 physical branch blocked. This assessment does not create physical-condition credit or elevate catalog counts into passed cases.
-
