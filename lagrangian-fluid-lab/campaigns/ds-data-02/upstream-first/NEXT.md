@@ -22,3 +22,5 @@ Scanpayloadcompletedbutlauncher/sessionlostduringinterruption; originalrunningre
 4. M2complete see M2_PORTABLE_DATA_CARD.json + M2_EXTERNAL_PACK.json. F1/F5referencesdiagnosticonly; observeddiscrepanciesnotretimed/tuned.
 
 Root prepared m3/prepare_derivative_native_audits.py. After each actualsolverterminal use --case UF_F1_MDBC_DP010_H050/H060 --mode exclusions; then sharedrunner emittedrequest. After nativeexclusion reportverified use --mode frames. Newinputmanifests bind actualdata; refuse unfinishedsolver or overwrite. H050/H060 framecount241 full6s.
+
+Root auditqueue session18738 PID3691651 now actually waits for completedH060, then sequentially launches H050 exclusions+241frames, H060 exclusions+241frames. DO NOT launch any duplicate audit or heavytask while queueexists. Poll thishandle/receipts. Queueaborts on failed/orphaneddependency or existingattempt. Postprocess/comparison preparation agentm3_comparison still prep-only; launch postprocess afterauditqueue finishes.

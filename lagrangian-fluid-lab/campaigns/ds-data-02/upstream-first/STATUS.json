@@ -25,7 +25,7 @@
   "running_attempts": [
     "F1/UF_F1_MDBC_DP010_H060/solver-001"
   ],
-  "next": "Complete H060 existing session44780; sequential child native audits and CSV extraction, then actual comparisons.",
+  "next": "Poll H060 session44780 and auditqueue18738; do not launch parallel heavywork. Prepare actual CSV post/comparison requests while waiting.",
   "nas_preflight_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/UF_NAS_PREFLIGHT/check-001/execution-receipt.json",
   "runtime_regression": {
     "commit": "45ed7af9f",
@@ -49,7 +49,8 @@
     "bytes": 29500166968
   },
   "active_sessions": {
-    "H060_dependency_then_solver": 44780
+    "H060_dependency_then_solver": 44780,
+    "derivative_native_audit_queue": 18738
   },
   "F5_comparison": {
     "status": "diagnostic_only_insufficient_full_window_reference",
@@ -75,7 +76,7 @@
   },
   "F1_comparison_veto": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/F1_COMPARISON_001_VETO.json",
   "usage_note": "NAS terminal receipts, includes failed attempts; authoritative parent ledger also retains preflight and active reservations.",
-  "updated_at_utc": "2026-10-11T04:46:58.248837+00:00",
+  "updated_at_utc": "2026-10-11T04:48:20.869991+00:00",
   "F1_comparison": {
     "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-002/comparison/spheric-comparison-report.json",
     "water_height_rmse_m": [
@@ -144,5 +145,17 @@
     "gpu_seconds": 522.8383143329993,
     "cpu_core_seconds": 578.9708469999999,
     "bytes": 7395847194
+  },
+  "derivative_native_audit_queue": {
+    "pid": 3691651,
+    "session": 18738,
+    "status": "waiting_H060_completed_receipt",
+    "sequence": [
+      "H050 native-integrity",
+      "H050 native-frame-scan",
+      "H060 native-integrity",
+      "H060 native-frame-scan"
+    ],
+    "no_duplicate_launch": true
   }
 }
