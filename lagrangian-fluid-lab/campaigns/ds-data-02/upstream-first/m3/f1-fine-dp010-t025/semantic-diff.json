@@ -1,0 +1,118 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-fine-dp010-t025.semantic-diff.v1",
+  "status": "verified_prepared_definitions_no_launch",
+  "source_mother": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+  "source_mother_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+  "comparisons": [
+    {
+      "case_id": "UF_F1_MDBC_DP010_H050",
+      "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "candidate": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-fine-dp010-t025/input/UF_F1_MDBC_DP010_H050_Def.xml",
+      "allowed_physical_changes": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.50"
+        }
+      ],
+      "allowed_numerical_output_schedule_changes": [
+        {
+          "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+          "kind": "attribute",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "changed_paths": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.50"
+        },
+        {
+          "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+          "kind": "attribute",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "physical_change_count": 1,
+      "numerical_output_schedule_change_count": 1,
+      "all_non_allowed_semantics_equal": true,
+      "fixed_controls_excluding_output_schedule_equal": true,
+      "source_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+      "candidate_sha256": "3f38b9eefe36ba259606c04cb5377154acd22b9c11a470990c4b7d263593ab9c",
+      "source_fixed_control_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab",
+      "candidate_fixed_control_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab"
+    },
+    {
+      "case_id": "UF_F1_MDBC_DP010_H060",
+      "source": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+      "candidate": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-fine-dp010-t025/input/UF_F1_MDBC_DP010_H060_Def.xml",
+      "allowed_physical_changes": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.60"
+        }
+      ],
+      "allowed_numerical_output_schedule_changes": [
+        {
+          "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+          "kind": "attribute",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "changed_paths": [
+        {
+          "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+          "kind": "attribute",
+          "before": "0.55",
+          "after": "0.60"
+        },
+        {
+          "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+          "kind": "attribute",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "physical_change_count": 1,
+      "numerical_output_schedule_change_count": 1,
+      "all_non_allowed_semantics_equal": true,
+      "fixed_controls_excluding_output_schedule_equal": true,
+      "source_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+      "candidate_sha256": "01618bf221e552980f3c54da7844de6d5ff6266cabcfc6040dbd18d169f65e1c",
+      "source_fixed_control_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab",
+      "candidate_fixed_control_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab"
+    }
+  ],
+  "physical_axis": {
+    "name": "initial_fill_height_m",
+    "mother_reference_value_m": 0.55,
+    "candidate_values_m": [
+      0.5,
+      0.6
+    ],
+    "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+    "single_physical_difference_per_case": true
+  },
+  "numerical_recipe": {
+    "dp_m": 0.01,
+    "time_max_s": 6.0,
+    "source_time_out_s": 0.01,
+    "candidate_time_out_s": 0.025,
+    "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+    "role": "separate output-sampling/numerical recipe difference; not physical-axis credit or equivalence proof"
+  },
+  "fixed_controls_excluding_output_schedule_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab",
+  "acceptance": {
+    "status": "not_assessed",
+    "mother_declared_use_gate": "pending_full_native_audit_and_m3_scope_review",
+    "claim": "No mother acceptance, numerical equivalence, or derivative acceptance is claimed by these metadata artifacts."
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-fine-dp010-t025.case-manifest.v1",
+  "status": "prepared_not_submitted",
+  "case_id": "UF_F1_MDBC_DP010_H060",
+  "family_id": "F1",
+  "reference_role": "physical_derivative_candidate_3d",
+  "upstream_case_id": "CaseDamBreak3D",
+  "source_mother": {
+    "case_id": "UF_F1_MDBC_DAMBREAK3D",
+    "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "role": "official immutable reference; no automatic acceptance transfer"
+  },
+  "definition": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-fine-dp010-t025/input/UF_F1_MDBC_DP010_H060_Def.xml",
+    "sha256": "01618bf221e552980f3c54da7844de6d5ff6266cabcfc6040dbd18d169f65e1c",
+    "geometry": {
+      "definition_dp_m": "0.01",
+      "fillbox_size_x_m": "1.4",
+      "fillbox_size_y_m": "1",
+      "fillbox_size_z_m": "0.60",
+      "time_max_s": "6",
+      "time_out_s": "0.025"
+    }
+  },
+  "physical_axis": {
+    "name": "initial_fill_height_m",
+    "mother_value_m": 0.55,
+    "candidate_value_m": 0.6,
+    "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+    "single_difference_count": 1,
+    "allowed_change": {
+      "before": "0.55",
+      "after": "0.60"
+    }
+  },
+  "numerical_output_recipe": {
+    "dp_m": 0.01,
+    "time_max_s": 6.0,
+    "source_time_out_s": 0.01,
+    "candidate_time_out_s": 0.025,
+    "estimated_saved_frames": 241,
+    "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+    "difference_role": "separate numerical/output-sampling recipe; full 0..6 s event retained"
+  },
+  "control_binding": {
+    "fixed_controls_excluding_output_schedule_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab",
+    "source_full_control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "candidate_full_control_sha256": "6c8aeb1f5a1f5db596ea1dc48393ee9338771668b0b40c2c6bf9b96e34ca331b",
+    "all_non_allowed_xml_semantics_equal": true
+  },
+  "semantic_diff": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-fine-dp010-t025/semantic-diff.json",
+    "sha256": "f21dc835b5bcf986d98cf8cf37bcacae7408754a49f7b20fffe901b9df130bf6",
+    "case_comparison": "UF_F1_MDBC_DP010_H060"
+  },
+  "mother_declared_use_gate": {
+    "status": "pending_full_native_audit_and_scope_review",
+    "required_before_submission": [
+      "official F1 601-frame full native identity/finite audit receipt bound to the mother output",
+      "root-owned M3 declared-use and scope review for this full-event numerical recipe",
+      "resource preflight and terminal storage reservation for both children"
+    ],
+    "failed_dp015_bridge_does_not_transfer_acceptance": true,
+    "no_launch_authorized_by_artifacts": true
+  },
+  "scope": {
+    "all_native_spatial_particles_required_at_each_saved_frame": true,
+    "primary_observations": [
+      "H1",
+      "H2",
+      "H3",
+      "H4"
+    ],
+    "auxiliary_observations": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "event_window_s": [
+      0.0,
+      6.0
+    ],
+    "truncated_window_forbidden": true,
+    "acceptance_claim": "none_pending_mother_gate_and_child_receipts"
+  },
+  "storage_forecast": {
+    "planning_solver_bytes": 8301624043,
+    "planning_solver_gib": 7.731489877216518,
+    "request_reservation_bytes": 9663676416,
+    "request_reservation_gib": 9.0,
+    "basis": "measured official fine solver bytes scaled by child particle count and 241/601 saved frames; runtime receipts are authoritative",
+    "not_a_reservation_until_root_submission": true
+  },
+  "preserve_existing_bridge_children": true,
+  "launch_authorization": "root-controlled; prepared metadata only; no GenCase or solver launch implied"
+}
