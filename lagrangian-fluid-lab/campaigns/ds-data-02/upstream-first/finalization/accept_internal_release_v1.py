@@ -49,6 +49,7 @@ def main():
     card_path = P/'M4_RELEASE_FINAL_V1.json'
     cost_path = P/'m4-cost-audit/checkpoints/M4-resource-audit-final-v1.json'
     m23_path = P/'m4/release/audit-only/M2-M3-final-evidence-v1.json'
+    data_card = P/'M4_DATA_CARD_FINAL_ZH.md'
     card, cost, m23 = load(card_path), load(cost_path), load(m23_path)
     require(card['status'] == 'completed_development_partition', 'four actual products required')
     require(card['development_partition']['eligible_condition_count'] == 4, 'four independent conditions required')
@@ -78,6 +79,45 @@ def main():
         require(av['source_unchanged'] and av['isolated_replay']['denied_probes_passed'], 'actual isolation required')
         require(av['semantic_negatives']['count'] == 2 and av['semantic_negatives']['passed'], 'actual rehashed negatives required')
         bundle = row['bundle']['relocated']
+        actual_binding = row['receipts']['actual_validation']
+        enrichment_binding = row['receipts']['enrichment_product']
+        check(actual_binding)
+        check(enrichment_binding)
+        actual = load(actual_binding['path'])
+        enriched = load(enrichment_binding['path'])
+        require(actual['status'] == enriched['status'] == 'completed'
+                and actual['case_id'] == enriched['case_id'] == case, 'nested product receipt mismatch')
+        require(actual['source_unchanged'] and actual['source_snapshot'] == actual['source_snapshot_after']
+                and all(v['matches'] for v in actual['source_snapshot'].values()), 'actual source snapshots changed')
+        require(actual['source_completion_receipt']['sha256'] == enrichment_binding['sha256'], 'enrichment lineage changed')
+        require(actual['source_bundle']['manifest_sha256'] == row['bundle']['source']['manifest']['sha256']
+                and actual['relocation']['destination_bundle'] == bundle['root']
+                and bundle['manifest']['sha256'] == row['bundle']['source']['manifest']['sha256'],
+                'actual relocated/source manifest lineage mismatch')
+        replay_binding = av['isolated_replay']['report']
+        check(replay_binding)
+        require(actual['isolated_replay']['report'] == replay_binding['path']
+                and actual['isolated_replay']['denied_probes_passed'], 'actual positive replay binding mismatch')
+        replay = load(replay_binding['path'])
+        require(replay['status'] == 'completed' and replay['validation']['case_id'] == case
+                and replay['validation']['portable'] and replay['validation']['source_paths_redacted'],
+                'actual portable positive replay failed')
+        negatives = av['semantic_negatives']['reports']
+        require(set(actual['semantic_negatives']['reports']) == {v['path'] for v in negatives}
+                and actual['semantic_negatives']['passed']
+                and actual['semantic_negatives']['scratch_removed_after_each_case'], 'actual negative binding mismatch')
+        names = set()
+        for negative_binding in negatives:
+            check(negative_binding)
+            negative = load(negative_binding['path'])
+            require(negative['status'] == 'rejected_as_expected' and negative['artifact_layer_rehashed']
+                    and negative['production_validator']['returncode'] == 2
+                    and negative['source_bundle_untouched'], 'actual rehashed negative failed')
+            names.add(negative['negative'])
+        require(names == {'typed_identity_endpoint_label', 'destination_position'}, 'both actual negative types required')
+        direct_report_binding = row['hash_lineage']['direct_conversion']['report']
+        check(direct_report_binding)
+        direct_report = load(direct_report_binding['path'])
         for key, value in bundle['artifacts'].items():
             check(value, payload=(key == 'normalized_hdf5'))
         check(bundle['manifest'])
@@ -99,6 +139,7 @@ def main():
             runner_checks.append({'id': attempt_id, 'execution_receipt': bind(path), 'request': request, 'parent_charge': charge})
         conditions.append({'case_id': case, 'initial_water_depth_m': row['planned_depth_m'],
             'physical_condition_sha256': ph, 'role': 'development', 'scientific_qualification': 'not_claimed',
+            'native_time_evidence': direct_report['time_evidence'],
             'bundle': bundle, 'fields': row['fields'], 'labels': row['labels'],
             'actual_validation': row['receipts']['actual_validation'],
             'evaluator_summary': row['reader_evaluator']['evaluator']['payload']['summary']})
@@ -111,6 +152,8 @@ def main():
             require(bind(artifact['path'])['sha256'] == artifact['sha256'], f'{milestone} artifact changed')
         certificates[milestone] = bind(path)
     require(shutil.which('bwrap') is not None and Path(sys.executable).is_file(), 'runtime dependency unavailable')
+    require(shutil.disk_usage('/home/jade').free >= 500 * 1024**3, 'Home free-space floor violated')
+    require(data_card.is_file() and '4/4' in data_card.read_text(), 'final four-condition data card required')
     now = datetime.now(timezone.utc).isoformat()
     usage = {k: sum(x.get(k, 0) for x in ledger['charges']) for k in ['gpu_seconds', 'cpu_core_seconds', 'new_storage_bytes']}
     initial = load(P/'STATUS.json')['initial_usage']
@@ -120,6 +163,7 @@ def main():
     index = {'schema': 'ds-data-02.upstream-first.internal-dataset.v1',
         'status': 'accepted_internal_diagnostic_version', 'accepted_at_utc': now,
         'release_id': card['release_id'], 'release': bind(card_path), 'resource_audit': bind(cost_path),
+        'data_card': bind(data_card),
         'conditions': conditions, 'development_case_ids': [x['case_id'] for x in conditions],
         'validation_case_ids': [], 'lineage_policy': card['development_partition']['lineage_policy'],
         'mother_reference': card['mother_reference'], 'reference_pack_certificates': certificates,
