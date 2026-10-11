@@ -104,6 +104,7 @@ REQUIRED_ENDPOINT_FIELDS: tuple[str, ...] = (
 )
 REQUIRED_ACTUAL_NEGATIVES = frozenset(("typed_identity_endpoint_label", "destination_position"))
 REQUIRED_REHASHED_BINDINGS = frozenset(("normalized_hdf5", "interface", "reader_manifest", "manifest_sha256"))
+EXPECTED_SAVED_FRAME_COUNT = 241
 REQUIRED_EVALUATOR_CHECKS = frozenset(
     (
         "validity_aware_nonfinite_policy",
@@ -747,6 +748,7 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
     base = {
         "case_id": case_id,
         "planned_depth_m": expected_depth,
+        "planned_saved_frame_count": EXPECTED_SAVED_FRAME_COUNT,
         "role": "development_candidate",
         "credit_status": "not_credited",
         "eligible_for_development_partition": False,
@@ -770,6 +772,9 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
         direct_physical = direct["report_payload"].get("hash_scopes", {}).get("physical_condition_sha256")
         if direct_physical != source_bundle["interface_summary"]["physical_condition_sha256"]:
             raise ReleaseError("direct conversion physical-condition hash disagrees with bundle")
+        actual_frames = source_bundle["interface_summary"]["identity_axis"].get("frame_count")
+        if actual_frames != EXPECTED_SAVED_FRAME_COUNT or direct["summary"]["frames"] != EXPECTED_SAVED_FRAME_COUNT:
+            raise ReleaseError("actual save.025 products must bind exactly 241 frames")
         actual_depth = interface["physical_condition"].get("depth_m")
         if type(actual_depth) not in (int, float) or abs(float(actual_depth) - expected_depth) > 1.0e-12:
             raise ReleaseError("bundle physical depth disagrees with condition slot")
