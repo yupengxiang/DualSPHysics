@@ -1,0 +1,29 @@
+{
+  "schema": "ds-data-02.upstream-first.f5-postprocess.v1",
+  "upstream_case_id": "CasePistonBeach_REG",
+  "solver_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/solver-001",
+  "native_data_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/solver-001/data",
+  "output_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations",
+  "official_bin_root": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux",
+  "input_points": {
+    "elevation": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f5/input/elevation.txt",
+    "velocity": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f5/input/velocity.txt"
+  },
+  "primary_observation_files": [
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/measuretool/_elevation.csv",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/measuretool/_velocity.csv"
+  ],
+  "auxiliary_products": [
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/particles/PartFluid",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/particles/PartPiston",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/particles/PartFluidOut",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/surface/Slices"
+  ],
+  "time_policy": {
+    "simulation_window_s": [0.0, 30.0],
+    "startup_report_window_s": [0.0, 2.0],
+    "primary_acceptance_window_s": [2.0, 30.0],
+    "theory_window_s": [0.0, 40.0],
+    "comparison_rule": "interpolate theory only inside brackets at actual MeasureTool times; never extrapolate"
+  }
+}

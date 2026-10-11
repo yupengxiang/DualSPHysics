@@ -1,0 +1,125 @@
+{
+  "case_id": "UF_PORTABLE_F1",
+  "control_family_id": "F1_CONTROL_ECCENTRIC_OBSTACLE_V1",
+  "control_sha256": "91d83be67693926420d80b0b873033e2026be0f198e529a4f03cda4f3e26c734",
+  "conversion_evidence": "streaming BI4 adapter evidence only; no Q-N or production claim",
+  "error_budget": {
+    "applicability": {
+      "event_time": "2% applies to first-arrival/remerge/return markers scaled by sqrt(H0/g). The .01 s reference output is registered for macro observables only; the .001 s complete-window event control is required before event-time qualification. This is not a universal per-particle trajectory tolerance and does not certify unresolved local chaos.",
+      "macro": "5% applies to fixed physical windows and volume-integrated/quantile observables once initial mass and geometry are within the initialization budget."
+    },
+    "event_time_error_absolute_seconds_at_nominal_H0": 0.003497487083913345,
+    "event_time_error_fraction_of_characteristic_time": 0.02,
+    "event_time_scale": {
+      "characteristic_time_s": 0.17487435419566724,
+      "definition": "T=sqrt(H0/g), with H0 the nominal initial fluid depth; this scales release, obstacle/separator interaction, downstream arrival, remerge, and return-flow markers.",
+      "event_control_scope": "run across the complete event window before timing qualification; interpolate bracketed threshold crossings only after native high-frequency output is available",
+      "event_control_time_out_s": 0.001,
+      "event_control_within_save_budget": true,
+      "event_control_worst_case_snapshot_quantization_s": 0.0005,
+      "nominal_H0_m": 0.3,
+      "reference_matrix_time_out_s": 0.01,
+      "reference_matrix_timing_status": "raw_reference_only; 0.01 s snapshots do not qualify the 2% event-time budget",
+      "save_quantization_budget_s": 0.000699497416782669,
+      "starting_absolute_budget_s": 0.003497487083913345
+    },
+    "integration_fraction_of_total_error_budget_max": 0.2,
+    "macro_observable_relative_error": 0.05,
+    "save_fraction_of_total_error_budget_max": 0.2,
+    "status": "starting_engineering_budget_pending_reference_matrix"
+  },
+  "event_window": {
+    "characteristic_length_m": 0.3,
+    "characteristic_time_s": 0.17487435419566724,
+    "characteristic_velocity_m_s": 1.7155174146594956,
+    "complete_event_window_s": 1.6,
+    "phase_basis": "front travel and remerge milestones are conservative registration targets; acceptance requires observed native data, not these estimates.",
+    "phase_targets_s": {
+      "downstream_arrival": 0.95,
+      "first_obstacle_interaction": 0.45,
+      "release": 0.0,
+      "remerge_or_return_flow": 1.35,
+      "window_end": 1.6
+    },
+    "save_interval_s": 0.01
+  },
+  "generated_xml_sha256": "20da0a14fd2307ba5c90eef3763efd2ec744bee3f3c6c111ab0a188be3c6c054",
+  "initial_exclusion_ledger": {
+    "count": 0,
+    "ids_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mass_kg": 0.0,
+    "mk_counts": {
+      "1": 0,
+      "10": 0,
+      "11": 0
+    },
+    "semantics": "finite IDs absent from BI4 frame zero but retained on the generated typed initial axis",
+    "type_counts": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0
+    }
+  },
+  "numerical_parameters_sha256": "119aa6c5fc9b56b437dd9c7b70fb4c9fb0bcb3e5f0ea17b43a7fe76806499945",
+  "observables": {
+    "finite_downstream_plane": {
+      "axis": "x",
+      "crossings": "signed_net_and_separate_recrossings",
+      "placement_rule": "after_remerge_zone_before_downstream_wall"
+    },
+    "native_labels": [
+      "source_label",
+      "destination_time_series",
+      "first_passage_interval",
+      "residence_time",
+      "final_category",
+      "failure_reason",
+      "unknown_mass"
+    ],
+    "primary": [
+      "free_surface_front_quantiles_x_y_z",
+      "fluid_center_of_mass_xyz",
+      "split_fraction_time_series",
+      "downstream_finite_plane_first_arrival_and_net_mass",
+      "three_dimensional_mass_and_kinetic_energy_distribution"
+    ],
+    "secondary": [
+      "velocity_quantiles",
+      "return_flow_fraction",
+      "initial_mass_and_volume_error"
+    ],
+    "split_regions": [
+      "left_of_obstacle",
+      "right_of_obstacle"
+    ],
+    "time_window_required": "release, first interaction, bypass/split, downstream arrival, remerge, and at least one observable return-flow event"
+  },
+  "owner_metadata_sha256": "9a4ed37a8bab7848d3df5a5f743b96e6bb9e43ba1caa431c678c8df163812c7e",
+  "recipe_id": "F1_DBC_ECCENTRIC_V1",
+  "schema": "ds-data-02.m2.control.v1",
+  "solver_parameters": {
+    "CoefDtMin": 0.05,
+    "DensityDT": 2,
+    "DensityDTvalue": 0.1,
+    "DtAllParticles": 0,
+    "DtFixed": 0,
+    "DtIni": 0,
+    "DtMin": 0,
+    "FtPause": 0,
+    "Kernel": 1,
+    "MinFluidStop": 0,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 0,
+    "Shifting": 0,
+    "StepAlgorithm": 1,
+    "TimeMax": "1.6",
+    "TimeOut": "0.01",
+    "VerletSteps": 40,
+    "Visco": 0.1,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1
+  }
+}
