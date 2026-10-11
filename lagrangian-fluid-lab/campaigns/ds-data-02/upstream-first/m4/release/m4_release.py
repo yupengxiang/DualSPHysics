@@ -269,6 +269,24 @@ def _required_paths(row: Mapping[str, Any]) -> dict[str, Path | None]:
     }
 
 
+def _cost_reconciliation_path(row: Mapping[str, Any]) -> Path | None:
+    validation = _first_mapping(row, "actual_validation", "validation", "relocation_validation")
+    value = _path_from(row, "cost_reconciliation", "cost_reconciliation_receipt", "cost_receipt")
+    if value is not None:
+        return value
+    return _path_from(validation, "cost_reconciliation", "cost_receipt", "cost_receipt_path")
+
+
+def _cost_reconciliation(row: Mapping[str, Any]) -> dict[str, Any] | None:
+    path = _cost_reconciliation_path(row)
+    if path is None:
+        return None
+    payload, binding = _json_binding(path, "cost reconciliation")
+    if payload.get("status") not in ("completed", "reconciled", "passed"):
+        raise ReleaseError("provided cost reconciliation is not completed")
+    return {"binding": binding, "payload": payload}
+
+
 def _execution_receipt(path: Path, case_id: str, label: str) -> tuple[dict[str, Any], dict[str, Any]]:
     receipt, binding = _json_binding(path, label)
     if receipt.get("schema") != EXECUTION_SCHEMA:
@@ -744,7 +762,10 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
     if type(row.get("depth_m")) not in (int, float) or abs(float(row["depth_m"]) - expected_depth) > 1.0e-12:
         raise ReleaseError(f"{case_id} depth_m must be {expected_depth}")
     paths = _required_paths(row)
+    cost_path = _cost_reconciliation_path(row)
     missing = [name for name, path in paths.items() if path is None or not path.exists()]
+    if cost_path is not None and not cost_path.exists():
+        missing.append("cost_reconciliation")
     base = {
         "case_id": case_id,
         "planned_depth_m": expected_depth,
@@ -780,6 +801,7 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
             raise ReleaseError("bundle physical depth disagrees with condition slot")
         owner_xml = _owner_and_xml(direct, enrichment, interface, source_bundle["geometry"], expected_depth, case_id)
         actual_validation = _actual_validation(paths, case_id, source_bundle, enrichment)
+        cost_reconciliation = _cost_reconciliation(row)
         base.update(
             {
                 "status": "eligible_development_condition",
@@ -861,12 +883,25 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
                 },
                 "source_mother": {**source_bundle["interface_summary"]["source_mother"], "credit_status": "reference_only"},
                 "bundle": {
-                    "source": {"root": source_bundle["root"], "manifest": source_bundle["manifest"], "self_contained_runtime": source_bundle["self_contained_runtime"]},
-                    "relocated": {"root": actual_validation["relocation"]["destination_bundle"], "manifest": actual_validation["relocation"]["manifest"], "self_contained_runtime": actual_validation["relocation"]["bundle"]["self_contained_runtime"]},
+                    "source": {
+                        "root": source_bundle["root"],
+                        "manifest": source_bundle["manifest"],
+                        "artifacts": source_bundle["artifacts"],
+                        "self_contained_runtime": source_bundle["self_contained_runtime"],
+                    },
+                    "relocated": {
+                        "root": actual_validation["relocation"]["destination_bundle"],
+                        "manifest": actual_validation["relocation"]["manifest"],
+                        "artifacts": actual_validation["relocation"]["bundle"]["artifacts"],
+                        "self_contained_runtime": actual_validation["relocation"]["bundle"]["self_contained_runtime"],
+                    },
                 },
                 "no_hdf5_scan": True,
             }
         )
+        if cost_reconciliation is not None:
+            base["cost_reconciliation"] = cost_reconciliation
+            base["hash_lineage"]["cost_reconciliation"] = cost_reconciliation["binding"]
     except (ReleaseError, KeyError, TypeError, ValueError, OSError) as exc:
         base["status"] = "rejected_actual_receipts"
         base["rejection_reasons"] = [str(exc)]
@@ -975,6 +1010,7 @@ def assemble(payload: Mapping[str, Any]) -> dict[str, Any]:
             "required_positive_isolated_replay": True,
             "required_rehashed_semantic_negatives": sorted(REQUIRED_ACTUAL_NEGATIVES),
             "source_bundle_immutable": True,
+            "provided_cost_reconciliation_must_be_completed": True,
             "hdf5_scanned_by_release_assembler": False,
             "ready_for_root_final_review": all_complete,
         },

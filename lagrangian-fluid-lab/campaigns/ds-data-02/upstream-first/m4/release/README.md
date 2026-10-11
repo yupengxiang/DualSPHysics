@@ -30,7 +30,8 @@ separate `mother_reference` object. Each actual row may use this shape:
   },
   "actual_validation": {
     "receipt": "/data/nas/.../m4-actual-validation-001/actual-validation-receipt.json"
-  }
+  },
+  "cost_reconciliation": "/data/nas/.../completed-cost-reconciliation.json"
 }
 ```
 
@@ -41,7 +42,11 @@ or claim that a prepared GenCase/solver condition is an M4 product. A final
 root-reviewed card should be written with `--require-complete`, which returns
 nonzero unless every row has a completed direct conversion, enrichment,
 portable build, positive isolated relocation replay, and both actual
-rehashed semantic negatives.
+rehashed semantic negatives. If a row supplies `cost_reconciliation`, that
+JSON receipt must also report `completed`, `reconciled`, or `passed`; the
+receipt hash is retained in the row's lineage. The relocation destination is
+always taken from the completed actual-validation receipt, so an independent
+NAS attempt root can be bound even when the runner's preparation path differs.
 
 Example command:
 

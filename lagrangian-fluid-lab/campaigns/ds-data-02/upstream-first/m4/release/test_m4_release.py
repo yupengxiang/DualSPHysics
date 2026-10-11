@@ -334,6 +334,9 @@ def _input(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 def test_pending_card_keeps_future_conditions_uncredited_and_validation_empty(tmp_path: Path) -> None:
     complete = _make_case(tmp_path, "UF_F1_MDBC_DP010_H050", 0.50)
+    cost_path = tmp_path / "UF_F1_MDBC_DP010_H050" / "completed-cost-reconciliation.json"
+    _write(cost_path, {"schema": "ds02.cost-reconciliation.v1", "status": "completed", "bytes": 1})
+    complete["cost_reconciliation"] = str(cost_path)
     rows = [complete]
     rows.extend({"case_id": case_id, "depth_m": depth} for case_id, depth in m4.CASES[1:])
     card = m4.assemble(_input(rows))
@@ -348,6 +351,7 @@ def test_pending_card_keeps_future_conditions_uncredited_and_validation_empty(tm
     }
     assert card["mother_reference"]["credit_status"] == "reference_only"
     assert all(not claim["claimed"] for claim in card["claims"].values())
+    assert card["development_partition"]["conditions"][0]["cost_reconciliation"]["payload"]["status"] == "completed"
     pending = {row["case_id"]: row for row in card["development_partition"]["conditions"]}["UF_F1_MDBC_DP010_H052"]
     assert pending["status"] == "pending_actual_receipts"
     assert pending["credit_status"] == "not_credited"
@@ -367,6 +371,7 @@ def test_four_actual_rows_bind_relocation_and_semantic_negatives_without_hdf5_re
         assert row["fields"]["validity_mask"]["dataset"] == "valid"
         assert row["labels"]["missing"] == ["censored", "unknown"]
         assert row["reader_evaluator"]["self_contained_runtime"]["source_paths_redacted"] is True
+        assert row["bundle"]["relocated"]["artifacts"]["runtime_adapter"]["path"].endswith("/runtime/m4_portable_adapter.py")
         assert row["no_hdf5_scan"] is True
     hashes = {row["physical_condition"]["actual"]["physical_condition_sha256"] for row in card["development_partition"]["conditions"]}
     assert len(hashes) == 4
