@@ -1,0 +1,36 @@
+{
+  "actual_bytes": 13100411143,
+  "case_id": "UF_F1_MDBC_DP010_H060",
+  "cause": "Original decoder leaves every per-frame file in common scratch until entire conversion ends. Arrays use numpy.fromfile and do not depend on files after decode.",
+  "corrected_converter": {
+    "bytes": 2295,
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_direct_convert_v2.py",
+    "sha256": "7be28068a08944c3629fcbe8806396bc5d567590d15b280d058771425810ede7"
+  },
+  "decoded_frame_directories_retained": 219,
+  "decoded_scratch_bytes": 7539773971,
+  "failed_attempt_id": "m4-direct-conversion-001",
+  "failure_receipt": {
+    "bytes": 23667,
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H060/m4-direct-conversion-001/execution-receipt.json",
+    "sha256": "fa6bcbe857d541d88df342340686ecf693fa5dd86dd3e8cb7b1411721d9060c3"
+  },
+  "history_policy": "Failed001 bytes and charges preserved; next attempt002 distinct; no scientific credit from tests.",
+  "observed_status": "failed",
+  "partial_hdf5_bytes": 5560613505,
+  "preserved_base_converter": {
+    "bytes": 57041,
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_direct_convert.py",
+    "sha256": "8ec204edb5ac20f2d83e2b9a3b5e70eb45cf1104fe0ee4bd8c3413a241c10ccd"
+  },
+  "repair": "Decode into a private temporary directory per frame; remove only that current directory after arrays are loaded. No higher reservation and no changes to numerical conversion.",
+  "reservation_bytes": 12884901888,
+  "schema": "ds02.upstream-first.conversion-repair.v1",
+  "status": "evidence_based_repair_prepared_not_launched",
+  "termination_reason": "terminal_storage_reservation_exceeded",
+  "verification": {
+    "passed": 3,
+    "scope": "real binary fixture decode, five-frame cleanup, private failure cleanup, full state dataset equality including initial exclusions; actual H060 replay still required",
+    "tests": "test_ds_data02_direct_convert_v2.py"
+  }
+}
