@@ -274,6 +274,7 @@ def _make_inputs(root: Path) -> dict[str, Path]:
         "generated_xml": xml_path,
         "owner": owner_path,
         "owner_child": owner_child_path,
+        "definition": definition_path,
         "integrity": integrity_path,
         "scan": scan_path,
         "manifest": manifest_path,
@@ -350,6 +351,19 @@ def test_native_scan_mismatch_rejects_without_creating_output(tmp_path: Path) ->
             semantic_diff=inputs["semantic"],
         )
     assert not output_dir.exists()
+
+
+def test_child_owner_rejects_definition_bytes_outside_manifest_hash(tmp_path: Path) -> None:
+    inputs = _make_inputs(tmp_path / "inputs")
+    inputs["definition"].write_text(_xml().replace('z="0.50"', 'z="0.51"'), encoding="utf-8")
+    with pytest.raises(m4.M4Error, match="definition bytes"):
+        producer.prepare_child_owner(
+            owner_metadata=inputs["owner"],
+            generated_xml=inputs["generated_xml"],
+            case_manifest=inputs["manifest"],
+            semantic_diff=inputs["semantic"],
+            output=tmp_path / "rejected-owner.json",
+        )
 
 
 def test_child_request_templates_bind_real_inputs_and_expected_241_frames() -> None:

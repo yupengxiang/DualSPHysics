@@ -260,8 +260,16 @@ def _derive_child_owner(
         raise M4Error("child manifest lacks definition binding")
     candidate_hash = comparison.get("candidate_sha256")
     definition_hash = definition.get("sha256")
-    if candidate_hash and definition_hash and candidate_hash != definition_hash:
+    definition_path_value = definition.get("path")
+    if not isinstance(candidate_hash, str) or not candidate_hash:
+        raise M4Error("semantic diff lacks the child definition hash")
+    if not isinstance(definition_hash, str) or not definition_hash:
+        raise M4Error("child manifest lacks the child definition hash")
+    if candidate_hash != definition_hash:
         raise M4Error("semantic diff candidate hash disagrees with child manifest definition hash")
+    definition_path = _regular(Path(definition_path_value), "child definition") if isinstance(definition_path_value, str) else None
+    if definition_path is None or _sha256(definition_path) != definition_hash:
+        raise M4Error("child definition bytes disagree with manifest/semantic-diff hash")
     candidate_geometry = definition.get("geometry")
     if isinstance(candidate_geometry, Mapping) and candidate_geometry.get("fillbox_size_z_m") is not None:
         if not math.isclose(_as_float(candidate_geometry["fillbox_size_z_m"], "manifest fillbox depth"), depth, abs_tol=1.0e-9, rel_tol=0.0):
@@ -339,6 +347,11 @@ def _derive_child_owner(
     if isinstance(reservoir, dict) and isinstance(reservoir.get("size_m"), list) and len(reservoir["size_m"]) == 3:
         reservoir["size_m"][2] = depth
     owner["geometry"] = geometry
+    owner["generated_geometry_evidence"] = {
+        "source": "evaluated GenCase XML",
+        "fillbox": copy.deepcopy(geometry["generated_fillbox"]),
+        "geometry_sha256": xml["geometry_sha256"],
+    }
     source_params = owner.get("parameter_values")
     params = dict(source_params) if isinstance(source_params, Mapping) else {}
     params.update(
@@ -365,11 +378,20 @@ def _derive_child_owner(
     if not isinstance(binding, dict):
         raise M4Error("mother owner metadata lacks explicit physical_binding.v1")
     binding["physical_case_id"] = case_id
-    binding["geometry"] = copy.deepcopy(owner.get("geometry", binding.get("geometry", {})))
+    binding["geometry"] = copy.deepcopy(
+        {key: value for key, value in geometry.items() if key != "generated_fillbox"}
+    )
     binding_params = binding.get("parameters")
     if isinstance(binding_params, dict):
         binding_params.clear()
         binding_params.update(copy.deepcopy(params))
+        for key in (
+            "generated_fillbox_start_x_m",
+            "generated_fillbox_length_m",
+            "generated_fillbox_width_m",
+            "generated_fillbox_depth_m",
+        ):
+            binding_params.pop(key, None)
     initial_state = binding.get("initial_state")
     if isinstance(initial_state, dict):
         masses = initial_state.get("continuum_mass_by_source_kg")
