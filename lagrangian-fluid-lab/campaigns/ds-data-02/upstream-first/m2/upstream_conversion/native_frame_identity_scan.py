@@ -361,10 +361,14 @@ def _finite_counts(frame: direct_bi4.DecodedFrame) -> dict[str, int]:
         if name in {"position", "velocity"}:
             if array.ndim != 2 or array.shape[1] != 3:
                 raise FrameScanError(f"decoded {name} shape is not (N,3)")
+            if array.shape[0] != frame.ids.size:
+                raise FrameScanError(f"decoded {name} count differs from Idp count")
             counts[name] = int(array.shape[0] - np.isfinite(array).all(axis=1).sum())
         else:
             if array.ndim != 1:
                 raise FrameScanError(f"decoded {name} shape is not (N,)")
+            if array.shape[0] != frame.ids.size:
+                raise FrameScanError(f"decoded {name} count differs from Idp count")
             counts[name] = int(array.shape[0] - np.isfinite(array).sum())
     return counts
 
@@ -560,7 +564,6 @@ def scan(manifest_path: Path, output: Path, *, max_wall_seconds: float) -> dict[
             _sample(anomaly_samples, "reappeared_ids", reappeared_ids)
             previously_missing |= missing
 
-            finite_id_indices = np.arange(ids.size, dtype=np.int64)
             for field, sample_key in (
                 ("position", "nonfinite_position_ids"),
                 ("velocity", "nonfinite_velocity_ids"),
