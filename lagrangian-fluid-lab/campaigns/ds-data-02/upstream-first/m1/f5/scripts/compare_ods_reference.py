@@ -701,15 +701,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             actual_common_end,
         )
     comparisons = {
-        "eta_x5": (elevation_series["x5"], ods_series["sph_eta_x5"], ods_series["theory_eta"]),
-        "eta_x6": (elevation_series["x6"], ods_series["sph_eta_x6"], ods_series["theory_eta"]),
-        "eta_x7": (elevation_series["x7"], ods_series["sph_eta_x7"], ods_series["theory_eta"]),
-        "velx_x6_z0p4": (velocity_series["velx"], ods_series["sph_velx"], ods_series["theory_velx"]),
-        "velz_x6_z0p4": (velocity_series["velz"], ods_series["sph_velz"], ods_series["theory_velz"]),
+        # x=5 and x=7 are auxiliary propagation checks against the ODS SPH
+        # histories.  The frozen primary x=6 and velocity comparisons use the
+        # ODS second-order Stokes columns.
+        "eta_x5": (elevation_series["x5"], ods_series["sph_eta_x5"]),
+        "eta_x6": (elevation_series["x6"], ods_series["theory_eta"]),
+        "eta_x7": (elevation_series["x7"], ods_series["sph_eta_x7"]),
+        "velx_x6_z0p4": (velocity_series["velx"], ods_series["theory_velx"]),
+        "velz_x6_z0p4": (velocity_series["velz"], ods_series["theory_velz"]),
     }
     metric_report: Dict[str, Dict[str, Dict[str, object]]] = {}
-    for label, (_, _, reference) in comparisons.items():
-        simulation = comparisons[label][0]
+    for label, (simulation, reference) in comparisons.items():
         metric_report[label] = {
             window_name: comparison_metrics(simulation, reference, *window)
             for window_name, window in windows.items()
@@ -777,6 +779,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "phase_shift_or_retiming": False,
         },
         "comparisons": metric_report,
+        "comparison_reference_sources": {
+            "eta_x5": "ODS ETA_SPH(x=5m), auxiliary propagation check",
+            "eta_x6": "ODS ETA_2ndStokes(x=6m), primary surface comparison",
+            "eta_x7": "ODS ETA_SPH(x=7m), auxiliary propagation check",
+            "velx_x6_z0p4": "ODS VelX_2ndStokes(x=6m;z=0.4m), primary velocity comparison",
+            "velz_x6_z0p4": "ODS VelZ_2ndStokes(x=6m;z=0.4m), primary velocity comparison",
+        },
         "propagation_delay": propagation_report(elevation_series, args.simulation_end),
         "provisional_calibration_gate": {
             "surface_rmse_limit_m": surface_limit,
@@ -798,7 +807,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     output.mkdir(parents=True)
     write_alignment(
         output / "aligned-observations.csv",
-        [(label, simulation, reference) for label, (simulation, _, reference) in comparisons.items()],
+        [(label, simulation, reference) for label, (simulation, reference) in comparisons.items()],
         args.simulation_start,
         args.simulation_end,
         args.startup_end,
