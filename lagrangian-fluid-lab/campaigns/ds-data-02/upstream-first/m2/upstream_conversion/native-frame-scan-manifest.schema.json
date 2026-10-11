@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "binding": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "bytes",
+        "sha256"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "ds-data-02.upstream-first.native-frame-scan-manifest.v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": true,
+  "properties": {
+    "case_id": {
+      "pattern": "^UF_F1_MDBC_[A-Z0-9_]+$",
+      "type": "string"
+    },
+    "data_root": {
+      "type": "string"
+    },
+    "decoder": {
+      "$ref": "#/$defs/binding"
+    },
+    "expected": {
+      "additionalProperties": true,
+      "properties": {
+        "excluded_particles": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "frame_count": {
+          "const": 601
+        },
+        "initial_particles": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "minimum_time_end_s": {
+          "const": 6.0
+        }
+      },
+      "required": [
+        "frame_count",
+        "initial_particles",
+        "excluded_particles",
+        "minimum_time_end_s"
+      ],
+      "type": "object"
+    },
+    "family_id": {
+      "const": "F1"
+    },
+    "schema": {
+      "const": "ds-data-02.upstream-first.native-frame-scan-manifest.v1"
+    },
+    "solver_root": {
+      "type": "string"
+    },
+    "sources": {
+      "additionalProperties": {
+        "$ref": "#/$defs/binding"
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema",
+    "family_id",
+    "case_id",
+    "solver_root",
+    "data_root",
+    "decoder",
+    "sources",
+    "expected"
+  ],
+  "type": "object"
+}
