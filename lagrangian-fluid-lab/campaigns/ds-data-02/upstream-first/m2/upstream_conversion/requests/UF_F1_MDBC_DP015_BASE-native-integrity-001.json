@@ -1,0 +1,65 @@
+{
+  "attempt_id": "native-integrity-001",
+  "case_id": "UF_F1_MDBC_DP015_BASE",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native_integrity_audit.py",
+    "--manifest",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/manifests/UF_F1_MDBC_DP015_BASE-native-integrity-001.json",
+    "--output",
+    "{attempt_root}/integrity.json"
+  ],
+  "cpu_task_kind": "conversion",
+  "cpu_threads": 1,
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "estimated_deferred_read_bytes": 0,
+  "estimated_storage_bytes": 67108864,
+  "estimated_temp_peak_bytes": 16777216,
+  "family_id": "F1",
+  "input_file_policy": "regular files only; no solver data directory and no Part_*.bi4 trajectory frame inputs",
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/manifests/UF_F1_MDBC_DP015_BASE-native-integrity-001.json",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native_integrity_audit.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native-integrity-manifest.schema.json",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/solver-001/execution-receipt.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/gencase-001/execution-receipt.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/gencase-001/UF_F1_MDBC_DP015_BASE.xml",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/f1-numerical-bridge/input/UF_F1_MDBC_DP015_BASE_Def.xml",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/solver-001/RunPARTs.csv",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/solver-001/Run.out",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/solver-001/data/PartOut_000.obi4",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP015_BASE/solver-001/data/PartInfo.ibi4",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml"
+  ],
+  "kind": "cpu",
+  "launch_gates": [
+    "solver and GenCase receipts are completed and case-bound in the manifest",
+    "PartOut_000.obi4, RunPARTs.csv, Run.out, PartInfo.ibi4 and generated XML hashes match the manifest",
+    "official decoder writes only bounded CSV/resume/evidence outputs under the fresh attempt root",
+    "no Part_*.bi4 trajectory frame is an input_file or decoder target"
+  ],
+  "max_wall_seconds": 300,
+  "native_integrity": {
+    "decoder": "official PartVTKOut_linux64",
+    "expected_excluded_particles": 382,
+    "expected_initial_particles": 357192,
+    "manifest": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/manifests/UF_F1_MDBC_DP015_BASE-native-integrity-001.json",
+    "minimum_time_end_s": 6.0,
+    "raw_partout_preserved": true,
+    "trajectory_frames_opened": false
+  },
+  "output_storage": "upstream_nas",
+  "physical_window_s": [
+    0.0,
+    6.0
+  ],
+  "reference_role": "numerical_bridge_same_physical_mother",
+  "request_note": "Bounded native-integrity conversion. It invokes official PartVTKOut on the small PartOut record, checks the full 0-6 s RunPARTs time/count ledger plus the Run.out terminal exclusion tail, and retains decoded native Idp/Motive records. It does not claim per-frame identity continuity because no Part_*.bi4 trajectory frame is opened; it never starts a solver or opens HDF5/trajectory frames.",
+  "schema": "ds-data-02.runner.request.v1",
+  "status": "ready_native_integrity",
+  "upstream_case_id": "CaseDamBreak3D",
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics"
+}

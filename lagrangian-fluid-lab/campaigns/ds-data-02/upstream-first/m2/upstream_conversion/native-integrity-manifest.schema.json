@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds-data-02.upstream-first.native-integrity-manifest.v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "family_id",
+    "case_id",
+    "upstream_case_id",
+    "solver_root",
+    "gencase_root",
+    "expected",
+    "source"
+  ],
+  "properties": {
+    "schema": {"const": "ds-data-02.upstream-first.native-integrity-manifest.v1"},
+    "family_id": {"const": "F1"},
+    "case_id": {"type": "string", "minLength": 1},
+    "upstream_case_id": {"const": "CaseDamBreak3D"},
+    "reference_role": {"type": "string", "minLength": 1},
+    "solver_root": {"type": "string", "minLength": 1},
+    "gencase_root": {"type": "string", "minLength": 1},
+    "physical_window_s": {
+      "type": "array",
+      "prefixItems": [{"type": "number"}, {"type": "number"}],
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "expected": {
+      "type": "object",
+      "required": ["initial_particles", "excluded_particles", "minimum_time_end_s"],
+      "properties": {
+        "initial_particles": {"type": "integer", "minimum": 1},
+        "excluded_particles": {"type": "integer", "minimum": 1},
+        "minimum_time_end_s": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "solver_receipt",
+        "gencase_receipt",
+        "generated_xml",
+        "source_definition",
+        "runparts",
+        "run_out",
+        "raw_partout",
+        "part_info",
+        "partvtk",
+        "dsph_config"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "sha256", "bytes"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "bytes": {"type": "integer", "minimum": 0}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
