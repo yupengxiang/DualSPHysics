@@ -36,6 +36,11 @@
     "ideal_dp010_fluid_particles": 635040,
     "planning_particle_range": [1240000, 1520000],
     "planning_fluid_range": [570000, 700000],
+    "completed_official_gencase_receipt": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/gencase-001/execution-receipt.json",
+    "completed_official_total_particles": 1015809,
+    "completed_official_fluid_particles": 652212,
+    "completed_official_gencase_elapsed_s": 0.8667590948753059,
+    "completed_official_gencase_input_base": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/gencase-001/CaseDamBreak3D",
     "completed_legacy_601_frame_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_DUAL_NOMINAL_MEDIUM/qualification-ref-dual-medium-v1/execution-receipt.json",
     "legacy_reference_particles": 643866,
     "legacy_reference_bytes": 12407422295,
@@ -47,10 +52,10 @@
     "cpu_threads": 1,
     "estimated_peak_gpu_mib": 16384,
     "estimated_storage_bytes": 42949672960,
-    "native_bytes_range_estimate": [23900000000, 29300000000],
-    "storage_basis": "Scale the completed 601-frame legacy reference (12,407,422,295 bytes at 643,866 particles) over the planning particle range; reserve headroom for generated XML, BI4 metadata, and solver receipts. Keep PartVTK/measurement products in a separate bounded postprocess attempt so the first-batch 50 GiB tranche remains auditable.",
-    "runtime_basis": "The legacy 643,866-particle 6 s run completed in 319.64 s; the official dp=0.01 planning range is about 1.9–2.4 times the particle count, while smaller time steps can increase work. 1,800 s is a bounded upper reservation, not a measured runtime.",
-    "status": "replace all estimates with completed GenCase particle count and root-approved solver request before launch"
+    "native_bytes_range_estimate": [19500000000, 23500000000],
+    "storage_basis": "The completed official GenCase count is 1,015,809 total and 652,212 fluid particles. Scale the completed 601-frame legacy reference (12,407,422,295 bytes at 643,866 particles) by total-particle ratio for a 19.5 GB central estimate, reserve 23.5 GB for native output plus receipts, and keep PartVTK/measurement products in a separate bounded postprocess attempt so the first-batch 50 GiB tranche remains auditable. Actual BI4 compression and solver arrays remain receipt-authoritative.",
+    "runtime_basis": "The legacy 643,866-particle 6 s run completed in 319.64 s; the fresh official case has 1.58 times as many particles and may use different mDBC workload. 1,800 s is a bounded upper reservation, not a measured runtime.",
+    "status": "GenCase estimate replaced with completed official count; root must bind the completed receipt and final solver request before launch"
   },
   "comparison_status": "no numerical comparison until the SPHERIC mapping record and fresh official observations are complete"
 }
