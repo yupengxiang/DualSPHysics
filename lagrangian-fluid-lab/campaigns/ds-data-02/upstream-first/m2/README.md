@@ -13,6 +13,12 @@ Use the completed F1 direct BI4 conversion as the first self-owned 3-D source:
 * Conversion evidence:
   `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_FINE/ds02-infra-f1-direct-bi4-fine-v3/direct-conversion-report.json`
   (SHA-256 `ece4c7e7d38d2c4180f80b8175879e2d13c2eb098e008156f04bc62dca3ea379`)
+* Owner metadata build input:
+  `/home/jade/.codex/worktrees/ds-data-02-integration/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/families/F1/definitions/F1_REF_ECC_NOMINAL_FINE.metadata.json`
+  (8,111 bytes; SHA-256 `9a4ed37a8bab7848d3df3a5f743b96e6bb9e43ba1caa431c678c8df163812c7e`)
+* Generated XML build input:
+  `/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_ECC_NOMINAL_FINE/gencase-reference-002/F1_REF_ECC_NOMINAL_FINE.xml`
+  (5,477 bytes; SHA-256 `20da0a14fd2307ba5c90eef3763efd2ec744bee3f3c6c111ab0a188be3c6c054`)
 * Existing converter: `lagrangian-fluid-lab/scripts/ds_data02_direct_convert.py`
   using the checked-in `bi4_dump` decoder one frame at a time.
 * Existing read-only utility reused by the portable bundle: `lagrangian-fluid-lab/scripts/l2_reader.py`.
