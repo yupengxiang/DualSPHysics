@@ -18,6 +18,7 @@ if str(M2_ROOT) not in sys.path:
 
 import lagrangebench_v2_loader as ldc  # noqa: E402
 import portable_bundle  # noqa: E402
+import portable_relocate_worker  # noqa: E402
 
 
 def _make_ldc_fixture(root: Path) -> Path:
@@ -148,6 +149,9 @@ def test_portable_bundle_redacts_source_paths_and_reuses_l2_reader(tmp_path: Pat
     assert result["portable"] is True
     assert result["original_paths_denied"] is True
     assert portable_bundle.validate_bundle(bundle)["trajectory"]["complete_validity"] is True
+    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["artifacts"]["runtime_portable_bundle"]["path"] == "runtime/portable_bundle.py"
+    assert manifest["artifacts"]["runtime_l2_reader"]["path"] == "runtime/l2_reader.py"
 
 
 def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
@@ -157,7 +161,6 @@ def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
     bundle = tmp_path / "bundle"
     portable_bundle.build_bundle(source, report, bundle, "F1_TEST")
     output = tmp_path / "isolated-validation.json"
-    worktree_root = M2_ROOT.parents[4]
     wrapper = M2_ROOT / "portable_isolated_validate.py"
     completed = subprocess.run(
         [
@@ -165,8 +168,6 @@ def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
             str(wrapper),
             "--bundle-root",
             str(bundle),
-            "--worktree-root",
-            str(worktree_root),
             "--python",
             sys.executable,
             "--output",
@@ -182,3 +183,48 @@ def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
     validation = json.loads(output.read_text(encoding="utf-8"))
     assert validation["namespace"]["denied_probes_passed"] is True
     assert validation["validation"]["portable"] is True
+    assert "worktree_mount" not in validation["namespace"]
+    assert validation["namespace"]["runtime_from_bundle"] == "/srv/runtime"
+
+
+def test_relocate_worker_copies_fresh_bundle_before_isolation(tmp_path: Path) -> None:
+    if shutil.which("bwrap") is None:
+        pytest.skip("bubblewrap is unavailable")
+    source, report = _make_3d_fixture(tmp_path)
+    bundle = tmp_path / "bundle"
+    portable_bundle.build_bundle(source, report, bundle, "F1_TEST")
+    relocated = tmp_path / "fresh-attempt" / "bundle"
+    validation_output = tmp_path / "fresh-attempt" / "isolated-validation.json"
+    receipt = tmp_path / "fresh-attempt" / "relocation-receipt.json"
+    wrapper = M2_ROOT / "portable_isolated_validate.py"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(M2_ROOT / "portable_relocate_worker.py"),
+            "--source-bundle",
+            str(bundle),
+            "--relocated-bundle",
+            str(relocated),
+            "--isolation-wrapper",
+            str(wrapper),
+            "--python",
+            sys.executable,
+            "--validation-output",
+            str(validation_output),
+            "--receipt",
+            str(receipt),
+            "--max-bytes",
+            str(128 * 1024 * 1024),
+            "--max-wall-seconds",
+            "120",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert relocated.is_dir()
+    worker_receipt = json.loads(receipt.read_text(encoding="utf-8"))
+    assert worker_receipt["status"] == "completed"
+    assert worker_receipt["validation"]["portable"] is True
+    assert worker_receipt["validation"]["denied_probes_passed"] is True

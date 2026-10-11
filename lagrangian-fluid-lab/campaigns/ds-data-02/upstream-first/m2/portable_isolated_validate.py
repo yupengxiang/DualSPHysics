@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Run portable bundle validation in a source-denying bubblewrap namespace.
+"""Run the bundled portable validator in a source-denying bubblewrap namespace.
 
-The validation process receives only a read-only bind of the relocated bundle
-and the code worktree.  The original source roots are over-mounted with empty
-tmpfs mounts, and their exact paths are probed from inside the namespace.  A
-successful report therefore records a real access denial rather than merely a
-different working directory or a hash comparison.
+The child process receives the relocated bundle and a read-only Python runtime.
+The evaluator and its L2 reader are loaded from ``bundle/runtime``; the
+development worktree is never mounted in the namespace.  Original source
+roots are over-mounted with empty tmpfs mounts and exact paths are probed from
+inside the namespace, so a successful report records a real access denial.
 """
 
 from __future__ import annotations
@@ -57,23 +57,24 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
     if not shutil_which("bwrap"):
         raise IsolationError("bubblewrap (bwrap) is required for source-denying validation")
     bundle_root = Path(args.bundle_root).resolve()
-    worktree_root = Path(args.worktree_root).resolve()
     # Keep the venv symlink layout intact: resolving ``.venv/bin/python`` to
     # /usr/bin/python would bind the system tree at /run and lose site-packages.
     python_path = Path(args.python).absolute()
     if not bundle_root.is_dir() or bundle_root.is_symlink():
         raise IsolationError(f"bundle root is not a regular directory: {bundle_root}")
-    if not worktree_root.is_dir() or worktree_root.is_symlink():
-        raise IsolationError(f"worktree root is not a regular directory: {worktree_root}")
     if not python_path.is_file():
         raise IsolationError(f"Python runtime is not a regular file: {python_path}")
-    portable_script = worktree_root / "lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/portable_bundle.py"
+    portable_script = bundle_root / "runtime" / "portable_bundle.py"
+    bundled_reader = bundle_root / "runtime" / "l2_reader.py"
     if not portable_script.is_file():
-        raise IsolationError(f"portable validator is missing: {portable_script}")
+        raise IsolationError(f"bundled portable validator is missing: {portable_script}")
+    if not bundled_reader.is_file():
+        raise IsolationError(f"bundled L2 reader is missing: {bundled_reader}")
     denied_paths = tuple(Path(value) for value in (args.denied_path or DEFAULT_DENIED_PATHS))
     mask_paths = tuple(Path(value) for value in DEFAULT_MASK_PATHS)
-    # /mnt, /srv, and /run exist in the base image, so bwrap can bind over
-    # them without creating writable host-side staging directories.
+    # /srv and /run exist in the base image, so bwrap can bind over them
+    # without creating writable host-side staging directories.  There is no
+    # /mnt worktree mount: the package's own runtime files are authoritative.
     command = [
         "bwrap",
         "--die-with-parent",
@@ -84,9 +85,6 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
         "--ro-bind",
         "/",
         "/",
-        "--ro-bind",
-        str(worktree_root),
-        "/mnt",
         "--ro-bind",
         str(bundle_root),
         "/srv",
@@ -106,7 +104,7 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
             "PYTHONNOUSERSITE",
             "1",
             "/run/bin/python",
-            "/mnt/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/portable_bundle.py",
+            "/srv/runtime/portable_bundle.py",
             "validate",
             "--bundle-root",
             "/srv",
@@ -141,7 +139,7 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
         "namespace": {
             "backend": "bubblewrap",
             "bundle_mount": "/srv",
-            "worktree_mount": "/mnt",
+            "runtime_from_bundle": "/srv/runtime",
             "python_mount": "/run",
             "network_unshared": True,
             "masked_paths": [str(path) for path in mask_paths],
@@ -166,7 +164,6 @@ def shutil_which(command: str) -> str | None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle-root", required=True, type=Path)
-    parser.add_argument("--worktree-root", required=True, type=Path)
     parser.add_argument("--python", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--max-wall-seconds", type=float, default=1800)

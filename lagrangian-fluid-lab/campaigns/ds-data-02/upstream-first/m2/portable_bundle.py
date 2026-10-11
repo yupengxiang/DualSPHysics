@@ -26,15 +26,34 @@ import h5py
 import numpy as np
 
 
+# A built package carries both this module and the small existing manifest
+# reader beside one another.  Prefer that sibling before falling back to the
+# development worktree; replay therefore has no dependency on the worktree.
+_LOCAL_ROOT = Path(__file__).resolve().parent
+_WORKTREE_LAB_ROOT = next(
+    (parent for parent in Path(__file__).resolve().parents if (parent / "scripts" / "l2_reader.py").is_file()),
+    None,
+)
 try:
-    # m2/ -> upstream-first/ -> ds-data-02/ -> campaigns/ ->
-    # lagrangian-fluid-lab/
-    _LAB_ROOT = Path(__file__).resolve().parents[4]
-    if str(_LAB_ROOT) not in sys.path:
-        sys.path.insert(0, str(_LAB_ROOT))
-    from scripts import l2_reader
-except ImportError as exc:  # pragma: no cover - direct deployment error
-    raise RuntimeError("portable_bundle.py requires lagrangian-fluid-lab/scripts/l2_reader.py") from exc
+    from . import l2_reader
+except ImportError:
+    _bundled_reader = _LOCAL_ROOT / "l2_reader.py"
+    if _bundled_reader.is_file():
+        if str(_LOCAL_ROOT) not in sys.path:
+            sys.path.insert(0, str(_LOCAL_ROOT))
+        import l2_reader  # type: ignore[no-redef]
+    else:  # pragma: no cover - only used by an unbuilt development checkout
+        if _WORKTREE_LAB_ROOT is None:
+            raise RuntimeError("portable_bundle.py cannot locate the existing L2 reader")
+        if str(_WORKTREE_LAB_ROOT) not in sys.path:
+            sys.path.insert(0, str(_WORKTREE_LAB_ROOT))
+        try:
+            from scripts import l2_reader  # type: ignore[no-redef]
+        except ImportError as exc:
+            raise RuntimeError(
+                "portable_bundle.py requires the bundled l2_reader.py or "
+                "lagrangian-fluid-lab/scripts/l2_reader.py"
+            ) from exc
 
 
 SCHEMA = "ds-data-02.m2.portable-bundle.v1"
@@ -77,8 +96,12 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _file_binding(path: Path) -> dict[str, Any]:
-    return {"path": path.name, "bytes": path.stat().st_size, "sha256": _sha256(path)}
+def _file_binding(path: Path, *, relative_path: str | None = None) -> dict[str, Any]:
+    return {
+        "path": relative_path or path.name,
+        "bytes": path.stat().st_size,
+        "sha256": _sha256(path),
+    }
 
 
 def _xml_node_evidence(node: ET.Element) -> dict[str, Any]:
@@ -92,7 +115,12 @@ def _xml_node_evidence(node: ET.Element) -> dict[str, Any]:
     }
 
 
-def _read_source_evidence(source_report: Path) -> dict[str, Any]:
+def _read_source_evidence(
+    source_report: Path,
+    *,
+    owner_metadata_override: Path | None = None,
+    generated_xml_override: Path | None = None,
+) -> dict[str, Any]:
     """Read owner metadata and generated XML at build time, retaining hashes."""
 
     report = json.loads(source_report.read_text(encoding="utf-8"))
@@ -106,7 +134,15 @@ def _read_source_evidence(source_report: Path) -> dict[str, Any]:
         "conversion_report_sha256": _sha256(source_report),
         "paths_published": False,
     }
-    owner_path = Path(owner_info["path"]) if isinstance(owner_info, dict) and owner_info.get("path") else None
+    owner_path = (
+        owner_metadata_override
+        if owner_metadata_override is not None
+        else (Path(owner_info["path"]) if isinstance(owner_info, dict) and owner_info.get("path") else None)
+    )
+    if owner_metadata_override is not None and (
+        not owner_metadata_override.is_file() or owner_metadata_override.is_symlink()
+    ):
+        raise PortableBundleError(f"bound owner metadata is not a regular file: {owner_metadata_override}")
     if owner_path is not None and owner_path.is_file() and not owner_path.is_symlink():
         actual_hash = _sha256(owner_path)
         expected_hash = owner_info.get("sha256")
@@ -119,7 +155,15 @@ def _read_source_evidence(source_report: Path) -> dict[str, Any]:
     else:
         receipts["owner_metadata"] = {"available": False, "reason": "source report has no readable owner metadata"}
 
-    xml_path = Path(xml_info["path"]) if isinstance(xml_info, dict) and xml_info.get("path") else None
+    xml_path = (
+        generated_xml_override
+        if generated_xml_override is not None
+        else (Path(xml_info["path"]) if isinstance(xml_info, dict) and xml_info.get("path") else None)
+    )
+    if generated_xml_override is not None and (
+        not generated_xml_override.is_file() or generated_xml_override.is_symlink()
+    ):
+        raise PortableBundleError(f"bound generated XML is not a regular file: {generated_xml_override}")
     if xml_path is not None and xml_path.is_file() and not xml_path.is_symlink():
         actual_hash = _sha256(xml_path)
         expected_hash = xml_info.get("sha256")
@@ -298,9 +342,15 @@ def _build_sidecars(
     source_report: Path,
     hdf5_path: Path,
     labels_path: Path,
+    owner_metadata: Path | None = None,
+    generated_xml: Path | None = None,
 ) -> None:
     try:
-        source_evidence = _read_source_evidence(source_report)
+        source_evidence = _read_source_evidence(
+            source_report,
+            owner_metadata_override=owner_metadata,
+            generated_xml_override=generated_xml,
+        )
         report = source_evidence["report"]
     except (OSError, json.JSONDecodeError) as exc:
         raise PortableBundleError(f"cannot read source conversion report: {source_report}") from exc
@@ -423,7 +473,29 @@ def _evaluator_score(hdf5_path: Path, labels_path: Path) -> dict[str, Any]:
     }
 
 
-def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case_id: str) -> dict[str, Any]:
+def _bundle_runtime(output_root: Path) -> None:
+    """Copy the reader and evaluator implementation into the package."""
+
+    runtime = output_root / "runtime"
+    runtime.mkdir()
+    if _WORKTREE_LAB_ROOT is None:
+        raise PortableBundleError("cannot locate the existing worktree L2 reader")
+    reader_source = _WORKTREE_LAB_ROOT / "scripts" / "l2_reader.py"
+    if not reader_source.is_file() or reader_source.is_symlink():
+        raise PortableBundleError(f"existing L2 reader source is missing: {reader_source}")
+    shutil.copyfile(Path(__file__), runtime / "portable_bundle.py")
+    shutil.copyfile(reader_source, runtime / "l2_reader.py")
+
+
+def build_bundle(
+    source_hdf5: Path,
+    source_report: Path,
+    output_root: Path,
+    case_id: str,
+    *,
+    owner_metadata: Path | None = None,
+    generated_xml: Path | None = None,
+) -> dict[str, Any]:
     """Materialise a sanitized bundle around an existing direct-conversion HDF5."""
 
     if output_root.exists() or output_root.is_symlink():
@@ -436,6 +508,7 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
         raise PortableBundleError(f"stale partial bundle exists: {temporary}")
     temporary.mkdir()
     try:
+        _bundle_runtime(temporary)
         _copy_sanitized_hdf5(source_hdf5, temporary / "trajectory.h5", case_id)
         _build_sidecars(
             temporary,
@@ -443,6 +516,8 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
             source_report=source_report,
             hdf5_path=temporary / "trajectory.h5",
             labels_path=temporary / "labels.h5",
+            owner_metadata=owner_metadata,
+            generated_xml=generated_xml,
         )
         _write_json(
             temporary / "evaluator.json",
@@ -467,6 +542,14 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
                 ("reader_manifest", "reader-manifest.json"),
             )
         }
+        artifacts["runtime_portable_bundle"] = _file_binding(
+            temporary / "runtime/portable_bundle.py",
+            relative_path="runtime/portable_bundle.py",
+        )
+        artifacts["runtime_l2_reader"] = _file_binding(
+            temporary / "runtime/l2_reader.py",
+            relative_path="runtime/l2_reader.py",
+        )
         manifest = {
             "schema": SCHEMA,
             "case_id": case_id,
@@ -773,6 +856,20 @@ def validate_bundle(
     case_id = manifest.get("case_id")
     if not isinstance(case_id, str) or not isinstance(artifacts, dict):
         raise PortableBundleError("bundle manifest lacks case_id or artifacts")
+    required_artifacts = {
+        "trajectory",
+        "geometry",
+        "control",
+        "labels",
+        "evaluator",
+        "source_receipts",
+        "reader_manifest",
+        "runtime_portable_bundle",
+        "runtime_l2_reader",
+    }
+    missing_artifacts = sorted(required_artifacts.difference(artifacts))
+    if missing_artifacts:
+        raise PortableBundleError(f"bundle manifest lacks required artifacts: {missing_artifacts}")
     files = {name: _verify_artifact(bundle_root, binding, name) for name, binding in artifacts.items()}
     payloads: dict[str, dict[str, Any]] = {}
     for name in ("geometry", "control", "evaluator", "source_receipts"):
@@ -860,6 +957,16 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--source-report", required=True, type=Path)
     build.add_argument("--output-root", required=True, type=Path)
     build.add_argument("--case-id", required=True)
+    build.add_argument(
+        "--owner-metadata",
+        type=Path,
+        help="optional exact owner metadata file to bind while building",
+    )
+    build.add_argument(
+        "--generated-xml",
+        type=Path,
+        help="optional exact generated XML file to bind while building",
+    )
     validate = sub.add_parser("validate", help="validate a relocated portable bundle")
     validate.add_argument("--bundle-root", required=True, type=Path)
     validate.add_argument(
@@ -876,7 +983,14 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         result = (
-            build_bundle(args.source_hdf5, args.source_report, args.output_root, args.case_id)
+            build_bundle(
+                args.source_hdf5,
+                args.source_report,
+                args.output_root,
+                args.case_id,
+                owner_metadata=args.owner_metadata,
+                generated_xml=args.generated_xml,
+            )
             if args.command == "build"
             else validate_bundle(args.bundle_root, denied_probe_paths=tuple(args.probe_denied_path))
         )

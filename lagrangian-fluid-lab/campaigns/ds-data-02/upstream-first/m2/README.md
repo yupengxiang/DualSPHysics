@@ -45,9 +45,14 @@ first/middle/final frames through `l2_reader`. The evaluator reports actual
 transport summaries and compares them with recomputed labels; its negatives
 permute destination identity and perturb a published position field.
 
-`portable_isolated_validate.py` runs that validator under bubblewrap with
-read-only binds for the worktree, runtime, and relocated bundle, empty mounts
-over the old source roots, and in-namespace probes of the denied paths. A
+The build also copies `portable_bundle.py` and the existing `l2_reader.py`
+into `runtime/` and binds both files through the package manifest. This makes
+the package replayable with the runtime Python environment after the original
+worktree is gone. `portable_relocate_worker.py` copies the completed package
+into a fresh attempt using bounded regular-file I/O, rejects symlinks, and
+then invokes `portable_isolated_validate.py`. That wrapper runs bubblewrap
+with only the relocated bundle and Python runtime mounted read-only; it masks
+the old source roots and probes the denied paths inside the namespace. A
 different working directory or a hash check alone is not accepted as the
 relocation proof.
 
