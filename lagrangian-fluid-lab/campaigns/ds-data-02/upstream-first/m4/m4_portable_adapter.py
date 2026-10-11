@@ -537,9 +537,9 @@ def _portable_interface(source: Mapping[str, Any], hdf5: Path) -> dict[str, Any]
     payload["source_receipts"] = [
         {
             **{key: value for key, value in receipt.items() if key != "path"},
-            "path": f"portable/source-receipt/{Path(str(receipt.get('path', 'receipt'))).name}",
+            "path": f"portable/source-receipt/{Path(str(raw_receipt.get('path', 'receipt'))).name}",
         }
-        for receipt in source["source_receipts"]
+        for receipt, raw_receipt in zip(payload["source_receipts"], source["source_receipts"])
     ]
     for key in ("conversion_report", "native_frame_scan", "native_lifecycle_sidecar"):
         item = payload.get(key)
