@@ -1,25 +1,13 @@
-# Continuation at the second checkpoint
+# Active continuation
 
-First read ADOPTION.json, STATUS.json, the shared ledger, live processes and leases. Deadline remains 2026-10-25T03:11:02Z. The goal is active and M1-M4 are not all delivered.
+Deadline remains 2026-10-25T03:11:02Z; goal active, M1–M4 not all delivered. Read ADOPTION.json, STATUS.json, real receipts, ledger and processes before launching. Preserve all historical charges and the first 50 GiB tranche.
 
-## Active tasks
+- External resume download session 70685 is live; verify completion, final MD5 and bytes before extraction request. Add actual download receipt bindings. Extraction uses the single heavy queue.
+- Real portable build and isolated relocation completed successfully (portable-build-001 and portable-validate-001). Original source paths were inaccessible. Actual copied-artifact tamper rejection audit remains to be run; data_product prepares bounded worker. Do not edit consumed package scripts.
+- Original F1 and dp015 bridge both completed 6 s/601 frames, CSV postprocessing completed. comparison-001 is vetoed due to column mapping; retain it. upstream_reference is authorized to prepare/run corrected comparison-002 and bridge comparison-001 as light audits.
+- Preliminary corrected bridge H1 RMSE .0836 m exceeds frozen .0275 m. No H050/H060 launches and no relaxed tolerance. Other three probe RMSEs approximately .0151/.0138/.0106 m. Formal audit pending. scope_catalog assesses alternatives within unchanged storage tranche.
+- data_product prepares generic native integrity audit for original and bridge. Need actual per-ID continuity/count/native PartOut reason evidence; position exclusion is not inferred physical fate.
+- F5 reference pack remains diagnostic: full-window elevation RMSE .0158907 m exceeds .015 m frozen calibration gate. No 3D credit.
+- 336-case catalog and seven-family upstream map are committed. M3 physical derivatives and M4 four-condition product remain outstanding.
 
-- F1 original official 3D mDBC solver: exec session 52009; request `requests/f1-solver-001.json`; NAS `runs/F1/UF_F1_MDBC_DAMBREAK3D/solver-001`. Initial 1,015,809 particles saved. Observe this existing process; do not duplicate it.
-- External download-only resume: exec session 70685; request `m2/requests/lagrangebench-v2-download-resume-002.json`; NAS `runs/infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-download-resume-002`. It is a light audit allowed alongside the solver, with strict HTTP 206/Content-Range and final MD5 checks. Original combined import was deliberately interrupted through its owned runner, charged and closed; its ~100 MB partial is immutable. See external-import-scheduling-transition.json.
-
-## Next ready actions
-
-1. On successful F1 solver receipt, run the committed m1/f1/scripts/extract_reference_observations.sh through a new shared-runner conversion request, with output `{attempt_root}/observations`. It uses MeasureTool with native `-threads:1`, elevation and pressure CSV only. Bind every native input hash and point-file hash. Do not duplicate all-particle VTK products. Then run compare_spheric_reference.py as a small audit.
-2. Run m2/requests/portable-f1-build-001.json after the heavy queue is free; then the relocation request. These now use valid UF_ namespace, runtime bindings, contained scratch, bundled reader/evaluator and bubblewrap without the original worktree. Real-data execution has not yet happened.
-3. Run requests/f1-dp015-base-solver-001.json after the heavy queue is free. Actual GenCase is 357,192 total / 192,456 fluid. The same physical mother at dp=.015 is a numerical bridge, not a new physical condition. Gate against original fine run using frozen m3/numerical-bridge-acceptance.json, all four H probes and integrity checks. No H050/H060 launches before acceptance.
-4. Once external download succeeds, run the separate extraction/inspection conversion request with actual archive and receipt bindings. Inspect its prepared request paths before launch. Do not extract concurrently with a heavy solver or conversion.
-
-## Completed evidence
-
-F5_REFERENCE_PACK.json binds original input, GenCase, 601-frame 30 s solver, official postprocess, ODS comparison and full-window supplementary analytical comparison. ODS populated theory ends at 15 s; the official WavePaddle order-2 curve matches that overlap exactly and extends to 40 s. Full-window 2-30 s eta RMSE is about .0158907 m, above the frozen .015 m threshold. Preserve diagnostic status; no 3D or production credit. Original comparison and consumed scripts/receipts remain immutable.
-
-The 336-case scope catalog and seven-family official mapping are committed. There is no matching compact 3D sloshing mother in the inspected official package. A bridge plus two depth derivatives is estimated to fit the first50GiB only with CSV-only postprocessing and controlled portable products; actual charges/reservations remain authoritative. Never reset the tranche to bypass a failure.
-
-## Latest preparation
-
-Root prepared requests/f1-postprocess-001.json (64 MiB output reservation); native data files must be appended to input_files only after the F1 solver receipt is completed. Full metadata snapshot F1_LIVE_METADATA_SNAPSHOT.json observed 479 position exclusions by2.61s with balanced counts. Do not force complete-valid assumptions on the new upstream conversion. Agent data_product prepares a bounded converter adapter under m2/upstream_conversion; scope_catalog independently reviews existing M2 portable acceptance; upstream_reference prepares the bridge CSV comparator and a generic extraction script. Existing worker/input bytes bound to active jobs stay unchanged.
+Next root actions: verify external download then extract when queue free; run native integrity and real tamper requests; inspect corrected comparison reports; choose evidence-based bounded M3 route. Never reset tranche or treat reports/prepared requests as missing physical deliveries.

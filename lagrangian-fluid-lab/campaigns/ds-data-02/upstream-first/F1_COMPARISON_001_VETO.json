@@ -1,0 +1,27 @@
+{
+  "schema": "upstream-first.derived-quality-veto.v1",
+  "artifact": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-001/comparison/spheric-comparison-report.json",
+  "sha256": "8ac0dbf2c2ff6cb304c454a5683a364d556f6c35e49af60e2c761b26fde8bbb3",
+  "status": "INVALID_COLUMN_MAPPING_DO_NOT_USE",
+  "execution_receipt_status": "completed means worker exit success only",
+  "cause": "Elevation CSV PosZ is initial detected surface (H4=.545), not the requested ray origin0. XYZ matching failed; positional fallback included Part index and shifted H1-H4.",
+  "evidence": {
+    "actual_columns": [
+      "Part",
+      "Time [s]",
+      "Elevation_0 [m]",
+      "Elevation_1 [m]",
+      "Elevation_2 [m]",
+      "Elevation_3 [m]"
+    ],
+    "reported_H1_RMSE_m": 346.0888370837796,
+    "correct_binding_zero_based": {
+      "H1": 2,
+      "H2": 3,
+      "H3": 4,
+      "H4": 5
+    }
+  },
+  "action": "Preserve report and consumed worker; create corrected v2 comparator using XY and quantity columnheaders for elevation, XYZ forpressure, reject ambiguity; rerun boundedcomparison002 using sameimmutableobservations",
+  "scientific_credit": "none"
+}
