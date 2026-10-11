@@ -1,0 +1,81 @@
+{
+  "schema": "upstream-first.reference-pack.v1",
+  "case_id": "UF_F5_PISTON_REG",
+  "dimension": 2,
+  "role": "calibration_2d",
+  "status": "diagnostic_comparison_available_full_window_not_accepted",
+  "source_inputs": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f5/input-manifest.json",
+    "sha256": "583c1ff870c4dd15f3a2fa2566d59f49588bd960c65216660e37753b10c68f99"
+  },
+  "observation_contract": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/observation-contract.md",
+    "sha256": "8e64682e53167ed628b3316ddff4c653fbc4a8a57c5df14594a9e113576d5cf5"
+  },
+  "gencase_receipt": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/gencase-002/execution-receipt.json",
+    "sha256": "9f7a52a01341e549bb5b5203b8f64f6620a996082fe3e162daabb9cd50b09916"
+  },
+  "solver_receipt": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/solver-001/execution-receipt.json",
+    "sha256": "0cfcb9a5253e617114b8a469fc28d4411e3516041c672fb913d241e1d8408b58"
+  },
+  "postprocess_receipt": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/execution-receipt.json",
+    "sha256": "1a9853300afb2dbd50109edfaf2a525133450ecce67a53a0a76c3868de94df95"
+  },
+  "comparison_receipt": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/comparison-001/execution-receipt.json",
+    "sha256": "9839157aa8bdd57c2d5adcf905bbe9b3e7f1fadac1f78c17cc081f5ff35ca18a"
+  },
+  "comparison_report": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/comparison-001/comparison/comparison-report.json",
+    "sha256": "68e4404ede6f1476ef96ac49273540d92c2debf398036821f4808877684ddc41"
+  },
+  "native_output_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/solver-001/data",
+  "native_output_hash_manifest": "postprocess_receipt.input_hashes_at_launch includes every native data file",
+  "primary_observation": "surface eta at x6m versus populated ODS second-order Stokes theory",
+  "auxiliary_observations": [
+    "velocity x/z at x6m z0.4m versus ODS theory",
+    "x5m/x7m surface against ODS prior SPH"
+  ],
+  "actual_comparison_window_s": [
+    2,
+    15
+  ],
+  "requested_window_s": [
+    2,
+    30
+  ],
+  "limits": [
+    "ODS numeric theory ends15s despite displayed40s metadata",
+    "No extrapolation or phase retiming",
+    "First-native-sample baseline transform recorded inreport; exact ODSformula verification pending",
+    "No3D or production credit",
+    "Official analytical reference is not independent laboratory evidence"
+  ],
+  "postprocess_manifest_correction": {
+    "original_manifest_preserved": true,
+    "actual_primary_files": [
+      "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/measuretool/_elevation_Elevation.csv",
+      "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/postprocess-001/observations/measuretool/_velocity_Vel.csv"
+    ]
+  },
+  "next": "Retain diagnostic reference pack; continue F1 and portable3D product",
+  "supplemental_comparison": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/wave-comparison-001/comparison/wave-generator-supplemental-report.json",
+    "sha256": "d7116d337d5663c4c62d0bfe3690ff3e0953698d8b280ccd4e57187c0028f09f",
+    "scope": "Official analytical generator, complete0..30s; exact overlap with populated ODS, independent experimental status not granted",
+    "primary_window_s": [
+      2,
+      30
+    ],
+    "eta_rmse_m": 0.0158907,
+    "frozen_eta_limit_m": 0.015,
+    "status": "diagnostic_surface_limit_exceeded"
+  },
+  "baseline_evidence": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f5/evidence/f5-elevation-baseline-audit.json",
+    "sha256": "855f055e823761fe1235abe8c8e484b8c6fe9a721579d251c412386b3593e0f5"
+  }
+}

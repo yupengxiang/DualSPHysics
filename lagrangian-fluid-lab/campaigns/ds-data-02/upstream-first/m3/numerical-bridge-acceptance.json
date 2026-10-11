@@ -1,0 +1,31 @@
+{
+  "schema": "upstream-first.numerical-bridge-acceptance.v1",
+  "status": "frozen_before_fine_and_bridge_solver_comparisons",
+  "purpose": "Limited 3D numerical transport diagnostic data development; not convergence or laboratory validation",
+  "physical_mother": "official CaseDamBreak3D initialdepth0.55m",
+  "fine_dp_m": 0.01,
+  "candidate_dp_m": 0.015,
+  "time_window_s": [
+    0,
+    6
+  ],
+  "scope": [
+    "all native spatial particles",
+    "official H1-H4 free-surface observations",
+    "official P1-P8 impactpressure diagnostics"
+  ],
+  "engineering_gates": {
+    "identity": "Only dp changes; record actual geometry discretization and native counts. No changes to physical fill, geometry commands, forcing or solver physics.",
+    "execution": "both full6second successful native runs with strictly increasing times and explicit excluded-particle records",
+    "height_comparison": "each H1-H4 bridge-to-fine RMSE <=0.0275m (5% of nominal0.55m initialwaterdepth), evaluated over actual common bracketedtime grid with no retiming",
+    "height_bias": "each H1-H4 absolute signedmeanbias <=0.0275m",
+    "data_integrity": "no unlabelled identity loss; all raw native fields and validity semantics retained; decoded coverage and spatial identity checks required before bundle acceptance"
+  },
+  "auxiliary_only": [
+    "P1-P8 pressurepeak/integral/timing errors; no pressurequalification from surfacepass",
+    "reference-to-experiment differences and absent sourceuncertainty kept visible"
+  ],
+  "tolerance_origin": "Internal engineering tolerance chosen before comparison to support limited diagnostic data; not asserted as source sensor uncertainty. Passing does not prove gridconvergence or materialtrajectorytruth.",
+  "failure_policy": "Do not promote bridge or launch its physicalchildren on failedgates. Analyze specificdifference and remainingbudget; use justifiedalternative without changingthreshold fromcurves.",
+  "counting": "samephysicalmother atdifferentdp is reference-only and is never an additionalM4condition"
+}

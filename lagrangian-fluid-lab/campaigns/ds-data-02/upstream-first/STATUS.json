@@ -12,9 +12,9 @@
   },
   "milestones": {
     "M0": "passed",
-    "M1": "F5_solver_and_postprocess_completed_comparison_pending_F1_solver_ready",
-    "M2": "external_import_running_portable_hardening",
-    "M3": "336_scope_catalog_prepared",
+    "M1": "F5_diagnostic_comparisons_complete_F1_solver_running",
+    "M2": "external_download_resume_running_portable_build_ready",
+    "M3": "scope_map_and_numerical_bridge_gencase_ready",
     "M4": "pending"
   },
   "agents": {
@@ -23,9 +23,10 @@
     "scope_catalog": "GPT5.6Luna Max"
   },
   "running_attempts": [
-    "infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-001"
+    "F1/UF_F1_MDBC_DAMBREAK3D/solver-001",
+    "infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-download-resume-002"
   ],
-  "next": "F5 comparison audit; F1 unchangedsolver after externalimport releasesheavyqueue; portablebuild",
+  "next": "Check both active processes; F1 CSV postprocess after successful receipt; portable build then bridge solver; external extraction after download verified",
   "nas_preflight_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/UF_NAS_PREFLIGHT/check-001/execution-receipt.json",
   "runtime_regression": {
     "commit": "45ed7af9f",
@@ -49,6 +50,19 @@
     "new_storage_bytes": 1268778331
   },
   "active_sessions": {
-    "external_import": 78847
+    "F1_solver": 52009,
+    "external_download_resume": 70685
+  },
+  "F5_comparison": {
+    "status": "diagnostic_only_insufficient_full_window_reference",
+    "observed_reference_end_s": 15,
+    "requested_reference_end_s": 30,
+    "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/comparison-001/comparison/comparison-report.json",
+    "supplemental_report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F5/UF_F5_PISTON_REG/wave-comparison-001/comparison/wave-generator-supplemental-report.json"
+  },
+  "F1_dp015_gencase": {
+    "total_particles": 357192,
+    "fluid_particles": 192456,
+    "status": "completed"
   }
 }
