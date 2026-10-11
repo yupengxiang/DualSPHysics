@@ -76,7 +76,7 @@ TIME_MAX_S = 6.0
 TIME_OUT_S = 0.025
 DP_M = 0.01
 CONFIRMATION = "ROOT_APPROVED_M4_NATIVE_SOLVER_AUDIT"
-PLAN_SCHEMA = "ds-data-02.m4.native-solver-audit-queue-plan.v1"
+PLAN_SCHEMA = "ds-data-02.m4.native-solver-audit-queue-plan.v2"
 REQUEST_SCHEMA = "ds-data-02.runner.request.v1"
 GRANT_SCHEMA = "ds02.upstream-first.batch-request-grant.v1"
 RECEIPT_SCHEMA = "ds02.execution-receipt.v1"
@@ -182,7 +182,9 @@ def _paths(case: str) -> dict[str, Path]:
         "definition": ADDITIONAL / f"{case}_Def.xml",
         "solver_request": REQUESTS / f"{case}-solver-001.json",
         "solver_grant": GRANTS / f"{case}-solver-001.json",
-        "plan": PREPARED_ROOT / "plans" / f"{case}-solver-native-audit.plan.json",
+        # The original v1 and earlier v2 handoffs are immutable; this review
+        # artifact is a fresh v2 file after postcondition hardening.
+        "plan": PREPARED_ROOT / "plans" / f"{case}-solver-native-audit.plan-v2-review.json",
     }
 
 
@@ -227,6 +229,70 @@ def _require_completed_receipt(path: Path, case: str, attempt: str) -> dict[str,
     if state != "completed" or receipt is None:
         raise QueueError(f"{case}/{attempt} is {state}; completed receipt required: {path}")
     return receipt
+
+
+def _assert_receipt_request_binding(
+    receipt: Mapping[str, Any], request_path: Path, case: str, attempt: str
+) -> None:
+    """Require a terminal receipt to name the exact immutable request bytes.
+
+    The runner records ``request_sha256`` in every terminal execution receipt.
+    Treating a missing value as acceptable would let an old or hand-written
+    receipt pass the queue's postcondition, so this check deliberately uses an
+    exact equality rather than an optional comparison.
+    """
+
+    request = _regular(request_path, f"immutable request for {case}/{attempt}")
+    expected = _sha256(request)
+    actual = receipt.get("request_sha256")
+    if not isinstance(actual, str) or not SHA256_RE.fullmatch(actual) or actual != expected:
+        raise QueueError(
+            f"{case}/{attempt} receipt request_sha256 does not equal the immutable request hash"
+        )
+    nested = receipt.get("request")
+    if isinstance(nested, Mapping):
+        if nested.get("case_id") not in (None, case) or nested.get("attempt_id") not in (None, attempt):
+            raise QueueError(f"{case}/{attempt} receipt request identity is not case-bound")
+
+
+def _assert_runner_report_binding(
+    case: str, attempt: str, report_path: Path, receipt: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Bind an auditor report to its execution receipt and stdout.
+
+    The frame auditor writes the full report to stdout.  The integrity auditor
+    intentionally writes a compact ``{path,status}`` summary because its
+    report can be large.  Both forms are checked against the runner's
+    ``stdout_sha256``; neither check reads or hashes native frame payloads.
+    """
+
+    p = _paths(case)
+    attempt_root = p["integrity_root"] if attempt == "native-integrity-001" else p["frame_root"]
+    stdout_path = _regular(attempt_root / "stdout.log", f"{case}/{attempt} stdout")
+    report = _regular(report_path, f"{case}/{attempt} report")
+    stdout_hash = _sha256(stdout_path)
+    if receipt.get("stdout_sha256") != stdout_hash:
+        raise QueueError(f"{case}/{attempt} execution receipt stdout_sha256 is stale")
+    try:
+        stdout_payload = json.loads(stdout_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise QueueError(f"{case}/{attempt} stdout is not JSON report evidence") from exc
+    report_payload = _load(report, f"{case}/{attempt} report")
+    if attempt == "native-frame-scan-001":
+        if stdout_payload != report_payload:
+            raise QueueError("native-frame report is not the full stdout report bound by its receipt")
+    else:
+        if not isinstance(stdout_payload, Mapping):
+            raise QueueError("native-integrity stdout summary is not an object")
+        if stdout_payload.get("path") != str(report.resolve()) or stdout_payload.get("status") != report_payload.get("status"):
+            raise QueueError("native-integrity stdout summary is not bound to its report")
+    if receipt.get("output_root") != str(attempt_root.resolve()):
+        raise QueueError(f"{case}/{attempt} receipt output_root differs from its case attempt")
+    return {
+        "execution_receipt_sha256": _sha256(p["integrity_receipt"] if attempt == "native-integrity-001" else p["frame_receipt"]),
+        "stdout_sha256": stdout_hash,
+        "report_sha256": _sha256(report),
+    }
 
 
 def _all_solver_files(case: str) -> list[Path]:
@@ -627,28 +693,24 @@ def _validate_native_candidate(candidate_path: Path, manifest_path: Path, case: 
             raise QueueError("native frame manifest data_root is not the child solver data root")
     if Path(str(manifest.get("solver_root", ""))).resolve() != p["solver_root"].resolve():
         raise QueueError("native audit manifest solver_root is not the child solver attempt")
-    actual = candidate.get("actual_solver_binding")
-    if not isinstance(actual, Mapping) or not isinstance(actual.get("receipt"), Mapping):
-        raise QueueError("prepared native candidate lacks actual solver binding")
     solver_receipt = _require_completed_receipt(p["solver_receipt"], case, "solver-001")
-    solver_hash = _sha256(p["solver_receipt"])
-    if actual["receipt"].get("sha256") != solver_hash or candidate.get("actual_solver_receipt_sha256") != solver_hash:
-        raise QueueError("prepared native candidate solver receipt binding is stale")
+    _assert_receipt_request_binding(solver_receipt, p["solver_request"], case, "solver-001")
+    prepared_frame_sequence = _assert_prepared_solver_binding(candidate, case, mode)
     gencase_hash = _sha256(p["gencase_receipt"])
     if candidate.get("actual_gencase_receipt_sha256") != gencase_hash:
         raise QueueError("prepared native candidate GenCase receipt binding is stale")
     source_key = "source" if mode == "exclusions" else "sources"
     if not isinstance(manifest.get(source_key), Mapping):
         raise QueueError("prepared native manifest lacks source bindings")
-    for key, value in manifest[source_key].items():
-        if not isinstance(value, Mapping) or not isinstance(value.get("path"), str) or not isinstance(value.get("sha256"), str):
-            raise QueueError(f"prepared native source binding is malformed: {key}")
-        if not SHA256_RE.fullmatch(value["sha256"]):
-            raise QueueError(f"prepared native source hash is malformed: {key}")
-        source = _regular(Path(value["path"]), f"prepared native source {key}")
-        if value.get("bytes") != source.stat().st_size or value["sha256"] != _sha256(source):
-            raise QueueError(f"prepared native source binding is stale: {key}")
-    return {"candidate": candidate, "manifest": manifest, "manifest_path": manifest_path, "candidate_path": candidate_path, "solver_receipt": solver_receipt}
+    _assert_exact_native_source_bindings(manifest, case, mode, source_field=source_key)
+    return {
+        "candidate": candidate,
+        "manifest": manifest,
+        "manifest_path": manifest_path,
+        "candidate_path": candidate_path,
+        "solver_receipt": solver_receipt,
+        "prepared_frame_hash_sequence_sha256": prepared_frame_sequence,
+    }
 
 
 def _promote_native_candidate(case: str, mode: str) -> tuple[Path, Path]:
@@ -755,6 +817,7 @@ def _run_or_require_completed(case: str, attempt: str, request_path: Path, grant
     receipt_path = attempt_root / "execution-receipt.json"
     state, receipt = _receipt_state(receipt_path, case, attempt)
     if state == "completed" and receipt is not None:
+        _assert_receipt_request_binding(receipt, request_path, case, attempt)
         return receipt
     if state != "absent":
         raise QueueError(f"{case}/{attempt} is {state}; refusing to wait, overwrite, or duplicate")
@@ -762,7 +825,146 @@ def _run_or_require_completed(case: str, attempt: str, request_path: Path, grant
         raise QueueError(f"{case}/{attempt} has an attempt directory without a terminal receipt; refusing duplicate launch")
     _validate_grant(grant_path, request_path, case, attempt)
     _run_shared(request_path, grant_path, case, attempt)
-    return _require_completed_receipt(receipt_path, case, attempt)
+    receipt = _require_completed_receipt(receipt_path, case, attempt)
+    _assert_receipt_request_binding(receipt, request_path, case, attempt)
+    return receipt
+
+
+def _expected_native_source_paths(case: str, mode: str) -> dict[str, Path]:
+    """Return the exact source files a child auditor is allowed to report."""
+
+    p = _paths(case)
+    sources = {
+        "dsph_config": DS_CONFIG,
+        "gencase_receipt": p["gencase_receipt"],
+        "generated_xml": p["generated_xml"],
+        "part_info": p["solver_data"] / "PartInfo.ibi4",
+        "partvtk": PARTVTK,
+        "raw_partout": p["solver_data"] / "PartOut_000.obi4",
+        "run_out": p["solver_root"] / "Run.out",
+        "runparts": p["solver_root"] / "RunPARTs.csv",
+        "solver_receipt": p["solver_receipt"],
+        "source_definition": p["definition"],
+    }
+    if mode == "frames":
+        sources["native_integrity"] = p["integrity_report"]
+    return sources
+
+
+def _assert_exact_native_source_bindings(
+    report: Mapping[str, Any], case: str, mode: str, *, source_field: str = "source_bindings"
+) -> dict[str, dict[str, Any]]:
+    sources = report.get(source_field)
+    if not isinstance(sources, Mapping):
+        raise QueueError("native audit report lacks source_bindings")
+    expected = _expected_native_source_paths(case, mode)
+    if set(sources) != set(expected):
+        raise QueueError(
+            f"native {mode} report source keys differ from the exact child contract"
+        )
+    rebound: dict[str, dict[str, Any]] = {}
+    for key, path in expected.items():
+        value = sources.get(key)
+        if not isinstance(value, Mapping):
+            raise QueueError(f"native {mode} source binding is malformed: {key}")
+        source = _regular(path, f"expected native {mode} source {key}")
+        expected_path = str(source.resolve())
+        if value.get("path") != expected_path:
+            raise QueueError(f"native {mode} source path is not the exact child file: {key}")
+        if value.get("bytes") != source.stat().st_size:
+            raise QueueError(f"native {mode} source byte count is stale: {key}")
+        digest = value.get("sha256")
+        if not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+            raise QueueError(f"native {mode} source hash is malformed: {key}")
+        if digest != _sha256(source):
+            raise QueueError(f"native {mode} source hash is stale: {key}")
+        rebound[key] = dict(value)
+    return rebound
+
+
+def _prepared_frame_hash_sequence(candidate: Mapping[str, Any], case: str) -> str:
+    """Derive the scanner's frame sequence from prepared metadata only.
+
+    The preparation helper already hashes each regular solver file.  Reusing
+    those bindings avoids opening or rehashing any of the deferred BI4 frame
+    payloads in the launcher while still closing the exact 241-frame identity
+    contract.
+    """
+
+    p = _paths(case)
+    actual = candidate.get("actual_solver_binding")
+    if not isinstance(actual, Mapping):
+        raise QueueError("prepared frame candidate lacks actual_solver_binding")
+    regular = actual.get("regular_native_solver_files")
+    if not isinstance(regular, list):
+        raise QueueError("prepared frame candidate lacks regular solver bindings")
+    frame_bindings: dict[str, Mapping[str, Any]] = {}
+    for item in regular:
+        if not isinstance(item, Mapping) or not isinstance(item.get("path"), str):
+            raise QueueError("prepared solver binding is malformed")
+        path = Path(str(item["path"])).expanduser().resolve()
+        if path.parent != p["solver_data"].resolve() or FRAME_RE.fullmatch(path.name) is None:
+            continue
+        if path.name in frame_bindings:
+            raise QueueError(f"prepared solver bindings duplicate frame: {path.name}")
+        if type(item.get("bytes")) is not int or item["bytes"] <= 0:
+            raise QueueError(f"prepared frame binding has invalid byte count: {path.name}")
+        digest = item.get("sha256")
+        if not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+            raise QueueError(f"prepared frame binding has invalid hash: {path.name}")
+        frame_bindings[path.name] = item
+    expected_names = [f"Part_{index:04d}.bi4" for index in range(EXPECTED_FRAMES)]
+    if sorted(frame_bindings) != expected_names:
+        raise QueueError("prepared frame bindings are not exactly Part_0000.bi4 through Part_0240.bi4")
+    deferred = actual.get("frame_files_deferred_from_input_files")
+    expected_paths = [str((p["solver_data"] / name).resolve()) for name in expected_names]
+    if deferred != expected_paths:
+        raise QueueError("prepared frame deferred-source list is not the exact case data root")
+    digest = hashlib.sha256()
+    for name in expected_names:
+        item = frame_bindings[name]
+        digest.update(name.encode("ascii"))
+        digest.update(b"\0")
+        digest.update(str(item["bytes"]).encode("ascii"))
+        digest.update(b"\0")
+        digest.update(str(item["sha256"]).encode("ascii"))
+        digest.update(b"\n")
+    return digest.hexdigest()
+
+
+def _assert_prepared_solver_binding(candidate: Mapping[str, Any], case: str, mode: str) -> str | None:
+    p = _paths(case)
+    actual = candidate.get("actual_solver_binding")
+    if not isinstance(actual, Mapping):
+        raise QueueError("prepared native candidate lacks actual solver binding")
+    receipt = actual.get("receipt")
+    if not isinstance(receipt, Mapping):
+        raise QueueError("prepared native candidate lacks actual solver receipt binding")
+    solver_hash = _sha256(p["solver_receipt"])
+    if receipt.get("path") != str(p["solver_receipt"].resolve()) or receipt.get("bytes") != p["solver_receipt"].stat().st_size or receipt.get("sha256") != solver_hash:
+        raise QueueError("prepared native candidate solver receipt binding is stale")
+    if candidate.get("actual_solver_receipt_sha256") != solver_hash:
+        raise QueueError("prepared native candidate solver receipt hash is stale")
+    regular = actual.get("regular_native_solver_files")
+    if not isinstance(regular, list) or not regular:
+        raise QueueError("prepared native candidate lacks regular solver-file bindings")
+    seen: set[str] = set()
+    for item in regular:
+        if not isinstance(item, Mapping) or not isinstance(item.get("path"), str):
+            raise QueueError("prepared regular solver binding is malformed")
+        path = Path(str(item["path"])).expanduser().resolve()
+        try:
+            path.relative_to(p["solver_root"].resolve())
+        except ValueError as exc:
+            raise QueueError(f"prepared solver binding escapes the case solver root: {path}") from exc
+        if str(path) in seen:
+            raise QueueError(f"prepared solver bindings duplicate a regular file: {path}")
+        seen.add(str(path))
+        if type(item.get("bytes")) is not int or item["bytes"] <= 0 or not SHA256_RE.fullmatch(str(item.get("sha256", ""))):
+            raise QueueError(f"prepared solver binding is incomplete: {path}")
+    if mode == "frames":
+        return _prepared_frame_hash_sequence(candidate, case)
+    return None
 
 
 def _assert_integrity_report(case: str) -> dict[str, Any]:
@@ -772,20 +974,22 @@ def _assert_integrity_report(case: str) -> dict[str, Any]:
         raise QueueError("native-integrity report is not actual verified case-bound evidence")
     if report.get("fatal_findings") not in (None, [], {}):
         raise QueueError("native-integrity report contains fatal findings")
-    sources = report.get("source_bindings")
-    if not isinstance(sources, Mapping):
-        raise QueueError("native-integrity report lacks source hash bindings")
-    for key in ("solver_receipt", "gencase_receipt", "generated_xml", "source_definition", "runparts", "run_out", "raw_partout", "part_info", "partvtk", "dsph_config"):
-        value = sources.get(key)
-        if not isinstance(value, Mapping) or not SHA256_RE.fullmatch(str(value.get("sha256", ""))):
-            raise QueueError(f"native-integrity report lacks actual source hash binding: {key}")
-        source = _regular(Path(str(value.get("path", ""))), f"native-integrity report source {key}")
-        if value.get("bytes") != source.stat().st_size or value["sha256"] != _sha256(source):
-            raise QueueError(f"native-integrity report source binding is stale: {key}")
+    p_solver_root = p["solver_root"].resolve()
+    if Path(str(report.get("solver_root", ""))).expanduser().resolve() != p_solver_root:
+        raise QueueError("native-integrity report solver_root is not the exact child solver root")
+    _assert_exact_native_source_bindings(report, case, "exclusions")
+    execution_receipt = _require_completed_receipt(p["integrity_receipt"], case, "native-integrity-001")
+    _assert_receipt_request_binding(
+        execution_receipt,
+        _root_request_path(case, "native-integrity-001"),
+        case,
+        "native-integrity-001",
+    )
+    _assert_runner_report_binding(case, "native-integrity-001", p["integrity_report"], execution_receipt)
     return report
 
 
-def _assert_frame_report(case: str) -> dict[str, Any]:
+def _assert_frame_report(case: str, prepared_candidate: Mapping[str, Any] | None = None) -> dict[str, Any]:
     p = _paths(case)
     report = _load(p["frame_report"], "native-frame report")
     coverage = report.get("coverage") if isinstance(report.get("coverage"), Mapping) else {}
@@ -795,6 +999,10 @@ def _assert_frame_report(case: str) -> dict[str, Any]:
         raise QueueError("native-frame report is not actual verified case-bound evidence")
     if report.get("fatal_findings") not in (None, [], {}):
         raise QueueError("native-frame report contains fatal findings")
+    if Path(str(report.get("solver_root", ""))).expanduser().resolve() != p["solver_root"].resolve():
+        raise QueueError("native-frame report solver_root is not the exact child solver root")
+    if Path(str(report.get("native_data_root", ""))).expanduser().resolve() != p["solver_data"].resolve():
+        raise QueueError("native-frame report native_data_root is not the exact child solver data root")
     if coverage.get("frame_count") != EXPECTED_FRAMES or coverage.get("first_frame") != "Part_0000.bi4" or coverage.get("last_frame") != "Part_0240.bi4":
         raise QueueError("native-frame report does not cover exactly Part_0000 through Part_0240")
     if coverage.get("raw_frames_staged_or_copied") is not False or not isinstance(coverage.get("frame_hash_sequence_sha256"), str) or not SHA256_RE.fullmatch(coverage["frame_hash_sequence_sha256"]):
@@ -803,16 +1011,21 @@ def _assert_frame_report(case: str) -> dict[str, Any]:
         raise QueueError("native-frame finite audit did not verify all 241 frames")
     if identity.get("all_ids_unique_and_in_generated_cohort") is not True:
         raise QueueError("native-frame identity audit did not close the generated cohort")
-    sources = report.get("source_bindings")
-    if not isinstance(sources, Mapping):
-        raise QueueError("native-frame report lacks actual source hash bindings")
-    for key in ("native_integrity", "solver_receipt", "gencase_receipt", "generated_xml", "source_definition", "runparts", "run_out", "raw_partout", "part_info", "partvtk", "dsph_config"):
-        value = sources.get(key)
-        if not isinstance(value, Mapping) or not SHA256_RE.fullmatch(str(value.get("sha256", ""))):
-            raise QueueError(f"native-frame report lacks actual source hash binding: {key}")
-        source = _regular(Path(str(value.get("path", ""))), f"native-frame report source {key}")
-        if value.get("bytes") != source.stat().st_size or value["sha256"] != _sha256(source):
-            raise QueueError(f"native-frame report source binding is stale: {key}")
+    _assert_exact_native_source_bindings(report, case, "frames")
+    if prepared_candidate is None:
+        _, candidate_path = _audit_candidate_paths(case, "frames")
+        prepared_candidate = _load(candidate_path, "prepared native-frame candidate")
+    prepared_sequence = _assert_prepared_solver_binding(prepared_candidate, case, "frames")
+    if coverage.get("frame_hash_sequence_sha256") != prepared_sequence:
+        raise QueueError("native-frame report hash sequence differs from prepared solver source bindings")
+    execution_receipt = _require_completed_receipt(p["frame_receipt"], case, "native-frame-scan-001")
+    _assert_receipt_request_binding(
+        execution_receipt,
+        _root_request_path(case, "native-frame-scan-001"),
+        case,
+        "native-frame-scan-001",
+    )
+    _assert_runner_report_binding(case, "native-frame-scan-001", p["frame_report"], execution_receipt)
     return report
 
 
@@ -824,8 +1037,7 @@ def _launch(case: str, plan: Mapping[str, Any]) -> dict[str, Any]:
     # The solver request and grant are root-owned immutable artifacts.  The
     # launcher never edits or regenerates either one.
     solver_receipt = _run_or_require_completed(case, "solver-001", p["solver_request"], p["solver_grant"])
-    if solver_receipt.get("request_sha256") not in (None, _sha256(p["solver_request"])):
-        raise QueueError("completed solver receipt is not bound to the immutable root solver request")
+    _assert_receipt_request_binding(solver_receipt, p["solver_request"], case, "solver-001")
     _regular(p["gencase_receipt"], "actual GenCase receipt")
     _regular(p["generated_xml"], "actual generated XML")
     _regular(p["generated_bi4"], "actual generated BI4")
@@ -837,6 +1049,12 @@ def _launch(case: str, plan: Mapping[str, Any]) -> dict[str, Any]:
     integrity_request, integrity_grant = _promote_native_candidate(case, "exclusions")
     _run_or_require_completed(case, "native-integrity-001", integrity_request, integrity_grant)
     _assert_integrity_report(case)
+    integrity_binding = _assert_runner_report_binding(
+        case,
+        "native-integrity-001",
+        p["integrity_report"],
+        _load(p["integrity_receipt"], "native-integrity execution receipt"),
+    )
 
     prep_request, prep_grant = _promote_preparation_candidate(case, "frames")
     _run_or_require_completed(case, _prep_attempt(case, "frames"), prep_request, prep_grant)
@@ -845,14 +1063,22 @@ def _launch(case: str, plan: Mapping[str, Any]) -> dict[str, Any]:
     frame_request, frame_grant = _promote_native_candidate(case, "frames")
     _run_or_require_completed(case, "native-frame-scan-001", frame_request, frame_grant)
     integrity = _assert_integrity_report(case)
-    frame = _assert_frame_report(case)
+    _, prepared_frame_candidate_path = _audit_candidate_paths(case, "frames")
+    prepared_frame_candidate = _load(prepared_frame_candidate_path, "prepared native-frame candidate")
+    frame = _assert_frame_report(case, prepared_frame_candidate)
+    frame_binding = _assert_runner_report_binding(
+        case,
+        "native-frame-scan-001",
+        p["frame_report"],
+        _load(p["frame_receipt"], "native-frame execution receipt"),
+    )
     return {
         "schema": PLAN_SCHEMA,
         "case_id": case,
         "status": "completed_verified_native_exclusion_and_241_frame_audit",
         "no_solver_or_audit_duplicate": True,
-        "native_integrity": {"status": integrity.get("status"), "report": str(p["integrity_report"])},
-        "native_frame_scan": {"status": frame.get("status"), "frame_count": frame.get("coverage", {}).get("frame_count"), "report": str(p["frame_report"])},
+        "native_integrity": {"status": integrity.get("status"), "report": str(p["integrity_report"]), "receipt_binding": integrity_binding},
+        "native_frame_scan": {"status": frame.get("status"), "frame_count": frame.get("coverage", {}).get("frame_count"), "report": str(p["frame_report"]), "receipt_binding": frame_binding},
     }
 
 
@@ -937,13 +1163,26 @@ def _plan(case: str) -> dict[str, Any]:
         },
         "sequence": ["solver-001", "native-preparation-integrity-001", "native-integrity-001", "native-preparation-frames-001", "native-frame-scan-001"],
         "preparation_stages": prep_specs,
-        "final_assertions": {"native_integrity_status": "verified", "native_frame_scan_status": "verified", "frame_count": EXPECTED_FRAMES, "finite_fields": ["position", "velocity", "density"], "fatal_findings": []},
+        "final_assertions": {
+            "native_integrity_status": "verified",
+            "native_frame_scan_status": "verified",
+            "frame_count": EXPECTED_FRAMES,
+            "finite_fields": ["position", "velocity", "density"],
+            "fatal_findings": [],
+            "every_completed_stage_request_sha256_equals_immutable_request": True,
+            "solver_request_sha256_is_required": True,
+            "exact_case_source_bindings": True,
+            "auditor_stdout_and_report_bound_to_execution_receipt": True,
+            "frame_hash_sequence_matches_prepared_solver_bindings": True,
+        },
         "root_review_notes": [
             "The existing solver request/grant are immutable and reused byte-for-byte; this launcher never edits them.",
             "Preparation is a charged one-thread conversion under the same batch-2 single-heavy queue, with a 64 MiB output reservation and no GPU lease.",
             "Native exclusion runs before the frame preparation; frame files are deferred through deferred_source_root and estimated_deferred_read_bytes.",
             "Promotion changes pending authorization/provenance input fields only and refuses scientific or command changes.",
             "Running or failed receipts stop the queue; no attempt is overwritten or duplicated.",
+            "Every terminal stage receipt must carry the exact immutable request hash; a missing solver hash is fatal.",
+            "Native reports must bind the exact child receipts/files and auditor stdout; frame sequence output must equal the charged preparation metadata.",
         ],
         "launch_policy": {"default": "prepare_only", "explicit_launch": "--launch --root-launch-confirmation ROOT_APPROVED_M4_NATIVE_SOLVER_AUDIT", "launches_now": False},
     }
