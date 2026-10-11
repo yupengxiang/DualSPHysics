@@ -15,7 +15,7 @@
     "M1": "two_actual_diagnostic_reference_packs_complete_no_calibration_or_convergence_credit",
     "M2": "completed_diagnostic_external_reader_and_self_contained_3d_portable_package",
     "M3": "completed_two_actual_depth_derivatives_full241frame_audits_full_H1H4_P1P8_comparisons_catalog336",
-    "M4": "two_of_four_actual_verified_products_H058solver_running_H052nativehandoff_metadata_repair"
+    "M4": "two_of_four_actual_verified_products_H052fullproduct_running_H058solver_completed"
   },
   "agents": {
     "batch_runtime": "GPT5.6Luna Max",
@@ -23,9 +23,9 @@
     "m4_product": "GPT5.6Luna Max"
   },
   "running_attempts": [
-    "F1/UF_F1_MDBC_DP010_H058/solver-001"
+    "F1/UF_F1_MDBC_DP010_H052/m4-direct-conversion-001"
   ],
-  "next": "Poll H058solver70897 terminal; review new nativequeuev2 and productv2 corrected1331628cf. Reuse H052 completedprep, finish native/full product; then H058 native/full product. No duplicate solver or H050/H060 product.",
+  "next": "Poll H052productqueue99257/parentreservation; after actualterminal verify2negatives/sources/cost then checkpoint3of4, launch H058nativequeuev2 plan-v3 + fullproduct. Finalrelease/cost/certs all4 required.",
   "nas_preflight_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/UF_NAS_PREFLIGHT/check-001/execution-receipt.json",
   "runtime_regression": {
     "commit": "45ed7af9f",
@@ -50,7 +50,7 @@
     "scope": "closed first M1-M3batch only; M4 charges extra in parentledger"
   },
   "active_sessions": {
-    "H058_solver": 70897
+    "H052_product_v2_queue": 99257
   },
   "F5_comparison": {
     "status": "diagnostic_only_insufficient_full_window_reference",
@@ -76,7 +76,7 @@
   },
   "F1_comparison_veto": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/F1_COMPARISON_001_VETO.json",
   "usage_note": "NAS terminal receipts, includes failed attempts; authoritative parent ledger also retains preflight and active reservations.",
-  "updated_at_utc": "2026-10-11T06:19:37.591715+00:00",
+  "updated_at_utc": "2026-10-11T06:41:41.234569+00:00",
   "F1_comparison": {
     "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-002/comparison/spheric-comparison-report.json",
     "water_height_rmse_m": [
@@ -270,7 +270,19 @@
     "partvtk_all_passed": true,
     "raw_unchanged": true
   },
-  "active_queues": {},
+  "active_queues": {
+    "H052": {
+      "session": 99257,
+      "helper": "m4-next-prepared/run_condition_product_queue_v2.py",
+      "plan": "m4-next-prepared/plans/UF_F1_MDBC_DP010_H052-product-queue-v2-002.plan.json",
+      "sequence": [
+        "direct001",
+        "enrich001",
+        "portable001",
+        "v2actualvalidation001"
+      ]
+    }
+  },
   "H060_product_stages": {
     "enrichment001": "completed",
     "portable001": "completed",
@@ -294,5 +306,20 @@
     "completed_preparation_cpu_core_seconds": 35.287343,
     "completed_preparation_bytes": 158816,
     "next": "new helper v2 derives recipe from bound actual XML/manifest, reuse completed preparation"
+  },
+  "H058_solver": {
+    "status": "completed",
+    "gpu_seconds": 645.271859918721,
+    "cpu_core_seconds": 708.6591620000002,
+    "bytes": 8141648966,
+    "frames": 241
+  },
+  "H052_native_audits": {
+    "status": "verified",
+    "frame_count": 241,
+    "fatal_findings": [],
+    "frame_scan_cpu_core_seconds": 98.217481,
+    "frame_scan_bytes": 244562,
+    "no_duplicate_preparation_or_solver": true
   }
 }
