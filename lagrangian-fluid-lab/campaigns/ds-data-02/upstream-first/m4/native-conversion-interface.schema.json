@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds-data-02.m4.native-conversion-interface.v1",
+  "title": "M4 normalized upstream data-product handoff",
+  "description": "Consumer contract for an existing data_product native conversion. It does not define a BI4 decoder or a conversion operation.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema",
+    "status",
+    "family_id",
+    "case_id",
+    "credit_status",
+    "physical_fate_inferred",
+    "normalized_hdf5",
+    "identity_axis",
+    "exclusion_mask",
+    "endpoint_transport",
+    "source_receipts"
+  ],
+  "properties": {
+    "schema": {"const": "ds-data-02.m4.native-conversion-interface.v1"},
+    "status": {"enum": ["normalized_verified", "template_pending_native_audit"]},
+    "family_id": {"const": "F1"},
+    "case_id": {"pattern": "^UF_F1_MDBC_[A-Z0-9_]+$", "type": "string"},
+    "credit_status": {"const": "not_credited"},
+    "physical_fate_inferred": {"const": false},
+    "normalized_hdf5": {"$ref": "#/$defs/binding"},
+    "identity_axis": {
+      "type": "object",
+      "required": [
+        "key",
+        "full_initial_identity",
+        "all_frames_fixed_axis",
+        "initial_particle_count",
+        "frame_count",
+        "initial_ids_sha256"
+      ],
+      "properties": {
+        "key": {"const": "(Zone,Idp)"},
+        "full_initial_identity": {"const": true},
+        "all_frames_fixed_axis": {"const": true},
+        "initial_particle_count": {"minimum": 1, "type": "integer"},
+        "frame_count": {"minimum": 1, "type": "integer"},
+        "initial_ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "exclusion_mask": {
+      "type": "object",
+      "required": ["status", "count", "physical_fate_inferred", "mask_dataset"],
+      "properties": {
+        "status": {"enum": ["verified", "pending_audit"]},
+        "count": {"type": ["integer", "null"], "minimum": 0},
+        "ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "mask_dataset": {"pattern": "^/", "type": "string"},
+        "physical_fate_inferred": {"const": false},
+        "native_scan_schema": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "endpoint_transport": {
+      "type": "object",
+      "required": [
+        "schema",
+        "source_frame",
+        "destination_frame",
+        "source_valid_label",
+        "destination_valid_label",
+        "missing_endpoint_labels",
+        "physical_fate_inferred",
+        "particle_id_dataset",
+        "particle_zone_dataset",
+        "source_valid_dataset",
+        "destination_valid_dataset",
+        "source_label_dataset",
+        "destination_label_dataset",
+        "source_position_dataset",
+        "destination_position_dataset",
+        "displacement_dataset"
+      ],
+      "properties": {
+        "schema": {"const": "ds-data-02.m4.endpoint-transport.v1"},
+        "source_frame": {"const": 0},
+        "destination_frame": {"const": "last"},
+        "source_valid_label": {"const": "valid_source"},
+        "destination_valid_label": {"const": "valid_destination"},
+        "missing_endpoint_labels": {
+          "type": "array",
+          "items": {"enum": ["unknown", "censored"]},
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true
+        },
+        "physical_fate_inferred": {"const": false},
+        "particle_id_dataset": {"pattern": "^/", "type": "string"},
+        "particle_zone_dataset": {"pattern": "^/", "type": "string"},
+        "source_valid_dataset": {"pattern": "^/", "type": "string"},
+        "destination_valid_dataset": {"pattern": "^/", "type": "string"},
+        "source_label_dataset": {"pattern": "^/", "type": "string"},
+        "destination_label_dataset": {"pattern": "^/", "type": "string"},
+        "source_position_dataset": {"pattern": "^/", "type": "string"},
+        "destination_position_dataset": {"pattern": "^/", "type": "string"},
+        "displacement_dataset": {"pattern": "^/", "type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "source_receipts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/receipt"}
+    }
+  },
+  "$defs": {
+    "binding": {
+      "type": "object",
+      "required": ["path", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string"},
+        "bytes": {"minimum": 1, "type": "integer"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "receipt": {
+      "type": "object",
+      "required": ["role", "bytes", "sha256"],
+      "properties": {
+        "role": {"type": "string"},
+        "path": {"type": "string"},
+        "bytes": {"minimum": 0, "type": "integer"},
+        "sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+      },
+      "additionalProperties": true
+    }
+  }
+}
