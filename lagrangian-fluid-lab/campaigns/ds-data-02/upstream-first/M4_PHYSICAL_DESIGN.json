@@ -1,0 +1,89 @@
+{
+  "schema": "ds-data-02.upstream-first.m4.physical-design.v1",
+  "status": "prospective_prepared_no_new_launch",
+  "mother": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "role": "reference_only"
+  },
+  "target_distinct_physical_conditions": 4,
+  "depths_m": [
+    0.5,
+    0.52,
+    0.58,
+    0.6
+  ],
+  "existing_m3_candidates": [
+    "UF_F1_MDBC_DP010_H050",
+    "UF_F1_MDBC_DP010_H060"
+  ],
+  "additional_candidates": [
+    {
+      "case_id": "UF_F1_MDBC_DP010_H052",
+      "depth_m": 0.52,
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/UF_F1_MDBC_DP010_H052_Def.xml",
+      "sha256": "64beaa0020d4d4079a52e95260f374951065c5fceb9cde5ece2f4e0655b0c16b",
+      "semantic_diff": [
+        {
+          "path": "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z",
+          "before": "0.55",
+          "after": "0.52"
+        },
+        {
+          "path": "/execution[1]/parameters[0]/parameter[24]/@value",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "status": "prepared_not_launched_not_credited"
+    },
+    {
+      "case_id": "UF_F1_MDBC_DP010_H058",
+      "depth_m": 0.58,
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/UF_F1_MDBC_DP010_H058_Def.xml",
+      "sha256": "09f3cbffc1336855d2515ec83a1d673e8e9cc21a08bb42d611fc2e6839382b7c",
+      "semantic_diff": [
+        {
+          "path": "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z",
+          "before": "0.55",
+          "after": "0.58"
+        },
+        {
+          "path": "/execution[1]/parameters[0]/parameter[24]/@value",
+          "before": "0.01",
+          "after": "0.025"
+        }
+      ],
+      "status": "prepared_not_launched_not_credited"
+    }
+  ],
+  "physical_axis": "initial_fill_height_m",
+  "selection_reason": "Two additional grid-aligned depths inside the existing .50-.60m derivative range; no expansion of geometry or forcing domain. Actual generated fluid-cohort hashes must differ before condition credit.",
+  "numerical_recipe": {
+    "dp_m": 0.01,
+    "time_max_s": 6,
+    "time_out_s": 0.025,
+    "expected_frames": 241,
+    "sampling_difference_from_mother_s": [
+      0.01,
+      0.025
+    ],
+    "convergence_or_sampling_equivalence_claim": false
+  },
+  "gates": [
+    "M1-M3 actual deliverable chain and first-batch cost audit",
+    "immutable later-batch admission under unchanged parent cumulative limits",
+    "actual generated geometry and distinct physical fluid-cohort hashes",
+    "completed solver, native exclusions and full-frame audit, actual mother comparison",
+    "full-state conversion, checked transport labels, isolated relocation and semantic negatives"
+  ],
+  "split_policy": {
+    "lineage_id": "official-v54-mdbc-CaseDamBreak3D",
+    "unit": "entire common-mother lineage",
+    "all_four_conditions_same_partition": true,
+    "planned_partition": "development",
+    "validation_partition": [],
+    "reason": "Only one independent lineage is planned. No fabricated independent validation/test set or random-window split. Numerical evaluator applies within development and supplies no generalization claim."
+  },
+  "credit_policy": "Prepared definitions, numerical resolutions, windows, and reference mother receive no new physical-condition product credit."
+}
