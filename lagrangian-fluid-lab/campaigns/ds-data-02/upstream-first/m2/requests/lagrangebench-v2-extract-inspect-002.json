@@ -1,0 +1,65 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "request_id": "lagrangebench-v2-extract-inspect-002",
+  "family_id": "infra",
+  "case_id": "UF_LAGRANGEBENCH_2D_LDC",
+  "attempt_id": "m2-external-lagrangebench-v2-extract-002",
+  "kind": "cpu",
+  "cpu_task_kind": "conversion",
+  "status": "standby_after_download_retry",
+  "launch_condition": "Launch only after the separate v2 download-only retry completed and its final archive size/MD5 receipt is present.",
+  "requires_parent_nas_preflight": true,
+  "requires_download_retry_receipt": true,
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/lagrangebench_v2_extract_inspect.py",
+    "--archive",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-download-resume-002/external/2D_LDC_2708_10kevery100.zip",
+    "--dataset-root",
+    "{attempt_root}/external/2D_LDC_2708_10kevery100",
+    "--report",
+    "{attempt_root}/external/lagrangebench-v2-inspection.json",
+    "--max-extract-bytes",
+    "5368709120",
+    "--max-wall-seconds",
+    "7200"
+  ],
+  "max_wall_seconds": 7200,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 6442450944,
+  "estimated_peak_storage_bytes": 6442450944,
+  "output_storage": "upstream_nas",
+  "reference_role": "external_raw_archive_extraction_and_inspection",
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/lagrangebench_v2_extract_inspect.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/lagrangebench_v2_worker.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/lagrangebench_v2_loader.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_LAGRANGEBENCH_2D_LDC/m2-external-lagrangebench-v2-download-resume-002/external/2D_LDC_2708_10kevery100.zip"
+  ],
+  "source": {
+    "record_url": "https://zenodo.org/records/10491868",
+    "file_name": "2D_LDC_2708_10kevery100.zip",
+    "download_url": "https://zenodo.org/records/10491868/files/2D_LDC_2708_10kevery100.zip?download=1",
+    "api_content_url": "https://zenodo.org/api/records/10491868/files/2D_LDC_2708_10kevery100.zip/content",
+    "bytes": 358811551,
+    "md5": "md5:f527ab73f69afc0d176a229f4b812cd5"
+  },
+  "extraction_contract": {
+    "archive_verified_before_extract": true,
+    "safe_existing_extraction_utility_reused": true,
+    "path_traversal_and_symlink_checks": true,
+    "max_extract_bytes": 5368709120,
+    "training_or_solver": false,
+    "raw_fields_preserved": ["position", "particle_type"]
+  },
+  "heavy_work": {
+    "solver": false,
+    "training": false,
+    "archive_extraction": true,
+    "conversion": true
+  }
+}

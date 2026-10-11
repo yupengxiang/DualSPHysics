@@ -90,5 +90,15 @@ MiB archive bound and 5 GiB extraction bound; it is
 `requests/lagrangebench-v2-2d-ldc-download-inspect-001.json`; the parent runner
 must substitute `{worktree}` and `{attempt_root}` after NAS preflight.
 
+If that combined attempt reaches a terminal failure, the bounded retry is split
+into `requests/lagrangebench-v2-download-resume-002.json` and
+`requests/lagrangebench-v2-extract-inspect-002.json`. The first copies the
+failed attempt's immutable `.partial` into a new attempt and resumes only on an
+exact HTTP 206 `Content-Range`; HTTP 200 is rejected before append. It performs
+download-only audit I/O. The second verifies the final archive, reuses the
+existing safe extractor, and performs the heavier extraction/inspection under
+the 5 GiB bound. Neither fallback request should be launched while the
+original attempt is live.
+
 Dependencies for both paths are Python 3.10+, NumPy, and h5py. JAX, PyTorch,
 and the LagrangeBench package are intentionally not required.
