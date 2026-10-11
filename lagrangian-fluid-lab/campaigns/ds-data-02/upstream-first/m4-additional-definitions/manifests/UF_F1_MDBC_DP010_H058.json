@@ -1,0 +1,145 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-fine-dp010-t025.case-manifest.v1",
+  "status": "m4_additional_prepared_not_submitted",
+  "case_id": "UF_F1_MDBC_DP010_H058",
+  "family_id": "F1",
+  "reference_role": "physical_derivative_candidate_3d",
+  "upstream_case_id": "CaseDamBreak3D",
+  "source_mother": {
+    "case_id": "UF_F1_MDBC_DAMBREAK3D",
+    "definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "role": "official immutable reference; no automatic acceptance transfer"
+  },
+  "definition": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/UF_F1_MDBC_DP010_H058_Def.xml",
+    "sha256": "09f3cbffc1336855d2515ec83a1d673e8e9cc21a08bb42d611fc2e6839382b7c",
+    "geometry": {
+      "definition_dp_m": "0.01",
+      "fillbox_size_x_m": "1.4",
+      "fillbox_size_y_m": "1",
+      "fillbox_size_z_m": "0.58",
+      "time_max_s": "6",
+      "time_out_s": "0.025"
+    }
+  },
+  "physical_axis": {
+    "name": "initial_fill_height_m",
+    "mother_value_m": 0.55,
+    "candidate_value_m": 0.58,
+    "path": "casedef/geometry/commands/mainlist/fillbox/size/@z",
+    "definition_verification_path": "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z",
+    "single_difference_count": 1,
+    "allowed_change": {
+      "before": "0.55",
+      "after": "0.58",
+      "role": "physical_initial_fill_height"
+    },
+    "difference_label": "physical depth difference"
+  },
+  "numerical_output_recipe": {
+    "dp_m": 0.01,
+    "time_max_s": 6.0,
+    "source_time_out_s": 0.01,
+    "candidate_time_out_s": 0.025,
+    "estimated_saved_frames": 241,
+    "expected_frames": 241,
+    "path": "execution/parameters/parameter[@key='TimeOut']/@value",
+    "definition_verification_path": "/execution[1]/parameters[0]/parameter[24]/@value",
+    "difference_role": "separate numerical/output-sampling difference; full 0..6 s event retained; no retiming"
+  },
+  "control_binding": {
+    "fixed_controls_excluding_output_schedule_sha256": "468afacf28150adb05173bc1da179b44d9d3006697898ca303a8316101e271ab",
+    "source_full_control_sha256": "07ba7dc10a29c0f3bf9e73536aa6a01e3dc1750a64283ea043c09036a69e7503",
+    "candidate_full_control_sha256": "6c8aeb1f5a1f5db596ea1dc48393ee9338771668b0b40c2c6bf9b96e34ca331b",
+    "all_non_allowed_xml_semantics_equal": true
+  },
+  "semantic_diff": {
+    "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/semantic-diff.json",
+    "sha256": "5912f1f253016a1c4c1bfe1332810acc959e63c6d6a8996a10f2fcffef84504c",
+    "case_comparison": "UF_F1_MDBC_DP010_H058"
+  },
+  "mother_declared_use_gate": {
+    "status": "pending_full_native_audit_scope_review_and_m4_later_batch_admission",
+    "required_before_submission": [
+      "official F1 601-frame full native identity/finite audit receipt bound to the mother output",
+      "root-owned M3 declared-use and scope review for this full-event numerical recipe",
+      "resource preflight and terminal storage reservation for both children"
+    ],
+    "failed_dp015_bridge_does_not_transfer_acceptance": true,
+    "no_launch_authorized_by_artifacts": true,
+    "gate_file": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/fine-mother-declared-use-acceptance.json",
+    "gate_file_sha256": "2ff1305d59052de705d530953f0364a0545bcc589cb92c84fdad00305f400667"
+  },
+  "scope": {
+    "all_native_spatial_particles_required_at_each_saved_frame": true,
+    "primary_observations": [
+      "H1",
+      "H2",
+      "H3",
+      "H4"
+    ],
+    "auxiliary_observations": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ],
+    "event_window_s": [
+      0.0,
+      6.0
+    ],
+    "truncated_window_forbidden": true,
+    "acceptance_claim": "none_m4_additional_prepared_only_no_m3_completion_claim_no_credit",
+    "physical_difference_label": "initial physical fill depth; compare separately from sampling difference",
+    "sampling_difference_label": "TimeOut=.025 versus mother .01; no retiming"
+  },
+  "storage_forecast": {
+    "planning_solver_bytes": null,
+    "planning_solver_gib": null,
+    "request_reservation_bytes": 9663676416,
+    "request_reservation_gib": 9.0,
+    "basis": "exact 9 GiB template reservation; observed solver bytes are unavailable until a completed child receipt",
+    "not_a_reservation_until_root_submission": true
+  },
+  "preserve_existing_bridge_children": true,
+  "launch_authorization": "root-controlled; M4 additional prepared metadata only; no GenCase or solver launch implied",
+  "condition_role": "m4_additional_physical_depth_candidate_3d",
+  "m4_additional": true,
+  "m3_completion_claim": false,
+  "credit_status": "not_credited",
+  "m4_additional_contract": {
+    "schema_family": "ds-data-02.upstream-first.m3.f1-fine-dp010-t025.case-manifest.v1",
+    "frozen_consumer": "m4/m4_direct_enrich.py",
+    "m4_additional": true,
+    "m3_completion_claim": false,
+    "condition_role": "m4_additional_physical_depth_candidate_3d",
+    "grid_index_at_dp_0.01": 58,
+    "definition_grid_alignment_verified": true,
+    "actual_generated_fluid_cohort_hash": null,
+    "actual_generated_fluid_cohort_hash_status": "pending_after_gencase",
+    "actual_gencase_receipt_sha256": null,
+    "actual_gencase_receipt_status": "pending_after_gencase",
+    "actual_solver_receipt_sha256": null,
+    "actual_solver_receipt_status": "pending_after_solver",
+    "native_integrity_and_frame_scan_receipts": "pending_after_actual_solver",
+    "physical_depth_difference": {
+      "mother": "0.55",
+      "candidate": "0.58",
+      "credit": "not_credited"
+    },
+    "sampling_difference": {
+      "mother": "0.01",
+      "candidate": "0.025",
+      "retiming": false
+    },
+    "experimental_credit": false,
+    "acceptance_threshold": null,
+    "no_receipt_fiction": true
+  },
+  "no_m3_completion_claim": true
+}

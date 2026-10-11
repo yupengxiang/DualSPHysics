@@ -42,3 +42,18 @@ Do not overwrite consumed candidates or that report.
 No GenCase or solver was launched for H052 or H058 while preparing these
 files. Root must materialize any later request in the root request directory
 only after all recorded gates and actual receipt bindings are satisfied.
+
+The compatible child manifests are in `manifests/UF_F1_MDBC_DP010_H052.json`
+and `manifests/UF_F1_MDBC_DP010_H058.json`; `semantic-diff.json` keeps the
+frozen M3 contract schema while marking this subtree as M4 additional and
+explicitly makes no M3 completion claim. The manifests label the `.52`/`.58`
+physical-depth change separately from the `.025` output-sampling change.
+
+`prepare_m4_additional_audits.py` is a receipt-gated preparation worker. Its
+`solver-ready` stage binds a completed child GenCase receipt, generated XML and
+BI4, and the actual typed fluid-cohort hash. Its `native-exclusions` and
+`native-frames` stages bind a completed solver receipt, all regular solver
+files needed for postprocess, and (for frames) a verified native-integrity
+receipt before cloning the frozen M2 auditor request contract. It writes only
+candidate files below this subtree and refuses to run when the actual receipt
+chain is absent. It never launches a payload or writes root requests.
