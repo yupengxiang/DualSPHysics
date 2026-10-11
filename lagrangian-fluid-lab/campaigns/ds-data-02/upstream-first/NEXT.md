@@ -23,3 +23,7 @@ M3 full-event fine alternative assessment estimates H050/H060 at dp=.01, TimeMax
 ## M2 actual completion
 
 portable-tamper-validation-002 passed both rehashed semantic negatives using real bundle and bundled validator; source hashes unchanged. Together with external-readback-001 and isolated portable-validate-001, M2 diagnostic product is delivered. See M2_PORTABLE_DATA_CARD.json and M2_EXTERNAL_PACK.json. Failed001 retained. M3/M4 remain outstanding.
+
+## Fine derivative preparation
+
+m3/f1-fine-dp010-t025 contains two full6s original-resolution depth definitions and requests, no GenCase/solver launched. Prospective m3/fine-mother-declared-use-acceptance.json is pending all-frame native audit; frozen dp015 metric gate unchanged. Source PDF Figures1/6, XLS K/M headers and chart references confirm H1/H3 labels; no fittedswap allowed. data_product owns native_frame_identity_scan.py under development; upstream_reference independently reviews scope/scanner. Root must inspect readiness and launch scan via sharedrunner when ready.
