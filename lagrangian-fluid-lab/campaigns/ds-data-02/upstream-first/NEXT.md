@@ -11,3 +11,11 @@ Deadline remains 2026-10-25T03:11:02Z; goal active, M1–M4 not all delivered. R
 - 336-case catalog and seven-family upstream map are committed. M3 physical derivatives and M4 four-condition product remain outstanding.
 
 Next root actions: verify external download then extract when queue free; run native integrity and real tamper requests; inspect corrected comparison reports; choose evidence-based bounded M3 route. Never reset tranche or treat reports/prepared requests as missing physical deliveries.
+
+## Latest native audit checkpoint
+
+Both native-integrity-001 attempts completed: original 657 and dp015 382 unique excluded IDs, all native position causes; counts agree with saved RunPARTs. These do NOT verify per-frame particle continuity. data_product prepares bounded all-frame decoder scan.
+
+Actual portable-tamper-validation-001 failed because valid venv interpreter symlink was rejected, before negative tests. Preserve worker and failed receipt. data_product prepares v2 to validate resolved executable but invoke original venv path.
+
+M3 full-event fine alternative assessment estimates H050/H060 at dp=.01, TimeMax6, TimeOut.025 total14.61GiB raw, within remaining22.5GiB. Not yet authorized for launch: establish corresponding declared-use mother acceptance first; failed coarse bridge gate remains unchanged.
