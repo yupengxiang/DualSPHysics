@@ -1,0 +1,70 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "request_id": "portable-f1-tamper-validation-001",
+  "family_id": "infra",
+  "case_id": "UF_PORTABLE_F1",
+  "attempt_id": "portable-tamper-validation-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "status": "ready_after_portable_isolation",
+  "requires_parent_nas_preflight": true,
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/portable_tamper_validation.py",
+    "--source-bundle",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1",
+    "--output",
+    "{attempt_root}/m2-tamper-validation",
+    "--python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "--max-bytes",
+    "1500000000",
+    "--max-wall-seconds",
+    "1800"
+  ],
+  "max_wall_seconds": 1800,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 1500000000,
+  "estimated_peak_storage_bytes": 1500000000,
+  "estimated_temp_peak_bytes": 500000000,
+  "output_storage": "upstream_nas",
+  "reference_role": "portable_3d_data_product_actual_negative_audit",
+  "source_build_attempt": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001",
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/portable_tamper_validation.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/manifest.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/trajectory.h5",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/labels.h5",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/geometry.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/control.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/evaluator.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/source-receipts.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/reader-manifest.json",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/runtime/portable_bundle.py",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/infra/UF_PORTABLE_F1/portable-build-001/m2-portable/UF_PORTABLE_F1/runtime/l2_reader.py"
+  ],
+  "negative_contract": {
+    "source_bundle_is_read_only": true,
+    "cases_run_sequentially": true,
+    "scratch_removed_after_each_case": true,
+    "immutable_files_hardlinked_when_possible": true,
+    "mutable_files_copied": [
+      "manifest.json",
+      "labels.h5"
+    ],
+    "manifest_rehashes_only_labels_binding": true,
+    "production_validator": "bundle/runtime/portable_bundle.py",
+    "required_rejections": {
+      "identity": "transport labels changed particle IDs",
+      "destination_position": "destination transport positions do not match final frame"
+    },
+    "trajectory_copy_is_not_mutated": true,
+    "solver_launch_forbidden": true,
+    "decoder_launch_forbidden": true
+  },
+  "purpose": "Use the actual produced portable bundle to prove that rehashed semantic identity and destination-position tampering is rejected by the bundled production validator, while preserving the source bundle and compact rejection reports."
+}
