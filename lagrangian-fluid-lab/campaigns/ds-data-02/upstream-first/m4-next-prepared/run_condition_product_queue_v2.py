@@ -50,6 +50,11 @@ ADAPTER = BASE / "m4/m4_portable_adapter.py"
 INTERFACE_SCHEMA = BASE / "m4/native-conversion-interface.schema.json"
 DS_CONFIG = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DsphConfig.xml")
 PARTVTK = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTK_linux64")
+# The native auditors use the official PartVTKOut binary.  The product
+# converter keeps ``PARTVTK`` above for compatibility with the existing H060
+# candidate; report source bindings must nevertheless be checked against the
+# binary that actually appeared in the immutable audit request.
+AUDIT_PARTVTK = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/PartVTKOut_linux64")
 DECODER = Path("/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/campaigns/l1-resume/artifacts/bi4_dump")
 MOTHER_OWNER = BASE / "m2/upstream_conversion/official-mdbc-owner-metadata.json"
 RELOCATION_QUEUE = BASE / "run_m4_relocation_queue_v2.py"
@@ -95,12 +100,12 @@ def _sha256(path: Path) -> str:
 
 
 def _regular(path: Path, label: str, *, required: bool = True) -> Path | None:
-    path = path.expanduser().resolve()
+    path = path.expanduser()
     if path.is_symlink() or not path.is_file():
         if required:
             raise QueueError(f"{label} is not a regular file: {path}")
         return None
-    return path
+    return path.resolve()
 
 
 def _load(path: Path, label: str) -> dict[str, Any]:
@@ -339,7 +344,21 @@ def _source_gates(case: str, paths: Mapping[str, Path], owner: Mapping[str, Any]
         valid = status == "verified" and report.get("schema") == "ds-data-02.upstream-first.f1-native-integrity.v1" and report.get("case_id") == case
         gates["native_integrity_report"] = _binding(integrity, "verified native integrity report")
         gates["native_integrity_report"].update({"status": "verified" if valid else "invalid", "report_status": status})
-        if not valid:
+        if valid:
+            try:
+                _assert_native_report_source_bindings(
+                    report,
+                    integrity,
+                    gates["native_integrity_receipt"].get("receipt"),
+                    case,
+                    paths,
+                    "integrity",
+                )
+            except QueueError as exc:
+                valid = False
+                gates["native_integrity_report"]["reason"] = str(exc)
+                gates["native_integrity_report"]["status"] = "invalid"
+        if not valid and "reason" not in gates["native_integrity_report"]:
             gates["native_integrity_report"]["reason"] = "native_integrity_report_not_verified"
 
     frame = _regular(paths["frame_report"], "native frame scan report", required=False)
@@ -370,7 +389,21 @@ def _source_gates(case: str, paths: Mapping[str, Path], owner: Mapping[str, Any]
             "frame_bytes_total": coverage.get("frame_bytes_total"),
             "frame_hash_sequence_sha256": coverage.get("frame_hash_sequence_sha256"),
         })
-        if not valid:
+        if valid:
+            try:
+                _assert_native_report_source_bindings(
+                    report,
+                    frame,
+                    gates["native_frame_scan_receipt"].get("receipt"),
+                    case,
+                    paths,
+                    "frames",
+                )
+            except QueueError as exc:
+                valid = False
+                gates["native_frame_scan_report"]["reason"] = str(exc)
+                gates["native_frame_scan_report"]["status"] = "invalid"
+        if not valid and "reason" not in gates["native_frame_scan_report"]:
             gates["native_frame_scan_report"]["reason"] = "native_frame_scan_not_full_verified_241_frame_scope"
 
     required = ("gencase", "solver", "generated_xml", "native_integrity_receipt", "native_integrity_report",
@@ -552,6 +585,90 @@ def _validate_source_request(
         required = (expected_xml, expected_solver, paths["solver_receipt"].parent / "Run.out", paths["solver_receipt"].parent / "RunPARTs.csv", expected_data / "PartInfo.ibi4", expected_data / "PartOut_000.obi4", paths["integrity_report"])
         if any(str(path.resolve()) not in input_files for path in required):
             raise QueueError(f"{case}/{attempt} native-frame input roots are incomplete")
+
+
+def _native_report_source_paths(paths: Mapping[str, Path], mode: str) -> dict[str, Path]:
+    """Return the exact small-file source contract emitted by native auditors.
+
+    The report contracts intentionally exclude ``Part_*.bi4``.  Their large
+    frame payloads remain charged to the native frame auditor; this preflight
+    checks only the regular metadata files and the auditor's recorded hashes.
+    """
+    if mode not in {"integrity", "frames"}:
+        raise QueueError(f"unsupported native report mode: {mode}")
+    solver_root = paths["solver_receipt"].parent
+    data_root = solver_root / "data"
+    sources = {
+        "dsph_config": DS_CONFIG,
+        "gencase_receipt": paths["gencase_receipt"],
+        "generated_xml": paths["xml"],
+        "part_info": data_root / "PartInfo.ibi4",
+        "partvtk": AUDIT_PARTVTK,
+        "raw_partout": data_root / "PartOut_000.obi4",
+        "run_out": solver_root / "Run.out",
+        "runparts": solver_root / "RunPARTs.csv",
+        "solver_receipt": paths["solver_receipt"],
+        "source_definition": paths["definition"],
+    }
+    if mode == "frames":
+        sources["native_integrity"] = paths["integrity_report"]
+    return sources
+
+
+def _assert_native_report_source_bindings(
+    report: Mapping[str, Any],
+    report_path: Path,
+    execution_receipt: Mapping[str, Any] | None,
+    case: str,
+    paths: Mapping[str, Path],
+    mode: str,
+) -> None:
+    """Close native report roots and metadata bindings without frame hashing."""
+    if mode == "integrity":
+        _exact_path(report.get("gencase_root"), paths["gencase_receipt"].parent, f"{case} native-integrity gencase_root")
+    elif "gencase_root" in report:
+        _exact_path(report.get("gencase_root"), paths["gencase_receipt"].parent, f"{case} native-frame gencase_root")
+    _exact_path(report.get("solver_root"), paths["solver_receipt"].parent, f"{case} native-{mode} solver_root")
+    if mode == "frames":
+        _exact_path(report.get("native_data_root"), paths["solver_receipt"].parent / "data", f"{case} native-frame native_data_root")
+
+    expected = _native_report_source_paths(paths, mode)
+    source_bindings = report.get("source_bindings")
+    if not isinstance(source_bindings, Mapping) or set(source_bindings) != set(expected):
+        raise QueueError(f"{case} native-{mode} report source_bindings differ from the exact child contract")
+
+    if not isinstance(execution_receipt, Mapping):
+        raise QueueError(f"{case} native-{mode} report has no completed execution receipt")
+    launch_hashes = execution_receipt.get("input_hashes_at_launch")
+    after_hashes = execution_receipt.get("input_hashes_after_run")
+    if not isinstance(launch_hashes, Mapping) or not isinstance(after_hashes, Mapping):
+        raise QueueError(f"{case} native-{mode} receipt lacks input hash bindings")
+
+    report_hashes = report.get("source_hashes")
+    if mode == "integrity":
+        expected_hash_keys = {f"{key}_sha256" for key in expected}
+        if not isinstance(report_hashes, Mapping) or set(report_hashes) != expected_hash_keys:
+            raise QueueError(f"{case} native-integrity source_hashes differ from the exact child contract")
+    elif report_hashes is not None and not isinstance(report_hashes, Mapping):
+        raise QueueError(f"{case} native-frame source_hashes are malformed")
+
+    for key, expected_path in expected.items():
+        source = _regular(expected_path, f"expected native {mode} source {key}")
+        assert source is not None
+        binding = source_bindings.get(key)
+        if not isinstance(binding, Mapping):
+            raise QueueError(f"{case} native-{mode} source binding is malformed: {key}")
+        _exact_path(binding.get("path"), source, f"{case} native-{mode} source {key} path")
+        if type(binding.get("bytes")) is not int or binding["bytes"] != source.stat().st_size:
+            raise QueueError(f"{case} native-{mode} source byte count is stale: {key}")
+        digest = binding.get("sha256")
+        if not isinstance(digest, str) or len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
+            raise QueueError(f"{case} native-{mode} source hash is malformed: {key}")
+        source_name = str(source)
+        if launch_hashes.get(source_name) != digest or after_hashes.get(source_name) != digest:
+            raise QueueError(f"{case} native-{mode} source execution hash is stale: {key}")
+        if isinstance(report_hashes, Mapping) and mode == "integrity" and report_hashes.get(f"{key}_sha256") != digest:
+            raise QueueError(f"{case} native-integrity source_hashes binding is stale: {key}")
 
 
 def _strict_source_gates(
@@ -810,6 +927,24 @@ def _direct_command(case: str, paths: Mapping[str, Path]) -> list[str]:
     ]
 
 
+def _flatten_file_bindings(bindings: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
+    """Flatten semantic source maps to the path-keyed input contract."""
+    flattened: dict[str, dict[str, Any]] = {}
+
+    def visit(value: Any) -> None:
+        if not isinstance(value, Mapping):
+            return
+        path = value.get("path")
+        if isinstance(path, str) and type(value.get("bytes")) is int:
+            flattened[path] = copy.deepcopy(dict(value))
+        for child in value.values():
+            if isinstance(child, Mapping):
+                visit(child)
+
+    visit(bindings)
+    return flattened
+
+
 def _build_direct_candidate(case: str, paths: Mapping[str, Path], owner_info: Mapping[str, Any], evidence: Mapping[str, Any], gates: Mapping[str, Any]) -> dict[str, Any] | None:
     if gates.get("status") != "ready":
         return None
@@ -838,7 +973,7 @@ def _build_direct_candidate(case: str, paths: Mapping[str, Path], owner_info: Ma
         str(paths["integrity_report"]), str(paths["integrity_receipt"]), str(paths["frame_report"]), str(paths["frame_receipt"]),
         str(paths["manifest"]), str(paths["semantic_diff"]), str(PRODUCER), str(RUNTIME_V2), str(RUNTIME_V6), str(RUNTIME_V6_BATCH2),
     ]
-    input_bindings = {key: value for key, value in receipt_bindings.items()}
+    input_bindings = _flatten_file_bindings(receipt_bindings)
     source_request_bindings = receipt_bindings.get("source_request_bindings", {})
     if isinstance(source_request_bindings, Mapping):
         for value in source_request_bindings.values():
@@ -846,17 +981,19 @@ def _build_direct_candidate(case: str, paths: Mapping[str, Path], owner_info: Ma
                 source_request_path = Path(value["path"])
                 direct_input_files.append(str(source_request_path))
                 input_bindings[str(source_request_path)] = _binding(source_request_path, "immutable completed-source request")
-    input_bindings.update({
-        "converter": _binding(CONVERTER, "direct converter"),
-        "converter_v2": _binding(CONVERTER_V2, "bounded-scratch direct converter v2"),
-        "decoder": _binding(DECODER, "canonical BI4 decoder"),
-        "partvtk": _binding(PARTVTK, "canonical PartVTK"),
-        "dsph_config": _binding(DS_CONFIG, "canonical DsphConfig"),
-        "producer": _binding(PRODUCER, "frozen M4 enrichment producer"),
-        "runtime_v2": _binding(RUNTIME_V2, "runtime v2"),
-        "runtime_v6": _binding(RUNTIME_V6, "runtime v6"),
-        "runtime_v6_batch2": _binding(RUNTIME_V6_BATCH2, "batch-2 runtime v6"),
-    })
+    for path, role in (
+        (CONVERTER, "direct converter"),
+        (CONVERTER_V2, "bounded-scratch direct converter v2"),
+        (DECODER, "canonical BI4 decoder"),
+        (PARTVTK, "canonical PartVTK"),
+        (DS_CONFIG, "canonical DsphConfig"),
+        (PRODUCER, "frozen M4 enrichment producer"),
+        (RUNTIME_V2, "runtime v2"),
+        (RUNTIME_V6, "runtime v6"),
+        (RUNTIME_V6_BATCH2, "batch-2 runtime v6"),
+    ):
+        binding = _binding(path, role)
+        input_bindings[binding["path"]] = binding
     depth = float(evidence["physical_axis"]["candidate_value_m"])
     native_files = _native_files(paths)
     present_native = {str(Path(item["path"]).relative_to(paths["solver_receipt"].parent)) for item in native_files["files"]}
@@ -906,6 +1043,7 @@ def _build_direct_candidate(case: str, paths: Mapping[str, Path], owner_info: Ma
         "storage_reservation": {"output_storage": "upstream_nas", "attempt_root": str(paths["run"] / paths["direct_attempt"]), "direct_conversion_output_bytes": DIRECT_RESERVE, "direct_conversion_output_gib": 12, "enriched_copy_bytes_upper_bound": DIRECT_RESERVE, "new_bytes_upper_bound": 2 * DIRECT_RESERVE, "nas_scratch": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/scratch", "scratch_bytes_outside_destination": 0, "scratch_policy": "NAS destination-side partial output only; no raw-frame staging or second scientific scratch copy"},
         "request_note": "Actual completed XML, GenCase, solver, native-integrity, and full 241-frame receipts are bound. Stream the immutable NAS native source through the frozen converter with canonical BI4 decoder/PartVTK; no retiming, no experimental credit, no acceptance threshold.",
     }
+    _validate_candidate_v2(candidate, case, paths, gates, owner_info["binding"])
     _write_immutable(paths["candidate"], candidate)
     written = _load(paths["candidate"], "new direct-conversion candidate")
     return {"path": str(paths["candidate"]), "binding": _binding(paths["candidate"], "immutable direct-conversion candidate"), "record": written, "created": True}

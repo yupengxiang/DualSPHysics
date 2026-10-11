@@ -50,6 +50,34 @@ class ConditionProductQueueV2Tests(unittest.TestCase):
         with self.assertRaisesRegex(QUEUE.QueueError, "generated_prefix"):
             QUEUE._validate_source_request(case, "solver-001", request, paths, manifest)
 
+    def test_native_reports_must_bind_exact_case_roots(self) -> None:
+        case, paths, _, _, gates = self._h060_context()
+        integrity = QUEUE._load(paths["integrity_report"], "H060 native integrity report")
+        wrong_integrity = copy.deepcopy(integrity)
+        wrong_integrity["gencase_root"] = str(Path("/tmp/wrong-gencase-root"))
+        with self.assertRaisesRegex(QUEUE.QueueError, "gencase_root"):
+            QUEUE._assert_native_report_source_bindings(
+                wrong_integrity,
+                paths["integrity_report"],
+                gates["native_integrity_receipt"]["receipt"],
+                case,
+                paths,
+                "integrity",
+            )
+
+        frame = QUEUE._load(paths["frame_report"], "H060 native frame report")
+        wrong_frame = copy.deepcopy(frame)
+        wrong_frame["native_data_root"] = str(Path("/tmp/wrong-native-data-root"))
+        with self.assertRaisesRegex(QUEUE.QueueError, "native_data_root"):
+            QUEUE._assert_native_report_source_bindings(
+                wrong_frame,
+                paths["frame_report"],
+                gates["native_frame_scan_receipt"]["receipt"],
+                case,
+                paths,
+                "frames",
+            )
+
     def test_changed_converter_v2_binding_is_rejected(self) -> None:
         case, paths, owner_info, _, gates = self._h060_context()
         candidate = QUEUE._load(paths["candidate"], "H060 direct candidate")
@@ -57,6 +85,37 @@ class ConditionProductQueueV2Tests(unittest.TestCase):
         changed["input_file_bindings"][str(QUEUE.CONVERTER_V2)]["sha256"] = "0" * 64
         with self.assertRaisesRegex(QUEUE.QueueError, "converter v2 binding"):
             QUEUE._validate_candidate_v2(changed, case, paths, gates, owner_info["binding"])
+
+    def test_fresh_candidate_uses_path_bindings_and_reuses(self) -> None:
+        case, paths, owner_info, _, gates = self._h060_context()
+        evidence = QUEUE._validate_evidence(case, paths, owner_info["record"])
+        with tempfile.TemporaryDirectory(prefix="m4-v2-candidate-") as temporary:
+            candidate_paths = dict(paths)
+            candidate_paths["candidate"] = Path(temporary) / "fresh.candidate.json"
+            solver_request = QUEUE._load(paths["solver_request"], "H060 solver request")
+            existing_candidate = QUEUE._load(paths["candidate"], "H060 direct candidate")
+            generated = existing_candidate["actual_generated_case_binding"]
+            solver_request["actual_generated_cohort"] = {
+                "schema": "ds-data-02.upstream-first.m4.generated-fluid-cohort.v1",
+                "case_id": case,
+                "status": "actual_completed",
+                "fluid_particles": generated["fluid_particles"],
+                "grid_index": generated["grid_index"],
+                "generated_xml": generated["generated_xml"],
+            }
+            candidate_paths["solver_request"] = Path(temporary) / "solver-request-fixture.json"
+            candidate_paths["solver_request"].write_text(json.dumps(solver_request), encoding="utf-8")
+            first = QUEUE._build_direct_candidate(case, candidate_paths, owner_info, evidence, gates)
+            self.assertIsNotNone(first)
+            assert first is not None
+            self.assertTrue(first["created"])
+            bindings = first["record"]["input_file_bindings"]
+            self.assertIn(str(QUEUE.CONVERTER_V2), bindings)
+            self.assertNotIn("converter_v2", bindings)
+            second = QUEUE._build_direct_candidate(case, candidate_paths, owner_info, evidence, gates)
+            self.assertIsNotNone(second)
+            assert second is not None
+            self.assertFalse(second["created"])
 
     def test_old_timeout_in_owner_recipe_is_rejected(self) -> None:
         case, paths, owner_info, manifest, _ = self._h060_context()
@@ -84,6 +143,16 @@ class ConditionProductQueueV2Tests(unittest.TestCase):
             }
             with self.assertRaisesRegex(QUEUE.QueueError, "request_sha256"):
                 QUEUE._assert_source_receipt_request_binding(receipt, request_path, case, attempt)
+
+    def test_regular_rejects_symlink_before_resolve(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="m4-v2-symlink-") as temporary:
+            root = Path(temporary)
+            target = root / "target.json"
+            link = root / "link.json"
+            target.write_text("{}\n", encoding="utf-8")
+            link.symlink_to(target)
+            with self.assertRaisesRegex(QUEUE.QueueError, "not a regular file"):
+                QUEUE._regular(link, "symlink fixture")
 
     def test_fresh_plan_prefix_does_not_select_consumed_v1_plan(self) -> None:
         path = QUEUE._fresh_plan_path("UF_F1_MDBC_DP010_H060")
