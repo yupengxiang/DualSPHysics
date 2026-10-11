@@ -1,0 +1,56 @@
+{
+  "schema": "ds-data-02.upstream-first.f1-solver-estimate.v1",
+  "launch_ready": false,
+  "family_id": "F1",
+  "case_id": "UF_F1_MDBC_DAMBREAK3D",
+  "upstream_case_id": "CaseDamBreak3D",
+  "reference_role": "primary_3d",
+  "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+  "source_definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+  "solver_command_template": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/bin/linux/DualSPHysics5.4_linux64",
+    "<completed_gencase_output_base>",
+    "{attempt_root}/CaseDamBreak3D",
+    "-tmax:6.0",
+    "-tout:0.01"
+  ],
+  "controls": {
+    "dimension": 3,
+    "dp_m": 0.01,
+    "time_max_s": 6.0,
+    "time_out_s": 0.01,
+    "expected_native_frames": 601,
+    "boundary": "mDBC",
+    "slip_mode": 1,
+    "no_penetration": 0,
+    "kernel": "Wendland",
+    "step_algorithm": "Symplectic"
+  },
+  "estimate_basis": {
+    "official_dp020_canary_receipt": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-01/d02/canaries/F1_mdbc_dambreak3d/prepare-receipt.json",
+    "official_dp020_total_particles": 172422,
+    "official_dp020_fluid_particles": 79380,
+    "official_dp020_elapsed_s": 0.146,
+    "ideal_dp_scaling_factor": 8,
+    "ideal_dp010_total_particles": 1379376,
+    "ideal_dp010_fluid_particles": 635040,
+    "planning_particle_range": [1240000, 1520000],
+    "planning_fluid_range": [570000, 700000],
+    "completed_legacy_601_frame_reference": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/F1/F1_REF_DUAL_NOMINAL_MEDIUM/qualification-ref-dual-medium-v1/execution-receipt.json",
+    "legacy_reference_particles": 643866,
+    "legacy_reference_bytes": 12407422295,
+    "legacy_reference_elapsed_s": 319.64290394005366,
+    "legacy_reference_note": "same official binary family and 601 saves, but asymmetric dual-channel geometry at dp=0.012; diagnostic scaling only"
+  },
+  "bounded_solver_reservation_guidance": {
+    "max_wall_seconds": 1800,
+    "cpu_threads": 1,
+    "estimated_peak_gpu_mib": 16384,
+    "estimated_storage_bytes": 42949672960,
+    "native_bytes_range_estimate": [23900000000, 29300000000],
+    "storage_basis": "Scale the completed 601-frame legacy reference (12,407,422,295 bytes at 643,866 particles) over the planning particle range; reserve headroom for generated XML, BI4 metadata, and solver receipts. Keep PartVTK/measurement products in a separate bounded postprocess attempt so the first-batch 50 GiB tranche remains auditable.",
+    "runtime_basis": "The legacy 643,866-particle 6 s run completed in 319.64 s; the official dp=0.01 planning range is about 1.9–2.4 times the particle count, while smaller time steps can increase work. 1,800 s is a bounded upper reservation, not a measured runtime.",
+    "status": "replace all estimates with completed GenCase particle count and root-approved solver request before launch"
+  },
+  "comparison_status": "no numerical comparison until the SPHERIC mapping record and fresh official observations are complete"
+}

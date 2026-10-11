@@ -23,24 +23,30 @@ four official H probes, H1 `(0.496,0.5,0)`, H2 `(0.992,0.5,0)`, H3
 column. The eight points in `f1/input/pressure.txt` are auxiliary pressure
 impact observations in Pa; they are not substituted for surface elevation.
 
-**Reference and comparison.** The numerical reference is the mapped SPHERIC
-Test 02 observation set specified by the campaign plan. Before comparison,
-record its source URL/file hash, units, coordinate convention, sensor labels,
-time origin, and digitisation uncertainty. No F1 numerical pass may be issued
-until that mapping record exists. Match common timestamps by interpolation
-only inside the two reference brackets; do not phase-shift, extrapolate, or
-retime either series.
+**Reference and comparison.** The mapped SPHERIC Test 02 observation set is
+recorded in `f1/reference/spheric-test2-metadata.json`. The published source
+workbook explicitly gives time in seconds, pressure in Pa, and height in m;
+its `Experimental_data` sheet contains 7,395 samples from approximately
+0.000022 to 7.394064 s. The source geometry is x-reflected relative to the
+official DualSPHysics XML: use `x_spheric = 3.22 - x_official`, preserve the
+H/P labels, and use the explicit coordinate table in that mapping record. In
+particular, H4 is the reservoir history and maps to the official H4 point at
+x=2.638 m; do not compare by raw increasing-x order. Before comparison,
+record the source URL/file hashes, units, coordinate convention, sensor
+labels, and time origin in the receipt. Match common timestamps by
+interpolation only inside the two reference brackets; do not phase-shift,
+extrapolate, or retime either series.
 
-**Frozen metrics and provisional gates.** Report, per elevation probe,
+**Frozen metrics and acceptance status.** Report, per elevation probe,
 RMSE, MAE, maximum absolute error, signed mean bias, peak elevation, and
-peak/arrival time error. The provisional operational gate is elevation RMSE
-`<= max(0.010 m, 0.10*H_ref)` and peak/arrival time error `<=0.020 s`
-(two native output intervals). For pressure, report peak and integrated
-impact-window error, with event timing `<=0.020 s` and relative peak error
-`<=15%` when the reference pressure uncertainty is available. If the mapped
-SPHERIC source gives a stricter uncertainty-based limit, record it before
-comparison and use that limit. Missing reference uncertainty leaves the result
-as diagnostic rather than accepted.
+peak/arrival time error. For pressure, also report peak and integrated
+impact-window error.
+The SPHERIC release does not state sensor precision, calibration uncertainty,
+digitisation uncertainty, or an acceptance tolerance. Therefore this contract
+does not assert a source-derived numerical pass/fail threshold. If the root
+chooses an internal project tolerance, it must be recorded as internal and
+frozen before comparison; until then, F1 results remain diagnostic rather than
+accepted.
 
 **Coverage checks.** Require monotonic real times covering `0..6 s`, all four
 elevation probes, all eight pressure probes, finite SI-valued observations,
