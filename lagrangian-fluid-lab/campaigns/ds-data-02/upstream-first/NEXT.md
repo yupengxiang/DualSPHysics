@@ -27,3 +27,7 @@ portable-tamper-validation-002 passed both rehashed semantic negatives using rea
 ## Fine derivative preparation
 
 m3/f1-fine-dp010-t025 contains two full6s original-resolution depth definitions and requests, no GenCase/solver launched. Prospective m3/fine-mother-declared-use-acceptance.json is pending all-frame native audit; frozen dp015 metric gate unchanged. Source PDF Figures1/6, XLS K/M headers and chart references confirm H1/H3 labels; no fittedswap allowed. data_product owns native_frame_identity_scan.py under development; upstream_reference independently reviews scope/scanner. Root must inspect readiness and launch scan via sharedrunner when ready.
+
+## Live full-frame audit
+
+Originalfine native-frame-scan-001 is running via sharedrunner, session3616 PID3676206, reserve640MiB. Poll existing handle, do not duplicate. It scansall601frames using frozen38585486d+77284aea4 implementation; source hashes/count/time/finite/Zone0/cohort/exclusion-set checks. After actualpass and independentreview, root can record scopedmother acceptance with exactreport/receipt/digestbindings then finalize GenCase requests. Preserve originalgate file; use decision sidecar ratherthan silentlyediting accepted prerequisites.
