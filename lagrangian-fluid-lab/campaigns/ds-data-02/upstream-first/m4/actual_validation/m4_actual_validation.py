@@ -586,6 +586,30 @@ def _snapshot_against_records(records: Sequence[tuple[Path, int, str]], *, deadl
     return result
 
 
+def _source_isolation_paths(args: argparse.Namespace, source: Path, receipt_path: Path) -> tuple[list[Path], list[Path]]:
+    # A tmpfs mount point itself still exists. Mask ancestors and probe their
+    # original children, so an empty mount cannot falsely prove source denial.
+    denied = [source, receipt_path.parent]
+    masks = [source.parent, receipt_path.parent.parent]
+    for raw in getattr(args, "source_mask_root", ()):
+        root = _directory(Path(raw), "original source mask root")
+        if not source.is_relative_to(root) or not receipt_path.is_relative_to(root):
+            raise ActualValidationError("source mask root must contain both source bundle and receipt")
+        masks.append(root)
+        for name in ("solver-001", "gencase-001", "native-integrity-001", "native-frame-scan-001", "m4-direct-conversion-001"):
+            original = root / name
+            if original.exists():
+                denied.append(original)
+    original_receipt = _load_json(receipt_path, "completed source receipt")
+    for value in original_receipt.get("source", {}).values():
+        if isinstance(value, Mapping) and isinstance(value.get("path"), str):
+            original = Path(value["path"])
+            if original.is_absolute() and original.exists():
+                denied.append(original)
+    masks = sorted(set(masks), key=lambda path: (len(path.parts), str(path)))
+    return list(dict.fromkeys(denied)), masks
+
+
 def run_actual_validation(args: argparse.Namespace) -> dict[str, Any]:
     started = time.monotonic()
     source = _directory(Path(args.source_bundle), "source bundle")
@@ -612,14 +636,14 @@ def run_actual_validation(args: argparse.Namespace) -> dict[str, Any]:
     relocation = _copy_bundle(source, relocated, records, max_bytes=args.max_bytes, deadline=deadline)
     output.mkdir(parents=True)
     isolated_path = output / "relocated-isolated-validation.json"
-    denied_paths = [source, receipt_path.parent]
+    denied_paths, mask_paths = _source_isolation_paths(args, source, receipt_path)
     isolated = _run_isolated_replay(
         wrapper_path=Path(args.isolation_wrapper),
         relocated_bundle=relocated,
         python_path=Path(args.python),
         output=isolated_path,
         denied_paths=denied_paths,
-        mask_paths=denied_paths,
+        mask_paths=mask_paths,
         max_wall_seconds=max(1.0, deadline - time.monotonic()),
     )
     scratch = output / "scratch"
@@ -688,7 +712,8 @@ def run_actual_validation(args: argparse.Namespace) -> dict[str, Any]:
             "portable": isolated.get("validation", {}).get("portable"),
             "source_paths_redacted": isolated.get("validation", {}).get("source_paths_redacted"),
             "denied_probes_passed": isolated.get("namespace", {}).get("denied_probes_passed"),
-            "masked_source_paths": [str(path) for path in denied_paths],
+            "masked_source_paths": [str(path) for path in mask_paths],
+            "denied_source_probes": [str(path) for path in denied_paths],
         },
         "semantic_negatives": {
             "count": len(rows),
@@ -730,6 +755,7 @@ def prepare_request(args: argparse.Namespace) -> dict[str, Any]:
     if not isinstance(case_id, str) or not case_id.startswith("UF_F1_"):
         raise ActualValidationError("source interface case_id is outside F1")
     completion = _source_receipt(receipt_path, case_id=case_id, deadline=deadline)
+    denied_paths, mask_paths = _source_isolation_paths(args, source, receipt_path)
     total_bytes = sum(size for _, size, _ in records)
     source_files = [str(path) for path, _, _ in records]
     worker = Path(__file__).resolve()
@@ -813,6 +839,10 @@ def prepare_request(args: argparse.Namespace) -> dict[str, Any]:
         "scientific_scope": "relocation and data-engineering audit only; no solver, decoder, converter, or physical-fate inference",
         "prepared_at_monotonic_seconds": time.monotonic() - started,
     }
+    for root in getattr(args, "source_mask_root", ()):
+        request["command"].extend(("--source-mask-root", str(Path(root).resolve())))
+    request["source_paths_hidden_during_replay"] = [str(path) for path in denied_paths]
+    request["source_mask_roots"] = [str(path) for path in mask_paths]
     _write_json(output_request, request)
     return request
 
@@ -829,6 +859,7 @@ def _parser() -> argparse.ArgumentParser:
     prepare.add_argument("--isolation-wrapper", required=True, type=Path)
     prepare.add_argument("--python", required=True, type=Path)
     prepare.add_argument("--max-wall-seconds", type=float, default=DEFAULT_MAX_WALL_SECONDS)
+    prepare.add_argument("--source-mask-root", action="append", default=[], type=Path)
 
     run = commands.add_parser("run", help="relocate and execute the actual M4 audit; root runner only")
     run.add_argument("--source-receipt", required=True, type=Path)
@@ -839,6 +870,7 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--python", required=True, type=Path)
     run.add_argument("--max-bytes", required=True, type=int)
     run.add_argument("--max-wall-seconds", type=float, default=DEFAULT_MAX_WALL_SECONDS)
+    run.add_argument("--source-mask-root", action="append", default=[], type=Path)
     return parser
 
 

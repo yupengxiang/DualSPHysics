@@ -13,6 +13,12 @@ receipt directory added to the wrapper's bubblewrap masks and denied probes.
 The validator loaded inside the namespace is the adapter copied under the
 relocated bundle's `runtime/` directory.
 
+For actual NAS cases, pass `--source-mask-root` with the original case root.
+This hides raw solver, generated XML, audits, and direct conversion as well as
+the source bundle and enrichment. Masks cover ancestors; denied probes target
+their original children because an empty tmpfs mount point still exists.
+The relocated bundle is bound at `/srv` before its original case path is masked.
+
 After the positive replay, it creates one full private copy at a time. The
 first copy changes one `/transport/particle_zone` endpoint label, and the
 second changes one valid `/transport/destination_position` coordinate while

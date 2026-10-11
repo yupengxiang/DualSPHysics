@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import sys
+import tempfile
 
 import pytest
 
@@ -138,3 +139,23 @@ def test_actual_replay_and_rehashed_hdf5_semantic_negatives(tmp_path: Path) -> N
     assert "endpoint identity labels changed" in rows[0]["production_validator"]["stderr_tail"]
     assert "displacement is not the keyed" in rows[1]["production_validator"]["stderr_tail"]
     assert not (tmp_path / "attempt" / "validation" / "scratch").exists()
+
+
+@pytest.mark.skipif(shutil.which("bwrap") is None, reason="bubblewrap is unavailable")
+def test_actual_replay_masks_original_case_outside_tmp() -> None:
+    # NAS paths do not benefit from the wrapper's automatic /tmp mask.
+    with tempfile.TemporaryDirectory(prefix="m4-isolation-", dir="/var/tmp") as directory:
+        root = Path(directory)
+        inputs = _inputs(root)
+        (root / "solver-001").mkdir()
+        (root / "solver-001" / "native.bi4").write_bytes(b"original native payload")
+        args = _run_args(inputs, root)
+        args.source_mask_root = [root]
+        result = worker.run_actual_validation(args)
+        replay = result["isolated_replay"]
+        assert replay["portable"] is True
+        assert replay["denied_probes_passed"] is True
+        assert str(root) in replay["masked_source_paths"]
+        assert str(root / "solver-001") in replay["denied_source_probes"]
+        assert str(root) not in replay["denied_source_probes"]
+        assert (root / "solver-001" / "native.bi4").read_bytes() == b"original native payload"
