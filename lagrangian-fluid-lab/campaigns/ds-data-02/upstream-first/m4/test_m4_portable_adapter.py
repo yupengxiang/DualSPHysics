@@ -26,6 +26,13 @@ def _array_hash(values: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(values.astype("<u4")).tobytes()).hexdigest()
 
 
+def _typed_hash(zones: np.ndarray, ids: np.ndarray) -> str:
+    pairs = np.empty((len(ids), 2), dtype="<u4")
+    pairs[:, 0] = zones.astype("<u4")
+    pairs[:, 1] = ids.astype("<u4")
+    return hashlib.sha256(np.ascontiguousarray(pairs).tobytes()).hexdigest()
+
+
 def _fixture(root: Path) -> Path:
     root.mkdir(parents=True, exist_ok=True)
     hdf5_path = root / "normalized.h5"
@@ -71,6 +78,17 @@ def _fixture(root: Path) -> Path:
         handle.attrs["solver_dimension"] = 3
         handle.attrs["identity_key"] = "(Zone,Idp)"
         handle.attrs["coordinate_frame"] = "DualSPHysics Cartesian coordinates (x,y,z)"
+        handle.attrs["units_json"] = json.dumps(
+            {
+                "time": "s",
+                "position": "m",
+                "velocity": "m/s",
+                "density": "kg/m^3",
+                "mass": "kg",
+                "pressure": "Pa",
+            },
+            sort_keys=True,
+        )
         handle.create_dataset("time", data=np.array([0.0, 0.1, 0.2], dtype="f8"))
         handle.create_dataset("particle_id", data=ids)
         handle.create_dataset("particle_zone", data=zones)
@@ -107,6 +125,34 @@ def _fixture(root: Path) -> Path:
         transport.create_dataset("destination_position", data=destination_position)
         transport.create_dataset("displacement", data=displacement)
     hdf5_binding = {"path": hdf5_path.name, "bytes": hdf5_path.stat().st_size, "sha256": m4._sha256(hdf5_path)}
+    geometry_path = root / "geometry.json"
+    geometry_path.write_text(
+        json.dumps(
+            {
+                "schema": "ds-data-02.m4.geometry.v1",
+                "case_id": "UF_F1_MDBC_SYNTHETIC",
+                "coordinate_frame": "DualSPHysics Cartesian coordinates (x,y,z)",
+                "solver_dimension": 3,
+                "geometry_family_id": "synthetic-geometry",
+                "geometry": {"tank": {"low_m": [0.0, 0.0, 0.0], "size_m": [4.0, 1.0, 1.0]}},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    control_path = root / "control.json"
+    control_path.write_text(
+        json.dumps(
+            {
+                "schema": "ds-data-02.m4.control.v1",
+                "case_id": "UF_F1_MDBC_SYNTHETIC",
+                "control_family_id": "synthetic-control",
+                "event_window": {"time_start_s": 0.0, "time_end_s": 0.2},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     interface = {
         "schema": m4.INTERFACE_SCHEMA,
         "status": "normalized_verified",
@@ -117,6 +163,8 @@ def _fixture(root: Path) -> Path:
         "credit_status": "not_credited",
         "physical_fate_inferred": False,
         "normalized_hdf5": hdf5_binding,
+        "geometry": {"path": geometry_path.name, "bytes": geometry_path.stat().st_size, "sha256": m4._sha256(geometry_path)},
+        "control": {"path": control_path.name, "bytes": control_path.stat().st_size, "sha256": m4._sha256(control_path)},
         "identity_axis": {
             "key": "(Zone,Idp)",
             "full_initial_identity": True,
@@ -124,11 +172,13 @@ def _fixture(root: Path) -> Path:
             "initial_particle_count": 4,
             "frame_count": 3,
             "initial_ids_sha256": _array_hash(ids),
+            "initial_typed_ids_sha256": _typed_hash(zones, ids),
         },
         "exclusion_mask": {
             "status": "verified",
             "count": 1,
             "ids_sha256": _array_hash(ids[exclusion]),
+            "typed_ids_sha256": _typed_hash(zones[exclusion], ids[exclusion]),
             "mask_dataset": "/native/exclusion_mask",
             "physical_fate_inferred": False,
             "native_scan_schema": "ds-data-02.upstream-first.native-frame-identity-scan.v1",
@@ -183,6 +233,9 @@ def test_validity_aware_normalized_case_accepts_nan_only_on_invalid_nodes(tmp_pa
     assert result["summary"]["initial_identity_complete"] is True
     assert result["summary"]["native_exclusion_count"] == 1
     assert result["summary"]["missing_destination_count"] == 1
+    assert result["summary"]["observed_all_frames_count"] == 3
+    assert result["sidecars"]["geometry"]["coordinate_frame"]
+    assert result["sidecars"]["control"]["event_window"]["time_end_s"] == 0.2
 
 
 def test_nonfinite_valid_field_is_rejected(tmp_path: Path) -> None:
@@ -200,6 +253,15 @@ def test_full_identity_and_mask_hash_cannot_be_permuted(tmp_path: Path) -> None:
         handle["particle_id"][1] = handle["particle_id"][0]
     _refresh_hdf5_binding(interface)
     with pytest.raises(m4.M4Error, match="duplicates"):
+        m4.validate_interface(interface)
+
+
+def test_zone_identity_is_bound_by_typed_hash(tmp_path: Path) -> None:
+    interface = _fixture(tmp_path)
+    with h5py.File(tmp_path / "normalized.h5", "r+") as handle:
+        handle["particle_zone"][0] = 1
+    _refresh_hdf5_binding(interface)
+    with pytest.raises(m4.M4Error, match="typed .*identity hash"):
         m4.validate_interface(interface)
 
 
@@ -228,6 +290,15 @@ def test_missing_endpoint_cannot_publish_finite_displacement(tmp_path: Path) -> 
         m4.validate_interface(interface)
 
 
+def test_missing_endpoint_cannot_publish_finite_position(tmp_path: Path) -> None:
+    interface = _fixture(tmp_path)
+    with h5py.File(tmp_path / "normalized.h5", "r+") as handle:
+        handle["transport/destination_position"][2] = [1.0, 1.0, 1.0]
+    _refresh_hdf5_binding(interface)
+    with pytest.raises(m4.M4Error, match="missing destination endpoints"):
+        m4.validate_interface(interface)
+
+
 def test_pending_children_are_inspectable_but_not_complete_products(tmp_path: Path) -> None:
     interface = _fixture(tmp_path)
     payload = json.loads(interface.read_text(encoding="utf-8"))
@@ -235,6 +306,7 @@ def test_pending_children_are_inspectable_but_not_complete_products(tmp_path: Pa
     payload["identity_axis"]["initial_particle_count"] = None
     payload["identity_axis"]["frame_count"] = None
     payload["identity_axis"].pop("initial_ids_sha256")
+    payload["identity_axis"].pop("initial_typed_ids_sha256")
     payload["exclusion_mask"]["status"] = "pending_audit"
     payload["exclusion_mask"]["count"] = None
     payload["exclusion_mask"].pop("ids_sha256")
@@ -252,9 +324,13 @@ def test_bundle_is_relocatable_and_runtime_recomputes_summary(tmp_path: Path) ->
     assert result["portable"] is True
     assert result["source_paths_redacted"] is True
     assert not (bundle / "runtime/m4_isolated_validate.py").exists()
+    assert result["semantic_negatives"]["passed"] is True
+    assert len(result["semantic_negatives"]["checks"]) == 3
     bundled_interface = json.loads((bundle / "interface.json").read_text(encoding="utf-8"))
     assert bundled_interface["source_receipts"][0]["path"].startswith("portable/source-receipt/")
     assert "/unavailable/" not in (bundle / "interface.json").read_text(encoding="utf-8")
+    assert json.loads((bundle / "geometry.json").read_text(encoding="utf-8"))["coordinate_frame"]
+    assert json.loads((bundle / "control.json").read_text(encoding="utf-8"))["event_window"]["time_end_s"] == 0.2
 
 
 @pytest.mark.skipif(shutil.which("bwrap") is None, reason="bubblewrap is unavailable")
@@ -277,3 +353,4 @@ def test_bubblewrap_wrapper_runs_only_bundled_runtime(tmp_path: Path) -> None:
     )
     assert result["validation"]["portable"] is True
     assert result["namespace"]["denied_probes_passed"] is True
+    assert result["namespace"]["semantic_negatives_passed"] is True

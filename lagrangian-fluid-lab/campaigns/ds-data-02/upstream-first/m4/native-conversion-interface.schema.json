@@ -13,6 +13,8 @@
     "credit_status",
     "physical_fate_inferred",
     "normalized_hdf5",
+    "geometry",
+    "control",
     "identity_axis",
     "exclusion_mask",
     "endpoint_transport",
@@ -34,7 +36,8 @@
         "all_frames_fixed_axis",
         "initial_particle_count",
         "frame_count",
-        "initial_ids_sha256"
+        "initial_ids_sha256",
+        "initial_typed_ids_sha256"
       ],
       "properties": {
         "key": {"const": "(Zone,Idp)"},
@@ -42,10 +45,13 @@
         "all_frames_fixed_axis": {"const": true},
         "initial_particle_count": {"minimum": 1, "type": "integer"},
         "frame_count": {"minimum": 1, "type": "integer"},
-        "initial_ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+        "initial_ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "initial_typed_ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
       },
       "additionalProperties": true
     },
+    "geometry": {"$ref": "#/$defs/binding"},
+    "control": {"$ref": "#/$defs/binding"},
     "exclusion_mask": {
       "type": "object",
       "required": ["status", "count", "physical_fate_inferred", "mask_dataset"],
@@ -53,6 +59,7 @@
         "status": {"enum": ["verified", "pending_audit"]},
         "count": {"type": ["integer", "null"], "minimum": 0},
         "ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+        "typed_ids_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
         "mask_dataset": {"pattern": "^/", "type": "string"},
         "physical_fate_inferred": {"const": false},
         "native_scan_schema": {"type": "string"}

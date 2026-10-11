@@ -8,9 +8,10 @@ PartOut, invoke a solver, or replace the converter owned by
 
 The handoff contract is
 [`native-conversion-interface.schema.json`](native-conversion-interface.schema.json).
-The producer supplies a relative `normalized_hdf5` binding, the fixed
-`(Zone,Idp)` identity contract, a native exclusion mask, endpoint datasets,
-and source receipt hashes. The adapter copies the normalized HDF5 with
+The producer supplies relative `normalized_hdf5`, `geometry`, and `control`
+bindings, the fixed full `(Zone,Idp)` identity contract, a native exclusion
+mask, endpoint datasets, and source receipt hashes. The adapter copies the
+normalized HDF5 with
 path-bearing attributes redacted. Source receipt roles and hashes remain in
 the portable interface, while host paths are replaced by receipt labels.
 The resulting bundle also carries a copied, read-only `l2_reader.py` and an
@@ -31,7 +32,10 @@ The normalized HDF5 keeps the full initial typed identity axis on every frame:
   `valid_source` or `valid_destination`. Missing endpoints use only `unknown`
   or `censored`; displacement is NaN when either endpoint is missing.
 
-The validator checks all frame fields at their fixed identity positions. A
+The validator checks all frame fields at their fixed identity positions. It
+binds both Zone and Idp with a canonical typed-axis hash, checks the explicit
+validity mask across every frame, and requires geometry/control sidecars with
+actual coordinate-frame and event-window evidence. A
 non-finite value is allowed only where that field's `valid` mask is false.
 Initial identity fields, time, and valid endpoint values must be finite. It
 rejects duplicate typed identities, mask/hash disagreement, endpoint identity
@@ -77,6 +81,8 @@ wrapper:
 ```
 
 The tests build only a tiny synthetic normalized package. They cover valid
-NaN masking, non-finite valid values, full-axis identity, native mask binding,
-endpoint semantic negatives, bundle relocation, and the optional bubblewrap
-wrapper. No scientific payload or upstream converter is read by the tests.
+NaN masking, non-finite valid values, full typed-axis identity, native mask
+binding, endpoint semantic negatives, geometry/control evidence, bundle
+relocation, three actual metadata tamper negatives, and the optional
+bubblewrap wrapper. No scientific payload or upstream converter is read by
+the tests.

@@ -23,6 +23,7 @@ from pathlib import Path
 import re
 import shutil
 import sys
+import tempfile
 from typing import Any, Iterable, Mapping
 
 import h5py
@@ -34,6 +35,8 @@ BUNDLE_SCHEMA = "ds-data-02.m4.portable-bundle.v1"
 ENDPOINT_SCHEMA = "ds-data-02.m4.endpoint-transport.v1"
 VALIDATION_SCHEMA = "ds-data-02.m4.portable-validation.v1"
 EVALUATOR_SCHEMA = "ds-data-02.m4.no-model-evaluator.v1"
+GEOMETRY_SCHEMAS = frozenset(("ds-data-02.m2.geometry.v1", "ds-data-02.m4.geometry.v1"))
+CONTROL_SCHEMAS = frozenset(("ds-data-02.m2.control.v1", "ds-data-02.m4.control.v1"))
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$", re.ASCII)
 CASE_RE = re.compile(r"^UF_F1_MDBC_[A-Z0-9_]+$", re.ASCII)
@@ -79,6 +82,80 @@ def _sha256(path: Path) -> str:
 def _sha256_array(values: np.ndarray, *, dtype: str | None = None) -> str:
     array = np.asarray(values, dtype=dtype) if dtype is not None else np.asarray(values)
     return hashlib.sha256(np.ascontiguousarray(array).tobytes()).hexdigest()
+
+
+def _typed_identity_hash(zones: np.ndarray, ids: np.ndarray) -> str:
+    """Hash the complete initial ``(Zone,Idp)`` axis canonically.
+
+    The direct converter stores Zone as a signed narrow integer and Idp as
+    uint32.  A fixed little-endian uint32 pair representation keeps the
+    handoff hash independent of those storage dtypes while binding both
+    identity components.
+    """
+
+    zone_values = np.asarray(zones)
+    id_values = np.asarray(ids)
+    if zone_values.ndim != 1 or id_values.ndim != 1 or zone_values.shape != id_values.shape:
+        raise M4Error("typed identity arrays have incompatible shapes")
+    pairs = np.empty((len(id_values), 2), dtype="<u4")
+    pairs[:, 0] = zone_values.astype("<u4", copy=False)
+    pairs[:, 1] = id_values.astype("<u4", copy=False)
+    return _sha256_array(pairs)
+
+
+def _json_object(path: Path, label: str) -> dict[str, Any]:
+    if path.is_symlink() or not path.is_file():
+        raise M4Error(f"{label} is not a regular file: {path}")
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise M4Error(f"{label} is not valid JSON: {path}") from exc
+    if not isinstance(value, dict):
+        raise M4Error(f"{label} must be a JSON object")
+    return value
+
+
+def _validate_sidecar_payload(payload: Mapping[str, Any], label: str) -> dict[str, Any]:
+    """Validate the geometry/control evidence carried by a producer handoff."""
+
+    schema = payload.get("schema")
+    allowed = GEOMETRY_SCHEMAS if label == "geometry" else CONTROL_SCHEMAS
+    if schema not in allowed:
+        raise M4Error(f"{label} sidecar schema is unsupported: {schema!r}")
+    case_id = payload.get("case_id")
+    if case_id is not None and (not isinstance(case_id, str) or not CASE_RE.fullmatch(case_id)):
+        raise M4Error(f"{label} sidecar case_id is outside the F1 upstream contract")
+    if label == "geometry":
+        geometry = payload.get("geometry")
+        if not isinstance(geometry, Mapping) or not geometry:
+            raise M4Error("geometry sidecar lacks actual geometry evidence")
+        coordinate_frame = payload.get("coordinate_frame")
+        if not isinstance(coordinate_frame, str) or not coordinate_frame.strip():
+            raise M4Error("geometry sidecar lacks coordinate-frame evidence")
+        dimension = payload.get("solver_dimension")
+        if dimension is not None and dimension != 3:
+            raise M4Error(f"geometry sidecar is not three-dimensional: {dimension!r}")
+        return {
+            "schema": schema,
+            "geometry_family_id": payload.get("geometry_family_id"),
+            "coordinate_frame": coordinate_frame,
+        }
+    event_window = payload.get("event_window")
+    if not isinstance(event_window, Mapping) or not event_window:
+        raise M4Error("control sidecar lacks event-window evidence")
+    if "time_start_s" in event_window or "time_end_s" in event_window:
+        try:
+            start = float(event_window.get("time_start_s", 0.0))
+            end = float(event_window["time_end_s"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise M4Error("control sidecar event window is not numeric") from exc
+        if not math.isfinite(start) or not math.isfinite(end) or end <= start:
+            raise M4Error("control sidecar event window must be finite and increasing")
+    return {
+        "schema": schema,
+        "control_family_id": payload.get("control_family_id"),
+        "event_window": dict(event_window),
+    }
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
@@ -224,6 +301,8 @@ def _validate_interface_shape(payload: Mapping[str, Any], *, allow_pending: bool
         if type(count) is not int or count <= 0 or type(frame_count) is not int or frame_count <= 0:
             raise M4Error("verified interface needs positive initial and frame counts")
         _valid_sha(identity.get("initial_ids_sha256"), "identity_axis.initial_ids_sha256")
+        typed_hash = identity.get("initial_typed_ids_sha256", identity.get("initial_identity_sha256"))
+        _valid_sha(typed_hash, "identity_axis.initial_typed_ids_sha256")
     elif not allow_pending:
         raise M4Error("native audit is pending; this interface is not a complete M4 product")
     elif count is not None and (type(count) is not int or count < 0):
@@ -237,6 +316,8 @@ def _validate_interface_shape(payload: Mapping[str, Any], *, allow_pending: bool
         if type(excluded_count) is not int or excluded_count < 0:
             raise M4Error("verified exclusion mask needs a non-negative count")
         _valid_sha(exclusions.get("ids_sha256"), "exclusion_mask.ids_sha256")
+        if exclusions.get("typed_ids_sha256") is not None:
+            _valid_sha(exclusions.get("typed_ids_sha256"), "exclusion_mask.typed_ids_sha256")
     elif exclusion_status == "pending_audit":
         if exclusions.get("count") is not None or exclusions.get("ids_sha256") is not None:
             raise M4Error("pending exclusion masks must leave count and hash unknown")
@@ -272,6 +353,19 @@ def _validate_interface_shape(payload: Mapping[str, Any], *, allow_pending: bool
         raise M4Error("missing endpoint labels must be exactly unknown and censored")
     if endpoints.get("source_valid_label") != "valid_source" or endpoints.get("destination_valid_label") != "valid_destination":
         raise M4Error("endpoint valid labels are not bound to valid_source/valid_destination")
+
+    sidecars: dict[str, Any] = {}
+    for name in ("geometry", "control"):
+        binding = payload.get(name)
+        if not isinstance(binding, Mapping):
+            raise M4Error(f"interface lacks the {name} sidecar binding")
+        sidecars[name] = binding
+        if not isinstance(binding.get("path"), str) or not binding["path"] or Path(binding["path"]).is_absolute():
+            raise M4Error(f"{name}.path must be a relative package path")
+        if type(binding.get("bytes")) is not int or binding["bytes"] <= 0:
+            raise M4Error(f"{name}.bytes is invalid")
+        _valid_sha(binding.get("sha256"), f"{name}.sha256")
+
     receipts = payload.get("source_receipts")
     if not isinstance(receipts, list) or not receipts:
         raise M4Error("interface needs at least one source receipt")
@@ -288,6 +382,8 @@ def _validate_interface_shape(payload: Mapping[str, Any], *, allow_pending: bool
         "frame_count": frame_count,
         "exclusion_status": exclusion_status,
         "exclusion_count": exclusions.get("count"),
+        "geometry_binding": sidecars["geometry"],
+        "control_binding": sidecars["control"],
     }
 
 
@@ -314,6 +410,25 @@ def _validate_hdf5(interface: Mapping[str, Any], hdf5_path: Path) -> dict[str, A
     expected_count = int(interface["identity_axis"]["initial_particle_count"])
     expected_frames = int(interface["identity_axis"]["frame_count"])
     with h5py.File(hdf5_path, "r") as handle:
+        try:
+            dimension = int(handle.attrs.get("solver_dimension", -1))
+        except (TypeError, ValueError):
+            dimension = -1
+        if dimension != 3:
+            raise M4Error(f"normalized HDF5 must be three-dimensional, got solver_dimension={dimension}")
+        if _text(handle.attrs.get("identity_key", "")) != "(Zone,Idp)":
+            raise M4Error("normalized HDF5 identity key is not (Zone,Idp)")
+        coordinate_frame = _text(handle.attrs.get("coordinate_frame", "")).strip()
+        if not coordinate_frame:
+            raise M4Error("normalized HDF5 lacks coordinate-frame metadata")
+        units_value = handle.attrs.get("units_json")
+        try:
+            units = json.loads(_text(units_value))
+        except (TypeError, UnicodeError, json.JSONDecodeError) as exc:
+            raise M4Error("normalized HDF5 units_json is invalid") from exc
+        required_units = {"time", "position", "velocity", "density", "mass", "pressure"}
+        if not isinstance(units, Mapping) or not required_units.issubset(units):
+            raise M4Error("normalized HDF5 units_json is incomplete")
         missing = sorted(set(REQUIRED_ROOT_FIELDS).difference(handle.keys()))
         if missing:
             raise M4Error(f"normalized HDF5 is missing required fields: {missing}")
@@ -336,6 +451,11 @@ def _validate_hdf5(interface: Mapping[str, Any], hdf5_path: Path) -> dict[str, A
             raise M4Error("typed initial identity axis contains duplicates")
         if _sha256_array(ids, dtype="<u4") != interface["identity_axis"]["initial_ids_sha256"]:
             raise M4Error("initial Idp identity hash disagrees with the interface")
+        typed_hash = interface["identity_axis"].get(
+            "initial_typed_ids_sha256", interface["identity_axis"].get("initial_identity_sha256")
+        )
+        if typed_hash is None or _typed_identity_hash(zones, ids) != typed_hash:
+            raise M4Error("initial typed (Zone,Idp) identity hash disagrees with the interface")
         for name in FRAME_FIELDS:
             array = np.asarray(handle[name][:])
             expected_shape = (len(time), len(ids), 3) if name in ("position", "velocity") else (len(time), len(ids))
@@ -360,8 +480,21 @@ def _validate_hdf5(interface: Mapping[str, Any], hdf5_path: Path) -> dict[str, A
             raise M4Error("native exclusion count disagrees with the HDF5 mask")
         if _sha256_array(ids[exclusion], dtype="<u4") != exclusions["ids_sha256"]:
             raise M4Error("native exclusion Idp hash disagrees with the interface")
+        if exclusions.get("typed_ids_sha256") is not None and _typed_identity_hash(
+            zones[exclusion], ids[exclusion]
+        ) != exclusions["typed_ids_sha256"]:
+            raise M4Error("native exclusion typed (Zone,Idp) hash disagrees with the interface")
         if not np.array_equal(exclusion, ~valid[-1]):
             raise M4Error("native exclusion mask does not equal the final missing identity set")
+
+        observed_all_frames = valid.all(axis=0)
+        observed_dataset = handle.get("native/observed_all_frames")
+        if observed_dataset is not None:
+            observed_declared = _binary_mask(
+                observed_dataset, "native observed_all_frames", (len(ids),)
+            )
+            if not np.array_equal(observed_declared, observed_all_frames):
+                raise M4Error("native observed_all_frames disagrees with all frame validity masks")
 
         transport = {
             key: _dataset(handle, endpoints[key], key)
@@ -420,6 +553,10 @@ def _validate_hdf5(interface: Mapping[str, Any], hdf5_path: Path) -> dict[str, A
                 raise M4Error(f"{name} has shape {array.shape}, expected {(len(ids), 3)}")
         _finite_where_valid(source_position[None, ...], source_valid[None, ...], "source_position")
         _finite_where_valid(destination_position[None, ...], destination_valid[None, ...], "destination_position")
+        if np.any(~source_valid) and not np.isnan(source_position[~source_valid]).all():
+            raise M4Error("missing source endpoints must have NaN position and remain unknown")
+        if np.any(~destination_valid) and not np.isnan(destination_position[~destination_valid]).all():
+            raise M4Error("missing destination endpoints must have NaN position and remain unknown")
         pair_valid = source_valid & destination_valid
         if np.any(pair_valid):
             if not np.isfinite(displacement[pair_valid]).all():
@@ -447,16 +584,39 @@ def _validate_hdf5(interface: Mapping[str, Any], hdf5_path: Path) -> dict[str, A
             "valid_source_count": int(source_valid.sum()),
             "valid_destination_count": int(destination_valid.sum()),
             "missing_destination_count": int((~destination_valid).sum()),
+            "observed_all_frames_count": int(observed_all_frames.sum()),
             "fate_inference": False,
         }
 
 
-def validate_interface(path: Path, *, allow_pending: bool = False, verify_payload: bool = True) -> dict[str, Any]:
+def validate_interface(
+    path: Path,
+    *,
+    allow_pending: bool = False,
+    verify_payload: bool = True,
+    artifact_root: Path | None = None,
+) -> dict[str, Any]:
     """Validate a data_product interface and, when present, its normalized HDF5."""
 
     payload = load_interface(path, allow_pending=allow_pending)
-    root = path.parent.resolve()
+    root = (artifact_root or path.parent).resolve()
     hdf5_path = _relative_local(root, payload["normalized_hdf5"]["path"], "normalized_hdf5.path", must_exist=verify_payload)
+    sidecar_paths: dict[str, Path] = {}
+    sidecar_summaries: dict[str, dict[str, Any]] = {}
+    for name in ("geometry", "control"):
+        sidecar_path = _relative_local(root, payload[name]["path"], f"{name}.path", must_exist=verify_payload)
+        sidecar_paths[name] = sidecar_path
+        if verify_payload:
+            binding = _file_binding(sidecar_path)
+            expected = payload[name]
+            if binding["bytes"] != expected["bytes"] or binding["sha256"] != expected["sha256"]:
+                raise M4Error(f"{name} sidecar does not match its interface binding")
+            sidecar_payload = _json_object(sidecar_path, f"{name} sidecar")
+            sidecar_summary = _validate_sidecar_payload(sidecar_payload, name)
+            sidecar_case = sidecar_payload.get("case_id")
+            if sidecar_case is not None and sidecar_case != payload["case_id"]:
+                raise M4Error(f"{name} sidecar case_id disagrees with the interface")
+            sidecar_summaries[name] = sidecar_summary
     if verify_payload:
         actual = _file_binding(hdf5_path)
         if actual["bytes"] != payload["normalized_hdf5"]["bytes"] or actual["sha256"] != payload["normalized_hdf5"]["sha256"]:
@@ -467,7 +627,14 @@ def validate_interface(path: Path, *, allow_pending: bool = False, verify_payloa
             "case_id": payload["case_id"],
             "pending": payload["status"] == "template_pending_native_audit",
         }
-    return {"interface": payload, "hdf5": hdf5_path, "summary": summary}
+    return {
+        "interface": payload,
+        "hdf5": hdf5_path,
+        "geometry": sidecar_paths["geometry"],
+        "control": sidecar_paths["control"],
+        "sidecars": sidecar_summaries,
+        "summary": summary,
+    }
 
 
 def _redact_attr(value: Any) -> Any:
@@ -522,7 +689,12 @@ def _portable_metadata(value: Any, *, key: str = "") -> Any:
     if isinstance(value, str):
         if key.endswith("_dataset"):
             return value
-        if value.startswith("/"):
+        if (
+            value.startswith("/")
+            or "/home/" in value
+            or "/worktrees/" in value
+            or "CURRENT" in value
+        ):
             return f"portable/source-receipt/{Path(value).name or 'root'}"
         return value
     return value
@@ -533,6 +705,14 @@ def _portable_interface(source: Mapping[str, Any], hdf5: Path) -> dict[str, Any]
     payload = _portable_metadata(payload)
     binding = _file_binding(hdf5, relative_path="normalized.h5")
     payload["normalized_hdf5"] = binding
+    payload["geometry"] = {
+        **payload["geometry"],
+        "path": "geometry.json",
+    }
+    payload["control"] = {
+        **payload["control"],
+        "path": "control.json",
+    }
     payload["portable_source_paths_redacted"] = True
     payload["source_receipts"] = [
         {
@@ -548,11 +728,22 @@ def _portable_interface(source: Mapping[str, Any], hdf5: Path) -> dict[str, Any]
     return payload
 
 
+def _copy_portable_sidecar(source: Path, destination: Path, label: str) -> None:
+    """Copy a geometry/control JSON sidecar after removing host paths."""
+
+    payload = _json_object(source, f"{label} sidecar")
+    portable = _portable_metadata(payload)
+    _validate_sidecar_payload(portable, label)
+    _write_json(destination, portable)
+
+
 def _artifact_map(root: Path) -> dict[str, dict[str, Any]]:
     return {
         key: _file_binding(root / filename, relative_path=filename)
         for key, filename in (
             ("normalized_hdf5", "normalized.h5"),
+            ("geometry", "geometry.json"),
+            ("control", "control.json"),
             ("interface", "interface.json"),
             ("evaluator", "evaluator.json"),
             ("reader_manifest", "reader-manifest.json"),
@@ -593,7 +784,11 @@ def build_bundle(interface_path: Path, output_root: Path, *, allow_pending: bool
     try:
         (temporary / "runtime").mkdir()
         _copy_sanitized_hdf5(checked["hdf5"], temporary / "normalized.h5", checked["interface"]["case_id"])
+        _copy_portable_sidecar(checked["geometry"], temporary / "geometry.json", "geometry")
+        _copy_portable_sidecar(checked["control"], temporary / "control.json", "control")
         portable_interface = _portable_interface(checked["interface"], temporary / "normalized.h5")
+        for name in ("geometry", "control"):
+            portable_interface[name] = _file_binding(temporary / f"{name}.json", relative_path=f"{name}.json")
         _write_json(temporary / "interface.json", portable_interface)
         packaged = validate_interface(temporary / "interface.json", verify_payload=True)
         evaluator = {
@@ -602,8 +797,18 @@ def build_bundle(interface_path: Path, output_root: Path, *, allow_pending: bool
             "checks": {
                 "validity_aware_nonfinite_policy": True,
                 "full_initial_identity_all_frames": packaged["summary"]["initial_identity_complete"],
+                "full_typed_zone_idp_identity": packaged["summary"]["all_frames_fixed_axis"],
+                "all_frame_validity_mask": True,
+                "native_exclusion_mask_bound": packaged["summary"]["native_exclusion_count"] >= 0,
                 "endpoint_labels_semantic": True,
                 "missing_endpoint_fate_not_inferred": packaged["summary"]["fate_inference"] is False,
+                "geometry_evidence": bool(packaged["sidecars"].get("geometry")),
+                "control_evidence": bool(packaged["sidecars"].get("control")),
+            },
+            "semantic_negative_contract": {
+                "typed_identity_hash_tamper": "must_reject",
+                "geometry_control_semantic_tamper": "must_reject",
+                "control_window_semantic_tamper": "must_reject",
             },
             "summary": packaged["summary"],
             "passed": True,
@@ -674,7 +879,126 @@ def _walk_portable_metadata(value: Any, location: str = "manifest", *, key: str 
         raise M4Error(f"absolute host path remains in portable metadata at {location}")
 
 
-def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = ()) -> dict[str, Any]:
+def _semantic_negative_checks(bundle_root: Path) -> dict[str, Any]:
+    """Exercise rejection paths against the actual relocated bundle metadata.
+
+    The normalized HDF5 can be tens of GiB, so the negatives mutate only
+    small interface/sidecar copies while validating them against the original
+    read-only bundle HDF5.  This still exercises the production validator with
+    real artifact hashes and avoids a second full scientific-data copy.
+    """
+
+    root = bundle_root.resolve()
+    interface_path = root / "interface.json"
+    geometry_path = root / "geometry.json"
+    control_path = root / "control.json"
+    interface = _json_object(interface_path, "bundled interface")
+    rows: list[dict[str, Any]] = []
+    source_paths = (interface_path, geometry_path, control_path)
+    source_before = {path.name: _sha256(path) for path in source_paths}
+
+    with tempfile.TemporaryDirectory(prefix="m4-semantic-negative-") as scratch_name:
+        scratch = Path(scratch_name)
+
+        identity_payload = json.loads(json.dumps(interface))
+        identity = identity_payload["identity_axis"]
+        typed_hash_key = (
+            "initial_typed_ids_sha256"
+            if "initial_typed_ids_sha256" in identity
+            else "initial_identity_sha256"
+        )
+        original_hash = identity[typed_hash_key]
+        identity[typed_hash_key] = "0" * 64 if original_hash != "0" * 64 else "1" * 64
+        identity_path = scratch / "identity-interface.json"
+        identity_path.write_text(json.dumps(identity_payload, indent=2), encoding="utf-8")
+        try:
+            validate_interface(identity_path, artifact_root=root)
+        except M4Error as exc:
+            rows.append(
+                {
+                    "name": "typed_identity_hash_tamper",
+                    "status": "rejected_as_expected",
+                    "error": str(exc),
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "name": "typed_identity_hash_tamper",
+                    "status": "accepted_unexpectedly",
+                    "error": None,
+                }
+            )
+
+        geometry_payload = _json_object(geometry_path, "bundled geometry sidecar")
+        geometry_payload["coordinate_frame"] = ""
+        geometry_tampered = scratch / "geometry.json"
+        geometry_tampered.write_text(json.dumps(geometry_payload, indent=2), encoding="utf-8")
+        try:
+            _validate_sidecar_payload(_json_object(geometry_tampered, "tampered geometry sidecar"), "geometry")
+        except M4Error as exc:
+            rows.append(
+                {
+                    "name": "geometry_control_semantic_tamper",
+                    "status": "rejected_as_expected",
+                    "error": str(exc),
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "name": "geometry_control_semantic_tamper",
+                    "status": "accepted_unexpectedly",
+                    "error": None,
+                }
+            )
+
+        control_payload = _json_object(control_path, "bundled control sidecar")
+        event_window = control_payload.get("event_window")
+        if isinstance(event_window, dict) and "time_end_s" in event_window:
+            event_window["time_end_s"] = event_window.get("time_start_s", 0.0)
+        else:
+            event_window = {"time_start_s": 1.0, "time_end_s": 0.0}
+            control_payload["event_window"] = event_window
+        control_tampered = scratch / "control.json"
+        control_tampered.write_text(json.dumps(control_payload, indent=2), encoding="utf-8")
+        try:
+            _validate_sidecar_payload(_json_object(control_tampered, "tampered control sidecar"), "control")
+        except M4Error as exc:
+            rows.append(
+                {
+                    "name": "control_window_semantic_tamper",
+                    "status": "rejected_as_expected",
+                    "error": str(exc),
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "name": "control_window_semantic_tamper",
+                    "status": "accepted_unexpectedly",
+                    "error": None,
+                }
+            )
+
+    source_after = {path.name: _sha256(path) for path in source_paths}
+    unchanged = source_before == source_after
+    return {
+        "schema": "ds-data-02.m4.semantic-negative-checks.v1",
+        "checks": rows,
+        "passed": bool(rows) and all(row["status"] == "rejected_as_expected" for row in rows) and unchanged,
+        "source_bundle_unchanged": unchanged,
+        "source_hashes": source_after,
+        "scientific_data_copied": False,
+    }
+
+
+def validate_bundle(
+    bundle_root: Path,
+    *,
+    denied_probe_paths: Iterable[Path] = (),
+    run_semantic_negatives: bool = True,
+) -> dict[str, Any]:
     """Validate a relocated bundle using only files under ``bundle_root``."""
 
     root = bundle_root.resolve()
@@ -698,6 +1022,8 @@ def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = (
         raise M4Error("bundle manifest lacks artifacts")
     required = {
         "normalized_hdf5",
+        "geometry",
+        "control",
         "interface",
         "evaluator",
         "reader_manifest",
@@ -713,6 +1039,12 @@ def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = (
     _walk_portable_metadata(interface_payload, "interface")
     if interface_payload.get("normalized_hdf5", {}).get("path") != "normalized.h5":
         raise M4Error("bundled interface does not bind the bundled normalized HDF5")
+    for name in ("geometry", "control"):
+        if interface_payload.get(name, {}).get("path") != f"{name}.json":
+            raise M4Error(f"bundled interface does not bind the bundled {name} sidecar")
+        sidecar_payload = _json_object(files[name], f"bundled {name} sidecar")
+        _walk_portable_metadata(sidecar_payload, name)
+        _validate_sidecar_payload(sidecar_payload, name)
     checked = validate_interface(files["interface"], verify_payload=True)
     if checked["hdf5"] != files["normalized_hdf5"].resolve():
         raise M4Error("interface and artifact normalized HDF5 paths disagree")
@@ -721,6 +1053,14 @@ def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = (
         raise M4Error("bundled no-model evaluator did not pass")
     if evaluator.get("summary") != checked["summary"]:
         raise M4Error("bundled evaluator summary disagrees with recomputation")
+    semantic_contract = evaluator.get("semantic_negative_contract")
+    required_semantic = {
+        "typed_identity_hash_tamper",
+        "geometry_control_semantic_tamper",
+        "control_window_semantic_tamper",
+    }
+    if not isinstance(semantic_contract, Mapping) or set(semantic_contract) != required_semantic:
+        raise M4Error("bundled evaluator lacks the complete semantic-negative contract")
     reader_manifest = json.loads(files["reader_manifest"].read_text(encoding="utf-8"))
     _walk_portable_metadata(reader_manifest, "reader_manifest")
     if reader_manifest.get("schema") != "l2.f3.canonical_manifest.v1" or reader_manifest.get("repository_root") != ".":
@@ -739,6 +1079,9 @@ def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = (
         raise M4Error("bundled L2 reader manifest disagrees with normalized HDF5")
     if manifest.get("portable_policy", {}).get("physical_fate_inferred") is not False:
         raise M4Error("bundle does not forbid physical-fate inference")
+    semantic = _semantic_negative_checks(root) if run_semantic_negatives else None
+    if semantic is not None and semantic.get("passed") is not True:
+        raise M4Error("M4 semantic-negative checks did not reject every tamper")
     return {
         "schema": VALIDATION_SCHEMA,
         "case_id": manifest["case_id"],
@@ -751,6 +1094,9 @@ def validate_bundle(bundle_root: Path, *, denied_probe_paths: Iterable[Path] = (
         },
         "source_paths_redacted": True,
         "physical_fate_inferred": False,
+        "semantic_negatives": semantic
+        if semantic is not None
+        else {"status": "skipped_for_semantic_negative_case"},
     }
 
 

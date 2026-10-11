@@ -87,6 +87,9 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
     ]
     for masked in mask_paths:
         command.extend(("--tmpfs", str(masked)))
+    # The semantic-negative audit creates tiny JSON copies under /tmp while
+    # keeping the scientific HDF5 read-only under /srv.
+    command.extend(("--tmpfs", "/tmp"))
     command.extend(
         (
             "--clearenv",
@@ -125,6 +128,9 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
         raise IsolationError("isolated M4 validator did not emit JSON") from exc
     if validation.get("portable") is not True or validation.get("source_paths_redacted") is not True:
         raise IsolationError("isolated M4 validator did not prove portability")
+    semantic = validation.get("semantic_negatives")
+    if not isinstance(semantic, dict) or semantic.get("passed") is not True:
+        raise IsolationError("isolated M4 validator did not prove semantic-negative rejection")
     return {
         "schema": SCHEMA,
         "status": "completed",
@@ -138,6 +144,7 @@ def _run(args: argparse.Namespace) -> dict[str, Any]:
             "masked_paths": [str(path) for path in mask_paths],
             "denied_paths": [str(path) for path in denied_paths],
             "denied_probes_passed": True,
+            "semantic_negatives_passed": True,
         },
         "validation": validation,
     }
