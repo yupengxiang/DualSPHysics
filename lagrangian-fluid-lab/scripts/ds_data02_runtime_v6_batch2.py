@@ -408,7 +408,12 @@ def _baseline_rows_match(
     expected_usage = admission["prior_usage"]
     actual_usage = _usage([charge_by_id[item] for item in prior_charge_ids])
     for key in actual_usage:
-        if actual_usage[key] != expected_usage[key]:
+        # Charge row hashes above enforce exact historical preservation. Float
+        # addition can differ after sorting the same thousands of rows by id.
+        equal = (actual_usage[key] == expected_usage[key]) if key == "new_storage_bytes" else math.isclose(
+            actual_usage[key], expected_usage[key], rel_tol=1e-12, abs_tol=1e-8
+        )
+        if not equal:
             raise BatchAdmissionError(f"historical usage baseline changed: {key}")
     if _rows_projection_hash([charge_by_id[item] for item in prior_charge_ids]) != admission["prior_charges_sha256"]:
         raise BatchAdmissionError("historical charge projection hash changed")

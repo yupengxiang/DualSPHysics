@@ -390,3 +390,18 @@ def test_nas_headroom_is_checked_without_local_fallback(tmp_path: Path, monkeypa
     reservation = _reservation(output_storage="upstream_nas", new_storage_bytes=1)
     with pytest.raises(RuntimeError, match="NAS headroom"):
         MODULE._check_batch2(ledger, reservation, {"output_storage": "upstream_nas"}, admission)
+
+
+def test_history_preservation_allows_float_resummation_order(tmp_path: Path) -> None:
+    ledger = _ledger(tmp_path / 'data-root')
+    for name, cpu in [('z', 1_000_000.0), ('b', 0.1), ('a', 0.2)]:
+        ledger['charges'].append({'id': 'legacy/float/' + name, 'cpu_core_seconds': cpu,
+                                  'gpu_seconds': 0.0, 'new_storage_bytes': 0,
+                                  'status': 'completed'})
+    _, _, admission, actual = _admission(tmp_path, ledger=ledger)
+    reordered = MODULE._usage(sorted(actual['charges'], key=lambda row: row['id']))
+    assert reordered['cpu_core_seconds'] != admission['prior_usage']['cpu_core_seconds']
+    MODULE._baseline_rows_match(actual, admission)
+    actual['charges'][-1]['cpu_core_seconds'] += 0.001
+    with pytest.raises(MODULE.BatchAdmissionError, match='historical charge baseline changed'):
+        MODULE._baseline_rows_match(actual, admission)
