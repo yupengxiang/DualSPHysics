@@ -79,7 +79,9 @@ cat >"$output_root/postprocess-manifest.json" <<EOF
     "pressure": "$script_root/pressure.txt"
   },
   "primary_observation_files": [
-    "$elevation_csv",
+    "$elevation_csv"
+  ],
+  "auxiliary_observation_files": [
     "$pressure_csv"
   ],
   "auxiliary_products": [],
