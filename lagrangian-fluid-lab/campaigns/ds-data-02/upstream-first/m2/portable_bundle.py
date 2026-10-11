@@ -118,12 +118,24 @@ def _xml_node_evidence(node: ET.Element) -> dict[str, Any]:
 def _read_source_evidence(
     source_report: Path,
     *,
+    source_hdf5: Path,
     owner_metadata_override: Path | None = None,
     generated_xml_override: Path | None = None,
 ) -> dict[str, Any]:
-    """Read owner metadata and generated XML at build time, retaining hashes."""
+    """Read source evidence and bind the exact HDF5 bytes to the report."""
 
     report = json.loads(source_report.read_text(encoding="utf-8"))
+    expected_source_hash = report.get("output_sha256")
+    if not isinstance(expected_source_hash, str) or not _SHA256.fullmatch(expected_source_hash):
+        raise PortableBundleError("conversion report lacks a valid output_sha256")
+    if not source_hdf5.is_file() or source_hdf5.is_symlink():
+        raise PortableBundleError(f"source HDF5 is not a regular file: {source_hdf5}")
+    source_bytes = source_hdf5.stat().st_size
+    source_hash = _sha256(source_hdf5)
+    if source_hash != expected_source_hash:
+        raise PortableBundleError(
+            "source HDF5 hash disagrees with conversion report output_sha256"
+        )
     provenance = report.get("source_provenance", {})
     owner_info = provenance.get("owner_metadata", {})
     xml_info = provenance.get("generated_xml", {})
@@ -132,6 +144,12 @@ def _read_source_evidence(
     receipts: dict[str, Any] = {
         "schema": "ds-data-02.m2.source-receipts.v1",
         "conversion_report_sha256": _sha256(source_report),
+        "source_hdf5": {
+            "bytes": source_bytes,
+            "sha256": source_hash,
+            "report_output_sha256": expected_source_hash,
+            "matches_conversion_report": True,
+        },
         "paths_published": False,
     }
     owner_path = (
@@ -340,20 +358,24 @@ def _build_sidecars(
     *,
     case_id: str,
     source_report: Path,
+    source_hdf5: Path,
     hdf5_path: Path,
     labels_path: Path,
     owner_metadata: Path | None = None,
     generated_xml: Path | None = None,
+    source_evidence: dict[str, Any] | None = None,
 ) -> None:
-    try:
-        source_evidence = _read_source_evidence(
-            source_report,
-            owner_metadata_override=owner_metadata,
-            generated_xml_override=generated_xml,
-        )
-        report = source_evidence["report"]
-    except (OSError, json.JSONDecodeError) as exc:
-        raise PortableBundleError(f"cannot read source conversion report: {source_report}") from exc
+    if source_evidence is None:
+        try:
+            source_evidence = _read_source_evidence(
+                source_report,
+                source_hdf5=source_hdf5,
+                owner_metadata_override=owner_metadata,
+                generated_xml_override=generated_xml,
+            )
+        except (OSError, json.JSONDecodeError) as exc:
+            raise PortableBundleError(f"cannot read source conversion report: {source_report}") from exc
+    report = source_evidence["report"]
     owner = source_evidence["owner_metadata"]
     report_physical = report.get("hash_scopes", {}).get("physical_condition", {})
     if not isinstance(report_physical, dict):
@@ -502,6 +524,15 @@ def build_bundle(
         raise PortableBundleError(f"refusing to overwrite bundle root: {output_root}")
     if not source_hdf5.is_file() or source_hdf5.is_symlink():
         raise PortableBundleError(f"source HDF5 is not a regular file: {source_hdf5}")
+    try:
+        source_evidence = _read_source_evidence(
+            source_report,
+            source_hdf5=source_hdf5,
+            owner_metadata_override=owner_metadata,
+            generated_xml_override=generated_xml,
+        )
+    except (OSError, json.JSONDecodeError) as exc:
+        raise PortableBundleError(f"cannot read source conversion report: {source_report}") from exc
     output_root.parent.mkdir(parents=True, exist_ok=True)
     temporary = output_root.with_name(output_root.name + f".partial-{os.getpid()}")
     if temporary.exists() or temporary.is_symlink():
@@ -514,10 +545,12 @@ def build_bundle(
             temporary,
             case_id=case_id,
             source_report=source_report,
+            source_hdf5=source_hdf5,
             hdf5_path=temporary / "trajectory.h5",
             labels_path=temporary / "labels.h5",
             owner_metadata=owner_metadata,
             generated_xml=generated_xml,
+            source_evidence=source_evidence,
         )
         _write_json(
             temporary / "evaluator.json",
@@ -530,6 +563,7 @@ def build_bundle(
             "cases": [{"case_id": case_id, "hdf5": "trajectory.h5", **trajectory_binding}],
         }
         _write_json(temporary / "reader-manifest.json", reader_manifest)
+        source_receipts = json.loads((temporary / "source-receipts.json").read_text(encoding="utf-8"))
         artifacts = {
             name: _file_binding(temporary / filename)
             for name, filename in (
@@ -579,6 +613,7 @@ def build_bundle(
             "source_evidence": {
                 "source_report_sha256": _json_hash(source_report),
                 "source_report_schema": "ds-data-02.bi4-direct-conversion.v1",
+                "source_hdf5": source_receipts["source_hdf5"],
                 "owner_metadata_and_generated_xml_read_at_build": True,
                 "paths_published": False,
             },
@@ -896,6 +931,26 @@ def validate_bundle(
         raise PortableBundleError("owner metadata was not read while building the portable bundle")
     if not receipts.get("generated_xml", {}).get("available"):
         raise PortableBundleError("generated XML was not read while building the portable bundle")
+    source_hdf5_receipt = receipts.get("source_hdf5")
+    if not isinstance(source_hdf5_receipt, dict):
+        raise PortableBundleError("source receipt lacks the bound source HDF5")
+    source_bytes = source_hdf5_receipt.get("bytes")
+    source_hash = source_hdf5_receipt.get("sha256")
+    report_source_hash = source_hdf5_receipt.get("report_output_sha256")
+    if (
+        type(source_bytes) is not int
+        or source_bytes <= 0
+        or not isinstance(source_hash, str)
+        or not _SHA256.fullmatch(source_hash)
+        or not isinstance(report_source_hash, str)
+        or not _SHA256.fullmatch(report_source_hash)
+        or source_hash != report_source_hash
+        or source_hdf5_receipt.get("matches_conversion_report") is not True
+    ):
+        raise PortableBundleError("source HDF5 receipt is not bound to conversion output_sha256")
+    manifest_source_evidence = manifest.get("source_evidence")
+    if not isinstance(manifest_source_evidence, dict) or manifest_source_evidence.get("source_hdf5") != source_hdf5_receipt:
+        raise PortableBundleError("manifest source evidence disagrees with source HDF5 receipt")
     trajectory_summary = _validate_trajectory(
         files["trajectory"], case_id, require_complete=True, denied=denied
     )

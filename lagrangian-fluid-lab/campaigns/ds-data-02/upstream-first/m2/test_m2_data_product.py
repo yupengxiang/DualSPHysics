@@ -119,6 +119,7 @@ def _make_3d_fixture(root: Path) -> tuple[Path, Path]:
                 "coordinate_frame": "DualSPHysics case Cartesian coordinates (x,y,z)",
                 "solver_dimension": {"solver_dimension": 3},
                 "units": {"position": "m"},
+                "output_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
                 "conversion_claim": "conversion evidence only",
                 "hash_scopes": {
                     "numerical_parameters_sha256": "n",
@@ -152,6 +153,67 @@ def test_portable_bundle_redacts_source_paths_and_reuses_l2_reader(tmp_path: Pat
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     assert manifest["artifacts"]["runtime_portable_bundle"]["path"] == "runtime/portable_bundle.py"
     assert manifest["artifacts"]["runtime_l2_reader"]["path"] == "runtime/l2_reader.py"
+    receipts = json.loads((bundle / "source-receipts.json").read_text(encoding="utf-8"))
+    source_binding = receipts["source_hdf5"]
+    assert source_binding["bytes"] == source.stat().st_size
+    assert source_binding["sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
+    assert source_binding["report_output_sha256"] == source_binding["sha256"]
+    assert source_binding["matches_conversion_report"] is True
+
+
+def test_portable_bundle_rejects_source_hash_mismatch(tmp_path: Path) -> None:
+    source, report = _make_3d_fixture(tmp_path)
+    mismatched_report = tmp_path / "mismatched-report.json"
+    report_payload = json.loads(report.read_text(encoding="utf-8"))
+    report_payload["output_sha256"] = "0" * 64
+    mismatched_report.write_text(json.dumps(report_payload), encoding="utf-8")
+    with pytest.raises(portable_bundle.PortableBundleError, match="output_sha256"):
+        portable_bundle.build_bundle(source, mismatched_report, tmp_path / "rejected-bundle", "F1_TEST")
+
+
+def test_portable_bundle_rejects_tampered_artifact_hash(tmp_path: Path) -> None:
+    source, report = _make_3d_fixture(tmp_path)
+    bundle = tmp_path / "bundle"
+    portable_bundle.build_bundle(source, report, bundle, "F1_TEST")
+    tampered = tmp_path / "tampered-manifest-hash"
+    shutil.copytree(bundle, tampered)
+    with h5py.File(tampered / "labels.h5", "r+") as handle:
+        handle["destination_region"][0] += 1
+    with pytest.raises(portable_bundle.PortableBundleError, match="labels artifact hash/size mismatch"):
+        portable_bundle.validate_bundle(tampered)
+    assert portable_bundle.validate_bundle(bundle)["portable"] is True
+
+
+@pytest.mark.parametrize("tamper", ("identity", "destination_position"))
+def test_portable_bundle_rejects_rehashed_semantic_label_tamper(tmp_path: Path, tamper: str) -> None:
+    source, report = _make_3d_fixture(tmp_path)
+    bundle = tmp_path / "bundle"
+    portable_bundle.build_bundle(source, report, bundle, "F1_TEST")
+    original_manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    tampered = tmp_path / f"tampered-rehashed-{tamper}"
+    shutil.copytree(bundle, tampered)
+    with h5py.File(tampered / "labels.h5", "r+") as handle:
+        if tamper == "identity":
+            handle["particle_id"][0] = 99
+        else:
+            handle["destination_position_m"][0, 0] += 0.25
+    manifest = json.loads((tampered / "manifest.json").read_text(encoding="utf-8"))
+    labels_path = tampered / "labels.h5"
+    manifest["artifacts"]["labels"] = {
+        "path": "labels.h5",
+        "bytes": labels_path.stat().st_size,
+        "sha256": hashlib.sha256(labels_path.read_bytes()).hexdigest(),
+    }
+    (tampered / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    expected_message = (
+        "transport labels changed particle IDs"
+        if tamper == "identity"
+        else "destination transport positions do not match final frame"
+    )
+    with pytest.raises(portable_bundle.PortableBundleError, match=expected_message):
+        portable_bundle.validate_bundle(tampered)
+    assert json.loads((bundle / "manifest.json").read_text(encoding="utf-8")) == original_manifest
+    assert portable_bundle.validate_bundle(bundle)["portable"] is True
 
 
 def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
