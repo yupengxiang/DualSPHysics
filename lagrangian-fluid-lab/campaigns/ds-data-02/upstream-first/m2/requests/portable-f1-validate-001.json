@@ -1,0 +1,66 @@
+{
+  "schema": "ds-data-02.upstream-first.m2.portable-validate-request.v1",
+  "request_id": "portable-f1-validate-001",
+  "family_id": "infra",
+  "case_id": "F1_REF_ECC_NOMINAL_FINE",
+  "attempt_id": "m2-portable-f1-validate-001",
+  "kind": "cpu",
+  "cpu_task_kind": "isolated_data_validation",
+  "status": "ready_after_portable_build",
+  "requires_parent_nas_preflight": true,
+  "requires_bubblewrap": true,
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "nas_root": "/data/nas/jade/Simulation/DualSPHysics/upstream-first",
+  "external_scratch": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/scratch",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/portable_isolated_validate.py",
+    "--bundle-root",
+    "{attempt_root}/m2-portable/F1_REF_ECC_NOMINAL_FINE",
+    "--worktree-root",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+    "--python",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "--output",
+    "{attempt_root}/m2-portable/F1_REF_ECC_NOMINAL_FINE-isolated-validation.json",
+    "--max-wall-seconds",
+    "1800",
+    "--denied-path",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_FINE/ds02-infra-f1-direct-bi4-fine-v3/trajectory.h5",
+    "--denied-path",
+    "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/F1_REF_ECC_NOMINAL_FINE/ds02-infra-f1-direct-bi4-fine-v3/direct-conversion-report.json",
+    "--denied-path",
+    "/home/jade/.codex/worktrees/ds-data-02-stage2/DualSPHysics",
+    "--denied-path",
+    "/home/jade/Projects/DualSPHysics-data/CURRENT"
+  ],
+  "limits": {
+    "max_wall_seconds": 1800,
+    "cpu_threads": 1,
+    "gpu": false,
+    "estimated_storage_bytes": 134217728
+  },
+  "max_wall_seconds": 1800,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 134217728,
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/portable_isolated_validate.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/portable_bundle.py",
+    "{attempt_root}/m2-portable/F1_REF_ECC_NOMINAL_FINE"
+  ],
+  "isolation_contract": {
+    "backend": "bubblewrap",
+    "bundle_read_only_mount": "/srv",
+    "worktree_read_only_mount": "/mnt",
+    "runtime_read_only_mount": "/run",
+    "network_unshared": true,
+    "old_source_roots_masked": [
+      "/home/jade/Projects/DualSPHysics-data",
+      "/home/jade/.codex/worktrees",
+      "/home/jade/Projects/DualSPHysics"
+    ],
+    "exact_denied_paths_probed_inside_namespace": true
+  },
+  "purpose": "Relocate the package and prove full-field, label, score, and reader validation without access to original source roots."
+}

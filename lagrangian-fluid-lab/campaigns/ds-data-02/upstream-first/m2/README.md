@@ -26,14 +26,24 @@ Q-N and production not assessed). F6 was rejected as the primary candidate
 because its direct output has frame-level fluid omissions.
 
 `portable_bundle.py build` copies this existing HDF5 through h5py, redacts
-absolute path attributes, emits geometry/control/label sidecars, writes an L2
-reader manifest, and creates a no-model evaluator. `portable_bundle.py
-validate` can then be run after copying the bundle to a new NAS directory. It
-hash-checks every artifact, rejects absolute paths and the old source/CURRENT
-markers in JSON and HDF5 attributes, checks all required native fields and the
-complete validity mask, and reads first/middle/final frames through
-`l2_reader`. The evaluator performs a zero self-comparison plus identity
-permutation and field-perturbation negatives.
+absolute path attributes, reads and hash-checks the owner metadata and
+generated XML named by `source_provenance`, and emits actual geometry/control
+evidence. The HDF5 `labels.h5` sidecar carries native `(Zone,Idp)` IDs, source
+and final positions, displacement, source/final type and mk, validity, and
+destination regions. `portable_bundle.py validate` can then be run after
+copying the bundle to a new NAS directory. It hash-checks every artifact,
+rejects absolute paths and the old source/CURRENT markers in JSON and HDF5
+attributes, checks all required native fields and the complete validity mask,
+recomputes every transport label from the relocated trajectory, and reads
+first/middle/final frames through `l2_reader`. The evaluator reports actual
+transport summaries and compares them with recomputed labels; its negatives
+permute destination identity and perturb a published position field.
+
+`portable_isolated_validate.py` runs that validator under bubblewrap with
+read-only binds for the worktree, runtime, and relocated bundle, empty mounts
+over the old source roots, and in-namespace probes of the denied paths. A
+different working directory or a hash check alone is not accepted as the
+relocation proof.
 
 The portable bundle intentionally does not publish `data_root`, decoder,
 generated XML, PartVTK, or worktree paths. Their hashes remain represented by
@@ -63,9 +73,9 @@ scans positions in small frame slices, and `read_window` has a byte bound.
 
 `lagrangebench_v2_worker.py` is opt-in and safe to schedule on NAS. It streams
 the download to a partial file, verifies size and MD5, rejects unsafe zip paths
-and symlinks, enforces the 4 GiB archive/10 GiB extraction limits, atomically
-publishes the extraction, and writes a path-light JSON inspection report. The
-ready request is
+and symlinks, atomically publishes the extraction, and writes a path-light JSON
+inspection report. The ready request reserves a 6 GiB NAS envelope with a 400
+MiB archive bound and 5 GiB extraction bound; it is
 `requests/lagrangebench-v2-2d-ldc-download-inspect-001.json`; the parent runner
 must substitute `{worktree}` and `{attempt_root}` after NAS preflight.
 

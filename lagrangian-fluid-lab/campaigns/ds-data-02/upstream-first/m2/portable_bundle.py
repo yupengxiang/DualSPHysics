@@ -18,8 +18,9 @@ import os
 import re
 import shutil
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import h5py
 import numpy as np
@@ -80,6 +81,61 @@ def _file_binding(path: Path) -> dict[str, Any]:
     return {"path": path.name, "bytes": path.stat().st_size, "sha256": _sha256(path)}
 
 
+def _xml_node_evidence(node: ET.Element) -> dict[str, Any]:
+    """Keep generated XML geometry/control evidence without path-bearing text."""
+
+    tag = node.tag.rsplit("}", 1)[-1]
+    return {
+        "tag": tag,
+        "attributes": {str(key): str(value) for key, value in sorted(node.attrib.items())},
+        "children": [_xml_node_evidence(child) for child in list(node)],
+    }
+
+
+def _read_source_evidence(source_report: Path) -> dict[str, Any]:
+    """Read owner metadata and generated XML at build time, retaining hashes."""
+
+    report = json.loads(source_report.read_text(encoding="utf-8"))
+    provenance = report.get("source_provenance", {})
+    owner_info = provenance.get("owner_metadata", {})
+    xml_info = provenance.get("generated_xml", {})
+    owner_metadata: dict[str, Any] = {}
+    generated_xml: dict[str, Any] = {}
+    receipts: dict[str, Any] = {
+        "schema": "ds-data-02.m2.source-receipts.v1",
+        "conversion_report_sha256": _sha256(source_report),
+        "paths_published": False,
+    }
+    owner_path = Path(owner_info["path"]) if isinstance(owner_info, dict) and owner_info.get("path") else None
+    if owner_path is not None and owner_path.is_file() and not owner_path.is_symlink():
+        actual_hash = _sha256(owner_path)
+        expected_hash = owner_info.get("sha256")
+        if isinstance(expected_hash, str) and actual_hash != expected_hash:
+            raise PortableBundleError("owner metadata hash disagrees with conversion report")
+        owner_metadata = json.loads(owner_path.read_text(encoding="utf-8"))
+        if not isinstance(owner_metadata, dict):
+            raise PortableBundleError("owner metadata must be a JSON object")
+        receipts["owner_metadata"] = {"available": True, "bytes": owner_path.stat().st_size, "sha256": actual_hash}
+    else:
+        receipts["owner_metadata"] = {"available": False, "reason": "source report has no readable owner metadata"}
+
+    xml_path = Path(xml_info["path"]) if isinstance(xml_info, dict) and xml_info.get("path") else None
+    if xml_path is not None and xml_path.is_file() and not xml_path.is_symlink():
+        actual_hash = _sha256(xml_path)
+        expected_hash = xml_info.get("sha256")
+        if isinstance(expected_hash, str) and actual_hash != expected_hash:
+            raise PortableBundleError("generated XML hash disagrees with conversion report")
+        try:
+            root = ET.fromstring(xml_path.read_bytes())
+        except ET.ParseError as exc:
+            raise PortableBundleError("generated XML is not parseable") from exc
+        generated_xml = _xml_node_evidence(root)
+        receipts["generated_xml"] = {"available": True, "bytes": xml_path.stat().st_size, "sha256": actual_hash}
+    else:
+        receipts["generated_xml"] = {"available": False, "reason": "source report has no readable generated XML"}
+    return {"report": report, "owner_metadata": owner_metadata, "generated_xml": generated_xml, "receipts": receipts}
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     if path.exists() or path.is_symlink():
         raise PortableBundleError(f"refusing to overwrite {path}")
@@ -137,9 +193,28 @@ def _destination_regions(position: np.ndarray, *, spacing_m: float = 0.05) -> li
     return [int(x * 10_000_000_000 + y * 100_000 + z) for x, y, z in bins]
 
 
-def _make_labels(hdf5_path: Path) -> dict[str, Any]:
+def _make_labels(hdf5_path: Path, labels_path: Path) -> dict[str, Any]:
+    """Write endpoint labels keyed by the native ``(Zone,Idp)`` axis.
+
+    The source and destination arrays are copied from the existing trajectory
+    fields at frame zero and the final native frame.  No nearest-neighbour
+    matching or re-numbering is introduced.  The resulting HDF5 sidecar keeps
+    the numerical transport labels separate from the full state while making
+    their identity binding explicit.
+    """
+
     with h5py.File(hdf5_path, "r") as handle:
-        required = {"particle_id", "particle_zone", "initial_type", "initial_mk", "position"}
+        required = {
+            "particle_id",
+            "particle_zone",
+            "initial_type",
+            "initial_mk",
+            "position",
+            "type",
+            "mk",
+            "valid",
+            "time",
+        }
         missing = sorted(required.difference(handle.keys()))
         if missing:
             raise PortableBundleError(f"cannot make labels; HDF5 fields missing: {missing}")
@@ -147,19 +222,72 @@ def _make_labels(hdf5_path: Path) -> dict[str, Any]:
         zones = np.asarray(handle["particle_zone"][:])
         source_type = np.asarray(handle["initial_type"][:])
         source_mk = np.asarray(handle["initial_mk"][:])
-        final_position = np.asarray(handle["position"][-1])
+        source_position = np.asarray(handle["position"][0])
+        destination_position = np.asarray(handle["position"][-1])
+        destination_type = np.asarray(handle["type"][-1])
+        destination_mk = np.asarray(handle["mk"][-1])
+        valid_source = np.asarray(handle["valid"][0], dtype=bool)
+        valid_destination = np.asarray(handle["valid"][-1], dtype=bool)
+        observed_all_frames = np.asarray(handle["valid"][:], dtype=bool).all(axis=0)
+        time = np.asarray(handle["time"][:], dtype=np.float64)
     n = len(ids)
-    if not (len(zones) == len(source_type) == len(source_mk) == final_position.shape[0] == n):
+    if not (
+        len(zones)
+        == len(source_type)
+        == len(source_mk)
+        == len(destination_type)
+        == len(destination_mk)
+        == source_position.shape[0]
+        == destination_position.shape[0]
+        == n
+    ):
         raise PortableBundleError("identity and label arrays have inconsistent lengths")
+    if len(time) == 0 or valid_source.shape != (n,) or valid_destination.shape != (n,):
+        raise PortableBundleError("trajectory time or validity fields have invalid shapes")
+    displacement = destination_position - source_position
+    with h5py.File(labels_path, "x") as labels:
+        labels.attrs["schema"] = "ds-data-02.m2.portable-labels.v2"
+        labels.attrs["key"] = "(Zone,Idp)"
+        labels.attrs["source_frame"] = 0
+        labels.attrs["destination_frame"] = len(time) - 1
+        labels.attrs["source_time_s"] = float(time[0])
+        labels.attrs["destination_time_s"] = float(time[-1])
+        labels.attrs["observation_window_frames_json"] = json.dumps([0, len(time) - 1])
+        labels.attrs["destination_region_spacing_m"] = 0.05
+        labels.attrs["label_semantics"] = (
+            "source/destination endpoints and displacement are copied by native typed identity; "
+            "destination_region is a deterministic 5 cm bin of native final position"
+        )
+        labels.create_dataset("particle_id", data=ids, chunks=True)
+        labels.create_dataset("particle_zone", data=zones, chunks=True)
+        labels.create_dataset("source_position_m", data=source_position, chunks=True)
+        labels.create_dataset("destination_position_m", data=destination_position, chunks=True)
+        labels.create_dataset("displacement_m", data=displacement, chunks=True)
+        labels.create_dataset("source_type", data=source_type, chunks=True)
+        labels.create_dataset("source_mk", data=source_mk, chunks=True)
+        labels.create_dataset("destination_type", data=destination_type, chunks=True)
+        labels.create_dataset("destination_mk", data=destination_mk, chunks=True)
+        labels.create_dataset("valid_source", data=valid_source, chunks=True)
+        labels.create_dataset("valid_destination", data=valid_destination, chunks=True)
+        labels.create_dataset("observed_all_frames", data=observed_all_frames, chunks=True)
+        labels.create_dataset(
+            "destination_region",
+            data=np.asarray(_destination_regions(destination_position), dtype=np.int64),
+            chunks=True,
+        )
     return {
-        "schema": "ds-data-02.m2.portable-labels.v1",
+        "schema": "ds-data-02.m2.portable-labels.v2",
         "key": ["particle_zone", "particle_id"],
         "particle_count": n,
-        "source_type": [int(value) for value in source_type],
-        "source_mk": [int(value) for value in source_mk],
-        "destination_region": _destination_regions(final_position),
+        "source_frame": 0,
+        "destination_frame": len(time) - 1,
+        "source_time_s": float(time[0]),
+        "destination_time_s": float(time[-1]),
+        "observed_all_frames_count": int(observed_all_frames.sum()),
+        "invalid_source_count": int((~valid_source).sum()),
+        "invalid_destination_count": int((~valid_destination).sum()),
         "destination_region_spacing_m": 0.05,
-        "semantics": "destination_region is a deterministic 5 cm bin of native final position; no pressure or mass is inferred",
+        "semantics": "native identity keyed source/destination positions, displacement, type/mk, validity, and destination regions",
     }
 
 
@@ -169,14 +297,34 @@ def _build_sidecars(
     case_id: str,
     source_report: Path,
     hdf5_path: Path,
+    labels_path: Path,
 ) -> None:
     try:
-        report = json.loads(source_report.read_text(encoding="utf-8"))
+        source_evidence = _read_source_evidence(source_report)
+        report = source_evidence["report"]
     except (OSError, json.JSONDecodeError) as exc:
         raise PortableBundleError(f"cannot read source conversion report: {source_report}") from exc
-    physical = report.get("hash_scopes", {}).get("physical_condition", {})
-    if not isinstance(physical, dict) or not isinstance(physical.get("geometry"), dict):
-        raise PortableBundleError("source report lacks physical geometry evidence")
+    owner = source_evidence["owner_metadata"]
+    report_physical = report.get("hash_scopes", {}).get("physical_condition", {})
+    if not isinstance(report_physical, dict):
+        report_physical = {}
+    physical = {
+        "geometry": report_physical.get("geometry") or owner.get("geometry"),
+        "geometry_family_id": report_physical.get("geometry_family_id") or owner.get("geometry_family_id"),
+        "control_family_id": report_physical.get("control_family_id") or owner.get("control_family_id"),
+        "recipe_id": report_physical.get("recipe_id") or owner.get("recipe_id"),
+        "event_window": report_physical.get("event_window") or owner.get("event_window", {}),
+        "family_id": report_physical.get("family_id") or owner.get("family_id"),
+        "physical_case_id": report_physical.get("physical_case_id") or owner.get("physical_case_id"),
+        "lineage_group_id": report_physical.get("lineage_group_id") or owner.get("lineage_group_id"),
+        "mechanism_id": report_physical.get("mechanism_id") or owner.get("mechanism_id"),
+        "paired_background_id": report_physical.get("paired_background_id") or owner.get("paired_background_id"),
+        "view_id": report_physical.get("view_id") or owner.get("view_id"),
+    }
+    if not isinstance(physical.get("geometry"), dict):
+        raise PortableBundleError(
+            "source report and owner metadata lack physical geometry; refusing synthetic geometry"
+        )
     geometry = {
         "schema": "ds-data-02.m2.geometry.v1",
         "case_id": case_id,
@@ -185,6 +333,10 @@ def _build_sidecars(
         "geometry_family_id": physical.get("geometry_family_id"),
         "geometry_sha256": report.get("source_provenance", {}).get("geometry_sha256"),
         "geometry": physical["geometry"],
+        "parameter_values": owner.get("parameter_values", {}),
+        "generated_xml": source_evidence["generated_xml"],
+        "owner_metadata_sha256": source_evidence["receipts"].get("owner_metadata", {}).get("sha256"),
+        "generated_xml_sha256": source_evidence["receipts"].get("generated_xml", {}).get("sha256"),
         "units": report.get("units", {}),
     }
     control = {
@@ -193,37 +345,81 @@ def _build_sidecars(
         "control_family_id": physical.get("control_family_id"),
         "recipe_id": physical.get("recipe_id"),
         "event_window": physical.get("event_window", {}),
+        "solver_parameters": owner.get("solver_parameters", report.get("hash_scopes", {}).get("numerical_parameters", {}).get("solver_parameters", {})),
+        "observables": owner.get("observables", {}),
+        "error_budget": owner.get("error_budget", {}),
         "numerical_parameters_sha256": report.get("hash_scopes", {}).get("numerical_parameters_sha256"),
         "control_sha256": report.get("source_provenance", {}).get("control_sha256"),
+        "owner_metadata_sha256": source_evidence["receipts"].get("owner_metadata", {}).get("sha256"),
+        "generated_xml_sha256": source_evidence["receipts"].get("generated_xml", {}).get("sha256"),
+        "initial_exclusion_ledger": report.get("typed_identity", {}).get("initial_exclusion_ledger", {}),
         "conversion_evidence": report.get("conversion_claim"),
     }
-    labels = _make_labels(hdf5_path)
+    _make_labels(hdf5_path, labels_path)
     _write_json(output_root / "geometry.json", geometry)
     _write_json(output_root / "control.json", control)
-    _write_json(output_root / "labels.json", labels)
+    _write_json(output_root / "source-receipts.json", source_evidence["receipts"])
 
 
-def _evaluator_score(hdf5_path: Path) -> dict[str, Any]:
-    with h5py.File(hdf5_path, "r") as handle:
-        position = handle["position"]
-        if position.ndim != 3 or position.shape[-1] != 3:
-            raise PortableBundleError("position must be (time, particle, 3)")
-        middle = np.asarray(position[position.shape[0] // 2])
-        self_error = float(np.max(np.abs(middle - middle)))
-        permutation_error = float(np.sqrt(np.mean((middle[::-1] - middle) ** 2)))
-    field_perturbation = 1e-4
+def _evaluator_score(hdf5_path: Path, labels_path: Path) -> dict[str, Any]:
+    """Recompute endpoint labels and meaningful keyed transport diagnostics."""
+
+    with h5py.File(hdf5_path, "r") as trajectory, h5py.File(labels_path, "r") as labels:
+        source_position = np.asarray(trajectory["position"][0])
+        destination_position = np.asarray(trajectory["position"][-1])
+        recomputed_displacement = destination_position - source_position
+        label_source = np.asarray(labels["source_position_m"][:])
+        label_destination = np.asarray(labels["destination_position_m"][:])
+        label_displacement = np.asarray(labels["displacement_m"][:])
+        label_region = np.asarray(labels["destination_region"][:])
+        source_type = np.asarray(labels["source_type"][:])
+        observed_all_frames = np.asarray(labels["observed_all_frames"][:], dtype=bool)
+        if label_source.shape != source_position.shape or label_destination.shape != destination_position.shape:
+            raise PortableBundleError("transport labels do not match trajectory endpoint shape")
+        label_recompute_error = float(
+            max(
+                np.max(np.abs(label_source - source_position)),
+                np.max(np.abs(label_destination - destination_position)),
+                np.max(np.abs(label_displacement - recomputed_displacement)),
+            )
+        )
+        recomputed_regions = np.asarray(_destination_regions(destination_position), dtype=np.int64)
+        region_mismatch_count = int(np.count_nonzero(recomputed_regions != label_region))
+        displacement_norm = np.linalg.norm(recomputed_displacement, axis=1)
+        fluid = source_type == 3
+        moving = displacement_norm > 1e-6
+        permutation_error = float(np.sqrt(np.mean((label_destination[::-1] - label_destination) ** 2)))
+        perturbed_destination = label_destination.copy()
+        perturbed_destination[0, 0] += 1e-4
+        field_perturbed_displacement = perturbed_destination - label_source
+        field_perturbation = float(
+            np.max(np.abs(field_perturbed_displacement - label_displacement))
+        )
+        transport_summary = {
+            "particle_count": int(len(displacement_norm)),
+            "observed_all_frames_count": int(observed_all_frames.sum()),
+            "moving_particle_count": int(moving.sum()),
+            "moving_fluid_count": int((moving & fluid).sum()),
+            "mean_displacement_m": float(displacement_norm.mean()),
+            "max_displacement_m": float(displacement_norm.max()),
+            "destination_region_count": int(len(np.unique(recomputed_regions))),
+        }
+    checks = {
+        "label_recomputation_passed": label_recompute_error <= 1e-6,
+        "region_recomputation_passed": region_mismatch_count == 0,
+        "identity_permutation_rejected": permutation_error > 1e-9,
+        "field_perturbation_rejected": field_perturbation > 0.0,
+    }
     return {
-        "schema": "ds-data-02.m2.no-model-evaluator.v1",
-        "self_comparison_max_abs": self_error,
+        "schema": "ds-data-02.m2.no-model-evaluator.v2",
+        "label_recompute_max_abs_m": label_recompute_error,
+        "region_mismatch_count": region_mismatch_count,
         "identity_permutation_rmse_m": permutation_error,
         "field_perturbation_delta_m": field_perturbation,
-        "checks": {
-            "self_comparison_passed": self_error == 0.0,
-            "identity_permutation_rejected": permutation_error > 0.0,
-            "field_perturbation_rejected": field_perturbation > 0.0,
-        },
-        "passed": self_error == 0.0 and permutation_error > 0.0 and field_perturbation > 0.0,
-        "semantics": "identity permutation is a keyed source/destination negative; field perturbation is a deterministic nonzero negative",
+        "transport_summary": transport_summary,
+        "checks": checks,
+        "passed": all(checks.values()),
+        "semantics": "endpoint labels are recomputed from the native typed identity axis; negatives permute destination identity or perturb a published field",
     }
 
 
@@ -241,8 +437,17 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
     temporary.mkdir()
     try:
         _copy_sanitized_hdf5(source_hdf5, temporary / "trajectory.h5", case_id)
-        _build_sidecars(temporary, case_id=case_id, source_report=source_report, hdf5_path=temporary / "trajectory.h5")
-        _write_json(temporary / "evaluator.json", _evaluator_score(temporary / "trajectory.h5"))
+        _build_sidecars(
+            temporary,
+            case_id=case_id,
+            source_report=source_report,
+            hdf5_path=temporary / "trajectory.h5",
+            labels_path=temporary / "labels.h5",
+        )
+        _write_json(
+            temporary / "evaluator.json",
+            _evaluator_score(temporary / "trajectory.h5", temporary / "labels.h5"),
+        )
         trajectory_binding = _file_binding(temporary / "trajectory.h5")
         reader_manifest = {
             "schema": READER_SCHEMA,
@@ -256,8 +461,9 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
                 ("trajectory", "trajectory.h5"),
                 ("geometry", "geometry.json"),
                 ("control", "control.json"),
-                ("labels", "labels.json"),
+                ("labels", "labels.h5"),
                 ("evaluator", "evaluator.json"),
+                ("source_receipts", "source-receipts.json"),
                 ("reader_manifest", "reader-manifest.json"),
             )
         }
@@ -269,12 +475,28 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
             "denied_path_markers": list(_DEFAULT_DENIED_MARKERS),
             "field_semantics": {
                 "available": list(_H5_FIELDS),
+                "label_fields": [
+                    "particle_id",
+                    "particle_zone",
+                    "source_position_m",
+                    "destination_position_m",
+                    "displacement_m",
+                    "source_type",
+                    "source_mk",
+                    "destination_type",
+                    "destination_mk",
+                    "valid_source",
+                    "valid_destination",
+                    "observed_all_frames",
+                    "destination_region",
+                ],
                 "unavailable": ["source_solver_paths", "raw_bi4_path", "decoder_path"],
                 "validity_contract": "closed fixed identity axis; expected complete for F1 reference",
             },
             "source_evidence": {
                 "source_report_sha256": _json_hash(source_report),
                 "source_report_schema": "ds-data-02.bi4-direct-conversion.v1",
+                "owner_metadata_and_generated_xml_read_at_build": True,
                 "paths_published": False,
             },
         }
@@ -286,19 +508,18 @@ def build_bundle(source_hdf5: Path, source_report: Path, output_root: Path, case
     return validate_bundle(output_root)
 
 
-def _walk_json_strings(value: Any, location: str, denied: tuple[str, ...]) -> Iterator[tuple[str, str]]:
+def _walk_json_strings(value: Any, location: str, denied: tuple[str, ...]) -> None:
     if isinstance(value, dict):
         for key, item in value.items():
-            yield from _walk_json_strings(item, f"{location}.{key}", denied)
+            _walk_json_strings(item, f"{location}.{key}", denied)
     elif isinstance(value, list):
         for index, item in enumerate(value):
-            yield from _walk_json_strings(item, f"{location}[{index}]", denied)
+            _walk_json_strings(item, f"{location}[{index}]", denied)
     elif isinstance(value, str):
         if any(marker in value for marker in denied):
             raise PortableBundleError(f"denied original path marker at {location}: {value!r}")
         if value.startswith("/") and not value.startswith("https://"):
             raise PortableBundleError(f"absolute path in portable metadata at {location}: {value!r}")
-        yield location, value
 
 
 def _verify_artifact(root: Path, binding: dict[str, Any], name: str) -> Path:
@@ -344,6 +565,111 @@ def _check_hdf5_attrs(handle: h5py.File, denied: tuple[str, ...]) -> None:
     check_group(handle, "")
 
 
+def _h5_scalar_text(value: Any) -> str:
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    return str(value)
+
+
+def _validate_labels(
+    labels_path: Path,
+    trajectory_path: Path,
+    *,
+    denied: tuple[str, ...],
+) -> dict[str, Any]:
+    """Check every published transport label against native trajectory rows."""
+
+    required = {
+        "particle_id",
+        "particle_zone",
+        "source_position_m",
+        "destination_position_m",
+        "displacement_m",
+        "source_type",
+        "source_mk",
+        "destination_type",
+        "destination_mk",
+        "valid_source",
+        "valid_destination",
+        "observed_all_frames",
+        "destination_region",
+    }
+    with h5py.File(labels_path, "r") as labels, h5py.File(trajectory_path, "r") as trajectory:
+        _check_hdf5_attrs(labels, denied)
+        if _h5_scalar_text(labels.attrs.get("schema", "")) != "ds-data-02.m2.portable-labels.v2":
+            raise PortableBundleError("transport label schema is unsupported")
+        missing = sorted(required.difference(labels.keys()))
+        if missing:
+            raise PortableBundleError(f"transport labels are missing fields: {missing}")
+        ids = np.asarray(trajectory["particle_id"][:])
+        zones = np.asarray(trajectory["particle_zone"][:])
+        n = len(ids)
+        t = len(trajectory["time"])
+        expected_shapes = {
+            "particle_id": (n,),
+            "particle_zone": (n,),
+            "source_position_m": (n, 3),
+            "destination_position_m": (n, 3),
+            "displacement_m": (n, 3),
+            "source_type": (n,),
+            "source_mk": (n,),
+            "destination_type": (n,),
+            "destination_mk": (n,),
+            "valid_source": (n,),
+            "valid_destination": (n,),
+            "observed_all_frames": (n,),
+            "destination_region": (n,),
+        }
+        for name, shape in expected_shapes.items():
+            if tuple(labels[name].shape) != shape:
+                raise PortableBundleError(f"transport label {name} shape {labels[name].shape} != {shape}")
+        if not np.array_equal(np.asarray(labels["particle_id"][:]), ids):
+            raise PortableBundleError("transport labels changed particle IDs")
+        if not np.array_equal(np.asarray(labels["particle_zone"][:]), zones):
+            raise PortableBundleError("transport labels changed particle zones")
+        source_position = np.asarray(trajectory["position"][0])
+        destination_position = np.asarray(trajectory["position"][-1])
+        if not np.array_equal(np.asarray(labels["source_position_m"][:]), source_position):
+            raise PortableBundleError("source transport positions do not match frame zero")
+        if not np.array_equal(np.asarray(labels["destination_position_m"][:]), destination_position):
+            raise PortableBundleError("destination transport positions do not match final frame")
+        displacement = np.asarray(labels["displacement_m"][:])
+        if not np.allclose(displacement, destination_position - source_position, rtol=0.0, atol=1e-7):
+            raise PortableBundleError("transport displacement is not source-to-destination")
+        if not np.array_equal(np.asarray(labels["source_type"][:]), np.asarray(trajectory["initial_type"][:])):
+            raise PortableBundleError("source type labels do not match native initial type")
+        if not np.array_equal(np.asarray(labels["source_mk"][:]), np.asarray(trajectory["initial_mk"][:])):
+            raise PortableBundleError("source mk labels do not match native initial mk")
+        if not np.array_equal(np.asarray(labels["destination_type"][:]), np.asarray(trajectory["type"][-1])):
+            raise PortableBundleError("destination type labels do not match native final type")
+        if not np.array_equal(np.asarray(labels["destination_mk"][:]), np.asarray(trajectory["mk"][-1])):
+            raise PortableBundleError("destination mk labels do not match native final mk")
+        valid = np.asarray(trajectory["valid"][:], dtype=bool)
+        for label_name, expected in (
+            ("valid_source", valid[0]),
+            ("valid_destination", valid[-1]),
+            ("observed_all_frames", valid.all(axis=0)),
+        ):
+            if not np.array_equal(np.asarray(labels[label_name][:], dtype=bool), expected):
+                raise PortableBundleError(f"transport label {label_name} disagrees with native validity")
+        recomputed_regions = np.asarray(_destination_regions(destination_position), dtype=np.int64)
+        if not np.array_equal(np.asarray(labels["destination_region"][:]), recomputed_regions):
+            raise PortableBundleError("destination regions are not computed from final native positions")
+        times = np.asarray(trajectory["time"][:])
+        source_time = float(labels.attrs.get("source_time_s", np.nan))
+        destination_time = float(labels.attrs.get("destination_time_s", np.nan))
+        if not np.isclose(source_time, times[0]) or not np.isclose(destination_time, times[-1]):
+            raise PortableBundleError("transport label observation times do not match native time")
+        return {
+            "schema": "ds-data-02.m2.portable-labels.v2",
+            "particles": n,
+            "frames": t,
+            "observed_all_frames_count": int(np.asarray(labels["observed_all_frames"], dtype=bool).sum()),
+            "invalid_source_count": int((~np.asarray(labels["valid_source"], dtype=bool)).sum()),
+            "invalid_destination_count": int((~np.asarray(labels["valid_destination"], dtype=bool)).sum()),
+        }
+
+
 def _validate_trajectory(
     path: Path,
     case_id: str,
@@ -356,6 +682,22 @@ def _validate_trajectory(
         if missing:
             raise PortableBundleError(f"trajectory is missing required fields: {missing}")
         _check_hdf5_attrs(handle, denied)
+        try:
+            dimension = int(handle.attrs.get("solver_dimension", -1))
+        except (TypeError, ValueError):
+            dimension = -1
+        if dimension != 3:
+            raise PortableBundleError(f"portable trajectory must be 3-D, got solver_dimension={dimension}")
+        if _h5_scalar_text(handle.attrs.get("identity_key", "")) != "(Zone,Idp)":
+            raise PortableBundleError("portable trajectory identity key is not (Zone,Idp)")
+        if not _h5_scalar_text(handle.attrs.get("coordinate_frame", "")).strip():
+            raise PortableBundleError("portable trajectory lacks coordinate-frame metadata")
+        try:
+            units = json.loads(_h5_scalar_text(handle.attrs.get("units_json", "{}")))
+        except json.JSONDecodeError as exc:
+            raise PortableBundleError("portable trajectory units_json is invalid") from exc
+        if not isinstance(units, dict) or sorted(units) != ["density", "mass", "position", "pressure", "time", "velocity"]:
+            raise PortableBundleError("portable trajectory units_json is incomplete")
         time = np.asarray(handle["time"][:])
         ids = np.asarray(handle["particle_id"][:])
         zones = np.asarray(handle["particle_zone"][:])
@@ -385,20 +727,32 @@ def _validate_trajectory(
                 raise PortableBundleError(f"{name} shape {handle[name].shape} != {shape}")
         if require_complete and not np.asarray(valid[:], dtype=bool).all():
             raise PortableBundleError("canonical complete-ID candidate contains invalid particles")
+        if valid.dtype.kind not in "biu":
+            raise PortableBundleError("valid mask must be boolean or integer-valued")
+        for name in ("initial_mass", "initial_type", "initial_mk"):
+            if not np.isfinite(handle[name][:]).all():
+                raise PortableBundleError(f"non-finite initial field: {name}")
         for start in range(0, t, 8):
             stop = min(t, start + 8)
             if not np.isfinite(handle["position"][start:stop]).all():
                 raise PortableBundleError(f"non-finite position near frame {start}")
             if not np.isfinite(handle["velocity"][start:stop]).all():
                 raise PortableBundleError(f"non-finite velocity near frame {start}")
-            for name in ("density", "mass", "pressure"):
+            for name in ("density", "mass", "pressure", "type", "mk"):
                 if not np.isfinite(handle[name][start:stop]).all():
                     raise PortableBundleError(f"non-finite {name} near frame {start}")
         return {"case_id": case_id, "frames": t, "particles": n, "complete_validity": bool(np.asarray(valid[:], dtype=bool).all())}
 
 
-def validate_bundle(bundle_root: Path) -> dict[str, Any]:
+def validate_bundle(
+    bundle_root: Path,
+    *,
+    denied_probe_paths: tuple[Path, ...] = (),
+) -> dict[str, Any]:
     bundle_root = bundle_root.resolve()
+    for denied_path in denied_probe_paths:
+        if denied_path.exists() or denied_path.is_symlink():
+            raise PortableBundleError(f"denied source path remains accessible: {denied_path}")
     manifest_path = bundle_root / "manifest.json"
     if not manifest_path.is_file():
         raise PortableBundleError(f"missing bundle manifest: {manifest_path}")
@@ -408,14 +762,20 @@ def validate_bundle(bundle_root: Path) -> dict[str, Any]:
     denied = tuple(manifest.get("denied_path_markers", _DEFAULT_DENIED_MARKERS))
     if not denied:
         raise PortableBundleError("portable bundle must declare denied path markers")
-    _walk_json_strings(manifest, "manifest", denied)
+    # The marker declarations are policy, not published source paths; all
+    # other manifest values must pass the path scan.
+    _walk_json_strings(
+        {key: value for key, value in manifest.items() if key != "denied_path_markers"},
+        "manifest",
+        denied,
+    )
     artifacts = manifest.get("artifacts")
     case_id = manifest.get("case_id")
     if not isinstance(case_id, str) or not isinstance(artifacts, dict):
         raise PortableBundleError("bundle manifest lacks case_id or artifacts")
     files = {name: _verify_artifact(bundle_root, binding, name) for name, binding in artifacts.items()}
     payloads: dict[str, dict[str, Any]] = {}
-    for name in ("geometry", "control", "labels", "evaluator"):
+    for name in ("geometry", "control", "evaluator", "source_receipts"):
         payload = json.loads(files[name].read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise PortableBundleError(f"{name} sidecar must contain an object")
@@ -424,22 +784,27 @@ def validate_bundle(bundle_root: Path) -> dict[str, Any]:
     expected_sidecar_schemas = {
         "geometry": "ds-data-02.m2.geometry.v1",
         "control": "ds-data-02.m2.control.v1",
-        "labels": "ds-data-02.m2.portable-labels.v1",
-        "evaluator": "ds-data-02.m2.no-model-evaluator.v1",
+        "evaluator": "ds-data-02.m2.no-model-evaluator.v2",
+        "source_receipts": "ds-data-02.m2.source-receipts.v1",
     }
     for name, expected_schema in expected_sidecar_schemas.items():
         if payloads[name].get("schema") != expected_schema:
             raise PortableBundleError(f"{name} sidecar has an unexpected schema")
-    labels = payloads["labels"]
+    if not isinstance(payloads["geometry"].get("geometry"), dict) or not payloads["geometry"].get("coordinate_frame"):
+        raise PortableBundleError("geometry sidecar lacks actual geometry or coordinate-frame evidence")
+    if not isinstance(payloads["control"].get("event_window"), dict):
+        raise PortableBundleError("control sidecar lacks event-window evidence")
+    receipts = payloads["source_receipts"]
+    if not receipts.get("owner_metadata", {}).get("available"):
+        raise PortableBundleError("owner metadata was not read while building the portable bundle")
+    if not receipts.get("generated_xml", {}).get("available"):
+        raise PortableBundleError("generated XML was not read while building the portable bundle")
     trajectory_summary = _validate_trajectory(
         files["trajectory"], case_id, require_complete=True, denied=denied
     )
-    if labels.get("particle_count") != trajectory_summary["particles"]:
+    label_summary = _validate_labels(files["labels"], files["trajectory"], denied=denied)
+    if label_summary["particles"] != trajectory_summary["particles"]:
         raise PortableBundleError("label particle_count does not match trajectory")
-    for field in ("source_type", "source_mk", "destination_region"):
-        values = labels.get(field)
-        if not isinstance(values, list) or len(values) != trajectory_summary["particles"]:
-            raise PortableBundleError(f"label field {field!r} does not cover the identity axis")
     reader_path = files["reader_manifest"]
     _walk_json_strings(json.loads(reader_path.read_text(encoding="utf-8")), "reader_manifest", denied)
     reader_manifest = l2_reader.load_manifest(reader_path)
@@ -456,17 +821,34 @@ def validate_bundle(bundle_root: Path) -> dict[str, Any]:
         )
         frame_checks.append({"frame": frame, "fields": sorted(frame_data), "valid": bool(np.asarray(frame_data["valid"]).all())})
     evaluator = payloads["evaluator"]
-    if evaluator.get("schema") != "ds-data-02.m2.no-model-evaluator.v1" or not evaluator.get("passed"):
+    recomputed_evaluator = _evaluator_score(files["trajectory"], files["labels"])
+    if evaluator.get("schema") != "ds-data-02.m2.no-model-evaluator.v2" or not evaluator.get("passed"):
         raise PortableBundleError("no-model evaluator did not pass self/negative checks")
+    for key in (
+        "label_recompute_max_abs_m",
+        "identity_permutation_rmse_m",
+        "field_perturbation_delta_m",
+    ):
+        if not np.isclose(float(evaluator.get(key, np.nan)), float(recomputed_evaluator[key]), rtol=0.0, atol=1e-12):
+            raise PortableBundleError(f"stored evaluator score does not match recomputed {key}")
+    if evaluator.get("region_mismatch_count") != recomputed_evaluator["region_mismatch_count"]:
+        raise PortableBundleError("stored evaluator region score does not match recomputation")
+    if evaluator.get("transport_summary") != recomputed_evaluator["transport_summary"]:
+        raise PortableBundleError("stored evaluator transport summary does not match recomputation")
+    if evaluator.get("checks") != recomputed_evaluator["checks"] or evaluator.get("passed") != recomputed_evaluator["passed"]:
+        raise PortableBundleError("stored evaluator checks do not match recomputation")
     return {
         "schema": "ds-data-02.m2.portable-bundle-validation.v1",
         "case_id": case_id,
         "trajectory": trajectory_summary,
+        "labels": label_summary,
         "integrity": {"bytes": integrity["bytes"], "sha256": integrity["sha256"]},
         "frame_checks": frame_checks,
-        "evaluator": evaluator,
+        "evaluator": recomputed_evaluator,
         "portable": True,
         "original_paths_denied": True,
+        "denied_probe_paths": [str(path) for path in denied_probe_paths],
+        "denied_probe_passed": True,
     }
 
 
@@ -480,6 +862,13 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--case-id", required=True)
     validate = sub.add_parser("validate", help="validate a relocated portable bundle")
     validate.add_argument("--bundle-root", required=True, type=Path)
+    validate.add_argument(
+        "--probe-denied-path",
+        action="append",
+        default=[],
+        type=Path,
+        help="path that must be inaccessible in the validation namespace",
+    )
     return parser
 
 
@@ -489,7 +878,7 @@ def main(argv: list[str] | None = None) -> int:
         result = (
             build_bundle(args.source_hdf5, args.source_report, args.output_root, args.case_id)
             if args.command == "build"
-            else validate_bundle(args.bundle_root)
+            else validate_bundle(args.bundle_root, denied_probe_paths=tuple(args.probe_denied_path))
         )
         print(json.dumps(result, indent=2, sort_keys=True))
     except (OSError, ValueError, KeyError, PortableBundleError) as exc:

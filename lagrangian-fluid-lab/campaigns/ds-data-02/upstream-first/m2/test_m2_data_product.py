@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import json
+import hashlib
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 import h5py
 import numpy as np
+import pytest
 
 
 M2_ROOT = Path(__file__).resolve().parent
@@ -54,9 +58,24 @@ def test_ldc_reader_preserves_raw_fields_and_bounds(tmp_path: Path) -> None:
 def _make_3d_fixture(root: Path) -> tuple[Path, Path]:
     source = root / "source.h5"
     report = root / "conversion-report.json"
+    owner = root / "owner-metadata.json"
+    generated_xml = root / "generated-case.xml"
     frames, particles = 3, 4
     with h5py.File(source, "w") as handle:
         handle.attrs["coordinate_frame_source"] = "/home/jade/Projects/DualSPHysics-data/old.xml"
+        handle.attrs["solver_dimension"] = 3
+        handle.attrs["identity_key"] = "(Zone,Idp)"
+        handle.attrs["coordinate_frame"] = "DualSPHysics case Cartesian coordinates (x,y,z)"
+        handle.attrs["units_json"] = json.dumps(
+            {
+                "density": "kg/m^3",
+                "mass": "kg",
+                "position": "m",
+                "pressure": "Pa",
+                "time": "s",
+                "velocity": "m/s",
+            }
+        )
         handle.create_dataset("time", data=np.array([0.0, 0.1, 0.2]))
         handle.create_dataset("particle_id", data=np.arange(particles, dtype="u4"))
         handle.create_dataset("particle_zone", data=np.zeros(particles, dtype="u4"))
@@ -71,6 +90,28 @@ def _make_3d_fixture(root: Path) -> tuple[Path, Path]:
         handle.create_dataset("initial_type", data=np.ones(particles, dtype="i4"))
         handle.create_dataset("initial_mk", data=np.ones(particles, dtype="i4"))
         handle.create_dataset("initial_mass", data=np.ones(particles, dtype="f4"))
+    owner.write_text(
+        json.dumps(
+            {
+                "schema": "ds-data-02.f1.generator.v1",
+                "case_id": "F1_TEST",
+                "geometry": {"tank_length_m": 1.0},
+                "geometry_family_id": "G",
+                "control_family_id": "C",
+                "recipe_id": "R",
+                "event_window": {"complete_event_window_s": 0.2},
+                "parameter_values": {"obstacle_offset_y_m": 0.0},
+                "solver_parameters": {"TimeMax": "0.2"},
+                "observables": {"native_labels": ["source_label", "final_category"]},
+                "metadata_path": "/home/jade/Projects/DualSPHysics-data/CURRENT/owner.json",
+            }
+        ),
+        encoding="utf-8",
+    )
+    generated_xml.write_text(
+        "<case><geometry><definition dp=\"0.01\" /></geometry></case>",
+        encoding="utf-8",
+    )
     report.write_text(
         json.dumps(
             {
@@ -80,15 +121,19 @@ def _make_3d_fixture(root: Path) -> tuple[Path, Path]:
                 "conversion_claim": "conversion evidence only",
                 "hash_scopes": {
                     "numerical_parameters_sha256": "n",
-                    "physical_condition": {
-                        "geometry": {"tank_length_m": 1.0},
-                        "geometry_family_id": "G",
-                        "control_family_id": "C",
-                        "recipe_id": "R",
-                        "event_window": {},
+                },
+                "source_provenance": {
+                    "geometry_sha256": "g",
+                    "control_sha256": "c",
+                    "owner_metadata": {
+                        "path": str(owner),
+                        "sha256": hashlib.sha256(owner.read_bytes()).hexdigest(),
+                    },
+                    "generated_xml": {
+                        "path": str(generated_xml),
+                        "sha256": hashlib.sha256(generated_xml.read_bytes()).hexdigest(),
                     },
                 },
-                "source_provenance": {"geometry_sha256": "g", "control_sha256": "c"},
             }
         ),
         encoding="utf-8",
@@ -103,3 +148,37 @@ def test_portable_bundle_redacts_source_paths_and_reuses_l2_reader(tmp_path: Pat
     assert result["portable"] is True
     assert result["original_paths_denied"] is True
     assert portable_bundle.validate_bundle(bundle)["trajectory"]["complete_validity"] is True
+
+
+def test_isolated_validation_probes_denied_source_roots(tmp_path: Path) -> None:
+    if shutil.which("bwrap") is None:
+        pytest.skip("bubblewrap is unavailable")
+    source, report = _make_3d_fixture(tmp_path)
+    bundle = tmp_path / "bundle"
+    portable_bundle.build_bundle(source, report, bundle, "F1_TEST")
+    output = tmp_path / "isolated-validation.json"
+    worktree_root = M2_ROOT.parents[4]
+    wrapper = M2_ROOT / "portable_isolated_validate.py"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(wrapper),
+            "--bundle-root",
+            str(bundle),
+            "--worktree-root",
+            str(worktree_root),
+            "--python",
+            sys.executable,
+            "--output",
+            str(output),
+            "--max-wall-seconds",
+            "120",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(output.read_text(encoding="utf-8"))
+    assert validation["namespace"]["denied_probes_passed"] is True
+    assert validation["validation"]["portable"] is True
