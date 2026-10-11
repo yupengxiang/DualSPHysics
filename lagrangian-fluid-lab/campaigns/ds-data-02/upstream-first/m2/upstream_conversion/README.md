@@ -42,13 +42,30 @@ selects particle samples, changes `(Zone,Idp)`, or infers a material trajectory.
    transient missing ledgers. Official PartVTK checks remain enabled at the
    first, middle, and final selected frames.
 4. Root obtains a producer-native lifecycle sidecar from the existing official
-   PartOut/RunPARTs path. The checked-in
-   `scripts/ds_data02_stage2_f1_dp0025_native_motive_audit_v2.py` is the closest
-   existing source-closed PartVTKOut/RunPARTs auditor; its manifest is
-   DP0025-specific, so it must be parent-bound or generalized by root for this
-   official case. Once that existing audit emits its small JSON result,
-   [`native_sidecar_from_audit.py`](native_sidecar_from_audit.py) projects the
-   result without opening any payload. The sidecar follows
+   PartOut/RunPARTs path. The generalized
+   [`native_integrity_audit.py`](native_integrity_audit.py) reuses the
+   DP0025 auditor's official PartVTKOut decoder, RunPARTs counter checks, and
+   Motive parsing, but binds the actual case IDs and completed GenCase/solver
+   receipts through a small manifest. It emits the full-window evidence needed
+   by the bridge comparison. The two ready requests are
+   [`UF_F1_MDBC_DAMBREAK3D-native-integrity-001.json`](requests/UF_F1_MDBC_DAMBREAK3D-native-integrity-001.json)
+   and
+   [`UF_F1_MDBC_DP015_BASE-native-integrity-001.json`](requests/UF_F1_MDBC_DP015_BASE-native-integrity-001.json).
+   Their manifests bind 601 native records through 6 s, the raw
+   `PartOut_000.obi4`, `RunPARTs.csv`, `Run.out`, `PartInfo.ibi4`, generated
+   XML, and source receipts. No `Part_*.bi4` frame is an input. The original
+   run is bound to 1,015,809 initial / 657 excluded particles; the bridge to
+   357,192 / 382. The worker reports native PartOut causes and unique Idp
+   one-row-per-native-exclusion Idp coverage while preserving the raw source
+   hash. The actual runs expose all 657/382 exclusions in the `Run.out`
+   terminal ledger after the final saved `RunPARTs` row; the worker records
+   that tail rather than pretending the saved-row counters are a per-frame
+   identity axis. Each request reserves 64 MiB and has a 16 MiB estimated
+   temporary peak.
+
+   Once that evidence is available,
+   [`native_sidecar_from_audit.py`](native_sidecar_from_audit.py) projects it
+   without opening any payload. The sidecar follows
    [`native-lifecycle-records.schema.json`](native-lifecycle-records.schema.json)
    and carries the native `reason`/`motive` for each `(Zone,Idp,time)` record.
    The route keeps those reasons as numerical-node censoring evidence. It never
@@ -97,7 +114,8 @@ complete-validity M2 artifact.
 The direct converter has no PartOut/RunPARTs argument. The native sidecar is
 therefore a deliberate post-conversion binding point for the existing official
 producer record path. The projection request is
-`requests/f1-mdbc-native-sidecar-001.template.json`. Until it is present, the report audit status is
+`requests/f1-mdbc-native-sidecar-001.template.json`. Until the full-window
+native evidence is present, the report audit status is
 `blocked_missing_native_partout_binding`; no scientific or portable-package
 claim is granted.
 

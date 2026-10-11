@@ -2,11 +2,13 @@
 """Project an existing official native-motive audit into the M4 sidecar.
 
 The source audit is expected to have been produced by the already checked-in
-official PartVTKOut/RunPARTs audit utility.  This adapter reads only its small
-JSON result; it does not open PartOut, BI4, HDF5, or CSV payloads and does not
-decode a native format.  The explicit zone argument binds the audit's Idp-only
-rows to the direct converter's ``(Zone,Idp)`` key (the official single-piece
-route uses zone 0).
+official PartVTKOut/RunPARTs audit utility.  It accepts both the historical
+DP0025 audit schema and the generalized M4
+``ds-data-02.upstream-first.f1-native-integrity.v1`` evidence.  This adapter
+reads only the small JSON result; it does not open PartOut, BI4, HDF5, or CSV
+payloads and does not decode a native format.  The explicit zone argument
+binds the audit's Idp-only rows to the direct converter's ``(Zone,Idp)`` key
+(the official single-piece route uses zone 0).
 """
 
 from __future__ import annotations
@@ -20,6 +22,7 @@ from typing import Any, Mapping
 
 
 SCHEMA = "ds-data-02.native-lifecycle-records.v1"
+NATIVE_INTEGRITY_SCHEMA = "ds-data-02.upstream-first.f1-native-integrity.v1"
 
 
 class NativeSidecarError(ValueError):
@@ -63,10 +66,15 @@ def project(
         raise NativeSidecarError(f"native motive audit is not valid JSON: {audit_path}") from exc
     if not isinstance(audit, Mapping):
         raise NativeSidecarError("native motive audit must be an object")
-    if str(audit.get("status", "")).upper() not in {
+    status = str(audit.get("status", "")).upper()
+    completed_legacy = status in {
         "COMPLETED_NATIVE_MOTIVE_AUDIT",
         "COMPLETED_NATIVE_MOTIVE_AUDIT_V2",
-    }:
+    }
+    completed_general = (
+        audit.get("schema") == NATIVE_INTEGRITY_SCHEMA and status == "VERIFIED"
+    )
+    if not (completed_legacy or completed_general):
         raise NativeSidecarError("native motive audit is not a completed source-closed result")
     rows = audit.get("native_rows")
     brackets = audit.get("saved_record_time_brackets_s")
