@@ -19,3 +19,7 @@ Both native-integrity-001 attempts completed: original 657 and dp015 382 unique 
 Actual portable-tamper-validation-001 failed because valid venv interpreter symlink was rejected, before negative tests. Preserve worker and failed receipt. data_product prepares v2 to validate resolved executable but invoke original venv path.
 
 M3 full-event fine alternative assessment estimates H050/H060 at dp=.01, TimeMax6, TimeOut.025 total14.61GiB raw, within remaining22.5GiB. Not yet authorized for launch: establish corresponding declared-use mother acceptance first; failed coarse bridge gate remains unchanged.
+
+## M2 actual completion
+
+portable-tamper-validation-002 passed both rehashed semantic negatives using real bundle and bundled validator; source hashes unchanged. Together with external-readback-001 and isolated portable-validate-001, M2 diagnostic product is delivered. See M2_PORTABLE_DATA_CARD.json and M2_EXTERNAL_PACK.json. Failed001 retained. M3/M4 remain outstanding.
