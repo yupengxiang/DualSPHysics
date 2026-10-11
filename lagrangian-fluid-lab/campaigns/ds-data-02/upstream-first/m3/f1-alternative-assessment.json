@@ -1,0 +1,149 @@
+{
+  "schema": "ds-data-02.upstream-first.m3.f1-alternative-assessment.v1",
+  "status": "planning_only_no_launch_no_gate_change",
+  "purpose": "Assess a storage-bounded full-event F1 physical-derivative recipe after the failed dp015 numerical bridge.",
+  "scope": {
+    "launches": 0,
+    "solver_or_native_payload_reads": 0,
+    "bounded_proxy_reads": {
+      "csv_bytes": 71190,
+      "reference_workbook_bytes": 5046272,
+      "note": "Only the existing F1 MeasureTool elevation/pressure CSVs and the mapped SPHERIC workbook were read for the sampling proxy; no native solver frame or full particle array was read."
+    },
+    "event_window_s": [
+      0.0,
+      6.0
+    ]
+  },
+  "frozen_gate_results": {
+    "bridge": {
+      "case_id": "UF_F1_MDBC_DP015_BASE",
+      "comparison_source": "/tmp/f1-bridge-v2-check/bridge-h1-h4-summary.csv",
+      "comparison_source_sha256": "4805901f03dfe6d0e26c63220c651d632bbdf3cb7cb8d4481996894f01d7f5cf",
+      "contract": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m3/numerical-bridge-acceptance.json",
+      "contract_sha256": "f47b549e6cd09a6e27787a029b77790bdef1d5bc7a909ea591365b47f31274a4",
+      "height_rmse_limit_m": 0.0275,
+      "height_bias_limit_m": 0.0275,
+      "h1_rmse_m": 0.08361210724473288,
+      "h1_signed_mean_bias_m": 0.015303595360249372,
+      "other_height_probes": "H2-H4 pass the numerical metrics, but native-integrity/lifecycle evidence remains pending.",
+      "decision": "failed_do_not_promote_or_launch_dp015_children"
+    },
+    "fine_mother": {
+      "case_id": "UF_F1_MDBC_DAMBREAK3D",
+      "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-002/comparison/spheric-comparison-report.json",
+      "report_sha256": "68c108ab7bacaaa1bcb90e81112aa002308ef3898eb4a1ede4902859872a64a8",
+      "acceptance_status": "diagnostic_only_no_source_derived_tolerance",
+      "height_rmse_m": {
+        "H1": 0.1533224705429089,
+        "H2": 0.03672719822789788,
+        "H3": 0.09313002023602543,
+        "H4": 0.046728208953413626
+      },
+      "decision": "not_an_accepted_mother_for_m3_derivative_credit"
+    }
+  },
+  "budget": {
+    "first_tranche_cap_bytes": 53687091200,
+    "completed_usage_bytes": 29500166968,
+    "completed_usage_gib": 27.474171452224255,
+    "remaining_bytes": 24186924232,
+    "remaining_gib": 22.525828547775745,
+    "basis": "STATUS.new_usage_completed_only.bytes and parent terminal NAS accounting; active external reservation was released after the small actual extraction.",
+    "reservation_policy": "Forecast only. A future request must use measured runtime estimates and the terminal guard; these figures are not a reservation."
+  },
+  "sampling_proxy": {
+    "method": "Select nearest existing fine-run samples at the target interval, retain the final 6 s sample, and rerun the frozen comparison script. This is an observation-sampling proxy, not a solver run at the new TimeOut.",
+    "source_files": {
+      "elevation_csv": {
+        "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/postprocess-001/observations/measuretool/_elevation_Elevation.csv",
+        "bytes": 27768,
+        "data_rows": 601,
+        "sha256": "2a06978432a1adee57d87cb8dd80f480be53258621a29cb8d0d19d832228a784"
+      },
+      "pressure_csv": {
+        "path": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/postprocess-001/observations/measuretool/_pressure_Press.csv",
+        "bytes": 43422,
+        "data_rows": 601,
+        "sha256": "5c2ef87eb828258e17ba9cf4812396eac8d6d64e09416e7a51333d3b3b3f1440"
+      },
+      "reference_workbook": {
+        "path": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m1/f1/reference/source/test_case_2_exp_data.xls",
+        "bytes": 5046272,
+        "sha256": "8126f8c8f6effb9e8bfb245a2d098186e9ebee2ef6e75fcb1b3166af17883d8c"
+      }
+    },
+    "reference_fine_metrics": {
+      "H1": {"rmse_m": 0.1533224705429089, "mae_m": 0.0976684125165692, "signed_mean_bias_m": 0.05052961630149912},
+      "H2": {"rmse_m": 0.03672719822789788, "mae_m": 0.024698156193283863, "signed_mean_bias_m": -0.00006692525902856814},
+      "H3": {"rmse_m": 0.09313002023602543, "mae_m": 0.06666190021403622, "signed_mean_bias_m": -0.003145799990169098},
+      "H4": {"rmse_m": 0.046728208953413626, "mae_m": 0.02655095756168464, "signed_mean_bias_m": -0.006502525003934299}
+    },
+    "target_intervals": {
+      "0.025": {
+        "rows_per_channel": 241,
+        "output_bytes": {"elevation": 11222, "pressure": 17580},
+        "time_first_s": 0.0,
+        "time_last_s": 6.00005,
+        "primary_metrics": {
+          "H1": {"rmse_m": 0.1559631321434287, "mae_m": 0.09875602758780296, "signed_mean_bias_m": 0.051667542091738815},
+          "H2": {"rmse_m": 0.036728365263303406, "mae_m": 0.0247279560363646, "signed_mean_bias_m": -0.00010515557448652718},
+          "H3": {"rmse_m": 0.09327280307033962, "mae_m": 0.06687305805464318, "signed_mean_bias_m": -0.002985128695236838},
+          "H4": {"rmse_m": 0.04680191415948418, "mae_m": 0.026587107204615355, "signed_mean_bias_m": -0.00657938774669562}
+        },
+        "max_abs_primary_delta": {"rmse_m": 0.002640661600519789, "mae_m": 0.0010876150712337551, "signed_mean_bias_m": 0.001137925790239698},
+        "max_abs_auxiliary_pressure_rmse_delta_pa": 132.59903490925467,
+        "comparison_status": "diagnostic_proxy_only"
+      },
+      "0.03": {
+        "rows_per_channel": 201,
+        "output_bytes": {"elevation": 9389, "pressure": 14710},
+        "time_first_s": 0.0,
+        "time_last_s": 6.00005,
+        "primary_metrics": {
+          "H1": {"rmse_m": 0.15619606589074916, "mae_m": 0.09897151391064701, "signed_mean_bias_m": 0.05224949988235934},
+          "H2": {"rmse_m": 0.036733188724569744, "mae_m": 0.024683867102170156, "signed_mean_bias_m": -0.00007401528083159295},
+          "H3": {"rmse_m": 0.09323371044432907, "mae_m": 0.06665860326222646, "signed_mean_bias_m": -0.003409228742108199},
+          "H4": {"rmse_m": 0.04673866143362886, "mae_m": 0.026492190190883835, "signed_mean_bias_m": -0.006558728159568736}
+        },
+        "max_abs_primary_delta": {"rmse_m": 0.002873595347840263, "mae_m": 0.001303101394077813, "signed_mean_bias_m": 0.0017198835808602264},
+        "max_abs_auxiliary_pressure_rmse_delta_pa": 108.76415865725903,
+        "comparison_status": "diagnostic_proxy_only"
+      }
+    },
+    "coverage": "Both proxies retained all H1-H4/P1-P8 labels, finite values, and the 0..6.00005 s simulation bracket; each label had one sample outside the SPHERIC reference bracket, matching the existing comparison behavior."
+  },
+  "storage_forecast": {
+    "basis": {
+      "fine_solver_bytes_601_frames": 19560649964,
+      "fine_total_particles": 1015809,
+      "fine_fluid_particles": 652212,
+      "fixed_particles": 363597,
+      "model": "Scale the measured fine solver bytes by the estimated child particle count (fixed boundary plus fill-height-scaled fluid count) and by saved-frame count. This is a planning estimate, not an exact charge."
+    },
+    "recipes": {
+      "H050_TimeOut025": {"fill_height_m": 0.5, "dp_m": 0.01, "time_max_s": 6.0, "time_out_s": 0.025, "estimated_saved_frames": 241, "estimated_solver_bytes": 7385952133, "estimated_solver_gib": 6.878703957402483},
+      "H060_TimeOut025": {"fill_height_m": 0.6, "dp_m": 0.01, "time_max_s": 6.0, "time_out_s": 0.025, "estimated_saved_frames": 241, "estimated_solver_bytes": 8301624043, "estimated_solver_gib": 7.73148987765755},
+      "H050_TimeOut030": {"fill_height_m": 0.5, "dp_m": 0.01, "time_max_s": 6.0, "time_out_s": 0.03, "estimated_saved_frames": 201, "estimated_solver_bytes": 6160067962, "estimated_solver_gib": 5.737010354514104},
+      "H060_TimeOut030": {"fill_height_m": 0.6, "dp_m": 0.01, "time_max_s": 6.0, "time_out_s": 0.03, "estimated_saved_frames": 201, "estimated_solver_bytes": 6923761131, "estimated_solver_gib": 6.448255043191567}
+    },
+    "pair_totals_before_overhead": {
+      "TimeOut025": {"estimated_solver_bytes": 15687576176, "estimated_solver_gib": 14.610193833708763, "projected_completed_gib": 42.08436528593302, "nominal_headroom_gib": 7.915634714066982},
+      "TimeOut030": {"estimated_solver_bytes": 13083829093, "estimated_solver_gib": 12.185265396721661, "projected_completed_gib": 39.659436848945916, "nominal_headroom_gib": 10.340563151054084}
+    },
+    "interpretation": "Both full-event fine pairs are storage-feasible in this rough model after reducing only saved-frame density, subject to measured GenCase/postprocess/receipt overhead and the runtime terminal guard. The original .01 pair forecast is about 36.43 GiB of solver output alone and cannot fit the 22.53 GiB remaining headroom."
+  },
+  "recommendation": {
+    "preferred_conditional_recipe": "If and only if an accepted 3D mother gate is established without changing the frozen bridge threshold, use dp=0.01, full TimeMax=6 s, and TimeOut=0.025 s for H050/H060. Record TimeOut as a separate numerical/output-sampling recipe and retain all native spatial particles at every saved frame.",
+    "contingency_recipe": "TimeOut=0.03 s leaves more budget margin but has a slightly larger primary proxy delta; use it only if the measured request estimate requires the margin.",
+    "current_decision": "Do not launch DP015 H050/H060. Do not claim the fine mother is accepted from this proxy or from the diagnostic comparison. Without a valid mother acceptance path, retain the existing fine/bridge diagnostic products and report the M3 physical branch blocked.",
+    "full_event_justification": "The frozen F1 contract binds 0..6 s, all H1-H4 surface histories, and all P1-P8 pressure histories. H4 is the reservoir history and the pressure contract defines the impact window as the full official 0..6 s run; no narrower event interval is declared. Saved-frame reduction preserves the full event span, while truncation would remove required evidence.",
+    "required_before_any_launch": [
+      "Freeze the chosen TimeOut in the request and definition receipt as a numerical/output-schedule difference.",
+      "Establish the applicable 3D mother acceptance evidence; M1 qualification does not transfer automatically to children.",
+      "Bind official fine dp=0.01 definitions with only fillbox z changed for H050/H060 and retain all fixed controls.",
+      "Use a measured storage estimate including GenCase, native solver output, postprocess, receipts, and any temporary peak; do not treat this forecast as a reservation.",
+      "Run the full 0..6 s event and recheck H/P coverage and native identity before any product credit."
+    ]
+  }
+}
