@@ -4,8 +4,11 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
+import sys
 import tempfile
+import types
 import unittest
+from unittest import mock
 
 
 HERE = Path(__file__).resolve().parent
@@ -116,6 +119,44 @@ class ConditionProductQueueV2Tests(unittest.TestCase):
             self.assertIsNotNone(second)
             assert second is not None
             self.assertFalse(second["created"])
+
+    def test_first_promotion_binds_candidate_path_and_reuses(self) -> None:
+        case, paths, _, _, _ = self._h060_context()
+        candidate = QUEUE._load(paths["candidate"], "H060 direct candidate")
+        with tempfile.TemporaryDirectory(prefix="m4-v2-promotion-") as temporary:
+            root = Path(temporary)
+            promotion_paths = dict(paths)
+            promotion_paths["candidate"] = root / "direct.candidate.json"
+            promotion_paths["root_direct_request"] = root / "root-request.json"
+            promotion_paths["root_direct_grant"] = root / "root-grant.json"
+            promotion_paths["candidate"].write_text(json.dumps(candidate), encoding="utf-8")
+
+            grant_module = types.ModuleType("grant_request")
+
+            def fake_grant(request_path: Path) -> str:
+                grant = {
+                    "schema": "ds02.upstream-first.batch-request-grant.v1",
+                    "status": "granted",
+                    "immutable": True,
+                    "request_path": str(request_path),
+                    "request_sha256": QUEUE._request_hash(request_path),
+                }
+                promotion_paths["root_direct_grant"].write_text(json.dumps(grant), encoding="utf-8")
+                return str(promotion_paths["root_direct_grant"])
+
+            grant_module.grant = fake_grant
+            with mock.patch.dict(sys.modules, {"grant_request": grant_module}):
+                first_request, first_grant = QUEUE._promote_candidate(case, promotion_paths, candidate)
+                promoted = QUEUE._load(first_request, "promoted root request")
+                candidate_path = str(promotion_paths["candidate"])
+                self.assertIn(candidate_path, promoted["input_files"])
+                self.assertNotIn(candidate_path, promoted["input_file_bindings"])
+                validated_request, validated_grant = QUEUE._validate_root_direct(case, promotion_paths, candidate)
+                self.assertEqual(validated_request, promoted)
+                self.assertEqual(validated_grant, QUEUE._load(first_grant, "promoted root grant"))
+                second_request, second_grant = QUEUE._promote_candidate(case, promotion_paths, candidate)
+                self.assertEqual(second_request, first_request)
+                self.assertEqual(second_grant, first_grant)
 
     def test_old_timeout_in_owner_recipe_is_rejected(self) -> None:
         case, paths, owner_info, manifest, _ = self._h060_context()

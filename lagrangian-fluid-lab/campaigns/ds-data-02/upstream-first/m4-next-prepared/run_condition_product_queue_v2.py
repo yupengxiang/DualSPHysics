@@ -652,6 +652,20 @@ def _assert_native_report_source_bindings(
     elif report_hashes is not None and not isinstance(report_hashes, Mapping):
         raise QueueError(f"{case} native-frame source_hashes are malformed")
 
+    # Reuse the preflight's existing hashes for small JSON/XML/ledger sources.
+    # PartInfo.ibi4 and PartOut_000.obi4 deliberately remain stat-only; their
+    # authoritative hashes stay with the charged native auditor and receipt.
+    small = _small_source_bindings(paths)
+    small_key_by_report_key = {
+        "generated_xml": "generated_xml",
+        "gencase_receipt": "gencase_receipt",
+        "solver_receipt": "solver_receipt",
+        "run_out": "run_out",
+        "runparts": "run_parts_csv",
+    }
+    if mode == "frames":
+        small_key_by_report_key["native_integrity"] = "native_integrity_report"
+
     for key, expected_path in expected.items():
         source = _regular(expected_path, f"expected native {mode} source {key}")
         assert source is not None
@@ -669,6 +683,11 @@ def _assert_native_report_source_bindings(
             raise QueueError(f"{case} native-{mode} source execution hash is stale: {key}")
         if isinstance(report_hashes, Mapping) and mode == "integrity" and report_hashes.get(f"{key}_sha256") != digest:
             raise QueueError(f"{case} native-integrity source_hashes binding is stale: {key}")
+        small_key = small_key_by_report_key.get(key)
+        if small_key is not None:
+            actual_small = small.get(small_key)
+            if not isinstance(actual_small, Mapping) or actual_small.get("status") == "missing" or actual_small.get("sha256") != digest:
+                raise QueueError(f"{case} native-{mode} actual small source hash is stale: {key}")
 
 
 def _strict_source_gates(
@@ -1308,6 +1327,14 @@ def _promote_candidate(case: str, paths: Mapping[str, Path], candidate: Mapping[
         _validate_root_direct(case, paths, candidate)
         return paths["root_direct_request"], paths["root_direct_grant"]
     request = copy.deepcopy(dict(candidate))
+    input_files = request.get("input_files")
+    if not isinstance(input_files, list) or any(not isinstance(item, str) for item in input_files):
+        raise QueueError(f"direct candidate input_files are malformed for {case}")
+    # The promoted root request must charge/read the immutable candidate file.
+    # Keep it out of input_file_bindings so the candidate does not recursively
+    # hash itself.
+    candidate_path = str(paths["candidate"])
+    request["input_files"] = list(dict.fromkeys([*input_files, candidate_path]))
     request.update({"status": "root_authorized_actual_completed_source", "candidate_only": False, "submission_forbidden": False, "root_review_required": False, "no_launch_performed": True, "launch_authorization": "root explicit --launch; shared batch-2 runner only"})
     _write_immutable(paths["root_direct_request"], request)
     sys.path.insert(0, str(BASE / "batch2-runtime"))
