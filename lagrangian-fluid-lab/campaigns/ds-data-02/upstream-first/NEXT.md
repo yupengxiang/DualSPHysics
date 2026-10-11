@@ -4,8 +4,8 @@ Deadline2026-10-25T03:11:02Z; goalactive M1diagnostic and M2delivered, M3/M4outs
 
 ## Live work
 
-- H050solver session90108, request requests/UF_F1_MDBC_DP010_H050-solver-001.json. ActualGenCase955419total (363597boundary), 3D. Poll existing process, neverduplicate.
-- H060GenCasecompleted; session44780 bounded dependency process waits for completed H050receipt then runs exactreceiptbound requests/UF_F1_MDBC_DP010_H060-solver-001.json through sharedrunner. DO NOT separately launch H060 while this process exists. It stops on failed/orphanedH050 or1900s timeout.
+- H050solver completed normally. GPU522.838s CPU578.971s bytes7395847194. Nativeexclusion audit request prepared in m3/f1-fine-dp010-t025/audits; wait for heavyqueue.
+- H060solver actually running PID3691064 session44780 through sharedrunner since04:45:42UTC. DO NOT separately launch H060.
 - Bothphysicaldepthconditions retain dp.01, full6s, save.025s (separate numericaloutputchange). Pair admitted withinfirst50GiB; no tranche reset.
 
 ## Verified mother decision
