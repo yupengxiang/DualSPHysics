@@ -238,7 +238,15 @@ def validate_request(request, *, approval_context=None):
         fluid_count = preflight.get('fluid_particles')
         if not isinstance(fluid_count, int) or fluid_count <= 0 or fluid_count > count:
             raise ValueError('GenCase must contain a positive actual fluid particle count')
-        if preflight.get('solver_dimension_from_gencase') != 3:
+        calibration_2d = (
+            preflight.get('solver_dimension_from_gencase') == 2
+            and request['kind'] == 'qualification'
+            and request['family_id'] == 'F5'
+            and request['case_id'] == 'UF_F5_PISTON_REG'
+            and request.get('reference_role') == 'calibration_2d'
+            and request.get('upstream_case_id') == 'CasePistonBeach_REG'
+        )
+        if preflight.get('solver_dimension_from_gencase') != 3 and not calibration_2d:
             raise ValueError('DS-DATA-02 core requires actual 3D GenCase evidence')
         expected_hash = request.get('gencase_receipt_sha256')
         if expected_hash and sha256(request['gencase_receipt']) != expected_hash:

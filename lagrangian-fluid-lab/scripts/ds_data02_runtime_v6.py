@@ -36,6 +36,58 @@ _base_validate = base.validate_request
 _base_check_reservation = base.check_reservation
 _base_atomic_json = base.atomic_json
 
+UPSTREAM_NAS = Path('/data/nas/jade/Simulation/DualSPHysics/upstream-first')
+
+
+def _upstream_id(value):
+    parts = str(value).split('/')
+    return len(parts) == 3 and parts[1].startswith('UF_')
+
+
+def _nas_available():
+    if not Path('/data/nas').is_mount():
+        raise RuntimeError('upstream NAS mount is absent; no local fallback')
+    if UPSTREAM_NAS.stat().st_dev == Path('/home/jade').stat().st_dev:
+        raise RuntimeError('upstream NAS must be a separate filesystem')
+    stat = os.statvfs(UPSTREAM_NAS)
+    return stat.f_bavail * stat.f_frsize
+
+
+def _output_path(request, data_root):
+    attempt = f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
+    storage = request.get('output_storage', 'home')
+    if storage == 'home':
+        return data_root / 'families' / attempt
+    if storage != 'upstream_nas' or not _upstream_id(attempt):
+        raise ValueError('unapproved output storage or upstream namespace')
+    _nas_available()
+    output = UPSTREAM_NAS / 'runs' / attempt
+    if not output.resolve().is_relative_to(UPSTREAM_NAS.resolve()):
+        raise ValueError('upstream output escapes NAS root')
+    return output
+
+
+def _check_upstream_batch(ledger, reservation, request):
+    if not _upstream_id(reservation['id']):
+        return
+    rows = [row for row in ledger['charges'] + ledger['reservations']
+            if _upstream_id(row.get('id'))]
+    for key, cap in [('gpu_seconds', 24 * 3600),
+                     ('cpu_core_seconds', 96 * 3600),
+                     ('new_storage_bytes', 50 * 1024 ** 3)]:
+        if sum(row.get(key, 0) for row in rows) + reservation[key] > cap:
+            raise RuntimeError('upstream first-batch allocation exhausted: ' + key)
+    solvers = [row for row in ledger['attempts'] if _upstream_id(row.get('id'))
+               and row.get('kind') in {'qualification', 'production'}]
+    if reservation['kind'] in {'qualification', 'production'} and len(solvers) >= 24:
+        raise RuntimeError('upstream first-batch solver attempt cap reached')
+    heavy = lambda row: row.get('kind') in {'qualification', 'production'} or row.get('cpu_task_kind') == 'conversion'
+    if heavy(reservation) and any(heavy(row) for row in ledger['reservations']):
+        raise RuntimeError('upstream single heavy-task queue is occupied')
+    if request.get('output_storage') == 'upstream_nas':
+        if _nas_available() < reservation['new_storage_bytes'] + 2 * 1024 ** 3:
+            raise RuntimeError('insufficient upstream NAS headroom')
+
 
 def _finite_number(value, name, *, minimum=0, integer=False):
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
@@ -214,7 +266,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
     approval_context = {}
     hashes = validate_request(request, approval_context=approval_context)
     attempt = f"{request['family_id']}/{request['case_id']}/{request['attempt_id']}"
-    output = data_root / 'families' / attempt
+    output = _output_path(request, data_root)
     if output.exists():
         raise FileExistsError(f'attempt output already exists: {output}')
     reservation = dict(id=attempt, kind=request['kind'], cpu_task_kind=request.get('cpu_task_kind'),
@@ -251,6 +303,7 @@ def run_request(request_path, *, data_root=DATA_ROOT):
             stat = os.statvfs(data_root)
             free_disk = stat.f_bavail * stat.f_frsize
             check_reservation(ledger, reservation, tree_bytes(data_root), available_bytes=free_disk)
+            _check_upstream_batch(ledger, reservation, request)
             if free_disk < request['estimated_storage_bytes'] + 2 * 1024 ** 3:
                 raise RuntimeError('insufficient filesystem headroom')
             if request['kind'] in {'qualification', 'production'}:
@@ -301,6 +354,8 @@ def run_request(request_path, *, data_root=DATA_ROOT):
                     reason = 'campaign_deadline_reached'
                 if elapsed - last_check >= 5:
                     last_check = elapsed
+                    if request.get('output_storage') == 'upstream_nas' and _nas_available() < 2 * 1024 ** 3:
+                        reason = 'upstream_nas_headroom_reached'
                     live_limits = json.loads((data_root / 'runtime/resource-ledger.json').read_text())['limits']
                     if live_limits.get('storage_policy') == 'home_free_floor':
                         live_free = os.statvfs(data_root).f_bavail * os.statvfs(data_root).f_frsize
