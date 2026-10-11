@@ -43,10 +43,15 @@ root-reviewed card should be written with `--require-complete`, which returns
 nonzero unless every row has a completed direct conversion, enrichment,
 portable build, positive isolated relocation replay, and both actual
 rehashed semantic negatives. If a row supplies `cost_reconciliation`, that
-JSON receipt must also report `completed`, `reconciled`, or `passed`; the
-receipt hash is retained in the row's lineage. The relocation destination is
-always taken from the completed actual-validation receipt, so an independent
-NAS attempt root can be bound even when the runner's preparation path differs.
+receipt must use schema
+`ds02.upstream-first.external-storage-reconciliation.v1`, identify the same
+case, use the deterministic first-copy charge ID
+`F1/<CASE>/m4-actual-validation-001::external-nas-copy-delta`, bind the actual
+validation receipt by path/bytes/hash, and reconcile a positive byte delta to
+`relocation.bytes`. The receipt hash is retained in the row's lineage. The
+relocation destination is always taken from the completed actual-validation
+receipt, so an independent NAS attempt root can be bound even when the
+runner's preparation path differs.
 
 Example command:
 

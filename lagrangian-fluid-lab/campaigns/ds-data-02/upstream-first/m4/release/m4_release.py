@@ -37,6 +37,7 @@ INTERFACE_SCHEMA = "ds-data-02.m4.native-conversion-interface.v1"
 BUNDLE_SCHEMA = "ds-data-02.m4.portable-bundle.v1"
 ACTUAL_VALIDATION_SCHEMA = "ds-data-02.m4.actual-validation.v1"
 ACTUAL_NEGATIVE_SCHEMA = "ds-data-02.m4.actual-semantic-negative.v1"
+EXTERNAL_RECONCILIATION_SCHEMA = "ds02.upstream-first.external-storage-reconciliation.v1"
 EVALUATOR_SCHEMA = "ds-data-02.m4.no-model-evaluator.v1"
 READER_SCHEMA = "l2.f3.canonical_manifest.v1"
 ENDPOINT_SCHEMA = "ds-data-02.m4.endpoint-transport.v1"
@@ -105,6 +106,7 @@ REQUIRED_ENDPOINT_FIELDS: tuple[str, ...] = (
 REQUIRED_ACTUAL_NEGATIVES = frozenset(("typed_identity_endpoint_label", "destination_position"))
 REQUIRED_REHASHED_BINDINGS = frozenset(("normalized_hdf5", "interface", "reader_manifest", "manifest_sha256"))
 EXPECTED_SAVED_FRAME_COUNT = 241
+EXTERNAL_COPY_CHARGE_SUFFIX = "m4-actual-validation-001::external-nas-copy-delta"
 REQUIRED_EVALUATOR_CHECKS = frozenset(
     (
         "validity_aware_nonfinite_policy",
@@ -277,13 +279,54 @@ def _cost_reconciliation_path(row: Mapping[str, Any]) -> Path | None:
     return _path_from(validation, "cost_reconciliation", "cost_receipt", "cost_receipt_path")
 
 
-def _cost_reconciliation(row: Mapping[str, Any]) -> dict[str, Any] | None:
+def _cost_reconciliation(
+    row: Mapping[str, Any],
+    case_id: str,
+    actual_validation: Mapping[str, Any],
+) -> dict[str, Any] | None:
     path = _cost_reconciliation_path(row)
     if path is None:
         return None
     payload, binding = _json_binding(path, "cost reconciliation")
+    if payload.get("schema") != EXTERNAL_RECONCILIATION_SCHEMA:
+        raise ReleaseError("provided cost reconciliation has an unsupported schema")
     if payload.get("status") not in ("completed", "reconciled", "passed"):
         raise ReleaseError("provided cost reconciliation is not completed")
+    if payload.get("case_id") != case_id:
+        raise ReleaseError("cost reconciliation case_id disagrees")
+    expected_charge_id = f"F1/{case_id}/{EXTERNAL_COPY_CHARGE_SUFFIX}"
+    if payload.get("charge_id") != expected_charge_id:
+        raise ReleaseError("cost reconciliation charge_id disagrees")
+
+    evidence = payload.get("actual_relocation_evidence")
+    expected_receipt = actual_validation.get("receipt")
+    if not isinstance(evidence, Mapping) or not isinstance(expected_receipt, Mapping):
+        raise ReleaseError("cost reconciliation lacks actual relocation evidence")
+    evidence_path_value = evidence.get("path")
+    if not isinstance(evidence_path_value, str) or not evidence_path_value:
+        raise ReleaseError("cost reconciliation actual relocation evidence path is missing")
+    evidence_path = _regular(Path(evidence_path_value), "cost reconciliation actual relocation evidence")
+    if str(evidence_path) != expected_receipt.get("path"):
+        raise ReleaseError("cost reconciliation actual relocation evidence path disagrees")
+    _compare_binding(evidence, expected_receipt, "cost reconciliation actual relocation evidence")
+
+    relocation = actual_validation.get("relocation")
+    if not isinstance(relocation, Mapping):
+        raise ReleaseError("cost reconciliation lacks actual relocation bytes")
+    relocation_bytes = relocation.get("bytes")
+    if type(relocation_bytes) is not int or relocation_bytes <= 0:
+        raise ReleaseError("actual relocation bytes must be positive")
+    delta = payload.get("additional_persistent_bytes")
+    if type(delta) is not int or delta <= 0:
+        raise ReleaseError("cost reconciliation additional bytes must be positive")
+    if delta != relocation_bytes:
+        raise ReleaseError("cost reconciliation additional bytes disagree with relocation.bytes")
+    original_bytes = payload.get("original_preparation_bytes")
+    observed_bytes = payload.get("observed_preparation_tree_bytes")
+    if type(original_bytes) is not int or original_bytes < 0 or type(observed_bytes) is not int or observed_bytes < 0:
+        raise ReleaseError("cost reconciliation preparation byte accounting is invalid")
+    if observed_bytes < original_bytes or observed_bytes - original_bytes != delta:
+        raise ReleaseError("cost reconciliation preparation byte delta disagrees with relocation.bytes")
     return {"binding": binding, "payload": payload}
 
 
@@ -606,10 +649,15 @@ def _actual_validation(paths: Mapping[str, Path | None], case_id: str, source_bu
         snapshot = receipt.get(snapshot_name)
         if not isinstance(snapshot, Mapping) or not snapshot:
             raise ReleaseError(f"actual validation lacks {snapshot_name}")
-        hdf5_path = Path(source_bundle["artifacts"]["normalized_hdf5"]["path"])
-        entry = _snapshot_entry(snapshot, hdf5_path)
-        if not isinstance(entry, Mapping) or entry.get("matches") is not True:
-            raise ReleaseError(f"actual validation {snapshot_name} does not bind unchanged normalized HDF5")
+        # The actual worker has already hashed these files.  Compare its
+        # metadata against the producer manifest without opening any HDF5.
+        snapshot_bindings = {"manifest": source_bundle["manifest"], **source_bundle["artifacts"]}
+        for name, expected in snapshot_bindings.items():
+            artifact_path = Path(expected["path"])
+            entry = _snapshot_entry(snapshot, artifact_path)
+            if not isinstance(entry, Mapping) or entry.get("matches") is not True:
+                raise ReleaseError(f"actual validation {snapshot_name} does not bind unchanged {name}")
+            _compare_binding(entry, expected, f"actual validation {snapshot_name} {name}")
     isolated = receipt.get("isolated_replay")
     if not isinstance(isolated, Mapping) or isolated.get("portable") is not True or isolated.get("source_paths_redacted") is not True or isolated.get("denied_probes_passed") is not True:
         raise ReleaseError("actual validation lacks positive isolated replay gates")
@@ -627,6 +675,8 @@ def _actual_validation(paths: Mapping[str, Path | None], case_id: str, source_bu
     if destination_root == Path(source_bundle["root"]).resolve():
         raise ReleaseError("relocated bundle is the source bundle")
     relocated = _bundle(destination_root, case_id, "relocated bundle")
+    if relocated["manifest"]["sha256"] != source_bundle["manifest"]["sha256"]:
+        raise ReleaseError("relocated bundle manifest hash disagrees with source bundle")
     negatives = receipt.get("semantic_negatives")
     if not isinstance(negatives, Mapping) or negatives.get("count") != 2 or negatives.get("passed") is not True or negatives.get("scratch_removed_after_each_case") is not True:
         raise ReleaseError("actual validation lacks both passed semantic negatives")
@@ -801,7 +851,7 @@ def _condition(row: Mapping[str, Any]) -> dict[str, Any]:
             raise ReleaseError("bundle physical depth disagrees with condition slot")
         owner_xml = _owner_and_xml(direct, enrichment, interface, source_bundle["geometry"], expected_depth, case_id)
         actual_validation = _actual_validation(paths, case_id, source_bundle, enrichment)
-        cost_reconciliation = _cost_reconciliation(row)
+        cost_reconciliation = _cost_reconciliation(row, case_id, actual_validation)
         base.update(
             {
                 "status": "eligible_development_condition",

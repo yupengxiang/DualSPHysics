@@ -291,8 +291,21 @@ def _make_case(root: Path, case_id: str, depth: float) -> dict[str, Any]:
         )
         negative_reports.append(str(negative_path))
     source_manifest = source / "manifest.json"
-    normalized = source / "normalized.h5"
-    normalized_entry = {"bytes": normalized.stat().st_size, "sha256": _sha(normalized), "matches": True}
+    snapshot_bindings = {
+        "manifest": _binding(source_manifest),
+        **{
+            name: _binding(source / str(declared["path"]))
+            for name, declared in json.loads(source_manifest.read_text(encoding="utf-8"))["artifacts"].items()
+        },
+    }
+    snapshot_entries = {
+        str(binding["path"]): {
+            "bytes": binding["bytes"],
+            "sha256": binding["sha256"],
+            "matches": True,
+        }
+        for binding in snapshot_bindings.values()
+    }
     completion = _binding(enrichment_receipt)
     validation_receipt = case_root / "actual-validation/actual-validation-receipt.json"
     _write(
@@ -303,8 +316,8 @@ def _make_case(root: Path, case_id: str, depth: float) -> dict[str, Any]:
             "case_id": case_id,
             "source_completion_receipt": completion,
             "source_bundle": {"path": str(source), "manifest_sha256": _sha(source_manifest), "file_count": 8, "bytes": 1, "production_validation": {"portable": True, "summary": {}}},
-            "source_snapshot": {str(normalized): normalized_entry},
-            "source_snapshot_after": {str(normalized): normalized_entry},
+            "source_snapshot": snapshot_entries,
+            "source_snapshot_after": snapshot_entries,
             "source_unchanged": True,
             "relocation": {"source_bundle": str(source), "destination_bundle": str(destination), "file_count": 8, "bytes": 1, "copy_mode": "full_regular_file_copy"},
             "isolated_replay": {"report": str(isolated_report), "portable": True, "source_paths_redacted": True, "denied_probes_passed": True},
@@ -322,6 +335,27 @@ def _make_case(root: Path, case_id: str, depth: float) -> dict[str, Any]:
     }
 
 
+def _write_valid_cost_reconciliation(row: dict[str, Any], path: Path, *, case_id: str | None = None) -> None:
+    actual_path = Path(row["actual_validation"]["receipt"])
+    actual = json.loads(actual_path.read_text(encoding="utf-8"))
+    case = case_id or row["case_id"]
+    relocation_bytes = actual["relocation"]["bytes"]
+    _write(
+        path,
+        {
+            "schema": m4.EXTERNAL_RECONCILIATION_SCHEMA,
+            "status": "completed",
+            "case_id": case,
+            "charge_id": f"F1/{case}/{m4.EXTERNAL_COPY_CHARGE_SUFFIX}",
+            "original_preparation_bytes": 0,
+            "observed_preparation_tree_bytes": relocation_bytes,
+            "additional_persistent_bytes": relocation_bytes,
+            "relocated_bundle": actual["relocation"]["destination_bundle"],
+            "actual_relocation_evidence": _binding(actual_path),
+        },
+    )
+
+
 def _input(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "schema": m4.INPUT_SCHEMA,
@@ -335,7 +369,7 @@ def _input(rows: list[dict[str, Any]]) -> dict[str, Any]:
 def test_pending_card_keeps_future_conditions_uncredited_and_validation_empty(tmp_path: Path) -> None:
     complete = _make_case(tmp_path, "UF_F1_MDBC_DP010_H050", 0.50)
     cost_path = tmp_path / "UF_F1_MDBC_DP010_H050" / "completed-cost-reconciliation.json"
-    _write(cost_path, {"schema": "ds02.cost-reconciliation.v1", "status": "completed", "bytes": 1})
+    _write_valid_cost_reconciliation(complete, cost_path)
     complete["cost_reconciliation"] = str(cost_path)
     rows = [complete]
     rows.extend({"case_id": case_id, "depth_m": depth} for case_id, depth in m4.CASES[1:])
@@ -355,6 +389,54 @@ def test_pending_card_keeps_future_conditions_uncredited_and_validation_empty(tm
     pending = {row["case_id"]: row for row in card["development_partition"]["conditions"]}["UF_F1_MDBC_DP010_H052"]
     assert pending["status"] == "pending_actual_receipts"
     assert pending["credit_status"] == "not_credited"
+
+
+def test_wrong_case_cost_reconciliation_cannot_promote_actual_row(tmp_path: Path) -> None:
+    complete = _make_case(tmp_path, "UF_F1_MDBC_DP010_H050", 0.50)
+    cost_path = tmp_path / "UF_F1_MDBC_DP010_H050" / "wrong-case-cost-reconciliation.json"
+    _write_valid_cost_reconciliation(complete, cost_path, case_id="UF_F1_MDBC_DP010_H052")
+    complete["cost_reconciliation"] = str(cost_path)
+    rows = [complete]
+    rows.extend({"case_id": case_id, "depth_m": depth} for case_id, depth in m4.CASES[1:])
+
+    card = m4.assemble(_input(rows))
+    rejected = card["development_partition"]["conditions"][0]
+    assert rejected["status"] == "rejected_actual_receipts"
+    assert rejected["eligible_for_development_partition"] is False
+    assert "case_id" in rejected["rejection_reasons"][0]
+
+
+def test_source_snapshot_binding_tamper_cannot_promote_actual_row(tmp_path: Path) -> None:
+    complete = _make_case(tmp_path, "UF_F1_MDBC_DP010_H050", 0.50)
+    validation_path = Path(complete["actual_validation"]["receipt"])
+    validation = json.loads(validation_path.read_text(encoding="utf-8"))
+    normalized_key = next(key for key in validation["source_snapshot"] if key.endswith("/normalized.h5"))
+    validation["source_snapshot"][normalized_key]["sha256"] = "0" * 64
+    validation_path.write_text(json.dumps(validation), encoding="utf-8")
+    rows = [complete]
+    rows.extend({"case_id": case_id, "depth_m": depth} for case_id, depth in m4.CASES[1:])
+
+    card = m4.assemble(_input(rows))
+    rejected = card["development_partition"]["conditions"][0]
+    assert rejected["status"] == "rejected_actual_receipts"
+    assert rejected["eligible_for_development_partition"] is False
+    assert "binding disagrees" in rejected["rejection_reasons"][0]
+
+
+def test_relocated_manifest_must_match_source_manifest(tmp_path: Path) -> None:
+    complete = _make_case(tmp_path, "UF_F1_MDBC_DP010_H050", 0.50)
+    destination_manifest = Path(complete["actual_validation"]["receipt"]).parents[1] / "nas-relocated/bundle/manifest.json"
+    manifest = json.loads(destination_manifest.read_text(encoding="utf-8"))
+    manifest["copy_marker"] = "tampered"
+    destination_manifest.write_text(json.dumps(manifest), encoding="utf-8")
+    rows = [complete]
+    rows.extend({"case_id": case_id, "depth_m": depth} for case_id, depth in m4.CASES[1:])
+
+    card = m4.assemble(_input(rows))
+    rejected = card["development_partition"]["conditions"][0]
+    assert rejected["status"] == "rejected_actual_receipts"
+    assert rejected["eligible_for_development_partition"] is False
+    assert "manifest hash disagrees" in rejected["rejection_reasons"][0]
 
 
 def test_four_actual_rows_bind_relocation_and_semantic_negatives_without_hdf5_read(tmp_path: Path) -> None:
