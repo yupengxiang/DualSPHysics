@@ -181,6 +181,8 @@ def zero_crossing_report(
         "simulation_upward_zero_crossings_s": simulation_crossings,
         "reference_upward_zero_crossings_s": reference_crossings,
         "paired_errors_s": errors,
+        "max_absolute_paired_error_s": max(map(abs, errors)) if errors else None,
+        "mean_absolute_paired_error_s": statistics.fmean(abs(error) for error in errors) if errors else None,
         "matched_count": matched,
         "unmatched_simulation_count": len(simulation_crossings) - matched,
         "unmatched_reference_count": len(reference_crossings) - matched,
@@ -243,6 +245,41 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         label: zero_crossing_report(simulation, reference, args.primary_start, args.simulation_end)
         for label, (simulation, reference) in comparisons.items()
     }
+    surface_limit = 0.015
+    timing_limit = 0.20
+    velocity_limit = max(
+        0.05,
+        0.10
+        * max(
+            max(abs(value) for time, value in wave["velx_o2"] if args.primary_start <= time <= args.simulation_end),
+            max(abs(value) for time, value in wave["velz_o2"] if args.primary_start <= time <= args.simulation_end),
+        ),
+    )
+    frozen_gate_projection = {
+        "surface_rmse_limit_m": surface_limit,
+        "velocity_rmse_limit_m_per_s": velocity_limit,
+        "peak_timing_limit_s": timing_limit,
+        "status": "diagnostic_projection_only",
+        "does_not_change_ods_result": True,
+        "primary": {
+            "eta_x6": {
+                "rmse": metric_report["eta_x6"]["primary_2_30s"].get("rmse"),
+                "rmse_within_limit": metric_report["eta_x6"]["primary_2_30s"].get("rmse", math.inf) <= surface_limit,
+                "global_peak_time_error_s": metric_report["eta_x6"]["primary_2_30s"].get("peak_time_error_s"),
+                "global_peak_timing_within_limit": abs(metric_report["eta_x6"]["primary_2_30s"].get("peak_time_error_s", math.inf)) <= timing_limit,
+            },
+            **{
+                label: {
+                    "rmse": metric_report[label]["primary_2_30s"].get("rmse"),
+                    "rmse_within_limit": metric_report[label]["primary_2_30s"].get("rmse", math.inf) <= velocity_limit,
+                    "global_peak_time_error_s": metric_report[label]["primary_2_30s"].get("peak_time_error_s"),
+                    "global_peak_timing_within_limit": abs(metric_report[label]["primary_2_30s"].get("peak_time_error_s", math.inf)) <= timing_limit,
+                }
+                for label in ("velx_x6_z0p4", "velz_x6_z0p4")
+            },
+        },
+        "timing_note": "Global peak timing is retained for the frozen metric; ordered upward-zero-crossing diagnostics are reported separately and no phase fit is applied.",
+    }
 
     ods_overlap = {
         "eta_o2_vs_ods_theory_eta": max_abs_difference(wave["eta_o2"], ods_series["theory_eta"]),
@@ -279,6 +316,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
         "comparisons": metric_report,
         "upward_zero_crossing_timing": zero_crossings,
+        "frozen_calibration_gate_projection": frozen_gate_projection,
         "comparison_reference_sources": {
             "eta_x6": "official WavePaddle_mkb0010.csv Elevation_o2 at x=6m,z=-0.26 control",
             "velx_x6_z0p4": "official WavePaddle_mkb0010.csv Velx_o2 at x=6m,z=-0.26 control",
