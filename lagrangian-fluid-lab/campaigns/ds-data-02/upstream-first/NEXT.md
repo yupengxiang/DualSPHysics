@@ -2,7 +2,7 @@
 
 Deadline remains 2026-10-25T03:11:02Z; goal active, M1–M4 not all delivered. Read ADOPTION.json, STATUS.json, real receipts, ledger and processes before launching. Preserve all historical charges and the first 50 GiB tranche.
 
-- External resume download session 70685 is live; verify completion, final MD5 and bytes before extraction request. Add actual download receipt bindings. Extraction uses the single heavy queue.
+- External download and extraction completed with pinned bytes/MD5. external-readback-001 passed 9 actual windows across 3 original splits and 3 invalid-access rejection tests. See M2_EXTERNAL_PACK.json. No duplicate download/extraction.
 - Real portable build and isolated relocation completed successfully (portable-build-001 and portable-validate-001). Original source paths were inaccessible. Actual copied-artifact tamper rejection audit remains to be run; data_product prepares bounded worker. Do not edit consumed package scripts.
 - Original F1 and dp015 bridge both completed 6 s/601 frames, CSV postprocessing completed. comparison-001 is vetoed due to column mapping; retain it. upstream_reference is authorized to prepare/run corrected comparison-002 and bridge comparison-001 as light audits.
 - Preliminary corrected bridge H1 RMSE .0836 m exceeds frozen .0275 m. No H050/H060 launches and no relaxed tolerance. Other three probe RMSEs approximately .0151/.0138/.0106 m. Formal audit pending. scope_catalog assesses alternatives within unchanged storage tranche.
