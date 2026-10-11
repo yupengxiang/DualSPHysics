@@ -1,0 +1,92 @@
+{
+  "schema": "ds-data-02.upstream-first.m4.additional-definition-verification.v1",
+  "status": "verified_static_definitions_only_no_receipts",
+  "verification_method": "Canonical XML element order, attributes, and normalized text were compared against the official mother definition.",
+  "mother": {
+    "path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "expected_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "role": "official_reference_only"
+  },
+  "grid_contract": {
+    "dp_m": 0.01,
+    "depths_m": [
+      0.52,
+      0.58
+    ],
+    "grid_indices": [
+      52,
+      58
+    ],
+    "all_depths_grid_aligned": true
+  },
+  "allowed_difference_roles": [
+    "physical_initial_fill_height",
+    "numerical_output_sampling_interval"
+  ],
+  "children": {
+    "H052": {
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/UF_F1_MDBC_DP010_H052_Def.xml",
+      "definition_sha256": "64beaa0020d4d4079a52e95260f374951065c5fceb9cde5ece2f4e0655b0c16b",
+      "depth_m": 0.52,
+      "grid_index_at_dp_0.01": 52,
+      "grid_aligned": true,
+      "only_mother_values": {
+        "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z": "0.55",
+        "/execution[1]/parameters[0]/parameter[24]/@value": "0.01"
+      },
+      "only_candidate_values": {
+        "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z": "0.52",
+        "/execution[1]/parameters[0]/parameter[24]/@value": "0.025"
+      },
+      "allowed_differences": [
+        {
+          "path": "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z",
+          "role": "physical_initial_fill_height",
+          "mother": "0.55",
+          "candidate": "0.52"
+        },
+        {
+          "path": "/execution[1]/parameters[0]/parameter[24]/@value",
+          "role": "numerical_output_sampling_interval",
+          "mother": "0.01",
+          "candidate": "0.025"
+        }
+      ]
+    },
+    "H058": {
+      "definition": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4-additional-definitions/UF_F1_MDBC_DP010_H058_Def.xml",
+      "definition_sha256": "09f3cbffc1336855d2515ec83a1d673e8e9cc21a08bb42d611fc2e6839382b7c",
+      "depth_m": 0.58,
+      "grid_index_at_dp_0.01": 58,
+      "grid_aligned": true,
+      "only_mother_values": {
+        "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z": "0.55",
+        "/execution[1]/parameters[0]/parameter[24]/@value": "0.01"
+      },
+      "only_candidate_values": {
+        "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z": "0.58",
+        "/execution[1]/parameters[0]/parameter[24]/@value": "0.025"
+      },
+      "allowed_differences": [
+        {
+          "path": "/casedef[0]/geometry[2]/commands[1]/mainlist[1]/fillbox[22]/size[2]/@z",
+          "role": "physical_initial_fill_height",
+          "mother": "0.55",
+          "candidate": "0.58"
+        },
+        {
+          "path": "/execution[1]/parameters[0]/parameter[24]/@value",
+          "role": "numerical_output_sampling_interval",
+          "mother": "0.01",
+          "candidate": "0.025"
+        }
+      ]
+    }
+  },
+  "negative_claims": [
+    "No GenCase execution is represented by this artifact.",
+    "No generated fluid-cohort hash is represented by this artifact.",
+    "No solver, postprocess, comparison, threshold, or physical-condition credit is represented by this artifact."
+  ]
+}
