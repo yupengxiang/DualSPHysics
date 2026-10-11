@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds-data-02.m4.bi4-frame-manifest.v1",
+  "title": "Parent-bound BI4 frame manifest",
+  "description": "Metadata-only input to bounded_conversion.py. The manifest is produced after the solver receipt is complete; the worker verifies each selected file before staging.",
+  "type": "object",
+  "required": ["schema", "source_root", "frames"],
+  "properties": {
+    "schema": {"const": "ds-data-02.m4.bi4-frame-manifest.v1"},
+    "source_root": {"type": "string"},
+    "source_root_sha256": {"type": ["string", "null"]},
+    "frames": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["relative_path", "frame_index", "time_s", "bytes", "sha256"],
+        "properties": {
+          "relative_path": {"type": "string"},
+          "frame_index": {"type": "integer", "minimum": 0},
+          "time_s": {"type": "number"},
+          "bytes": {"type": "integer", "minimum": 1},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

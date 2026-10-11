@@ -1,0 +1,64 @@
+{
+  "schema": "ds-data-02.runner.request.v1",
+  "status": "template_after_conversion",
+  "family_id": "F1",
+  "case_id": "UF_F1_MDBC_DAMBREAK3D",
+  "attempt_id": "m4-raw-normalized-audit-001",
+  "kind": "cpu",
+  "cpu_task_kind": "audit",
+  "command": [
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/validate_conversion_report.py",
+    "--report",
+    "{conversion_attempt_root}/direct-conversion-report.json",
+    "--owner-metadata",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/official-mdbc-owner-metadata.json",
+    "--generated-xml",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/gencase-001/CaseDamBreak3D.xml",
+    "--definition-xml",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "--native-lifecycle",
+    "{conversion_attempt_root}/native-lifecycle-records.json",
+    "--event-start-s",
+    "0.0",
+    "--event-end-s",
+    "1.6",
+    "--case-id",
+    "UF_F1_MDBC_DAMBREAK3D",
+    "--output",
+    "{attempt_root}/m4-compatibility.json"
+  ],
+  "cwd": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "worktree_root": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics",
+  "max_wall_seconds": 300,
+  "cpu_threads": 1,
+  "estimated_storage_bytes": 10485760,
+  "estimated_deferred_read_bytes": 0,
+  "output_storage": "upstream_nas",
+  "external_scratch": false,
+  "input_files": [
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/validate_conversion_report.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/native-lifecycle-records.schema.json",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m2/upstream_conversion/official-mdbc-owner-metadata.json",
+    "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/gencase-001/CaseDamBreak3D.xml",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/solver-001/RunPARTs.csv",
+    "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/solver-001/data/PartOut_000.obi4",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py",
+    "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py"
+  ],
+  "outputs": [
+    "{attempt_root}/m4-compatibility.json"
+  ],
+  "acceptance": {
+    "requires": [
+      "completed direct conversion report",
+      "generated XML and source-definition hashes",
+      "explicit initial/transient validity ledgers",
+      "producer-native PartOut/RunPARTs reason sidecar",
+      "physical fate remains UNKNOWN"
+    ],
+    "portable_builder": "do not call existing complete-validity M2 validator until a validity-aware mode is selected"
+  },
+  "request_note": "Report/XML/JSON-only audit. It does not open HDF5, BI4, PartOut, or RunPARTs payloads and returns blocked_missing_native_partout_binding if the producer-native sidecar is absent."
+}

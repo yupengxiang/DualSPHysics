@@ -1,0 +1,191 @@
+{
+  "schema": "ds-data-02.m4.official-mdbc-owner-metadata.v1",
+  "family_id": "F1",
+  "case_id": "UF_F1_MDBC_DAMBREAK3D",
+  "physical_case_id": "F1_MDBC_DAMBREAK3D",
+  "mechanism_id": "dam_break_over_central_obstacle",
+  "geometry_family_id": "F1_OFFICIAL_MDBC_DAMBREAK3D_GEOMETRY_V1",
+  "control_family_id": "F1_OFFICIAL_MDBC_DAMBREAK3D_CONTROLS_V1",
+  "lineage_group_id": "F1_official_v54_mdbc_dambreak3d_v1",
+  "recipe_id": "official_v54_mdbc_case",
+  "paired_background_id": null,
+  "view_id": "native_full_state",
+  "definition_path": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+  "definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+  "geometry": {
+    "tank": {
+      "low_m": [0.0, 0.0, 0.0],
+      "size_m": [3.22, 1.0, 1.0],
+      "label": "continuous official tank envelope"
+    },
+    "central_obstacle": {
+      "low_m": [0.66, 0.30, 0.0],
+      "size_m": [0.16, 0.40, 0.16],
+      "label": "continuous central obstacle envelope"
+    },
+    "initial_fluid_reservoir": {
+      "low_m": [2.10, 0.0, 0.0],
+      "size_m": [1.12, 1.0, 0.55],
+      "mkfluid": 0,
+      "label": "continuous initial water volume; native fillbox includes rounding margin"
+    }
+  },
+  "parameter_values": {
+    "tank_length_m": 3.22,
+    "tank_width_m": 1.0,
+    "tank_height_m": 1.0,
+    "separator_start_x_m": 1.25,
+    "separator_end_x_m": 2.05,
+    "separator_y_m": 0.30,
+    "separator_thickness_m": 0.16,
+    "separator_height_m": 0.16,
+    "reservoir_start_x_m": 2.10,
+    "reservoir_length_m": 1.12,
+    "initial_depth_m": 0.55,
+    "initial_fluid_volume_m3": 0.616,
+    "open_top": true,
+    "finite_wall_faces": ["bottom", "left", "right", "front", "back"]
+  },
+  "event_window": {
+    "time_start_s": 0.0,
+    "time_end_s": 6.0,
+    "sequence": [
+      "release",
+      "first_obstacle_interaction",
+      "downstream_remerge",
+      "return_flow_observable"
+    ],
+    "expected_first_contact_range_s": [0.0, 1.0],
+    "right_censor_policy": "native time-window censoring remains UNKNOWN; no physical-fate inference"
+  },
+  "solver_parameters": {
+    "Boundary": 2,
+    "CoefDtMin": 0.05,
+    "DensityDT": 3,
+    "DensityDTvalue": 0.1,
+    "DtAllParticles": 0,
+    "DtFixed": 0,
+    "DtIni": 0,
+    "DtMin": 0,
+    "FtPause": 0.0,
+    "Kernel": 2,
+    "MinFluidStop": 0,
+    "NoPenetration": 0,
+    "RhopOutMax": 1300,
+    "RhopOutMin": 700,
+    "RigidAlgorithm": 1,
+    "SavePosDouble": 0,
+    "Shifting": 0,
+    "SlipMode": 1,
+    "StepAlgorithm": 2,
+    "TimeMax": 6.0,
+    "TimeOut": 0.01,
+    "VerletSteps": 40,
+    "Visco": 0.01,
+    "ViscoBoundFactor": 1,
+    "ViscoTreatment": 1,
+    "WrnPartsOut": 1
+  },
+  "physical_binding": {
+    "schema": "ds-data-02.physical-binding.v1",
+    "family_id": "F1",
+    "physical_case_id": "F1_MDBC_DAMBREAK3D",
+    "mechanism_id": "dam_break_over_central_obstacle",
+    "geometry_family_id": "F1_OFFICIAL_MDBC_DAMBREAK3D_GEOMETRY_V1",
+    "control_family_id": "F1_OFFICIAL_MDBC_DAMBREAK3D_CONTROLS_V1",
+    "lineage_group_id": "F1_official_v54_mdbc_dambreak3d_v1",
+    "geometry": {
+      "tank": {
+        "low_m": [0.0, 0.0, 0.0],
+        "size_m": [3.22, 1.0, 1.0],
+        "label": "continuous official tank envelope"
+      },
+      "central_obstacle": {
+        "low_m": [0.66, 0.30, 0.0],
+        "size_m": [0.16, 0.40, 0.16],
+        "label": "continuous central obstacle envelope"
+      },
+      "initial_fluid_reservoir": {
+        "low_m": [2.10, 0.0, 0.0],
+        "size_m": [1.12, 1.0, 0.55],
+        "mkfluid": 0,
+        "label": "continuous initial water volume"
+      }
+    },
+    "initial_state": {
+      "source_regions": ["initial_fluid_reservoir"],
+      "velocities_m_per_s": [0.0, 0.0, 0.0],
+      "source_labels": ["fluid"],
+      "continuum_mass_by_source_kg": {"initial_fluid_reservoir": 616.0},
+      "initial_mass_total_kg": 616.0,
+      "mass_policy": "continuum value is a physical reference; native per-node mass remains authoritative"
+    },
+    "controls": {
+      "step_algorithm": "Symplectic",
+      "kernel": "Wendland",
+      "viscosity": 0.01,
+      "density_dt": 3,
+      "density_dt_value": 0.1,
+      "boundary": "mDBC"
+    },
+    "gravity_m_s2": [0.0, 0.0, -9.81],
+    "density_kg_m3": 1000.0,
+    "parameters": {
+      "tank_length_m": 3.22,
+      "tank_width_m": 1.0,
+      "tank_height_m": 1.0,
+      "separator_start_x_m": 1.25,
+      "separator_end_x_m": 2.05,
+      "separator_y_m": 0.30,
+      "separator_thickness_m": 0.16,
+      "separator_height_m": 0.16,
+      "reservoir_start_x_m": 2.10,
+      "reservoir_length_m": 1.12,
+      "initial_depth_m": 0.55,
+      "initial_fluid_volume_m3": 0.616,
+      "open_top": true,
+      "finite_wall_faces": ["bottom", "left", "right", "front", "back"]
+    },
+    "event_window": {
+      "time_start_s": 0.0,
+      "time_end_s": 6.0,
+      "sequence": [
+        "release",
+        "first_obstacle_interaction",
+        "downstream_remerge",
+        "return_flow_observable"
+      ],
+      "expected_first_contact_range_s": [0.0, 1.0],
+      "right_censor_policy": "native time-window censoring remains UNKNOWN; no physical-fate inference"
+    },
+    "mass_policy": "native per-node mass is never rescaled"
+  },
+  "source_mother": {
+    "source": "mdbc/04_Dambreak",
+    "source_case": "CaseDamBreak3D",
+    "source_definition": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/vendor/official/DualSPHysics_v5.4/examples/mdbc/04_Dambreak/CaseDamBreak3D_Def.xml",
+    "source_definition_sha256": "1f7cca807e16a3b1a1cc4da649a68db5166439d3f4b30fa4ea25635baf6045b7",
+    "boundary": "mDBC",
+    "solver_dimension": "3D",
+    "complete_event_window_role": "physical source upper bound; selected conversion window is recorded separately",
+    "claim_boundary": "official source metadata only; conversion and scientific qualification remain separate"
+  },
+  "observables": {
+    "native_labels": [
+      "source_identity",
+      "destination_time_series",
+      "first_observed_region",
+      "native_exclusion_reason",
+      "validity_mask",
+      "unknown_mass"
+    ],
+    "transport_identity": "numerical (Zone,Idp) node identity; no material trajectory claim"
+  },
+  "claim_boundary": {
+    "source": "official unchanged v5.4 mDBC CaseDamBreak3D definition",
+    "conversion": "streaming BI4 evidence only",
+    "scientific_transport_truth": "not established",
+    "physical_fate": "UNKNOWN",
+    "native_exclusion": "reason/motive must remain source-bound and explicit"
+  }
+}

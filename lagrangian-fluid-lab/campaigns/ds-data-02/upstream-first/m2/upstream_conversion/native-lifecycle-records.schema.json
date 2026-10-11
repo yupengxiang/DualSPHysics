@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ds-data-02.native-lifecycle-records.v1",
+  "title": "Producer-native numerical-node lifecycle records",
+  "description": "A small exchange contract for an existing official PartOut/RunPARTs extraction. It preserves native reasons without mapping them to physical fate.",
+  "type": "object",
+  "required": ["schema", "source", "identity_key", "records"],
+  "properties": {
+    "schema": {"const": "ds-data-02.native-lifecycle-records.v1"},
+    "source": {
+      "type": "object",
+      "required": ["partout", "runparts"],
+      "properties": {
+        "partout": {"type": "object"},
+        "runparts": {"type": "object"}
+      },
+      "additionalProperties": true
+    },
+    "identity_key": {"const": "(Zone,Idp)"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["time_s", "reason"],
+        "properties": {
+          "time_s": {"type": "number"},
+          "particle_id": {"type": "integer"},
+          "idp": {"type": "integer"},
+          "particle_zone": {"type": "integer"},
+          "zone": {"type": "integer"},
+          "piece": {"type": "integer"},
+          "reason": {"type": "string"},
+          "motive": {"type": "string"},
+          "valid_after": {"type": ["boolean", "null"]}
+        },
+        "anyOf": [
+          {"required": ["particle_id"]},
+          {"required": ["idp"]}
+        ],
+        "additionalProperties": true
+      }
+    },
+    "fate_inference": {"const": "forbidden"}
+  },
+  "additionalProperties": true
+}
