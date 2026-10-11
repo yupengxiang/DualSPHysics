@@ -12,10 +12,10 @@
   },
   "milestones": {
     "M0": "passed",
-    "M1": "two_actual_diagnostic_reference_packs_complete_no_calibration_or_convergence_credit",
+    "M1": "actual_reference_comparisons_delivered_corrected_postprocess_manifest_handoff_pending_finalaudit",
     "M2": "completed_diagnostic_external_reader_and_self_contained_3d_portable_package",
     "M3": "completed_two_actual_depth_derivatives_full241frame_audits_full_H1H4_P1P8_comparisons_catalog336",
-    "M4": "two_of_four_actual_verified_products_H052fullproduct_running_H058solver_completed"
+    "M4": "three_of_four_actual_verified_products_H058native_audit_running"
   },
   "agents": {
     "batch_runtime": "GPT5.6Luna Max",
@@ -23,9 +23,9 @@
     "m4_product": "GPT5.6Luna Max"
   },
   "running_attempts": [
-    "F1/UF_F1_MDBC_DP010_H052/m4-direct-conversion-001"
+    "F1/UF_F1_MDBC_DP010_H058/native-preparation-frames-001"
   ],
-  "next": "Poll H052productqueue99257/parentreservation; after actualterminal verify2negatives/sources/cost then checkpoint3of4, launch H058nativequeuev2 plan-v3 + fullproduct. Finalrelease/cost/certs all4 required.",
+  "next": "Poll H058nativequeue81234; createfresh H058productv2ready plan/launch. Complete M1correctedmanifests/pack revisions parallel; finalinputV3 rootmotherref latest, release --requirecomplete, all4cost/certificate/completion audit.",
   "nas_preflight_receipt": "/home/jade/Projects/DualSPHysics-data/ds-data-02/families/infra/UF_NAS_PREFLIGHT/check-001/execution-receipt.json",
   "runtime_regression": {
     "commit": "45ed7af9f",
@@ -50,7 +50,7 @@
     "scope": "closed first M1-M3batch only; M4 charges extra in parentledger"
   },
   "active_sessions": {
-    "H052_product_v2_queue": 99257
+    "H058_native_v2_queue": 81234
   },
   "F5_comparison": {
     "status": "diagnostic_only_insufficient_full_window_reference",
@@ -76,7 +76,7 @@
   },
   "F1_comparison_veto": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/F1_COMPARISON_001_VETO.json",
   "usage_note": "NAS terminal receipts, includes failed attempts; authoritative parent ledger also retains preflight and active reservations.",
-  "updated_at_utc": "2026-10-11T06:41:41.234569+00:00",
+  "updated_at_utc": "2026-10-11T07:02:12.691983+00:00",
   "F1_comparison": {
     "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DAMBREAK3D/comparison-002/comparison/spheric-comparison-report.json",
     "water_height_rmse_m": [
@@ -167,7 +167,7 @@
       0.6
     ],
     "additional_definitions": "actualGenCasescompleted",
-    "credit_count": 2,
+    "credit_count": 3,
     "credit_scope": "actual dataengineering+model-free numericaltransportdiagnostics only; no QN/QE"
   },
   "H050_postprocess_request": "completed",
@@ -222,9 +222,10 @@
   },
   "M4_actual_eligible_conditions": [
     "UF_F1_MDBC_DP010_H050",
+    "UF_F1_MDBC_DP010_H052",
     "UF_F1_MDBC_DP010_H060"
   ],
-  "M4_release_checkpoint": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/M4_RELEASE_CHECKPOINT_003.json",
+  "M4_release_checkpoint": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/M4_RELEASE_CHECKPOINT_004.json",
   "H050_actual_relocation": {
     "status": "completed",
     "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H050/m4-actual-validation-001/m4-actual-validation/results/actual-validation-receipt.json",
@@ -271,16 +272,10 @@
     "raw_unchanged": true
   },
   "active_queues": {
-    "H052": {
-      "session": 99257,
-      "helper": "m4-next-prepared/run_condition_product_queue_v2.py",
-      "plan": "m4-next-prepared/plans/UF_F1_MDBC_DP010_H052-product-queue-v2-002.plan.json",
-      "sequence": [
-        "direct001",
-        "enrich001",
-        "portable001",
-        "v2actualvalidation001"
-      ]
+    "H058": {
+      "session": 81234,
+      "helper": "m4-native-prepared/run_solver_native_audit_queue_v2.py",
+      "plan": "m4-native-prepared/plans/UF_F1_MDBC_DP010_H058-solver-native-audit.plan-v3.json"
     }
   },
   "H060_product_stages": {
@@ -321,5 +316,31 @@
     "frame_scan_cpu_core_seconds": 98.217481,
     "frame_scan_bytes": 244562,
     "no_duplicate_preparation_or_solver": true
+  },
+  "H052_direct_conversion001": {
+    "status": "completed",
+    "elapsed_seconds": 265.3383753411472,
+    "cpu_core_seconds": 267.139515,
+    "bytes": 5368660622,
+    "frames": 241,
+    "particles": 979575,
+    "partvtk_all_passed": true
+  },
+  "M1_final_audit_gap": {
+    "scope": "metadata_only_existing_actual_postprocess_and_comparisons",
+    "F1": "active postprocess manifest unexpectedschema/elevationhash mismatch",
+    "F5": "originalmanifest missingactual filename corrections",
+    "repair": "new named corrected manifests and referencepack revisions preserve all source and consumed original metadata",
+    "audit": "/home/jade/.codex/worktrees/upstream-first/DualSPHysics/lagrangian-fluid-lab/campaigns/ds-data-02/upstream-first/m4/release/audit-only/m1-reference-pack-completion-audit.md"
+  },
+  "H052_actual_relocation": {
+    "status": "completed",
+    "report": "/data/nas/jade/Simulation/DualSPHysics/upstream-first/runs/F1/UF_F1_MDBC_DP010_H052/m4-actual-validation-001/m4-actual-validation/results/actual-validation-receipt.json",
+    "source_unchanged": true,
+    "positive_source_case_denied": true,
+    "rehashed_identity_and_destination_negatives_passed": true,
+    "copy_inside_charged_attempt": true,
+    "cpu_core_seconds": 316.202019,
+    "bytes": 5546540088
   }
 }
