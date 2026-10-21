@@ -1,0 +1,1127 @@
+{
+  "schema": "lfd01.rolling-backlog-seed.v1",
+  "campaign_id": "LFD-01",
+  "planning_only": true,
+  "runner_compatible_request": false,
+  "adopted_at_utc": null,
+  "deadline_utc": null,
+  "scope": "These are seeds and expansion templates. Local controller binds real source paths, tools, costs and execution requests after adoption. No tasks have executed in this planning package.",
+  "static_seed_completion_is_parent_completion": false,
+  "dependency_semantics": {
+    "depends_on": "required predecessor deliverables available; a closed-negative predecessor does not imply a scientific gate passed",
+    "after_any_positive": "positive gates are matched by actual bound recipe_id, domain_id and task_id, including dynamically generated qualification/fallback instances; seed IDs are examples and never an exclusive whitelist",
+    "activation_predicates": "controller evaluates against verified product/resource state, not task self-declared booleans",
+    "generated_instances": "unique IDs bound to campaign, family, recipe, condition group and purpose; cumulative limits unchanged",
+    "dependency_output_requirements": "a named predecessor output/state can satisfy the dependency before all rolling outputs from that seed are complete; verify the named state and binding",
+    "non_bootstrap_heavy": "M0/S01 must be actually verified before any non-bootstrap heavy job; small bounded metadata preparation may proceed earlier",
+    "candidate_vs_product": "S22 creates a candidate after counts, science, fields, tasks and splits are ready; it does not depend on downstream isolated replay, final closeout or expansion decision"
+  },
+  "seed_tasks": [
+    {
+      "id": "S00",
+      "title": "正式采纳与实时基线",
+      "owner_role": "controller",
+      "execution_class": "control",
+      "depends_on": [],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S00/<version>/",
+      "outputs": [
+        "ADOPTION",
+        "实时父余额/进程/挂载基线",
+        "独立目标工作区"
+      ],
+      "acceptance": [
+        "T0及42天截止真实固定",
+        "旧目标和历史账保留",
+        "新权限范围与caps绑定"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S01",
+        "S02",
+        "S03"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S01",
+      "title": "未来计量 调度 期限和自动恢复最小修复",
+      "owner_role": "controller_runtime",
+      "execution_class": "mixed_bounded",
+      "depends_on": [
+        "S00"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S01/<version>/",
+      "outputs": [
+        "前向runner版本",
+        "7项必要集成验收",
+        "真实主控单例与唤醒"
+      ],
+      "acceptance": [
+        "进程树CPU无重复且等待不乘128",
+        "NAS底层分池和实际deadline检查生效",
+        "heavy/light实际限额生效",
+        "退出后自动恢复下一任务"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "所有就绪实证分支；不继续扩张管理平台"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S02",
+      "title": "现有全事件资产与来源快速接续",
+      "owner_role": "product",
+      "execution_class": "light_or_heavy_if_size_requires",
+      "depends_on": [
+        "S00"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S02/<version>/",
+      "outputs": [
+        "四水深与两个新F1资产定位",
+        "官方母例路径/版本映射",
+        "现成reader清单"
+      ],
+      "acceptance": [
+        "现有文件实际可定位",
+        "未读字段标未验证",
+        "M2局部演示不算全事件"
+      ],
+      "activation_predicates": [
+        "if_actual_execution_is_heavy_then_S01_M0_verified_else_enforced_light_metadata_scope"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S04",
+        "S05",
+        "S06",
+        "S09",
+        "S12"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S03",
+      "title": "七族336条历史条件登记与去重",
+      "owner_role": "product",
+      "execution_class": "bounded_metadata_batches",
+      "depends_on": [
+        "S00"
+      ],
+      "status": "planned",
+      "priority": 2,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S03/<version>/",
+      "outputs": [
+        "全量历史目录",
+        "canonical物理条件键",
+        "复用/待修复/未验证分类"
+      ],
+      "acceptance": [
+        "实际数量差异完整解释",
+        "数值变体不算新条件",
+        "无需全库原始数组重扫"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S16",
+        "每批新条件去重"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S04",
+      "title": "冻结共同任务尺度与G0到G3规则",
+      "owner_role": "science",
+      "execution_class": "light",
+      "depends_on": [
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S04/<version>/",
+      "outputs": [
+        "用途v1",
+        "任务尺度与预算",
+        "非作者审阅"
+      ],
+      "acceptance": [
+        "不是用旧残差反推通过",
+        "G2需要正面数值证据",
+        "G3不误阻纯数值用途"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S07",
+        "各族资格设计"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S05",
+      "title": "增量全事件reader与流式原生绑定",
+      "owner_role": "data",
+      "execution_class": "heavy_after_bounded_preparation",
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S05/<version>/",
+      "outputs": [
+        "现有reader修复/扩展",
+        "一个真实全事件格式样例",
+        "字段来源矩阵"
+      ],
+      "acceptance": [
+        "实际读取全部保存帧",
+        "身份/时钟/字段/坐标语义",
+        "不重建未改变的四水深包"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S07",
+        "全族共用data_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S06",
+      "title": "F1几何和accepted-step缺口辨因",
+      "owner_role": "f1_science",
+      "execution_class": "bounded_analysis",
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S06/<version>/",
+      "outputs": [
+        "共同连续几何差异表",
+        "首尾日志语义裁决",
+        "必要新增实验候选"
+      ],
+      "acceptance": [
+        "区分几何离散与纯算子误差",
+        "不强制等质量/不编造步长",
+        "旧已知结果只作开发"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S08",
+        "未来重要run记录修复"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S07",
+      "title": "四水深及已有全事件的历史输运任务",
+      "owner_role": "data",
+      "execution_class": "heavy",
+      "depends_on": [
+        "S01",
+        "S04",
+        "S05"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S07/<version>/",
+      "outputs": [
+        "端点与全时段区域质量",
+        "首次观测/保存样本停留",
+        "真实身份与采样负例"
+      ],
+      "acceptance": [
+        "实际数据执行",
+        "initial_mass及删失闭合",
+        "保存样本不夸成连续材料轨迹",
+        "合法无事件对照保留"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S08",
+        "S18",
+        "后续每族任务实例"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S08",
+      "title": "F1用途资格设计与必要确认",
+      "owner_role": "f1_science",
+      "execution_class": "qualification",
+      "depends_on": [
+        "S04",
+        "S06",
+        "S07"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S08/<version>/",
+      "outputs": [
+        "有界设计及真实对照",
+        "正面或负面用途裁决",
+        "配方域候选"
+      ],
+      "acceptance": [
+        "实际dt/空间/采样对照",
+        "通过只覆盖所验用途",
+        "必要时新确认而非默认重跑",
+        "失败自动走fallback_template",
+        "前瞻边界条件至少针对最敏感因素做实际受控对照；单run的G1不足以建立G2"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "正面→S16及S17；负面→新配方/其他族"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S09",
+      "title": "WaveRunup完整数值源与运动尾段语义",
+      "owner_role": "new_family",
+      "execution_class": "bounded_source_analysis",
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S09/<version>/",
+      "outputs": [
+        "数值G0合同",
+        "15/15.6/20秒执行语义",
+        "初始成本与NAS预约候选",
+        "实验映射独立未决项"
+      ],
+      "acceptance": [
+        "精确版本与实际执行输入明确",
+        "数值源门槛和实验G3分开",
+        "完整20秒不为旧32GiB删减"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S10；源未闭合→fallback_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S10",
+      "title": "WaveRunup完整三维母例与原生验收",
+      "owner_role": "new_family",
+      "execution_class": "qualification",
+      "depends_on": [
+        "S01",
+        "S09"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S10/<version>/",
+      "outputs": [
+        "真实20s母例",
+        "全保存帧验收",
+        "实测时间/显存/持久字节/峰值"
+      ],
+      "acceptance": [
+        "实际solver运行与收据",
+        "原样数值条件或明确新版本",
+        "无实验映射时不宣称QE"
+      ],
+      "activation_predicates": [
+        "WaveRunup.G0==positive"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S11",
+        "data_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S11",
+      "title": "WaveRunup用途资格与边界条件",
+      "owner_role": "new_family_science",
+      "execution_class": "qualification",
+      "depends_on": [
+        "S04",
+        "S05",
+        "S10"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S11/<version>/",
+      "outputs": [
+        "dt/空间/采样证据",
+        "新边界条件development复核",
+        "明示配方域"
+      ],
+      "acceptance": [
+        "共同任务G2真实正面才准生产",
+        "实验用途单列",
+        "失败走备选不停止F1等",
+        "前瞻边界条件至少针对最敏感因素做实际受控对照；单run的G1不足以建立G2"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "正面→S16/S17；负面→fallback_template"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S12",
+      "title": "第三三维族优先自由刚体来源",
+      "owner_role": "new_family",
+      "execution_class": "bounded_source_and_gencase",
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S12/<version>/",
+      "outputs": [
+        "Floating或有依据备选G0",
+        "实际刚体状态合同",
+        "GenCase及成本"
+      ],
+      "acceptance": [
+        "3D维度和自由耦合真实",
+        "10000kg源不称静浮平衡",
+        "不以2D晃荡凑三维"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S13；失败→fallback_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S13",
+      "title": "第三族完整母例及全事件状态",
+      "owner_role": "new_family",
+      "execution_class": "qualification",
+      "depends_on": [
+        "S01",
+        "S12"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S13/<version>/",
+      "outputs": [
+        "完整实际母例",
+        "刚体与流体字段",
+        "G1与成本"
+      ],
+      "acceptance": [
+        "真实求解",
+        "姿态/参考系/身份清楚",
+        "只管理本任务进程"
+      ],
+      "activation_predicates": [
+        "third_family.G0==positive"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S14",
+        "data_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S14",
+      "title": "第三族用途资格及前瞻边界复核",
+      "owner_role": "new_family_science",
+      "execution_class": "qualification",
+      "depends_on": [
+        "S04",
+        "S05",
+        "S13"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S14/<version>/",
+      "outputs": [
+        "资格锚点",
+        "未消费边界development证据",
+        "配方域"
+      ],
+      "acceptance": [
+        "共同任务G2正面",
+        "真实自由耦合保护量",
+        "不因文件完整自动计core",
+        "前瞻边界条件至少针对最敏感因素做实际受控对照；单run的G1不足以建立G2"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "正面→S16/S17；失败及时切备选"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S15",
+      "title": "晃荡备选与其他族来源缺口",
+      "owner_role": "source",
+      "execution_class": "bounded_analysis_or_qualification",
+      "depends_on": [
+        "S01",
+        "S02"
+      ],
+      "status": "planned",
+      "priority": 3,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S15/<version>/",
+      "outputs": [
+        "Acc负结果保留",
+        "Motion/项目派生候选",
+        "F2/F4/F7有依据路线"
+      ],
+      "acceptance": [
+        "坐标/轴心由源和运动学证明",
+        "不凭拟合选符号",
+        "二维不计3D核心",
+        "不抢占已就绪高价值生产"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "fallback_template",
+        "后续缺口优先队列"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S16",
+      "title": "按配方域冻结条件设计与开发角色",
+      "owner_role": "product_science",
+      "execution_class": "light",
+      "depends_on": [
+        "S03",
+        "S04"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S16/<version>/",
+      "outputs": [
+        "每族1到2物理轴",
+        "新旧去重条件设计",
+        "开发/资格角色表"
+      ],
+      "acceptance": [
+        "canonical条件唯一",
+        "数值变体不计新",
+        "进入配方域外先做开发"
+      ],
+      "activation_predicates": [
+        "bound_recipe_id_and_domain_id.G2_for_common_core_task==positive_including_dynamic_fallback_qualification"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S17",
+        "S18",
+        "holdout_template"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true,
+      "instance_binding_required": [
+        "recipe_id",
+        "domain_id",
+        "common_core_task_id"
+      ],
+      "positive_seed_examples_not_exclusive": [
+        "S08",
+        "S11",
+        "S14"
+      ]
+    },
+    {
+      "id": "S17",
+      "title": "滚动保护最终6加6资源并逐配方冻结留出方案",
+      "owner_role": "controller_product",
+      "execution_class": "control",
+      "depends_on": [
+        "S00",
+        "S01"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S17/<version>/",
+      "outputs": [
+        "holdout_resources_protected: 尚未验收且未污染的6+6缺口资源包络",
+        "final_holdout_design_frozen_for_bound_recipe_domain: 就绪配方的单独留出预登记",
+        "未就绪族的明确估计占位及后续实际成本补足"
+      ],
+      "acceptance": [
+        "资源保护先行，不等待第二族或全体配方冻结",
+        "已知族用真实成本；未知族明确保守估计，成本更新后补足",
+        "12初始尝试是中央26中的受保护子集，已生成但未验收不能释放",
+        "仅正式验收且未污染条件减少对应split缺口；失败或转development须补足余下保护",
+        "本批具体留出清单只在自己的配方/域/任务/阈值冻结后形成",
+        "每split至少2族及最终6+6在S21汇总与S22最终验收，不能阻塞首个合格族生产",
+        "资格边界不占最终名额；普通补点不能消耗受保护资源"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "保护建立→本身配方G2合格的S18实例",
+        "相关配方留出冻结→对应S21实例",
+        "成本或有效留出数变化→更新本任务新版本"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true,
+      "staged_output_semantics": {
+        "holdout_resources_protected": "may be accepted on its own while other families remain unresolved",
+        "final_holdout_design_frozen_for_bound_recipe_domain": "repeat for each bound recipe/domain only after its S16 design and G2 domain are frozen; do not claim unknown families frozen"
+      }
+    },
+    {
+      "id": "S18",
+      "title": "首批及滚动4到8条合格条件生产",
+      "owner_role": "controller_and_workers",
+      "execution_class": "production",
+      "depends_on": [
+        "S01",
+        "S05",
+        "S16",
+        "S17"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S18/<version>/",
+      "outputs": [
+        "真实独立物理条件数据",
+        "逐case G1与用途输出",
+        "成本和产品增量"
+      ],
+      "acceptance": [
+        "仅G2域内配方",
+        "condition去重",
+        "全部保存帧实际验收",
+        "失败不计核心",
+        "生产种类不伪装资格"
+      ],
+      "activation_predicates": [
+        "bound_recipe_id_and_domain_id.G2_for_common_core_task==positive",
+        "holdout_resources_protected_for_current_remaining_gaps==true",
+        "this_batch_condition_design_and_holdout_rules_registered==true"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "data_template",
+        "下一production_template",
+        "S19/S20按实际计数触发"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true,
+      "dependency_output_requirements": {
+        "S16": "condition_design_for_this_recipe_domain",
+        "S17": "holdout_resources_protected; not all final holdout designs frozen"
+      },
+      "instance_binding_required": [
+        "recipe_id",
+        "domain_id",
+        "condition_group_ids",
+        "common_core_task_id"
+      ]
+    },
+    {
+      "id": "S19",
+      "title": "12条内部里程碑交付并续接",
+      "owner_role": "controller_product",
+      "execution_class": "review",
+      "depends_on": [
+        "S18"
+      ],
+      "status": "planned",
+      "priority": 2,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S19/<version>/",
+      "outputs": [
+        "v0内部核心",
+        "实际reader与任务",
+        "至24条缺口计划"
+      ],
+      "acceptance": [
+        "12条且至少2个真实3D族",
+        "明确非终止",
+        "生成下一滚动批"
+      ],
+      "activation_predicates": [
+        "core_count>=12",
+        "true_3d_family_count>=2"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S18重复实例",
+        "S20"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S20",
+      "title": "24条与第三族提前检查",
+      "owner_role": "controller_product",
+      "execution_class": "review",
+      "depends_on": [
+        "S19"
+      ],
+      "status": "planned",
+      "priority": 2,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S20/<version>/",
+      "outputs": [
+        "24条时实际产品状态",
+        "M2通过或未达成的准确状态",
+        "第三族缺口与实际派发的下一任务",
+        "至48条缺口计划"
+      ],
+      "acceptance": [
+        "实际核查24条及第三族缺口，不以第三族已经成功作为检查前置",
+        "第三族至少1个真实全事件G2核心条件时M2才通过",
+        "第三族不足时M2保持未达成并立即派发有依据的备选或补缺",
+        "明确非终止"
+      ],
+      "activation_predicates": [
+        "core_count>=24"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S18",
+        "S21",
+        "fallback_template按需"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S21",
+      "title": "最终validation和test条件实际生成",
+      "owner_role": "product_and_data",
+      "execution_class": "production",
+      "depends_on": [
+        "S17"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S21/<version>/",
+      "outputs": [
+        "每类至少6未消费条件",
+        "封存任务结果",
+        "split污染检查"
+      ],
+      "acceptance": [
+        "最终配方/域/阈值冻结后生成",
+        "资格边界不冒充最终留出",
+        "验收不回调同一批阈值",
+        "若据结果改设计则转dev并补新条件",
+        "逐配方实例可先执行；汇总最终validation/test各>=6且各>=2族，未满足则继续补充"
+      ],
+      "activation_predicates": [
+        "bound_recipe_domain_task_and_thresholds_frozen==true",
+        "this_instance_final_holdout_design_frozen==true",
+        "holdout_resources_protected_for_current_remaining_gaps==true"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "data_template",
+        "S22"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true,
+      "dependency_output_requirements": {
+        "S17": "final_holdout_design_frozen_for_bound_recipe_domain and current holdout_resources_protected"
+      },
+      "instance_binding_required": [
+        "recipe_id",
+        "domain_id",
+        "final_split",
+        "condition_group_ids"
+      ]
+    },
+    {
+      "id": "S22",
+      "title": "48条多族产品候选与完整数据卡",
+      "owner_role": "controller_product",
+      "execution_class": "mixed",
+      "depends_on": [
+        "S18",
+        "S21"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S22/<version>/",
+      "outputs": [
+        "48条条件唯一核心候选",
+        "三族及用途矩阵",
+        "完整reader/evaluator/manifest"
+      ],
+      "acceptance": [
+        ">=3族且各>=8",
+        "单族<=50%",
+        ">=24新物理条件",
+        "validation/test各>=6",
+        "所有共同任务和字段验收",
+        "这是待隔离复现产品候选；完整M3还需S23及最终必要交付验收"
+      ],
+      "activation_predicates": [
+        "candidate_counts_families_G0_G1_G2_tasks_fields_and_splits_ready==true"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S23"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true,
+      "candidate_predicate_excludes": [
+        "S23_isolated_replay",
+        "final_resource_closeout",
+        "S24_expansion_decision"
+      ]
+    },
+    {
+      "id": "S23",
+      "title": "非作者隔离实际复现及必要修复",
+      "owner_role": "independent_reviewer",
+      "execution_class": "heavy_plus_light",
+      "depends_on": [
+        "S22"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S23/<version>/",
+      "outputs": [
+        "隔离实际读取评分",
+        "每族完整语义复核",
+        "全核心流式检查",
+        "真实负例"
+      ],
+      "acceptance": [
+        "无原工作区隐式缓存",
+        "作者/复核角色分离",
+        "内部不夸外部验证",
+        "修复有新版本且预算结算"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "S24；问题→repair_template"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S24",
+      "title": "48到64条边际价值决定及自动扩展",
+      "owner_role": "controller_science",
+      "execution_class": "review",
+      "depends_on": [
+        "S23"
+      ],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S24/<version>/",
+      "outputs": [
+        "剩余高价值候选表",
+        "继续或停止依据"
+      ],
+      "acceptance": [
+        "至少核最有价值3候选或全部",
+        ">=72h且有未预留资源才扩展",
+        "每批4到8且最多64",
+        "不重复无增量点"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "满足条件→production_template并重复实际复现；否则S25"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S25",
+      "title": "产品或真实部分终态交付",
+      "owner_role": "controller",
+      "execution_class": "control_and_closeout",
+      "depends_on": [],
+      "status": "planned",
+      "priority": 1,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S25/<version>/",
+      "outputs": [
+        "最终产品/部分产品",
+        "费用及lease结算",
+        "来源/版本/限制",
+        "小型可校验证据包"
+      ],
+      "acceptance": [
+        "终态符合CAMPAIGN_POLICY",
+        "无未解释活动预约",
+        "报告与真实数据一致",
+        "product_delivered只在全部主产品条件达成"
+      ],
+      "activation_predicates": [
+        "product_and_expansion_and_replay_complete OR confirmed_global_partial_stop"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "终态后停止派发"
+      ],
+      "repeatable_via_new_unique_instances": false,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S26",
+      "title": "全部路径科学或外部受阻复核",
+      "owner_role": "independent_reviewer",
+      "execution_class": "review",
+      "depends_on": [],
+      "status": "planned",
+      "priority": 2,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S26/<version>/",
+      "outputs": [
+        "逐产品缺口候选表",
+        "实际尝试/否定/未决",
+        "最小外部问题或科学部分交付依据"
+      ],
+      "acceptance": [
+        "单族/单队列不能触发全局",
+        "仍有可行第四族或已有数据处理则继续",
+        "未执行不能冒充科学否定"
+      ],
+      "activation_predicates": [
+        "controller_reports_all_remaining_valuable_paths_blocked"
+      ],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "仍可执行→滚动队列；真全局终态→S25"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    },
+    {
+      "id": "S27",
+      "title": "持续健康检查与恢复摘要",
+      "owner_role": "controller",
+      "execution_class": "bounded_control",
+      "depends_on": [
+        "S00"
+      ],
+      "status": "planned",
+      "priority": 2,
+      "actual_source_paths_to_resolve_locally": true,
+      "write_scope": "work/S27/<version>/",
+      "outputs": [
+        "本地进展",
+        "恢复摘要",
+        "幂等事件状态"
+      ],
+      "acceptance": [
+        "不计空闲全机CPU",
+        "不以14/28天或上下文结束终止",
+        "原job活则接续",
+        "确认自己job已退出则自动结算释放"
+      ],
+      "activation_predicates": [],
+      "after_any_positive": [],
+      "on_terminal_update_product_gaps": true,
+      "successors_or_next_actions": [
+        "持续循环直至母目标真实终态"
+      ],
+      "repeatable_via_new_unique_instances": true,
+      "no_bare_solver_or_unbound_arrays": true
+    }
+  ],
+  "expansion_templates": [
+    {
+      "id": "qualification_template",
+      "when": "G0/G1 available but a required task-domain lacks G2",
+      "creates": [
+        "frozen hypothesis and <=6-run initial design",
+        "actual controlled comparisons",
+        "prospective boundary qualification case",
+        "non-author domain decision"
+      ],
+      "positive_next": "production_template for qualified domain",
+      "negative_next": "bounded discriminating followup or fallback_template",
+      "final_holdout_credit": false,
+      "prospective_boundary_control_required": "至少针对已识别最敏感因素做实际受控比较或独立已知答案；仅新run的G1不构成G2，资格条件不计最终留出"
+    },
+    {
+      "id": "production_template",
+      "when": "product gap exists and recipe G2 positive and domain/split/cost bound",
+      "batch_conditions": [
+        4,
+        8
+      ],
+      "requires": [
+        "deduplicate physical condition keys",
+        "reserve live tranche",
+        "protect final holdout resources",
+        "whole event output and all-frame checks"
+      ],
+      "creates": [
+        "real production jobs",
+        "data_template",
+        "product-state update",
+        "next rolling batch or milestone"
+      ],
+      "parent_done_on_batch_completion": false,
+      "bound_recipe_domain_required": true,
+      "holdout_gate": "current resource envelope protects outstanding formally unaccepted/uncontaminated gaps; do not require all families frozen"
+    },
+    {
+      "id": "data_template",
+      "when": "native full event available or exact existing package reusable",
+      "creates": [
+        "streaming field/lifecycle checks",
+        "uniform reader binding",
+        "common endpoint task",
+        "sampled history task where qualified",
+        "case card and cost"
+      ],
+      "reuse_unchanged_verified_hashes": true,
+      "no_fake_fields": true
+    },
+    {
+      "id": "holdout_template",
+      "when": "recipe/region/threshold/domain final frozen",
+      "creates": [
+        "at_least_6_validation_and_6_test_across_campaign",
+        "new generation and planned quality evaluation",
+        "no-feedback sealed test scoring"
+      ],
+      "qualified_boundary_data_are_final_holdout": false,
+      "if_design_changes_from_results": "preserve result, move consumed case to development, reserve replacement unseen conditions",
+      "release_protection_only_after_formal_uncontaminated_acceptance": true
+    },
+    {
+      "id": "fallback_template",
+      "when": "mother/source/hypothesis remains blocked after bounded useful work",
+      "creates": [
+        "same-family complete alternate or other authorized family",
+        "new G0 identity",
+        "bounded new source/qualification plan"
+      ],
+      "keep_old_negative": true,
+      "may_rename_to_reset_limits": false,
+      "may_contact_others_or_buy_new_resources": false
+    },
+    {
+      "id": "repair_template",
+      "when": "specific root cause affects an otherwise useful deliverable",
+      "creates": [
+        "new-version targeted fix",
+        "only risk-relevant regression",
+        "actual affected data verification"
+      ],
+      "same_root_cause_initial_repairs": 2,
+      "further_repair_requires": "new root-cause evidence, non-author review, central allocation",
+      "retroactive_input_or_cost_rewrite": false
+    },
+    {
+      "id": "gap_replenishment_template",
+      "when": "queue low or empty and parent active",
+      "creates": [
+        "rank remaining product gaps",
+        "pick actual next useful action and fallback",
+        "bind near-term tasks"
+      ],
+      "must_check_existing_ready_data_work": true,
+      "no_information_tasks_allowed": false,
+      "if_no_viable_informative_paths": "S26 then appropriate partial state; no empty spinning"
+    }
+  ],
+  "initial_parallel_workflows": [
+    "F1 and numerical scope",
+    "data and identity/history tasks",
+    "new 3D sources and mothers",
+    "product inventory and condition design"
+  ],
+  "governing_policy": "CAMPAIGN_POLICY.json"
+}

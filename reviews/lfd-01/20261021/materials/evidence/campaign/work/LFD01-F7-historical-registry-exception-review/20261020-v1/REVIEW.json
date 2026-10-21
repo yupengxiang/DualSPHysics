@@ -1,0 +1,201 @@
+{
+  "conclusion": "The 54-row historical F7 registry declares 48 production rows and six reference rows. The exact six count-surplus records are the two parent groups' coarse/medium/fine references listed below. However, none of the 54 historical case_id values matches either a current F7 declared_physical_case_id or runtime_alias in the 48-row S03 catalogue projection. Thus the arithmetic 54-48=6 is not a row-level reconciliation: the six reference entries are identified, but the remaining 48 historical production entries also have no direct ID/alias crosswalk to the current 48. Retain all 54 as unresolved history until source provenance establishes their relationship.",
+  "decision": {
+    "historical_scope": "Include all 54 historical F7 registry rows, including the six reference rows, in the next lineage/source-closure crosswalk; do not add six to the 336 catalogue count or discard them based only on registry_kind.",
+    "noncollision": "Not established. The capture contains metadata identities and source tuple declarations only; it does not validate the source contents or realize canonical keys.",
+    "source_only_sufficiency": "A source-only noncollision claim may be made only after a complete, provenance-bound source closure for all relevant records yields a frozen canonical key containing all physically defining inputs and the candidate key has no match. Any unresolved forcing/configuration/source reference keeps uniqueness false."
+  },
+  "declared_numeric_relationships": {
+    "common_declared_values_within_each_reference_parent": {
+      "fill_fraction": 0.9,
+      "gap_fraction": 0.2,
+      "offset_m": -0.04,
+      "phase_deg": 0.0,
+      "speed_scale": 0.8,
+      "split": "reference",
+      "stage": "reference_matrix",
+      "time_max_s": 12.0,
+      "time_out_s": 0.02
+    },
+    "current_catalogue_known_physical_parameters": {
+      "amplitude_deg_max": 65.0,
+      "amplitude_deg_min": 30.0,
+      "canonical_condition_key_status": "pending_complete_continuous_geometry_forcing_material_and_initial_state_identity for all 48 rows",
+      "declared_parameter_keys": [
+        "amplitude_deg"
+      ],
+      "interpretation": "These are S03 declarations only. Distinct amplitude_deg declarations, aliases, provisional groups, or names do not establish distinct realized physical conditions.",
+      "rows": 48,
+      "unique_declared_parameter_objects": 48
+    },
+    "meaning": "The six rows declare a three-resolution sweep under two parent IDs; only resolution/dp_m changes within each parent. This is a declared numerical-resolution grouping, not verified equality of underlying geometry, forcing, material, initial state, or boundary inputs.",
+    "production_rows": {
+      "distinct_physical_parent_ids": 48,
+      "interpretation": "variant is a row/design index in this metadata. It does not prove which differences are physical or numerical without checking realized inputs.",
+      "mechanism_counts": {
+        "moving_obstacle_exchange": 24,
+        "pump_recirculation": 24
+      },
+      "rows": 48,
+      "variant_indices_per_mechanism": "0 through 23"
+    },
+    "reference_groups": [
+      {
+        "dp_m_values": [
+          0.025,
+          0.02,
+          0.016
+        ],
+        "mechanism": "pump_recirculation",
+        "physical_parent_id": "F7_PUMP_REFERENCE_BASE",
+        "resolutions": [
+          "coarse",
+          "medium",
+          "fine"
+        ],
+        "rows": 3,
+        "variant_values": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "dp_m_values": [
+          0.025,
+          0.02,
+          0.016
+        ],
+        "mechanism": "moving_obstacle_exchange",
+        "physical_parent_id": "F7_OBSTACLE_REFERENCE_BASE",
+        "resolutions": [
+          "coarse",
+          "medium",
+          "fine"
+        ],
+        "rows": 3,
+        "variant_values": [
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "pins": {
+    "S03_metadata_register": {
+      "bytes": 3825498,
+      "path": "work/S03/v1/LEGACY_METADATA_REGISTER_CANDIDATE.json",
+      "sha256": "9c4f5e6599d04d4c574aba9291abdcce10c1cf7ea33a142de908550e6922c5a9"
+    },
+    "captured_54_registry_metadata": {
+      "bytes": 96999,
+      "path": "decisions/F7_HISTORICAL_54_REGISTRY_EXCEPTION_METADATA_V1.json",
+      "sha256": "fd17b5a54f7583617cb357f2e0979d7864c01a975179fa764a38759aff4238dc"
+    },
+    "captured_registry_source_binding": {
+      "bytes": 69680,
+      "declared_path": "/home/jade/.codex/worktrees/ufq-01/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/families/F7/case_registry.jsonl",
+      "sha256": "8bfcd90951471eba5807d2cc23526d2ad0e76135b95e6d00f392b9f2974d24fc"
+    }
+  },
+  "row_counts_and_identity": {
+    "captured_current_catalogue_id_list_matches_declared_physical_case_ids": true,
+    "current_catalogue_F7_rows": 48,
+    "current_catalogue_unique_declared_physical_case_ids": 48,
+    "current_catalogue_unique_runtime_aliases": 48,
+    "historical_case_id_overlap_with_current_declared_physical_ids": 0,
+    "historical_case_id_overlap_with_current_runtime_aliases": 0,
+    "historical_registry_kind_counts": {
+      "production": 48,
+      "reference": 6
+    },
+    "historical_registry_rows": 54,
+    "historical_unique_case_ids": 54,
+    "interpretation": "The six named reference rows are exactly six more rows by count in the historical registry. The zero overlap means current S03 rows cannot be identified as the remaining 48 historical production rows by case_id or runtime_alias. Do not assert the six references are the only unmatched historical conditions."
+  },
+  "schema": "lfd01.review.F7.historical-registry-exceptions.v1",
+  "scope": {
+    "core_credit": 0,
+    "definition_xml_or_control_csv_or_manifest_followed": false,
+    "historical_tuple_targets_stat_open_or_hash": false,
+    "motion_VTK_native_or_executable_payload_accessed": false,
+    "registry_jsonl_payload_opened_or_followed": false,
+    "review_kind": "non-author static review of two named ordinary JSON metadata artifacts",
+    "science_credit": 0
+  },
+  "six_reference_rows": [
+    {
+      "case_id": "F7_PUMP_REFERENCE_BASE_COARSE",
+      "dp_m": 0.025,
+      "physical_parent_id": "F7_PUMP_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "coarse",
+      "variant": 0
+    },
+    {
+      "case_id": "F7_PUMP_REFERENCE_BASE_MEDIUM",
+      "dp_m": 0.02,
+      "physical_parent_id": "F7_PUMP_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "medium",
+      "variant": 0
+    },
+    {
+      "case_id": "F7_PUMP_REFERENCE_BASE_FINE",
+      "dp_m": 0.016,
+      "physical_parent_id": "F7_PUMP_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "fine",
+      "variant": 0
+    },
+    {
+      "case_id": "F7_OBSTACLE_REFERENCE_BASE_COARSE",
+      "dp_m": 0.025,
+      "physical_parent_id": "F7_OBSTACLE_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "coarse",
+      "variant": 0
+    },
+    {
+      "case_id": "F7_OBSTACLE_REFERENCE_BASE_MEDIUM",
+      "dp_m": 0.02,
+      "physical_parent_id": "F7_OBSTACLE_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "medium",
+      "variant": 0
+    },
+    {
+      "case_id": "F7_OBSTACLE_REFERENCE_BASE_FINE",
+      "dp_m": 0.016,
+      "physical_parent_id": "F7_OBSTACLE_REFERENCE_BASE",
+      "registry_kind": "reference",
+      "resolution": "fine",
+      "variant": 0
+    }
+  ],
+  "source_and_forcing_gaps": {
+    "independent_physical_gates": [
+      "native_3d_intent is a declaration, not proof of actual 3D geometry or dynamics; verify the actual source and admitted output.",
+      "A source geometry or mechanism name does not establish the realized geometry.",
+      "Resolve operative per-ID mass, identity/type/zone, complete initial cohort and denominator, and censoring/uncertainty rules.",
+      "Verify candidate waveheight through its realized forcing source and generation route. SavePosDouble is a save-format setting and cannot establish exact arithmetic, mass, identity, or a distinct physical condition."
+    ],
+    "not_reviewed_or_followed": [
+      "any definition XML, control CSV, manifest, motion/forcing, VTK, native, executable, or referenced payload"
+    ],
+    "required_next_evidence": [
+      "Produce an explicit provenance crosswalk from all 54 historical registry rows to the 48 current catalogue records, or document unmatched historical lineages without dropping them. A parent ID or registry_kind label alone is insufficient.",
+      "For every retained historical and candidate row, independently bind the definition XML, control/forcing CSV, manifest and any exact referenced geometry, motion, or other forcing sources. Verify bytes/SHA and producer/config provenance in a separately reviewed finite source tranche; no recursive reference crawl.",
+      "Resolve effective forcing, units, geometry/topology, material, initial state, boundary conditions, model configuration and time axis before deriving canonical physical keys. Compare candidate keys against all historical records, retaining reference and numerical-variant records in the review set.",
+      "Treat coarse/medium/fine dp variants as same-parent numerical-resolution declarations unless source-backed physical differences prove otherwise; do not count them as three new physical conditions from the metadata alone."
+    ],
+    "unverified_declared_registry_sources": [
+      "definition_xml",
+      "control_csv",
+      "manifest_json",
+      "their declared hashes and source availability"
+    ]
+  },
+  "status": "accepted_static_metadata_capture_pending_source_crosswalk_and_provenance"
+}

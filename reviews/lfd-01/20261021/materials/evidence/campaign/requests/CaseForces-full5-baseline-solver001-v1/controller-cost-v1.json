@@ -1,0 +1,34 @@
+{
+  "schema": "lfd01.controller-invocation-cost.v1",
+  "campaign_id": "LFD-01",
+  "job_id": "LFD01_CASEFORCES_FULL5_BASELINE_SOLVER_001",
+  "command": [
+    "/usr/bin/prlimit",
+    "--cpu=1800:1800",
+    "--",
+    "/usr/bin/python3.10",
+    "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py",
+    "controller",
+    "--request",
+    "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/CaseForces-full5-baseline-solver001-v1/request.json",
+    "--grant",
+    "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/CaseForces-full5-baseline-solver001-v1/grant.json",
+    "--job-id",
+    "LFD01_CASEFORCES_FULL5_BASELINE_SOLVER_001"
+  ],
+  "returncode": 1,
+  "started_at_utc": "2026-10-21T15:05:35.339445+00:00",
+  "dispatch_environment_projection": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONOPTIMIZE": "0",
+    "TMPDIR": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/F2/LFD01_F2_OFFICIAL_CASEFORCES_DP020_FULL5/LFD01_SOLVER_001/.tmp"
+  },
+  "cached_native_tools_root_filesystem_access": false,
+  "finished_at_utc": "2026-10-21T15:05:36.077965+00:00",
+  "cpu_core_seconds": 0.469591,
+  "cpu_owner": "This wrapper SELF and reaped controller CLI tree only; detached un-waited guardian and its worker excluded.",
+  "guardian_controller_self_snapshot_must_not_be_charged_again": true,
+  "accounting": "pending root unique infrastructure settlement",
+  "response": "Traceback (most recent call last):\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 4475, in <module>\n    raise SystemExit(main())\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 4457, in main\n    result = controller(args.request, args.grant, job_id=args.job_id)\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 4329, in controller\n    result = dispatch(request_path, grant_path, job_id=job_id)\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 4310, in dispatch\n    return _dispatch_locked(request_path, grant_path, job_id=job_id)\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 4220, in _dispatch_locked\n    request, grant, adoption, baseline = _validate_request_grant(\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 1862, in _validate_request_grant\n    _validate_compiled_build_evidence(request, small_hashes)\n  File \"/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v14/lfd01_forward_runtime.py\", line 1496, in _validate_compiled_build_evidence\n    raise LFD01Error(f\"compiled BUILD_004 target stat differs for {key}\")\n__main__.LFD01Error: compiled BUILD_004 target stat differs for device\n"
+}

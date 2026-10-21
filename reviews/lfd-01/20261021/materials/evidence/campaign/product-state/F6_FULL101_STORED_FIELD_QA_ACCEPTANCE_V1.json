@@ -1,0 +1,174 @@
+{
+  "schema": "lfd01.Root.F6.full101.stored-field-QA.acceptance.v1",
+  "status": "accepted_actual_development_field_QA_no_core_promotion",
+  "observed_at_utc": "2026-10-21T08:28:06.767596+00:00",
+  "case_id": "LFD01_F6_FULL10_FLUID_CONVERSION",
+  "actual_operation": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/F6-unread-field-QA-actual001-v1/actual-field-QA-closure.json",
+    "bytes": 6181,
+    "sha256": "2e06ad6d69697acc5e58ae6358a9279d3feb2b57a4306314b8b95dd10c3e28b0"
+  },
+  "independent_actual_review": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/LFD01-F6-unread-field-QA-review/20261021-v1/ACTUAL_REVIEW.json",
+    "bytes": 8466,
+    "sha256": "458db4ed3bcc675525ec930fe70df227d232823dd5f93fa64f446fe35a21a9e9"
+  },
+  "field_observations": {
+    "density": {
+      "status": "read",
+      "dtype": "float32",
+      "shape": [
+        101,
+        445161
+      ],
+      "unit_contract": "kg/m^3",
+      "stored_unit": "unavailable",
+      "semantics": "stored_frame_values",
+      "total": {
+        "maximum": 1050.4466552734375,
+        "minimum": 981.6548461914062,
+        "nonfinite": 0,
+        "nonpositive": 0,
+        "scalars": 44961261,
+        "valid_rows": 44961261
+      },
+      "frames_read": 101,
+      "source_block_mapping_mismatches": null
+    },
+    "mk": {
+      "status": "read",
+      "dtype": "int16",
+      "shape": [
+        101,
+        445161
+      ],
+      "unit_contract": "categorical_source_mapped_label",
+      "stored_unit": "unavailable",
+      "semantics": "stored_frame_values",
+      "total": {
+        "maximum": 60.0,
+        "minimum": 1.0,
+        "nonfinite": 0,
+        "scalars": 44961261,
+        "valid_rows": 44961261
+      },
+      "frames_read": 101,
+      "source_block_mapping_mismatches": 0
+    },
+    "type": {
+      "status": "read",
+      "dtype": "int8",
+      "shape": [
+        101,
+        445161
+      ],
+      "unit_contract": "categorical_source_mapped_label",
+      "stored_unit": "unavailable",
+      "semantics": "stored_frame_values",
+      "total": {
+        "maximum": 3.0,
+        "minimum": 0.0,
+        "nonfinite": 0,
+        "scalars": 44961261,
+        "valid_rows": 44961261
+      },
+      "frames_read": 101,
+      "source_block_mapping_mismatches": 0
+    },
+    "velocity": {
+      "status": "read",
+      "dtype": "float32",
+      "shape": [
+        101,
+        445161,
+        3
+      ],
+      "unit_contract": "unresolved_here_stored_attribute_observation_only",
+      "stored_unit": "unavailable",
+      "semantics": "stored_frame_values",
+      "total": {
+        "maximum": 6.858673095703125,
+        "minimum": -6.351008415222168,
+        "nonfinite": 0,
+        "scalars": 134883783,
+        "valid_rows": 44961261
+      },
+      "frames_read": 101,
+      "source_block_mapping_mismatches": null
+    }
+  },
+  "input_binding": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_F6_FULL10_FLUID_CONVERSION/LFD01_CONVERT_002/CaseFloating.full10.h5",
+    "bytes": 1235880559,
+    "sha256": "377a996dd456b3c36949b6a4febb77b896a189a589f0279b5c20ac5cb21bea29",
+    "role": "trajectory_hdf5"
+  },
+  "scientific_increment": "Previously unread stored velocity/density/type/mk now actually inspected over all101 frames and44,961,261 valid rows. No repeated v9 history-only scan.",
+  "velocity_units_reconciliation": {
+    "qa_report": "Per-dataset unit/units attribute unavailable; leaf-local contract intentionally unresolved.",
+    "existing_source_basis": "The exact bound converter declares root-level units_json and report.units with velocity=m/s and density=kg/m^3. Vel float32 is written to HDF float32 without rescaling.",
+    "converter": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S12-floating-mass-converter-forward/v4/ds_data02_direct_convert_forward_v4.py",
+      "bytes": 67672,
+      "sha256": "549add3a8729bcfce08e2721f97bace9377cf35a43f429e3e71a96c06755c770"
+    },
+    "paid_converter_manifest": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/S12-fluid-conversion-v2/manifest.json",
+      "bytes": 90327,
+      "sha256": "b6adbccf6039140d546fb61c880e6b91c08ba897da05ffe74b31e505b2c75ac2"
+    },
+    "paid_converter_request": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/S12-fluid-conversion-v2/request.json",
+      "bytes": 22358,
+      "sha256": "660e5cc57f5c9498fb787d3674d2cfa73cbae5389ae2a5b6aa2d19a7640c5329"
+    },
+    "source_lines": [
+      "332:raw Vel float32 read",
+      "756:root units_json declaration",
+      "764:velocity f4 dataset",
+      "804:unscaled frame velocity write",
+      "908:PartVTK velocity column m/s declaration",
+      "1205:report units declaration"
+    ],
+    "basis_status": "source-declared SI units; actual root HDF units_json attribute not inspected by this leaf",
+    "no_reread_or_threshold_change": true
+  },
+  "limits": [
+    "Stored labels agree with frozen source block map; they are not independently measured native Type/Mk arrays or lifecycle proof.",
+    "No native→HDF full-event equality or body pose/ghost/radius/operative mass qualification is conferred.",
+    "Prior800 primary body comparison failures remain; source32 diagnostics do not erase them.",
+    "Full G0/G1/G2, numerical_core, new-condition and split credit remain zero.",
+    "Failed first-sample window remains closed; no replacement six-hour window or unchanged retry."
+  ],
+  "next_scientific_gate": "One full-event native-to-HDF field/source identity join, reusing the existing admitted decoder and type/Mk source mapping where valid; preserve body-state root-cause gap. A new native Type/Mk array is not required when the adopted contract permits an authenticated equivalent.",
+  "paid_increment": {
+    "id": "infra/LFD01_F6_UNREAD_FIELD_QA/LFD01_AUDIT_001",
+    "gpu_seconds": 0.0,
+    "cpu_core_seconds": 18.174485,
+    "new_storage_bytes": 169027,
+    "output_storage": "lfd01_nas",
+    "status": "completed",
+    "finished_at_utc": "2026-10-21T08:18:10.291097+00:00",
+    "campaign_id": "LFD-01",
+    "namespace": "LFD01_",
+    "lfd01_namespace": "LFD01_",
+    "pool": "work",
+    "tranche_id": "LFD01_F6_UNREAD_FIELD_QA_001",
+    "stage": "F6_existing_HDF_unread_field_QA_full101",
+    "purpose": null
+  },
+  "formal_product_counts": {
+    "qualified_unique_complete_3d_conditions": 0,
+    "qualified_3d_families": 0,
+    "new_qualified_physical_conditions": 0,
+    "untouched_validation": 0,
+    "untouched_test": 0
+  },
+  "science_credit": 0,
+  "core_credit": 0,
+  "current_request": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/F6-unread-field-QA-actual001-v1/request.json",
+    "bytes": 15050,
+    "sha256": "9f5e691c582c07b413889afeb5bd5e56b60918fdd6645e2190e0452e19912947"
+  }
+}

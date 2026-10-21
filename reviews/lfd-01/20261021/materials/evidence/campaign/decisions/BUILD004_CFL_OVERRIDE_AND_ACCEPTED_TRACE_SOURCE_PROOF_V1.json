@@ -1,0 +1,107 @@
+{
+  "schema": "lfd01.build004.bound-source-proof.v1",
+  "campaign_id": "LFD-01",
+  "status": "verified_source_metadata_not_new_execution",
+  "observed_at_utc": "2026-10-17T01:27:17.512876+00:00",
+  "build_result": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/build-result-v2.json",
+    "bytes": 568264,
+    "sha256": "5dd067ac46444b16146ea2ea2f8335a972040f27f03fb97b76b089e47bfe126c"
+  },
+  "existing_compiled_attestation_source": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/F5-official-full12-startup-solver-v1/request.json",
+    "bytes": 32031,
+    "sha256": "04e6f761cc067fef0edaca1662bdcff63f5b3a2c204887fe9a266b5d2e3fbb10"
+  },
+  "binary_cached_paid_tuple": {
+    "bytes": 52743392,
+    "ctime_ns": 1791852734394531912,
+    "device": 83,
+    "inode": 20185002,
+    "mtime_ns": 1791852734393531912,
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/bin/linux/DualSPHysics5.4_linux64",
+    "sha256": "d9285ea3e5d9fb1b7768a6681b4a60e66200cff2094158ec2dc2fe3def001a0f"
+  },
+  "fresh_binary_fingerprint": false,
+  "exact_staged_source_bindings": [
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSphCfgRun.cpp",
+      "bytes": 22511,
+      "sha256": "51b8dc214181edc0518e4c7de42a71b9248dee891064de3efb74aa8b095a2c96"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSph.cpp",
+      "bytes": 177192,
+      "sha256": "206e4486a3a0d304e02da1a73d2e7c7ed96354d559ce481275d09f5245b8c9e7"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSphGpuSingle.cpp",
+      "bytes": 59678,
+      "sha256": "8a0c03d60ad0637cee18cd1c938093bb6974ec96aed3d05c32c030ad99cff740"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSphInOut.cpp",
+      "bytes": 69527,
+      "sha256": "1fbd78738a49ca558aa9adc9a0322fccf7941316eaba3e1e2b6e5398ac5632ad"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSphInOutZone.cpp",
+      "bytes": 20851,
+      "sha256": "e9d71bf577711de0c2468244e8d59c71b9e3f61ec6536dbceca9f9230dc7c8d0"
+    },
+    {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/source/src/source/JSphInOutPoints.cpp",
+      "bytes": 41853,
+      "sha256": "1e0e22a7907e7b597da59943e0feba8d34446aa7fc539457f36d6e7e595cad1b"
+    }
+  ],
+  "facts": [
+    {
+      "source": "JSphCfgRun.cpp",
+      "lines": [
+        478,
+        480
+      ],
+      "claim": "CFL option parses numeric value and rejects non-positive values."
+    },
+    {
+      "source": "JSph.cpp",
+      "lines": [
+        652,
+        652
+      ],
+      "claim": "Initial CFL is read from case constants."
+    },
+    {
+      "source": "JSph.cpp",
+      "lines": [
+        961,
+        961
+      ],
+      "claim": "Positive CLI CFL value overrides case constant in the compiled source."
+    },
+    {
+      "source": "JSphGpuSingle.cpp",
+      "lines": [
+        1001,
+        1032
+      ],
+      "claim": "Instrumentation emits seven-column post-commit rows with before/after accepted Nstep and TimeStep, main-loop stepdt, and next symplectic dt; it does not add a fabricated initial row."
+    }
+  ],
+  "macro_binding_proof": {
+    "cppflags_assignment": "override CPPFLAGS := -DLFD01_S06_ACCEPTED_DT_TRACE",
+    "device_effective_assignment": "override NCCFLAGS := $(NCCFLAGS) $(CPPFLAGS)",
+    "expansion_rule": "The wrapper includes Makefile.vendor first, then override simple assignments expand inherited CCFLAGS/NCCFLAGS plus CPPFLAGS; both host and nvcc compile recipes consume those variables.",
+    "host_effective_assignment": "override CCFLAGS := $(CCFLAGS) $(CPPFLAGS)",
+    "literal_macro_occurrences": 1
+  },
+  "interpretation_limits": [
+    "This proves source/build provenance and parser intent. It does not prove effective CFL or trace values for an unlaunched child.",
+    "InOut source units are present in exact staged source graph, not proof of successful F7 run, source-zone birth, initial native state, or identity uniqueness.",
+    "Owned current-v14 child still must verify current binary stable FD/hash before/after and provide actual terminal metadata."
+  ],
+  "no_native_elf_csv_hdf_payload_read": true,
+  "no_solver_test_import_or_runtime_run": true,
+  "science_credit": 0
+}

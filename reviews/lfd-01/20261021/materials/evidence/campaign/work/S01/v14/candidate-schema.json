@@ -1,0 +1,682 @@
+{
+  "schema": "lfd01.forward-runtime-contract.v14",
+  "campaign_id": "LFD-01",
+  "namespace": "LFD01_",
+  "entrypoint": {
+    "path": "lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01-compiled-binary-runtime-forward/v3/lfd01_forward_runtime.py",
+    "actions": [
+      "controller",
+      "dispatch",
+      "guardian",
+      "worker",
+      "recover",
+      "light-worker",
+      "status"
+    ],
+    "bootstrap_runner": "lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v12/bootstrap_runner.py",
+    "legacy_adapters": [
+      "lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v12/lfd01_forward_runtime.py",
+      "lagrangian-fluid-lab/scripts/ds_data02_runtime_v6.py",
+      "lagrangian-fluid-lab/scripts/ds_data02_runtime_v2.py"
+    ],
+    "legacy_sources_are_immutable": true,
+    "bootstrap_probe_diagnostics": {
+      "operation": "fork-tree",
+      "stdout_schema": "lfd01.bootstrap.fork-tree-diagnostic.v1",
+      "records": "exactly one compact JSON line for parent, child, and grandchild; each binds pid and ppid",
+      "cpu_fields": "each line includes independent SELF segment and waited CHILDREN before/after/delta totals",
+      "accounting": "diagnostic only; no additional charge or change to RUSAGE_CHILDREN plus live-group accounting"
+    }
+  },
+  "authority": {
+    "parent_ledger_path": "/data/nas/jade/Simulation/DualSPHysics-data/ds-data-02/runtime/resource-ledger.json",
+    "parent_ledger_lock": "/data/nas/jade/Simulation/DualSPHysics-data/ds-data-02/runtime/resource-ledger.lock",
+    "nas_root": "/data/nas/jade/Simulation/DualSPHysics/lfd-01",
+    "output_root": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs",
+    "grant_bindings": [
+      "request_sha256",
+      "source_bindings_sha256",
+      "adoption_sha256",
+      "baseline_sha256",
+      "parent_ledger_path",
+      "attempt_id",
+      "execution_class",
+      "bootstrap",
+      "m0_gate",
+      "pool",
+      "tranche_id",
+      "stage",
+      "allocation",
+      "policy_sha256"
+    ],
+    "locked_rechecks": [
+      "adoption_sha256",
+      "baseline_sha256",
+      "parent deadline",
+      "parent limits",
+      "historical charge rows",
+      "historical attempt rows",
+      "actual MemAvailable",
+      "pool/tranche cumulative usage",
+      "holdout protection"
+    ]
+  },
+  "request": {
+    "required": [
+      "namespace",
+      "family_id",
+      "case_id",
+      "attempt_id",
+      "kind",
+      "execution_class",
+      "cpu_task_kind",
+      "cpu_threads",
+      "affinity_cpus",
+      "ram_limit_bytes",
+      "max_wall_seconds",
+      "estimated_storage_bytes",
+      "nas_peak_bytes",
+      "output_storage",
+      "cwd",
+      "command",
+      "binary_binding",
+      "source_bindings",
+      "input_files",
+      "bootstrap"
+    ],
+    "identity": {
+      "namespace": "LFD01_",
+      "case_id_prefix": "LFD01_",
+      "attempt_id_prefix": "LFD01_",
+      "attempt_id": "family_id/case_id/attempt_id"
+    },
+    "source_binding": {
+      "regular_non_symlink": true,
+      "normal_metadata_max_bytes": 67108864,
+      "deferred_full_sha256": "For the approved_compiled_binary branch only: after the locked shared reservation is admitted, one O_NOFOLLOW stable-FD pass is made at owned_launch and one after_owned_reap pass is made after the owned tree is confirmed reaped. Each pass requires a regular FD fstat before and after the single full SHA-256 read, lexical-path lstat metadata before and after, and matching device/inode/bytes/mtime_ns/ctime_ns; both observations are recorded. The binary is excluded from the generic deferred hash pass and is never opened or payload-hashed during preflight. Other deferred inputs retain the inherited v12 behavior; launch failures have no after pass.",
+      "allowed_existing_data_roots": [
+        "/data/nas/jade/Simulation/DualSPHysics-data/ds-data-02",
+        "/home/jade/Projects/DualSPHysics-data/ds-data-02",
+        "/data/nas/jade/Simulation/DualSPHysics/upstream-first"
+      ],
+      "registered_scientific_venv": "/home/jade/Projects/DualSPHysics/lagrangian-fluid-lab/.venv/bin/python",
+      "venv_requirements": [
+        "canonical interpreter full SHA",
+        "pyvenv.cfg binding",
+        "dependency provenance binding"
+      ]
+    },
+    "m0": {
+      "bootstrap": "only cpu/tests with B01..B07 and bootstrap_probe.py, or sealed small JSON/CSV/XML/text light metadata",
+      "non_bootstrap_heavy": "requires exact accepted lfd01.m0-acceptance.v1 artifact",
+      "solver_and_gencase_before_m0": false
+    },
+    "b07_notify_root": {
+      "operation": "bootstrap_probe.py notify-root",
+      "helper": "one regular non-symlink root-reviewed file directly under the fixed LFD-01 control root, normal input with full SHA-256 binding",
+      "records": [
+        "canonical request output execution-receipt.json",
+        "helper-read dispatch.json",
+        "helper-read infrastructure-ownership.json"
+      ],
+      "arguments": [
+        "--job-id",
+        "--event-id",
+        "--receipt"
+      ],
+      "subtree": "probe subprocess inherits the admitted worker cpuset, RLIMIT_AS, owned process group, and worker RUSAGE scope",
+      "helper_timeout_seconds": 30,
+      "nonzero_or_timeout": "unknown; no retry",
+      "queue": "helper performs at most one fixed codex queue notification after verifying the original controller identity has exited",
+      "job_binding": "request --job-id must equal the actual dispatcher job_id before worker launch; a legal but different LFD01_ id is rejected by both dispatch and worker validation"
+    },
+    "branch_fields": {
+      "solver_branch": "optional; absent means the unchanged official v12 solver branch; approved_compiled_binary selects only the v14 branch",
+      "gpu_required": "must be true for approved_compiled_binary",
+      "compiled_binary_attestation": "required only for approved_compiled_binary"
+    }
+  },
+  "grant": {
+    "schema": "lfd01.request-grant.v1",
+    "immutable": true,
+    "issuer": "root",
+    "status": "granted",
+    "required": [
+      "schema",
+      "status",
+      "issuer",
+      "immutable",
+      "namespace",
+      "request_path",
+      "request_sha256",
+      "payload_sha256",
+      "attempt_id",
+      "execution_class",
+      "bootstrap",
+      "source_bindings_sha256",
+      "adoption_sha256",
+      "baseline_sha256",
+      "parent_ledger_path",
+      "policy_sha256",
+      "pool",
+      "tranche_id",
+      "stage",
+      "allocation"
+    ],
+    "central_pool": {
+      "purposes": [
+        "repair",
+        "holdout",
+        "replay",
+        "closeout"
+      ],
+      "ordinary_redundant_points": false
+    },
+    "cumulative_scopes": {
+      "campaign": "effective_caps, never reset by a new tranche",
+      "pool": "adopted work_pool or central_reserve, filtered by pool metadata",
+      "tranche": "immutable allocation, filtered by pool and tranche_id",
+      "cpu_tests_and_light_do_not_consume_solver_attempts": true
+    },
+    "production": {
+      "requires_holdout_protection": {
+        "minimum_attempts": 12,
+        "horizon": 26,
+        "actual_fields": [
+          "actual_consumed_attempts",
+          "remaining_attempts",
+          "required_remaining_attempts",
+          "evidence.status",
+          "evidence.sha256"
+        ]
+      }
+    }
+  },
+  "g2": {
+    "schema": "lfd01.g2-approval.v1",
+    "required_for": "production",
+    "required_fields": [
+      "recipe_id",
+      "domain_id",
+      "common_core_task_id",
+      "author_review",
+      "non_author_review",
+      "non_author_review_hash",
+      "static_review",
+      "launch_commit.integration_commit",
+      "scientific_contract",
+      "actual_source_proof.source_bindings_sha256"
+    ],
+    "bare_accepted_boolean_is_insufficient": true
+  },
+  "reservation": {
+    "legacy_check_preserved": [
+      "campaign deadline",
+      "parent CPU cap",
+      "parent GPU cap",
+      "parent attempt cap",
+      "duplicate attempt identity",
+      "legacy shared thread cap"
+    ],
+    "home_min_free_bytes": 536870912000,
+    "nas_min_free_bytes": 2199023255552,
+    "active_peak_bytes": 274877906944,
+    "actual_mem_available_guard": "MemAvailable >= active RAM reservations + request RAM",
+    "global_heavy_slots": 1,
+    "global_light_slots": 4,
+    "nas_storage_is_excluded_from_legacy_home_deduction": true,
+    "nas_storage_is_checked_separately": true
+  },
+  "process_accounting": {
+    "cpu_source": "RUSAGE self+children for reaped descendants plus live owned group utime+stime only while live",
+    "no_descendant_sampler_addition": true,
+    "cpu_capacity": {
+      "set": "online CPUs from /sys/devices/system/cpu/online intersected with the current cgroup effective cpuset",
+      "cgroup_identity": "/proc/self/cgroup is read and validated before resolving /sys/fs/cgroup/<relative>/cpuset.cpus.effective (v1 cpuset.cpus fallback); inherited ancestors are checked only up to that validated mount root",
+      "request_affinity": "must be a subset of that online/effective set; execution still pins to the request cpuset",
+      "current_process_affinity_is_not_capacity": true,
+      "unreadable_or_empty": "fail closed",
+      "privilege_changes": false
+    },
+    "ownership": "launch-persisted child/group pid, host, boot_id, start_ticks; Linux subreaper is enabled before every worker/target Popen; current PGID members require exact PID/start_ticks, the token-bound parent-proof handshake, or a bounded PPID chain to a previously verified member/subreaper identity with the same PGID and post-launch start time; unknown members block killpg and remain an explicit uncertainty",
+    "subreaper": {
+      "enabled_before": [
+        "guardian worker Popen",
+        "worker target Popen"
+      ],
+      "worker_identity": "host/boot/pid/start_ticks captured in the owned group before target launch",
+      "adopted_member_proof": "PPID chain reaches that worker only when PR_SET_CHILD_SUBREAPER was true, member PGID equals the launch PGID, and member start_ticks is no earlier than the launch leader",
+      "failure": "fail closed before target Popen"
+    },
+    "parent_proof": {
+      "file": "owned-parent-proof.json",
+      "environment": [
+        "LFD01_PARENT_PROOF_PATH",
+        "LFD01_PARENT_PROOF_TOKEN"
+      ],
+      "required_for": "instrumented bootstrap_probe.py ignore-term-grandchild",
+      "contents": "parent and surviving child host/boot/pid/start_ticks plus child PPID/PGID, written atomically before the direct parent exits",
+      "validation": "random token, expected target identity, exact PGID, start ordering, and live PID/start/PGID recheck when available",
+      "invalid_or_missing": "never signal an unverified PGID; retain the reservation and durable recovery waiting state"
+    },
+    "cpuset_inherited": true,
+    "rlimit_as": true,
+    "rlimit_fsize": {
+      "worker_metadata": "soft=current real parent ledger st_size plus AUTHORITY_MAX_BYTES (minimum 2*AUTHORITY_MAX_BYTES); hard=exactly 256 GiB after inherited-hard precheck",
+      "scientific_child_output": "request.estimated_storage_bytes (<=256 GiB) applied as child soft/hard by SHA-bound /usr/bin/prlimit after the request binary binding is checked",
+      "light_output": "request.estimated_storage_bytes capped at 256 MiB and applied as sealed light worker soft/hard",
+      "metadata_does_not_consume_science_output_limit": true,
+      "authority_metadata_allowance_bytes": 16777216,
+      "worker_minimum_bytes": 33554432,
+      "formula": "worker_soft=max(2*AUTHORITY_MAX_BYTES, stat(parent runtime/resource-ledger.json)+AUTHORITY_MAX_BYTES)",
+      "authorized_global_hard_bytes": 274877906944,
+      "inherited_hard_precheck": "current RLIMIT_FSIZE hard must be RLIM_INFINITY or >= authorized_global_hard_bytes; otherwise fail closed without raising privileges",
+      "light_hard_bytes": "<=268435456 and never above the inherited hard limit"
+    },
+    "aggregate_rss_monitor": true,
+    "wall_multiplier": 1,
+    "preexec_fn": false,
+    "caller_kill_survival": "detached guardian and worker sessions",
+    "checkpoint_identity": [
+      "pid",
+      "host",
+      "boot_id",
+      "proc start_ticks",
+      "last trusted CPU and timestamp",
+      "owned child/group identity"
+    ],
+    "trusted_helpers": {
+      "path": "/usr/bin/prlimit",
+      "sha256": "740e7bb73625b7aa99821cd6641015dfd043de801a86881837a2cb688182d94",
+      "role": "child RLIMIT_FSIZE wrapper; request command/binary binding remains unchanged"
+    },
+    "final_reap": "after direct/group grace or kill, bounded waitpid reap targets only members with exact PID/start/PGID proof; every proven zombie must be reaped and the final identity-checked snapshot must complete before child_exit_confirmed, deferred/G2 proof, and v6 CPU cutoff",
+    "children_rusage_interval": {
+      "before": "raw resource.RUSAGE_CHILDREN immediately before the admitted target child Popen",
+      "after": "raw resource.RUSAGE_CHILDREN after real wait and final owned-tree reap, before deferred/posthash proof",
+      "delta": "after minus before for utime, stime, and total CPU",
+      "other_child_processes_expected": false,
+      "diagnostic_only": true,
+      "does_not_add_to_charge": true
+    }
+  },
+  "reliability": {
+    "atomic_json": "each call uses a unique same-directory temporary name and removes it after replace",
+    "worker_runtime_state": "snapshot mutation, serialization, and atomic replacement stay inside the shared state lock; checkpoint CPU fields merge under the same lock",
+    "launch_cpu_sample": "owned-child launch preserves the worker-entry last trusted CPU counter and immediately samples RUSAGE plus live verified group CPU without resetting it before the first heartbeat",
+    "orphan_recovery_import": "all v6 imports insert the canonical SCRIPTS_ROOT before import_module",
+    "terminal_guarded_hook": "v6._guarded_atomic_json is bound to the serializable LFD terminal projection for the duration of run_request and restored afterward; v6 normal fixed-point writer remains the final writer",
+    "launch_failure_cleanup": "post-Popen identity or owned-child persistence failure synchronously cleans the verified group when identity exists, otherwise the exact Popen handle only; identity uncertainty is retained and no unverified PGID is signalled",
+    "watcher_shutdown": "done is set, watchdog Timer is cancelled and joined, heartbeat/storage/RSS threads are joined without a timeout, and watchdog/RSS/storage callbacks recheck done before self/group signal",
+    "rss_state_merge": "RSS terminal flags and cleanup are merged into live runtime_state under state_lock after a fresh snapshot; a stale detached snapshot is never written back",
+    "terminal_settlement_gate": "when an owned child exists and child_exit_confirmed is false, the guarded terminal writer raises before v6 removes the reservation or appends a normal charge; guardian recovery settles only after verified group exit or a bounded unknown interval",
+    "guardian_recovery_persistence": "after worker exit, retry recover at the bounded poll interval until confirmed settlement or the request hard deadline; write recovery_waiting_for_owned_exit while guardian remains alive and never label that state completed",
+    "recovery_group_source": "recover may read the atomic worker-runtime record when owned-child-launch.json was not reached; an observed child with no durable group remains identity-unavailable and cannot release its reservation",
+    "proof_only_reap": "worker and guardian recovery reap only exact identity-proven target-group members; waitpid(-1) is never used, and un-reaped zombies keep child_exit_confirmed false"
+  },
+  "infrastructure_accounting": {
+    "controller": "dispatch writes one immutable RUSAGE_SELF snapshot before returning",
+    "guardian": "terminal guardian writes one immutable RUSAGE_SELF snapshot; RUSAGE_CHILDREN is excluded because it contains the worker",
+    "guardian_children_diagnostic": "guardian records raw RUSAGE_CHILDREN before worker Popen and after worker wait plus adopted-descendant reaping; the delta is diagnostic and root may reconcile one max(0, delta-worker-charge) infrastructure amount without adding it to worker charge",
+    "worker_exclusion": [
+      "controller",
+      "guardian",
+      "root_supervisor_watcher"
+    ],
+    "root_settlement": "root settles each recorded controller/guardian SELF snapshot once"
+  },
+  "receipt_projection": {
+    "field": "lfd01_runtime.execution_status",
+    "running": "exact RUNNING only when immutable v6 top-level status is running and the verified owned_child identity exists",
+    "terminal": "uppercase normalization of the actual v6 terminal status completed or failed",
+    "legacy_status": "top-level v6 receipt.status is preserved unchanged",
+    "fields": [
+      "worker_metadata_fsize_limit_bytes",
+      "worker_metadata_fsize_soft_bytes",
+      "worker_metadata_fsize_hard_bytes",
+      "child_fsize_limit_bytes",
+      "child_fsize_soft_bytes",
+      "child_fsize_hard_bytes",
+      "child_fsize_helper",
+      "child_exit_confirmed",
+      "final_reap",
+      "launch_identity_observed",
+      "owned_identity_uncertain",
+      "launch_cleanup",
+      "children_rusage_interval",
+      "deferred_input_hashes",
+      "g2",
+      "owned_child",
+      "owned_group",
+      "subreaper_enabled",
+      "parent_proof",
+      "terminal_settlement_blocked",
+      "verified_member_proofs",
+      "peak_rss_bytes",
+      "compiled_binary_reservation_admitted",
+      "compiled_binary_observations"
+    ]
+  },
+  "recovery": {
+    "alive": "reattach only when host, boot, pid, and start_ticks all match",
+    "exited": "verify and terminate only the owned group, confirm every proof-only final reap, then remove one reservation and append one bounded unknown charge",
+    "unknown_cpu_interval": "last trusted counter timestamp to confirmed group exit or hard deadline",
+    "unresolved_at_deadline": "write durable failed_recovered_unknown upper-bound evidence at the hard cutoff while retaining reservation, lease, and slot; release is allowed only after a later confirmed owned-tree exit",
+    "duplicate_charge": false,
+    "duplicate_launch": false,
+    "foreign_gpu_processes": "never stop or charge",
+    "no_parent_reservation": {
+      "status": "not_registered",
+      "meaning": "No reservation row was persisted; do not call this already_settled and do not append a charge"
+    },
+    "already_settled": {
+      "status": "already_settled",
+      "meaning": "A prior charge row already exists for this attempt; return the immutable row and never append a duplicate charge"
+    }
+  },
+  "light": {
+    "operations": [
+      "json_collection_counts",
+      "csv_summary"
+    ],
+    "limits": {
+      "max_jobs": 4,
+      "max_threads": 2,
+      "max_combined_threads": 8,
+      "max_ram_bytes": 4294967296,
+      "max_input_bytes": 67108864,
+      "max_output_bytes": 268435456,
+      "max_wall_seconds": 600
+    },
+    "executor": "sealed candidate light-worker under canonical /usr/bin/bwrap",
+    "native_suffixes_refused_before_launch": [
+      ".bi4",
+      ".hdf",
+      ".h5",
+      ".hdf5",
+      ".vtk",
+      ".vtu",
+      ".bin",
+      ".raw",
+      ".npy",
+      ".npz"
+    ],
+    "path_traversal_refused": true,
+    "source_initialization": {
+      "sealed_script_path": "/opt/lfd01/lfd01_forward_runtime.py",
+      "activation_guard": "exact resolved script path plus argv[1] == 'light-worker'",
+      "sandbox_repository_root": "/opt/lfd01",
+      "sandbox_scripts_root": "/opt/lfd01",
+      "normal_controller_root": "SCRIPT_PATH.parents[7] remains required for controller, dispatch, guardian, worker, recover, and status",
+      "parent_ancestry_access": false,
+      "purpose": "avoid import-time parents[7] IndexError in the bwrap-mounted sealed light worker without widening any host source or ledger access"
+    },
+    "loader_mounts": {
+      "paths": [
+        "/lib",
+        "/lib64"
+      ],
+      "source": "resolved regular host directories mounted read-only at the exact conventional loader destinations",
+      "purpose": "allow the SHA-bound /usr/bin/python3.10 to resolve its dynamic loader inside bwrap"
+    }
+  },
+  "forward_delta": {
+    "schema": "lfd01.s01-compiled-binary-runtime.forward-delta.v3",
+    "source_version": "S01-compiled-binary-runtime/v2",
+    "candidate_version": "S01-compiled-binary-runtime-forward/v3",
+    "status": "source_prototype_pending_root_integration_non_author_review_and_admitted_software_tests",
+    "changes": [
+      "Retain the opt-in approved_compiled_binary request branch; absent solver_branch preserves official v12 behavior.",
+      "Retain the exact completed BUILD004 report chain, source closure, M0, review, parent settlement, and /bin/linux target metadata guards.",
+      "Require the CUDA13 compatibility and accepted-step patch-helper results to have returncode == 0, elapsed_seconds, command, and truncated == false. Their timed_out field is optional because the real patch helper omits it; if present it must be false. Make and compile-probe retain required timed_out == false; missing required fields fail closed.",
+      "Keep the compiled executable deferred and excluded from input_files; do not open or payload-hash it before the shared reservation is admitted.",
+      "At owned_launch and after_owned_reap, hash once per phase through one O_NOFOLLOW regular-file FD; record FD fstat before/after plus lexical lstat before/after and require stable device/inode/bytes/mtime_ns/ctime_ns.",
+      "Exclude the compiled path from the generic deferred hash pass so the two stable-FD phase observations are the only compiled payload hash passes.",
+      "Preserve v12 ownership, limits, parent accounting, reaping, posthash, production G2, and official solver behavior outside the explicit branch."
+    ],
+    "prior_v1_review": {
+      "path": "work/S01-compiled-binary-runtime-review/v1/REVIEW.json",
+      "sha256": "0618b28bbfbec1fa8a5a82cb4dde58bf1141b438f9ead2dde00eb95b0e61d36b",
+      "status": "changes_requested_source_gate_blocked",
+      "resolved_blockers": [
+        "stable-FD, regular fstat and launch/after observation proof for the deferred BUILD004 binary",
+        "strict CUDA13 compatibility and accepted-step phase returncode/command/elapsed/truncated fields, with optional false-only helper timed_out"
+      ]
+    },
+    "actual_execution_performed": false,
+    "binary_read_or_hashed_during_preparation": false,
+    "tests_or_imports_executed": false,
+    "gpu_activity": false,
+    "scientific_credit": {
+      "g0": false,
+      "g1": false,
+      "g2": false,
+      "core": false
+    }
+  },
+  "compiled_binary_branch": {
+    "schema": "lfd01.compiled-binary-attestation.v1",
+    "status": "source_prototype_pending_root_integration_review_and_admitted_software_tests",
+    "solver_branch": "approved_compiled_binary",
+    "kind": [
+      "qualification",
+      "production"
+    ],
+    "execution_class": "heavy",
+    "cpu_task_kind": "compiled_gpu_solver",
+    "bootstrap": false,
+    "target": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/bin/linux/DualSPHysics5.4_linux64",
+      "bytes": 52743392,
+      "sha256": "d9285ea3e5d9fb1b7768a6681b4a60e66200cff2094158ec2dc2fe3def001a0f",
+      "stat": {
+        "device": 83,
+        "inode": 20185002,
+        "bytes": 52743392,
+        "mtime_ns": 1791852734393531912,
+        "ctime_ns": 1791852734394531912
+      },
+      "regular_non_symlink": true
+    },
+    "deferred_binary": {
+      "source_binding": "full known SHA from BUILD_004 result; deferred=true",
+      "input_files": "excluded",
+      "full_sha256_at": [
+        "owned_launch",
+        "after_owned_reap"
+      ],
+      "reservation_scope": "the v6 shared reservation must already be admitted; preflight never opens the payload",
+      "one_hash_pass_per_phase": true,
+      "stable_fd": {
+        "open_flags": [
+          "O_RDONLY",
+          "O_NOFOLLOW",
+          "O_CLOEXEC when available"
+        ],
+        "regular_file_required": true,
+        "fstat_before_and_after": true,
+        "lexical_path_lstat_before_and_after": true,
+        "identity_fields": [
+          "device",
+          "inode",
+          "bytes",
+          "mtime_ns",
+          "ctime_ns"
+        ],
+        "fd_and_path_identity_must_match": true,
+        "expected_build_stat_must_match": true
+      },
+      "observations": [
+        "phase",
+        "path",
+        "sha256",
+        "bytes",
+        "fd_stat_before",
+        "fd_stat_after",
+        "path_lstat_before",
+        "path_lstat_after",
+        "regular",
+        "observed_at_utc"
+      ],
+      "must_match_at_both_points": true,
+      "generic_deferred_hash_exclusion": "exact compiled binary lexical path only"
+    },
+    "build_attempt": {
+      "id": "infra/LFD01_S06_BUILD/LFD01_BUILD_004",
+      "result_status": "completed",
+      "make_returncode": 0,
+      "probe_returncode": 0,
+      "child_exit_confirmed": true,
+      "final_reap_completed": true,
+      "deferred_posthash_status": "verified",
+      "unique_parent_charge_count": 1,
+      "active_reservation_count": 0,
+      "uuid_lease": "absent",
+      "compatibility_patch_phase": {
+        "phase_key": "device_info_compatibility_patch",
+        "result": {
+          "returncode": 0,
+          "elapsed_seconds": "finite non-negative",
+          "truncated": false,
+          "timed_out": "omitted by the real patch helper or false"
+        },
+        "after_expected_source": {
+          "bytes": 35946,
+          "sha256_role": "compatibility_expected_source"
+        }
+      },
+      "accepted_step_patch_phase": {
+        "phase_key": "patch",
+        "returncode": 0,
+        "elapsed_seconds": "finite non-negative",
+        "truncated": false,
+        "timed_out": "omitted by the real patch helper or false"
+      },
+      "missing_phase_fields": "make/compile-probe timed_out is required; patch-helper timed_out is optional but never defaulted to success"
+    },
+    "normal_input_roles": [
+      "build_receipt",
+      "build_result",
+      "build_request",
+      "build_grant",
+      "build_manifest",
+      "m0_acceptance",
+      "source_closure",
+      "compatibility_patch_v2",
+      "compatibility_expected_source",
+      "accepted_step_trace",
+      "actual_non_author_review",
+      "immutable_v12_runtime",
+      "immutable_v12_schema"
+    ],
+    "provenance": [
+      {
+        "role": "build_receipt",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/execution-receipt.json",
+        "bytes": 332960,
+        "sha256": "180cc8eccc0d2786101f8ae86dc1d51c8650c7a84d63879d2105443d4c58832d"
+      },
+      {
+        "role": "build_result",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_S06_BUILD/LFD01_BUILD_004/s06-build-v2/build-result-v2.json",
+        "bytes": 568264,
+        "sha256": "5dd067ac46444b16146ea2ea2f8335a972040f27f03fb97b76b089e47bfe126c"
+      },
+      {
+        "role": "build_request",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/S06-accepted-dt-build-v4/request.json",
+        "bytes": 127282,
+        "sha256": "924f90c22713746665176de5e2f78cfacd74b7a114faf51277693dfaed2b687c"
+      },
+      {
+        "role": "build_grant",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/S06-accepted-dt-build-v4/grant.json",
+        "bytes": 2775,
+        "sha256": "8c6e46fe618ab4cfb63cedefb3727baeb0b7e639d2efc6b718ae179631b2f5f0"
+      },
+      {
+        "role": "build_manifest",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/requests/S06-accepted-dt-build-v4/manifest.json",
+        "bytes": 143691,
+        "sha256": "5145758a35e48bf9ad64cfbcd66b664232dfbf082775090e58464f9121a8ff3f"
+      },
+      {
+        "role": "m0_acceptance",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/control/M0_ACCEPTANCE.json",
+        "bytes": 1824,
+        "sha256": "d2772b43e8fbfe1620f5c4b884fdcd61bf0961b0a5abf817dc563d7f8219d515"
+      },
+      {
+        "role": "source_closure",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S06-build-closure/v1/SOURCE_CLOSURE.candidate-v1.json",
+        "bytes": 704176,
+        "sha256": "e62c47cbd4112f4338f4a0228e3b773d2aeca3ed4d63f2f319933d6873c0a31e"
+      },
+      {
+        "role": "compatibility_patch_v2",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S06-cuda13-info-compat/v2/FunctionsCuda_cuda13_info_v2.patch",
+        "bytes": 2159,
+        "sha256": "64ccc63f6bfa64ff34d1e6789e3c3b66d9d1477ddf4fe0b7a288923d13688f19"
+      },
+      {
+        "role": "compatibility_expected_source",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S06-cuda13-info-compat/v2/expected-patched-source.candidate.cpp",
+        "bytes": 35946,
+        "sha256": "75209a1f7387584c8d501883ec02b0f8d998689530418315b916550e48e918b7"
+      },
+      {
+        "role": "accepted_step_trace",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S06-accepted-step-forward/v2/accepted-dt-instrumentation.patch",
+        "bytes": 2532,
+        "sha256": "da75cc4153e84447144e9362497b8926fb17864060761544a108c4fc9f02782e"
+      },
+      {
+        "role": "actual_non_author_review",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S06-build-actual-review/v1/REVIEW.json",
+        "bytes": 19601,
+        "sha256": "5c19e9de8b101c39927d506d528786071d2c606e740f721a325e34ecef1b9761"
+      },
+      {
+        "role": "immutable_v12_runtime",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v12/lfd01_forward_runtime.py",
+        "bytes": 202971,
+        "sha256": "b1dd30642885bfef04d74dc7c013ecbf466c34f889f7fcb58ba76459a2cce82e"
+      },
+      {
+        "role": "immutable_v12_schema",
+        "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S01/v12/candidate-schema.json",
+        "bytes": 19935,
+        "sha256": "5a21444d4927edf9bc15fb7650f95680cfdd43095d4c626450a2cf0389b67d99"
+      }
+    ],
+    "legacy_solver_boundary": {
+      "v2_solver_constant_unchanged": true,
+      "v12_official_branch_unchanged": true,
+      "temporary_projection": "only after the attestation and parent settlement checks, in-process v2.SOLVER assignment; restore in finally",
+      "no_file_edit": true,
+      "no_official_binary_copy": true,
+      "stable_fd_payload_hash_scope": "only after live reservation admission, once at owned_launch and once after_owned_reap"
+    },
+    "preserved_guards": [
+      "v2 positive GenCase particle/fluid/3-D checks",
+      "v2 positive GPU peak and UUID lease checks",
+      "v2 rejection of -cpu arguments",
+      "v12 M0/adoption/baseline/parent lock/caps/global heavy slot",
+      "v12 owned PID/start/host/boot/PGID, subreaper, final reap and guardian recovery",
+      "v12 atomic receipt/history and production G2 revalidation"
+    ],
+    "science_status": "binary provenance prerequisite only; no G0/G1/G2/core/production credit",
+    "rejection_cases": [
+      "old no-linux target path or any copied official binary",
+      "CPU/tests/conversion relabeling or missing gpu_required",
+      "missing/duplicate/mismatched normal BUILD004 evidence role",
+      "null/guessed/old binary SHA or binary in input_files",
+      "BUILD004 failed/nonzero/unreaped/posthash-unverified or duplicate/unpaid parent charge",
+      "binary stat mutation, symlink, device/inode/time/bytes mismatch",
+      "missing/nonzero/truncated CUDA13 compatibility or accepted-step patch-helper result, or a present true timed_out; make/compile-probe missing timed_out fails closed",
+      "binary payload opened or hashed before reservation admission",
+      "missing O_NOFOLLOW stable FD, non-regular fstat, FD/path identity drift, or missing launch/after observation",
+      "more than one compiled binary hash pass at either phase or a generic deferred pass that includes the binary"
+    ]
+  }
+}

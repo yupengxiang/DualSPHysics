@@ -1,0 +1,76 @@
+{
+  "schema": "lfd01.F6.full101.PartVTK-comparison.independent-review.v2",
+  "status": "accepted_static_pending_shared_v14_admission",
+  "source_author": "/root",
+  "reviewer": "/root/s00_batch028_exact_luna56_review",
+  "reviewer_model": "gpt-5.6-luna/max",
+  "reviewer_is_non_author": true,
+  "reviewed_files": [
+    {
+      "role": "comparison_source_v2",
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/LFD01-F6-full101-PartVTK-comparison/20261021-v2/compare.py",
+      "bytes": 13547,
+      "sha256": "9f0dd3db6ed6484cff651827d6317c1cfc752088e6bc92c5697608175e4f54cf"
+    },
+    {
+      "role": "comparison_contract_v2",
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/LFD01-F6-full101-PartVTK-comparison/20261021-v2/CONTRACT.json",
+      "bytes": 5379,
+      "sha256": "02cbe93cf9714247374de9db52e1a5c910771c941c270df2a04f45bccf6f1b93"
+    },
+    {
+      "role": "inherited_v4_comparator",
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/work/S12-floating-mass-converter-forward/v4/ds_data02_direct_convert_forward_v4.py",
+      "bytes": 67672,
+      "sha256": "549add3a8729bcfce08e2721f97bace9377cf35a43f429e3e71a96c06755c770"
+    }
+  ],
+  "inherited_review": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/work/LFD01-F6-full101-PartVTK-comparison-review/20261021-v1/REVIEW.json",
+    "bytes": 9330,
+    "sha256": "9ea754e53811944ea1461b2cadcc7c47dcaa75bab35f97581631da3de23f2c74",
+    "role": "independent_v1_review_and_delta_basis"
+  },
+  "delta_verdict": {
+    "B01_partvtk_binding": {
+      "closed": true,
+      "evidence": "read_bound(cfg['partvtk'], 8 MiB) now performs canonical no-link/O_NOFOLLOW regular-file, exact-byte, exact-SHA, and stable-identity validation; the initial executable signature is regular+executable, checked before each frame, and the exact binding is re-read/hashed and re-statted after the loop."
+    },
+    "B02_diagnostics_budget": {
+      "closed": true,
+      "evidence": "The replacement runner preserves the v4 argv and 300-second timeout while sending both stdout and stderr to DEVNULL. The contract explicitly records zero captured PartVTK diagnostic bytes; shared-v14 remains responsible for the bounded aggregate child stdout."
+    },
+    "B03_scratch_boundary": {
+      "closed": true,
+      "evidence": "The .tmp parent is canonical/no-link checked, opened with O_DIRECTORY|O_NOFOLLOW, owned by the effective UID, and retained through a held descriptor. scratch_stable rechecks path/fd device, inode, mode, and owner before and after each frame; each private child is separately no-link checked and the configured per-frame cap is consumed."
+    },
+    "B04_contract_scope_joins": {
+      "closed": true,
+      "evidence": "The source now asserts frames, particles, native count, time tolerance, and the complete frozen resource map; native content hash joins expected_native_tree_sha256 and the paid prior tree; frame iteration, scratch cap, result time tolerance, and report requested_frames consume the asserted pins."
+    }
+  },
+  "unchanged_trace": {
+    "comparator": "The v4 comparator path/bytes/SHA is unchanged. Its 13-column API, finite reader substitution, identity/Type/Mk/row coverage, numeric tolerances, and time semantics remain the reviewed legacy comparator.",
+    "hdf": "The exact HDF remains O_RDONLY|O_NOFOLLOW through a held descriptor with pre/post SHA and identity checks; no HDF conversion or new HDF is introduced.",
+    "native": "The same native dataRoot receives pre/post signature inventories and raw manifests; symlink and file-count guards remain active.",
+    "scope": "The 101-frame stop-on-first-negative behavior, temporary CSV policy, zero science/core credit, and no-G1/G2/core limits are unchanged."
+  },
+  "decision": {
+    "static": "accepted",
+    "dispatch_allowed": false,
+    "bounded_meaning": "This is a static source acceptance only. A positive live result would mean exact saved-frame PartVTK/HDF consistency under the frozen printed tolerances, not G1, G2, solver, or core qualification.",
+    "live_prerequisite": "Root must still use canonical shared S01/v14 admission and independently settle terminal, reap, posthash, and unique-parent accounting evidence."
+  },
+  "execution_boundary": {
+    "candidate_imported": false,
+    "candidate_executed": false,
+    "tests_run": false,
+    "compiler_or_native_payload_accessed": false,
+    "runtime_outputs_read": false,
+    "hdf_csv_elf_or_old_receipt_accessed": false,
+    "parent_ledger_or_control_body_read": false,
+    "science_credit": 0,
+    "core_credit": 0,
+    "dispatch_allowed": false
+  }
+}

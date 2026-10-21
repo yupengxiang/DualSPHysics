@@ -1,0 +1,177 @@
+{
+  "schema": "lfd01.Root.CaseForces.full5-science-contract.v1",
+  "status": "frozen_pending_nonauthor_review_before_solver",
+  "created_at_utc": "2026-10-21T14:53:12.156845+00:00",
+  "case_id": "LFD01_F2_OFFICIAL_CASEFORCES_DP020_FULL5",
+  "physical_question": "Source-conditioned transport and saved-sample detection/residence of two original fluidcohorts in a closed3D cube with fixedsphere under officialvertical/angular forcing. Numericaluseonly, no experimental orcontinuousmaterialfate claim.",
+  "source_asset_contract": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/decisions/OFFICIAL_CASEFORCES_GENCASE_ASSET_CONTRACT_V2.json",
+    "bytes": 5166,
+    "sha256": "289e733b11787ecd794fbb93a236b6b9400526be27b42f248e4a36e5d4bf75fd"
+  },
+  "source_preflight": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/decisions/CASEFORCES_DERIVED_GENCASE_SOURCE_PREFLIGHT_V1.json",
+    "bytes": 2350,
+    "sha256": "232617157bbe94f2809e2cc9b8330d13cc4ee1144c74939b9ffebac4ca3e79dc"
+  },
+  "initial_facts": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/runs/infra/LFD01_CASEFORCES_INITIAL_FACTS/LFD01_OBSERVE_001/initial-facts.json",
+    "bytes": 10005,
+    "sha256": "1eb225863ff874f9700a1fe7ddc00f427e8a1145409945a461e031856d08f290"
+  },
+  "policy_revision": {
+    "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/decisions/CASEFORCES_BOOTSTRAP_POLICY_EXPLICIT_REVISION_V1.json",
+    "bytes": 2520,
+    "sha256": "ffdc45537f6a3d5a48b7aa036b140e04667b2ac7ac57773bca1f2108a3834bc1"
+  },
+  "source_dimension": "Official finitewidth cube+sphere, fluidboxes each three-axis sizes .3213,.964,.3213, nativeData2dFalse; fullsolver fluidspans/typedidentity still checked before productcredit.",
+  "baseline": {
+    "dp_m": 0.02,
+    "cfl": 0.25,
+    "boundary": "DBC official default, no -mdbc override",
+    "step_algorithm": 2,
+    "kernel": 2,
+    "viscosity_treatment": 1,
+    "viscosity": 0.1,
+    "force_scale": 1.0,
+    "source_changes": []
+  },
+  "time": {
+    "nominal_event_s": [
+      0,
+      5
+    ],
+    "TimeOut_s": 0.02,
+    "retain": "all actual savedframes including terminalovershoot; no crop/retime/interpolation",
+    "endpoint": "actual terminalframe; nominal5s, actualTend andovershootreportedseparately",
+    "history_denominator": "complete fullsavedhorizon Tend-t0, not observed-duration; thresholds remain basedon nominal5s"
+  },
+  "source_cohorts": [
+    "original MKfluid0, exactemittedXMLrange joinedtoobservednativeIDs",
+    "original MKfluid1, exactemittedXMLrange joinedtoobservednativeIDs"
+  ],
+  "destinations": {
+    "axes": [
+      "x",
+      "z"
+    ],
+    "thresholds_m": [
+      -0.15,
+      0.15
+    ],
+    "bins": [
+      "q<-.15",
+      "-.15<=q<.15",
+      "q>=.15"
+    ],
+    "cartesian_regions": 9,
+    "unknown": "unobserved/nonfinite/unknown initialmass separate; never assignedspace",
+    "complement": "all observed unassignedfinite source identities explicitly counted, expected0 for exhaustivepartition"
+  },
+  "mass": {
+    "per_condition": "operative native solverPart0float32-promotedparticlemass andcompleteinitialsource IDs; do not use guessedidealvolume/sourceequalization",
+    "cross_resolution": "compare normalizedsourcepopulationfractions usingeachcompleteM0; also report allkg/M0differences, no claim absolutecontinuummass equivalence",
+    "unknown": "censored/unknownsource mass retained in fullinitialdenominator; never survivorrenormalize"
+  },
+  "tasks": {
+    "endpoint": "source-to9destination observedmass fractions +unknownmass/M0, withkg andclosure",
+    "residence": "trapezoid savedoccupancy estimator overadjacentactualtimes, lower/upper for missingendpoints; populationmeanweightedby initialm0 dividedbyfullM0 andfullT, never onlyknown duration",
+    "detection": "per source firstsavedentry into eachregion; present_at_initial, observedbracket, priorcensor, notobserved andunknown separately; no crossdpIDmatching",
+    "primary_time": "firstsavedentry to z>=.15 union, 10%-of-fullinitialsource-mass quantile for eachof2sources. Both must be identifiable; otherwise time use unavailable, neverpass.",
+    "protection": "Report .5/.9 arrivalquantiles/CDF andall9regionhistories, sourcekg/M0, densityrange andallmissingidentitymass; unknownprotectionnotadvertisedqualified."
+  },
+  "criteria": {
+    "task_mass_fraction": 0.05,
+    "task_time_s": 0.1,
+    "sensitivity_mass_fraction": 0.0125,
+    "sensitivity_time_s": 0.025,
+    "censor_interval_mass_fraction": 0.025,
+    "aggregation": "max over bothsources andall9regions for endpointfraction and timeaveragedresidencefraction; max2primaryarrivalquantiledifferences; eventstate-mismatchmass separate<=.0125M0",
+    "nondegeneracy": "bothsources have identifiable10%primaryarrival, and at least2noninitialchanged source-region fractions exceed .0125; otherwise unavailable/negative",
+    "not_experimental_tolerance": true,
+    "not_sum_of_true_error_bounds": true
+  },
+  "controls": [
+    {
+      "id": "B",
+      "dp": 0.02,
+      "cfl": 0.25,
+      "force_scale": 1.0
+    },
+    {
+      "id": "T",
+      "dp": 0.02,
+      "cfl": 0.125,
+      "force_scale": 1.0
+    },
+    {
+      "id": "S",
+      "dp": 0.016,
+      "cfl": 0.125,
+      "force_scale": 1.0
+    },
+    {
+      "id": "U",
+      "dp": 0.02,
+      "cfl": 0.125,
+      "force_scale": 0.8
+    },
+    {
+      "id": "UF",
+      "dp": 0.016,
+      "cfl": 0.125,
+      "force_scale": 0.8
+    }
+  ],
+  "comparisons": {
+    "time_pair": [
+      "B",
+      "T"
+    ],
+    "space_pair": [
+      "T",
+      "S"
+    ],
+    "sampling": "fullB .02 trajectory vs predetermined nested everyotheractualsavedframe, alwaysretainactualterminalframe; historytasks aswellasendpoint; nointegration rerun",
+    "unconsumed_boundary_pair": [
+      "U",
+      "UF"
+    ],
+    "boundary": "newforceScale.8wholeofficialschedule, samegeometry/full5s; qualification/development, neverfinalvalidation/test",
+    "numerical_variants_not_new_conditions": true
+  },
+  "accepted_dt": {
+    "post_execution": "full7column actual acceptedtrace, positivefiniteacceptedDt, contiguousNstep, TimeAfter-TimeBefore consistency, actualRun.outTotalSteps andendpointclosure; preservewholetrace/distributions/max",
+    "temporal_control": "T actualmean and95thpercentileacceptedDt strictly smaller than B, actualstepcountchanges; nominalCFL alone neverpass. Source-controlledtimestepchange plus alltasksensitivity required; no invented universal scalarphysicsmax or expectedfixedmean.",
+    "horizon": "actualendpoint>=5 and overshoot<=largestactualacceptedDt plusdeclaredfloat/printedprecision; no extendTimeMax forpass"
+  },
+  "G1": {
+    "all_saved_frames": "read everyframe; uniqueinitialIDaxis, nointroducedIDs inclosednondynamiccase, exactunits/finitepositionsvelocities/positivedensity/sourcecoverage; missingretained",
+    "runtime": "Data2dFalse, actualPeriModeNone observedinPart0/allframes, Npiece1/Piece0/noReuseIds/noNpDynamic, operativeMassFluidconsistent, typedsourcejoin; no inferthese from GenCaseUnknown.",
+    "true3d": "actualfluidcohorts have at least3resolvablepositionssitesperaxis andfinite3Dextentconsistentwithsource; no2Dextrusioncredit"
+  },
+  "execution": {
+    "first_only": "baselineB after source-readiness/nonauthorreview andsmallatomicgrant; everylaterchildneedsownreadiness/resources",
+    "solver_binary_proof": {
+      "path": "/data/nas/jade/Simulation/DualSPHysics/lfd-01/worktree/lagrangian-fluid-lab/campaigns/ds-data-02/lfd-01/decisions/BUILD004_CFL_OVERRIDE_AND_ACCEPTED_TRACE_SOURCE_PROOF_V1.json",
+      "bytes": 4830,
+      "sha256": "7c65f5bd98519d1097de3536775d6e7dc43f80a47d15885b2bff7edc1c387cc7"
+    },
+    "new_method_compiler_or_sharedruntime_change": false,
+    "pilot_fixed_end_utc": "2026-10-21T19:59:02.813444+00:00",
+    "planning_ceiling": {
+      "gpu_seconds": 14400,
+      "cpu_core_seconds": 28800,
+      "new_storage_bytes": 12884901888,
+      "solver_attempts": 5
+    },
+    "budget_note": "Prospective5row scientificdesign before anysolver; Root mayforwardallocate withinmother, nofullbudgetreservation, alloldfeesincluded/noreset."
+  },
+  "stops": [
+    "Any scientificnegative/unknown retained; no threshold/ROI/denominator/windowretuning or repeatedsolverforpass.",
+    "Engineeringfailure handled by exactcause+bounds anddirectrealverification underadoptedrunbook, neverconvertedintophysicalfailure orpermanentglobalstop.",
+    "No firstqualifiedsample claimed until G0/G1/G2, independentreplay andremainingproductpredicates actuallycompleted."
+  ],
+  "science_credit": 0,
+  "core_credit": 0
+}
